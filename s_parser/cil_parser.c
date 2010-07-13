@@ -49,7 +49,7 @@ struct element * cil_parser(char * buffer, int size)
 			paren_count--;
 			if (paren_count < 0)
 			{
-				printf("Syntax error: Close parenthesis without matching open");
+				printf("Syntax error: Close parenthesis without matching open\n");
 				exit(1);
 			}	
 			current = current->parent;
