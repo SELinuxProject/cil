@@ -138,7 +138,7 @@ struct cil_avrule
 	uint32_t line_num;
 };
 
-struct cil_rule cil_role_rule
+struct cil_role_rule
 {
 	uint32_t rule_kind;
 	sepol_id_t src;	
