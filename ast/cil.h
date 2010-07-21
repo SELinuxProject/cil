@@ -64,7 +64,7 @@ struct cil_class
 {
 	sepol_symtab_datum cls;
 	cil_list *av;
-	sepol_id_t common; //can a class inherit from more than one common?
+	sepol_id_t common; //can a class inherit from more than one common? cjp says no
 	uint32_t line_num;
 };
 
@@ -173,35 +173,110 @@ struct cil_level
 	uint32_t line_num;
 };
 
-struct cil_interface
+struct cil_transform_interface
 {
 	sepol_symtab_datum interface;
-	//param list and matching item class?
+	cil_list *params;
+	uint32_t line_num;	
+	//contents?
+};
+
+struct cil_transform_call
+{
+	cil_list *params;
+	sepol_id_t interface; //block? 
+};
+
+struct cil_transform_inherits
+{
+	sepol_symtab_datum new_block;
+	cil_list *params;
+	sepol_id_t from_block;
+	cil_list *except;
 	uint32_t line_num;	
 };
 
-struct cil_filecontext //symtab?
+struct cil_transform_abs
+{
+	// abstract?
+};
+
+struct cil_transform_del
+{
+	sepol_id_t block;
+	// ?
+};
+
+struct cil_transform_transform
+{
+	// ?
+};
+
+
+struct cil_optional
+{
+	// ?	
+};
+
+struct cil_context
 {
 	sepol_id_t user;
 	sepol_id_t role;
 	sepol_id_t type;
 	struct cil_level low;
-	struct cil_level high; 
-	char * path;
+	struct cil_level high;
+};
+
+struct cil_filecon
+{
+	sepol_symtab_datum path; // ?
+	struct cil_context context;
+//	char * path;
 	uint32_t line_num;
 };
 
-struct cil_portcontext
+struct cil_portcon
 {
-	sepol_id_t user;
-	sepol_id_t role;
-	sepol_id_t type;
-	struct cil_level level;
+	sepol_symtab_datum datum; // ?
+	struct cil_context context;
 	uint32_t proto;
 	uint32_t port; //range or individual ports?
 	uint32_t line_num;
 };
 
+struct cil_netifcon
+{
+	//netifcon lo system_u:object_r:lo_netif_t:s0 - s15:c0.c1023 system_u:object_r:unlabeled_t:s0 - s15:c0.c1023
+};
 
-//interfaces, templates, classes, conditionals?
+struct cil_fscon
+{
+	sepol_symtab_datum datum; // path?
+	sepol_id_t fs;
+	struct cil_context context;
+};
+
+struct cil_fs_use_xattr
+{
+};
+
+struct cil_fs_use_task
+{
+};
+
+struct cil_fs_use_trans
+{
+};
+
+struct constrain
+{
+};
+
+struct mls_constrain
+{
+};
+
+//IN?
+
+
 
