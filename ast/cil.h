@@ -34,6 +34,7 @@ struct cil_tree_node
 	struct cil_tree *children;
 	struct cil_tree_node *parent;
 	uint32_t node_class;
+	// Add line_num here and remove from everywhere else
 	void *data;
 };
 
@@ -49,15 +50,25 @@ struct cil_list_item
 	void *data;
 };
 
+struct cil_search
+{
+	//?
+};
+
 struct cil_module
 {
 	sepol_symtab_datum name;
+	// Need pointer back to its place in the tree (its tree node)
 };
 
 struct cil_block
 {
 	sepol_symtab_datum block;
 	uint32_t line_num;
+	uint16_t is_abstract;
+	uint16_t is_optional;
+	char *condition;
+	// Need pointer back to its place in the tree (its tree node)
 };
 
 struct cil_class
@@ -175,10 +186,10 @@ struct cil_level
 
 struct cil_transform_interface
 {
-	sepol_symtab_datum interface;
-	cil_list *params;
+	struct sepol_symtab_datum interface;
+	struct cil_list *params;
 	uint32_t line_num;	
-	//contents?
+	// Need pointer back to its place in the tree (its tree node)
 };
 
 struct cil_transform_call
@@ -187,29 +198,35 @@ struct cil_transform_call
 	sepol_id_t interface; //block? 
 };
 
+// CDS: this is a blockinherit (or inheritblock). Also need typeinherit and roleinherit
 struct cil_transform_inherits
 {
-	sepol_symtab_datum new_block;
-	cil_list *params;
+	struct sepol_symtab_datum new_block;
+	struct cil_list *params; //CDS: I don't think this is needed
 	sepol_id_t from_block;
-	cil_list *except;
+	struct cil_list *except;
 	uint32_t line_num;	
 };
 
-struct cil_transform_abs
-{
-	// abstract?
-};
 
 struct cil_transform_del
 {
-	sepol_id_t block;
+	struct cil_search target;
+	uint32_t line_num;
 	// ?
 };
 
+// This is the transform that modifies things in-place
 struct cil_transform_transform
 {
-	// ?
+	struct cil_search target;
+	// TODO: contents when we figure out what this will look like
+	uint32_t line_num;
+};
+
+struct cil_in
+{
+	struct cil_search target;
 };
 
 
@@ -229,7 +246,7 @@ struct cil_context
 
 struct cil_filecon
 {
-	sepol_symtab_datum path; // ?
+	struct sepol_symtab_datum path; // ?
 	struct cil_context context;
 //	char * path;
 	uint32_t line_num;
@@ -237,35 +254,35 @@ struct cil_filecon
 
 struct cil_portcon
 {
-	sepol_symtab_datum datum; // ?
+	struct sepol_symtab_datum port_range; // ?
 	struct cil_context context;
-	uint32_t proto;
-	uint32_t port; //range or individual ports?
+	sepol_id_t proto;
 	uint32_t line_num;
 };
 
 struct cil_netifcon
 {
+	struct sepol_symtab_datum netif;
+	struct cil_context if_context;
+	struct cil_context packet_context;
 	//netifcon lo system_u:object_r:lo_netif_t:s0 - s15:c0.c1023 system_u:object_r:unlabeled_t:s0 - s15:c0.c1023
 };
 
 struct cil_fscon
 {
-	sepol_symtab_datum datum; // path?
 	sepol_id_t fs;
+	sepol_id_t path;
 	struct cil_context context;
 };
 
-struct cil_fs_use_xattr
+#define CIL_FS_USE_XATTR 1
+#define CIL_FS_USE_TASK 2
+#define CIL_FS_USE_TRANS 3
+struct cil_fs_use
 {
-};
-
-struct cil_fs_use_task
-{
-};
-
-struct cil_fs_use_trans
-{
+	uint32_t flavor;
+	struct sepol_symtab_datum fs;
+	struct cil_context context;
 };
 
 struct constrain
