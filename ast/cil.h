@@ -51,32 +51,40 @@ struct cil_list_item
 
 struct cil_module
 {
-	char *name;
+	sepol_symtab_datum name;
 };
 
 struct cil_block
 {
-	char *name;
+	sepol_symtab_datum block;
 	uint32_t line_num;
 };
 
-struct cil_av
+struct cil_class
 {
-	sepol_symtab_datum datum;
+	sepol_symtab_datum cls;
 	cil_list *av;
+	sepol_id_t common; //can a class inherit from more than one common?
+	uint32_t line_num;
 };
 
-struct cil_av cil_common;
-struct cil_av cil_class;
+struct cil_common
+{
+	sepol_symtab_datum common;
+	cil_list *av;
+	uint32_t line_num;
+};
 
 struct cil_sid
 {
 	sepol_symtab_datum sid;
+	uint32_t line_num;
 };
 
 struct cil_user
 {
 	sepol_symtab_datum user;
+	uint32_t line_num;
 };
 
 struct cil_type
@@ -103,21 +111,24 @@ struct cil_role_dominates
 {
 	sepol_id_t role;
 	sepol_id_t dominates;
+	uint32_t line_num;
 };
 
 struct cil_role_types
 {
 	sepol_id_t role;
 	sepol_id_t type;
+	uint32_t line_num;
 };
 
 struct cil_bool
 {
-	sepol_id_t bool;
-	uint32_t value;
+	sepol_symtab_datum bool;
+	uint16_t value;
+	uint32_t line_num;
 };
 
-struct cil_rule
+struct cil_avrule
 {
 	uint32_t rule_kind;
 	sepol_id_t src;	
@@ -127,47 +138,70 @@ struct cil_rule
 	uint32_t line_num;
 };
 
-struct cil_rule cil_avrule;
-struct cil_rule cil_role_rule;
+struct cil_rule cil_role_rule
+{
+	uint32_t rule_kind;
+	sepol_id_t src;	
+	sepol_id_t tgt;
+	sepol_id_t obj;
+	uint32_t perms;	
+	uint32_t line_num;
+};
 
 struct cil_sens
 {
-	sepol_id_t sens;
+	sepol_symtab_datum sens;
+	uint32_t line_num;
 };
 
 struct cil_sens_dominates
 {
 	cil_list *sens;
+	uint32_t line_num;
 };
 
 struct cil_cat
 {
-	sepol_id_t cat;
+	sepol_symtab_datum cat;
+	uint32_t line_num;
 };
 
 struct cil_level
 {
 	sepol_id_t sens;
 	struct cil_list *cats;	
+	uint32_t line_num;
 };
 
-struct cil_filecontext 
+struct cil_interface
+{
+	sepol_symtab_datum interface;
+	//param list and matching item class?
+	uint32_t line_num;	
+};
+
+struct cil_filecontext //symtab?
 {
 	sepol_id_t user;
 	sepol_id_t role;
 	sepol_id_t type;
-	struct cil_level level; 
+	struct cil_level low;
+	struct cil_level high; 
 	char * path;
+	uint32_t line_num;
+};
+
+struct cil_portcontext
+{
+	sepol_id_t user;
+	sepol_id_t role;
+	sepol_id_t type;
+	struct cil_level level;
+	uint32_t proto;
+	uint32_t port; //range or individual ports?
+	uint32_t line_num;
 };
 
 
 //interfaces, templates, classes, conditionals?
-
-struct cil_index_node
-{
-	struct cil_tree_node *attr;
-	struct cil_index_node* next;
-};
-
-struct cil_index_node *attr_type_index;
 
