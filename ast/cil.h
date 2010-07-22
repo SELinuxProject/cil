@@ -1,3 +1,10 @@
+#ifndef CIL_H_
+#define CIL_H_
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+
 /*
 	Tree/list node types
 */
@@ -36,6 +43,27 @@
 #define CIL_CONSTRAIN		33
 #define CIL_MLS_CONSTRAIN	34
 
+/*
+	Keywords
+*/
+#define CIL_KEY_BLOCK 		"block"
+#define CIL_KEY_CLASS		"class"
+#define CIL_KEY_COMMON		"common"
+#define CIL_KEY_SID		"sid"
+#define CIL_KEY_USER		"user"
+#define CIL_KEY_ROLE 		"role"
+#define CIL_KEY_ROLETYPE	"roletype"
+#define CIL_KEY_TYPE 		"type"
+#define CIL_KEY_ATTR		"attribute"
+#define CIL_KEY_BOOL		"boolean"
+#define CIL_KEY_ALLOW		"allow"
+#define CIL_KEY_AUDITALLOW	"auditallow"
+#define CIL_KEY_DONTAUDIT	"dontaudit"
+#define CIL_KEY_NEVERALLOW	"neverallow"
+#define CIL_KEY_TYPETRANS	"typetrans"
+#define CIL_KEY_TYPEATTR	"typeattr"
+#define CIL_KEY_TYPEALIAS	"typealias"
+
 typedef uint16_t sepol_id_t;
 
 struct sepol_symtab_datum 
@@ -43,7 +71,7 @@ struct sepol_symtab_datum
 	sepol_id_t value;
 };
 
-const char* sepol_symtab_datum_id_to_name(struct sepol_symtab *symtab, sepol_id_t id);
+//const char* sepol_symtab_datum_id_to_name(struct sepol_symtab *symtab, sepol_id_t id);
 
 struct cil_tree
 {
@@ -75,6 +103,7 @@ struct cil_list_item
 struct cil_search
 {
 	//Design
+	int x; //temporary while attempting to get this to compile
 };
 
 struct cil_module
@@ -212,7 +241,7 @@ struct cil_transform_interface
 
 struct cil_transform_call
 {
-	cil_list *params;
+	struct cil_list *params;
 	sepol_id_t interface; 
 };
 
@@ -290,7 +319,7 @@ struct cil_fs_use
 	struct cil_context context;
 };
 
-struct constrain
+/*struct constrain
 {
 	//Design
 };
@@ -298,4 +327,6 @@ struct constrain
 struct mls_constrain
 {
 	//Design
-};
+};*/
+
+#endif
