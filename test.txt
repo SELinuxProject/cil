@@ -1,6 +1,6 @@
 (block apache
 			(type process)
-			(alias apache apache_t)(type log)
+			(typealias apache apache_t)(type log)
 			(type pid)
 			(type user_cgi)
 			(attribute httpd_sys_content)

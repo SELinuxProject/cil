@@ -1,4 +1,5 @@
 %{
+	#include <stdint.h>
 	#include "cil_lexer.h"
 	char * value;
 	int line = 1;
@@ -24,7 +25,7 @@ comment		;.*$
 .		value=yytext; return NONE;
 %%
 
-void cil_lexer_setup(char *buffer, int size)
+void cil_lexer_setup(char *buffer, uint32_t size)
 {
 	size = (yy_size_t)size;
 	yy_scan_buffer(buffer, size + 2);

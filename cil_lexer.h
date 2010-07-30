@@ -1,6 +1,8 @@
 #ifndef CIL_LEXER_H_
 #define CIL_LEXER_H_
 
+#include <stdint.h>
+
 #define OPAREN 1
 #define CPAREN 2
 #define SYMBOL 3
@@ -10,12 +12,12 @@
 
 struct token
 {
-	int type;
+	uint32_t type;
 	char * value;
-	int line;
+	uint32_t line;
 };
 
 struct token * cil_lexer_next();
-void cil_lexer_setup(char*, int);
+void cil_lexer_setup(char*, uint32_t);
 
 #endif /* CIL_LEXER_H_ */

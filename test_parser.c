@@ -1,19 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "../s_parser/cil_lexer.h"
-#include "../s_parser/cil_parser.h"
-#include "cil.h"
+#include <stdint.h>
+#include "cil_lexer.h"
 
 int main(int argc, char *argv[])
 {
-        int file_size;
+        uint32_t file_size;
         char *buffer;
         FILE *file;
-
-	struct element *tree;
-	struct cil_tree *ast;
-
-	ast = (struct cil_tree *)malloc(sizeof(struct cil_tree));
 
         char buf[10];
 
@@ -31,12 +25,7 @@ int main(int argc, char *argv[])
                 fread(buffer, file_size, 1, file); 
                 fclose(file);           
 
-		tree = cil_parser(buffer, file_size);
-
-		cil_print_tree(tree, 0);
-		
-		cil_build_ast(tree, ast);				
-
+		cil_print_tree(cil_parser(buffer, file_size), 0);
         }
 
         exit(0);

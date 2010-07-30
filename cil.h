@@ -42,6 +42,7 @@
 #define CIL_FS_USE		32
 #define CIL_CONSTRAIN		33
 #define CIL_MLS_CONSTRAIN	34
+#define CIL_PERM		35
 
 /*
 	Keywords
@@ -63,6 +64,7 @@
 #define CIL_KEY_TYPETRANS	"typetrans"
 #define CIL_KEY_TYPEATTR	"typeattr"
 #define CIL_KEY_TYPEALIAS	"typealias"
+#define CIL_KEY_INTERFACE	"interface"
 
 typedef uint16_t sepol_id_t;
 
@@ -72,26 +74,6 @@ struct sepol_symtab_datum
 };
 
 //const char* sepol_symtab_datum_id_to_name(struct sepol_symtab *symtab, sepol_id_t id);
-
-struct cil_tree
-{
-	struct cil_tree_node *data;
-};
-
-struct cil_tree_node
-{
-	struct cil_tree_node *next;
-	struct cil_tree *children;
-	struct cil_tree_node *parent;
-	uint32_t node_class;
-	uint32_t line_num;
-	void *data;
-};
-
-struct cil_list
-{
-	struct cil_list_item *data;
-};
 
 struct cil_list_item
 {
@@ -124,14 +106,19 @@ struct cil_block
 struct cil_class
 {
 	struct sepol_symtab_datum cls;
-	struct cil_list *av;
+	struct cil_list_item *av;
 	sepol_id_t common;
+};
+
+struct cil_perm
+{
+	struct sepol_symtab_datum perm;
 };
 
 struct cil_common
 {
 	struct sepol_symtab_datum common;
-	struct cil_list *av;
+	struct cil_list_item *av;
 };
 
 struct cil_sid
@@ -163,7 +150,6 @@ struct cil_role_types
 
 #define CIL_TYPE_TYPE 0
 #define CIL_TYPE_ATTRIB 1
-#define CIL_TYPE_ALIAS 2
 struct cil_type
 {
 	struct sepol_symtab_datum type;
@@ -174,6 +160,12 @@ struct cil_typeattribute
 {
 	sepol_id_t type;
 	sepol_id_t attrib;
+};
+
+struct cil_typealias
+{
+	struct sepol_symtab_datum alias;
+	sepol_id_t type;
 };
 
 struct cil_bool
@@ -197,7 +189,7 @@ struct cil_avrule
 	uint32_t rule_kind;
 	sepol_id_t src;	
 	sepol_id_t tgt;
-	sepol_id_t obj;
+	struct cil_list_item *obj;
 	uint32_t perms;	
 };
 
@@ -218,7 +210,7 @@ struct cil_sens
 
 struct cil_sens_dominates
 {
-	struct cil_list *sens;
+	struct cil_list_item *sens;
 };
 
 struct cil_cat
@@ -229,19 +221,19 @@ struct cil_cat
 struct cil_level
 {
 	sepol_id_t sens;
-	struct cil_list *cats;	
+	struct cil_list_item *cats;	
 };
 
 struct cil_transform_interface
 {
 	struct sepol_symtab_datum interface;
-	struct cil_list *params;
+	struct cil_list_item *params;
 	struct cil_tree_node *self;
 };
 
 struct cil_transform_call
 {
-	struct cil_list *params;
+	struct cil_list_item *params;
 	sepol_id_t interface; 
 };
 
@@ -252,7 +244,7 @@ struct cil_transform_inherit
 {
 	struct sepol_symtab_datum inherit_to;
 	sepol_id_t inherit_from;
-	struct cil_list *except;
+	struct cil_list_item *except;
 	uint32_t flavor;	
 };
 
