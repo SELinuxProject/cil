@@ -148,12 +148,9 @@ struct cil_role_types
 	sepol_id_t type;
 };
 
-#define CIL_TYPE_TYPE 0
-#define CIL_TYPE_ATTRIB 1
-struct cil_type
+struct cil_type	//Also used for attributes
 {
 	struct sepol_symtab_datum type;
-	uint32_t flavor;
 };
 
 struct cil_typeattribute
@@ -320,5 +317,13 @@ struct mls_constrain
 {
 	//Design
 };*/
+
+/* 
+	Functions for creating and populating data structures above from parse tree nodes
+*/
+
+struct cil_block * gen_block(struct cil_tree_node *, uint16_t, uint16_t, char*);
+struct cil_avrule * gen_avrule(struct cil_tree_node *, uint32_t);
+struct cil_type * gen_type(struct cil_tree_node *, uint32_t);
 
 #endif
