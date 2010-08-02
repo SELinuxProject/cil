@@ -1,7 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+
 #include "cil_lexer.h"
+#include "cil_tree.h"
+#include "cil.h"
+#include "cil_parser.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,7 +29,7 @@ int main(int argc, char *argv[])
                 fread(buffer, file_size, 1, file); 
                 fclose(file);           
 
-		cil_print_tree(cil_parser(buffer, file_size), 0);
+		cil_print_tree((cil_parser(buffer, file_size))->root, 0);
         }
 
         exit(0);

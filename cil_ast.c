@@ -47,20 +47,28 @@ void cil_build_ast(struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK))
 			{
 				printf("new block: %s\n", (char*)parse_current->next->data); //This should be setting sepol_id_t	
-				node->data = gen_block(node, 0, 0, NULL);
+				node->data = gen_block(parse_current, node, 0, 0, NULL);
 				node->flavor = CIL_BLOCK;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPE))
 			{
-				//Set values of type here
 				node->data = gen_type(parse_current, CIL_TYPE);
 				node->flavor = CIL_TYPE; //This is the data structure type (same for both type and attr)
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ATTR))
 			{
-				//Set values of type here
 				node->data = gen_type(parse_current, CIL_TYPE_ATTR);
 				node->flavor = CIL_TYPE_ATTR;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_ATTR))
+			{
+				node->data = gen_role(parse_current);
+				node->flavor = CIL_ROLE;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_BOOL))
+			{
+				node->data = gen_bool(parse_current);
+				node->flavor = CIL_BOOL;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW))
 			{

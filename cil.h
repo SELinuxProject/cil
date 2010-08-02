@@ -56,7 +56,7 @@
 #define CIL_KEY_ROLETYPE	"roletype"
 #define CIL_KEY_TYPE 		"type"
 #define CIL_KEY_ATTR		"attribute"
-#define CIL_KEY_BOOL		"boolean"
+#define CIL_KEY_BOOL		"bool"
 #define CIL_KEY_ALLOW		"allow"
 #define CIL_KEY_AUDITALLOW	"auditallow"
 #define CIL_KEY_DONTAUDIT	"dontaudit"
@@ -322,8 +322,10 @@ struct mls_constrain
 	Functions for creating and populating data structures above from parse tree nodes
 */
 
-struct cil_block * gen_block(struct cil_tree_node *, uint16_t, uint16_t, char*);
+struct cil_block * gen_block(struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char*);
 struct cil_avrule * gen_avrule(struct cil_tree_node *, uint32_t);
 struct cil_type * gen_type(struct cil_tree_node *, uint32_t);
+struct cil_role * gen_role(struct cil_tree_node*);
+struct cil_bool * gen_bool(struct cil_tree_node*);
 
 #endif

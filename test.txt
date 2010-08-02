@@ -1,5 +1,6 @@
 (block apache
 			(type process)
+			(role apache_r)
 			(typealias apache apache_t)(type log)
 			(type pid)
 			(type user_cgi)
@@ -15,6 +16,9 @@
 			(allow process log file (read write))
 
 			(corenet_tcp_sendrecv_all_nodes process))
+
+		(bool foo true)
+		(bool bar false)
 
 		; object classes
 		(class file
