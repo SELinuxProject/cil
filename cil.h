@@ -43,6 +43,7 @@
 #define CIL_CONSTRAIN		33
 #define CIL_MLS_CONSTRAIN	34
 #define CIL_PERM		35
+#define CIL_TYPEALIAS		36
 
 /*
 	Keywords
@@ -327,5 +328,6 @@ struct cil_avrule * gen_avrule(struct cil_tree_node *, uint32_t);
 struct cil_type * gen_type(struct cil_tree_node *, uint32_t);
 struct cil_role * gen_role(struct cil_tree_node*);
 struct cil_bool * gen_bool(struct cil_tree_node*);
+struct cil_typealias * gen_typealias(struct cil_tree_node*);
 
 #endif
