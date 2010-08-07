@@ -185,5 +185,11 @@ struct cil_bool * gen_bool(struct cil_tree_node *parse_current)
 	return boolean;
 }
 
-
-
+struct cil_typealias * gen_typealias(struct cil_tree_node *parse_current)
+{
+	struct cil_typealias *alias;	
+	alias = (struct cil_typealias*)malloc(sizeof(struct cil_typealias));
+	printf("new alias: %s, type: %s\n", (char*)parse_current->next->data, (char*)parse_current->next->next->data);
+	
+	return(alias);
+}

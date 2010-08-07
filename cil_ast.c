@@ -60,7 +60,12 @@ void cil_build_ast(struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 				node->data = gen_type(parse_current, CIL_TYPE_ATTR);
 				node->flavor = CIL_TYPE_ATTR;
 			}
-			else if (!strcmp(parse_current->data, CIL_KEY_ATTR))
+			else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS))
+			{
+				node->data = gen_typealias(parse_current);
+				node->flavor = CIL_TYPEALIAS;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_ROLE))
 			{
 				node->data = gen_role(parse_current);
 				node->flavor = CIL_ROLE;
