@@ -4,6 +4,16 @@
 #include "cil_tree.h"
 #include "cil.h"
 
+struct cil_module * gen_module(struct cil_tree_node *parse_current, struct cil_tree_node *node)
+{
+	struct cil_module *module;
+	module = (struct cil_module*)malloc(sizeof(struct cil_module));
+	//Insert module into symtab and add sepol_id_t
+	module->self = node;
+
+	return module;
+}
+
 struct cil_block * gen_block(struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
 	//TODO: Check if this is actually a block, abort if not	
@@ -16,7 +26,72 @@ struct cil_block * gen_block(struct cil_tree_node *parse_current, struct cil_tre
 	block->condition = condition;
 	block->self = node;
 
-	return(block);	
+	return block;	
+}
+
+struct cil_class * gen_class(struct cil_tree_node *parse_current)
+{
+	struct cil_class *cls;
+	cls = (struct cil_class*)malloc(sizeof(struct cil_class));
+	
+	//Add class to symtab and add sepol_id_t
+	//List of av rules here
+	//Common to inherit from
+
+	return cls;
+}
+
+struct cil_perm * gen_perm(struct cil_perm *parse_current)
+{
+	struct cil_perm *perm;
+	perm = (struct cil_perm*)malloc(sizeof(struct cil_perm));
+
+	//sepol_id_t?
+
+	return perm;
+}
+
+struct cil_common * gen_common(struct cil_common *parse_current)
+{
+	struct cil_common *common;
+	common = (struct cil_common*)malloc(sizeof(struct cil_common));
+
+	//sepol_id_t
+	//list of av
+	
+	return common;
+}
+
+struct cil_sid * gen_sid(struct cil_tree_node *parse_current)
+{
+	struct cil_sid * sid;
+	sid = (struct cil_sid*)malloc(sizeof(struct cil_sid));	
+
+	//sepol_id_t
+
+	return sid;
+}
+
+struct cil_user * gen_user(struct cil_tree_node *parse_current)
+{
+	struct cil_user *user;
+	user = (struct cil_user*)malloc(sizeof(struct cil_user));
+
+	printf("new user: %s", (char*)parse_current->next->data);
+	//Add to user symtab and set user->user sepol_id_t of new entry
+
+	return user;
+}
+
+struct cil_role * gen_role(struct cil_tree_node *parse_current)
+{
+	struct cil_role *role;
+	role = (struct cil_role*)malloc(sizeof(struct cil_role));
+
+	printf("new role: %s\n", (char*)parse_current->next->data);
+	//Add to role symtab and set role->role to sepol_id_t of new entry
+
+	return role;
 }
 
 struct cil_avrule * gen_avrule(struct cil_tree_node *parse_current, uint32_t rule_kind)
@@ -62,7 +137,7 @@ struct cil_avrule * gen_avrule(struct cil_tree_node *parse_current, uint32_t rul
 	else
 		printf("perms: %s\n", (char*)parse_current->next->next->next->next->data);
 
-	return(rule);	
+	return rule;	
 }
 
 struct cil_type * gen_type(struct cil_tree_node *parse_current, uint32_t flavor)
@@ -73,37 +148,29 @@ struct cil_type * gen_type(struct cil_tree_node *parse_current, uint32_t flavor)
 	if (flavor == CIL_TYPE)
 	{
 		printf("new type: %s\n", (char*)parse_current->next->data);
-		//Add to type symtab and set type->type to point to new entry
+		//Add to type symtab and set type->type to sepol_id_t of new entry
 	}
 	else if (flavor == CIL_TYPE_ATTR)
 	{
 		printf("new attr: %s\n", (char*)parse_current->next->data);
-		//ADD to attr symtab and set type->type to point to entry
+		//ADD to attr symtab and set type->type to sepol_id_t of new entry
 	}
 	else
 	{
 		printf("Error: gen_type called on invalid node\n");
 		exit(1);
 	}
-	return(type);
+
+	return type;
 }
 
-struct cil_role * gen_role(struct cil_tree_node *parse_current)
-{
-	struct cil_role *role;
-	role = (struct cil_role*)malloc(sizeof(struct cil_role));
-
-	printf("new role: %s\n", (char*)parse_current->next->data);
-	//Add to role symtab and set role->role to point to new entry
-	return(role);
-}
 
 struct cil_bool * gen_bool(struct cil_tree_node *parse_current)
 {
 	struct cil_bool *boolean;
 	boolean = (struct cil_bool*)malloc(sizeof(struct cil_bool));
 	printf("new bool: %s", (char*)parse_current->next->data);
-	//Add to bool symtab and set boolean->bool to point to new entry
+	//Add to bool symtab and set boolean->bool to sepol_id_t of new entry
 	if (!strcmp(parse_current->next->next->data, "true"))
 		boolean->value = 1;
 	else if (!strcmp(parse_current->next->next->data, "false"))
@@ -114,7 +181,9 @@ struct cil_bool * gen_bool(struct cil_tree_node *parse_current)
 		exit(1);
 	}
 	printf(", value= %d\n", boolean->value);
-	return(boolean);
+
+	return boolean;
 }
+
 
 
