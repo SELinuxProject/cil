@@ -30,6 +30,7 @@ struct cil_db * cil_db_init()
 	db->ast_root = (struct cil_tree *)malloc(sizeof(struct cil_tree));
 
 	return db;
+}
 
 struct cil_module * gen_module(struct cil_tree_node *parse_current, struct cil_tree_node *node)
 {
