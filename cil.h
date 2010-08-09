@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include <sepol/policydb/symtab.h>
+
 /*
 	Tree/list node types
 */
@@ -67,6 +69,31 @@
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_INTERFACE	"interface"
 
+/*
+	Symbol Table Array Indices
+*/
+#define CIL_SYM_MODULES			0
+#define CIL_SYM_BLOCKS			1
+#define CIL_SYM_CLASSES			2
+#define CIL_SYM_PERMS			3
+#define CIL_SYM_COMMONS			4
+#define CIL_SYM_SIDS			5
+#define CIL_SYM_USERS			6
+#define CIL_SYM_ROLES			7
+#define CIL_SYM_TYPES			8
+#define CIL_SYM_ALIASES			9
+#define CIL_SYM_BOOLS			10
+#define CIL_SYM_SENS			11
+#define CIL_SYM_CATS			12
+#define CIL_SYM_FILECONS		13
+#define CIL_SYM_PORTCONS		14
+#define CIL_SYM_NETIFCONS		15
+#define CIL_SYM_TRANS_INTERFACES	16
+#define CIL_SYM_TRANS_INHERITS		17
+
+#define CIL_SYM_NUM			18
+
+
 typedef uint16_t sepol_id_t;
 
 struct sepol_symtab_datum 
@@ -74,7 +101,13 @@ struct sepol_symtab_datum
 	sepol_id_t value;
 };
 
-//const char* sepol_symtab_datum_id_to_name(struct sepol_symtab *symtab, sepol_id_t id);
+struct cil_db
+{
+	struct cil_tree *parse_root;
+	struct cil_tree *ast_root;
+	
+	symtab_t symtab[CIL_SYM_NUM]; 	
+};
 
 struct cil_list_item
 {
@@ -322,6 +355,8 @@ struct mls_constrain
 /* 
 	Functions for creating and populating data structures above from parse tree nodes
 */
+
+struct cil_db * cil_db_init();
 
 struct cil_block * gen_block(struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char*);
 struct cil_avrule * gen_avrule(struct cil_tree_node *, uint32_t);

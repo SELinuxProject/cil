@@ -1,8 +1,36 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <sepol/policydb/symtab.h>
+#include <sepol/policydb/policydb.h>
+
 #include "cil_tree.h"
 #include "cil.h"
+
+struct cil_db * cil_db_init()
+{
+	int i, rc;	
+
+	uint32_t symtab_size;
+	symtab_size = 256;	//Need to determine what sizes are needed for each
+
+	struct cil_db *db;
+	db = (struct cil_db*)malloc(sizeof(struct cil_db));
+
+	for (i = 0; i < CIL_SYM_NUM; i++)
+	{
+		rc = symtab_init(&db->symtab[i], symtab_size);
+		if (rc)
+		{
+			printf("Symtab init failed\n");
+			exit(1);
+		}
+	}
+	
+	db->ast_root = (struct cil_tree *)malloc(sizeof(struct cil_tree));
+
+	return db;
+}
 
 struct cil_block * gen_block(struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
