@@ -4,54 +4,53 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-
 #include <sepol/policydb/symtab.h>
 
 /*
 	Tree/list node types
 */
-#define CIL_SEARCH		1
-#define CIL_MODULE		2
-#define CIL_BLOCK		3
-#define CIL_CLASS		4
-#define CIL_COMMON		5
-#define CIL_SID			6
-#define CIL_USER		7
-#define CIL_ROLE		8
-#define CIL_ROLE_TYPES		9
-#define CIL_TYPE		10
-#define CIL_TYPE_ATTR		11
-#define CIL_BOOL		12
-#define CIL_AVRULE		13
-#define CIL_ROLE_RULE		14
-#define CIL_SENS		15
-#define CIL_SENS_DOM		16
-#define CIL_CAT			17
-#define CIL_LEVEL		18
-#define CIL_TRANS_IF		19
-#define CIL_TRANS_CALL		20
-#define CIL_TRANS_INH_BLK	21
-#define CIL_TRANS_INH_TYPE	22
-#define CIL_TRANS_INH_ROLE	23
-#define CIL_TRANS_DEL		24
-#define CIL_TRANS_TRANS		25
-#define CIL_IN			26
-#define CIL_CONTEXT		27
-#define CIL_FILECON		28
-#define CIL_PORTCON		29
-#define CIL_NETIFCON		30
-#define CIL_FSCON		31
-#define CIL_FS_USE		32
-#define CIL_CONSTRAIN		33
-#define CIL_MLS_CONSTRAIN	34
-#define CIL_PERM		35
-#define CIL_TYPEALIAS		36
+#define CIL_BLOCK		1
+#define CIL_CLASS		2
+#define CIL_COMMON		3
+#define CIL_SID			4
+#define CIL_USER		5
+#define CIL_ROLE		6
+#define CIL_ROLE_TYPES		7
+#define CIL_TYPE		8
+#define CIL_TYPE_ATTR		9
+#define CIL_BOOL		10
+#define CIL_AVRULE		11
+#define CIL_ROLE_RULE		12
+#define CIL_SENS		13
+#define CIL_SENS_DOM		14
+#define CIL_CAT			15
+#define CIL_LEVEL		16
+#define CIL_SEARCH		17
+#define CIL_TRANS_IF		18
+#define CIL_TRANS_CALL		19
+#define CIL_TRANS_INH_BLK	20
+#define CIL_TRANS_INH_TYPE	21
+#define CIL_TRANS_INH_ROLE	22
+#define CIL_TRANS_DEL		23
+#define CIL_TRANS_TRANS		24
+#define CIL_IN			25
+#define CIL_CONTEXT		26
+#define CIL_FILECON		27
+#define CIL_PORTCON		28
+#define CIL_NETIFCON		29
+#define CIL_FSCON		30
+#define CIL_FS_USE		31
+#define CIL_CONSTRAIN		32
+#define CIL_MLS_CONSTRAIN	33
+#define CIL_PERM		34
+#define CIL_TYPEALIAS		35
 
 /*
 	Keywords
 */
 #define CIL_KEY_BLOCK 		"block"
 #define CIL_KEY_CLASS		"class"
+#define CIL_KEY_PERM		"perm"
 #define CIL_KEY_COMMON		"common"
 #define CIL_KEY_SID		"sid"
 #define CIL_KEY_USER		"user"
@@ -72,34 +71,28 @@
 /*
 	Symbol Table Array Indices
 */
-#define CIL_SYM_MODULES			0
-#define CIL_SYM_BLOCKS			1
-#define CIL_SYM_CLASSES			2
-#define CIL_SYM_PERMS			3
-#define CIL_SYM_COMMONS			4
-#define CIL_SYM_SIDS			5
-#define CIL_SYM_USERS			6
-#define CIL_SYM_ROLES			7
-#define CIL_SYM_TYPES			8
-#define CIL_SYM_ALIASES			9
-#define CIL_SYM_BOOLS			10
-#define CIL_SYM_SENS			11
-#define CIL_SYM_CATS			12
-#define CIL_SYM_FILECONS		13
-#define CIL_SYM_PORTCONS		14
-#define CIL_SYM_NETIFCONS		15
-#define CIL_SYM_TRANS_INTERFACES	16
-#define CIL_SYM_TRANS_INHERITS		17
+#define CIL_SYM_FILES			1	//Filenames of modules
+#define CIL_SYM_BLOCKS			2
+#define CIL_SYM_CLASSES			3
+#define CIL_SYM_PERMS			4
+#define CIL_SYM_COMMONS			5
+#define CIL_SYM_SIDS			6
+#define CIL_SYM_USERS			7
+#define CIL_SYM_ROLES			8
+#define CIL_SYM_TYPES			9
+#define CIL_SYM_ALIASES			10
+#define CIL_SYM_BOOLS			11
+#define CIL_SYM_SENS			12
+#define CIL_SYM_CATS			13
+#define CIL_SYM_FILECONS		14
+#define CIL_SYM_PORTCONS		15
+#define CIL_SYM_NETIFCONS		16
+#define CIL_SYM_TRANS_INTERFACES	17
+#define CIL_SYM_TRANS_INHERITS		18
 
-#define CIL_SYM_NUM			18
+#define CIL_SYM_NUM			19
 
-
-typedef uint16_t sepol_id_t;
-
-struct sepol_symtab_datum 
-{
-	sepol_id_t value;
-};
+typedef uint32_t sepol_id_t;
 
 struct cil_db
 {
@@ -122,15 +115,9 @@ struct cil_search
 	int x; //temporary while attempting to get this to compile
 };
 
-struct cil_module
-{
-	struct sepol_symtab_datum name;
-	struct cil_tree_node *self;
-};
-
 struct cil_block
 {
-	struct sepol_symtab_datum block;
+	symtab_datum_t block;
 	uint16_t is_abstract;
 	uint16_t is_optional;
 	char *condition;
@@ -139,35 +126,35 @@ struct cil_block
 
 struct cil_class
 {
-	struct sepol_symtab_datum cls;
+	symtab_datum_t cls;
 	struct cil_list_item *av;
 	sepol_id_t common;
 };
 
 struct cil_perm
 {
-	struct sepol_symtab_datum perm;
+	symtab_datum_t perm;
 };
 
 struct cil_common
 {
-	struct sepol_symtab_datum common;
+	symtab_datum_t common;
 	struct cil_list_item *av;
 };
 
 struct cil_sid
 {
-	struct sepol_symtab_datum sid;
+	symtab_datum_t sid;
 };
 
 struct cil_user
 {
-	struct sepol_symtab_datum user;
+	symtab_datum_t user;
 };
 
 struct cil_role
 {
-	struct sepol_symtab_datum role;
+	symtab_datum_t role;
 };
 
 struct cil_role_dominates
@@ -184,7 +171,7 @@ struct cil_role_types
 
 struct cil_type	//Also used for attributes
 {
-	struct sepol_symtab_datum type;
+	symtab_datum_t type;
 };
 
 struct cil_typeattribute
@@ -195,13 +182,13 @@ struct cil_typeattribute
 
 struct cil_typealias
 {
-	struct sepol_symtab_datum alias;
+	symtab_datum_t alias;
 	sepol_id_t type;
 };
 
 struct cil_bool
 {
-	struct sepol_symtab_datum bool;
+	symtab_datum_t bool;
 	uint16_t value;
 };
 
@@ -236,7 +223,7 @@ struct cil_role_rule
 
 struct cil_sens
 {
-	struct sepol_symtab_datum sens;
+	symtab_datum_t sens;
 };
 
 struct cil_sens_dominates
@@ -246,7 +233,7 @@ struct cil_sens_dominates
 
 struct cil_cat
 {
-	struct sepol_symtab_datum cat;
+	symtab_datum_t cat;
 };
 
 struct cil_level
@@ -257,7 +244,7 @@ struct cil_level
 
 struct cil_transform_interface
 {
-	struct sepol_symtab_datum interface;
+	symtab_datum_t interface;
 	struct cil_list_item *params;
 	struct cil_tree_node *self;
 };
@@ -273,7 +260,7 @@ struct cil_transform_call
 #define CIL_INHERIT_TYPE  3
 struct cil_transform_inherit
 {
-	struct sepol_symtab_datum inherit_to;
+	symtab_datum_t inherit_to;
 	sepol_id_t inherit_from;
 	struct cil_list_item *except;
 	uint32_t flavor;	
@@ -307,20 +294,20 @@ struct cil_context
 
 struct cil_filecon
 {
-	struct sepol_symtab_datum path;
+	symtab_datum_t path;
 	struct cil_context context;
 };
 
 struct cil_portcon
 {
-	struct sepol_symtab_datum port_range; 
+	symtab_datum_t port_range; 
 	struct cil_context context;
 	sepol_id_t proto;
 };
 
 struct cil_netifcon
 {
-	struct sepol_symtab_datum netif;
+	symtab_datum_t netif;
 	struct cil_context if_context;
 	struct cil_context packet_context;
 };
@@ -338,7 +325,7 @@ struct cil_fscon
 struct cil_fs_use
 {
 	uint32_t flavor;
-	struct sepol_symtab_datum fs;
+	symtab_datum_t fs;
 	struct cil_context context;
 };
 
@@ -358,11 +345,17 @@ struct mls_constrain
 
 struct cil_db * cil_db_init();
 
-struct cil_block * gen_block(struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char*);
-struct cil_avrule * gen_avrule(struct cil_tree_node *, uint32_t);
-struct cil_type * gen_type(struct cil_tree_node *, uint32_t);
-struct cil_role * gen_role(struct cil_tree_node*);
-struct cil_bool * gen_bool(struct cil_tree_node*);
-struct cil_typealias * gen_typealias(struct cil_tree_node*);
+char * cil_resolve_name(struct cil_tree_node *, char *);
+
+struct cil_block * cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char*);
+struct cil_class * cil_gen_class(struct cil_db *, struct cil_tree_node*);
+struct cil_perm * cil_gen_perm(struct cil_db *, struct cil_tree_node*);
+struct cil_common * cil_gen_common(struct cil_db *, struct cil_tree_node*);
+struct cil_sid * cil_gen_sid(struct cil_db *, struct cil_tree_node*);
+struct cil_avrule * cil_gen_avrule(struct cil_db *, struct cil_tree_node *, uint32_t);
+struct cil_type * cil_gen_type(struct cil_db *, struct cil_tree_node *, uint32_t);
+struct cil_role * cil_gen_role(struct cil_db *, struct cil_tree_node*);
+struct cil_bool * cil_gen_bool(struct cil_db *, struct cil_tree_node*);
+struct cil_typealias * cil_gen_typealias(struct cil_db *, struct cil_tree_node*);
 
 #endif

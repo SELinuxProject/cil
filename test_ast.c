@@ -6,6 +6,8 @@
 #include "cil_tree.h"
 #include "cil_parser.h"
 
+#include <sepol/policydb/hashtab.h>
+
 int main(int argc, char *argv[])
 {
         uint32_t file_size;
@@ -31,10 +33,9 @@ int main(int argc, char *argv[])
 
 		db->parse_root = cil_parser(buffer, file_size);
 
-//		cil_print_tree(tree->root, 0); //Separate print_tree functions for parse and ast? Wrap so depth isn't shown
+		cil_print_tree(db->parse_root->root, 0); //Separate print_tree functions for parse and ast? Wrap so depth isn't shown
 		
-		cil_build_ast(db->parse_root->root, db->ast_root);				
-
+		cil_build_ast(db, db->parse_root->root, db->ast_root);			
         }
 
         exit(0);

@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <sepol/policydb/symtab.h>
 #include <sepol/policydb/policydb.h>
+#include <sepol/policydb/symtab.h>
 
 #include "cil_tree.h"
 #include "cil.h"
@@ -32,23 +32,35 @@ struct cil_db * cil_db_init()
 	return db;
 }
 
-struct cil_module * gen_module(struct cil_tree_node *parse_current, struct cil_tree_node *node)
+char * cil_resolve_name(struct cil_tree_node *parse_parent, char* name)
 {
-	struct cil_module *module;
-	module = (struct cil_module*)malloc(sizeof(struct cil_module));
-	//Insert module into symtab and add sepol_id_t
-	module->self = node;
+	return name;
+	strcat(parse_parent->next->data, name);
+	if (parse_parent->parent != NULL)
+		cil_resolve_name(parse_parent->parent, name);
 
-	return module;
+	return name; 
 }
 
-struct cil_block * gen_block(struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
+struct cil_block * cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
-	//TODO: Check if this is actually a block, abort if not	
-
+	int rc;
+	char *name, *key;
 	struct cil_block *block;
 	block = (struct cil_block*)malloc(sizeof(struct cil_block));
-	//block->name --  insert name into table, and add sepol_id_t here
+
+	name = (char *)parse_current->next->data;
+		
+	key = (hashtab_key_t)cil_resolve_name(parse_current->parent, name);
+	printf("key: %s\n", (char*)key);
+	
+	rc = hashtab_insert(db->symtab[CIL_SYM_BLOCKS].table, (hashtab_key_t)parse_current->next->data, block);
+	if (rc)
+	{
+		printf("Failed to insert block %s\n", (char*)parse_current->next->data);
+		exit(1);
+	}
+
 	block->is_abstract = is_abstract;
 	block->is_optional = is_optional;
 	block->condition = condition;
@@ -57,7 +69,7 @@ struct cil_block * gen_block(struct cil_tree_node *parse_current, struct cil_tre
 	return block;	
 }
 
-struct cil_class * gen_class(struct cil_tree_node *parse_current)
+struct cil_class * cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current)
 {
 	struct cil_class *cls;
 	cls = (struct cil_class*)malloc(sizeof(struct cil_class));
@@ -69,7 +81,7 @@ struct cil_class * gen_class(struct cil_tree_node *parse_current)
 	return cls;
 }
 
-struct cil_perm * gen_perm(struct cil_perm *parse_current)
+struct cil_perm * cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current)
 {
 	struct cil_perm *perm;
 	perm = (struct cil_perm*)malloc(sizeof(struct cil_perm));
@@ -79,7 +91,7 @@ struct cil_perm * gen_perm(struct cil_perm *parse_current)
 	return perm;
 }
 
-struct cil_common * gen_common(struct cil_common *parse_current)
+struct cil_common * cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current)
 {
 	struct cil_common *common;
 	common = (struct cil_common*)malloc(sizeof(struct cil_common));
@@ -90,7 +102,7 @@ struct cil_common * gen_common(struct cil_common *parse_current)
 	return common;
 }
 
-struct cil_sid * gen_sid(struct cil_tree_node *parse_current)
+struct cil_sid * cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current)
 {
 	struct cil_sid * sid;
 	sid = (struct cil_sid*)malloc(sizeof(struct cil_sid));	
@@ -100,7 +112,7 @@ struct cil_sid * gen_sid(struct cil_tree_node *parse_current)
 	return sid;
 }
 
-struct cil_user * gen_user(struct cil_tree_node *parse_current)
+struct cil_user * cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current)
 {
 	struct cil_user *user;
 	user = (struct cil_user*)malloc(sizeof(struct cil_user));
@@ -111,7 +123,7 @@ struct cil_user * gen_user(struct cil_tree_node *parse_current)
 	return user;
 }
 
-struct cil_role * gen_role(struct cil_tree_node *parse_current)
+struct cil_role * cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current)
 {
 	struct cil_role *role;
 	role = (struct cil_role*)malloc(sizeof(struct cil_role));
@@ -122,7 +134,7 @@ struct cil_role * gen_role(struct cil_tree_node *parse_current)
 	return role;
 }
 
-struct cil_avrule * gen_avrule(struct cil_tree_node *parse_current, uint32_t rule_kind)
+struct cil_avrule * cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, uint32_t rule_kind)
 {
 	//TODO: Check if this is actually an avrule, abort if not
 	
@@ -168,7 +180,7 @@ struct cil_avrule * gen_avrule(struct cil_tree_node *parse_current, uint32_t rul
 	return rule;	
 }
 
-struct cil_type * gen_type(struct cil_tree_node *parse_current, uint32_t flavor)
+struct cil_type * cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, uint32_t flavor)
 {
 	struct cil_type *type;
 	type = (struct cil_type*)malloc(sizeof(struct cil_type));
@@ -185,7 +197,7 @@ struct cil_type * gen_type(struct cil_tree_node *parse_current, uint32_t flavor)
 	}
 	else
 	{
-		printf("Error: gen_type called on invalid node\n");
+		printf("Error: cil_gen_type called on invalid node\n");
 		exit(1);
 	}
 
@@ -193,7 +205,7 @@ struct cil_type * gen_type(struct cil_tree_node *parse_current, uint32_t flavor)
 }
 
 
-struct cil_bool * gen_bool(struct cil_tree_node *parse_current)
+struct cil_bool * cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current)
 {
 	struct cil_bool *boolean;
 	boolean = (struct cil_bool*)malloc(sizeof(struct cil_bool));
@@ -213,7 +225,7 @@ struct cil_bool * gen_bool(struct cil_tree_node *parse_current)
 	return boolean;
 }
 
-struct cil_typealias * gen_typealias(struct cil_tree_node *parse_current)
+struct cil_typealias * cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current)
 {
 	struct cil_typealias *alias;	
 	alias = (struct cil_typealias*)malloc(sizeof(struct cil_typealias));
