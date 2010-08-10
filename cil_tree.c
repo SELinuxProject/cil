@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "cil_tree.h"
+#include "cil.h"
 
 void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
 {
@@ -14,11 +15,19 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
                 if (current->cl_head == NULL)
                 {
 //			printf("cil_print_tree: current->cl_head is null\n");
-			//TODO: If flavor == parser do these, else call functions to lookup data from symtab and print
-                        if (current->parent->cl_head == current)
-                                printf("%s", (char*)current->data);
-                        else
-                                printf(" %s", (char*)current->data);
+			if (current->flavor == CIL_PARSER)
+			{
+                        	if (current->parent->cl_head == current)
+                                	printf("%s", (char*)current->data);
+	                        else
+        	                        printf(" %s", (char*)current->data);
+			}
+			else
+			{
+				for (x = 0; x<depth; x++)
+					printf("\t");
+				printf("CIL_TYPE: %d\n", current->flavor);	
+			}
                 }
                 else
                 {
@@ -30,6 +39,9 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
                                 for (x = 0; x<depth; x++)
                                         printf("\t");
                                 printf("(");
+
+				if (current->flavor != CIL_PARSER)
+					printf("CIL_TYPE: %d\n", current->flavor);
                         }
                         cil_print_tree(current->cl_head, depth + 1);
                 }
@@ -47,4 +59,6 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
                         cil_print_tree(current->next, depth);
                 }
         }
+	else
+		printf("Tree is NULL\n");
 }

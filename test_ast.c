@@ -33,9 +33,10 @@ int main(int argc, char *argv[])
 
 		db->parse_root = cil_parser(buffer, file_size);
 
-		cil_print_tree(db->parse_root->root, 0); //Separate print_tree functions for parse and ast? Wrap so depth isn't shown
+		cil_print_tree(db->parse_root->root, 0);
 		
-		cil_build_ast(db, db->parse_root->root, db->ast_root);			
+		cil_build_ast(db, db->parse_root->root, db->ast_root->root);	
+		cil_print_tree(db->ast_root->root, 0);	
         }
 
         exit(0);

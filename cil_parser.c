@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "cil_tree.h" 
 #include "cil_lexer.h"
+#include "cil.h"
 
 struct cil_tree * cil_parser(char * buffer, uint32_t size)
 {
@@ -25,6 +26,7 @@ struct cil_tree * cil_parser(char * buffer, uint32_t size)
 	tree->root->parent = NULL;
 	tree->root->data = "ROOT";
 	tree->root->next = NULL;
+	tree->root->flavor = CIL_PARSER;
 	current = tree->root;	
 
 	do
@@ -38,6 +40,7 @@ struct cil_tree * cil_parser(char * buffer, uint32_t size)
 			node->cl_head = NULL;
 			node->cl_tail = NULL;
 			node->next = NULL;
+			node->flavor = CIL_PARSER;
 			node->line = tok->line;
 			if (current->cl_head == NULL)
 				current->cl_head = node;
@@ -63,6 +66,7 @@ struct cil_tree * cil_parser(char * buffer, uint32_t size)
 			item->cl_head = NULL;
 			item->cl_tail = NULL;
 			item->data = strdup(tok->value);
+			item->flavor = CIL_PARSER;
 			item->line = tok->line;
 			if (current->cl_head == NULL)
 				current->cl_head = item;

@@ -28,6 +28,7 @@ struct cil_db * cil_db_init()
 	}
 	
 	db->ast_root = (struct cil_tree *)malloc(sizeof(struct cil_tree));
+	db->ast_root->root = (struct cil_tree_node *)malloc(sizeof(struct cil_tree_node));
 
 	return db;
 }

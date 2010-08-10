@@ -9,6 +9,7 @@
 /*
 	Tree/list node types
 */
+#define CIL_PARSER		0
 #define CIL_BLOCK		1
 #define CIL_CLASS		2
 #define CIL_COMMON		3
