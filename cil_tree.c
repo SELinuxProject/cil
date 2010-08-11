@@ -49,7 +49,14 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
                 {
 //			printf("cil_print_tree: current->next is null\n");
                         if ((current->parent != NULL) && (current->parent->cl_tail == current) && (current->parent->parent != NULL))
-                                printf(")");
+				if (current->flavor != CIL_PARSER)
+				{
+					for (x = 0; x<depth-1; x++)
+						printf("\t");
+					printf(")\n");
+				}
+				else
+	                                printf(")");
                         if ((current->parent != NULL) && (current->parent->parent == NULL))
                                 printf("\n\n");
                 }

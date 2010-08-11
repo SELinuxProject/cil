@@ -105,8 +105,8 @@ void cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct c
 			else if (!strcmp(parse_current->data, CIL_KEY_INTERFACE))
 			{
 				printf("new interface: %s\n", (char*)parse_current->next->data);
+				node->flavor = CIL_TRANS_IF;
 			}
-			
 		}
 		else //Rest of line 
 		{
