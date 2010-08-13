@@ -5,6 +5,15 @@
 			(type pid)
 			(type user_cgi)
 
+			(block test
+				(type test1)
+				(type test2))
+			(block three
+				(type testing)
+				(type testing2))
+			(block four
+				(type test)
+				(type test4))
 ;			(interface read_log (x:type)
 ;				(allow x log (file dir) (read getattr)))
 

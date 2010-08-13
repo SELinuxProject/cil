@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
 
 		cil_print_tree(db->parse_root->root, 0);
 		
-		cil_build_ast(db, db->parse_root->root, db->ast_root->root);	
-		cil_print_tree(db->ast_root->root, 0);	
+		cil_build_ast(db);	
+		//cil_print_tree(db->ast_root->root, 0);	
         }
 
         exit(0);

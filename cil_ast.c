@@ -7,7 +7,15 @@
 #include "cil_parser.h"
 #include "cil.h"
 
-void cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
+void cil_build_ast(struct cil_db *db)
+{
+	struct cil_stack *namespace;
+	namespace = cil_stack_init();
+	__cil_build_ast(db, namespace, db->parse_root->root, db->ast_root->root);
+	free(namespace);
+}
+
+void __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
 	struct cil_tree_node *parse_current;
 	parse_current = parse_tree;
@@ -43,62 +51,61 @@ void cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct c
 			ast_current = node;
 				
 			// Determine data types and set those values here
-			printf("parse_current->data: %s\n", (char*)parse_current->data);
+//			printf("parse_current->data: %s\n", (char*)parse_current->data);
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK))
 			{
-				printf("new block: %s\n", (char*)parse_current->next->data); //This should be setting sepol_id_t	
-				node->data = cil_gen_block(db, parse_current, node, 0, 0, NULL);
+				node->data = cil_gen_block(db, namespace, parse_current, node, 0, 0, NULL);
 				node->flavor = CIL_BLOCK;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS))
 			{
-				node->data = cil_gen_class(db, parse_current);
+				node->data = cil_gen_class(db, namespace, parse_current);
 				node->flavor = CIL_CLASS;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_PERM))
 			{
-				node->data = cil_gen_perm(db, parse_current);
+				node->data = cil_gen_perm(db, namespace, parse_current);
 				node->flavor = CIL_PERM;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON))
 			{
-				node->data = cil_gen_common(db, parse_current);
+				node->data = cil_gen_common(db, namespace, parse_current);
 				node->flavor = CIL_COMMON;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID))
 			{
-				node->data = cil_gen_sid(db, parse_current);
+				node->data = cil_gen_sid(db, namespace, parse_current);
 				node->flavor = CIL_SID;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPE))
 			{
-				node->data = cil_gen_type(db, parse_current, CIL_TYPE);
+				node->data = cil_gen_type(db, namespace, parse_current, CIL_TYPE);
 				node->flavor = CIL_TYPE; //This is the data structure type (same for both type and attr)
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ATTR))
 			{
-				node->data = cil_gen_type(db, parse_current, CIL_TYPE_ATTR);
+				node->data = cil_gen_type(db, namespace, parse_current, CIL_TYPE_ATTR);
 				node->flavor = CIL_TYPE_ATTR;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS))
 			{
-				node->data = cil_gen_typealias(db, parse_current);
+				node->data = cil_gen_typealias(db, namespace, parse_current);
 				node->flavor = CIL_TYPEALIAS;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ROLE))
 			{
-				node->data = cil_gen_role(db, parse_current);
+				node->data = cil_gen_role(db, namespace, parse_current);
 				node->flavor = CIL_ROLE;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_BOOL))
 			{
-				node->data = cil_gen_bool(db, parse_current);
+				node->data = cil_gen_bool(db, namespace, parse_current);
 				node->flavor = CIL_BOOL;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW))
 			{
 				printf("new allow: src:%s, tgt:%s\n", (char*)parse_current->next->data, (char*)parse_current->next->next->data);
-				node->data = cil_gen_avrule(db, parse_current, CIL_AVRULE_ALLOWED); 
+				node->data = cil_gen_avrule(db, namespace, parse_current, CIL_AVRULE_ALLOWED); 
 				node->flavor = CIL_AVRULE;
 				return;	//So that the object and perms lists don't get parsed again as potential keywords
 			}
@@ -117,19 +124,28 @@ void cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct c
 	else
 	{
 //		printf("recurse with cl_head\n");
-		cil_build_ast(db, parse_current->cl_head, ast_current);
+		__cil_build_ast(db, namespace, parse_current->cl_head, ast_current);
 	}
 	if (parse_current->next != NULL)
 	{
 		//Process next in list
 //		printf("recurse with next\n");
-		cil_build_ast(db, parse_current->next, ast_current);
+		__cil_build_ast(db, namespace, parse_current->next, ast_current);
 	}
 	else
 	{
-		//Return to parent -- just return
+		//Return to parent
 //		printf("set ast_current to parent\n");
+		if (ast_current->flavor == CIL_BLOCK)
+		{
+			cil_stack_pop(namespace);
+		}
+
 		ast_current = ast_current->parent;
+				
+		
+
+
 		return;
 	}
 }
