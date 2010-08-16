@@ -72,6 +72,7 @@
 /*
 	Symbol Table Array Indices
 */
+/* TODO CDS why does this start at 1? */
 #define CIL_SYM_FILES			1	//Filenames of modules
 #define CIL_SYM_BLOCKS			2
 #define CIL_SYM_CLASSES			3
@@ -94,19 +95,24 @@
 
 #define CIL_SYM_NUM			20
 
+/* TODO CDS Think about whether we need the self pointer for everything that is in a symtab for search/tranform uses */
+
+/* TODO CDS just use uint32_t instead of sepol_id_t for now, as that's what the libsepol symtab uses */
 typedef uint32_t sepol_id_t;
 
 struct cil_db
 {
+	/* TODO CDS remove parse tree from here, as there will be 1 for each module that is freed after filling out the AST */
 	struct cil_tree *parse_root;
 	struct cil_tree *ast_root;
 	
-	symtab_t symtab[CIL_SYM_NUM]; 	
+	symtab_t symtab[CIL_SYM_NUM];
 };
 
 struct cil_list_item
 {
 	struct cil_list_item *next;
+	/* TODO CDS rename from item_class to flavor */
 	uint32_t item_class;
 	void *data;
 };
@@ -131,8 +137,10 @@ struct cil_search
 struct cil_block
 {
 	symtab_datum_t block;
+	/* TODO CDS eventually, these should probably become a flags bit vector */
 	uint16_t is_abstract;
 	uint16_t is_optional;
+	/* TODO CDS we need to figure out how to handle conditionals */
 	char *condition;
 	struct cil_tree_node *self;
 };
@@ -158,12 +166,15 @@ struct cil_common
 struct cil_sid
 {
 	symtab_datum_t sid;
+	struct cil_context context;
 };
 
 struct cil_user
 {
 	symtab_datum_t user;
 };
+
+/* TODO CDS need userrole statement to associate users with roles and userlevel statement to associate users with levels */
 
 struct cil_role
 {
@@ -211,10 +222,6 @@ struct cil_bool
 #define CIL_AVRULE_DONTAUDIT   8
 #define CIL_AVRULE_NEVERALLOW 128
 #define CIL_AVRULE_AV         (AVRULE_ALLOWED | AVRULE_AUDITALLOW | AVRULE_AUDITDENY | AVRULE_DONTAUDIT | AVRULE_NEVERALLOW)
-#define CIL_AVRULE_TRANSITION 16
-#define CIL_AVRULE_MEMBER     32
-#define CIL_AVRULE_CHANGE     64
-#define CIL_AVRULE_TYPE       (AVRULE_TRANSITION | AVRULE_MEMBER | AVRULE_CHANGE)
 struct cil_avrule
 {
 	uint32_t rule_kind;
@@ -224,12 +231,26 @@ struct cil_avrule
 	uint32_t perms;	
 };
 
+#define CIL_AVRULE_TRANSITION 16
+#define CIL_AVRULE_MEMBER     32
+#define CIL_AVRULE_CHANGE     64
+#define CIL_AVRULE_TYPE       (AVRULE_TRANSITION | AVRULE_MEMBER | AVRULE_CHANGE)
+struct cil_typerule
+{
+	uint32_t rule_kind;
+	sepol_id_t src;
+	sepol_id_t tgt;
+	struct cil_list_item *obj;
+	sepol_id_t result;
+};
+
 // Define role_rule kinds here
 struct cil_role_rule
 {
 	uint32_t rule_kind;
 	sepol_id_t src;	
 	sepol_id_t tgt;
+	/* TODO CDS this should match whatever cil_avrule does */
 	sepol_id_t obj;
 	uint32_t perms;	
 };
@@ -325,10 +346,16 @@ struct cil_netifcon
 	struct cil_context packet_context;
 };
 
+/* There is no fs declaration, but we will create a cil_fs on demand when the cil_fscon or cil_fs_use statements need one */
+struct cil_fs
+{
+	symtab_datum_t fs;
+};
+
 struct cil_fscon
 {
 	sepol_id_t fs;
-	sepol_id_t path;
+	char *path;
 	struct cil_context context;
 };
 
@@ -338,7 +365,7 @@ struct cil_fscon
 struct cil_fs_use
 {
 	uint32_t flavor;
-	symtab_datum_t fs;
+	sepol_id_t fs;
 	struct cil_context context;
 };
 
@@ -351,10 +378,6 @@ struct mls_constrain
 {
 	//Design
 };*/
-
-/* 
-	Functions for creating and populating data structures above from parse tree nodes
-*/
 
 struct cil_db * cil_db_init();
 struct cil_stack * cil_stack_init();

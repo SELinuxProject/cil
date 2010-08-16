@@ -10,7 +10,7 @@
 void cil_build_ast(struct cil_db *db)
 {
 	struct cil_stack *namespace;
-	char * namespace_str;
+	char *namespace_str = NULL;
 	namespace = cil_stack_init();
 	__cil_build_ast(db, namespace, namespace_str, db->parse_root->root, db->ast_root->root);
 	free(namespace);
@@ -18,12 +18,8 @@ void cil_build_ast(struct cil_db *db)
 
 void __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *namespace_str, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
-	struct cil_tree_node *parse_current;
-	parse_current = parse_tree;
-
-	struct cil_tree_node *ast_current;
-	ast_current = ast;
-
+	struct cil_tree_node *parse_current = parse_tree;
+	struct cil_tree_node *ast_current = ast;
 	struct cil_tree_node *node;
 
 	if ((parse_current == NULL) || (ast_current == NULL))
@@ -141,6 +137,7 @@ void __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *names
 		if (ast_current->flavor == CIL_BLOCK)
 		{
 			cil_stack_pop(namespace);
+			/* TODO CDS update namespace_str here as well */
 		}
 
 		ast_current = ast_current->parent;

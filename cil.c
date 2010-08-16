@@ -7,14 +7,16 @@
 #include "cil_tree.h"
 #include "cil.h"
 
-struct cil_db * cil_db_init()
+/* TODO CDS Big change - need to change all functions in all files to return an int error code, e.g.:
+int cil_db_init(struct cil_db **db) */
+struct cil_db *cil_db_init()
 {
 	int i, rc;	
 
-	uint32_t symtab_size;
-	symtab_size = 256;	//Need to determine what sizes are needed for each
+	uint32_t symtab_size = 256;	//Need to determine what sizes are needed for each
 
 	struct cil_db *db;
+	/* TODO CDS Is the cast here necessary */
 	db = (struct cil_db*)malloc(sizeof(struct cil_db));
 
 	for (i = 0; i < CIL_SYM_NUM; i++)
@@ -23,34 +25,38 @@ struct cil_db * cil_db_init()
 		if (rc)
 		{
 			printf("Symtab init failed\n");
+			/* TODO CDS Do not ever abort or exit from within library code - return an error value of some sort */
 			exit(1);
 		}
 	}
 	
+	/* TODO CDS need to give cil_tree an initializer instead of malloc'ing here */
 	db->ast_root = (struct cil_tree *)malloc(sizeof(struct cil_tree));
 	db->ast_root->root = (struct cil_tree_node *)malloc(sizeof(struct cil_tree_node));
 
 	return db;
 }
 
-struct cil_stack * cil_stack_init()
+/* TODO CDS add cil_db_destroy() */
+
+struct cil_stack *cil_stack_init()
 {
-	struct cil_stack *stack;
-	stack = (struct cil_stack *)malloc(sizeof(struct cil_stack));
+	/* TODO CDS Big change - when you malloc, you need to check what you got back. malloc can fail */
+	struct cil_stack *stack = (struct cil_stack *)malloc(sizeof(struct cil_stack));
 	stack->top = NULL;
 	return stack;
 }
 
 void cil_stack_push(struct cil_stack *stack, void *data)
 {
-	struct cil_stack_element *top;
-	top = (struct cil_stack_element*)malloc(sizeof(struct cil_stack_element));
-	top->data = data;
-	top->next = stack->top;
-	stack->top = top;
+	struct cil_stack_element *new_top;
+	new_top = (struct cil_stack_element*)malloc(sizeof(struct cil_stack_element));
+	new_top->data = data;
+	new_top->next = stack->top;
+	stack->top = new_top;
 }
 
-void * cil_stack_pop(struct cil_stack *stack)
+void *cil_stack_pop(struct cil_stack *stack)
 {
 	if (stack->top != NULL)
 	{
@@ -65,7 +71,36 @@ void * cil_stack_pop(struct cil_stack *stack)
 	return NULL;
 }
 
-char * cil_get_namespace_str(struct cil_stack *stack)
+static void __namespace_helper(struct cil_stack_element *current, char *namespace)
+{
+	/* TODO add error handling */
+	if (current->next != NULL)
+	{
+		namespace_helper(current->next, namespace);
+		strcat(namespace, ".");
+	}
+	strcat(namespace, current->data);
+}
+
+/* TODO CDS test this, since we wrote it without regard for compiling it */
+char *cil_get_namespace_str(struct cil_stack *stack)
+{
+	char *namespace;
+	struct cil_stack_element *current = stack->top;
+	/* TODO add error handling */
+	uint32_t length = strlen(current->data) + 2;
+	while (current->next != NULL)
+	{
+		current = current->next;
+		length += strlen(current->data) + 1;
+	}
+	namespace = malloc(length);
+	namespace[0] = '\0';
+	__namespace_helper(stack->top, namespace);
+	return namespace;
+}
+
+/*char *cil_get_namespace_str(struct cil_stack *stack)
 {
 	char *namespace, *tmp;
 
@@ -100,9 +135,9 @@ char * cil_get_namespace_str(struct cil_stack *stack)
 		free(tmp);
 	}
 	return namespace;
-}
+}*/
 
-struct cil_block * cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
+struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
 	int rc;
 	char *name, *key;
@@ -130,7 +165,7 @@ struct cil_block * cil_gen_block(struct cil_db *db, struct cil_stack *namespace,
 	return block;	
 }
 
-struct cil_class * cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_class *cls;
 	cls = (struct cil_class*)malloc(sizeof(struct cil_class));
@@ -142,7 +177,7 @@ struct cil_class * cil_gen_class(struct cil_db *db, char *namespace_str, struct 
 	return cls;
 }
 
-struct cil_perm * cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+struct cil_perm *cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_perm *perm;
 	perm = (struct cil_perm*)malloc(sizeof(struct cil_perm));
@@ -152,7 +187,7 @@ struct cil_perm * cil_gen_perm(struct cil_db *db, char *namespace_str, struct ci
 	return perm;
 }
 
-struct cil_common * cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+struct cil_common *cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_common *common;
 	common = (struct cil_common*)malloc(sizeof(struct cil_common));
@@ -163,7 +198,7 @@ struct cil_common * cil_gen_common(struct cil_db *db, char *namespace_str, struc
 	return common;
 }
 
-struct cil_sid * cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+struct cil_sid *cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_sid * sid;
 	sid = (struct cil_sid*)malloc(sizeof(struct cil_sid));	
@@ -173,7 +208,7 @@ struct cil_sid * cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_
 	return sid;
 }
 
-struct cil_user * cil_gen_user(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+struct cil_user *cil_gen_user(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_user *user;
 	user = (struct cil_user*)malloc(sizeof(struct cil_user));
@@ -184,7 +219,7 @@ struct cil_user * cil_gen_user(struct cil_db *db, char *namespace_str, struct ci
 	return user;
 }
 
-struct cil_role * cil_gen_role(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+struct cil_role *cil_gen_role(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_role *role;
 	role = (struct cil_role*)malloc(sizeof(struct cil_role));
@@ -195,7 +230,7 @@ struct cil_role * cil_gen_role(struct cil_db *db, char *namespace_str, struct ci
 	return role;
 }
 
-struct cil_avrule * cil_gen_avrule(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, uint32_t rule_kind)
+struct cil_avrule *cil_gen_avrule(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, uint32_t rule_kind)
 {
 	//TODO: Check if this is actually an avrule, abort if not
 	
@@ -241,7 +276,7 @@ struct cil_avrule * cil_gen_avrule(struct cil_db *db, char *namespace_str, struc
 	return rule;	
 }
 
-struct cil_type * cil_gen_type(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, uint32_t flavor)
+struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, uint32_t flavor)
 {
 	int rc;
 	char *name, *key; 
@@ -280,7 +315,7 @@ struct cil_type * cil_gen_type(struct cil_db *db, char *namespace_str, struct ci
 }
 
 
-struct cil_bool * cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+struct cil_bool *cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_bool *boolean;
 	boolean = (struct cil_bool*)malloc(sizeof(struct cil_bool));
@@ -300,7 +335,7 @@ struct cil_bool * cil_gen_bool(struct cil_db *db, char *namespace_str, struct ci
 	return boolean;
 }
 
-struct cil_typealias * cil_gen_typealias(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+struct cil_typealias *cil_gen_typealias(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_typealias *alias;	
 	alias = (struct cil_typealias*)malloc(sizeof(struct cil_typealias));

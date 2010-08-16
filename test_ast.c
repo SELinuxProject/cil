@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
                         fprintf(stderr, "Could not open file\n");
                         exit(1);
                 }
+		/* TODO CDS - use stat() to figure out size */
                 fseek(file, 0L, SEEK_END);
                 file_size = ftell(file);
                 fseek(file, 0, SEEK_SET);
