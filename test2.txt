@@ -3,7 +3,8 @@
 		(block a1
 			(type a1_t))
 		(block a2
-			(type a2_t)))
+			(type a2_t)
+			(attribute aa)))
 	(block b
 		(block b1
 			(type b1_t))))

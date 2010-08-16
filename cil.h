@@ -90,8 +90,9 @@
 #define CIL_SYM_NETIFCONS		16
 #define CIL_SYM_TRANS_INTERFACES	17
 #define CIL_SYM_TRANS_INHERITS		18
+#define CIL_SYM_ATTRS			19
 
-#define CIL_SYM_NUM			19
+#define CIL_SYM_NUM			20
 
 typedef uint32_t sepol_id_t;
 

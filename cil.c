@@ -65,20 +65,60 @@ void * cil_stack_pop(struct cil_stack *stack)
 	return NULL;
 }
 
+char * cil_get_namespace_str(struct cil_stack *stack)
+{
+	char *namespace, *tmp;
+
+	struct cil_stack_element *current;
+	current = stack->top;
+	
+	if (current->data != NULL)
+	{
+		namespace = (char*)malloc(strlen(current->data) + 1);
+		tmp = (char*)malloc(strlen(current->data) + 2);
+
+		strcpy(namespace, "");
+		strcat(tmp, ".");
+		strcat(tmp, (char*)current->data);
+		strcat(tmp, namespace);
+		strcpy(namespace, tmp);
+		free(tmp);
+	}
+
+	while (current->next != NULL)
+	{
+		current = current->next;
+	
+		tmp = (char*)malloc(strlen(namespace) + strlen(current->data) + 3);
+
+		strcat(tmp, ".");
+		strcat(tmp, (char*)current->data);
+		strcat(tmp, namespace);
+		free(namespace);
+		namespace = (char*)malloc(strlen(tmp) + 1);
+		strcpy(namespace, tmp);
+		free(tmp);
+	}
+	return namespace;
+}
+
 struct cil_block * cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
 	int rc;
-	char *name, *key, *new_namespace;
+	char *name, *key;
 	struct cil_block *block;
 	block = (struct cil_block*)malloc(sizeof(struct cil_block));
 
-	name = strdup((char *)parse_current->next->data);
+	block->is_abstract = is_abstract;
+	block->is_optional = is_optional;
+	block->condition = condition;
+	block->self = node;
 
-	printf("new block: %s\n", name); //This should be setting sepol_id_t	
+	name = strdup((char *)parse_current->next->data);
 
 	cil_stack_push(namespace, name);
 
-	key = (hashtab_key_t)name;
+	key = (hashtab_key_t)cil_get_namespace_str(namespace);
 	
 	rc = hashtab_insert(db->symtab[CIL_SYM_BLOCKS].table, (hashtab_key_t)key, block);
 	if (rc)
@@ -86,11 +126,6 @@ struct cil_block * cil_gen_block(struct cil_db *db, struct cil_stack *namespace,
 		printf("Failed to insert block %s\n", (char*)key);
 		exit(1);
 	}
-
-	block->is_abstract = is_abstract;
-	block->is_optional = is_optional;
-	block->condition = condition;
-	block->self = node;
 
 	return block;	
 }
@@ -208,18 +243,28 @@ struct cil_avrule * cil_gen_avrule(struct cil_db *db, struct cil_stack *namespac
 
 struct cil_type * cil_gen_type(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, uint32_t flavor)
 {
+	int rc;
+	char *name, *key, *namespace_str; 
 	struct cil_type *type;
 	type = (struct cil_type*)malloc(sizeof(struct cil_type));
+
+	name = (char*)malloc(strlen((char*)parse_current->next->data) + 1);
+	strcpy(name, parse_current->next->data);
 	
+	namespace_str = cil_get_namespace_str(namespace);
+	key = (char*)malloc(strlen(namespace_str) + strlen(name) + 2);
+	strcpy(key, namespace_str);
+	strcat(key, ".");
+	strcat(key, name);
+	free(name);	
+
 	if (flavor == CIL_TYPE)
 	{
-		printf("new type: %s\n", (char*)parse_current->next->data);
-		//Add to type symtab and set type->type to sepol_id_t of new entry
+		rc = hashtab_insert(db->symtab[CIL_SYM_TYPES].table, (hashtab_key_t)key, type);
 	}
 	else if (flavor == CIL_TYPE_ATTR)
 	{
-		printf("new attr: %s\n", (char*)parse_current->next->data);
-		//ADD to attr symtab and set type->type to sepol_id_t of new entry
+		rc = hashtab_insert(db->symtab[CIL_SYM_ATTRS].table, (hashtab_key_t)key, type);	
 	}
 	else
 	{
@@ -227,6 +272,11 @@ struct cil_type * cil_gen_type(struct cil_db *db, struct cil_stack *namespace, s
 		exit(1);
 	}
 
+	if (rc)
+	{
+		printf("Failed to insert %s, rc:%d\n", key,rc);
+		exit(1);
+	}
 	return type;
 }
 
