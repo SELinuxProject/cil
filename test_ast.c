@@ -36,7 +36,11 @@ int main(int argc, char *argv[])
 		cil_print_tree(db->parse_root->root, 0);
 		
 		cil_build_ast(db);	
-		//cil_print_tree(db->ast_root->root, 0);	
+		//cil_print_tree(db->ast_root->root, 0);
+		//hashtab_datum_t key;
+		//key = ".main.a.a2.aa";
+		//if (hashtab_search(db->symtab[CIL_SYM_ATTRS].table, key))
+		//	printf("found\n");
         }
 
         exit(0);
