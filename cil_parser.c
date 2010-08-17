@@ -6,15 +6,14 @@
 #include "cil_lexer.h"
 #include "cil.h"
 
-struct cil_tree * cil_parser(char * buffer, uint32_t size)
+struct cil_tree *cil_parser(char *buffer, uint32_t size)
 {
 	cil_lexer_setup(buffer, size);
 
 	int paren_count = 0;
 
-	struct cil_tree * tree;
-	struct cil_tree_node * node, * item;
-	struct cil_tree_node * current;
+	struct cil_tree *tree;
+	struct cil_tree_node *node, *item, *current;
 
 	struct token *tok;
 
@@ -35,6 +34,7 @@ struct cil_tree * cil_parser(char * buffer, uint32_t size)
 		if (tok->type == OPAREN)
 		{
 			paren_count++;
+			/* TODO CDS switch to using an init()/destroy() for cil_tree_nodes to remove all this duplicate code */
 			node = (struct cil_tree_node*)malloc(sizeof(struct cil_tree_node));
 			node->parent = current;
 			node->cl_head = NULL;

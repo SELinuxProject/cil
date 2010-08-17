@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+/* TODO CDS Big change - structs also should have the brace on the same line */
 struct cil_tree
 {
 	struct cil_tree_node *root;

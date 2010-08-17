@@ -137,24 +137,26 @@ char *cil_get_namespace_str(struct cil_stack *stack)
 	return namespace;
 }*/
 
+/* TODO CDS Change node to ast_node here and anywhere else that might need it just to be more explicit */
 struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
 	int rc;
 	char *name, *key;
-	struct cil_block *block;
-	block = (struct cil_block*)malloc(sizeof(struct cil_block));
+	struct cil_block *block = (struct cil_block*)malloc(sizeof(struct cil_block));
 
 	block->is_abstract = is_abstract;
 	block->is_optional = is_optional;
 	block->condition = condition;
 	block->self = node;
 
-	name = strdup((char *)parse_current->next->data);
+	name = (char *)parse_current->next->data;
 
 	cil_stack_push(namespace, name);
 
+	/* TODO CDS cast is unnecessary here */
 	key = (hashtab_key_t)cil_get_namespace_str(namespace);
 	
+	/* TODO CDS look at hashtab_insert to see who owns the key, to see if they need to be freed */
 	rc = hashtab_insert(db->symtab[CIL_SYM_BLOCKS].table, (hashtab_key_t)key, block);
 	if (rc)
 	{
@@ -280,18 +282,17 @@ struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil
 {
 	int rc;
 	char *name, *key; 
-	struct cil_type *type;
-	type = (struct cil_type*)malloc(sizeof(struct cil_type));
+	struct cil_type *type = (struct cil_type*)malloc(sizeof(struct cil_type));
 
-	name = (char*)malloc(strlen((char*)parse_current->next->data) + 1);
-	strcpy(name, parse_current->next->data);
+	name = (char*)parse_current->next->data;
 	
+	/* TODO CDS see if you need to free this or if hashtab_insert takes ownership of key */
 	key = (char*)malloc(strlen(namespace_str) + strlen(name) + 2);
 	strcpy(key, namespace_str);
 	strcat(key, ".");
 	strcat(key, name);
-	free(name);	
 
+	/* TODO CDS Big change - our style puts braces on the same line for if/loops */
 	if (flavor == CIL_TYPE)
 	{
 		rc = hashtab_insert(db->symtab[CIL_SYM_TYPES].table, (hashtab_key_t)key, type);

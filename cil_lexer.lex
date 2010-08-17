@@ -1,3 +1,4 @@
+/* TODO CDS Should this file have a .l or a .lex extension? */
 %{
 	#include <stdint.h>
 	#include "cil_lexer.h"
@@ -34,9 +35,11 @@ void cil_lexer_setup(char *buffer, uint32_t size)
 struct token * cil_lexer_next()
 {
 	struct token *n;
+	/* TODO CDS who should free token? or just put n on the stack and don't worry about it */
 	n = (struct token*) malloc( sizeof(struct token));
 	n->type = yylex();
 	n->value = value;
 	n->line = line;
+	return n;
 }
 
