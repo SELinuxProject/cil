@@ -36,7 +36,7 @@ struct token * cil_lexer_next()
 {
 	struct token *n;
 	/* TODO CDS who should free token? or just put n on the stack and don't worry about it */
-	n = (struct token*) malloc( sizeof(struct token));
+	n = malloc( sizeof(struct token));
 	n->type = yylex();
 	n->value = value;
 	n->line = line;

@@ -17,9 +17,9 @@ struct cil_tree *cil_parser(char *buffer, uint32_t size)
 
 	struct token *tok;
 
-	tree = (struct cil_tree*)malloc(sizeof(struct cil_tree));
+	tree = malloc(sizeof(struct cil_tree));
 
-	tree->root = (struct cil_tree_node*)malloc(sizeof(struct cil_tree_node));	
+	tree->root = malloc(sizeof(struct cil_tree_node));	
 	tree->root->cl_head = NULL;
 	tree->root->cl_tail = NULL;
 	tree->root->parent = NULL;
@@ -33,7 +33,7 @@ struct cil_tree *cil_parser(char *buffer, uint32_t size)
 		if (tok->type == OPAREN) {
 			paren_count++;
 			/* TODO CDS switch to using an init()/destroy() for cil_tree_nodes to remove all this duplicate code */
-			node = (struct cil_tree_node*)malloc(sizeof(struct cil_tree_node));
+			node = malloc(sizeof(struct cil_tree_node));
 			node->parent = current;
 			node->cl_head = NULL;
 			node->cl_tail = NULL;
@@ -56,7 +56,7 @@ struct cil_tree *cil_parser(char *buffer, uint32_t size)
 			current = current->parent;
 		}
 		else if ((tok->type == SYMBOL) || (tok->type == QSTRING)) {
-			item = (struct cil_tree_node*)malloc(sizeof(struct cil_tree_node));
+			item = malloc(sizeof(struct cil_tree_node));
 			item->parent = current;
 			item->cl_head = NULL;
 			item->cl_tail = NULL;

@@ -16,8 +16,8 @@ struct cil_db *cil_db_init()
 	uint32_t symtab_size = 256;	//Need to determine what sizes are needed for each
 
 	struct cil_db *db;
-	/* TODO CDS Is the cast here necessary */
-	db = (struct cil_db*)malloc(sizeof(struct cil_db));
+
+	db = malloc(sizeof(struct cil_db));
 
 	for (i = 0; i < CIL_SYM_NUM; i++) {
 		rc = symtab_init(&db->symtab[i], symtab_size);
@@ -29,8 +29,8 @@ struct cil_db *cil_db_init()
 	}
 	
 	/* TODO CDS need to give cil_tree an initializer instead of malloc'ing here */
-	db->ast_root = (struct cil_tree *)malloc(sizeof(struct cil_tree));
-	db->ast_root->root = (struct cil_tree_node *)malloc(sizeof(struct cil_tree_node));
+	db->ast_root = malloc(sizeof(struct cil_tree));
+	db->ast_root->root = malloc(sizeof(struct cil_tree_node));
 
 	return db;
 }
@@ -40,7 +40,7 @@ struct cil_db *cil_db_init()
 struct cil_stack *cil_stack_init()
 {
 	/* TODO CDS Big change - when you malloc, you need to check what you got back. malloc can fail */
-	struct cil_stack *stack = (struct cil_stack *)malloc(sizeof(struct cil_stack));
+	struct cil_stack *stack = malloc(sizeof(struct cil_stack));
 	stack->top = NULL;
 	return stack;
 }
@@ -48,7 +48,7 @@ struct cil_stack *cil_stack_init()
 void cil_stack_push(struct cil_stack *stack, void *data)
 {
 	struct cil_stack_element *new_top;
-	new_top = (struct cil_stack_element*)malloc(sizeof(struct cil_stack_element));
+	new_top = malloc(sizeof(struct cil_stack_element));
 	new_top->data = data;
 	new_top->next = stack->top;
 	stack->top = new_top;
@@ -94,29 +94,27 @@ char *cil_get_namespace_str(struct cil_stack *stack)
 	return namespace;
 }
 
-/* TODO CDS Change node to ast_node here and anywhere else that might need it just to be more explicit */
-struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
+struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
 	int rc;
 	char *name, *key;
-	struct cil_block *block = (struct cil_block*)malloc(sizeof(struct cil_block));
+	struct cil_block *block = malloc(sizeof(struct cil_block));
 
 	block->is_abstract = is_abstract;
 	block->is_optional = is_optional;
 	block->condition = condition;
-	block->self = node;
+	block->self = ast_node;
 
 	name = (char *)parse_current->next->data;
 
 	cil_stack_push(namespace, name);
 
-	/* TODO CDS cast is unnecessary here */
-	key = (hashtab_key_t)cil_get_namespace_str(namespace);
+	key = cil_get_namespace_str(namespace);
 	
 	/* TODO CDS look at hashtab_insert to see who owns the key, to see if they need to be freed */
 	rc = hashtab_insert(db->symtab[CIL_SYM_BLOCKS].table, (hashtab_key_t)key, block);
 	if (rc) {
-		printf("Failed to insert block %s\n", (char*)key);
+		printf("Failed to insert block %s\n", key);
 		exit(1);
 	}
 
@@ -126,7 +124,7 @@ struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, 
 struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_class *cls;
-	cls = (struct cil_class*)malloc(sizeof(struct cil_class));
+	cls = malloc(sizeof(struct cil_class));
 	
 	//Add class to symtab and add sepol_id_t
 	//List of av rules here
@@ -138,7 +136,7 @@ struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct c
 struct cil_perm *cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_perm *perm;
-	perm = (struct cil_perm*)malloc(sizeof(struct cil_perm));
+	perm = malloc(sizeof(struct cil_perm));
 
 	//sepol_id_t?
 
@@ -148,7 +146,7 @@ struct cil_perm *cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil
 struct cil_common *cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_common *common;
-	common = (struct cil_common*)malloc(sizeof(struct cil_common));
+	common = malloc(sizeof(struct cil_common));
 
 	//sepol_id_t
 	//list of av
@@ -159,7 +157,7 @@ struct cil_common *cil_gen_common(struct cil_db *db, char *namespace_str, struct
 struct cil_sid *cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_sid * sid;
-	sid = (struct cil_sid*)malloc(sizeof(struct cil_sid));	
+	sid = malloc(sizeof(struct cil_sid));	
 
 	//sepol_id_t
 
@@ -169,7 +167,7 @@ struct cil_sid *cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_t
 struct cil_user *cil_gen_user(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_user *user;
-	user = (struct cil_user*)malloc(sizeof(struct cil_user));
+	user = malloc(sizeof(struct cil_user));
 
 	printf("new user: %s", (char*)parse_current->next->data);
 	//Add to user symtab and set user->user sepol_id_t of new entry
@@ -180,7 +178,7 @@ struct cil_user *cil_gen_user(struct cil_db *db, char *namespace_str, struct cil
 struct cil_role *cil_gen_role(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_role *role;
-	role = (struct cil_role*)malloc(sizeof(struct cil_role));
+	role = malloc(sizeof(struct cil_role));
 
 	printf("new role: %s\n", (char*)parse_current->next->data);
 	//Add to role symtab and set role->role to sepol_id_t of new entry
@@ -193,7 +191,7 @@ struct cil_avrule *cil_gen_avrule(struct cil_db *db, char *namespace_str, struct
 	//TODO: Check if this is actually an avrule, abort if not
 	
 	struct cil_avrule *rule;
-	rule = (struct cil_avrule*)malloc(sizeof(struct cil_avrule));
+	rule = malloc(sizeof(struct cil_avrule));
 	rule->rule_kind = rule_kind;
 	//rule->src -- confirm source domain exists and add sepol_id_t here
 	//rule->tgt -- confirm target domain exists and add sepol_id_t here
@@ -234,13 +232,13 @@ struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil
 {
 	int rc;
 	char *name, *key; 
-	struct cil_type *type = (struct cil_type*)malloc(sizeof(struct cil_type));
+	struct cil_type *type = malloc(sizeof(struct cil_type));
 
 	name = (char*)parse_current->next->data;
 
 	/* TODO CDS see if you need to free this or if hashtab_insert takes ownership of key */
 	if (namespace_str != NULL) {
-		key = (char*)malloc(strlen(namespace_str) + strlen(name) + 2);
+		key = malloc(strlen(namespace_str) + strlen(name) + 2);
 		strcpy(key, namespace_str);
 		strcat(key, ".");
 		strcat(key, name);
@@ -270,7 +268,7 @@ struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil
 struct cil_bool *cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_bool *boolean;
-	boolean = (struct cil_bool*)malloc(sizeof(struct cil_bool));
+	boolean = malloc(sizeof(struct cil_bool));
 	printf("new bool: %s", (char*)parse_current->next->data);
 	//Add to bool symtab and set boolean->bool to sepol_id_t of new entry
 	if (!strcmp(parse_current->next->next->data, "true"))
@@ -289,7 +287,7 @@ struct cil_bool *cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil
 struct cil_typealias *cil_gen_typealias(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
 	struct cil_typealias *alias;	
-	alias = (struct cil_typealias*)malloc(sizeof(struct cil_typealias));
+	alias = malloc(sizeof(struct cil_typealias));
 	printf("new alias: %s, type: %s\n", (char*)parse_current->next->data, (char*)parse_current->next->next->data);
 	
 	return(alias);

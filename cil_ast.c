@@ -20,7 +20,7 @@ void __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *names
 {
 	struct cil_tree_node *parse_current = parse_tree;
 	struct cil_tree_node *ast_current = ast;
-	struct cil_tree_node *node;
+	struct cil_tree_node *ast_node;
 
 	if ((parse_current == NULL) || (ast_current == NULL)) {
 		printf("Error: NULL tree as parameter\n");
@@ -33,69 +33,69 @@ void __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *names
 		if (parse_current->parent->cl_head == parse_current) { //This is the beginning of the line
 //			printf("cl_head = parse_current\n");
 			//Node values set here
-			node = (struct cil_tree_node*)malloc(sizeof(struct cil_tree_node));
-			node->parent = ast_current;
-			node->line = parse_current->line;
+			ast_node = malloc(sizeof(struct cil_tree_node));
+			ast_node->parent = ast_current;
+			ast_node->line = parse_current->line;
 
 			if (ast_current->cl_head == NULL)
-				ast_current->cl_head = node;
+				ast_current->cl_head = ast_node;
 			else
-				ast_current->cl_tail->next = node;
-			ast_current->cl_tail = node;
-			ast_current = node;
+				ast_current->cl_tail->next = ast_node;
+			ast_current->cl_tail = ast_node;
+			ast_current = ast_node;
 				
 			// Determine data types and set those values here
 //			printf("parse_current->data: %s\n", (char*)parse_current->data);
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
-				node->data = cil_gen_block(db, namespace, parse_current, node, 0, 0, NULL);
-				node->flavor = CIL_BLOCK;
+				ast_node->data = cil_gen_block(db, namespace, parse_current, ast_node, 0, 0, NULL);
+				ast_node->flavor = CIL_BLOCK;
 				namespace_str = cil_get_namespace_str(namespace);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
-				node->data = cil_gen_class(db, namespace_str, parse_current);
-				node->flavor = CIL_CLASS;
+				ast_node->data = cil_gen_class(db, namespace_str, parse_current);
+				ast_node->flavor = CIL_CLASS;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_PERM)) {
-				node->data = cil_gen_perm(db, namespace_str, parse_current);
-				node->flavor = CIL_PERM;
+				ast_node->data = cil_gen_perm(db, namespace_str, parse_current);
+				ast_node->flavor = CIL_PERM;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
-				node->data = cil_gen_common(db, namespace_str, parse_current);
-				node->flavor = CIL_COMMON;
+				ast_node->data = cil_gen_common(db, namespace_str, parse_current);
+				ast_node->flavor = CIL_COMMON;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
-				node->data = cil_gen_sid(db, namespace_str, parse_current);
-				node->flavor = CIL_SID;
+				ast_node->data = cil_gen_sid(db, namespace_str, parse_current);
+				ast_node->flavor = CIL_SID;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
-				node->data = cil_gen_type(db, namespace_str, parse_current, CIL_TYPE);
-				node->flavor = CIL_TYPE; //This is the data structure type (same for both type and attr)
+				ast_node->data = cil_gen_type(db, namespace_str, parse_current, CIL_TYPE);
+				ast_node->flavor = CIL_TYPE; //This is the data structure type (same for both type and attr)
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
-				node->data = cil_gen_type(db, namespace_str, parse_current, CIL_TYPE_ATTR);
-				node->flavor = CIL_TYPE_ATTR;
+				ast_node->data = cil_gen_type(db, namespace_str, parse_current, CIL_TYPE_ATTR);
+				ast_node->flavor = CIL_TYPE_ATTR;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
-				node->data = cil_gen_typealias(db, namespace_str, parse_current);
-				node->flavor = CIL_TYPEALIAS;
+				ast_node->data = cil_gen_typealias(db, namespace_str, parse_current);
+				ast_node->flavor = CIL_TYPEALIAS;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
-				node->data = cil_gen_role(db, namespace_str, parse_current);
-				node->flavor = CIL_ROLE;
+				ast_node->data = cil_gen_role(db, namespace_str, parse_current);
+				ast_node->flavor = CIL_ROLE;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
-				node->data = cil_gen_bool(db, namespace_str, parse_current);
-				node->flavor = CIL_BOOL;
+				ast_node->data = cil_gen_bool(db, namespace_str, parse_current);
+				ast_node->flavor = CIL_BOOL;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
 				printf("new allow: src:%s, tgt:%s\n", (char*)parse_current->next->data, (char*)parse_current->next->next->data);
-				node->data = cil_gen_avrule(db, namespace_str, parse_current, CIL_AVRULE_ALLOWED); 
-				node->flavor = CIL_AVRULE;
+				ast_node->data = cil_gen_avrule(db, namespace_str, parse_current, CIL_AVRULE_ALLOWED); 
+				ast_node->flavor = CIL_AVRULE;
 				return;	//So that the object and perms lists don't get parsed again as potential keywords
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_INTERFACE)) {
 				printf("new interface: %s\n", (char*)parse_current->next->data);
-				node->flavor = CIL_TRANS_IF;
+				ast_node->flavor = CIL_TRANS_IF;
 			}
 		}
 		else { //Rest of line 
