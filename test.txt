@@ -27,15 +27,15 @@
 		(bool foo true)
 		(bool bar false)
 
-		; object classes
+; 		object classes
 ;		(class file
 ;			(read write open))
 
-		; local.cil
+; 		local.cil
 
 		(type my_t)
 
-		(allow my_t apache.log (file dir) (read getattr))
+;		(allow my_t apache.log (file dir) (read getattr))
 
 ;		; replace all calls to corenet_tcp_sendrecv_all_nodes
 ;		(template (match block[@name=apache]/ifcall[@ifname=corenet_tcp_sendrecv_all_nodes])

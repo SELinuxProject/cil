@@ -117,7 +117,8 @@ void __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *names
 //		printf("set ast_current to parent\n");
 		if (ast_current->flavor == CIL_BLOCK) {
 			cil_stack_pop(namespace);
-			/* TODO CDS update namespace_str here as well */
+			namespace_str = cil_get_namespace_str(namespace);
+			printf("pop: new namespace_str: %s\n", namespace_str);
 		}
 
 		ast_current = ast_current->parent;

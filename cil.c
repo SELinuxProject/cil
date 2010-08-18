@@ -83,6 +83,8 @@ char *cil_get_namespace_str(struct cil_stack *stack)
 	char *namespace;
 	struct cil_stack_element *current = stack->top;
 	/* TODO add error handling */
+	if (current == NULL)
+		return NULL;
 	uint32_t length = strlen(current->data) + 2;
 	while (current->next != NULL) {
 		current = current->next;
