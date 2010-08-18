@@ -110,8 +110,7 @@ struct cil_db {
 
 struct cil_list_item {
 	struct cil_list_item *next;
-	/* TODO CDS rename from item_class to flavor */
-	uint32_t item_class;
+	uint32_t flavor;
 	void *data;
 };
 

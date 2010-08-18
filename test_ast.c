@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
                 file_size = ftell(file);
                 fseek(file, 0, SEEK_SET);
 
-                buffer = (char*)malloc(file_size + 1);
+                buffer = malloc(file_size + 1);
                 fread(buffer, file_size, 1, file); 
                 fclose(file);           
 
