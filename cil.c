@@ -78,7 +78,6 @@ static void __namespace_helper(struct cil_stack_element *current, char *namespac
 	strcat(namespace, current->data);
 }
 
-/* TODO CDS test this, since we wrote it without regard for compiling it */
 char *cil_get_namespace_str(struct cil_stack *stack)
 {
 	char *namespace;
@@ -94,43 +93,6 @@ char *cil_get_namespace_str(struct cil_stack *stack)
 	__namespace_helper(stack->top, namespace);
 	return namespace;
 }
-
-/*char *cil_get_namespace_str(struct cil_stack *stack)
-{
-	char *namespace, *tmp;
-
-	struct cil_stack_element *current;
-	current = stack->top;
-	
-	if (current->data != NULL)
-	{
-		namespace = (char*)malloc(strlen(current->data) + 1);
-		tmp = (char*)malloc(strlen(current->data) + 2);
-
-		strcpy(namespace, "");
-		strcat(tmp, ".");
-		strcat(tmp, (char*)current->data);
-		strcat(tmp, namespace);
-		strcpy(namespace, tmp);
-		free(tmp);
-	}
-
-	while (current->next != NULL)
-	{
-		current = current->next;
-	
-		tmp = (char*)malloc(strlen(namespace) + strlen(current->data) + 3);
-
-		strcat(tmp, ".");
-		strcat(tmp, (char*)current->data);
-		strcat(tmp, namespace);
-		free(namespace);
-		namespace = (char*)malloc(strlen(tmp) + 1);
-		strcpy(namespace, tmp);
-		free(tmp);
-	}
-	return namespace;
-}*/
 
 /* TODO CDS Change node to ast_node here and anywhere else that might need it just to be more explicit */
 struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *node, uint16_t is_abstract, uint16_t is_optional, char *condition)
@@ -275,12 +237,16 @@ struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil
 	struct cil_type *type = (struct cil_type*)malloc(sizeof(struct cil_type));
 
 	name = (char*)parse_current->next->data;
-	
+
 	/* TODO CDS see if you need to free this or if hashtab_insert takes ownership of key */
-	key = (char*)malloc(strlen(namespace_str) + strlen(name) + 2);
-	strcpy(key, namespace_str);
-	strcat(key, ".");
-	strcat(key, name);
+	if (namespace_str != NULL) {
+		key = (char*)malloc(strlen(namespace_str) + strlen(name) + 2);
+		strcpy(key, namespace_str);
+		strcat(key, ".");
+		strcat(key, name);
+	}
+	else
+		key = strdup(name);
 
 	if (flavor == CIL_TYPE) {
 		rc = hashtab_insert(db->symtab[CIL_SYM_TYPES].table, (hashtab_key_t)key, type);
