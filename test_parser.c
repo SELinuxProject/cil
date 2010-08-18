@@ -15,9 +15,9 @@ int main(int argc, char *argv[])
 
         char buf[10];
 
-        if (argc > 1){
+        if (argc > 1) {
                 file = fopen(argv[1], "r");
-                if (!file){
+                if (!file) {
                         fprintf(stderr, "Could not open file\n");
                         exit(1);
                 }

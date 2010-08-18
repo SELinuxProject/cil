@@ -8,31 +8,25 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
         current = tree;
         uint32_t x = 0;
 
-        if (current != NULL)
-        {
+        if (current != NULL) {
 //		printf("cil_print_tree: current not null\n");
-                if (current->cl_head == NULL)
-                {
+                if (current->cl_head == NULL) {
 //			printf("cil_print_tree: current->cl_head is null\n");
-			if (current->flavor == CIL_PARSER)
-			{
+			if (current->flavor == CIL_PARSER) {
                         	if (current->parent->cl_head == current)
                                 	printf("%s", (char*)current->data);
 	                        else
         	                        printf(" %s", (char*)current->data);
 			}
-			else
-			{
+			else {
 				for (x = 0; x<depth; x++)
 					printf("\t");
 				printf("CIL_TYPE: %d\n", current->flavor);	
 			}
                 }
-                else
-                {
+                else {
 //			printf("cil_print_tree: current->cl_head is not null\n");
-                        if (current->parent != NULL)
-                        {
+                        if (current->parent != NULL) {
 //				printf("cil_print_tree: current->parent not null\n");
                                 printf("\n");
                                 for (x = 0; x<depth; x++)
@@ -44,12 +38,10 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
                         }
                         cil_print_tree(current->cl_head, depth + 1);
                 }
-                if (current->next == NULL)
-                {
+                if (current->next == NULL) {
 //			printf("cil_print_tree: current->next is null\n");
-                        if ((current->parent != NULL) && (current->parent->cl_tail == current) && (current->parent->parent != NULL)){
-				if (current->flavor != CIL_PARSER)
-				{
+                        if ((current->parent != NULL) && (current->parent->cl_tail == current) && (current->parent->parent != NULL)) {
+				if (current->flavor != CIL_PARSER) {
 					for (x = 0; x<depth-1; x++)
 						printf("\t");
 					printf(")\n");
@@ -60,8 +52,7 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
                         if ((current->parent != NULL) && (current->parent->parent == NULL))
                                 printf("\n\n");
                 }
-                else
-                {
+                else {
 //			printf("cil_print_tree: current->next is not null\n");
                         cil_print_tree(current->next, depth);
                 }

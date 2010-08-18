@@ -10,8 +10,7 @@
 #define COMMENT 5
 #define NONE 6
 
-struct token
-{
+struct token {
 	uint32_t type;
 	char * value;
 	uint32_t line;

@@ -18,9 +18,9 @@ int main(int argc, char *argv[])
 	struct cil_db *db;
 	db = cil_db_init();
 
-        if (argc > 1){
+        if (argc > 1) {
                 file = fopen(argv[1], "r");
-                if (!file){
+                if (!file) {
                         fprintf(stderr, "Could not open file\n");
                         exit(1);
                 }

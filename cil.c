@@ -19,11 +19,9 @@ struct cil_db *cil_db_init()
 	/* TODO CDS Is the cast here necessary */
 	db = (struct cil_db*)malloc(sizeof(struct cil_db));
 
-	for (i = 0; i < CIL_SYM_NUM; i++)
-	{
+	for (i = 0; i < CIL_SYM_NUM; i++) {
 		rc = symtab_init(&db->symtab[i], symtab_size);
-		if (rc)
-		{
+		if (rc) {
 			printf("Symtab init failed\n");
 			/* TODO CDS Do not ever abort or exit from within library code - return an error value of some sort */
 			exit(1);
@@ -58,8 +56,7 @@ void cil_stack_push(struct cil_stack *stack, void *data)
 
 void *cil_stack_pop(struct cil_stack *stack)
 {
-	if (stack->top != NULL)
-	{
+	if (stack->top != NULL) {
 		struct cil_stack_element *new_top;
 		void *data;
 		data = stack->top->data;
@@ -74,8 +71,7 @@ void *cil_stack_pop(struct cil_stack *stack)
 static void __namespace_helper(struct cil_stack_element *current, char *namespace)
 {
 	/* TODO add error handling */
-	if (current->next != NULL)
-	{
+	if (current->next != NULL) {
 		__namespace_helper(current->next, namespace);
 		strcat(namespace, ".");
 	}
@@ -89,8 +85,7 @@ char *cil_get_namespace_str(struct cil_stack *stack)
 	struct cil_stack_element *current = stack->top;
 	/* TODO add error handling */
 	uint32_t length = strlen(current->data) + 2;
-	while (current->next != NULL)
-	{
+	while (current->next != NULL) {
 		current = current->next;
 		length += strlen(current->data) + 1;
 	}
@@ -158,8 +153,7 @@ struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, 
 	
 	/* TODO CDS look at hashtab_insert to see who owns the key, to see if they need to be freed */
 	rc = hashtab_insert(db->symtab[CIL_SYM_BLOCKS].table, (hashtab_key_t)key, block);
-	if (rc)
-	{
+	if (rc) {
 		printf("Failed to insert block %s\n", (char*)key);
 		exit(1);
 	}
@@ -245,13 +239,11 @@ struct cil_avrule *cil_gen_avrule(struct cil_db *db, char *namespace_str, struct
 	//rule->perms -- lookup perms and OR together here
 
 
-	if (parse_current->next->next->next->cl_head != NULL) //List of objects -- TODO: we're not going to support this
-	{
+	if (parse_current->next->next->next->cl_head != NULL) { //List of objects -- TODO: we're not going to support this
 		struct cil_tree_node *x;
 		x = parse_current->next->next->next->cl_head;
 		printf("obj: ");
-		do
-		{
+		do {
 			printf(" %s", (char*)x->data);
 			x = x->next;
 		} while (x != NULL);
@@ -260,13 +252,11 @@ struct cil_avrule *cil_gen_avrule(struct cil_db *db, char *namespace_str, struct
 	else
 		printf("obj: %s\n", (char*)parse_current->next->next->next->data);
 							
-	if (parse_current->next->next->next->next->cl_head != NULL) //List of permissions
-	{
+	if (parse_current->next->next->next->next->cl_head != NULL) { //List of permissions
 		struct cil_tree_node *x;
 		x = parse_current->next->next->next->next->cl_head;
 		printf("perms: ");
-		do
-		{
+		do {
 			printf(" %s", (char*)x->data);
 			x = x->next;
 		} while (x != NULL);
@@ -292,23 +282,18 @@ struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil
 	strcat(key, ".");
 	strcat(key, name);
 
-	/* TODO CDS Big change - our style puts braces on the same line for if/loops */
-	if (flavor == CIL_TYPE)
-	{
+	if (flavor == CIL_TYPE) {
 		rc = hashtab_insert(db->symtab[CIL_SYM_TYPES].table, (hashtab_key_t)key, type);
 	}
-	else if (flavor == CIL_TYPE_ATTR)
-	{
+	else if (flavor == CIL_TYPE_ATTR) {
 		rc = hashtab_insert(db->symtab[CIL_SYM_ATTRS].table, (hashtab_key_t)key, type);	
 	}
-	else
-	{
+	else {
 		printf("Error: cil_gen_type called on invalid node\n");
 		exit(1);
 	}
 
-	if (rc)
-	{
+	if (rc) {
 		printf("Failed to insert %s, rc:%d\n", key,rc);
 		exit(1);
 	}
@@ -326,8 +311,7 @@ struct cil_bool *cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil
 		boolean->value = 1;
 	else if (!strcmp(parse_current->next->next->data, "false"))
 		boolean->value = 0;
-	else
-	{
+	else {
 		printf("Error: boolean value must be \'true\' or \'false\'");
 		exit(1);
 	}
