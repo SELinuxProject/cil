@@ -72,28 +72,27 @@
 /*
 	Symbol Table Array Indices
 */
-/* TODO CDS why does this start at 1? */
-#define CIL_SYM_FILES			1	//Filenames of modules
-#define CIL_SYM_BLOCKS			2
-#define CIL_SYM_CLASSES			3
-#define CIL_SYM_PERMS			4
-#define CIL_SYM_COMMONS			5
-#define CIL_SYM_SIDS			6
-#define CIL_SYM_USERS			7
-#define CIL_SYM_ROLES			8
-#define CIL_SYM_TYPES			9
-#define CIL_SYM_ALIASES			10
-#define CIL_SYM_BOOLS			11
-#define CIL_SYM_SENS			12
-#define CIL_SYM_CATS			13
-#define CIL_SYM_FILECONS		14
-#define CIL_SYM_PORTCONS		15
-#define CIL_SYM_NETIFCONS		16
-#define CIL_SYM_TRANS_INTERFACES	17
-#define CIL_SYM_TRANS_INHERITS		18
-#define CIL_SYM_ATTRS			19
+#define CIL_SYM_FILES			0	//Filenames of modules
+#define CIL_SYM_BLOCKS			1
+#define CIL_SYM_CLASSES			2
+#define CIL_SYM_PERMS			3
+#define CIL_SYM_COMMONS			4
+#define CIL_SYM_SIDS			5
+#define CIL_SYM_USERS			6
+#define CIL_SYM_ROLES			7
+#define CIL_SYM_TYPES			8
+#define CIL_SYM_ALIASES			9
+#define CIL_SYM_BOOLS			10
+#define CIL_SYM_SENS			11
+#define CIL_SYM_CATS			12
+#define CIL_SYM_FILECONS		13
+#define CIL_SYM_PORTCONS		14
+#define CIL_SYM_NETIFCONS		15
+#define CIL_SYM_TRANS_INTERFACES	16
+#define CIL_SYM_TRANS_INHERITS		17
+#define CIL_SYM_ATTRS			18
 
-#define CIL_SYM_NUM			20
+#define CIL_SYM_NUM			19
 
 /* TODO CDS Think about whether we need the self pointer for everything that is in a symtab for search/tranform uses */
 
