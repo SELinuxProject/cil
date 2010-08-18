@@ -166,7 +166,7 @@ struct cil_common
 struct cil_sid
 {
 	symtab_datum_t sid;
-	struct cil_context context;
+	struct cil_context *context;
 };
 
 struct cil_user

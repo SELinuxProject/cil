@@ -5,6 +5,7 @@
 #include "cil.h"
 #include "cil_tree.h"
 #include "cil_parser.h"
+#include "cil_ast.h"
 
 #include <sepol/policydb/hashtab.h>
 

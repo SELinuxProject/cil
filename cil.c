@@ -76,7 +76,7 @@ static void __namespace_helper(struct cil_stack_element *current, char *namespac
 	/* TODO add error handling */
 	if (current->next != NULL)
 	{
-		namespace_helper(current->next, namespace);
+		__namespace_helper(current->next, namespace);
 		strcat(namespace, ".");
 	}
 	strcat(namespace, current->data);
