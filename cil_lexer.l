@@ -1,4 +1,3 @@
-/* TODO CDS Should this file have a .l or a .lex extension? */
 %{
 	#include <stdint.h>
 	#include "cil_lexer.h"
