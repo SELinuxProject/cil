@@ -100,10 +100,7 @@
 typedef uint32_t sepol_id_t;
 
 struct cil_db {
-	/* TODO CDS remove parse tree from here, as there will be 1 for each module that is freed after filling out the AST */
-	struct cil_tree *parse_root;
 	struct cil_tree *ast_root;
-	
 	symtab_t symtab[CIL_SYM_NUM];
 };
 

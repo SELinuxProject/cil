@@ -7,12 +7,12 @@
 #include "cil_parser.h"
 #include "cil.h"
 
-void cil_build_ast(struct cil_db *db)
+void cil_build_ast(struct cil_db *db, struct cil_tree *parse_root)
 {
 	struct cil_stack *namespace;
 	char *namespace_str = NULL;
 	namespace = cil_stack_init();
-	__cil_build_ast(db, namespace, namespace_str, db->parse_root->root, db->ast_root->root);
+	__cil_build_ast(db, namespace, namespace_str, parse_root->root, db->ast_root->root);
 	free(namespace);
 }
 

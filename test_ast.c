@@ -15,6 +15,9 @@ int main(int argc, char *argv[])
         char *buffer;
         FILE *file;
 
+	struct cil_tree *parse_root;
+	parse_root = cil_tree_init(parse_root);
+
 	struct cil_db *db;
 	db = cil_db_init();
 
@@ -33,13 +36,13 @@ int main(int argc, char *argv[])
                 fread(buffer, file_size, 1, file); 
                 fclose(file);           
 
-		db->parse_root = cil_parser(buffer, file_size);
+		parse_root = cil_parser(buffer, file_size);
 
-		cil_tree_print(db->parse_root->root, 0);
+		cil_tree_print(parse_root->root, 0);
 	
 		printf("after cil_tree_print\n");
 	
-		cil_build_ast(db);	
+		cil_build_ast(db, parse_root);	
 		cil_tree_print(db->ast_root->root, 0);
 		hashtab_datum_t key;
 		key = "apache.process";
