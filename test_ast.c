@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <sys/stat.h>
+
 #include "cil_lexer.h"
 #include "cil.h"
 #include "cil_tree.h"
@@ -11,15 +13,14 @@
 
 int main(int argc, char *argv[])
 {
+	struct stat filedata;
         uint32_t file_size;
         char *buffer;
         FILE *file;
 
-	struct cil_tree *parse_root;
-	parse_root = cil_tree_init(parse_root);
+	struct cil_tree *parse_root = cil_tree_init(parse_root);
 
-	struct cil_db *db;
-	db = cil_db_init();
+	struct cil_db *db = cil_db_init();
 
         if (argc > 1) {
                 file = fopen(argv[1], "r");
@@ -27,10 +28,11 @@ int main(int argc, char *argv[])
                         fprintf(stderr, "Could not open file\n");
                         exit(1);
                 }
-		/* TODO CDS - use stat() to figure out size */
-                fseek(file, 0L, SEEK_END);
-                file_size = ftell(file);
-                fseek(file, 0, SEEK_SET);
+		if (stat(argv[1], &filedata) == -1) {
+			printf("Could not stat file\n");
+			exit(1);
+		}
+		file_size = filedata.st_size;	
 
                 buffer = malloc(file_size + 1);
                 fread(buffer, file_size, 1, file); 
