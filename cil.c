@@ -30,9 +30,7 @@ struct cil_db *cil_db_init()
 		}
 	}
 	
-	/* TODO CDS need to give cil_tree an initializer instead of malloc'ing here */
-	db->ast_root = malloc(sizeof(struct cil_tree));
-	db->ast_root->root = malloc(sizeof(struct cil_tree_node));
+	db->ast_root = cil_tree_init(db->ast_root);
 
 	return db;
 }

@@ -35,14 +35,16 @@ int main(int argc, char *argv[])
 
 		db->parse_root = cil_parser(buffer, file_size);
 
-		cil_print_tree(db->parse_root->root, 0);
-		
+		cil_tree_print(db->parse_root->root, 0);
+	
+		printf("after cil_tree_print\n");
+	
 		cil_build_ast(db);	
-		//cil_print_tree(db->ast_root->root, 0);
-		//hashtab_datum_t key;
-		//key = ".main.a.a2.aa";
-		//if (hashtab_search(db->symtab[CIL_SYM_ATTRS].table, key))
-		//	printf("found\n");
+		cil_tree_print(db->ast_root->root, 0);
+		hashtab_datum_t key;
+		key = "apache.process";
+		if (hashtab_search(db->symtab[CIL_SYM_TYPES].table, key))
+			printf("found\n");
         }
 
         exit(0);

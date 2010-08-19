@@ -17,14 +17,7 @@ struct cil_tree *cil_parser(char *buffer, uint32_t size)
 
 	struct token *tok;
 
-	tree = malloc(sizeof(struct cil_tree));
-
-	tree->root = malloc(sizeof(struct cil_tree_node));	
-	tree->root->cl_head = NULL;
-	tree->root->cl_tail = NULL;
-	tree->root->parent = NULL;
-	tree->root->data = "ROOT";
-	tree->root->next = NULL;
+	tree = cil_tree_init(tree);
 	tree->root->flavor = CIL_PARSER;
 	current = tree->root;	
 
@@ -33,11 +26,8 @@ struct cil_tree *cil_parser(char *buffer, uint32_t size)
 		if (tok->type == OPAREN) {
 			paren_count++;
 			/* TODO CDS switch to using an init()/destroy() for cil_tree_nodes to remove all this duplicate code */
-			node = malloc(sizeof(struct cil_tree_node));
+			node = cil_tree_node_init(node);
 			node->parent = current;
-			node->cl_head = NULL;
-			node->cl_tail = NULL;
-			node->next = NULL;
 			node->flavor = CIL_PARSER;
 			node->line = tok->line;
 			if (current->cl_head == NULL)
@@ -52,14 +42,12 @@ struct cil_tree *cil_parser(char *buffer, uint32_t size)
 			if (paren_count < 0) {
 				printf("Syntax error: Close parenthesis without matching open: line %d\n", tok->line);
 				exit(1);
-			}	
+			}
 			current = current->parent;
 		}
 		else if ((tok->type == SYMBOL) || (tok->type == QSTRING)) {
-			item = malloc(sizeof(struct cil_tree_node));
+			item = cil_tree_node_init(item);
 			item->parent = current;
-			item->cl_head = NULL;
-			item->cl_tail = NULL;
 			item->data = strdup(tok->value);
 			item->flavor = CIL_PARSER;
 			item->line = tok->line;

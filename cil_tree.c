@@ -2,16 +2,38 @@
 #include "cil_tree.h"
 #include "cil.h"
 
-void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
+struct cil_tree *cil_tree_init(struct cil_tree *tree)
+{
+	tree = malloc(sizeof(struct cil_tree));
+	tree->root = cil_tree_node_init(tree->root);
+	
+	return tree;
+}
+
+struct cil_tree_node *cil_tree_node_init(struct cil_tree_node *node)
+{
+	node = malloc(sizeof(struct cil_tree_node));
+	node->cl_head = NULL;
+	node->cl_tail = NULL;
+	node->parent = NULL;
+	node->data = NULL;
+	node->next = NULL;
+	node->flavor = 0;
+	node->line = 0;	
+
+	return node;
+}
+
+void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 {
         struct cil_tree_node * current;
         current = tree;
         uint32_t x = 0;
 
         if (current != NULL) {
-//		printf("cil_print_tree: current not null\n");
+//		printf("cil_tree_print: current not null\n");
                 if (current->cl_head == NULL) {
-//			printf("cil_print_tree: current->cl_head is null\n");
+//			printf("cil_tree_print: current->cl_head is null\n");
 			if (current->flavor == CIL_PARSER) {
                         	if (current->parent->cl_head == current)
                                 	printf("%s", (char*)current->data);
@@ -25,9 +47,9 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
 			}
                 }
                 else {
-//			printf("cil_print_tree: current->cl_head is not null\n");
+//			printf("cil_tree_print: current->cl_head is not null\n");
                         if (current->parent != NULL) {
-//				printf("cil_print_tree: current->parent not null\n");
+//				printf("cil_tree_print: current->parent not null\n");
                                 printf("\n");
                                 for (x = 0; x<depth; x++)
                                         printf("\t");
@@ -36,10 +58,10 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
 				if (current->flavor != CIL_PARSER)
 					printf("CIL_TYPE: %d\n", current->flavor);
                         }
-                        cil_print_tree(current->cl_head, depth + 1);
+                        cil_tree_print(current->cl_head, depth + 1);
                 }
                 if (current->next == NULL) {
-//			printf("cil_print_tree: current->next is null\n");
+//			printf("cil_tree_print: current->next is null\n");
                         if ((current->parent != NULL) && (current->parent->cl_tail == current) && (current->parent->parent != NULL)) {
 				if (current->flavor != CIL_PARSER) {
 					for (x = 0; x<depth-1; x++)
@@ -53,8 +75,8 @@ void cil_print_tree(struct cil_tree_node *tree, uint32_t depth)
                                 printf("\n\n");
                 }
                 else {
-//			printf("cil_print_tree: current->next is not null\n");
-                        cil_print_tree(current->next, depth);
+//			printf("cil_tree_print: current->next is not null\n");
+                        cil_tree_print(current->next, depth);
                 }
         }
 	else
