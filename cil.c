@@ -8,7 +8,9 @@
 #include "cil.h"
 
 /* TODO CDS Big change - need to change all functions in all files to return an int error code, e.g.:
-int cil_db_init(struct cil_db **db) */
+int cil_db_init(struct cil_db **db) 
+Use error codes provided by libsepol
+*/
 struct cil_db *cil_db_init()
 {
 	int i, rc;	
