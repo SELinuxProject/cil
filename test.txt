@@ -1,3 +1,10 @@
+(perm read)
+(perm write)
+(perm open)
+;object classes
+(class file
+	(read write open))
+
 (block apache
 			(type process)
 			(role apache_r)
@@ -26,10 +33,6 @@
 )
 		(bool foo true)
 		(bool bar false)
-
-; 		object classes
-;		(class file
-;			(read write open))
 
 ; 		local.cil
 

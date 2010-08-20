@@ -36,6 +36,23 @@ struct cil_db *cil_db_init()
 }
 
 /* TODO CDS add cil_db_destroy() */
+struct cil_list *cil_list_init()
+{
+	struct cil_list *list = malloc(sizeof(struct cil_list));
+	list->list = NULL;
+	return list;
+}
+
+
+struct cil_list_item *cil_list_item_init()
+{
+	struct cil_list_item *item = malloc(sizeof(struct cil_list_item));
+	item->next = NULL;
+	item->flavor = 0;
+	item->data = NULL;
+
+	return item;
+}
 
 struct cil_stack *cil_stack_init()
 {
@@ -125,22 +142,54 @@ struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, 
 
 struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
-	struct cil_class *cls;
-	cls = malloc(sizeof(struct cil_class));
-	
-	//Add class to symtab and add sepol_id_t
-	//List of av rules here
-	//Common to inherit from
+	int rc;
+	char *key = parse_current->next->data;
+	struct cil_tree_node *parse_current_av;
+	struct cil_list_item *new_av, *last_av;
+	struct cil_class *cls = malloc(sizeof(struct cil_class));
+	cls->av = cil_list_init();
+	parse_current_av = parse_current->next->next->cl_head;
 
+	while(parse_current_av != NULL) {
+		printf("parse_current_av: %s\n", (char*)parse_current_av->data);
+		if (hashtab_search(db->symtab[CIL_SYM_PERMS].table, (hashtab_key_t)parse_current_av->data)) {
+			new_av = cil_list_item_init();
+			new_av->flavor = CIL_PERM;
+			if (cls->av->list == NULL) {
+				cls->av->list = new_av;
+				last_av = cls->av->list;
+			}
+			else {
+				last_av->next = new_av;
+				last_av = last_av->next;
+			}
+		}
+		else {
+			printf("Error: unknown permission: %s\n", (char*)parse_current_av->data);
+			exit(1);
+		}
+		parse_current_av = parse_current_av->next;		
+	}
+	
+	//Syntax for inherit from common?
+	//Lookup common in symtab and store in cls->common
+
+	rc = hashtab_insert(db->symtab[CIL_SYM_CLASSES].table, (hashtab_key_t)key, cls);	
+	
 	return cls;
 }
 
 struct cil_perm *cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
-	struct cil_perm *perm;
-	perm = malloc(sizeof(struct cil_perm));
+	int rc;
+	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
+	char *key = parse_current->next->data;
 
-	//sepol_id_t?
+	rc = hashtab_insert(db->symtab[CIL_SYM_PERMS].table, (hashtab_key_t)key, perm);
+	if (rc) {
+		printf("Failed to insert perm into symtab\n");
+		exit(1);
+	}
 
 	return perm;
 }

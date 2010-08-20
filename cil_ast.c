@@ -54,6 +54,8 @@ void __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *names
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
 				ast_node->data = cil_gen_class(db, namespace_str, parse_current);
 				ast_node->flavor = CIL_CLASS;
+				ast_current = ast_current->parent;
+				return;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_PERM)) {
 				ast_node->data = cil_gen_perm(db, namespace_str, parse_current);
@@ -91,6 +93,7 @@ void __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *names
 				printf("new allow: src:%s, tgt:%s\n", (char*)parse_current->next->data, (char*)parse_current->next->next->data);
 				ast_node->data = cil_gen_avrule(db, namespace_str, parse_current, CIL_AVRULE_ALLOWED); 
 				ast_node->flavor = CIL_AVRULE;
+				ast_current = ast_current->parent;
 				return;	//So that the object and perms lists don't get parsed again as potential keywords
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_INTERFACE)) {
