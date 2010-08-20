@@ -1,4 +1,4 @@
-(perm read)
+(perm read) ;no idea what the permission declarations will look like. just needed to add this to make class and interfaces work
 (perm write)
 (perm open)
 ;object classes

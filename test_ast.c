@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 	struct cil_tree *parse_root = cil_tree_init(parse_root);
 
 	struct cil_db *db = cil_db_init();
+	}
 
         if (argc > 1) {
                 file = fopen(argv[1], "r");
@@ -42,14 +43,8 @@ int main(int argc, char *argv[])
 
 		cil_tree_print(parse_root->root, 0);
 	
-		printf("after cil_tree_print\n");
-	
 		cil_build_ast(db, parse_root);	
 		cil_tree_print(db->ast_root->root, 0);
-		hashtab_datum_t key;
-		key = "apache.process";
-		if (hashtab_search(db->symtab[CIL_SYM_TYPES].table, key))
-			printf("found\n");
         }
 
         exit(0);

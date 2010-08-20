@@ -151,7 +151,6 @@ struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct c
 	parse_current_av = parse_current->next->next->cl_head;
 
 	while(parse_current_av != NULL) {
-		printf("parse_current_av: %s\n", (char*)parse_current_av->data);
 		if (hashtab_search(db->symtab[CIL_SYM_PERMS].table, (hashtab_key_t)parse_current_av->data)) {
 			new_av = cil_list_item_init();
 			new_av->flavor = CIL_PERM;
@@ -318,10 +317,10 @@ struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil
 
 struct cil_bool *cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
 {
+	int rc;
 	struct cil_bool *boolean;
+	char *key = parse_current->next->data;
 	boolean = malloc(sizeof(struct cil_bool));
-	printf("new bool: %s", (char*)parse_current->next->data);
-	//Add to bool symtab and set boolean->bool to sepol_id_t of new entry
 	if (!strcmp(parse_current->next->next->data, "true"))
 		boolean->value = 1;
 	else if (!strcmp(parse_current->next->next->data, "false"))
@@ -330,7 +329,12 @@ struct cil_bool *cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil
 		printf("Error: boolean value must be \'true\' or \'false\'");
 		exit(1);
 	}
-	printf(", value= %d\n", boolean->value);
+
+	rc = hashtab_insert(db->symtab[CIL_SYM_BOOLS].table, (hashtab_key_t)key, boolean);
+	if (rc) {
+		printf("Failed to insert bool into symtab\n");
+		exit(1);	
+	}
 
 	return boolean;
 }
