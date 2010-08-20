@@ -38,11 +38,14 @@ int cil_db_init(struct cil_db **db)
 }
 
 /* TODO CDS add cil_db_destroy() */
-struct cil_list *cil_list_init()
+int cil_list_init(struct cil_list **list)
 {
-	struct cil_list *list = malloc(sizeof(struct cil_list));
-	list->list = NULL;
-	return list;
+	struct cil_list *new_list = malloc(sizeof(struct cil_list));
+	new_list->list = NULL;
+
+	*list = new_list;
+	
+	return SEPOL_OK;
 }
 
 
@@ -149,7 +152,10 @@ struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct c
 	struct cil_tree_node *parse_current_av;
 	struct cil_list_item *new_av, *last_av;
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
-	cls->av = cil_list_init();
+	if (cil_list_init(&cls->av)) {
+		printf("Failed to init list for class perms\n");
+		//return SEPOL_ERR;
+	}
 	parse_current_av = parse_current->next->next->cl_head;
 
 	while(parse_current_av != NULL) {
@@ -176,7 +182,6 @@ struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct c
 	//Lookup common in symtab and store in cls->common
 
 	rc = hashtab_insert(db->symtab[CIL_SYM_CLASSES].table, (hashtab_key_t)key, cls);	
-	
 	return cls;
 }
 
