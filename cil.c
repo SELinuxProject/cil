@@ -11,28 +11,30 @@
 int cil_db_init(struct cil_db **db) 
 Use error codes provided by libsepol
 */
-struct cil_db *cil_db_init()
+int cil_db_init(struct cil_db **db)
 {
 	int i, rc;	
 
 	uint32_t symtab_size = 256;	//Need to determine what sizes are needed for each
 
-	struct cil_db *db;
-
-	db = malloc(sizeof(struct cil_db));
+	struct cil_db *new_db;
+	new_db = malloc(sizeof(struct cil_db));
 
 	for (i = 0; i < CIL_SYM_NUM; i++) {
-		rc = symtab_init(&db->symtab[i], symtab_size);
+		rc = symtab_init(&new_db->symtab[i], symtab_size);
 		if (rc) {
 			printf("Symtab init failed\n");
+			free(new_db);
 			/* TODO CDS Do not ever abort or exit from within library code - return an error value of some sort */
-			exit(1);
+			return SEPOL_ERR;
 		}
 	}
 	
-	db->ast_root = cil_tree_init(db->ast_root);
+	new_db->ast_root = cil_tree_init(new_db->ast_root);
+	
+	*db = new_db;
 
-	return db;
+	return SEPOL_OK;
 }
 
 /* TODO CDS add cil_db_destroy() */

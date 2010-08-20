@@ -339,7 +339,7 @@ struct mls_constrain {
 	//Design
 };*/
 
-struct cil_db *cil_db_init();
+int cil_db_init(struct cil_db **);
 struct cil_list	*cil_list_init();
 struct cil_list_item *cil_list_item_init();
 struct cil_stack *cil_stack_init();

@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
 
 	struct cil_tree *parse_root = cil_tree_init(parse_root);
 
-	struct cil_db *db = cil_db_init();
+	struct cil_db *db;
+	cil_db_init(&db);
 
         if (argc > 1) {
                 file = fopen(argv[1], "r");
@@ -42,7 +43,7 @@ int main(int argc, char *argv[])
 
 		cil_tree_print(parse_root->root, 0);
 	
-		cil_build_ast(db, parse_root);	
+		cil_build_ast(&db, parse_root);	
 		cil_tree_print(db->ast_root->root, 0);
         }
 
