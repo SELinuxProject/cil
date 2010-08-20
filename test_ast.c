@@ -21,7 +21,6 @@ int main(int argc, char *argv[])
 	struct cil_tree *parse_root = cil_tree_init(parse_root);
 
 	struct cil_db *db = cil_db_init();
-	}
 
         if (argc > 1) {
                 file = fopen(argv[1], "r");
