@@ -17,7 +17,7 @@ struct cil_tree_node {
 	//add file path here
 	void *data;
 };
-struct cil_tree *cil_tree_init(struct cil_tree *);
+int cil_tree_init(struct cil_tree **);
 struct cil_tree_node *cil_tree_node_init(struct cil_tree_node *);
 void cil_tree_print(struct cil_tree_node *, uint32_t);
 

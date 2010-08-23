@@ -2,12 +2,15 @@
 #include "cil_tree.h"
 #include "cil.h"
 
-struct cil_tree *cil_tree_init(struct cil_tree *tree)
+int cil_tree_init(struct cil_tree **tree)
 {
-	tree = malloc(sizeof(struct cil_tree));
-	tree->root = cil_tree_node_init(tree->root);
+	struct cil_tree *new_tree;
+	new_tree = malloc(sizeof(struct cil_tree));
+	new_tree->root = cil_tree_node_init(new_tree->root);
 	
-	return tree;
+	*tree = new_tree;
+	
+	return SEPOL_OK;
 }
 
 struct cil_tree_node *cil_tree_node_init(struct cil_tree_node *node)

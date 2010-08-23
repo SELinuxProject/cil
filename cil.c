@@ -30,7 +30,7 @@ int cil_db_init(struct cil_db **db)
 		}
 	}
 	
-	new_db->ast_root = cil_tree_init(new_db->ast_root);
+	cil_tree_init(&new_db->ast_root);
 	
 	*db = new_db;
 

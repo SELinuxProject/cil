@@ -17,8 +17,9 @@ int main(int argc, char *argv[])
         uint32_t file_size;
         char *buffer;
         FILE *file;
-
-	struct cil_tree *parse_root = cil_tree_init(parse_root);
+	
+	struct cil_tree *parse_root;
+	cil_tree_init(&parse_root);
 
 	struct cil_db *db;
 	cil_db_init(&db);
