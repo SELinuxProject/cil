@@ -11,7 +11,7 @@ void cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 {
 	struct cil_stack *namespace;
 	char *namespace_str = NULL;
-	namespace = cil_stack_init();
+	cil_stack_init(&namespace);
 	__cil_build_ast(db, namespace, namespace_str, parse_root->root, (*db)->ast_root->root);
 	free(namespace);
 }

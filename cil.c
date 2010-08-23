@@ -61,12 +61,15 @@ int cil_list_item_init(struct cil_list_item **item)
 	return SEPOL_OK;
 }
 
-struct cil_stack *cil_stack_init()
+int cil_stack_init(struct cil_stack **stack)
 {
 	/* TODO CDS Big change - when you malloc, you need to check what you got back. malloc can fail */
-	struct cil_stack *stack = malloc(sizeof(struct cil_stack));
-	stack->top = NULL;
-	return stack;
+	struct cil_stack *new_stack = malloc(sizeof(struct cil_stack));
+	new_stack->top = NULL;
+	
+	*stack = new_stack;
+
+	return SEPOL_OK;
 }
 
 void cil_stack_push(struct cil_stack *stack, void *data)
