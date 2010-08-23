@@ -62,33 +62,25 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 				cil_gen_common(*db, namespace_str, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
-				ast_node->data = cil_gen_sid(*db, namespace_str, parse_current);
-				ast_node->flavor = CIL_SID;
+				cil_gen_sid(*db, namespace_str, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
-				ast_node->data = cil_gen_type(*db, namespace_str, parse_current, CIL_TYPE);
-				ast_node->flavor = CIL_TYPE; //This is the data structure type (same for both type and attr)
+				cil_gen_type(*db, namespace_str, parse_current, ast_node, CIL_TYPE);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
-				ast_node->data = cil_gen_type(*db, namespace_str, parse_current, CIL_TYPE_ATTR);
-				ast_node->flavor = CIL_TYPE_ATTR;
+				cil_gen_type(*db, namespace_str, parse_current, ast_node, CIL_TYPE_ATTR);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
-				ast_node->data = cil_gen_typealias(*db, namespace_str, parse_current);
-				ast_node->flavor = CIL_TYPEALIAS;
+				cil_gen_typealias(*db, namespace_str, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
-				ast_node->data = cil_gen_role(*db, namespace_str, parse_current);
-				ast_node->flavor = CIL_ROLE;
+				cil_gen_role(*db, namespace_str, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
-				ast_node->data = cil_gen_bool(*db, namespace_str, parse_current);
-				ast_node->flavor = CIL_BOOL;
+				cil_gen_bool(*db, namespace_str, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
-				printf("new allow: src:%s, tgt:%s\n", (char*)parse_current->next->data, (char*)parse_current->next->next->data);
-				ast_node->data = cil_gen_avrule(*db, namespace_str, parse_current, CIL_AVRULE_ALLOWED); 
-				ast_node->flavor = CIL_AVRULE;
+				cil_gen_avrule(*db, namespace_str, parse_current, ast_node, CIL_AVRULE_ALLOWED); 
 				ast_current = ast_current->parent;
 				return;	//So that the object and perms lists don't get parsed again as potential keywords
 			}

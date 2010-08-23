@@ -238,17 +238,20 @@ int cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node 
 	return SEPOL_OK;
 }
 
-struct cil_sid *cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+int cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	struct cil_sid * sid;
 	sid = malloc(sizeof(struct cil_sid));	
 
 	//sepol_id_t
 
-	return sid;
+	ast_node->data = sid;
+	ast_node->flavor = CIL_SID;
+
+	return SEPOL_OK;
 }
 
-struct cil_user *cil_gen_user(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+int cil_gen_user(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	struct cil_user *user;
 	user = malloc(sizeof(struct cil_user));
@@ -256,10 +259,13 @@ struct cil_user *cil_gen_user(struct cil_db *db, char *namespace_str, struct cil
 	printf("new user: %s", (char*)parse_current->next->data);
 	//Add to user symtab and set user->user sepol_id_t of new entry
 
-	return user;
+	ast_node->data = user;
+	ast_node->flavor = CIL_USER;
+
+	return SEPOL_OK;
 }
 
-struct cil_role *cil_gen_role(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+int cil_gen_role(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	struct cil_role *role;
 	role = malloc(sizeof(struct cil_role));
@@ -267,10 +273,13 @@ struct cil_role *cil_gen_role(struct cil_db *db, char *namespace_str, struct cil
 	printf("new role: %s\n", (char*)parse_current->next->data);
 	//Add to role symtab and set role->role to sepol_id_t of new entry
 
-	return role;
+	ast_node->data = role;
+	ast_node->flavor = CIL_ROLE;
+
+	return SEPOL_OK;
 }
 
-struct cil_avrule *cil_gen_avrule(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, uint32_t rule_kind)
+int cil_gen_avrule(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
 	//TODO: Check if this is actually an avrule, abort if not
 	
@@ -309,10 +318,13 @@ struct cil_avrule *cil_gen_avrule(struct cil_db *db, char *namespace_str, struct
 	else
 		printf("perms: %s\n", (char*)parse_current->next->next->next->next->data);
 
-	return rule;	
+	ast_node->data = rule;
+	ast_node->flavor = CIL_AVRULE;
+
+	return SEPOL_OK;	
 }
 
-struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, uint32_t flavor)
+int cil_gen_type(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor)
 {
 	int rc;
 	char *name, *key; 
@@ -345,11 +357,14 @@ struct cil_type *cil_gen_type(struct cil_db *db, char *namespace_str, struct cil
 		printf("Failed to insert %s, rc:%d\n", key,rc);
 		exit(1);
 	}
-	return type;
+
+	ast_node->data = type;
+	ast_node->flavor = flavor;	
+
+	return SEPOL_OK;
 }
 
-
-struct cil_bool *cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+int cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	int rc;
 	struct cil_bool *boolean;
@@ -361,23 +376,29 @@ struct cil_bool *cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil
 		boolean->value = 0;
 	else {
 		printf("Error: boolean value must be \'true\' or \'false\'");
-		exit(1);
+		return 1;
 	}
 
 	rc = hashtab_insert(db->symtab[CIL_SYM_BOOLS].table, (hashtab_key_t)key, boolean);
 	if (rc) {
 		printf("Failed to insert bool into symtab\n");
-		exit(1);	
+		return 1;	
 	}
 
-	return boolean;
+	ast_node->data = boolean;
+	ast_node->flavor = CIL_BOOL;
+
+	return SEPOL_OK;
 }
 
-struct cil_typealias *cil_gen_typealias(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+int cil_gen_typealias(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	struct cil_typealias *alias;	
 	alias = malloc(sizeof(struct cil_typealias));
 	printf("new alias: %s, type: %s\n", (char*)parse_current->next->data, (char*)parse_current->next->next->data);
 	
-	return(alias);
+	ast_node->data = alias;
+	ast_node->flavor = CIL_TYPEALIAS;
+
+	return SEPOL_OK;
 }
