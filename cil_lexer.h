@@ -16,7 +16,7 @@ struct token {
 	uint32_t line;
 };
 
-struct token * cil_lexer_next();
-void cil_lexer_setup(char*, uint32_t);
+int cil_lexer_next(struct token **);
+int cil_lexer_setup(char*, uint32_t);
 
 #endif /* CIL_LEXER_H_ */

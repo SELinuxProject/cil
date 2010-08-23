@@ -1,5 +1,6 @@
 %{
 	#include <stdint.h>
+	#include <sepol/policydb/policydb.h>
 	#include "cil_lexer.h"
 	char * value;
 	int line = 1;
@@ -25,13 +26,15 @@ comment		;.*$
 .		value=yytext; return NONE;
 %%
 
-void cil_lexer_setup(char *buffer, uint32_t size)
+int cil_lexer_setup(char *buffer, uint32_t size)
 {
 	size = (yy_size_t)size;
 	yy_scan_buffer(buffer, size + 2);
+	
+	return SEPOL_OK;
 }
 
-struct token * cil_lexer_next()
+int cil_lexer_next(struct token **tok)
 {
 	struct token *n;
 	/* TODO CDS who should free token? or just put n on the stack and don't worry about it */
@@ -39,6 +42,9 @@ struct token * cil_lexer_next()
 	n->type = yylex();
 	n->value = value;
 	n->line = line;
-	return n;
+	
+	*tok = n;
+	
+	return SEPOL_OK;
 }
 

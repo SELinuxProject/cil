@@ -22,7 +22,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 	current = tree->root;	
 
 	do {
-		tok = cil_lexer_next();
+		cil_lexer_next(&tok);
 		if (tok->type == OPAREN) {
 			paren_count++;
 			/* TODO CDS switch to using an init()/destroy() for cil_tree_nodes to remove all this duplicate code */
@@ -64,8 +64,6 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 			
 	}
 	while (tok->type != 0);
-
-	printf("returning from parser\n");	
 
 	*parse_root = tree;
 
