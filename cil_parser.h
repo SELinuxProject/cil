@@ -3,6 +3,6 @@
 
 #include "cil_tree.h"
 
-struct cil_tree * cil_parser(char *, uint32_t);
+int cil_parser(char *, uint32_t, struct cil_tree **);
 
 #endif /* CIL_PARSER_H_ */

@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
                 fread(buffer, file_size, 1, file); 
                 fclose(file);           
 
-		parse_root = cil_parser(buffer, file_size);
+		cil_parser(buffer, file_size, &parse_root);
 
 		cil_tree_print(parse_root->root, 0);
 	

@@ -6,7 +6,7 @@
 #include "cil_lexer.h"
 #include "cil.h"
 
-struct cil_tree *cil_parser(char *buffer, uint32_t size)
+int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 {
 	cil_lexer_setup(buffer, size);
 
@@ -41,7 +41,7 @@ struct cil_tree *cil_parser(char *buffer, uint32_t size)
 			paren_count--;
 			if (paren_count < 0) {
 				printf("Syntax error: Close parenthesis without matching open: line %d\n", tok->line);
-				exit(1);
+				return 1;
 			}
 			current = current->parent;
 		}
@@ -59,11 +59,15 @@ struct cil_tree *cil_parser(char *buffer, uint32_t size)
 		}
 		else if ((tok->type == 0) && (paren_count > 0)) {
 			printf("Syntax error: Open parenthesis without matching close\n");
-			exit(1);
+			return 1;
 		}	
 			
 	}
 	while (tok->type != 0);
 
-	return tree;
+	printf("returning from parser\n");	
+
+	*parse_root = tree;
+
+	return SEPOL_OK;
 }

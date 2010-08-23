@@ -11,6 +11,7 @@
 int main(int argc, char *argv[])
 {
 	struct stat filedata;
+	struct cil_tree *tree;
         uint32_t file_size;
         char *buffer;
         FILE *file;
@@ -31,7 +32,8 @@ int main(int argc, char *argv[])
                 fread(buffer, file_size, 1, file); 
                 fclose(file);           
 
-		cil_tree_print((cil_parser(buffer, file_size))->root, 0);
+		cil_parser(buffer, file_size, &tree);
+		cil_tree_print(tree->root, 0);
         }
 
         exit(0);
