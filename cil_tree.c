@@ -6,25 +6,28 @@ int cil_tree_init(struct cil_tree **tree)
 {
 	struct cil_tree *new_tree;
 	new_tree = malloc(sizeof(struct cil_tree));
-	new_tree->root = cil_tree_node_init(new_tree->root);
+	cil_tree_node_init(&new_tree->root);
 	
 	*tree = new_tree;
 	
 	return SEPOL_OK;
 }
 
-struct cil_tree_node *cil_tree_node_init(struct cil_tree_node *node)
+int cil_tree_node_init(struct cil_tree_node **node)
 {
-	node = malloc(sizeof(struct cil_tree_node));
-	node->cl_head = NULL;
-	node->cl_tail = NULL;
-	node->parent = NULL;
-	node->data = NULL;
-	node->next = NULL;
-	node->flavor = 0;
-	node->line = 0;	
+	struct cil_tree_node *new_node;
+	new_node = malloc(sizeof(struct cil_tree_node));
+	new_node->cl_head = NULL;
+	new_node->cl_tail = NULL;
+	new_node->parent = NULL;
+	new_node->data = NULL;
+	new_node->next = NULL;
+	new_node->flavor = 0;
+	new_node->line = 0;	
 
-	return node;
+	*node = new_node;
+
+	return SEPOL_OK;
 }
 
 void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)

@@ -26,7 +26,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 		if (tok->type == OPAREN) {
 			paren_count++;
 			/* TODO CDS switch to using an init()/destroy() for cil_tree_nodes to remove all this duplicate code */
-			node = cil_tree_node_init(node);
+			cil_tree_node_init(&node);
 			node->parent = current;
 			node->flavor = CIL_PARSER;
 			node->line = tok->line;
@@ -46,7 +46,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 			current = current->parent;
 		}
 		else if ((tok->type == SYMBOL) || (tok->type == QSTRING)) {
-			item = cil_tree_node_init(item);
+			cil_tree_node_init(&item);
 			item->parent = current;
 			item->data = strdup(tok->value);
 			item->flavor = CIL_PARSER;

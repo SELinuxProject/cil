@@ -24,7 +24,7 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 		if (parse_current->parent->cl_head == parse_current) { //This is the beginning of the line
 //			printf("cl_head = parse_current\n");
 			//Node values set here
-			ast_node = cil_tree_node_init(ast_node);
+			cil_tree_node_init(&ast_node);
 			ast_node->parent = ast_current;
 			ast_node->line = parse_current->line;
 
