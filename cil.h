@@ -343,7 +343,7 @@ int cil_db_init(struct cil_db **);
 int cil_list_init(struct cil_list **);
 int cil_list_item_init(struct cil_list_item **);
 int cil_stack_init(struct cil_stack **);
-void cil_stack_push(struct cil_stack *, void *);
+int cil_stack_push(struct cil_stack *, void *);
 void *cil_stack_pop(struct cil_stack *);
 char *cil_get_namespace_str(struct cil_stack *);
 

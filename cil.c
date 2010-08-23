@@ -72,13 +72,15 @@ int cil_stack_init(struct cil_stack **stack)
 	return SEPOL_OK;
 }
 
-void cil_stack_push(struct cil_stack *stack, void *data)
+int cil_stack_push(struct cil_stack *stack, void *data)
 {
 	struct cil_stack_element *new_top;
 	new_top = malloc(sizeof(struct cil_stack_element));
 	new_top->data = data;
 	new_top->next = stack->top;
 	stack->top = new_top;
+
+	return SEPOL_OK;
 }
 
 void *cil_stack_pop(struct cil_stack *stack)
