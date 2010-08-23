@@ -224,15 +224,18 @@ int cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 	return SEPOL_OK;
 }
 
-struct cil_common *cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+int cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	struct cil_common *common;
 	common = malloc(sizeof(struct cil_common));
 
 	//sepol_id_t
 	//list of av
+
+	ast_node->data = common;
+	ast_node->flavor = CIL_COMMON;
 	
-	return common;
+	return SEPOL_OK;
 }
 
 struct cil_sid *cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)

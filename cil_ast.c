@@ -59,8 +59,7 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 				cil_gen_perm(*db, namespace_str, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
-				ast_node->data = cil_gen_common(*db, namespace_str, parse_current);
-				ast_node->flavor = CIL_COMMON;
+				cil_gen_common(*db, namespace_str, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
 				ast_node->data = cil_gen_sid(*db, namespace_str, parse_current);
