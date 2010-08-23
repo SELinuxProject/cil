@@ -347,15 +347,15 @@ int cil_stack_push(struct cil_stack *, void *);
 int cil_stack_pop(struct cil_stack *, void *);
 int cil_get_namespace_str(struct cil_stack *, char **);
 
-int cil_gen_block(struct cil_db *, struct cil_stack *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char*);
-struct cil_class *cil_gen_class(struct cil_db *, char *, struct cil_tree_node*);
+int cil_gen_block(struct cil_db *, struct cil_stack *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
+int cil_gen_class(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *);
 struct cil_perm *cil_gen_perm(struct cil_db *, char *, struct cil_tree_node*);
-struct cil_common *cil_gen_common(struct cil_db *, char *, struct cil_tree_node*);
-struct cil_sid *cil_gen_sid(struct cil_db *, char *, struct cil_tree_node*);
+struct cil_common *cil_gen_common(struct cil_db *, char *, struct cil_tree_node *);
+struct cil_sid *cil_gen_sid(struct cil_db *, char *, struct cil_tree_node *);
 struct cil_avrule *cil_gen_avrule(struct cil_db *, char *, struct cil_tree_node *, uint32_t);
 struct cil_type *cil_gen_type(struct cil_db *, char *, struct cil_tree_node *, uint32_t);
-struct cil_role *cil_gen_role(struct cil_db *, char *, struct cil_tree_node*);
-struct cil_bool *cil_gen_bool(struct cil_db *, char *, struct cil_tree_node*);
-struct cil_typealias *cil_gen_typealias(struct cil_db *, char *, struct cil_tree_node*);
+struct cil_role *cil_gen_role(struct cil_db *, char *, struct cil_tree_node *);
+struct cil_bool *cil_gen_bool(struct cil_db *, char *, struct cil_tree_node *);
+struct cil_typealias *cil_gen_typealias(struct cil_db *, char *, struct cil_tree_node *);
 
 #endif

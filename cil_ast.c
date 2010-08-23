@@ -51,9 +51,8 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 				cil_get_namespace_str(namespace, &namespace_str);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
-				ast_node->data = cil_gen_class(*db, namespace_str, parse_current);
-				ast_node->flavor = CIL_CLASS;
-				ast_current = ast_current->parent;
+				cil_gen_class(*db, namespace_str, parse_current, ast_node);
+				ast_current = ast_current->parent; //To avoid parsing list of perms again
 				return;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_PERM)) {

@@ -162,7 +162,7 @@ int cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tre
 	return SEPOL_OK;	
 }
 
-struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+int cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	int rc;
 	char *key = parse_current->next->data;
@@ -190,7 +190,7 @@ struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct c
 		}
 		else {
 			printf("Error: unknown permission: %s\n", (char*)parse_current_av->data);
-			exit(1);
+			return 1;
 		}
 		parse_current_av = parse_current_av->next;		
 	}
@@ -200,7 +200,10 @@ struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct c
 
 	rc = hashtab_insert(db->symtab[CIL_SYM_CLASSES].table, (hashtab_key_t)key, cls);	
 
-	return cls;
+	ast_node->data = cls;
+	ast_node->flavor = CIL_CLASS;
+
+	return SEPOL_OK;
 }
 
 struct cil_perm *cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
