@@ -341,7 +341,7 @@ struct mls_constrain {
 
 int cil_db_init(struct cil_db **);
 int cil_list_init(struct cil_list **);
-struct cil_list_item *cil_list_item_init();
+int cil_list_item_init(struct cil_list_item **);
 struct cil_stack *cil_stack_init();
 void cil_stack_push(struct cil_stack *, void *);
 void *cil_stack_pop(struct cil_stack *);

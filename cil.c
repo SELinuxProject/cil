@@ -49,14 +49,16 @@ int cil_list_init(struct cil_list **list)
 }
 
 
-struct cil_list_item *cil_list_item_init()
+int cil_list_item_init(struct cil_list_item **item)
 {
-	struct cil_list_item *item = malloc(sizeof(struct cil_list_item));
-	item->next = NULL;
-	item->flavor = 0;
-	item->data = NULL;
+	struct cil_list_item *new_item = malloc(sizeof(struct cil_list_item));
+	new_item->next = NULL;
+	new_item->flavor = 0;
+	new_item->data = NULL;
 
-	return item;
+	*item = new_item;
+
+	return SEPOL_OK;
 }
 
 struct cil_stack *cil_stack_init()
@@ -160,7 +162,7 @@ struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct c
 
 	while(parse_current_av != NULL) {
 		if (hashtab_search(db->symtab[CIL_SYM_PERMS].table, (hashtab_key_t)parse_current_av->data)) {
-			new_av = cil_list_item_init();
+			cil_list_item_init(&new_av);
 			new_av->flavor = CIL_PERM;
 			if (cls->av->list == NULL) {
 				cls->av->list = new_av;
@@ -182,6 +184,7 @@ struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct c
 	//Lookup common in symtab and store in cls->common
 
 	rc = hashtab_insert(db->symtab[CIL_SYM_CLASSES].table, (hashtab_key_t)key, cls);	
+
 	return cls;
 }
 
