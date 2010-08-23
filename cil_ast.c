@@ -47,8 +47,7 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 			// Determine data types and set those values here
 //			printf("parse_current->data: %s\n", (char*)parse_current->data);
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
-				ast_node->data = cil_gen_block(*db, namespace, parse_current, ast_node, 0, 0, NULL);
-				ast_node->flavor = CIL_BLOCK;
+				cil_gen_block(*db, namespace, parse_current, ast_node, 0, 0, NULL);
 				cil_get_namespace_str(namespace, &namespace_str);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {

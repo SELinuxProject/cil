@@ -129,7 +129,7 @@ int cil_get_namespace_str(struct cil_stack *stack, char **namespace)
 	return SEPOL_OK;
 }
 
-struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, uint16_t is_optional, char *condition)
+int cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
 	int rc;
 	char *name, *key;
@@ -152,8 +152,14 @@ struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, 
 		printf("Failed to insert block %s\n", key);
 		exit(1);
 	}
+	else {
+		block->block.value = ++db->symtab[CIL_SYM_BLOCKS].nprim;
+	}
 
-	return block;	
+	ast_node->data = block;
+	ast_node->flavor = CIL_BLOCK;
+
+	return SEPOL_OK;	
 }
 
 struct cil_class *cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
