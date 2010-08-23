@@ -83,18 +83,17 @@ int cil_stack_push(struct cil_stack *stack, void *data)
 	return SEPOL_OK;
 }
 
-void *cil_stack_pop(struct cil_stack *stack)
+int cil_stack_pop(struct cil_stack *stack, void *popped)
 {
 	if (stack->top != NULL) {
 		struct cil_stack_element *new_top;
-		void *data;
-		data = stack->top->data;
+		popped = stack->top->data;
 		new_top = stack->top->next;
 		free(stack->top);
 		stack->top = new_top;
-		return data;
+		return SEPOL_OK;
 	}
-	return NULL;
+	 return 1; //TODO add error codes
 }
 
 static void __namespace_helper(struct cil_stack_element *current, char *namespace)

@@ -344,7 +344,7 @@ int cil_list_init(struct cil_list **);
 int cil_list_item_init(struct cil_list_item **);
 int cil_stack_init(struct cil_stack **);
 int cil_stack_push(struct cil_stack *, void *);
-void *cil_stack_pop(struct cil_stack *);
+int cil_stack_pop(struct cil_stack *, void *);
 char *cil_get_namespace_str(struct cil_stack *);
 
 struct cil_block *cil_gen_block(struct cil_db *, struct cil_stack *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char*);
