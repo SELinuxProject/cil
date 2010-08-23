@@ -49,7 +49,7 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
 				ast_node->data = cil_gen_block(*db, namespace, parse_current, ast_node, 0, 0, NULL);
 				ast_node->flavor = CIL_BLOCK;
-				namespace_str = cil_get_namespace_str(namespace);
+				cil_get_namespace_str(namespace, &namespace_str);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
 				ast_node->data = cil_gen_class(*db, namespace_str, parse_current);
@@ -120,7 +120,7 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 //		printf("set ast_current to parent\n");
 		if (ast_current->flavor == CIL_BLOCK) {
 			cil_stack_pop(namespace, NULL);
-			namespace_str = cil_get_namespace_str(namespace);
+			cil_get_namespace_str(namespace, &namespace_str);
 		}
 
 		ast_current = ast_current->parent;

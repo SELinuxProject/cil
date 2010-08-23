@@ -106,22 +106,25 @@ static void __namespace_helper(struct cil_stack_element *current, char *namespac
 	strcat(namespace, current->data);
 }
 
-char *cil_get_namespace_str(struct cil_stack *stack)
+int cil_get_namespace_str(struct cil_stack *stack, char **namespace)
 {
-	char *namespace;
+	char *new_namespace;
 	struct cil_stack_element *current = stack->top;
 	/* TODO add error handling */
-	if (current == NULL)
-		return NULL;
+	if (current == NULL) {
+		new_namespace = NULL;
+		return SEPOL_OK;
+	}	
 	uint32_t length = strlen(current->data) + 2;
 	while (current->next != NULL) {
 		current = current->next;
 		length += strlen(current->data) + 1;
 	}
-	namespace = malloc(length);
-	namespace[0] = '\0';
-	__namespace_helper(stack->top, namespace);
-	return namespace;
+	new_namespace = malloc(length);
+	new_namespace[0] = '\0';
+	__namespace_helper(stack->top, new_namespace);
+	*namespace = new_namespace;
+	return SEPOL_OK;
 }
 
 struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, uint16_t is_optional, char *condition)
@@ -139,7 +142,7 @@ struct cil_block *cil_gen_block(struct cil_db *db, struct cil_stack *namespace, 
 
 	cil_stack_push(namespace, name);
 
-	key = cil_get_namespace_str(namespace);
+	cil_get_namespace_str(namespace, &key);
 	
 	/* TODO CDS look at hashtab_insert to see who owns the key, to see if they need to be freed */
 	rc = hashtab_insert(db->symtab[CIL_SYM_BLOCKS].table, (hashtab_key_t)key, block);
