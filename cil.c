@@ -96,7 +96,7 @@ int cil_stack_pop(struct cil_stack *stack, void *popped)
 	 return 1; //TODO add error codes
 }
 
-static void __namespace_helper(struct cil_stack_element *current, char *namespace)
+static int __namespace_helper(struct cil_stack_element *current, char *namespace)
 {
 	/* TODO add error handling */
 	if (current->next != NULL) {
@@ -104,6 +104,8 @@ static void __namespace_helper(struct cil_stack_element *current, char *namespac
 		strcat(namespace, ".");
 	}
 	strcat(namespace, current->data);
+	
+	return SEPOL_OK;
 }
 
 int cil_get_namespace_str(struct cil_stack *stack, char **namespace)
