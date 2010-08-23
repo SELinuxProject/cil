@@ -6,8 +6,7 @@
 #include "cil_tree.h"
 #include "cil.h"
 
-void cil_build_ast(struct cil_db **, struct cil_tree *);
-void __cil_build_ast(struct cil_db **, struct cil_stack *, char *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_build_ast(struct cil_db **, struct cil_tree *);
 
 #endif /* CIL_AST_H_ */
 

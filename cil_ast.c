@@ -7,16 +7,7 @@
 #include "cil_parser.h"
 #include "cil.h"
 
-void cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
-{
-	struct cil_stack *namespace;
-	char *namespace_str = NULL;
-	cil_stack_init(&namespace);
-	__cil_build_ast(db, namespace, namespace_str, parse_root->root, (*db)->ast_root->root);
-	free(namespace);
-}
-
-void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *namespace_str, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
+static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *namespace_str, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
 	struct cil_tree_node *parse_current = parse_tree;
 	struct cil_tree_node *ast_current = ast;
@@ -53,7 +44,7 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
 				cil_gen_class(*db, namespace_str, parse_current, ast_node);
 				ast_current = ast_current->parent; //To avoid parsing list of perms again
-				return;
+				return SEPOL_OK;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_PERM)) {
 				cil_gen_perm(*db, namespace_str, parse_current, ast_node);
@@ -82,7 +73,7 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
 				cil_gen_avrule(*db, namespace_str, parse_current, ast_node, CIL_AVRULE_ALLOWED); 
 				ast_current = ast_current->parent;
-				return;	//So that the object and perms lists don't get parsed again as potential keywords
+				return SEPOL_OK;	//So that the object and perms lists don't get parsed again as potential keywords
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_INTERFACE)) {
 				printf("new interface: %s\n", (char*)parse_current->next->data);
@@ -113,7 +104,19 @@ void __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *name
 
 		ast_current = ast_current->parent;
 
-		return;
+		return SEPOL_OK;
 	}
+	
+	return SEPOL_OK;
 }
 
+int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
+{
+	struct cil_stack *namespace;
+	char *namespace_str = NULL;
+	cil_stack_init(&namespace);
+	__cil_build_ast(db, namespace, namespace_str, parse_root->root, (*db)->ast_root->root);
+	free(namespace);
+	
+	return SEPOL_OK;
+}
