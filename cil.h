@@ -349,7 +349,7 @@ int cil_get_namespace_str(struct cil_stack *, char **);
 
 int cil_gen_block(struct cil_db *, struct cil_stack *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
 int cil_gen_class(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *);
-struct cil_perm *cil_gen_perm(struct cil_db *, char *, struct cil_tree_node*);
+int cil_gen_perm(struct cil_db *, char *, struct cil_tree_node*, struct cil_tree_node *);
 struct cil_common *cil_gen_common(struct cil_db *, char *, struct cil_tree_node *);
 struct cil_sid *cil_gen_sid(struct cil_db *, char *, struct cil_tree_node *);
 struct cil_avrule *cil_gen_avrule(struct cil_db *, char *, struct cil_tree_node *, uint32_t);

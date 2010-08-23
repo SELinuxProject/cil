@@ -206,7 +206,7 @@ int cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *
 	return SEPOL_OK;
 }
 
-struct cil_perm *cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
+int cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	int rc;
 	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
@@ -215,10 +215,13 @@ struct cil_perm *cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil
 	rc = hashtab_insert(db->symtab[CIL_SYM_PERMS].table, (hashtab_key_t)key, perm);
 	if (rc) {
 		printf("Failed to insert perm into symtab\n");
-		exit(1);
+		return 1;
 	}
 
-	return perm;
+	ast_node->data = perm;
+	ast_node->flavor = CIL_PERM;
+
+	return SEPOL_OK;
 }
 
 struct cil_common *cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current)
