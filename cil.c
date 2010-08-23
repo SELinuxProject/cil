@@ -7,10 +7,6 @@
 #include "cil_tree.h"
 #include "cil.h"
 
-/* TODO CDS Big change - need to change all functions in all files to return an int error code, e.g.:
-int cil_db_init(struct cil_db **db) 
-Use error codes provided by libsepol
-*/
 int cil_db_init(struct cil_db **db)
 {
 	int i, rc;	
@@ -25,7 +21,6 @@ int cil_db_init(struct cil_db **db)
 		if (rc) {
 			printf("Symtab init failed\n");
 			free(new_db);
-			/* TODO CDS Do not ever abort or exit from within library code - return an error value of some sort */
 			return SEPOL_ERR;
 		}
 	}
@@ -93,7 +88,7 @@ int cil_stack_pop(struct cil_stack *stack, void *popped)
 		stack->top = new_top;
 		return SEPOL_OK;
 	}
-	 return 1; //TODO add error codes
+	 return SEPOL_ERR;
 }
 
 static int __namespace_helper(struct cil_stack_element *current, char *namespace)
@@ -190,7 +185,7 @@ int cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *
 		}
 		else {
 			printf("Error: unknown permission: %s\n", (char*)parse_current_av->data);
-			return 1;
+			return SEPOL_ERR;
 		}
 		parse_current_av = parse_current_av->next;		
 	}
@@ -215,7 +210,7 @@ int cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 	rc = hashtab_insert(db->symtab[CIL_SYM_PERMS].table, (hashtab_key_t)key, perm);
 	if (rc) {
 		printf("Failed to insert perm into symtab\n");
-		return 1;
+		return SEPOL_ERR;
 	}
 
 	ast_node->data = perm;
@@ -376,13 +371,13 @@ int cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 		boolean->value = 0;
 	else {
 		printf("Error: boolean value must be \'true\' or \'false\'");
-		return 1;
+		return SEPOL_ERR;
 	}
 
 	rc = hashtab_insert(db->symtab[CIL_SYM_BOOLS].table, (hashtab_key_t)key, boolean);
 	if (rc) {
 		printf("Failed to insert bool into symtab\n");
-		return 1;	
+		return SEPOL_ERR;	
 	}
 
 	ast_node->data = boolean;

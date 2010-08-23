@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <sepol/errcodes.h>
 #include "cil_tree.h" 
 #include "cil_lexer.h"
 #include "cil.h"
@@ -41,7 +42,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 			paren_count--;
 			if (paren_count < 0) {
 				printf("Syntax error: Close parenthesis without matching open: line %d\n", tok->line);
-				return 1;
+				return SEPOL_ERR;
 			}
 			current = current->parent;
 		}
@@ -59,7 +60,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 		}
 		else if ((tok->type == 0) && (paren_count > 0)) {
 			printf("Syntax error: Open parenthesis without matching close\n");
-			return 1;
+			return SEPOL_ERR;
 		}	
 			
 	}

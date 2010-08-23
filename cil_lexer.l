@@ -1,6 +1,6 @@
 %{
 	#include <stdint.h>
-	#include <sepol/policydb/policydb.h>
+	#include <sepol/errcodes.h>
 	#include "cil_lexer.h"
 	char * value;
 	int line = 1;
