@@ -23,6 +23,9 @@
 				(type test4))
 ;			(interface read_log (x:type)
 ;				(allow x log (file dir) (read getattr)))
+(block foo
+			(type bar))
+
 
 ;			(typeattr user_cgi (cgi_script))
 ;			(domain_type process)

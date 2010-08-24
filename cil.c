@@ -143,7 +143,6 @@ int cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tre
 	cil_get_namespace_str(namespace, &key);
 	
 	/* TODO CDS look at hashtab_insert to see who owns the key, to see if they need to be freed */
-	printf("block key: %s\n", (char*)key);
 	rc = sepol_symtab_insert(&db->symtab[CIL_SYM_BLOCKS], (hashtab_key_t)key, (symtab_datum_t*)block);
 	if (rc) {
 		printf("Failed to insert block %s\n", key);
@@ -344,12 +343,12 @@ int cil_gen_type(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 	}
 	else {
 		printf("Error: cil_gen_type called on invalid node\n");
-		exit(1);
+		return SEPOL_ERR;
 	}
 
 	if (rc) {
 		printf("Failed to insert %s, rc:%d\n", key,rc);
-		exit(1);
+		return SEPOL_ERR;
 	}
 
 	ast_node->data = type;

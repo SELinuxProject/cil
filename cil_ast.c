@@ -15,7 +15,7 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 
 	if ((parse_current == NULL) || (ast_current == NULL)) {
 		printf("Error: NULL tree as parameter\n");
-		exit(1);
+		return SEPOL_ERR;
 	}
 
 //	printf("before parse_current->cl_head check\n");

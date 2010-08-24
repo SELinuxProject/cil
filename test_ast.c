@@ -28,11 +28,11 @@ int main(int argc, char *argv[])
                 file = fopen(argv[1], "r");
                 if (!file) {
                         fprintf(stderr, "Could not open file\n");
-                        exit(1);
+                        return SEPOL_ERR;
                 }
 		if (stat(argv[1], &filedata) == -1) {
 			printf("Could not stat file\n");
-			exit(1);
+			return SEPOL_ERR;
 		}
 		file_size = filedata.st_size;	
 
@@ -46,8 +46,15 @@ int main(int argc, char *argv[])
 	
 		cil_build_ast(&db, parse_root);	
 		cil_tree_print(db->ast_root->root, 0);
+		
+	/*	struct cil_block *search;
+		search = (struct cil_block*)hashtab_search(db->symtab[CIL_SYM_BLOCKS].table, "apache.test");
+		
+		printf("id: %d\n", search->datum.value);
+		printf("first child is of type: %d\n", search->self->cl_head->flavor);	*/	
+
         }
 
-        exit(0);
+        return SEPOL_OK;
 }
 

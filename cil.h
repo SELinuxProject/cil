@@ -97,7 +97,6 @@
 
 /* TODO CDS Think about whether we need the self pointer for everything that is in a symtab for search/tranform uses */
 
-/* TODO CDS just use uint32_t instead of sepol_id_t for now, as that's what the libsepol symtab uses */
 typedef uint32_t sepol_id_t;
 
 struct cil_db {

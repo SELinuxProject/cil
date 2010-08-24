@@ -20,11 +20,11 @@ int main(int argc, char *argv[])
                 file = fopen(argv[1], "r");
                 if (!file) {
                         fprintf(stderr, "Could not open file\n");
-                        exit(1);
+                        return SEPOL_ERR;
                 }
 		if (stat(argv[1], &filedata) == -1) {
 			printf("Could not stat file\n");
-			exit(1);
+			return SEPOL_ERR;
 		}	
 		file_size = filedata.st_size;
 	
@@ -36,6 +36,6 @@ int main(int argc, char *argv[])
 		cil_tree_print(tree->root, 0);
         }
 
-        exit(0);
+        return SEPOL_OK;
 }
 
