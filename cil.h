@@ -130,7 +130,7 @@ struct cil_search {
 };
 
 struct cil_block {
-	symtab_datum_t block;
+	symtab_datum_t datum;
 	/* TODO CDS eventually, these should probably become a flags bit vector */
 	uint16_t is_abstract;
 	uint16_t is_optional;
@@ -140,33 +140,33 @@ struct cil_block {
 };
 
 struct cil_class {
-	symtab_datum_t cls;
+	symtab_datum_t datum;
 	struct cil_list *av;
 	sepol_id_t common;
 };
 
 struct cil_perm {
-	symtab_datum_t perm;
+	symtab_datum_t datum;
 };
 
 struct cil_common {
-	symtab_datum_t common;
+	symtab_datum_t datum;
 	struct cil_list *av;
 };
 
 struct cil_sid {
-	symtab_datum_t sid;
+	symtab_datum_t datum;
 	struct cil_context *context;
 };
 
 struct cil_user {
-	symtab_datum_t user;
+	symtab_datum_t datum;
 };
 
 /* TODO CDS need userrole statement to associate users with roles and userlevel statement to associate users with levels */
 
 struct cil_role {
-	symtab_datum_t role;
+	symtab_datum_t datum;
 };
 
 struct cil_role_dominates {
@@ -180,7 +180,7 @@ struct cil_role_types {
 };
 
 struct cil_type	{//Also used for attributes
-	symtab_datum_t type;
+	symtab_datum_t datum;
 };
 
 struct cil_typeattribute {
@@ -189,12 +189,12 @@ struct cil_typeattribute {
 };
 
 struct cil_typealias {
-	symtab_datum_t alias;
+	symtab_datum_t datum;
 	sepol_id_t type;
 };
 
 struct cil_bool {
-	symtab_datum_t bool;
+	symtab_datum_t datum;
 	uint16_t value;
 };
 
@@ -235,7 +235,7 @@ struct cil_role_rule {
 };
 
 struct cil_sens {
-	symtab_datum_t sens;
+	symtab_datum_t datum;
 };
 
 struct cil_sens_dominates {
@@ -243,7 +243,7 @@ struct cil_sens_dominates {
 };
 
 struct cil_cat {
-	symtab_datum_t cat;
+	symtab_datum_t datum;
 };
 
 struct cil_level {
@@ -252,7 +252,7 @@ struct cil_level {
 };
 
 struct cil_transform_interface {
-	symtab_datum_t interface;
+	symtab_datum_t datum;
 	struct cil_list_item *params;
 	struct cil_tree_node *self;
 };
@@ -266,7 +266,7 @@ struct cil_transform_call {
 #define CIL_INHERIT_ROLE  2
 #define CIL_INHERIT_TYPE  3
 struct cil_transform_inherit {
-	symtab_datum_t inherit_to;
+	symtab_datum_t datum;
 	sepol_id_t inherit_from;
 	struct cil_list_item *except;
 	uint32_t flavor;	
@@ -295,25 +295,25 @@ struct cil_context {
 };
 
 struct cil_filecon {
-	symtab_datum_t path;
+	symtab_datum_t datum;
 	struct cil_context context;
 };
 
 struct cil_portcon {
-	symtab_datum_t port_range; 
+	symtab_datum_t datum; 
 	struct cil_context context;
 	sepol_id_t proto;
 };
 
 struct cil_netifcon {
-	symtab_datum_t netif;
+	symtab_datum_t datum;
 	struct cil_context if_context;
 	struct cil_context packet_context;
 };
 
 /* There is no fs declaration, but we will create a cil_fs on demand when the cil_fscon or cil_fs_use statements need one */
 struct cil_fs {
-	symtab_datum_t fs;
+	symtab_datum_t datum;
 };
 
 struct cil_fscon {

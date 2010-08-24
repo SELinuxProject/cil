@@ -2,8 +2,9 @@
 #include <stdio.h>
 
 #include <sepol/policydb/policydb.h>
-#include <sepol/policydb/symtab.h>
+//#include <sepol/policydb/symtab.h>
 
+#include "cil_symtab.h"
 #include "cil_tree.h"
 #include "cil.h"
 
@@ -142,13 +143,11 @@ int cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tre
 	cil_get_namespace_str(namespace, &key);
 	
 	/* TODO CDS look at hashtab_insert to see who owns the key, to see if they need to be freed */
-	rc = hashtab_insert(db->symtab[CIL_SYM_BLOCKS].table, (hashtab_key_t)key, block);
+	printf("block key: %s\n", (char*)key);
+	rc = sepol_symtab_insert(&db->symtab[CIL_SYM_BLOCKS], (hashtab_key_t)key, (symtab_datum_t*)block);
 	if (rc) {
 		printf("Failed to insert block %s\n", key);
-		exit(1);
-	}
-	else {
-		block->block.value = ++db->symtab[CIL_SYM_BLOCKS].nprim;
+		return SEPOL_ERR;
 	}
 
 	ast_node->data = block;
