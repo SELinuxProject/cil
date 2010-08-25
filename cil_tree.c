@@ -30,6 +30,40 @@ int cil_tree_node_init(struct cil_tree_node **node)
 	return SEPOL_OK;
 }
 
+void cil_tree_print_node(struct cil_tree_node *node)
+{
+	switch( node->flavor ) {
+		case CIL_BLOCK	: {
+			struct cil_block *block = node->data;
+			printf("BLOCK: %d\n", block->datum.value);
+			return;
+		}
+		case CIL_TYPE : {
+			struct cil_type *type = node->data;
+			printf("TYPE: %d\n", type->datum.value);
+			return;
+		}
+		case CIL_ROLE : {
+			struct cil_role *role = node->data;
+			printf("ROLE: %d\n", role->datum.value);
+			return;
+		}
+		case CIL_CLASS : {
+			int *id;
+			struct cil_class *cls = node->data;
+			struct cil_list_item *item;
+			item = cls->av->list;
+			printf("CLASS: %d (", cls->datum.value);
+			while (item != NULL) {
+				id = item->data;
+				printf(" %d", *id);
+				item = item->next;
+			}
+			printf(" )\n");
+		}
+	}
+}
+
 void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 {
         struct cil_tree_node * current;
@@ -49,7 +83,12 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 			else {
 				for (x = 0; x<depth; x++)
 					printf("\t");
-				printf("CIL_TYPE: %d\n", current->flavor);	
+				if (current->flavor == CIL_BLOCK)
+					cil_tree_print_node(current);
+				else if (current->flavor == CIL_CLASS)
+					cil_tree_print_node(current);
+				else
+					printf("CIL_TYPE: %d\n", current->flavor);	
 			}
                 }
                 else {
@@ -61,8 +100,19 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
                                         printf("\t");
                                 printf("(");
 
-				if (current->flavor != CIL_PARSER)
-					printf("CIL_TYPE: %d\n", current->flavor);
+				if (current->flavor != CIL_PARSER) {
+					if (current->flavor == CIL_BLOCK) {
+						cil_tree_print_node(current);
+					}
+					else if (current->flavor == CIL_TYPE) {
+						cil_tree_print_node(current);
+					}
+					else if (current->flavor == CIL_CLASS) {
+						cil_tree_print_node(current);
+					}	
+					else
+						printf("CIL_TYPE: %d\n", current->flavor);
+				}
                         }
                         cil_tree_print(current->cl_head, depth + 1);
                 }

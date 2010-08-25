@@ -4,6 +4,6 @@
 #include <sepol/policydb/symtab.h>
 #include <sepol/policydb/hashtab.h>
 
-int sepol_symtab_insert(symtab_t *, hashtab_key_t, symtab_datum_t *);
+int cil_symtab_insert(symtab_t *, hashtab_key_t, symtab_datum_t *);
 
 #endif

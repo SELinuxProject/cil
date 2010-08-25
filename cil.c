@@ -57,6 +57,46 @@ int cil_list_item_init(struct cil_list_item **item)
 	return SEPOL_OK;
 }
 
+int cil_parse_to_list(symtab_t symtab, struct cil_tree_node *parse_cl_head, struct cil_list **ast_cl, symtab_datum_t *datum, uint32_t flavor)
+{
+	struct cil_list_item *new_item;
+	struct cil_tree_node *parse_current = parse_cl_head;
+	struct cil_list_item *list_tail;
+	struct cil_list *ast_list = *ast_cl;
+	
+	if (ast_list == NULL) {
+		if (cil_list_init(&ast_list)) {
+			printf("Failed to init list\n");
+			return SEPOL_ERR;
+		}
+	}
+	while(parse_current != NULL) {
+		datum = hashtab_search(symtab.table, parse_current->data);
+		if (datum != NULL) {
+			cil_list_item_init(&new_item);
+			new_item->flavor = flavor;
+			new_item->data = &datum->value;
+			if (ast_list->list == NULL) {
+				ast_list->list = new_item;
+				list_tail = ast_list->list;
+			}
+			else {
+				list_tail->next = new_item;
+				list_tail = list_tail->next;
+			}
+		}
+		else {
+			printf("Symtab datum not found\n");
+			return SEPOL_ERR;
+		}
+		parse_current = parse_current->next;
+	}
+
+	*ast_cl = ast_list;
+
+	return SEPOL_OK;
+} 
+
 int cil_stack_init(struct cil_stack **stack)
 {
 	/* TODO CDS Big change - when you malloc, you need to check what you got back. malloc can fail */
@@ -143,10 +183,10 @@ int cil_gen_block(struct cil_db *db, struct cil_stack *namespace, struct cil_tre
 	cil_get_namespace_str(namespace, &key);
 	
 	/* TODO CDS look at hashtab_insert to see who owns the key, to see if they need to be freed */
-	rc = sepol_symtab_insert(&db->symtab[CIL_SYM_BLOCKS], (hashtab_key_t)key, (symtab_datum_t*)block);
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_BLOCKS], (hashtab_key_t)key, (symtab_datum_t*)block);
 	if (rc) {
 		printf("Failed to insert block %s\n", key);
-		return SEPOL_ERR;
+		return rc;
 	}
 
 	ast_node->data = block;
@@ -159,39 +199,25 @@ int cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *
 {
 	int rc;
 	char *key = parse_current->next->data;
-	struct cil_tree_node *parse_current_av;
-	struct cil_list_item *new_av, *last_av;
+	//struct cil_tree_node *parse_current_av;
+	//struct cil_list_item *new_av, *last_av;
+	struct cil_perm *perm;
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
-	if (cil_list_init(&cls->av)) {
-		printf("Failed to init list for class perms\n");
-		//return SEPOL_ERR;
-	}
-	parse_current_av = parse_current->next->next->cl_head;
-
-	while(parse_current_av != NULL) {
-		if (hashtab_search(db->symtab[CIL_SYM_PERMS].table, (hashtab_key_t)parse_current_av->data)) {
-			cil_list_item_init(&new_av);
-			new_av->flavor = CIL_PERM;
-			if (cls->av->list == NULL) {
-				cls->av->list = new_av;
-				last_av = cls->av->list;
-			}
-			else {
-				last_av->next = new_av;
-				last_av = last_av->next;
-			}
-		}
-		else {
-			printf("Error: unknown permission: %s\n", (char*)parse_current_av->data);
-			return SEPOL_ERR;
-		}
-		parse_current_av = parse_current_av->next;		
-	}
 	
+	rc = cil_parse_to_list(db->symtab[CIL_SYM_PERMS], parse_current->next->next->cl_head, &cls->av, (symtab_datum_t*)perm, CIL_PERM);
+	if (rc) {
+		printf("Failed to parse permissions list from parse tree\n");
+		return rc;
+ 	}
+
 	//Syntax for inherit from common?
 	//Lookup common in symtab and store in cls->common
 
-	rc = hashtab_insert(db->symtab[CIL_SYM_CLASSES].table, (hashtab_key_t)key, cls);	
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_CLASSES], (hashtab_key_t)key, (symtab_datum_t*)cls);	
+	if (rc) {
+		printf("Failed to insert class into symtab\n");
+		return rc;
+	}
 
 	ast_node->data = cls;
 	ast_node->flavor = CIL_CLASS;
@@ -205,10 +231,10 @@ int cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
 	char *key = parse_current->next->data;
 
-	rc = hashtab_insert(db->symtab[CIL_SYM_PERMS].table, (hashtab_key_t)key, perm);
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_PERMS], (hashtab_key_t)key, (symtab_datum_t*)perm);
 	if (rc) {
 		printf("Failed to insert perm into symtab\n");
-		return SEPOL_ERR;
+		return rc;
 	}
 
 	ast_node->data = perm;
@@ -219,11 +245,22 @@ int cil_gen_perm(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 
 int cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	struct cil_common *common;
-	common = malloc(sizeof(struct cil_common));
+	int rc;
+	char *key = parse_current->next->data;
+	struct cil_perm *perm;
+	struct cil_common *common = malloc(sizeof(struct cil_common));
 
-	//sepol_id_t
-	//list of av
+	rc = cil_parse_to_list(db->symtab[CIL_SYM_PERMS], parse_current->next->next->cl_head, &common->av, (symtab_datum_t*)perm, CIL_PERM);
+	if (rc) {
+		printf("Failed to parse permissions list from parse tree\n");
+		return rc;
+	}
+
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_COMMONS], (hashtab_key_t)key, (symtab_datum_t*)common);
+	if (rc) {
+		printf("Failed to insert common into symtab\n");
+		return rc;
+	}
 
 	ast_node->data = common;
 	ast_node->flavor = CIL_COMMON;
@@ -233,10 +270,15 @@ int cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node 
 
 int cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	struct cil_sid * sid;
-	sid = malloc(sizeof(struct cil_sid));	
+	int rc;
+	struct cil_sid * sid = malloc(sizeof(struct cil_sid));	
+	char *key = parse_current->next->data;
 
-	//sepol_id_t
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_SIDS], (hashtab_key_t)key, (symtab_datum_t*)sid);
+	if (rc) {
+		printf("Failed to insert sid into symtab\n");
+		return rc;	
+	}
 
 	ast_node->data = sid;
 	ast_node->flavor = CIL_SID;
@@ -246,11 +288,15 @@ int cil_gen_sid(struct cil_db *db, char *namespace_str, struct cil_tree_node *pa
 
 int cil_gen_user(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	struct cil_user *user;
-	user = malloc(sizeof(struct cil_user));
+	int rc;
+	struct cil_user *user = malloc(sizeof(struct cil_user));
+	char *key = parse_current->next->data;
 
-	printf("new user: %s", (char*)parse_current->next->data);
-	//Add to user symtab and set user->user sepol_id_t of new entry
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_USERS], (hashtab_key_t)key, (symtab_datum_t*)user);
+	if (rc) {
+		printf("Failed to insert user into symtab\n");
+		return rc;
+	}
 
 	ast_node->data = user;
 	ast_node->flavor = CIL_USER;
@@ -260,11 +306,15 @@ int cil_gen_user(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 
 int cil_gen_role(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	struct cil_role *role;
-	role = malloc(sizeof(struct cil_role));
+	int rc;
+	struct cil_role *role = malloc(sizeof(struct cil_role));
+	char *key = parse_current->next->data;
 
-	printf("new role: %s\n", (char*)parse_current->next->data);
-	//Add to role symtab and set role->role to sepol_id_t of new entry
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_ROLES], (hashtab_key_t)key, (symtab_datum_t*)role);
+	if (rc) {
+		printf("Failed to insert role into symtab\n");
+		return rc;
+	}
 
 	ast_node->data = role;
 	ast_node->flavor = CIL_ROLE;
@@ -388,7 +438,7 @@ int cil_gen_typealias(struct cil_db *db, char *namespace_str, struct cil_tree_no
 {
 	struct cil_typealias *alias;	
 	alias = malloc(sizeof(struct cil_typealias));
-	printf("new alias: %s, type: %s\n", (char*)parse_current->next->data, (char*)parse_current->next->next->data);
+
 	
 	ast_node->data = alias;
 	ast_node->flavor = CIL_TYPEALIAS;

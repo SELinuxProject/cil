@@ -10,41 +10,42 @@
 	Tree/list node types
 */
 #define CIL_PARSER		0
-#define CIL_BLOCK		1
-#define CIL_CLASS		2
-#define CIL_COMMON		3
-#define CIL_SID			4
-#define CIL_USER		5
-#define CIL_ROLE		6
-#define CIL_ROLE_TYPES		7
-#define CIL_TYPE		8
-#define CIL_TYPE_ATTR		9
-#define CIL_BOOL		10
-#define CIL_AVRULE		11
-#define CIL_ROLE_RULE		12
-#define CIL_SENS		13
-#define CIL_SENS_DOM		14
-#define CIL_CAT			15
-#define CIL_LEVEL		16
-#define CIL_SEARCH		17
-#define CIL_TRANS_IF		18
-#define CIL_TRANS_CALL		19
-#define CIL_TRANS_INH_BLK	20
-#define CIL_TRANS_INH_TYPE	21
-#define CIL_TRANS_INH_ROLE	22
-#define CIL_TRANS_DEL		23
-#define CIL_TRANS_TRANS		24
-#define CIL_IN			25
-#define CIL_CONTEXT		26
-#define CIL_FILECON		27
-#define CIL_PORTCON		28
-#define CIL_NETIFCON		29
-#define CIL_FSCON		30
-#define CIL_FS_USE		31
-#define CIL_CONSTRAIN		32
-#define CIL_MLS_CONSTRAIN	33
-#define CIL_PERM		34
-#define CIL_TYPEALIAS		35
+#define CIL_SEPOL_ID		1
+#define CIL_BLOCK		2
+#define CIL_CLASS		3
+#define CIL_COMMON		4
+#define CIL_SID			5
+#define CIL_USER		6
+#define CIL_ROLE		7
+#define CIL_ROLE_TYPES		8
+#define CIL_TYPE		9
+#define CIL_TYPE_ATTR		10
+#define CIL_BOOL		11
+#define CIL_AVRULE		12
+#define CIL_ROLE_RULE		13
+#define CIL_SENS		14
+#define CIL_SENS_DOM		15
+#define CIL_CAT			16
+#define CIL_LEVEL		17
+#define CIL_SEARCH		18
+#define CIL_TRANS_IF		19
+#define CIL_TRANS_CALL		20
+#define CIL_TRANS_INH_BLK	21
+#define CIL_TRANS_INH_TYPE	22
+#define CIL_TRANS_INH_ROLE	23
+#define CIL_TRANS_DEL		24
+#define CIL_TRANS_TRANS		25
+#define CIL_IN			26
+#define CIL_CONTEXT		27
+#define CIL_FILECON		28
+#define CIL_PORTCON		29
+#define CIL_NETIFCON		30
+#define CIL_FSCON		31
+#define CIL_FS_USE		32
+#define CIL_CONSTRAIN		33
+#define CIL_MLS_CONSTRAIN	34
+#define CIL_PERM		35
+#define CIL_TYPEALIAS		36
 
 /*
 	Keywords
@@ -141,7 +142,7 @@ struct cil_block {
 struct cil_class {
 	symtab_datum_t datum;
 	struct cil_list *av;
-	sepol_id_t common;
+	sepol_id_t common; // TODO What will class inheritance look like?
 };
 
 struct cil_perm {
