@@ -7,8 +7,9 @@
 
 (block apache
 			(type process)
+			(type tmp)
 			(role apache_r)
-			(typealias apache apache_t)(type log)
+			(typealias apache.tmp apache_t)(type log)
 			(type pid)
 			(type user_cgi)
 
