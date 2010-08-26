@@ -29,7 +29,10 @@ comment		;.*$
 int cil_lexer_setup(char *buffer, uint32_t size)
 {
 	size = (yy_size_t)size;
-	yy_scan_buffer(buffer, size + 2);
+	if (yy_scan_buffer(buffer, size + 2) == NULL) {
+		printf("Lexer failed to setup buffer\n");
+		return SEPOL_ERR;
+	}
 	
 	return SEPOL_OK;
 }
