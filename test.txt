@@ -5,6 +5,10 @@
 (class file
 	(read write open))
 
+(type foo)
+(type bar)
+(type foobar)
+
 (block apache
 			(type process)
 			(type tmp)

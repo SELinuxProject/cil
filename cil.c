@@ -201,7 +201,7 @@ int cil_gen_class(struct cil_db *db, char *namespace_str, struct cil_tree_node *
 	char *key = parse_current->next->data;
 	//struct cil_tree_node *parse_current_av;
 	//struct cil_list_item *new_av, *last_av;
-	struct cil_perm *perm;
+	struct cil_perm *perm = NULL;
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
 	
 	rc = cil_parse_to_list(db->symtab[CIL_SYM_PERMS], parse_current->next->next->cl_head, &cls->av, (symtab_datum_t*)perm, CIL_PERM);
@@ -247,7 +247,7 @@ int cil_gen_common(struct cil_db *db, char *namespace_str, struct cil_tree_node 
 {
 	int rc;
 	char *key = parse_current->next->data;
-	struct cil_perm *perm;
+	struct cil_perm *perm = NULL;
 	struct cil_common *common = malloc(sizeof(struct cil_common));
 
 	rc = cil_parse_to_list(db->symtab[CIL_SYM_PERMS], parse_current->next->next->cl_head, &common->av, (symtab_datum_t*)perm, CIL_PERM);
