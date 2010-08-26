@@ -8,10 +8,10 @@ struct cil_tree {
 };
 
 struct cil_tree_node {
-        struct cil_tree_node *parent;
-        struct cil_tree_node *cl_head;        //Head of child_list
-        struct cil_tree_node *cl_tail;        //Tail of child_list
-        struct cil_tree_node *next;           //Each element in the list points to the next element
+	struct cil_tree_node *parent;
+	struct cil_tree_node *cl_head;		//Head of child_list
+	struct cil_tree_node *cl_tail;		//Tail of child_list
+	struct cil_tree_node *next;		//Each element in the list points to the next element
 	uint32_t flavor;
 	uint32_t line;
 	//add file path here

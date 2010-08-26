@@ -4,14 +4,14 @@
 
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, symtab_datum_t *datum)
 {
-        int rc = hashtab_insert(symtab->table, key, (hashtab_datum_t)datum);
-        if (rc) {
-                printf("Failed to insert into symtab\n");
-                return rc;
-        }
-        else
-                datum->value = ++symtab->nprim;
+	int rc = hashtab_insert(symtab->table, key, (hashtab_datum_t)datum);
+	if (rc) {
+		printf("Failed to insert into symtab\n");
+		return rc;
+	}
+	else
+		datum->value = ++symtab->nprim;
 
-        return SEPOL_OK;
+	return SEPOL_OK;
 }
 
