@@ -48,6 +48,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("ROLE: %d\n", role->datum.value);
 			return;
 		}
+		case CIL_PERM : {
+			struct cil_perm *perm = node->data;
+			printf("PERM: %d\n", perm->datum.value);
+			return;
+		}
 		case CIL_CLASS : {
 			int *id;
 			struct cil_class *cls = node->data;
@@ -60,6 +65,21 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				item = item->next;
 			}
 			printf(" )\n");
+			return;
+		}
+		case CIL_BOOL : {
+			struct cil_bool *boolean = node->data;
+			printf("BOOL: %d, value: %d\n", boolean->datum.value, boolean->value);
+			return;
+		}
+		case CIL_TYPEALIAS : {
+			struct cil_typealias *alias = node->data;
+			printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type);
+			return;
+		}
+		default : {
+			printf("CIL FLAVOR: %d\n", node->flavor);
+			return;
 		}
 	}
 }
@@ -83,12 +103,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 			else {
 				for (x = 0; x<depth; x++)
 					printf("\t");
-				if (current->flavor == CIL_BLOCK)
-					cil_tree_print_node(current);
-				else if (current->flavor == CIL_CLASS)
-					cil_tree_print_node(current);
-				else
-					printf("CIL_TYPE: %d\n", current->flavor);	
+				cil_tree_print_node(current);
 			}
                 }
                 else {
@@ -100,20 +115,9 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
                                         printf("\t");
                                 printf("(");
 
-				if (current->flavor != CIL_PARSER) {
-					if (current->flavor == CIL_BLOCK) {
-						cil_tree_print_node(current);
-					}
-					else if (current->flavor == CIL_TYPE) {
-						cil_tree_print_node(current);
-					}
-					else if (current->flavor == CIL_CLASS) {
-						cil_tree_print_node(current);
-					}	
-					else
-						printf("CIL_TYPE: %d\n", current->flavor);
-				}
-                        }
+				if (current->flavor != CIL_PARSER) 
+					cil_tree_print_node(current);
+			}
                         cil_tree_print(current->cl_head, depth + 1);
                 }
                 if (current->next == NULL) {

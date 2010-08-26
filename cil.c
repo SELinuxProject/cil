@@ -386,10 +386,10 @@ int cil_gen_type(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 		key = strdup(name);
 
 	if (flavor == CIL_TYPE) {
-		rc = hashtab_insert(db->symtab[CIL_SYM_TYPES].table, (hashtab_key_t)key, type);
+		rc = cil_symtab_insert(&db->symtab[CIL_SYM_TYPES], (hashtab_key_t)key, (symtab_datum_t*)type);
 	}
 	else if (flavor == CIL_TYPE_ATTR) {
-		rc = hashtab_insert(db->symtab[CIL_SYM_ATTRS].table, (hashtab_key_t)key, type);	
+		rc = cil_symtab_insert(&db->symtab[CIL_SYM_ATTRS], (hashtab_key_t)key, (symtab_datum_t*)type);	
 	}
 	else {
 		printf("Error: cil_gen_type called on invalid node\n");
@@ -398,7 +398,7 @@ int cil_gen_type(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 
 	if (rc) {
 		printf("Failed to insert %s, rc:%d\n", key,rc);
-		return SEPOL_ERR;
+		return rc;
 	}
 
 	ast_node->data = type;
@@ -422,10 +422,10 @@ int cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 		return SEPOL_ERR;
 	}
 
-	rc = hashtab_insert(db->symtab[CIL_SYM_BOOLS].table, (hashtab_key_t)key, boolean);
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_BOOLS], (hashtab_key_t)key, (symtab_datum_t*)boolean);
 	if (rc) {
 		printf("Failed to insert bool into symtab\n");
-		return SEPOL_ERR;	
+		return rc;	
 	}
 
 	ast_node->data = boolean;
@@ -436,10 +436,27 @@ int cil_gen_bool(struct cil_db *db, char *namespace_str, struct cil_tree_node *p
 
 int cil_gen_typealias(struct cil_db *db, char *namespace_str, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	struct cil_typealias *alias;	
+	int rc;
+	struct cil_typealias *alias;
+	struct cil_type *type;
+	char *key = parse_current->next->next->data;
 	alias = malloc(sizeof(struct cil_typealias));
+	type = hashtab_search(db->symtab[CIL_SYM_TYPES].table, (hashtab_key_t)parse_current->next->data);
+	if (type != NULL) { 
+		alias->type = type->datum.value;
+		printf("alias->type: %d\n", alias->type);
+	}
+	else {
+		printf("Failed to lookup type for typealias\n");
+		return SEPOL_ERR;
+	}
 
-	
+	rc = cil_symtab_insert(&db->symtab[CIL_SYM_ALIASES], (hashtab_key_t)key, (symtab_datum_t*)alias);
+	if (rc) {
+		printf("Failed to insert alias into symtab\n");
+		return rc;
+	}
+
 	ast_node->data = alias;
 	ast_node->flavor = CIL_TYPEALIAS;
 
