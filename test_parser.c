@@ -28,11 +28,12 @@ int main(int argc, char *argv[])
 		}	
 		file_size = filedata.st_size;
 	
-                buffer = malloc(file_size + 1);
+                buffer = malloc(file_size + 2);
                 fread(buffer, file_size, 1, file); 
+                memset(buffer+file_size, 0, 2);
                 fclose(file);           
 
-		cil_parser(buffer, file_size, &tree);
+		cil_parser(buffer, file_size+2, &tree);
 		cil_tree_print(tree->root, 0);
         }
 
