@@ -62,4 +62,4 @@ clean:
 bare: clean
 	-rm -f $(AST_NAME) $(PARSER_NAME)
 
-.PHONY: cil all clean install bare
+.PHONY: cil all clean install bare test
