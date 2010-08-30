@@ -74,6 +74,18 @@
 /*
 	Symbol Table Array Indices
 */
+
+#define CIL_SYM_GLOBAL_USERS		
+#define CIL_SYM_GLOBAL_ROLES
+#define CIL_SYM_GLOBAL_PERMS
+#define CIL_SYM_GLOBAL_COMMONS
+#define CIL_SYM_GLOBAL_CLASSES
+#define CIL_SYM_GLOBAL_SENS
+#define CIL_SYM_GLOBAL_CATS
+
+
+
+
 #define CIL_SYM_FILES			0	//Filenames of modules
 #define CIL_SYM_BLOCKS			1
 #define CIL_SYM_CLASSES			2
