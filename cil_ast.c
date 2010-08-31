@@ -38,40 +38,40 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 			// Determine data types and set those values here
 //			printf("parse_current->data: %s\n", (char*)parse_current->data);
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
-				cil_gen_block(*db, namespace, parse_current, ast_node, 0, 0, NULL);
+				cil_gen_block(*db, parse_current, ast_node, 0, 0, NULL);
 				cil_get_namespace_str(namespace, &namespace_str);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
-				cil_gen_class(*db, namespace_str, parse_current, ast_node);
+				cil_gen_class(*db, parse_current, ast_node);
 				ast_current = ast_current->parent; //To avoid parsing list of perms again
 				return SEPOL_OK;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_PERM)) {
-				cil_gen_perm(*db, namespace_str, parse_current, ast_node);
+				cil_gen_perm(*db, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
-				cil_gen_common(*db, namespace_str, parse_current, ast_node);
+				cil_gen_common(*db, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
-				cil_gen_sid(*db, namespace_str, parse_current, ast_node);
+				cil_gen_sid(*db, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
-				cil_gen_type(*db, namespace_str, parse_current, ast_node, CIL_TYPE);
+				cil_gen_type(*db, parse_current, ast_node, CIL_TYPE);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
-				cil_gen_type(*db, namespace_str, parse_current, ast_node, CIL_TYPE_ATTR);
+				cil_gen_type(*db, parse_current, ast_node, CIL_TYPE_ATTR);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
-				cil_gen_typealias(*db, namespace_str, parse_current, ast_node);
+				cil_gen_typealias(*db, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
-				cil_gen_role(*db, namespace_str, parse_current, ast_node);
+				cil_gen_role(*db, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
-				cil_gen_bool(*db, namespace_str, parse_current, ast_node);
+				cil_gen_bool(*db, parse_current, ast_node);
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
-				cil_gen_avrule(*db, namespace_str, parse_current, ast_node, CIL_AVRULE_ALLOWED); 
+				cil_gen_avrule(*db, parse_current, ast_node, CIL_AVRULE_ALLOWED); 
 				ast_current = ast_current->parent;
 				return SEPOL_OK;	//So that the object and perms lists don't get parsed again as potential keywords
 			}

@@ -9,43 +9,44 @@
 /*
 	Tree/list node types
 */
-#define CIL_PARSER		0
-#define CIL_SEPOL_ID		1
-#define CIL_BLOCK		2
-#define CIL_CLASS		3
-#define CIL_COMMON		4
-#define CIL_SID			5
-#define CIL_USER		6
-#define CIL_ROLE		7
-#define CIL_ROLE_TYPES		8
-#define CIL_TYPE		9
-#define CIL_TYPE_ATTR		10
-#define CIL_BOOL		11
-#define CIL_AVRULE		12
-#define CIL_ROLE_RULE		13
-#define CIL_SENS		14
-#define CIL_SENS_DOM		15
-#define CIL_CAT			16
-#define CIL_LEVEL		17
-#define CIL_SEARCH		18
-#define CIL_TRANS_IF		19
-#define CIL_TRANS_CALL		20
-#define CIL_TRANS_INH_BLK	21
-#define CIL_TRANS_INH_TYPE	22
-#define CIL_TRANS_INH_ROLE	23
-#define CIL_TRANS_DEL		24
-#define CIL_TRANS_TRANS		25
-#define CIL_IN			26
-#define CIL_CONTEXT		27
-#define CIL_FILECON		28
-#define CIL_PORTCON		29
-#define CIL_NETIFCON		30
-#define CIL_FSCON		31
-#define CIL_FS_USE		32
-#define CIL_CONSTRAIN		33
-#define CIL_MLS_CONSTRAIN	34
-#define CIL_PERM		35
-#define CIL_TYPEALIAS		36
+#define CIL_ROOT		0
+#define CIL_PARSER		1
+#define CIL_SEPOL_ID		2
+#define CIL_BLOCK		3
+#define CIL_CLASS		4
+#define CIL_COMMON		5
+#define CIL_SID			6
+#define CIL_USER		7
+#define CIL_ROLE		8
+#define CIL_ROLE_TYPES		9
+#define CIL_TYPE		10
+#define CIL_TYPE_ATTR		11
+#define CIL_BOOL		12
+#define CIL_AVRULE		13
+#define CIL_ROLE_RULE		14
+#define CIL_SENS		15
+#define CIL_SENS_DOM		16
+#define CIL_CAT			17
+#define CIL_LEVEL		18
+#define CIL_SEARCH		19
+#define CIL_TRANS_IF		20
+#define CIL_TRANS_CALL		21
+#define CIL_TRANS_INH_BLK	22
+#define CIL_TRANS_INH_TYPE	23
+#define CIL_TRANS_INH_ROLE	24
+#define CIL_TRANS_DEL		25
+#define CIL_TRANS_TRANS		26
+#define CIL_IN			27
+#define CIL_CONTEXT		28
+#define CIL_FILECON		29
+#define CIL_PORTCON		30
+#define CIL_NETIFCON		31
+#define CIL_FSCON		32
+#define CIL_FS_USE		33
+#define CIL_CONSTRAIN		34
+#define CIL_MLS_CONSTRAIN	35
+#define CIL_PERM		36
+#define CIL_TYPEALIAS		37
 
 /*
 	Keywords
@@ -75,38 +76,34 @@
 	Symbol Table Array Indices
 */
 
-#define CIL_SYM_GLOBAL_USERS		
-#define CIL_SYM_GLOBAL_ROLES
-#define CIL_SYM_GLOBAL_PERMS
-#define CIL_SYM_GLOBAL_COMMONS
-#define CIL_SYM_GLOBAL_CLASSES
-#define CIL_SYM_GLOBAL_SENS
-#define CIL_SYM_GLOBAL_CATS
+// Global symtabs
+#define CIL_SYM_GLOBAL_FILENAMES	0
+#define CIL_SYM_GLOBAL_USERS		1
+#define CIL_SYM_GLOBAL_ROLES		2
+#define CIL_SYM_GLOBAL_PERMS		3
+#define CIL_SYM_GLOBAL_COMMONS		4
+#define CIL_SYM_GLOBAL_CLASSES		5
+#define CIL_SYM_GLOBAL_BOOLS		6
+#define CIL_SYM_GLOBAL_SENS		7
+#define CIL_SYM_GLOBAL_CATS		8
+#define CIL_SYM_GLOBAL_SIDS		9
+#define CIL_SYM_GLOBAL_FILECONS		10
+#define CIL_SYM_GLOBAL_PORTCONS		11
+#define CIL_SYM_GLOBAL_NETIFCONS	12
 
+#define CIL_SYM_GLOBAL_NUM		13
 
+// Local symtabs
+#define CIL_SYM_LOCAL_BLOCKS		0
+#define CIL_SYM_LOCAL_TYPES		1
+#define CIL_SYM_LOCAL_ATTRS		2
+#define CIL_SYM_LOCAL_ALIASES		3
+#define CIL_SYM_LOCAL_TRANS_INTERFACES	5
 
+#define CIL_SYM_LOCAL_NUM		5
 
-#define CIL_SYM_FILES			0	//Filenames of modules
-#define CIL_SYM_BLOCKS			1
-#define CIL_SYM_CLASSES			2
-#define CIL_SYM_PERMS			3
-#define CIL_SYM_COMMONS			4
-#define CIL_SYM_SIDS			5
-#define CIL_SYM_USERS			6
-#define CIL_SYM_ROLES			7
-#define CIL_SYM_TYPES			8
-#define CIL_SYM_ALIASES			9
-#define CIL_SYM_BOOLS			10
-#define CIL_SYM_SENS			11
-#define CIL_SYM_CATS			12
-#define CIL_SYM_FILECONS		13
-#define CIL_SYM_PORTCONS		14
-#define CIL_SYM_NETIFCONS		15
-#define CIL_SYM_TRANS_INTERFACES	16
-#define CIL_SYM_TRANS_INHERITS		17
-#define CIL_SYM_ATTRS			18
+#define CIL_SYM_SIZE			256 	//TODO Need to determine symtab sizes
 
-#define CIL_SYM_NUM			19
 
 /* TODO CDS Think about whether we need the self pointer for everything that is in a symtab for search/tranform uses */
 
@@ -114,7 +111,8 @@ typedef uint32_t sepol_id_t;
 
 struct cil_db {
 	struct cil_tree *ast_root;
-	symtab_t symtab[CIL_SYM_NUM];
+	symtab_t global_symtab[CIL_SYM_GLOBAL_NUM]; 	//Global namespace
+	symtab_t local_symtab[CIL_SYM_LOCAL_NUM];	//Local namespace for top level declarations
 };
 
 struct cil_list {
@@ -143,6 +141,7 @@ struct cil_search {
 
 struct cil_block {
 	symtab_datum_t datum;
+	symtab_t symtab[CIL_SYM_LOCAL_NUM];
 	/* TODO CDS eventually, these should probably become a flags bit vector */
 	uint16_t is_abstract;
 	uint16_t is_optional;
@@ -154,7 +153,7 @@ struct cil_block {
 struct cil_class {
 	symtab_datum_t datum;
 	struct cil_list *av;
-	sepol_id_t common; // TODO What will class inheritance look like?
+	sepol_id_t common;
 };
 
 struct cil_perm {
@@ -358,16 +357,18 @@ int cil_stack_init(struct cil_stack **);
 int cil_stack_push(struct cil_stack *, void *);
 int cil_stack_pop(struct cil_stack *, void *);
 int cil_get_namespace_str(struct cil_stack *, char **);
+int cil_symtab_array_init(symtab_t [], uint32_t);
+int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
 
-int cil_gen_block(struct cil_db *, struct cil_stack *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
-int cil_gen_class(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *);
-int cil_gen_perm(struct cil_db *, char *, struct cil_tree_node*, struct cil_tree_node *);
-int cil_gen_common(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *);
-int cil_gen_sid(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *);
-int cil_gen_avrule(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
-int cil_gen_type(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
-int cil_gen_role(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *);
-int cil_gen_bool(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *);
-int cil_gen_typealias(struct cil_db *, char *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
+int cil_gen_class(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_perm(struct cil_db *, struct cil_tree_node*, struct cil_tree_node *);
+int cil_gen_common(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_avrule(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
+int cil_gen_type(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
+int cil_gen_role(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 
 #endif

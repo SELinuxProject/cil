@@ -43,18 +43,10 @@ int main(int argc, char *argv[])
 		fclose(file);
 
 		cil_parser(buffer, file_size + 2, &parse_root);
-
 		cil_tree_print(parse_root->root, 0);
-	
+
 		cil_build_ast(&db, parse_root);	
 		cil_tree_print(db->ast_root->root, 0);
-		
-		struct cil_block *search;
-		search = hashtab_search(db->symtab[CIL_SYM_BLOCKS].table, "apache.test");
-		
-		printf("id: %d\n", search->datum.value);
-		printf("first child is of type: %d\n", search->self->cl_head->flavor);		
-
 	}
 
 	return SEPOL_OK;
