@@ -153,6 +153,7 @@ struct cil_block {
 struct cil_class {
 	symtab_datum_t datum;
 	struct cil_list *av;
+	char *common_str;
 	sepol_id_t common;
 };
 
@@ -181,12 +182,16 @@ struct cil_role {
 };
 
 struct cil_role_dominates {
+	char *role_str;
 	sepol_id_t role;
+	char *dominates_str;
 	sepol_id_t dominates;
 };
 
 struct cil_role_types {
+	char *role_str;
 	sepol_id_t role;
+	char *type_str;
 	sepol_id_t type;
 };
 
@@ -195,12 +200,15 @@ struct cil_type	{//Also used for attributes
 };
 
 struct cil_typeattribute {
+	char *type_str;
 	sepol_id_t type;
+	char *attrib_str;
 	sepol_id_t attrib;
 };
 
 struct cil_typealias {
 	symtab_datum_t datum;
+	char *type_str;
 	sepol_id_t type;
 };
 
@@ -217,7 +225,9 @@ struct cil_bool {
 #define CIL_AVRULE_AV         (AVRULE_ALLOWED | AVRULE_AUDITALLOW | AVRULE_AUDITDENY | AVRULE_DONTAUDIT | AVRULE_NEVERALLOW)
 struct cil_avrule {
 	uint32_t rule_kind;
-	sepol_id_t src;	
+	char *src_str;
+	sepol_id_t src;
+	char *tgt_str;	
 	sepol_id_t tgt;
 	struct cil_list_item *obj;
 	uint32_t perms;	
@@ -229,18 +239,24 @@ struct cil_avrule {
 #define CIL_AVRULE_TYPE       (AVRULE_TRANSITION | AVRULE_MEMBER | AVRULE_CHANGE)
 struct cil_typerule {
 	uint32_t rule_kind;
+	char *src_str;
 	sepol_id_t src;
+	char *tgt_str;
 	sepol_id_t tgt;
 	struct cil_list_item *obj;
+	char *result_str;
 	sepol_id_t result;
 };
 
 // Define role_rule kinds here
 struct cil_role_rule {
 	uint32_t rule_kind;
-	sepol_id_t src;	
+	char *src_str;
+	sepol_id_t src;
+	char *tgt_str;	
 	sepol_id_t tgt;
 	/* TODO CDS this should match whatever cil_avrule does */
+	char *obj_str;
 	sepol_id_t obj;
 	uint32_t perms;	
 };
@@ -258,6 +274,7 @@ struct cil_cat {
 };
 
 struct cil_level {
+	char *sens_str;
 	sepol_id_t sens;
 	struct cil_list_item *cats;	
 };
@@ -270,6 +287,7 @@ struct cil_transform_interface {
 
 struct cil_transform_call {
 	struct cil_list_item *params;
+	char *interface_str;
 	sepol_id_t interface; 
 };
 
@@ -278,6 +296,7 @@ struct cil_transform_call {
 #define CIL_INHERIT_TYPE  3
 struct cil_transform_inherit {
 	symtab_datum_t datum;
+	char *inherit_from_str;
 	sepol_id_t inherit_from;
 	struct cil_list_item *except;
 	uint32_t flavor;	
@@ -298,8 +317,11 @@ struct cil_in {
 };
 
 struct cil_context {
+	char *user_str;
 	sepol_id_t user;
+	char *role_str;
 	sepol_id_t role;
+	char *type_str;
 	sepol_id_t type;
 	struct cil_level low;
 	struct cil_level high;
@@ -313,6 +335,7 @@ struct cil_filecon {
 struct cil_portcon {
 	symtab_datum_t datum; 
 	struct cil_context context;
+	char *proto_str;
 	sepol_id_t proto;
 };
 
@@ -328,6 +351,7 @@ struct cil_fs {
 };
 
 struct cil_fscon {
+	char *fs_str;
 	sepol_id_t fs;
 	char *path;
 	struct cil_context context;
@@ -338,6 +362,7 @@ struct cil_fscon {
 #define CIL_FS_USE_TRANS 3
 struct cil_fs_use {
 	uint32_t flavor;
+	char *fs_str;
 	sepol_id_t fs;
 	struct cil_context context;
 };
