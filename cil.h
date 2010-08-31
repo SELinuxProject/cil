@@ -11,42 +11,43 @@
 */
 #define CIL_ROOT		0
 #define CIL_PARSER		1
-#define CIL_SEPOL_ID		2
-#define CIL_BLOCK		3
-#define CIL_CLASS		4
-#define CIL_COMMON		5
-#define CIL_SID			6
-#define CIL_USER		7
-#define CIL_ROLE		8
-#define CIL_ROLE_TYPES		9
-#define CIL_TYPE		10
-#define CIL_TYPE_ATTR		11
-#define CIL_BOOL		12
-#define CIL_AVRULE		13
-#define CIL_ROLE_RULE		14
-#define CIL_SENS		15
-#define CIL_SENS_DOM		16
-#define CIL_CAT			17
-#define CIL_LEVEL		18
-#define CIL_SEARCH		19
-#define CIL_TRANS_IF		20
-#define CIL_TRANS_CALL		21
-#define CIL_TRANS_INH_BLK	22
-#define CIL_TRANS_INH_TYPE	23
-#define CIL_TRANS_INH_ROLE	24
-#define CIL_TRANS_DEL		25
-#define CIL_TRANS_TRANS		26
-#define CIL_IN			27
-#define CIL_CONTEXT		28
-#define CIL_FILECON		29
-#define CIL_PORTCON		30
-#define CIL_NETIFCON		31
-#define CIL_FSCON		32
-#define CIL_FS_USE		33
-#define CIL_CONSTRAIN		34
-#define CIL_MLS_CONSTRAIN	35
-#define CIL_PERM		36
-#define CIL_TYPEALIAS		37
+#define CIL_AST_STR		2
+#define CIL_SEPOL_ID		3
+#define CIL_BLOCK		4
+#define CIL_CLASS		5
+#define CIL_COMMON		6
+#define CIL_SID			7
+#define CIL_USER		8
+#define CIL_ROLE		9
+#define CIL_ROLE_TYPES		10
+#define CIL_TYPE		11
+#define CIL_TYPE_ATTR		12
+#define CIL_BOOL		13
+#define CIL_AVRULE		14
+#define CIL_ROLE_RULE		15
+#define CIL_SENS		16
+#define CIL_SENS_DOM		17
+#define CIL_CAT			18
+#define CIL_LEVEL		19
+#define CIL_SEARCH		20
+#define CIL_TRANS_IF		21
+#define CIL_TRANS_CALL		22
+#define CIL_TRANS_INH_BLK	23
+#define CIL_TRANS_INH_TYPE	24
+#define CIL_TRANS_INH_ROLE	25
+#define CIL_TRANS_DEL		26
+#define CIL_TRANS_TRANS		27
+#define CIL_IN			28
+#define CIL_CONTEXT		29
+#define CIL_FILECON		30
+#define CIL_PORTCON		31
+#define CIL_NETIFCON		32
+#define CIL_FSCON		33
+#define CIL_FS_USE		34
+#define CIL_CONSTRAIN		35
+#define CIL_MLS_CONSTRAIN	36
+#define CIL_PERM		37
+#define CIL_TYPEALIAS		38
 
 /*
 	Keywords
@@ -229,7 +230,8 @@ struct cil_avrule {
 	sepol_id_t src;
 	char *tgt_str;	
 	sepol_id_t tgt;
-	struct cil_list_item *obj;
+	char *obj_str;
+	sepol_id_t obj;
 	uint32_t perms;	
 };
 
@@ -243,7 +245,8 @@ struct cil_typerule {
 	sepol_id_t src;
 	char *tgt_str;
 	sepol_id_t tgt;
-	struct cil_list_item *obj;
+	char *obj_str;
+	sepol_id_t obj;
 	char *result_str;
 	sepol_id_t result;
 };
@@ -378,6 +381,7 @@ struct mls_constrain {
 int cil_db_init(struct cil_db **);
 int cil_list_init(struct cil_list **);
 int cil_list_item_init(struct cil_list_item **);
+int cil_parse_to_list(struct cil_tree_node *, struct cil_list **, uint32_t);
 int cil_stack_init(struct cil_stack **);
 int cil_stack_push(struct cil_stack *, void *);
 int cil_stack_pop(struct cil_stack *, void *);

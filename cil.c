@@ -58,7 +58,7 @@ int cil_list_item_init(struct cil_list_item **item)
 	return SEPOL_OK;
 }
 
-int cil_parse_to_list(symtab_t symtab, struct cil_tree_node *parse_cl_head, struct cil_list **ast_cl, symtab_datum_t *datum, uint32_t flavor)
+int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast_cl, uint32_t flavor)
 {
 	struct cil_list_item *new_item;
 	struct cil_tree_node *parse_current = parse_cl_head;
@@ -72,23 +72,16 @@ int cil_parse_to_list(symtab_t symtab, struct cil_tree_node *parse_cl_head, stru
 		}
 	}
 	while(parse_current != NULL) {
-		datum = hashtab_search(symtab.table, parse_current->data);
-		if (datum != NULL) {
-			cil_list_item_init(&new_item);
-			new_item->flavor = flavor;
-			new_item->data = &datum->value;
-			if (ast_list->list == NULL) {
-				ast_list->list = new_item;
-				list_tail = ast_list->list;
-			}
-			else {
-				list_tail->next = new_item;
-				list_tail = list_tail->next;
-			}
+		cil_list_item_init(&new_item);
+		new_item->flavor = flavor;
+		new_item->data = parse_current->data;
+		if (ast_list->list == NULL) {
+			ast_list->list = new_item;
+			list_tail = ast_list->list;
 		}
 		else {
-			printf("Symtab datum not found\n");
-			return SEPOL_ERR;
+			list_tail->next = new_item;
+			list_tail = list_tail->next;
 		}
 		parse_current = parse_current->next;
 	}
@@ -233,10 +226,9 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	int rc;
 	char *key = parse_current->next->data;
 
-	struct cil_perm *perm = NULL;
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
 	
-	rc = cil_parse_to_list(db->global_symtab[CIL_SYM_GLOBAL_PERMS], parse_current->next->next->cl_head, &cls->av, (symtab_datum_t*)perm, CIL_PERM);
+	rc = cil_parse_to_list(parse_current->next->next->cl_head, &cls->av, CIL_PERM);
 	if (rc) {
 		printf("Failed to parse permissions list from parse tree\n");
 		return rc;
@@ -279,10 +271,9 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 {
 	int rc;
 	char *key = parse_current->next->data;
-	struct cil_perm *perm = NULL;
 	struct cil_common *common = malloc(sizeof(struct cil_common));
 
-	rc = cil_parse_to_list(db->global_symtab[CIL_SYM_GLOBAL_PERMS], parse_current->next->next->cl_head, &common->av, (symtab_datum_t*)perm, CIL_PERM);
+	rc = cil_parse_to_list(parse_current->next->next->cl_head, &common->av, CIL_PERM);
 	if (rc) {
 		printf("Failed to parse permissions list from parse tree\n");
 		return rc;
@@ -361,9 +352,11 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	struct cil_avrule *rule;
 	rule = malloc(sizeof(struct cil_avrule));
 	rule->rule_kind = rule_kind;
-	//rule->src -- confirm source domain exists and add sepol_id_t here
-	//rule->tgt -- confirm target domain exists and add sepol_id_t here
-	//rule->obj -- confirm objects exist and add sepol_id_t here
+	rule->src_str = parse_current->next->data;
+	rule->tgt_str = parse_current->next->next->data;
+	rule->obj_str = parse_current->next->next->next->data;	
+
+	printf("allow src: %s\n", rule->src_str);
 	//rule->perms -- lookup perms and OR together here
 
 
@@ -464,32 +457,16 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 {
 	int rc;
 	struct cil_typealias *alias = malloc(sizeof(struct cil_typealias));
-	struct cil_type *type;
 	char *key = parse_current->next->next->data;
 	symtab_t *symtab;
 
-	if (strchr((char*)parse_current->next->data, '.') == NULL) {	
-		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ALIASES);
-		if (rc) {
-			free(alias);
-			return rc;
-		}
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ALIASES);
+	if (rc) {
+		free(alias);
+		return rc;
 	}
-	else {
-		printf("type is not local\n");
-		
-		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ALIASES);
-	}
-
-	type = hashtab_search(symtab->table, (hashtab_key_t)parse_current->next->data);
-	if (type != NULL) { 
-		alias->type = type->datum.value;
-		printf("alias->type: %d\n", alias->type);
-	}
-	else {
-		printf("Failed to lookup type for typealias\n");
-		return SEPOL_ERR;
-	}
+	
+	alias->type_str = strdup(parse_current->next->data);
 
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (symtab_datum_t*)alias);
 	if (rc) {

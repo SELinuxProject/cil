@@ -60,8 +60,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			item = cls->av->list;
 			printf("CLASS: %d (", cls->datum.value);
 			while (item != NULL) {
-				id = item->data;
-				printf(" %d", *id);
+				if (item->flavor == CIL_SEPOL_ID) {
+					id = item->data;
+					printf(" %d", *id);
+				}
+				else {
+					printf(" %s", (char*)item->data);
+				}
 				item = item->next;
 			}
 			printf(" )\n");
@@ -74,7 +79,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_TYPEALIAS : {
 			struct cil_typealias *alias = node->data;
-			printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type);
+			if (alias->type_str != NULL) 
+				printf("TYPEALIAS: %d, type: %s\n", alias->datum.value, alias->type_str);
+			else
+				printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type);
 			return;
 		}
 		default : {
