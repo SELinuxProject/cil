@@ -46,9 +46,9 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 				ast_current = ast_current->parent; //To avoid parsing list of perms again
 				return SEPOL_OK;
 			}
-			else if (!strcmp(parse_current->data, CIL_KEY_PERM)) {
-				cil_gen_perm(*db, parse_current, ast_node);
-			}
+//			else if (!strcmp(parse_current->data, CIL_KEY_PERM)) {
+//				cil_gen_perm(*db, parse_current, ast_node);
+//			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
 				cil_gen_common(*db, parse_current, ast_node);
 			}

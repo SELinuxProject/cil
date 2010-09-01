@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 		cil_parser(buffer, file_size + 2, &parse_root);
 		cil_tree_print(parse_root->root, 0);
 
-		cil_build_ast(&db, parse_root);	
+		cil_build_ast(&db, parse_root);
 		cil_tree_print(db->ast_root->root, 0);
 	}
 

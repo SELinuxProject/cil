@@ -1,3 +1,6 @@
+(class file (read write getattr execute))
+(class dir (read write open))
+
 (block main 
 	(block a
 		(block a1

@@ -6,7 +6,6 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, symtab_datum_t *datum
 {
 	int rc = hashtab_insert(symtab->table, key, (hashtab_datum_t)datum);
 	if (rc) {
-		printf("Failed to insert into symtab\n");
 		return rc;
 	}
 	else

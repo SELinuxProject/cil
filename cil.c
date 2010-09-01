@@ -221,10 +221,36 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;	
 }
 
+int cil_insert_perm(struct cil_db *db, char *name, uint32_t *value)
+{
+	int rc;
+	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
+	symtab_datum_t *datum;
+
+	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_PERMS], (hashtab_key_t)name, (symtab_datum_t*)perm);
+	if (rc) {
+		if (rc == SEPOL_EEXIST) {
+			datum = (symtab_datum_t*)hashtab_search(db->global_symtab[CIL_SYM_GLOBAL_PERMS].table, (hashtab_key_t)name);
+			if (datum != NULL)
+				*value = datum->value;
+			else
+				return SEPOL_ERR;
+		}
+		else
+			printf("Failed to insert perm into symtab\n");
+		return rc;
+	}
+	else
+		*value = perm->datum.value;
+
+	return SEPOL_OK;
+}
+
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	int rc;
 	char *key = parse_current->next->data;
+	struct cil_list_item *item = NULL;
 
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
 	
@@ -234,8 +260,19 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return rc;
  	}
 
+	item = cls->av->list;
+	while(item != NULL) {
+		rc = cil_insert_perm(db, (char*)item->data, &item->data);
+		if (rc == SEPOL_EEXIST || rc == SEPOL_OK) 
+			item->flavor = CIL_SEPOL_ID;
+		else {
+			printf("Failed to insert perm list\n");
+			return rc;
+		}
+		item = item->next;
+	}
+
 	//Syntax for inherit from common?
-	//Lookup common in symtab and store in cls->common
 
 	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)key, (symtab_datum_t*)cls);	
 	if (rc) {
@@ -245,24 +282,6 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	ast_node->data = cls;
 	ast_node->flavor = CIL_CLASS;
-
-	return SEPOL_OK;
-}
-
-int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	int rc;
-	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
-	char *key = parse_current->next->data;
-
-	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_PERMS], (hashtab_key_t)key, (symtab_datum_t*)perm);
-	if (rc) {
-		printf("Failed to insert perm into symtab\n");
-		return rc;
-	}
-
-	ast_node->data = perm;
-	ast_node->flavor = CIL_PERM;
 
 	return SEPOL_OK;
 }
@@ -356,35 +375,19 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	rule->tgt_str = parse_current->next->next->data;
 	rule->obj_str = parse_current->next->next->next->data;	
 
-	printf("allow src: %s\n", rule->src_str);
-	//rule->perms -- lookup perms and OR together here
-
-
-	if (parse_current->next->next->next->cl_head != NULL) { //List of objects -- TODO: we're not going to support this
-		struct cil_tree_node *x;
-		x = parse_current->next->next->next->cl_head;
-		printf("obj: ");
-		do {
-			printf(" %s", (char*)x->data);
-			x = x->next;
-		} while (x != NULL);
-		printf("\n");
+	if(cil_list_init(&rule->perms)) {
+		printf("failed to init perm list\n");
+		return SEPOL_ERR;
 	}
-	else
-		printf("obj: %s\n", (char*)parse_current->next->next->next->data);
-							
-	if (parse_current->next->next->next->next->cl_head != NULL) { //List of permissions
-		struct cil_tree_node *x;
-		x = parse_current->next->next->next->next->cl_head;
-		printf("perms: ");
-		do {
-			printf(" %s", (char*)x->data);
-			x = x->next;
-		} while (x != NULL);
-		printf("\n");
+	
+
+	if (parse_current->next->next->next->next->cl_head != NULL)
+		cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms, CIL_PERM);
+	else if ((parse_current->next->next->next->next->data != NULL) && (parse_current->next->next->next->next->next == NULL)) {
+		rule->perms->list->flavor = CIL_AST_STR;
+		rule->perms->list->data = (char*)parse_current->next->next->next->next->data;		
+		
 	}
-	else
-		printf("perms: %s\n", (char*)parse_current->next->next->next->next->data);
 
 	ast_node->data = rule;
 	ast_node->flavor = CIL_AVRULE;

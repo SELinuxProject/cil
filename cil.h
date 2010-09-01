@@ -232,7 +232,7 @@ struct cil_avrule {
 	sepol_id_t tgt;
 	char *obj_str;
 	sepol_id_t obj;
-	uint32_t perms;	
+	struct cil_list *perms;	
 };
 
 #define CIL_AVRULE_TRANSITION 16
@@ -261,7 +261,7 @@ struct cil_role_rule {
 	/* TODO CDS this should match whatever cil_avrule does */
 	char *obj_str;
 	sepol_id_t obj;
-	uint32_t perms;	
+	struct cil_list *perms;	
 };
 
 struct cil_sens {
@@ -390,8 +390,8 @@ int cil_symtab_array_init(symtab_t [], uint32_t);
 int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
 
 int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
+int cil_insert_perm(struct cil_db *, char *, uint32_t *);
 int cil_gen_class(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
-int cil_gen_perm(struct cil_db *, struct cil_tree_node*, struct cil_tree_node *);
 int cil_gen_common(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_gen_avrule(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);

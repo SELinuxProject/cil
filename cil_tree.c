@@ -48,13 +48,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("ROLE: %d\n", role->datum.value);
 			return;
 		}
-		case CIL_PERM : {
-			struct cil_perm *perm = node->data;
-			printf("PERM: %d\n", perm->datum.value);
-			return;
-		}
 		case CIL_CLASS : {
-			int *id;
+			uint32_t id;
 			struct cil_class *cls = node->data;
 			struct cil_list_item *item;
 			item = cls->av->list;
@@ -62,7 +57,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			while (item != NULL) {
 				if (item->flavor == CIL_SEPOL_ID) {
 					id = item->data;
-					printf(" %d", *id);
+					printf(" %d", id);
 				}
 				else {
 					printf(" %s", (char*)item->data);

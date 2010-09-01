@@ -1,6 +1,3 @@
-(perm read) ;no idea what the permission declarations will look like. just needed to add this to make class and interfaces work
-(perm open)
-(perm write)
 ;object classes
 (class file
 	(read write open))
@@ -45,6 +42,9 @@
 ; 		local.cil
 
 		(type my_t)
+
+		(class dir
+			(read write execute))
 
 ;		(allow my_t apache.log (file dir) (read getattr))
 
