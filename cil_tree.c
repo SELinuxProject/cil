@@ -59,8 +59,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					id = item->data;
 					printf(" %d", id);
 				}
-				else {
+				else if (item->flavor == CIL_AST_STR) {
 					printf(" %s", (char*)item->data);
+				}
+				else {
+					printf("\n\n perms list contained unexpected data type\n");
+					break;
 				}
 				item = item->next;
 			}
@@ -78,6 +82,40 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("TYPEALIAS: %d, type: %s\n", alias->datum.value, alias->type_str);
 			else
 				printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type);
+			return;
+		}
+		case CIL_AVRULE : {
+			struct cil_avrule *rule = node->data;
+			struct cil_list_item *item = NULL;
+			if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
+				printf("ALLOW:");
+				if (rule->src_str != NULL)
+					printf(" %s", rule->src_str);
+				else
+					printf(" %d", rule->src);
+				if (rule->tgt_str != NULL)
+					printf(" %s", rule->tgt_str);
+				else
+					printf(" %d", rule->tgt);
+				if (rule->obj_str != NULL)
+					printf(" %s", rule->obj_str);
+				else
+					printf(" %d", rule->obj);
+				printf(" (");
+				item = rule->perms->list;
+				while(item != NULL) {
+					if (item->flavor == CIL_AST_STR)
+						printf(" %s", (char*)item->data);
+					else if (item->flavor == CIL_SEPOL_ID)
+						printf(" %d", (uint32_t)item->data);
+					else {
+						printf("\n\n perms list contained unexpected data type\n");
+						break;
+					}
+					item = item->next;
+				}
+				printf(" )\n");
+			}
 			return;
 		}
 		default : {

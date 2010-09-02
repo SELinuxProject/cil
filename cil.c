@@ -254,7 +254,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
 	
-	rc = cil_parse_to_list(parse_current->next->next->cl_head, &cls->av, CIL_PERM);
+	rc = cil_parse_to_list(parse_current->next->next->cl_head, &cls->av, CIL_AST_STR);
 	if (rc) {
 		printf("Failed to parse permissions list from parse tree\n");
 		return rc;
@@ -382,7 +382,7 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	
 
 	if (parse_current->next->next->next->next->cl_head != NULL)
-		cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms, CIL_PERM);
+		cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms, CIL_AST_STR);
 	else if ((parse_current->next->next->next->next->data != NULL) && (parse_current->next->next->next->next->next == NULL)) {
 		rule->perms->list->flavor = CIL_AST_STR;
 		rule->perms->list->data = (char*)parse_current->next->next->next->next->data;		
