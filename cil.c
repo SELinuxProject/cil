@@ -425,6 +425,8 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		printf("Failed to insert %s, rc:%d\n", key,rc);
 		return rc;
 	}
+	
+	type->self = ast_node;
 
 	ast_node->data = type;
 	ast_node->flavor = flavor;	
@@ -480,6 +482,8 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		printf("Failed to insert alias into symtab\n");
 		return rc;
 	}
+
+	alias->self = ast_node;
 
 	ast_node->data = alias;
 	ast_node->flavor = CIL_TYPEALIAS;
