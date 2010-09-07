@@ -221,27 +221,28 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;	
 }
 
-int cil_insert_perm(struct cil_db *db, char *name, uint32_t *value)
+int cil_insert_perm(struct cil_db *db, char *name, struct cil_perm **perm)
 {
 	int rc;
-	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
+	struct cil_perm *new_perm = malloc(sizeof(struct cil_perm));
 	symtab_datum_t *datum;
 
-	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_PERMS], (hashtab_key_t)name, (symtab_datum_t*)perm);
+	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_PERMS], (hashtab_key_t)name, (symtab_datum_t*)new_perm);
 	if (rc) {
 		if (rc == SEPOL_EEXIST) {
 			datum = (symtab_datum_t*)hashtab_search(db->global_symtab[CIL_SYM_GLOBAL_PERMS].table, (hashtab_key_t)name);
-			if (datum != NULL)
-				*value = datum->value;
+			if (datum != NULL) {
+				new_perm->datum.value = datum->value;
+			}
 			else
 				return SEPOL_ERR;
 		}
-		else
+		else {
 			printf("Failed to insert perm into symtab\n");
-		return rc;
+			return rc;
+		}
 	}
-	else
-		*value = perm->datum.value;
+	*perm = new_perm;
 
 	return SEPOL_OK;
 }
@@ -260,11 +261,14 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return rc;
  	}
 
+	struct cil_perm *perm;
 	item = cls->av->list;
 	while(item != NULL) {
-		rc = cil_insert_perm(db, (char*)item->data, &item->data);
+		rc = cil_insert_perm(db, item->data, &perm);
+		item->data = perm;
+	
 		if (rc == SEPOL_EEXIST || rc == SEPOL_OK) 
-			item->flavor = CIL_SEPOL_ID;
+			item->flavor = CIL_PERM;
 		else {
 			printf("Failed to insert perm list\n");
 			return rc;

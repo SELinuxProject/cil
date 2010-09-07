@@ -49,15 +49,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_CLASS : {
-			uint32_t id;
 			struct cil_class *cls = node->data;
 			struct cil_list_item *item;
 			item = cls->av->list;
 			printf("CLASS: %d (", cls->datum.value);
 			while (item != NULL) {
-				if (item->flavor == CIL_SEPOL_ID) {
-					id = item->data;
-					printf(" %d", id);
+				if (item->flavor == CIL_PERM) {
+					printf(" %d", ((struct cil_perm *)item->data)->datum.value);
 				}
 				else if (item->flavor == CIL_AST_STR) {
 					printf(" %s", (char*)item->data);
@@ -81,7 +79,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			if (alias->type_str != NULL) 
 				printf("TYPEALIAS: %d, type: %s\n", alias->datum.value, alias->type_str);
 			else
-				printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type);
+				printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type->datum.value);
 			return;
 		}
 		case CIL_AVRULE : {
@@ -92,15 +90,15 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				if (rule->src_str != NULL)
 					printf(" %s", rule->src_str);
 				else
-					printf(" %d", rule->src);
+					printf(" %d", rule->src->datum.value);
 				if (rule->tgt_str != NULL)
 					printf(" %s", rule->tgt_str);
 				else
-					printf(" %d", rule->tgt);
+					printf(" %d", rule->tgt->datum.value);
 				if (rule->obj_str != NULL)
 					printf(" %s", rule->obj_str);
 				else
-					printf(" %d", rule->obj);
+					printf(" %d", rule->obj->datum.value);
 				printf(" (");
 				item = rule->perms->list;
 				while(item != NULL) {

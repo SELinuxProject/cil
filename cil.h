@@ -155,7 +155,7 @@ struct cil_class {
 	symtab_datum_t datum;
 	struct cil_list *av;
 	char *common_str;
-	sepol_id_t common;
+	struct cil_common *common;
 };
 
 struct cil_perm {
@@ -184,33 +184,35 @@ struct cil_role {
 
 struct cil_role_dominates {
 	char *role_str;
-	sepol_id_t role;
+	struct cil_role *role;
 	char *dominates_str;
-	sepol_id_t dominates;
+	struct cil_role *dominates;
 };
 
 struct cil_role_types {
 	char *role_str;
-	sepol_id_t role;
+	struct cil_role *role;
 	char *type_str;
-	sepol_id_t type;
+	struct cil_type *type;
 };
 
 struct cil_type	{//Also used for attributes
 	symtab_datum_t datum;
+	struct cil_type *self;
 };
 
 struct cil_typeattribute {
 	char *type_str;
-	sepol_id_t type;
+	struct cil_type *type;
 	char *attrib_str;
-	sepol_id_t attrib;
+	struct cil_type *attrib;
 };
 
 struct cil_typealias {
 	symtab_datum_t datum;
+	struct cil_typealias *self;
 	char *type_str;
-	sepol_id_t type;
+	struct cil_type *type;
 };
 
 struct cil_bool {
@@ -227,11 +229,11 @@ struct cil_bool {
 struct cil_avrule {
 	uint32_t rule_kind;
 	char *src_str;
-	sepol_id_t src;
+	struct cil_type *src;
 	char *tgt_str;	
-	sepol_id_t tgt;
+	struct cil_type *tgt;
 	char *obj_str;
-	sepol_id_t obj;
+	struct cil_class *obj;
 	struct cil_list *perms;	
 };
 
@@ -242,25 +244,25 @@ struct cil_avrule {
 struct cil_typerule {
 	uint32_t rule_kind;
 	char *src_str;
-	sepol_id_t src;
+	struct cil_type *src;
 	char *tgt_str;
-	sepol_id_t tgt;
+	struct cil_type *tgt;
 	char *obj_str;
-	sepol_id_t obj;
+	struct cil_class *obj;
 	char *result_str;
-	sepol_id_t result;
+	struct cil_type *result;
 };
 
 // Define role_rule kinds here
 struct cil_role_rule {
 	uint32_t rule_kind;
 	char *src_str;
-	sepol_id_t src;
+	struct cil_role *src;
 	char *tgt_str;	
-	sepol_id_t tgt;
+	struct cil_role *tgt;
 	/* TODO CDS this should match whatever cil_avrule does */
 	char *obj_str;
-	sepol_id_t obj;
+	struct cil_class *obj;
 	struct cil_list *perms;	
 };
 
@@ -278,7 +280,7 @@ struct cil_cat {
 
 struct cil_level {
 	char *sens_str;
-	sepol_id_t sens;
+	struct cil_sens *sens;
 	struct cil_list_item *cats;	
 };
 
@@ -321,11 +323,11 @@ struct cil_in {
 
 struct cil_context {
 	char *user_str;
-	sepol_id_t user;
+	struct cil_user *user;
 	char *role_str;
-	sepol_id_t role;
+	struct cil_role *role;
 	char *type_str;
-	sepol_id_t type;
+	struct cil_type *type;
 	struct cil_level low;
 	struct cil_level high;
 };
@@ -390,7 +392,7 @@ int cil_symtab_array_init(symtab_t [], uint32_t);
 int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
 
 int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
-int cil_insert_perm(struct cil_db *, char *, uint32_t *);
+int cil_insert_perm(struct cil_db *, char *, struct cil_perm **);
 int cil_gen_class(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_gen_common(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
