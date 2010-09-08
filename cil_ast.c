@@ -120,3 +120,76 @@ int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 	
 	return SEPOL_OK;
 }
+
+int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
+{
+	symtab_datum_t *datum = NULL;
+
+	if (current == NULL) {
+		printf("Error: Can't resolve NULL tree\n");
+		return SEPOL_ERR;
+	}
+
+	if (current->cl_head == NULL) {
+		switch( current->flavor ) {
+			case CIL_TYPEALIAS : {
+				printf("case typealias\n");
+				struct cil_typealias *alias = (struct cil_typealias*)current->data;
+				char first = *alias->type_str;
+				struct cil_tree_node *node;
+				cil_resolve_name(*db, current, alias->type_str, &node);
+				alias->type = node;	
+			}
+			break;
+			case CIL_AVRULE : {
+				printf("case avrule\n");
+				struct cil_avrule *rule = (struct cil_avrule*)current->data;
+				//if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
+				//}
+			}	
+			default : {
+				printf("Default\n");
+			}
+			
+		}
+	}
+	else {
+		cil_resolve_ast(db, current->cl_head);
+	}
+
+	if (current->next != NULL) {
+		cil_resolve_ast(db, current->next);
+	}
+	else {
+		current = current->parent;		
+	}
+	
+	return SEPOL_OK;
+}
+
+int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, void **data)
+{
+	char first = *name;
+	symtab_datum_t *datum = NULL;	
+
+	if (name != NULL) {
+		if (first == '.') {
+			printf("start lookup in global namespace\n");
+			if (strrchr(name, '.') == name) {
+				printf("Look in Global types\n");
+				datum = (symtab_datum_t*)hashtab_search(db->local_symtab[CIL_SYM_LOCAL_TYPES].table, (hashtab_key_t)name);
+				if (datum != NULL) {
+					printf("found\n");
+					
+				}
+			}
+		}
+		else {
+			printf("do lookup in local namespace first\n");
+		}
+	}
+
+	return SEPOL_OK;
+}
+
+

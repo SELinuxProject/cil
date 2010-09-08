@@ -11,6 +11,7 @@
 			(type tmp)
 			(role apache_r)
 			(typealias .apache.tmp apache_t)(type log)
+			(typealias .foo apache_alias)
 			(type pid)
 			(type user_cgi)
 

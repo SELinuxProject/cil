@@ -13,7 +13,7 @@ symbol		({digit}|{alpha}|{spec_char})+
 white		[ \t]
 newline		[\n\r]
 qstring		\"[^"\n\']*\"
-comment		;.*$
+comment		;[^\n]*
 
 %%
 {newline}	line++; 
