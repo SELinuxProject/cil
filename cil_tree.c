@@ -48,7 +48,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("ROLE: %d\n", role->datum.value);
 			return;
 		}
-		case CIL_CLASS : {
+/*		case CIL_CLASS : {
 			struct cil_class *cls = node->data;
 			struct cil_list_item *item;
 			item = cls->av->list;
@@ -68,7 +68,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			printf(" )\n");
 			return;
-		}
+		}*/
 		case CIL_BOOL : {
 			struct cil_bool *boolean = node->data;
 			printf("BOOL: %d, value: %d\n", boolean->datum.value, boolean->value);
@@ -82,7 +82,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type->datum.value);
 			return;
 		}
-		case CIL_AVRULE : {
+/*		case CIL_AVRULE : {
 			struct cil_avrule *rule = node->data;
 			struct cil_list_item *item = NULL;
 			if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
@@ -115,7 +115,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" )\n");
 			}
 			return;
-		}
+		}*/
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;

@@ -123,7 +123,7 @@ int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 
 int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 {
-	symtab_datum_t *datum = NULL;
+	cil_symtab_datum_t *datum = NULL;
 
 	if (current == NULL) {
 		printf("Error: Can't resolve NULL tree\n");
@@ -136,9 +136,9 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 				printf("case typealias\n");
 				struct cil_typealias *alias = (struct cil_typealias*)current->data;
 				char first = *alias->type_str;
-				struct cil_tree_node *node;
-				cil_resolve_name(*db, current, alias->type_str, &node);
-				alias->type = node;	
+				struct cil_type *type;
+				cil_resolve_name(*db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type);
+				alias->type = type;	
 			}
 			break;
 			case CIL_AVRULE : {
@@ -167,21 +167,23 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, void **data)
+int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, void **data)
 {
 	char first = *name;
-	symtab_datum_t *datum = NULL;	
+	cil_symtab_datum_t *datum = NULL;	
 
 	if (name != NULL) {
 		if (first == '.') {
 			printf("start lookup in global namespace\n");
 			if (strrchr(name, '.') == name) {
-				printf("Look in Global types\n");
-				datum = (symtab_datum_t*)hashtab_search(db->local_symtab[CIL_SYM_LOCAL_TYPES].table, (hashtab_key_t)name);
+				printf("Look in Global table\n");
+				datum = (cil_symtab_datum_t*)hashtab_search(db->local_symtab[sym_index].table, (hashtab_key_t)(name+1));
 				if (datum != NULL) {
-					printf("found\n");
-					
+					printf("type id: %d\n", (uint32_t)datum->value);
+							
 				}
+				else
+					printf("datum is null\n");
 			}
 		}
 		else {

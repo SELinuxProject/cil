@@ -8,7 +8,7 @@
 
 int cil_build_ast(struct cil_db **, struct cil_tree *);
 int cil_resolve_ast(struct cil_db **, struct cil_tree_node *);
-int cil_resolve_name(struct cil_db *, struct cil_tree_node *, char *, void **);
+int cil_resolve_name(struct cil_db *, struct cil_tree_node *, char *, uint32_t, void **);
 
 #endif /* CIL_AST_H_ */
 

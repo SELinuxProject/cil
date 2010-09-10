@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <sepol/policydb/symtab.h>
+#include "cil_symtab.h"
 
 /*
 	Tree/list node types
@@ -141,7 +141,7 @@ struct cil_search {
 };
 
 struct cil_block {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	symtab_t symtab[CIL_SYM_LOCAL_NUM];
 	/* TODO CDS eventually, these should probably become a flags bit vector */
 	uint16_t is_abstract;
@@ -152,34 +152,34 @@ struct cil_block {
 };
 
 struct cil_class {
-	symtab_datum_t datum;
-	struct cil_list *av;
+	cil_symtab_datum_t datum;
+	symtab_t perms;
 	char *common_str;
 	struct cil_common *common;
 };
 
 struct cil_perm {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 };
 
 struct cil_common {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	struct cil_list *av;
 };
 
 struct cil_sid {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	struct cil_context *context;
 };
 
 struct cil_user {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 };
 
 /* TODO CDS need userrole statement to associate users with roles and userlevel statement to associate users with levels */
 
 struct cil_role {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 };
 
 struct cil_role_dominates {
@@ -197,7 +197,7 @@ struct cil_role_types {
 };
 
 struct cil_type	{//Also used for attributes
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	struct cil_tree_node *self;
 };
 
@@ -209,14 +209,14 @@ struct cil_typeattribute {
 };
 
 struct cil_typealias {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	struct cil_tree_node *self;
 	char *type_str;
 	struct cil_type *type;
 };
 
 struct cil_bool {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	uint16_t value;
 };
 
@@ -267,7 +267,7 @@ struct cil_role_rule {
 };
 
 struct cil_sens {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 };
 
 struct cil_sens_dominates {
@@ -275,7 +275,7 @@ struct cil_sens_dominates {
 };
 
 struct cil_cat {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 };
 
 struct cil_level {
@@ -285,7 +285,7 @@ struct cil_level {
 };
 
 struct cil_transform_interface {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	struct cil_list_item *params;
 	struct cil_tree_node *self;
 };
@@ -300,7 +300,7 @@ struct cil_transform_call {
 #define CIL_INHERIT_ROLE  2
 #define CIL_INHERIT_TYPE  3
 struct cil_transform_inherit {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	char *inherit_from_str;
 	sepol_id_t inherit_from;
 	struct cil_list_item *except;
@@ -333,26 +333,26 @@ struct cil_context {
 };
 
 struct cil_filecon {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	struct cil_context context;
 };
 
 struct cil_portcon {
-	symtab_datum_t datum; 
+	cil_symtab_datum_t datum; 
 	struct cil_context context;
 	char *proto_str;
 	sepol_id_t proto;
 };
 
 struct cil_netifcon {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 	struct cil_context if_context;
 	struct cil_context packet_context;
 };
 
 /* There is no fs declaration, but we will create a cil_fs on demand when the cil_fscon or cil_fs_use statements need one */
 struct cil_fs {
-	symtab_datum_t datum;
+	cil_symtab_datum_t datum;
 };
 
 struct cil_fscon {
@@ -392,7 +392,7 @@ int cil_symtab_array_init(symtab_t [], uint32_t);
 int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
 
 int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
-int cil_insert_perm(struct cil_db *, char *, struct cil_perm **);
+int cil_gen_perm(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_gen_class(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_gen_common(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
