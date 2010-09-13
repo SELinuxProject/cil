@@ -177,6 +177,8 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 {
 	if (ast_node->parent->flavor == CIL_BLOCK)
 		*symtab = &((struct cil_block*)ast_node->parent->data)->symtab[cil_sym_index];
+	else if (ast_node->parent->flavor == CIL_CLASS) 
+		*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
 	else if (ast_node->parent->flavor == CIL_ROOT)
 		*symtab = &db->local_symtab[cil_sym_index];
 	else {
@@ -223,32 +225,16 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	printf("gen class\n");
 	int rc;
 	char *key = parse_current->next->data;
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
 	struct cil_tree_node *current_perm = NULL;
 	struct cil_tree_node *new_ast = NULL;
 
-	if (parse_current->next->next != NULL) {
-		if (parse_current->next->next->cl_head != NULL)	
-			current_perm = parse_current->next->next->cl_head;
-		else
-			current_perm = parse_current->next->next;
-	}
-	else {
-		printf("Error, no perms\n");
+	rc = symtab_init(&cls->perms, CIL_SYM_SIZE);
+	if (rc) {
+		printf("Perms symtab init failed\n");
 		return SEPOL_ERR;
-	}
-
-	while(current_perm != NULL) {
-		printf("perm loop\n");
-		cil_tree_node_init(&new_ast);
-		new_ast->parent = ast_node;
-		new_ast->line = current_perm->line;
-		rc = cil_gen_perm(db, current_perm, new_ast);
-	
-		current_perm = current_perm->next;
 	}
 
 	//Syntax for inherit from common?
@@ -262,19 +248,41 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	ast_node->data = cls;
 	ast_node->flavor = CIL_CLASS;
 
-	printf("exit gen_class\n");
+	if ((parse_current->next->next != NULL) && (parse_current->next->next->cl_head != NULL)) {
+		current_perm = parse_current->next->next->cl_head;
+	}
+	else {
+		printf("Error, no perms\n");
+		return SEPOL_ERR;
+	}
+
+	while(current_perm != NULL) {
+		cil_tree_node_init(&new_ast);
+		new_ast->parent = ast_node;
+		new_ast->line = current_perm->line;
+		rc = cil_gen_perm(db, current_perm, new_ast);
+		//printf("perm id: %d\n", ((struct cil_perm*)new_ast->data)->datum.value);
+		current_perm = current_perm->next;
+
+		if (ast_node->cl_head == NULL) 
+			ast_node->cl_head = new_ast;
+		else {
+			ast_node->cl_tail->next = new_ast;
+		}
+		ast_node->cl_tail = new_ast;
+	}
+
 	return SEPOL_OK;
 }
 
 int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	printf("gen perm\n");
 	int rc = 0;
 	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
 	symtab_t *symtab = NULL;
-	char *key = parse_current->next->data;
+	char *key = (char*)parse_current->data;
 
-	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_TYPES);
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_PERMS);
 	if (rc) {
 		return rc;
 	}
@@ -293,7 +301,6 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	ast_node->data = perm;
 	ast_node->flavor = CIL_PERM;
 
-	printf("exit gen perm\n");
 	return SEPOL_OK;
 }
 
@@ -418,7 +425,6 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (flavor == CIL_TYPE) {
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_TYPES);
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (cil_symtab_datum_t*)type);
-		printf("inserting type with key: %s\n", key);
 	}
 	else if (flavor == CIL_TYPE_ATTR) {
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ATTRS);

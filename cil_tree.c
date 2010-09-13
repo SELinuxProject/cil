@@ -48,27 +48,25 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("ROLE: %d\n", role->datum.value);
 			return;
 		}
-/*		case CIL_CLASS : {
+		case CIL_CLASS : {
 			struct cil_class *cls = node->data;
-			struct cil_list_item *item;
-			item = cls->av->list;
 			printf("CLASS: %d (", cls->datum.value);
-			while (item != NULL) {
-				if (item->flavor == CIL_PERM) {
-					printf(" %d", ((struct cil_perm *)item->data)->datum.value);
-				}
-				else if (item->flavor == CIL_AST_STR) {
-					printf(" %s", (char*)item->data);
+			struct cil_tree_node *current_perm = node->cl_head;
+
+			while (current_perm != NULL) {
+				if (current_perm->flavor == CIL_PERM) {
+					printf(" %d", ((struct cil_perm *)current_perm->data)->datum.value);
 				}
 				else {
-					printf("\n\n perms list contained unexpected data type\n");
+					printf("\n\n perms list contained unexpected data type: %d\n", current_perm->flavor);
 					break;
 				}
-				item = item->next;
+				current_perm = current_perm->next;	
 			}
-			printf(" )\n");
+
+			printf(" )");
 			return;
-		}*/
+		}
 		case CIL_BOOL : {
 			struct cil_bool *boolean = node->data;
 			printf("BOOL: %d, value: %d\n", boolean->datum.value, boolean->value);
@@ -139,7 +137,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 				else
 					printf(" %s", (char*)current->data);
 			}
-			else {
+			else if (current->flavor != CIL_PERM) {
 				for (x = 0; x<depth; x++)
 					printf("\t");
 				cil_tree_print_node(current);
@@ -162,7 +160,9 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 		if (current->next == NULL) {
 //			printf("cil_tree_print: current->next is null\n");
 			if ((current->parent != NULL) && (current->parent->cl_tail == current) && (current->parent->parent != NULL)) {
-				if (current->flavor != CIL_PARSER) {
+				if (current->flavor == CIL_PERM)
+					printf(")\n");
+				else if (current->flavor != CIL_PARSER) {
 					for (x = 0; x<depth-1; x++)
 						printf("\t");
 					printf(")\n");
