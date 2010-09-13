@@ -1,0 +1,5 @@
+*.swp
+*.gcda
+*.gcno
+src/cil_lexer.c
+unit_tests

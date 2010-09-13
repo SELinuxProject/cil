@@ -2,24 +2,31 @@ PREFIX ?= $(DESTDIR)/usr
 LIBDIR ?= $(PREFIX)/lib
 SHLIBDIR ?= $(DESTDIR)/lib
 INCLUDEDIR ?= $(PREFIX)/include
+SRCDIR ?= ./src
+TESTDIR ?= ./testing
+UNITDIR ?= $(TESTDIR)/unit
 
 LEX = flex
 
 AST_NAME = ast
 PARSER_NAME = parser
 
-AST_SRCS = test_ast.c cil.c cil_tree.c cil_ast.c cil_parser.c cil_lexer.c cil_symtab.c
-PARSER_SRCS = test_parser.c cil.c cil_tree.c cil_ast.c cil_parser.c cil_lexer.c cil_symtab.c
+AST_TEST = $(TESTDIR)/test_ast.c
+PARSER_TEST = $(TESTDIR)/test_parser.c
+TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
+CIL_SRCS =  cil.c cil_tree.c cil_ast.c cil_parser.c cil_symtab.c cil_lexer.c
 
 GENERATED = cil_lexer.c
 
-ALL_SRCS= $(wildcard *.c) $(GENERATED)
+ALL_SRCS= $(wildcard $(SRCDIR)/*.c) $(SRCDIR)/$(GENERATED)
 ALL_OBJS= $(patsubst %.c,%.o,$(ALL_SRCS))
+
 
 LIBSEPOL_STATIC = /usr/lib/libsepol.a
 
 LIBS = 
 LDFLAGS = -lfl
+COVCFLAGS = -fprofile-arcs -ftest-coverage
 
 ifeq ($(DEBUG),1)
 	export CFLAGS = -g3 -O0 -gdwarf-2 -fno-strict-aliasing -Wall -Wshadow -Werror
@@ -45,19 +52,33 @@ cil: parser ast
 cil_lexer.c: cil_lexer.l
 	$(LEX) -t $< > $@
 
-ast: $(AST_SRCS)
+ast: $(AST_TEST) $(ALL_SRCS)
 	$(CC) $(CFLAGS) -o $(AST_NAME) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) 
 
-parser: $(PARSER_SRCS)
+parser: $(PARSER_TEST) $(ALL_SRCS)
 	$(CC) $(CFLAGS) -o $(PARSER_NAME) $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
 
-test: ast parser
-	./ast test.txt
+unit: $(TEST_SRCS) $(ALL_SRCS)
+	@echo $(ALL_SRCS)
+	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests.exe
+	./unit_tests.exe
+
+coverage: clean unit
+	test -d cov || mkdir cov
+	export GCOV_PREFIX_STRIP=1
+	lcov --directory . --capture --output-file cov/app.info --ignore-errors source
+	genhtml -o ./cov/html ./cov/app.info
+
+test: ast
+	./ast testing/test.txt
 
 install:
 
 clean: 
-	-rm -f $(OBJS) $(GENERATED)
+	-rm -f $(SRCDIR)/$(ALL_OBJS) $(SRCDIR)/$(GENERATED) run_tests
+	-rm -f *.gcno *.gcda *.gcov unit_tests.exe
+	-rm -f $(PARSER_NAME) $(AST_NAME)
+	-rm -rf cov/
 
 bare: clean
 	-rm -f $(AST_NAME) $(PARSER_NAME)

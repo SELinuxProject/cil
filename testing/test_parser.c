@@ -4,10 +4,10 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#include "cil_lexer.h"
-#include "cil_tree.h"
-#include "cil.h"
-#include "cil_parser.h"
+#include "../src/cil_lexer.h"
+#include "../src/cil_tree.h"
+#include "../src/cil.h"
+#include "../src/cil_parser.h"
 
 int main(int argc, char *argv[])
 {
