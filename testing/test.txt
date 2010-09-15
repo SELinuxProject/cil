@@ -8,45 +8,45 @@
 (type foobar)
 
 (block apache
-			(type process)
-			(type tmp)
-			(role apache_r)
-			(typealias .apache.tmp apache_t)(type log)
-			(typealias .foo apache_alias)
-			(type pid)
-			(type user_cgi)
+	(type process)
+	(type tmp)
+	(role apache_r)
+	(typealias .apache.tmp apache_t)(type log)
+	(typealias .foo apache_alias)
+	(type pid)
+	(type user_cgi)
 
-			(block test
-				(type test1)
-				(type test2))
-			(block three
-				(type testing)
-				(type testing2))
-			(block four
-				(type test)
-				(type test4))
-;			(interface read_log (x:type)
-;				(allow x log (file dir) (read getattr)))
+	(block test
+		(type test1)
+		(type test2))
+	(block three
+		(type testing)
+		(type testing2))
+	(block four
+		(type test)
+		(type test4))
+;	(interface read_log (x:type)
+;	(allow x log (file dir) (read getattr)))
 (block foo
-			(type bar))
+	(type bar))
 
 
 ;			(typeattr user_cgi (cgi_script))
 ;			(domain_type process)
 
-			(allow process log file (read write))
+(allow process log file (read write))
 
 ;			(corenet_tcp_sendrecv_all_nodes process))
 )
-		(bool foo true)
-		(bool bar false)
+(bool foo true)
+(bool bar false)
 
 ; 		local.cil
 
-		(type my_t)
+(type my_t)
 
-		(class dir
-			(read write execute))
+(class dir
+	(read write execute))
 
 ;		(allow my_t apache.log (file dir) (read getattr))
 

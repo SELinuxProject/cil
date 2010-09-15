@@ -136,9 +136,13 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 				printf("case typealias\n");
 				struct cil_typealias *alias = (struct cil_typealias*)current->data;
 				char first = *alias->type_str;
-				struct cil_type *type;
-				cil_resolve_name(*db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type);
-				alias->type = type;	
+				struct cil_tree_node *type_node;
+				cil_resolve_name(*db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+				alias->type = (struct cil_type*)(type_node->data);
+				free(alias->type_str);
+				alias->type_str = NULL;
+				printf("id: %d\n", (uint32_t)(alias->type->datum.value));
+				printf("flavor: %d\n", (uint32_t)(type_node->flavor));
 			}
 			break;
 			case CIL_AVRULE : {
@@ -173,21 +177,49 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 	cil_symtab_datum_t *datum = NULL;	
 
 	if (name != NULL) {
-		if (first == '.') {
-			printf("start lookup in global namespace\n");
-			if (strrchr(name, '.') == name) {
-				printf("Look in Global table\n");
+		if (first == '.') { //Name begins with a dot
+			if (strrchr(name, '.') == name) { //Only one dot in name, check global symtabs
 				datum = (cil_symtab_datum_t*)hashtab_search(db->local_symtab[sym_index].table, (hashtab_key_t)(name+1));
-				if (datum != NULL) {
-					printf("type id: %d\n", (uint32_t)datum->value);
-							
+				if (datum != NULL) 
+					*data = (struct cil_tree_node*)datum->self;
+				else {
+					printf("Global name not found in global symtabs\n");
+					return SEPOL_ERR;
 				}
-				else
-					printf("datum is null\n");
+			}
+			else {
+				char *tok_current = strtok(name, ".");
+				char *tok_next = strtok(NULL, ".");
+				symtab_t *symtab = db->local_symtab;
+				while (tok_current != NULL) {
+					if (tok_next != NULL) {
+						datum = (cil_symtab_datum_t*)hashtab_search(symtab[CIL_SYM_LOCAL_BLOCKS].table, (hashtab_key_t)tok_current);
+						if (datum == NULL) {
+							printf("Failed to find table\n");
+						//	printf("block current: %s\n, tok_current");
+							return SEPOL_ERR;
+						}
+						symtab = ((struct cil_block*)datum->self->data)->symtab;
+					}
+					else {
+						//printf("type key: %s\n", tok_current); 
+						datum = (cil_symtab_datum_t*)hashtab_search(symtab[sym_index].table, (hashtab_key_t)tok_current);
+						if (datum == NULL) {
+							printf("Failed to resolve name\n");
+							return SEPOL_ERR;
+						}
+					}
+					tok_current = tok_next;
+					tok_next = strtok(NULL, ".");
+				}
+				*data = (struct cil_tree_node*)datum->self;
 			}
 		}
 		else {
-			printf("do lookup in local namespace first\n");
+			if (strrchr(name, '.') == NULL) 
+				printf("name should belong to child\n");
+			else
+				printf("do lookup in local namespace\n");
 		}
 	}
 

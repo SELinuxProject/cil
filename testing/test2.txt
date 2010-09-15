@@ -11,3 +11,4 @@
 	(block b
 		(block b1
 			(type b1_t))))
+(typealias .main.a.a1.a1_t nested_t)

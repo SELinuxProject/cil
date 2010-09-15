@@ -80,7 +80,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type->datum.value);
 			return;
 		}
-/*		case CIL_AVRULE : {
+		case CIL_AVRULE : {
 			struct cil_avrule *rule = node->data;
 			struct cil_list_item *item = NULL;
 			if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
@@ -113,7 +113,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" )\n");
 			}
 			return;
-		}*/
+		}
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;
