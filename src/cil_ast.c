@@ -213,7 +213,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 	cil_symtab_datum_t *datum = NULL;	
 
 	if (name != NULL) {
-		if (first != '.') { //No dot, should be local
+		if (first != '.') {//No dot, should be local
 			if (strrchr(name, '.') == NULL) {
 				symtab_t *symtab = NULL;
 				cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
@@ -222,10 +222,8 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 					printf("Not found in local symtab, checking global\n");
 					free(global_name);
 					global_name = malloc(strlen(name)+2);
-					printf("name: %s\n", name);
 					strcpy(global_name, ".");
 					strncat(global_name, name, strlen(name));
-					printf("global_name updated: %s\n", global_name);
 				}
 			}
 			else {
@@ -256,33 +254,6 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 					free(global_name);
 					return SEPOL_ERR;
 				}
-			/*
-				char *tok_current = strtok(global_name, ".");
-				char *tok_next = strtok(NULL, ".");
-				symtab_t *symtab = db->local_symtab;
-				while (tok_current != NULL) {
-					if (tok_next != NULL) {
-						datum = (cil_symtab_datum_t*)hashtab_search(symtab[CIL_SYM_LOCAL_BLOCKS].table, (hashtab_key_t)tok_current);
-						if (datum == NULL) {
-							printf("Failed to find table\n");
-							free(global_name);
-						//	printf("block current: %s\n, tok_current");
-							return SEPOL_ERR;
-						}
-						symtab = ((struct cil_block*)datum->self->data)->symtab;
-					}
-					else {
-						//printf("type key: %s\n", tok_current); 
-						datum = (cil_symtab_datum_t*)hashtab_search(symtab[sym_index].table, (hashtab_key_t)tok_current);
-						if (datum == NULL) {
-							printf("Failed to resolve name\n");
-							free(global_name);
-							return SEPOL_ERR;
-						}
-					}
-					tok_current = tok_next;
-					tok_next = strtok(NULL, ".");
-				}*/
 			}
 		}
 
