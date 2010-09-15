@@ -173,22 +173,44 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 
 int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, void **data)
 {
+	char *global_name = strdup(name);
 	char first = *name;
 	cil_symtab_datum_t *datum = NULL;	
 
 	if (name != NULL) {
-		if (first == '.') { //Name begins with a dot
-			if (strrchr(name, '.') == name) { //Only one dot in name, check global symtabs
-				datum = (cil_symtab_datum_t*)hashtab_search(db->local_symtab[sym_index].table, (hashtab_key_t)(name+1));
+		if (first != '.') { //No dot, should be local
+			if (strrchr(name, '.') == NULL) {
+				symtab_t *symtab = NULL;
+				cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
+				datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)name);
+				if (datum == NULL) {
+					printf("Not found in local symtab, checking global\n");
+					free(global_name);
+					global_name = malloc(strlen(name)+2);
+					strncat(global_name, ".", 1);
+					strncat(global_name, name, strlen(name));
+					printf("global_name updated: %s\n", global_name);
+				}
+			}
+			else {	
+				printf("do lookup in local namespace\n");
+			}
+		}
+		
+		first = *global_name;
+
+		if (first == '.') {
+			if (strrchr(global_name, '.') == global_name) { //Only one dot in name, check global symtabs
+				datum = (cil_symtab_datum_t*)hashtab_search(db->local_symtab[sym_index].table, (hashtab_key_t)(global_name+1));
 				if (datum != NULL) 
 					*data = (struct cil_tree_node*)datum->self;
 				else {
-					printf("Global name not found in global symtabs\n");
+					printf("Name could not be resolved\n");
 					return SEPOL_ERR;
 				}
 			}
 			else {
-				char *tok_current = strtok(name, ".");
+				char *tok_current = strtok(global_name, ".");
 				char *tok_next = strtok(NULL, ".");
 				symtab_t *symtab = db->local_symtab;
 				while (tok_current != NULL) {
@@ -212,20 +234,6 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 					tok_current = tok_next;
 					tok_next = strtok(NULL, ".");
 				}
-			}
-		}
-		else {
-			if (strrchr(name, '.') == NULL) {
-				symtab_t *symtab = NULL;
-				cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
-				datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)name);
-				if (datum == NULL) {
-					printf("Failed to resolve name\n");
-					return SEPOL_ERR;
-				}
-			}
-			else {
-				printf("do lookup in local namespace\n");
 			}
 		}
 
