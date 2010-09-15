@@ -123,8 +123,6 @@ int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 
 int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 {
-	cil_symtab_datum_t *datum = NULL;
-
 	if (current == NULL) {
 		printf("Error: Can't resolve NULL tree\n");
 		return SEPOL_ERR;
@@ -135,7 +133,6 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 			case CIL_TYPEALIAS : {
 				printf("case typealias\n");
 				struct cil_typealias *alias = (struct cil_typealias*)current->data;
-				char first = *alias->type_str;
 				struct cil_tree_node *type_node;
 				if (cil_resolve_name(*db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node)) {
 					printf("Name resolution failed for %s\n", alias->type_str);
@@ -144,10 +141,8 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 				alias->type = (struct cil_type*)(type_node->data);
 				free(alias->type_str);
 				alias->type_str = NULL;
-				printf("id: %d\n", (uint32_t)(alias->type->datum.value));
-				printf("flavor: %d\n", (uint32_t)(type_node->flavor));
+				break;
 			}
-			break;
 			case CIL_AVRULE : {
 				printf("case avrule\n");
 				struct cil_avrule *rule = (struct cil_avrule*)current->data;
