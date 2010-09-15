@@ -13,6 +13,7 @@
 	(role apache_r)
 	(typealias .apache.tmp apache_t)(type log)
 	(typealias .foo apache_alias)
+	(typealias pid apache_pid)
 	(type pid)
 	(type user_cgi)
 

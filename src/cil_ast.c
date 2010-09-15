@@ -212,14 +212,25 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 					tok_current = tok_next;
 					tok_next = strtok(NULL, ".");
 				}
-				*data = (struct cil_tree_node*)datum->self;
 			}
 		}
 		else {
-			if (strrchr(name, '.') == NULL) 
-				printf("name should belong to child\n");
-			else
+			if (strrchr(name, '.') == NULL) {
+				symtab_t *symtab = NULL;
+				cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
+				datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)name);
+				if (datum == NULL) {
+					printf("Failed to resolve name\n");
+					return SEPOL_ERR;
+				}
+			}
+			else {
 				printf("do lookup in local namespace\n");
+			}
+		}
+
+		if (datum != NULL) {
+			*data = (struct cil_tree_node*)datum->self;
 		}
 	}
 
