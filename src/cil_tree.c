@@ -98,18 +98,20 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				else
 					printf(" %d", rule->obj->datum.value);
 				printf(" (");
-				item = rule->perms->list;
-				while(item != NULL) {
-					if (item->flavor == CIL_AST_STR)
-						printf(" %s", (char*)item->data);
-					else if (item->flavor == CIL_SEPOL_ID)
-						printf(" %d", (uint32_t)item->data);
-					else {
-						printf("\n\n perms list contained unexpected data type\n");
-						break;
+				if (rule->perms_str != NULL) {
+					item = rule->perms_str->list;
+					while(item != NULL) {
+						if (item->flavor == CIL_AST_STR)
+							printf(" %s", (char*)item->data);
+						else {
+							printf("\n\n perms list contained unexpected data type\n");
+							break;
+						}
+						item = item->next;
 					}
-					item = item->next;
 				}
+				else
+					printf(" %d", rule->perms);
 				printf(" )\n");
 			}
 			return;

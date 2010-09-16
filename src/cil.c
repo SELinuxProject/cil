@@ -400,17 +400,17 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	rule->tgt_str = parse_current->next->next->data;
 	rule->obj_str = parse_current->next->next->next->data;	
 
-	if(cil_list_init(&rule->perms)) {
+	if(cil_list_init(&rule->perms_str)) {
 		printf("failed to init perm list\n");
 		return SEPOL_ERR;
 	}
 	
 
 	if (parse_current->next->next->next->next->cl_head != NULL)
-		cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms, CIL_AST_STR);
+		cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms_str, CIL_AST_STR);
 	else if ((parse_current->next->next->next->next->data != NULL) && (parse_current->next->next->next->next->next == NULL)) {
-		rule->perms->list->flavor = CIL_AST_STR;
-		rule->perms->list->data = (char*)parse_current->next->next->next->next->data;		
+		rule->perms_str->list->flavor = CIL_AST_STR;
+		rule->perms_str->list->data = (char*)parse_current->next->next->next->next->data;		
 		
 	}
 

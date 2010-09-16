@@ -234,7 +234,9 @@ struct cil_avrule {
 	struct cil_type *tgt;
 	char *obj_str;
 	struct cil_class *obj;
-	struct cil_list *perms;	
+	struct cil_list *perms_str;
+	uint32_t perms;
+	
 };
 
 #define CIL_AVRULE_TRANSITION 16

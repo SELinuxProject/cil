@@ -133,7 +133,7 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 			case CIL_TYPEALIAS : {
 				printf("case typealias\n");
 				struct cil_typealias *alias = (struct cil_typealias*)current->data;
-				struct cil_tree_node *type_node;
+				struct cil_tree_node *type_node = NULL;
 				if (cil_resolve_name(*db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node)) {
 					printf("Name resolution failed for %s\n", alias->type_str);
 					return SEPOL_ERR;
@@ -146,8 +146,55 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 			case CIL_AVRULE : {
 				printf("case avrule\n");
 				struct cil_avrule *rule = (struct cil_avrule*)current->data;
-				//if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
-				//}
+				struct cil_tree_node *src_node = NULL;
+				struct cil_tree_node *tgt_node = NULL;
+				struct cil_tree_node *obj_node = NULL;
+					
+				if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
+					if (cil_resolve_name(*db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node)) {
+						printf("Name resolution failed for %s\n", rule->src_str);
+						return SEPOL_ERR;
+					}
+					else {
+						rule->src = (struct cil_type*)(src_node->data);
+						free(rule->src_str);
+						rule->src_str = NULL;
+					}
+					
+					if (cil_resolve_name(*db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node)) {
+						printf("Name resolution failed for %s\n", rule->tgt_str);
+						return SEPOL_ERR;
+					}
+					else {
+						rule->tgt = (struct cil_type*)(tgt_node->data);
+						free(rule->tgt_str);
+						rule->tgt_str = NULL;	
+					}
+
+					if (cil_resolve_name_global((*db)->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node)) {
+						printf("Name resolution failed for %s\n", rule->obj_str);
+						return SEPOL_ERR;
+					}
+					else {
+						rule->obj = (struct cil_class*)(obj_node->data);
+						free(rule->obj_str);
+						rule->obj_str = NULL;
+					}
+					cil_symtab_datum_t *datum = NULL;
+					struct cil_list_item *perm = rule->perms_str->list;
+					while (	perm != NULL) {
+						datum = (cil_symtab_datum_t*)hashtab_search(rule->obj->perms.table, (hashtab_key_t)perm->data);
+						if (datum != NULL) 
+							rule->perms |= 1U << (datum->value - 1);
+						else {
+							printf("Failed to resolve perm %s\n", perm);
+							return SEPOL_ERR;
+						}
+						perm = perm->next;
+					}
+					rule->perms_str = NULL; //TODO Need to destroy list here
+				}
+				break;
 			}	
 			default : {
 				printf("Default\n");
@@ -168,6 +215,18 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 	
 	return SEPOL_OK;
 }
+
+int cil_resolve_name_global(symtab_t symtab, char *name, void **data)
+{
+	cil_symtab_datum_t *datum = NULL;
+	datum = (cil_symtab_datum_t*)hashtab_search(symtab.table, (hashtab_key_t)(name));
+	if (datum == NULL)
+		return SEPOL_ERR;
+
+	*data = (struct cil_tree_node*)datum->self;
+	
+	return SEPOL_OK;
+} 
 
 static int __cil_resolve_name_helper(struct cil_db *db, char *name, uint32_t sym_index, cil_symtab_datum_t **datum)
 {
@@ -235,11 +294,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 
 		if (first == '.') {
 			if (strrchr(global_name, '.') == global_name) { //Only one dot in name, check global symtabs
-				datum = (cil_symtab_datum_t*)hashtab_search(db->local_symtab[sym_index].table, (hashtab_key_t)(global_name+1));
-				if (datum != NULL) 
-					*data = (struct cil_tree_node*)datum->self;
-				else {
-					printf("Name could not be resolved\n");
+				if (cil_resolve_name_global(db->local_symtab[sym_index], global_name+1, data)) {
 					free(global_name);
 					return SEPOL_ERR;
 				}

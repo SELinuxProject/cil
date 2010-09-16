@@ -36,7 +36,7 @@
 ;			(typeattr user_cgi (cgi_script))
 ;			(domain_type process)
 
-(allow process log file (read write))
+(allow process log file (read open))
 
 ;			(corenet_tcp_sendrecv_all_nodes process))
 )
