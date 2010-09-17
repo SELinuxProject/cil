@@ -1,4 +1,3 @@
-;object classes
 (class file
 	(read write open))
 
@@ -15,6 +14,7 @@
 	(typealias .foo apache_alias)
 	(typealias pid apache_pid)
 	(typealias foo apache_foo)
+	(typealias foo.bar apache_test)
 	(type pid)
 	(type user_cgi)
 
@@ -27,45 +27,19 @@
 	(block four
 		(type test)
 		(type test4))
-;	(interface read_log (x:type)
-;	(allow x log (file dir) (read getattr)))
-(block foo
-	(type bar))
+	(block foo
+		(type foo)
+		(type bar))
 
 
-;			(typeattr user_cgi (cgi_script))
-;			(domain_type process)
+	(allow process log file (read open))
 
-(allow process log file (read open))
-
-;			(corenet_tcp_sendrecv_all_nodes process))
 )
 (bool foo true)
 (bool bar false)
 
-; 		local.cil
 
 (type my_t)
 
 (class dir
 	(read write execute))
-
-;		(allow my_t apache.log (file dir) (read getattr))
-
-;		; replace all calls to corenet_tcp_sendrecv_all_nodes
-;		(template (match block[@name=apache]/ifcall[@ifname=corenet_tcp_sendrecv_all_nodes])
-;			(ifcall corenet_tcp_sendrecv_generic_nodes (value-of @ifname)))
-;
-;		; replace using a slightly different syntax
-;		(template (match block[@name=apache])
-;			(for-each (select ifcall[@ifname=corenet_tcp_sendrecv_all_nodes))
-;			(ifcall corenet_tcp_sendrecv_generic_nodes (value-of @ifname)))
-;
-;		; IN
-;
-;		(in apache
-;			(allow process bar file write))
-;
-;		(in apache.read_log
-;			(allow x log file write))
-

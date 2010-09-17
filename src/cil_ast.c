@@ -228,26 +228,34 @@ int cil_resolve_name_global(symtab_t symtab, char *name, void **data)
 	return SEPOL_OK;
 } 
 
-static int __cil_resolve_name_helper(struct cil_db *db, char *name, uint32_t sym_index, cil_symtab_datum_t **datum)
+static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, cil_symtab_datum_t **datum)
 {
 	char *tok_current = strtok(name, ".");
 	char *tok_next = strtok(NULL, ".");
-	symtab_t *symtab = db->local_symtab;
+	symtab_t *symtab = NULL;
 	cil_symtab_datum_t *new_datum = NULL;
+
+	if (ast_node->flavor == CIL_ROOT) {
+		printf("root node\n");
+		symtab = &(db->local_symtab[CIL_SYM_LOCAL_BLOCKS]);
+	}
+	else 
+		cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
 
 	while (tok_current != NULL) {
 		if (tok_next != NULL) {
-			new_datum = (cil_symtab_datum_t*)hashtab_search(symtab[CIL_SYM_LOCAL_BLOCKS].table, (hashtab_key_t)tok_current);
+			new_datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)tok_current);
 			if (new_datum == NULL) {
 				printf("Failed to find table\n");
-			//	printf("block current: %s\n, tok_current");
+				printf("block current: %s\n", tok_current);
 				return SEPOL_ERR;
 			}
-			symtab = ((struct cil_block*)new_datum->self->data)->symtab;
+			symtab = &(((struct cil_block*)new_datum->self->data)->symtab[CIL_SYM_LOCAL_BLOCKS]);
 		}
 		else {
 			//printf("type key: %s\n", tok_current); 
-			new_datum = (cil_symtab_datum_t*)hashtab_search(symtab[sym_index].table, (hashtab_key_t)tok_current);
+			symtab = &(((struct cil_block*)new_datum->self->data)->symtab[sym_index]);
+			new_datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)tok_current);
 			if (new_datum == NULL) {
 				printf("Failed to resolve name\n");
 				return SEPOL_ERR;
@@ -281,12 +289,18 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 				}
 			}
 			else {
-				if (__cil_resolve_name_helper(db, global_name, sym_index, &datum)) {
-					free(global_name);
-					global_name = malloc(strlen(name)+2);
-					strcpy(global_name, ".");
-					strncat(global_name, name, strlen(name));
+				printf("call resolve name helper\n");
+				if (__cil_resolve_name_helper(db, ast_node, global_name, sym_index, &datum)) {
+					printf("call resolve name helper 2\n");
+					if (__cil_resolve_name_helper(db, db->ast_root->root, global_name, sym_index, &datum)) {
+						free(global_name);
+						global_name = malloc(strlen(name)+2);
+						strcpy(global_name, ".");
+						strncat(global_name, name, strlen(name));
+					}
+					printf("resolve name helper 2 returned\n");
 				}
+				printf("resolve name helper returned\n");
 			}
 		}
 		
@@ -300,7 +314,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 				}
 			}
 			else {
-				if (__cil_resolve_name_helper(db, global_name, sym_index, &datum)) {
+				if (__cil_resolve_name_helper(db, db->ast_root->root, global_name, sym_index, &datum)) {
 					free(global_name);
 					return SEPOL_ERR;
 				}

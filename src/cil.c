@@ -220,7 +220,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	/* TODO CDS look at hashtab_insert to see who owns the key (name in this case), to see if they need to be freed */
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)name, (cil_symtab_datum_t*)block, ast_node);
 	if (rc) {
-		printf("Failed to insert block %s\n into symtab", name);
+		printf("Failed to insert block %s into symtab, rc: %d\n", name, rc);
 		return rc;
 	}
 
