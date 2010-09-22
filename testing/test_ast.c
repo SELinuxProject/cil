@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
 		memset(buffer+file_size, 0, 2);
 		fclose(file);
 
+		printf("----------------------------------------------\n\n");
+		printf("Building parse tree\n");
 		if (cil_parser(buffer, file_size + 2, &parse_root)) {
 			printf("Failed to parse CIL policy, exiting\n");
 			return SEPOL_ERR;
@@ -49,7 +51,7 @@ int main(int argc, char *argv[])
 		cil_tree_print(parse_root->root, 0);
 
 		printf("----------------------------------------------\n\n");
-		printf("Building ast from parse tree\n");
+		printf("Building ast from parse tree\n\n");
 		if (cil_build_ast(&db, parse_root)) {
 			printf("Failed to build ast, exiting\n");
 			return SEPOL_ERR;
@@ -57,7 +59,7 @@ int main(int argc, char *argv[])
 		cil_tree_print(db->ast_root->root, 0);
 	
 		printf("----------------------------------------------\n\n");
-		printf("Resolving ast\n");
+		printf("Resolving ast\n\n");
 		if (cil_resolve_ast(&db, db->ast_root->root)) {
 			printf("Failed to resolve ast, exiting\n");
 			return SEPOL_ERR;

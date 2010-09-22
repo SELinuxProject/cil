@@ -65,12 +65,9 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 	struct cil_list_item *list_tail;
 	struct cil_list *ast_list = *ast_cl;
 	
-	if (ast_list == NULL) {
-		if (cil_list_init(&ast_list)) {
-			printf("Failed to init list\n");
-			return SEPOL_ERR;
-		}
-	}
+	if (parse_current == NULL || ast_list == NULL)
+		return SEPOL_ERR;
+	
 	while(parse_current != NULL) {
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
@@ -104,6 +101,9 @@ int cil_stack_init(struct cil_stack **stack)
 
 int cil_stack_push(struct cil_stack *stack, void *data)
 {
+	if (stack == NULL || data == NULL)
+		return SEPOL_ERR;
+
 	struct cil_stack_element *new_top;
 	new_top = malloc(sizeof(struct cil_stack_element));
 	new_top->data = data;
@@ -115,6 +115,9 @@ int cil_stack_push(struct cil_stack *stack, void *data)
 
 int cil_stack_pop(struct cil_stack *stack, void *popped)
 {
+	if (stack == NULL)
+		return SEPOL_ERR;
+	
 	if (stack->top != NULL) {
 		struct cil_stack_element *new_top;
 		popped = stack->top->data;
@@ -128,6 +131,9 @@ int cil_stack_pop(struct cil_stack *stack, void *popped)
 
 static int __namespace_helper(struct cil_stack_element *current, char *namespace)
 {
+	if (current == NULL || namespace == NULL)
+		return SEPOL_ERR;
+	
 	/* TODO add error handling */
 	if (current->next != NULL) {
 		__namespace_helper(current->next, namespace);
@@ -140,6 +146,9 @@ static int __namespace_helper(struct cil_stack_element *current, char *namespace
 
 int cil_get_namespace_str(struct cil_stack *stack, char **namespace)
 {
+	if (stack == NULL)
+		return SEPOL_ERR;
+
 	char *new_namespace;
 	struct cil_stack_element *current = stack->top;
 	/* TODO add error handling */
@@ -200,6 +209,9 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 
 int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, uint16_t is_optional, char *condition)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
 	int rc;
 	char *name;
 	struct cil_block *block = malloc(sizeof(struct cil_block));
@@ -235,6 +247,15 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	// TODO Update this check to work with common inherits
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid class declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
 	int rc;
 	char *key = parse_current->next->data;
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
@@ -287,6 +308,9 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
 	int rc = 0;
 	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
 	symtab_t *symtab = NULL;
@@ -316,6 +340,14 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid common declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
 	int rc;
 	char *key = parse_current->next->data;
 	struct cil_common *common = malloc(sizeof(struct cil_common));
@@ -340,6 +372,9 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
 	int rc;
 	struct cil_sid * sid = malloc(sizeof(struct cil_sid));	
 	char *key = parse_current->next->data;
@@ -358,6 +393,14 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 
 int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next != NULL) {
+		printf("Invalid user declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
 	int rc;
 	struct cil_user *user = malloc(sizeof(struct cil_user));
 	char *key = parse_current->next->data;
@@ -376,6 +419,14 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next != NULL) {
+		printf("Invalid role declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
 	int rc;
 	struct cil_role *role = malloc(sizeof(struct cil_role));
 	char *key = parse_current->next->data;
@@ -394,7 +445,16 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
-	//TODO: Check if this is actually an avrule, abort if not
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+	switch (rule_kind) {
+		case (CIL_AVRULE_ALLOWED) : {
+			if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next == NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next != NULL) {
+				printf("Invalid allow rule (line: %d)\n", parse_current->line);
+				return SEPOL_ERR;
+			}
+		}
+	}
 	
 	struct cil_avrule *rule;
 	rule = malloc(sizeof(struct cil_avrule));
@@ -425,6 +485,16 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next != NULL) {
+		if (flavor == CIL_TYPE) {
+			printf("Invalid type declaration (line: %d)\n", parse_current->line);
+			return SEPOL_ERR;
+		}
+	}
+
 	int rc;
 	char *key = (char*)parse_current->next->data; 
 	struct cil_type *type = malloc(sizeof(struct cil_type));
@@ -460,6 +530,14 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid boolean declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
 	int rc;
 	struct cil_bool *boolean;
 	char *key = parse_current->next->data;
@@ -488,6 +566,9 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
 	int rc;
 	struct cil_typealias *alias = malloc(sizeof(struct cil_typealias));
 	char *key = parse_current->next->next->data;
