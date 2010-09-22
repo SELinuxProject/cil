@@ -175,6 +175,9 @@ int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 
 int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, uint32_t cil_sym_index)
 {
+	if (db == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
 	if (ast_node->parent != NULL) {
 		if (ast_node->parent->flavor == CIL_BLOCK) 
 			*symtab = &((struct cil_block*)ast_node->parent->data)->symtab[cil_sym_index];
