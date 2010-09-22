@@ -498,6 +498,10 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 			printf("Invalid type declaration (line: %d)\n", parse_current->line);
 			return SEPOL_ERR;
 		}
+		if (flavor == CIL_ATTR) {
+			printf("Invalid attribute declaration (line %d)\n", parse_current->line);
+			return SEPOL_ERR;
+		}
 	}
 
 	int rc;
@@ -511,7 +515,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_TYPES);
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (cil_symtab_datum_t*)type, ast_node);
 	}
-	else if (flavor == CIL_TYPE_ATTR) {
+	else if (flavor == CIL_ATTR) {
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ATTRS);
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (cil_symtab_datum_t*)type, ast_node);	
 	}

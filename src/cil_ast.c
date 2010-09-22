@@ -89,7 +89,7 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
-				rc = cil_gen_type(*db, parse_current, ast_node, CIL_TYPE_ATTR);
+				rc = cil_gen_type(*db, parse_current, ast_node, CIL_ATTR);
 				if (rc) {
 					printf("cil_gen_type (attr) failed, rc: %d\n", rc);
 					return rc;

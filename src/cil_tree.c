@@ -43,6 +43,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("TYPE: %d\n", type->datum.value);
 			return;
 		}
+		case CIL_ATTR : {
+			struct cil_type *attr = node->data;
+			printf("ATTRIBUTE: %d\n", attr->datum.value);
+			return;
+		}
 		case CIL_ROLE : {
 			struct cil_role *role = node->data;
 			printf("ROLE: %d\n", role->datum.value);
