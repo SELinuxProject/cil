@@ -69,8 +69,7 @@
 #define CIL_KEY_DONTAUDIT	"dontaudit"
 #define CIL_KEY_NEVERALLOW	"neverallow"
 #define CIL_KEY_TYPETRANS	"typetrans"
-#define CIL_KEY_TYPEATTR	"typeattr"
-#define CIL_KEY_PERM		"perm"
+#define CIL_KEY_TYPEATTR	"typeattribute"
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_INTERFACE	"interface"
 
@@ -165,7 +164,7 @@ struct cil_perm {
 
 struct cil_common {
 	cil_symtab_datum_t datum;
-	struct cil_list *av;
+	symtab_t perms;
 };
 
 struct cil_sid {
@@ -387,6 +386,7 @@ int cil_db_init(struct cil_db **);
 int cil_list_init(struct cil_list **);
 int cil_list_item_init(struct cil_list_item **);
 int cil_parse_to_list(struct cil_tree_node *, struct cil_list **, uint32_t);
+int cil_parse_to_children(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_stack_init(struct cil_stack **);
 int cil_stack_push(struct cil_stack *, void *);
 int cil_stack_pop(struct cil_stack *, void *);

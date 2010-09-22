@@ -30,6 +30,20 @@ int cil_tree_node_init(struct cil_tree_node **node)
 	return SEPOL_OK;
 }
 
+void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
+{
+	while (current_perm != NULL) {
+		if (current_perm->flavor == CIL_PERM) {
+			printf(" %d", ((struct cil_perm *)current_perm->data)->datum.value);
+		}
+		else {
+			printf("\n\n perms list contained unexpected data type: %d\n", current_perm->flavor);
+			break;
+		}
+		current_perm = current_perm->next;	
+	}
+}
+
 void cil_tree_print_node(struct cil_tree_node *node)
 {
 	switch( node->flavor ) {
@@ -56,21 +70,21 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		case CIL_CLASS : {
 			struct cil_class *cls = node->data;
 			printf("CLASS: %d (", cls->datum.value);
-			struct cil_tree_node *current_perm = node->cl_head;
-
-			while (current_perm != NULL) {
-				if (current_perm->flavor == CIL_PERM) {
-					printf(" %d", ((struct cil_perm *)current_perm->data)->datum.value);
-				}
-				else {
-					printf("\n\n perms list contained unexpected data type: %d\n", current_perm->flavor);
-					break;
-				}
-				current_perm = current_perm->next;	
-			}
+			
+			cil_tree_print_perms_list(node->cl_head);
 
 			printf(" )");
 			return;
+		}
+		case CIL_COMMON : {
+			struct cil_common *common = node->data;
+			printf("COMMON: %d (", common->datum.value);
+		
+			cil_tree_print_perms_list(node->cl_head);
+	
+			printf(" )");
+			return;
+							
 		}
 		case CIL_BOOL : {
 			struct cil_bool *boolean = node->data;

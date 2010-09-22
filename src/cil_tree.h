@@ -21,5 +21,6 @@ int cil_tree_init(struct cil_tree **);
 int cil_tree_node_init(struct cil_tree_node **);
 void cil_tree_print_node(struct cil_tree_node *);
 void cil_tree_print(struct cil_tree_node *, uint32_t);
+void cil_tree_print_perms_list(struct cil_tree_node *);
 #endif /* CIL_TREE_H_ */
 

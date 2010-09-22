@@ -88,6 +88,33 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 	return SEPOL_OK;
 } 
 
+int cil_parse_to_children(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node)
+{
+	int rc = 0;
+	struct cil_tree_node *new_ast = NULL;
+
+	while(current_perm != NULL) {
+		cil_tree_node_init(&new_ast);
+		new_ast->parent = ast_node;
+		new_ast->line = current_perm->line;
+		rc = cil_gen_perm(db, current_perm, new_ast);
+		if (rc) {
+			printf("CLASS: Failed to gen perm\n");
+			return SEPOL_ERR;
+		}
+		//printf("perm id: %d\n", ((struct cil_perm*)new_ast->data)->datum.value);
+		current_perm = current_perm->next;
+
+		if (ast_node->cl_head == NULL) 
+			ast_node->cl_head = new_ast;
+		else {
+			ast_node->cl_tail->next = new_ast;
+		}
+		ast_node->cl_tail = new_ast;
+	}
+	return SEPOL_OK;
+}
+
 int cil_stack_init(struct cil_stack **stack)
 {
 	/* TODO CDS Big change - when you malloc, you need to check what you got back. malloc can fail */
@@ -192,6 +219,8 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			*symtab = &((struct cil_block*)ast_node->parent->data)->symtab[cil_sym_index];
 		else if (ast_node->parent->flavor == CIL_CLASS) 
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
+		else if (ast_node->parent->flavor == CIL_COMMON)
+			*symtab = &((struct cil_common*)ast_node->parent->data)->perms;
 		else if (ast_node->parent->flavor == CIL_ROOT)
 			*symtab = &db->local_symtab[cil_sym_index];
 		else {
@@ -265,7 +294,6 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	char *key = parse_current->next->data;
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
 	struct cil_tree_node *current_perm = NULL;
-	struct cil_tree_node *new_ast = NULL;
 
 	rc = symtab_init(&cls->perms, CIL_SYM_SIZE);
 	if (rc) {
@@ -284,29 +312,12 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	ast_node->data = cls;
 	ast_node->flavor = CIL_CLASS;
 
-	if ((parse_current->next->next != NULL) && (parse_current->next->next->cl_head != NULL)) {
-		current_perm = parse_current->next->next->cl_head;
-	}
-	else {
-		printf("Error, no perms\n");
+	rc = cil_parse_to_children(db, parse_current->next->next->cl_head, ast_node);
+	if (rc) {
+		printf("Class: failed to parse perms\n");
 		return SEPOL_ERR;
 	}
 
-	while(current_perm != NULL) {
-		cil_tree_node_init(&new_ast);
-		new_ast->parent = ast_node;
-		new_ast->line = current_perm->line;
-		rc = cil_gen_perm(db, current_perm, new_ast);
-		//printf("perm id: %d\n", ((struct cil_perm*)new_ast->data)->datum.value);
-		current_perm = current_perm->next;
-
-		if (ast_node->cl_head == NULL) 
-			ast_node->cl_head = new_ast;
-		else {
-			ast_node->cl_tail->next = new_ast;
-		}
-		ast_node->cl_tail = new_ast;
-	}
 
 	return SEPOL_OK;
 }
@@ -356,11 +367,12 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	int rc;
 	char *key = parse_current->next->data;
 	struct cil_common *common = malloc(sizeof(struct cil_common));
+	struct cil_tree_node *current_perm = NULL;
 
-	rc = cil_parse_to_list(parse_current->next->next->cl_head, &common->av, CIL_PERM);
+	rc = symtab_init(&common->perms, CIL_SYM_SIZE);
 	if (rc) {
-		printf("Failed to parse permissions list from parse tree\n");
-		return rc;
+		printf("Common perms symtab init failed\n");
+		return SEPOL_ERR;
 	}
 
 	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_COMMONS], (hashtab_key_t)key, (cil_symtab_datum_t*)common, ast_node);
@@ -371,7 +383,13 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 	ast_node->data = common;
 	ast_node->flavor = CIL_COMMON;
-	
+
+	rc = cil_parse_to_children(db, parse_current->next->next->cl_head, ast_node);
+	if (rc) {
+		printf("Class: failed to parse perms\n");
+		return SEPOL_ERR;
+	}
+		
 	return SEPOL_OK;
 }
 

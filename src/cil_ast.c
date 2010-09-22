@@ -73,6 +73,8 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 					printf("cil_gen_common failed, rc: %d\n", rc);
 					return rc;
 				}
+				ast_current = ast_current->parent;
+				return SEPOL_OK;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
 				rc = cil_gen_sid(*db, parse_current, ast_node);
