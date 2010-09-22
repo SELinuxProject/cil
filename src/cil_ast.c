@@ -9,6 +9,9 @@
 
 static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *namespace_str, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
+	if (db == NULL || parse_tree == NULL || ast == NULL)
+		return SEPOL_ERR;
+
 	int rc = 0;
 	struct cil_tree_node *parse_current = parse_tree;
 	struct cil_tree_node *ast_current = ast;
@@ -159,6 +162,9 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 
 int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 {
+	if (db == NULL || parse_root == NULL)
+		return SEPOL_ERR;
+
 	struct cil_stack *namespace;
 	char *namespace_str = NULL;
 	cil_stack_init(&namespace);
@@ -291,7 +297,8 @@ int cil_resolve_name_global(symtab_t symtab, char *name, void **data)
 static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, cil_symtab_datum_t **datum)
 {
 	int rc = 0;
-	char *tok_current = strtok(name, ".");
+	char* name_dup = strdup(name);
+	char *tok_current = strtok(name_dup, ".");
 	char *tok_next = strtok(NULL, ".");
 	symtab_t *symtab = NULL;
 	cil_symtab_datum_t *new_datum = NULL;
@@ -303,8 +310,14 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
 		if (rc) {
 			printf("__cil_resolve_name_helper: cil_get_parent_symtab failed, rc: %d\n", rc);
+			free(name_dup);
 			return rc;
 		}
+	}
+
+	if (tok_next == NULL) {
+		free(name_dup);
+		return SEPOL_ERR;
 	}
 
 	while (tok_current != NULL) {
@@ -312,6 +325,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			new_datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)tok_current);
 			if (new_datum == NULL) {
 				printf("__cil_resolve_name_helper: Failed to find table, block current: %s\n", tok_current);
+				free(name_dup);
 				return SEPOL_ERR;
 			}
 			symtab = &(((struct cil_block*)new_datum->self->data)->symtab[CIL_SYM_LOCAL_BLOCKS]);
@@ -322,6 +336,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			new_datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)tok_current);
 			if (new_datum == NULL) {
 				printf("__cil_resolve_name_helper: Failed to resolve name, current: %s\n", tok_current);
+				free(name_dup);
 				return SEPOL_ERR;
 			}
 		}
@@ -329,6 +344,8 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		tok_next = strtok(NULL, ".");
 	}
 	*datum = new_datum;
+	free(name_dup);	
+
 	return SEPOL_OK;
 }
 
