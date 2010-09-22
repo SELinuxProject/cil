@@ -98,7 +98,9 @@
 #define CIL_SYM_LOCAL_TYPES		1
 #define CIL_SYM_LOCAL_ATTRS		2
 #define CIL_SYM_LOCAL_ALIASES		3
+// TODO CDS PERMS can go away
 #define CIL_SYM_LOCAL_PERMS		4
+// TODO CDS this should be MACRO, not INTERFACE
 #define CIL_SYM_LOCAL_TRANS_INTERFACES	5
 
 #define CIL_SYM_LOCAL_NUM		6
@@ -126,6 +128,7 @@ struct cil_list_item {
 	void *data;
 };
 
+// TODO CDS Can delete stack?
 struct cil_stack {
 	struct cil_stack_element *top;
 };
@@ -148,6 +151,7 @@ struct cil_block {
 	uint16_t is_optional;
 	/* TODO CDS we need to figure out how to handle conditionals */
 	char *condition;
+	// TODO CDS should not need this since it is now in the datum
 	struct cil_tree_node *self;
 };
 

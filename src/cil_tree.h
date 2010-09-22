@@ -14,7 +14,7 @@ struct cil_tree_node {
 	struct cil_tree_node *next;		//Each element in the list points to the next element
 	uint32_t flavor;
 	uint32_t line;
-	//add file path here
+	//TODO add file path here
 	void *data;
 };
 int cil_tree_init(struct cil_tree **);

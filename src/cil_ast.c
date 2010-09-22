@@ -7,27 +7,25 @@
 #include "cil_parser.h"
 #include "cil.h"
 
+// TODO CDS think about switching to a loop instead of recursion
 static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *namespace_str, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
 	if (db == NULL || parse_tree == NULL || ast == NULL)
 		return SEPOL_ERR;
 
-	int rc = 0;
+	int rc = SEPOL_ERR;
 	struct cil_tree_node *parse_current = parse_tree;
 	struct cil_tree_node *ast_current = ast;
 	struct cil_tree_node *ast_node;
-
-	if ((parse_current == NULL) || (ast_current == NULL)) {
-		printf("Error: NULL tree as parameter\n");
-		return SEPOL_ERR;
-	}
 
 //	printf("before parse_current->cl_head check\n");
 	if (parse_current->cl_head == NULL) {	//This is a leaf node
 //		printf("parse_current cl_head is NULL\n");
 		if (parse_current->parent->cl_head == parse_current) { //This is the beginning of the line
+			// TODO CDS pull this out into a function of its own, as this is pretty nested
 //			printf("cl_head = parse_current\n");
 			//Node values set here
+			// TODO CDS move this code to cil_tree_add_child() with or without the initializer
 			rc = cil_tree_node_init(&ast_node);
 			if (rc) {
 				printf("Failed to init tree node, rc: %d\n", rc);
@@ -51,6 +49,7 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 					printf("cil_gen_block failed, rc: %d\n", rc);
 					return rc;
 				}
+				// TODO CDS this can go away
 				rc = cil_get_namespace_str(namespace, &namespace_str);
 				if (rc) {
 					printf("cil_get_namespace_str failed, rc: %d\n", rc);
@@ -162,11 +161,14 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 	return SEPOL_OK;
 }
 
+// TODO CDS db does not need to be a double pointer here and everywhere
+// TODO CDS Seems like this can go away, as all it does is call the helper function
 int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 {
 	if (db == NULL || parse_root == NULL)
 		return SEPOL_ERR;
 
+	// TODO CDS namespace stuff should go away here
 	struct cil_stack *namespace;
 	char *namespace_str = NULL;
 	cil_stack_init(&namespace);
