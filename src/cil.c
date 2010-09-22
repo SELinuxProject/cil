@@ -212,6 +212,11 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
+	if (parse_current->next == NULL) {
+		printf("Invalid block declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
 	int rc;
 	char *name;
 	struct cil_block *block = malloc(sizeof(struct cil_block));
