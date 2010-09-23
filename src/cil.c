@@ -71,6 +71,7 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 	while(parse_current != NULL) {
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
+		// TODO CDS this should strdup() since the parse tree will go away
 		new_item->data = parse_current->data;
 		if (ast_list->list == NULL) {
 			ast_list->list = new_item;
@@ -88,6 +89,7 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 	return SEPOL_OK;
 } 
 
+// TODO rename function to sound less generic, since it just generates perms for class/common
 int cil_parse_to_children(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node)
 {
 	int rc = 0;
@@ -103,7 +105,6 @@ int cil_parse_to_children(struct cil_db *db, struct cil_tree_node *current_perm,
 			return SEPOL_ERR;
 		}
 		//printf("perm id: %d\n", ((struct cil_perm*)new_ast->data)->datum.value);
-		current_perm = current_perm->next;
 
 		if (ast_node->cl_head == NULL) 
 			ast_node->cl_head = new_ast;
@@ -111,6 +112,8 @@ int cil_parse_to_children(struct cil_db *db, struct cil_tree_node *current_perm,
 			ast_node->cl_tail->next = new_ast;
 		}
 		ast_node->cl_tail = new_ast;
+
+		current_perm = current_perm->next;
 	}
 	return SEPOL_OK;
 }
@@ -331,6 +334,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	int rc = 0;
 	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
+	// TODO CDS the rest of this function is done over and over again. Look at pulling it out into a helper function that can be called from cil_gen_*.
 	symtab_t *symtab = NULL;
 	char *key = (char*)parse_current->data;
 
@@ -356,6 +360,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 }
 
+// TODO try to merge some of this with cil_gen_class (helper function for both)
 int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -468,10 +473,12 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 }
 
+// TODO CDS db is unused here, remove
 int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
+	// TODO CDS All rules have the same format, so no switch statement is necessary
 	switch (rule_kind) {
 		case (CIL_AVRULE_ALLOWED) : {
 			if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next == NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next != NULL) {
@@ -481,9 +488,9 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		}
 	}
 	
-	struct cil_avrule *rule;
-	rule = malloc(sizeof(struct cil_avrule));
+	struct cil_avrule *rule = malloc(sizeof(struct cil_avrule));
 	rule->rule_kind = rule_kind;
+	// TODO these should strdup()
 	rule->src_str = parse_current->next->data;
 	rule->tgt_str = parse_current->next->next->data;
 	rule->obj_str = parse_current->next->next->next->data;	
@@ -494,6 +501,7 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	}
 	
 
+	// TODO CDS get rid of the if/else, as it must be a list
 	if (parse_current->next->next->next->next->cl_head != NULL)
 		cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms_str, CIL_AST_STR);
 	else if ((parse_current->next->next->next->next->data != NULL) && (parse_current->next->next->next->next->next == NULL)) {
@@ -528,8 +536,6 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	char *key = (char*)parse_current->next->data; 
 	struct cil_type *type = malloc(sizeof(struct cil_type));
 	symtab_t *symtab = NULL;
-
-	/* TODO CDS see if you need to free this or if hashtab_insert takes ownership of key */
 
 	if (flavor == CIL_TYPE) {
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_TYPES);
