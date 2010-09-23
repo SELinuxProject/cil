@@ -2,7 +2,7 @@
 	#include <stdint.h>
 	#include <sepol/errcodes.h>
 	#include "cil_lexer.h"
-	char * value;
+	char *value;
 	int line = 1;
 %}
 
