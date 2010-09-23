@@ -51,7 +51,7 @@ int cil_tree_node_init(struct cil_tree_node **node)
 	new_node->parent = NULL;
 	new_node->data = NULL;
 	new_node->next = NULL;
-	new_node->flavor = 0;
+	new_node->flavor = CIL_ROOT;
 	new_node->line = 0;	
 
 	*node = new_node;

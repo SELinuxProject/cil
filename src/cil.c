@@ -251,6 +251,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	struct cil_block *block = malloc(sizeof(struct cil_block));
 	symtab_t *symtab = NULL;
 
+	// TODO CDS check for error
 	cil_symtab_array_init(block->symtab, CIL_SYM_LOCAL_NUM);
 
 	block->is_abstract = is_abstract;
@@ -262,6 +263,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
 	if (rc) {
+		// TODO CDS create cleanup for this, since you need it after insert failure too
 		free(block);
 		return rc;
 	}	
@@ -310,7 +312,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return SEPOL_ERR;
 	}
 
-	//Syntax for inherit from common?
+	//TODO Syntax for inherit from common?
 
 	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)key, (cil_symtab_datum_t*)cls, ast_node);	
 	if (rc) {
