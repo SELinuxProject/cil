@@ -279,6 +279,16 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;	
 }
 
+void cil_destroy_block(struct cil_block *block)
+{
+	int i=0;
+	for (i=0;i<CIL_SYM_LOCAL_NUM; i++) {
+		hashtab_destroy(block->symtab[i].table);
+	}
+
+	free(block);
+}
+
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -293,7 +303,6 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	int rc;
 	char *key = parse_current->next->data;
 	struct cil_class *cls = malloc(sizeof(struct cil_class));
-	struct cil_tree_node *current_perm = NULL;
 
 	rc = symtab_init(&cls->perms, CIL_SYM_SIZE);
 	if (rc) {
@@ -318,8 +327,14 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return SEPOL_ERR;
 	}
 
-
 	return SEPOL_OK;
+}
+
+void cil_destroy_class(struct cil_class *cls)
+{
+	hashtab_destroy(cls->perms.table);
+	
+	free(cls);
 }
 
 int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -354,6 +369,11 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 }
 
+void cil_destroy_perm(struct cil_perm *perm)
+{
+	free(perm);
+}
+
 int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -367,7 +387,6 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	int rc;
 	char *key = parse_current->next->data;
 	struct cil_common *common = malloc(sizeof(struct cil_common));
-	struct cil_tree_node *current_perm = NULL;
 
 	rc = symtab_init(&common->perms, CIL_SYM_SIZE);
 	if (rc) {
@@ -393,6 +412,12 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	return SEPOL_OK;
 }
 
+void cil_destroy_common(struct cil_common *common)
+{
+	hashtab_destroy(common->perms.table);
+	free(common);
+}
+
 int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -412,6 +437,11 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 	ast_node->flavor = CIL_SID;
 
 	return SEPOL_OK;
+}
+
+void cil_destroy_sid(struct cil_sid *sid)
+{
+	free(sid);
 }
 
 int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -440,6 +470,11 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 }
 
+void cil_destroy_user(struct cil_user *user)
+{
+	free(user);
+}
+
 int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -464,6 +499,11 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	ast_node->flavor = CIL_ROLE;
 
 	return SEPOL_OK;
+}
+
+void cil_destroy_role(struct cil_role *role)
+{
+	free(role);
 }
 
 int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
@@ -504,6 +544,18 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	ast_node->flavor = CIL_AVRULE;
 
 	return SEPOL_OK;	
+}
+
+void cil_destroy_avrule(struct cil_avrule *rule)
+{
+	if (rule->src_str != NULL)
+		free(rule->src_str);
+	if (rule->tgt_str != NULL)
+		free(rule->tgt_str);
+	if (rule->obj_str != NULL)
+		free(rule->obj_str);
+	//If perms_str is not null, destroy list
+	free(rule);
 }
 
 int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor)
@@ -555,6 +607,11 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 }
 
+void cil_destroy_type(struct cil_type *type)
+{
+	free(type);
+}
+
 int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -591,6 +648,11 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 }
 
+void cil_destroy_bool(struct cil_bool *boolean)
+{
+	free(boolean);
+}
+
 int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -621,4 +683,11 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	ast_node->flavor = CIL_TYPEALIAS;
 
 	return SEPOL_OK;
+}
+
+void cil_destroy_typealias(struct cil_typealias *alias)
+{
+	if (alias->type_str != NULL)
+		free(alias->type_str);
+	free(alias);
 }

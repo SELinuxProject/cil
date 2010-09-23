@@ -154,6 +154,7 @@ struct cil_block {
 struct cil_class {
 	cil_symtab_datum_t datum;
 	symtab_t perms;
+	//(class msg inherits ipc (send receive))
 	char *common_str;
 	struct cil_common *common;
 };
@@ -395,14 +396,26 @@ int cil_symtab_array_init(symtab_t [], uint32_t);
 int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
 
 int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
+void cil_destroy_block(struct cil_block *);
 int cil_gen_perm(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_perm(struct cil_perm *);
 int cil_gen_class(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_class(struct cil_class *);
 int cil_gen_common(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_common(struct cil_common *);
 int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_sid(struct cil_sid *);
 int cil_gen_avrule(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
+void cil_destroy_avrule(struct cil_avrule *);
 int cil_gen_type(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
+void cil_destroy_type(struct cil_type *);
+int cil_gen_user(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_user(struct cil_user *);
 int cil_gen_role(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_role(struct cil_role *);
 int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_bool(struct cil_bool *);
 int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_typealias(struct cil_typealias *);
 
 #endif
