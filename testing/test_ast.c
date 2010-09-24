@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
 		printf("----------------------------------------------\n\n");
 		printf("Building ast from parse tree\n\n");
-		if (cil_build_ast(&db, parse_root)) {
+		if (cil_build_ast(db, parse_root)) {
 			printf("Failed to build ast, exiting\n");
 			return SEPOL_ERR;
 		}
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	
 		printf("----------------------------------------------\n\n");
 		printf("Resolving ast\n\n");
-		if (cil_resolve_ast(&db, db->ast_root->root)) {
+		if (cil_resolve_ast(db, db->ast_root->root)) {
 			printf("Failed to resolve ast, exiting\n");
 			return SEPOL_ERR;
 		}

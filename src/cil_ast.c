@@ -8,7 +8,7 @@
 #include "cil.h"
 
 // TODO CDS think about switching to a loop instead of recursion
-static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char *namespace_str, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
+static int __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *namespace_str, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
 	if (db == NULL || parse_tree == NULL || ast == NULL)
 		return SEPOL_ERR;
@@ -18,12 +18,12 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 	struct cil_tree_node *ast_current = ast;
 	struct cil_tree_node *ast_node;
 
-//	printf("before parse_current->cl_head check\n");
+	printf("before parse_current->cl_head check\n");
 	if (parse_current->cl_head == NULL) {	//This is a leaf node
-//		printf("parse_current cl_head is NULL\n");
+		printf("parse_current cl_head is NULL\n");
 		if (parse_current->parent->cl_head == parse_current) { //This is the beginning of the line
 			// TODO CDS pull this out into a function of its own, as this is pretty nested
-//			printf("cl_head = parse_current\n");
+			printf("cl_head = parse_current\n");
 			//Node values set here
 			// TODO CDS move this code to cil_tree_add_child() with or without the initializer
 			rc = cil_tree_node_init(&ast_node);
@@ -42,9 +42,9 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 			ast_current = ast_node;
 				
 			// Determine data types and set those values here
-//			printf("parse_current->data: %s\n", (char*)parse_current->data);
+			printf("parse_current->data: %s\n", (char*)parse_current->data);
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
-				rc = cil_gen_block(*db, parse_current, ast_node, 0, 0, NULL);
+				rc = cil_gen_block(db, parse_current, ast_node, 0, 0, NULL);
 				if (rc) {
 					printf("cil_gen_block failed, rc: %d\n", rc);
 					return rc;
@@ -57,7 +57,7 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
-				rc = cil_gen_class(*db, parse_current, ast_node);
+				rc = cil_gen_class(db, parse_current, ast_node);
 				if (rc) {
 					printf("cil_gen_class failed, rc: %d\n", rc);
 					return rc;
@@ -67,7 +67,7 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 				return SEPOL_OK;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
-				rc = cil_gen_common(*db, parse_current, ast_node);
+				rc = cil_gen_common(db, parse_current, ast_node);
 				if (rc) {
 					printf("cil_gen_common failed, rc: %d\n", rc);
 					return rc;
@@ -76,49 +76,49 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 				return SEPOL_OK;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
-				rc = cil_gen_sid(*db, parse_current, ast_node);
+				rc = cil_gen_sid(db, parse_current, ast_node);
 				if (rc) {
 					printf("cil_gen_sid failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
-				rc = cil_gen_type(*db, parse_current, ast_node, CIL_TYPE);
+				rc = cil_gen_type(db, parse_current, ast_node, CIL_TYPE);
 				if (rc) {
 					printf("cil_gen_type failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
-				rc = cil_gen_type(*db, parse_current, ast_node, CIL_ATTR);
+				rc = cil_gen_type(db, parse_current, ast_node, CIL_ATTR);
 				if (rc) {
 					printf("cil_gen_type (attr) failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
-				rc = cil_gen_typealias(*db, parse_current, ast_node);
+				rc = cil_gen_typealias(db, parse_current, ast_node);
 				if (rc) {
 					printf("cil_gen_typealias failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
-				rc = cil_gen_role(*db, parse_current, ast_node);
+				rc = cil_gen_role(db, parse_current, ast_node);
 				if (rc) {
 					printf("cil_gen_role failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
-				rc = cil_gen_bool(*db, parse_current, ast_node);
+				rc = cil_gen_bool(db, parse_current, ast_node);
 				if (rc) {
 					printf("cil_gen_bool failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
-				rc = cil_gen_avrule(*db, parse_current, ast_node, CIL_AVRULE_ALLOWED); 
+				rc = cil_gen_avrule(db, parse_current, ast_node, CIL_AVRULE_ALLOWED); 
 				if (rc) {
 					printf("cil_gen_avrule (allow) failed, rc: %d\n", rc);
 					return rc;
@@ -132,26 +132,26 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 			}
 		}
 		else { //Rest of line 
-			//printf("Rest of line\n");
+			printf("Rest of line\n");
 			//Not sure if this case is necessary (should be handled above when keyword is detected)			
 		}
 	}
 	else {
-//		printf("recurse with cl_head\n");
+		printf("recurse with cl_head\n");
 		rc = __cil_build_ast(db, namespace, namespace_str, parse_current->cl_head, ast_current);
 		if (rc) 
 			return rc;
 	}
 	if (parse_current->next != NULL) {
 		//Process next in list
-//		printf("recurse with next\n");
+		printf("recurse with next\n");
 		rc = __cil_build_ast(db, namespace, namespace_str, parse_current->next, ast_current);
 		if (rc) 
 			return rc;	
 	}
 	else {
 		//Return to parent
-//		printf("set ast_current to parent\n");
+		printf("set ast_current to parent\n");
 
 		ast_current = ast_current->parent;
 
@@ -161,9 +161,8 @@ static int __cil_build_ast(struct cil_db **db, struct cil_stack *namespace, char
 	return SEPOL_OK;
 }
 
-// TODO CDS db does not need to be a double pointer here and everywhere
 // TODO CDS Seems like this can go away, as all it does is call the helper function
-int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
+int cil_build_ast(struct cil_db *db, struct cil_tree *parse_root)
 {
 	if (db == NULL || parse_root == NULL)
 		return SEPOL_ERR;
@@ -172,7 +171,7 @@ int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 	struct cil_stack *namespace;
 	char *namespace_str = NULL;
 	cil_stack_init(&namespace);
-	if(__cil_build_ast(db, namespace, namespace_str, parse_root->root, (*db)->ast_root->root)) {
+	if(__cil_build_ast(db, namespace, namespace_str, parse_root->root, db->ast_root->root)) {
 		free(namespace);
 		return SEPOL_ERR;
 	}
@@ -182,8 +181,7 @@ int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 }
 
 // TODO CDS un-recurse
-// TODO CDS db doesn't need to be a double pointer
-int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
+int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = 0;
 
@@ -199,7 +197,7 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 				printf("case typealias\n");
 				struct cil_typealias *alias = (struct cil_typealias*)current->data;
 				struct cil_tree_node *type_node = NULL;
-				rc = cil_resolve_name(*db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+				rc = cil_resolve_name(db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
 				if (rc) {
 					printf("Name resolution failed for %s\n", alias->type_str);
 					return SEPOL_ERR;
@@ -217,7 +215,7 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 				struct cil_tree_node *obj_node = NULL;
 					
 				if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
-					rc = cil_resolve_name(*db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
+					rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
 					if (rc) {
 						printf("Name resolution failed for %s\n", rule->src_str);
 						return SEPOL_ERR;
@@ -228,7 +226,7 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 						rule->src_str = NULL;
 					}
 					
-					rc = cil_resolve_name(*db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
+					rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
 					if (rc) {
 						printf("Name resolution failed for %s\n", rule->tgt_str);
 						return SEPOL_ERR;
@@ -239,7 +237,7 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 						rule->tgt_str = NULL;	
 					}
 
-					rc = cil_resolve_name_global((*db)->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
+					rc = cil_resolve_name_global(db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
 					if (rc) {
 						printf("Name resolution failed for %s\n", rule->obj_str);
 						return SEPOL_ERR;
