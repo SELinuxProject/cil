@@ -400,7 +400,7 @@ int cil_gen_common(struct cil_db *, struct cil_tree_node *, struct cil_tree_node
 void cil_destroy_common(struct cil_common *);
 int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_sid(struct cil_sid *);
-int cil_gen_avrule(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
+int cil_gen_avrule(struct cil_tree_node *, struct cil_tree_node *, uint32_t);
 void cil_destroy_avrule(struct cil_avrule *);
 int cil_gen_type(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
 void cil_destroy_type(struct cil_type *);

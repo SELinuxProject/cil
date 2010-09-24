@@ -112,7 +112,7 @@ static int __cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, 
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
-				rc = cil_gen_avrule(db, parse_current, ast_node, CIL_AVRULE_ALLOWED); 
+				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_ALLOWED); 
 				if (rc) {
 					printf("cil_gen_avrule (allow) failed, rc: %d\n", rc);
 					return rc;

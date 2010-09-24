@@ -511,19 +511,14 @@ void cil_destroy_role(struct cil_role *role)
 	free(role);
 }
 
-// TODO CDS db is unused here, remove
-int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
+int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
-	if (db == NULL || parse_current == NULL || ast_node == NULL)
+	if (parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
-	// TODO CDS All rules have the same format, so no switch statement is necessary
-	switch (rule_kind) {
-		case (CIL_AVRULE_ALLOWED) : {
-			if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next == NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next != NULL) {
-				printf("Invalid allow rule (line: %d)\n", parse_current->line);
-				return SEPOL_ERR;
-			}
-		}
+	
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next == NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next != NULL) {
+		printf("Invalid allow rule (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
 	}
 	
 	struct cil_avrule *rule = malloc(sizeof(struct cil_avrule));
