@@ -8,7 +8,7 @@
 #include "cil.h"
 
 // TODO CDS think about switching to a loop instead of recursion
-static int __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char *namespace_str, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
+static int __cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
 	if (db == NULL || parse_tree == NULL || ast == NULL)
 		return SEPOL_ERR;
@@ -47,12 +47,6 @@ static int __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char 
 				rc = cil_gen_block(db, parse_current, ast_node, 0, 0, NULL);
 				if (rc) {
 					printf("cil_gen_block failed, rc: %d\n", rc);
-					return rc;
-				}
-				// TODO CDS this can go away
-				rc = cil_get_namespace_str(namespace, &namespace_str);
-				if (rc) {
-					printf("cil_get_namespace_str failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
@@ -138,14 +132,14 @@ static int __cil_build_ast(struct cil_db *db, struct cil_stack *namespace, char 
 	}
 	else {
 		printf("recurse with cl_head\n");
-		rc = __cil_build_ast(db, namespace, namespace_str, parse_current->cl_head, ast_current);
+		rc = __cil_build_ast(db, parse_current->cl_head, ast_current);
 		if (rc) 
 			return rc;
 	}
 	if (parse_current->next != NULL) {
 		//Process next in list
 		printf("recurse with next\n");
-		rc = __cil_build_ast(db, namespace, namespace_str, parse_current->next, ast_current);
+		rc = __cil_build_ast(db, parse_current->next, ast_current);
 		if (rc) 
 			return rc;	
 	}
@@ -167,15 +161,9 @@ int cil_build_ast(struct cil_db *db, struct cil_tree *parse_root)
 	if (db == NULL || parse_root == NULL)
 		return SEPOL_ERR;
 
-	// TODO CDS namespace stuff should go away here
-	struct cil_stack *namespace;
-	char *namespace_str = NULL;
-	cil_stack_init(&namespace);
-	if(__cil_build_ast(db, namespace, namespace_str, parse_root->root, db->ast_root->root)) {
-		free(namespace);
+	if(__cil_build_ast(db, parse_root->root, db->ast_root->root)) {
 		return SEPOL_ERR;
 	}
-	free(namespace);
 	
 	return SEPOL_OK;
 }
