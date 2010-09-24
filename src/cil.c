@@ -71,8 +71,7 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 	while(parse_current != NULL) {
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
-		// TODO CDS this should strdup() since the parse tree will go away
-		new_item->data = parse_current->data;
+		new_item->data = strdup(parse_current->data);
 		if (ast_list->list == NULL) {
 			ast_list->list = new_item;
 			list_tail = ast_list->list;
@@ -529,10 +528,9 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	
 	struct cil_avrule *rule = malloc(sizeof(struct cil_avrule));
 	rule->rule_kind = rule_kind;
-	// TODO these should strdup()
-	rule->src_str = parse_current->next->data;
-	rule->tgt_str = parse_current->next->next->data;
-	rule->obj_str = parse_current->next->next->next->data;	
+	rule->src_str = strdup(parse_current->next->data);
+	rule->tgt_str = strdup(parse_current->next->next->data);
+	rule->obj_str = strdup(parse_current->next->next->next->data);	
 
 	if(cil_list_init(&rule->perms_str)) {
 		printf("failed to init perm list\n");
@@ -540,14 +538,7 @@ int cil_gen_avrule(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	}
 	
 
-	// TODO CDS get rid of the if/else, as it must be a list
-	if (parse_current->next->next->next->next->cl_head != NULL)
-		cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms_str, CIL_AST_STR);
-	else if ((parse_current->next->next->next->next->data != NULL) && (parse_current->next->next->next->next->next == NULL)) {
-		rule->perms_str->list->flavor = CIL_AST_STR;
-		rule->perms_str->list->data = (char*)parse_current->next->next->next->next->data;		
-		
-	}
+	cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms_str, CIL_AST_STR);
 
 	ast_node->data = rule;
 	ast_node->flavor = CIL_AVRULE;
