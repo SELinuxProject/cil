@@ -253,8 +253,12 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	struct cil_block *block = malloc(sizeof(struct cil_block));
 	symtab_t *symtab = NULL;
 
-	// TODO CDS check for error
-	cil_symtab_array_init(block->symtab, CIL_SYM_LOCAL_NUM);
+	rc = cil_symtab_array_init(block->symtab, CIL_SYM_LOCAL_NUM);
+	if (rc != SEPOL_OK) {
+		printf("Failed to initialize symtab array\n");
+		free(block);
+		return rc;
+	}
 
 	block->is_abstract = is_abstract;
 	block->is_optional = is_optional;
