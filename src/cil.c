@@ -296,7 +296,6 @@ void cil_destroy_block(struct cil_block *block)
 
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	printf("enter cil_gen_class\n");
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
@@ -318,8 +317,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	//TODO Syntax for inherit from common?
 
-	printf("cil_symtab_insert\n");
-	rc = cil_symtab_insert(&(db->global_symtab[CIL_SYM_GLOBAL_CLASSES]), (hashtab_key_t)key, (cil_symtab_datum_t*)cls, ast_node);	
+	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)key, (cil_symtab_datum_t*)cls, ast_node);	
 	if (rc) {
 		printf("Failed to insert class into symtab\n");
 		return rc;
@@ -328,14 +326,12 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	ast_node->data = cls;
 	ast_node->flavor = CIL_CLASS;
 
-	printf("cil_parse_to_children\n");
 	rc = cil_parse_to_children(db, parse_current->next->next->cl_head, ast_node);
 	if (rc) {
 		printf("Class: failed to parse perms\n");
 		return SEPOL_ERR;
 	}
 
-	printf("exit cil_gen_class\n");
 	return SEPOL_OK;
 }
 
