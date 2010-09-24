@@ -18,12 +18,12 @@ static int __cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, 
 	struct cil_tree_node *ast_current = ast;
 	struct cil_tree_node *ast_node;
 
-	printf("before parse_current->cl_head check\n");
+//	printf("before parse_current->cl_head check\n");
 	if (parse_current->cl_head == NULL) {	//This is a leaf node
-		printf("parse_current cl_head is NULL\n");
+//		printf("parse_current cl_head is NULL\n");
 		if (parse_current->parent->cl_head == parse_current) { //This is the beginning of the line
 			// TODO CDS pull this out into a function of its own, as this is pretty nested
-			printf("cl_head = parse_current\n");
+//			printf("cl_head = parse_current\n");
 			//Node values set here
 			// TODO CDS move this code to cil_tree_add_child() with or without the initializer
 			rc = cil_tree_node_init(&ast_node);
@@ -42,7 +42,7 @@ static int __cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, 
 			ast_current = ast_node;
 				
 			// Determine data types and set those values here
-			printf("parse_current->data: %s\n", (char*)parse_current->data);
+//			printf("parse_current->data: %s\n", (char*)parse_current->data);
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
 				rc = cil_gen_block(db, parse_current, ast_node, 0, 0, NULL);
 				if (rc) {
@@ -126,26 +126,26 @@ static int __cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, 
 			}
 		}
 		else { //Rest of line 
-			printf("Rest of line\n");
+//			printf("Rest of line\n");
 			//Not sure if this case is necessary (should be handled above when keyword is detected)			
 		}
 	}
 	else {
-		printf("recurse with cl_head\n");
+//		printf("recurse with cl_head\n");
 		rc = __cil_build_ast(db, parse_current->cl_head, ast_current);
 		if (rc) 
 			return rc;
 	}
 	if (parse_current->next != NULL) {
 		//Process next in list
-		printf("recurse with next\n");
+//		printf("recurse with next\n");
 		rc = __cil_build_ast(db, parse_current->next, ast_current);
 		if (rc) 
 			return rc;	
 	}
 	else {
 		//Return to parent
-		printf("set ast_current to parent\n");
+//		printf("set ast_current to parent\n");
 
 		ast_current = ast_current->parent;
 
