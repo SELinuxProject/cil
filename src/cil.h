@@ -98,7 +98,6 @@
 #define CIL_SYM_LOCAL_TYPES		1
 #define CIL_SYM_LOCAL_ATTRS		2
 #define CIL_SYM_LOCAL_ALIASES		3
-// TODO CDS PERMS can go away
 #define CIL_SYM_LOCAL_PERMS		4
 // TODO CDS this should be MACRO, not INTERFACE
 #define CIL_SYM_LOCAL_TRANS_INTERFACES	5
@@ -106,9 +105,6 @@
 #define CIL_SYM_LOCAL_NUM		6
 
 #define CIL_SYM_SIZE			256 	//TODO Need to determine symtab sizes
-
-
-/* TODO CDS Think about whether we need the self pointer for everything that is in a symtab for search/tranform uses */
 
 typedef uint32_t sepol_id_t;
 
@@ -151,8 +147,6 @@ struct cil_block {
 	uint16_t is_optional;
 	/* TODO CDS we need to figure out how to handle conditionals */
 	char *condition;
-	// TODO CDS should not need this since it is now in the datum
-	struct cil_tree_node *self;
 };
 
 struct cil_class {
@@ -203,8 +197,6 @@ struct cil_role_types {
 
 struct cil_type	{//Also used for attributes
 	cil_symtab_datum_t datum;
-	// TODO CDS should not need this since it is now in the datum
-	struct cil_tree_node *self;
 };
 
 struct cil_typeattribute {
@@ -216,8 +208,6 @@ struct cil_typeattribute {
 
 struct cil_typealias {
 	cil_symtab_datum_t datum;
-	// TODO CDS should not need this since it is now in the datum
-	struct cil_tree_node *self;
 	char *type_str;
 	struct cil_type *type;
 };
@@ -296,8 +286,6 @@ struct cil_level {
 struct cil_transform_interface {
 	cil_symtab_datum_t datum;
 	struct cil_list_item *params;
-	// TODO CDS should not need this since it is now in the datum
-	struct cil_tree_node *self;
 };
 
 struct cil_transform_call {

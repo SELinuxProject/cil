@@ -260,7 +260,6 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	block->is_abstract = is_abstract;
 	block->is_optional = is_optional;
 	block->condition = condition;
-	block->self = ast_node;
 
 	name = (char *)parse_current->next->data;
 
@@ -607,8 +606,6 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return rc;
 	}
 	
-	type->self = ast_node;
-
 	ast_node->data = type;
 	ast_node->flavor = flavor;	
 
@@ -684,8 +681,6 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		printf("Failed to insert alias into symtab\n");
 		return rc;
 	}
-
-	alias->self = ast_node;
 
 	ast_node->data = alias;
 	ast_node->flavor = CIL_TYPEALIAS;
