@@ -181,6 +181,8 @@ int cil_build_ast(struct cil_db **db, struct cil_tree *parse_root)
 	return SEPOL_OK;
 }
 
+// TODO CDS un-recurse
+// TODO CDS db doesn't need to be a double pointer
 int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 {
 	int rc = 0;
@@ -191,6 +193,7 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 	}
 
 	if (current->cl_head == NULL) {
+		// TODO CDS factor out each case into its own resolve function
 		switch( current->flavor ) {
 			case CIL_TYPEALIAS : {
 				printf("case typealias\n");
@@ -286,6 +289,7 @@ int cil_resolve_ast(struct cil_db **db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+// TODO rename, as this is generic and just resolves in a symtab, global or not
 int cil_resolve_name_global(symtab_t symtab, char *name, void **data)
 {
 	cil_symtab_datum_t *datum = NULL;
@@ -314,6 +318,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
 		if (rc) {
 			printf("__cil_resolve_name_helper: cil_get_parent_symtab failed, rc: %d\n", rc);
+			// TODO add cleanup label
 			free(name_dup);
 			return rc;
 		}
@@ -356,15 +361,18 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, void **data)
 {
 	int rc = 0;
+	// TODO CDS change to something more descriptive
 	char *global_name = strdup(name);
 	char first = *name;
 	cil_symtab_datum_t *datum = NULL;	
 
+	// TODO Need to actually error out if you no name
 	if (name != NULL) {
-		if (first != '.') {//No dot, should be local
+		if (first != '.') {
 			if (strrchr(name, '.') == NULL) {
 				symtab_t *symtab = NULL;
 				rc = cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
+				// TODO CDS should really check against constants, since we're using them
 				if (rc) {
 					printf("cil_resolve_name: cil_get_parent_symtab failed, rc: %d\n", rc);
 					return rc;
@@ -379,13 +387,11 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 				}
 			}
 			else {
-				if (__cil_resolve_name_helper(db, ast_node, global_name, sym_index, &datum)) {
-					if (__cil_resolve_name_helper(db, db->ast_root->root, global_name, sym_index, &datum)) {
-						free(global_name);
-						global_name = malloc(strlen(name)+2);
-						strcpy(global_name, ".");
-						strncat(global_name, name, strlen(name));
-					}
+				if (__cil_resolve_name_helper(db, ast_node, global_name, sym_index, &datum) != SEPOL_OK) {
+					free(global_name);
+					global_name = malloc(strlen(name)+2);
+					strcpy(global_name, ".");
+					strncat(global_name, name, strlen(name));
 				}
 			}
 		}

@@ -203,6 +203,7 @@ struct cil_role_types {
 
 struct cil_type	{//Also used for attributes
 	cil_symtab_datum_t datum;
+	// TODO CDS should not need this since it is now in the datum
 	struct cil_tree_node *self;
 };
 
@@ -215,6 +216,7 @@ struct cil_typeattribute {
 
 struct cil_typealias {
 	cil_symtab_datum_t datum;
+	// TODO CDS should not need this since it is now in the datum
 	struct cil_tree_node *self;
 	char *type_str;
 	struct cil_type *type;
@@ -294,6 +296,7 @@ struct cil_level {
 struct cil_transform_interface {
 	cil_symtab_datum_t datum;
 	struct cil_list_item *params;
+	// TODO CDS should not need this since it is now in the datum
 	struct cil_tree_node *self;
 };
 
