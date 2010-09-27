@@ -27,7 +27,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 			//Node values set here
 			// TODO CDS move this code to cil_tree_add_child() with or without the initializer
 			rc = cil_tree_node_init(&ast_node);
-			if (rc) {
+			if (rc != SEPOL_OK) {
 				printf("Failed to init tree node, rc: %d\n", rc);
 				return rc;
 			}
@@ -45,14 +45,14 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 //			printf("parse_current->data: %s\n", (char*)parse_current->data);
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
 				rc = cil_gen_block(db, parse_current, ast_node, 0, 0, NULL);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_block failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
 				rc = cil_gen_class(db, parse_current, ast_node);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_class failed, rc: %d\n", rc);
 					return rc;
 				}
@@ -62,7 +62,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
 				rc = cil_gen_common(db, parse_current, ast_node);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_common failed, rc: %d\n", rc);
 					return rc;
 				}
@@ -71,49 +71,49 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
 				rc = cil_gen_sid(db, parse_current, ast_node);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_sid failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
 				rc = cil_gen_type(db, parse_current, ast_node, CIL_TYPE);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_type failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
 				rc = cil_gen_type(db, parse_current, ast_node, CIL_ATTR);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_type (attr) failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
 				rc = cil_gen_typealias(db, parse_current, ast_node);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_typealias failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
 				rc = cil_gen_role(db, parse_current, ast_node);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_role failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
 				rc = cil_gen_bool(db, parse_current, ast_node);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_bool failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
 				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_ALLOWED); 
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("cil_gen_avrule (allow) failed, rc: %d\n", rc);
 					return rc;
 				}
@@ -133,14 +133,14 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	else {
 //		printf("recurse with cl_head\n");
 		rc = cil_build_ast(db, parse_current->cl_head, ast_current);
-		if (rc) 
+		if (rc != SEPOL_OK) 
 			return rc;
 	}
 	if (parse_current->next != NULL) {
 		//Process next in list
 //		printf("recurse with next\n");
 		rc = cil_build_ast(db, parse_current->next, ast_current);
-		if (rc) 
+		if (rc != SEPOL_OK) 
 			return rc;	
 	}
 	else {
@@ -173,7 +173,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				struct cil_typealias *alias = (struct cil_typealias*)current->data;
 				struct cil_tree_node *type_node = NULL;
 				rc = cil_resolve_name(db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
-				if (rc) {
+				if (rc != SEPOL_OK) {
 					printf("Name resolution failed for %s\n", alias->type_str);
 					return SEPOL_ERR;
 				}
@@ -191,7 +191,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 					
 				if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
 					rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
-					if (rc) {
+					if (rc != SEPOL_OK) {
 						printf("Name resolution failed for %s\n", rule->src_str);
 						return SEPOL_ERR;
 					}
@@ -202,7 +202,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 					}
 					
 					rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
-					if (rc) {
+					if (rc != SEPOL_OK) {
 						printf("Name resolution failed for %s\n", rule->tgt_str);
 						return SEPOL_ERR;
 					}
@@ -213,7 +213,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 					}
 
 					rc = cil_resolve_name_global(db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
-					if (rc) {
+					if (rc != SEPOL_OK) {
 						printf("Name resolution failed for %s\n", rule->obj_str);
 						return SEPOL_ERR;
 					}
@@ -246,13 +246,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	}
 	else {
 		rc = cil_resolve_ast(db, current->cl_head);
-		if (rc) 
+		if (rc != SEPOL_OK) 
 			return rc;
 	}
 
 	if (current->next != NULL) {
 		rc = cil_resolve_ast(db, current->next);
-		if (rc)
+		if (rc != SEPOL_OK)
 			return rc;
 	}
 	else {
@@ -289,7 +289,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 	}
 	else {
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
-		if (rc) {
+		if (rc != SEPOL_OK) {
 			printf("__cil_resolve_name_helper: cil_get_parent_symtab failed, rc: %d\n", rc);
 			// TODO add cleanup label
 			free(name_dup);
@@ -348,8 +348,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 		if (strrchr(name, '.') == NULL) {
 			symtab_t *symtab = NULL;
 			rc = cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
-			// TODO CDS should really check against constants, since we're using them
-			if (rc) {
+			if (rc != SEPOL_OK) {
 				printf("cil_resolve_name: cil_get_parent_symtab failed, rc: %d\n", rc);
 				return rc;
 			}

@@ -9,7 +9,7 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, cil_symtab_datum_t *d
 {
 	char *newkey = strdup(key);
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
-	if (rc) {
+	if (rc != SEPOL_OK) {
 		free(newkey);
 		return rc;
 	}
