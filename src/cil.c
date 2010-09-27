@@ -88,8 +88,7 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 	return SEPOL_OK;
 } 
 
-// TODO rename function to sound less generic, since it just generates perms for class/common
-int cil_parse_to_children(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node)
+int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node)
 {
 	int rc = 0;
 	struct cil_tree_node *new_ast = NULL;
@@ -328,7 +327,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	ast_node->data = cls;
 	ast_node->flavor = CIL_CLASS;
 
-	rc = cil_parse_to_children(db, parse_current->next->next->cl_head, ast_node);
+	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node);
 	if (rc) {
 		printf("Class: failed to parse perms\n");
 		return SEPOL_ERR;
@@ -412,7 +411,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	ast_node->data = common;
 	ast_node->flavor = CIL_COMMON;
 
-	rc = cil_parse_to_children(db, parse_current->next->next->cl_head, ast_node);
+	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node);
 	if (rc) {
 		printf("Class: failed to parse perms\n");
 		return SEPOL_ERR;

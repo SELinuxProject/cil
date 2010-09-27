@@ -382,7 +382,7 @@ int cil_db_init(struct cil_db **);
 int cil_list_init(struct cil_list **);
 int cil_list_item_init(struct cil_list_item **);
 int cil_parse_to_list(struct cil_tree_node *, struct cil_list **, uint32_t);
-int cil_parse_to_children(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_perm_nodes(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_stack_init(struct cil_stack **);
 int cil_stack_push(struct cil_stack *, void *);
 int cil_stack_pop(struct cil_stack *, void *);
