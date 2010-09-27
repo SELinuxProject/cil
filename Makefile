@@ -59,9 +59,8 @@ parser: $(PARSER_TEST) $(ALL_SRCS)
 	$(CC) $(CFLAGS) -o $(PARSER_NAME) $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
 
 unit: $(TEST_SRCS) $(ALL_SRCS)
-	@echo $(ALL_SRCS)
-	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests.exe
-	./unit_tests.exe
+	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
+	./unit_tests
 
 coverage: clean unit
 	test -d cov || mkdir cov
@@ -76,7 +75,7 @@ install:
 
 clean: 
 	-rm -f $(SRCDIR)/$(ALL_OBJS) $(SRCDIR)/$(GENERATED) run_tests
-	-rm -f *.gcno *.gcda *.gcov unit_tests.exe
+	-rm -f *.gcno *.gcda *.gcov unit_tests
 	-rm -f $(PARSER_NAME) $(AST_NAME)
 	-rm -rf cov/
 
