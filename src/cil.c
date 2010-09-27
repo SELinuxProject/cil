@@ -34,6 +34,16 @@ int cil_db_init(struct cil_db **db)
 	return SEPOL_OK;
 }
 
+void cil_db_destroy(struct cil_db **db)
+{
+	cil_tree_destroy((*db)->ast_root);
+	cil_symtab_array_destroy((*db)->global_symtab);
+	cil_symtab_array_destroy((*db)->local_symtab);
+	
+	*db = NULL;	
+
+}
+
 /* TODO CDS add cil_db_destroy() */
 int cil_list_init(struct cil_list **list)
 {
@@ -210,6 +220,14 @@ int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 	return SEPOL_OK;
 }
 
+void cil_symtab_array_destroy(symtab_t symtab[])
+{
+	int i=0;
+	for (i=0;i<CIL_SYM_LOCAL_NUM; i++) {
+		hashtab_destroy(symtab[i].table);
+	}
+}
+
 int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, uint32_t cil_sym_index)
 {
 	if (db == NULL || ast_node == NULL)
@@ -287,11 +305,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 void cil_destroy_block(struct cil_block *block)
 {
-	int i=0;
-	for (i=0;i<CIL_SYM_LOCAL_NUM; i++) {
-		hashtab_destroy(block->symtab[i].table);
-	}
-
+	cil_symtab_array_destroy(block->symtab);
 	free(block);
 }
 

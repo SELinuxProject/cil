@@ -73,9 +73,9 @@ int main(int argc, char *argv[])
 		cil_tree_print(db->ast_root->root, 0);
 		
 		printf("----------------------------------------------\n\n");
-		printf("Destroying ast\n");
-		cil_tree_destroy(&db->ast_root);
-		printf("AST destroyed\n\n");
+		printf("Destroying db\n");
+		cil_db_destroy(&db);
+		printf("db destroyed\n\n");
 
 	}
 
