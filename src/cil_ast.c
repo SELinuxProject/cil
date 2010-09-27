@@ -270,7 +270,7 @@ int cil_resolve_name_global(symtab_t symtab, char *name, void **data)
 	if (datum == NULL) 
 		return SEPOL_ERR;
 
-	*data = (struct cil_tree_node*)datum->self;
+	*data = (struct cil_tree_node*)datum->node;
 	
 	return SEPOL_OK;
 } 
@@ -310,11 +310,11 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 				free(name_dup);
 				return SEPOL_ERR;
 			}
-			symtab = &(((struct cil_block*)new_datum->self->data)->symtab[CIL_SYM_LOCAL_BLOCKS]);
+			symtab = &(((struct cil_block*)new_datum->node->data)->symtab[CIL_SYM_LOCAL_BLOCKS]);
 		}
 		else {
 			//printf("type key: %s\n", tok_current); 
-			symtab = &(((struct cil_block*)new_datum->self->data)->symtab[sym_index]);
+			symtab = &(((struct cil_block*)new_datum->node->data)->symtab[sym_index]);
 			new_datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)tok_current);
 			if (new_datum == NULL) {
 				printf("__cil_resolve_name_helper: Failed to resolve name, current: %s\n", tok_current);
@@ -387,7 +387,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 		}
 
 		if (datum != NULL) {
-			*data = (struct cil_tree_node*)datum->self;
+			*data = (struct cil_tree_node*)datum->node;
 		}
 	}
 	

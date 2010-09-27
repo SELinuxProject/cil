@@ -15,7 +15,7 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, cil_symtab_datum_t *d
 	}
 	else {
 		datum->value = ++symtab->nprim;
-		datum->self = node;
+		datum->node = node;
 	}
 	
 	return SEPOL_OK;
