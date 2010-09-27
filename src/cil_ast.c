@@ -8,7 +8,7 @@
 #include "cil.h"
 
 // TODO CDS think about switching to a loop instead of recursion
-static int __cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
+int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
 	if (db == NULL || parse_tree == NULL || ast == NULL)
 		return SEPOL_ERR;
@@ -132,14 +132,14 @@ static int __cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, 
 	}
 	else {
 //		printf("recurse with cl_head\n");
-		rc = __cil_build_ast(db, parse_current->cl_head, ast_current);
+		rc = cil_build_ast(db, parse_current->cl_head, ast_current);
 		if (rc) 
 			return rc;
 	}
 	if (parse_current->next != NULL) {
 		//Process next in list
 //		printf("recurse with next\n");
-		rc = __cil_build_ast(db, parse_current->next, ast_current);
+		rc = cil_build_ast(db, parse_current->next, ast_current);
 		if (rc) 
 			return rc;	
 	}
@@ -150,19 +150,6 @@ static int __cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, 
 		ast_current = ast_current->parent;
 
 		return SEPOL_OK;
-	}
-	
-	return SEPOL_OK;
-}
-
-// TODO CDS Seems like this can go away, as all it does is call the helper function
-int cil_build_ast(struct cil_db *db, struct cil_tree *parse_root)
-{
-	if (db == NULL || parse_root == NULL)
-		return SEPOL_ERR;
-
-	if(__cil_build_ast(db, parse_root->root, db->ast_root->root)) {
-		return SEPOL_ERR;
 	}
 	
 	return SEPOL_OK;
