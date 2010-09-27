@@ -362,7 +362,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 			}
 		}
 		else {
-			if (__cil_resolve_name_helper(db, ast_node, global_name, sym_index, &datum) != SEPOL_OK) {
+			if (__cil_resolve_name_helper(db, ast_node, name, sym_index, &datum) != SEPOL_OK) {
 				free(global_name);
 				global_name = malloc(strlen(name)+2);
 				strcpy(global_name, ".");
