@@ -44,7 +44,6 @@ void cil_db_destroy(struct cil_db **db)
 
 }
 
-/* TODO CDS add cil_db_destroy() */
 int cil_list_init(struct cil_list **list)
 {
 	struct cil_list *new_list = malloc(sizeof(struct cil_list));

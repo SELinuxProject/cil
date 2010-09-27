@@ -26,7 +26,6 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 		cil_lexer_next(&tok);
 		if (tok->type == OPAREN) {
 			paren_count++;
-			/* TODO CDS switch to using an init()/destroy() for cil_tree_nodes to remove all this duplicate code */
 			cil_tree_node_init(&node);
 			node->parent = current;
 			node->flavor = CIL_PARSER;
