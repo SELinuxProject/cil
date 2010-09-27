@@ -59,6 +59,11 @@ int main(int argc, char *argv[])
 		cil_tree_print(db->ast_root->root, 0);
 	
 		printf("----------------------------------------------\n\n");
+		printf("Destroying parse tree\n");
+		cil_tree_destroy(&parse_root);
+		printf("Parse tree destroyed\n\n");
+
+		printf("----------------------------------------------\n\n");
 		printf("Resolving ast\n\n");
 		if (cil_resolve_ast(db, db->ast_root->root)) {
 			printf("Failed to resolve ast, exiting\n");
@@ -66,6 +71,12 @@ int main(int argc, char *argv[])
 		}
 
 		cil_tree_print(db->ast_root->root, 0);
+		
+		printf("----------------------------------------------\n\n");
+		printf("Destroying ast\n");
+		cil_tree_destroy(&db->ast_root);
+		printf("AST destroyed\n\n");
+
 	}
 
 	return SEPOL_OK;

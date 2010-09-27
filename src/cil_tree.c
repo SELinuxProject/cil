@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "cil_tree.h"
 #include "cil.h"
+#include "cil_parser.h"
 
 int cil_tree_init(struct cil_tree **tree)
 {
@@ -13,33 +14,37 @@ int cil_tree_init(struct cil_tree **tree)
 	return SEPOL_OK;
 }
 
-void __cil_tree_destroy(struct cil_tree_node *node)
+void cil_tree_destroy(struct cil_tree **tree)
 {
+	struct cil_tree_node *node = (*tree)->root;
+	struct cil_tree_node *next = NULL;
+
 	while(node != NULL)
 	{
-		if (node->next == NULL) 
-			cil_tree_node_destroy(node);
-
-	}
-
-/*	if (node->cl_head == NULL) {
-		if (node->next == NULL) {
-			cil_tree_node_destroy(node);
-		else {
-			__cil_tree_destroy(node->next);
-			__cil_tree_destroy(node);
+		//printf("##### node: %d#####\n", (char*)node->flavor);
+		if (node->cl_head != NULL){
+			next = node->cl_head;
 		}
+		
+		else {
+			if (node->next == NULL) {
+				next = node->parent;
+				if (node->parent != NULL) {
+					node->parent->cl_head = NULL;
+				}
+				//printf("Destroying node\n");
+				cil_tree_node_destroy(&node);
+			}
+			else {
+				next = node->next;
+				//printf("Destroying node\n");
+				cil_tree_node_destroy(&node);
+			}
+		}
+		node = next;
 	}
-	else { 
-		__cil_tree_destroy(node->cl_head);
-		__cil_tree_destroy(node);
-	} */
-}
 
-void cil_tree_destroy(struct cil_tree *tree)
-{
-	struct cil_tree_node *current = tree->root;
-	
+	*tree = NULL;
 }
 
 int cil_tree_node_init(struct cil_tree_node **node)
@@ -59,60 +64,65 @@ int cil_tree_node_init(struct cil_tree_node **node)
 	return SEPOL_OK;
 }
 
-void cil_tree_node_destroy(struct cil_tree_node *node)
+void cil_tree_node_destroy(struct cil_tree_node **node)
 {
-	switch(node->flavor) {
+	switch((*node)->flavor) {
+		case(CIL_PARSER) : {
+			free((*node)->data);
+			break;	
+		}
 		case(CIL_BLOCK) : { 
-			cil_destroy_block(node->data);	
+			cil_destroy_block((*node)->data);	
 			break;
 		}
 		case(CIL_CLASS) : {
-			cil_destroy_class(node->data);
+			cil_destroy_class((*node)->data);
 			break;
 		}
 		case(CIL_PERM) : {
-			cil_destroy_perm(node->data);
+			cil_destroy_perm((*node)->data);
 			break;
 		}
 		case(CIL_COMMON) : {
-			cil_destroy_common(node->data);
+			cil_destroy_common((*node)->data);
 			break;
 		}
 		case(CIL_SID) :{
-			cil_destroy_sid(node->data);
+			cil_destroy_sid((*node)->data);
 			break;
 		}
 		case(CIL_AVRULE) : {
-			cil_destroy_avrule(node->data);
+			cil_destroy_avrule((*node)->data);
 			break;
 		}
 		case(CIL_TYPE) : {
-			cil_destroy_type(node->data);
+			cil_destroy_type((*node)->data);
 			break;
 		}
 		case(CIL_ATTR) : {
-			cil_destroy_type(node->data);
+			cil_destroy_type((*node)->data);
 			break;
 		}
 		case(CIL_USER) : {
-			cil_destroy_user(node->data);
+			cil_destroy_user((*node)->data);
 			break;
 		}
 		case(CIL_ROLE) : {
-			cil_destroy_role(node->data);
+			cil_destroy_role((*node)->data);
 			break;
 		}
 		case(CIL_BOOL) : {
-			cil_destroy_bool(node->data);
+			cil_destroy_bool((*node)->data);
 			break;
 		}
 		case(CIL_TYPEALIAS) : {
-			cil_destroy_typealias(node->data);
+			cil_destroy_typealias((*node)->data);
 			break;
 		}
 	}
 
-	free(node);
+	free(*node);
+	*node = NULL;
 }
 
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
