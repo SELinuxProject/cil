@@ -213,7 +213,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 					}
 
 					rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
-//					rc = cil_resolve_name_global(db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
 					if (rc != SEPOL_OK) {
 						printf("Name resolution failed for %s\n", rule->obj_str);
 						return SEPOL_ERR;
