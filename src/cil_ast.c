@@ -234,7 +234,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 						}
 						perm = perm->next;
 					}
-					rule->perms_str = NULL; //TODO Need to destroy list here
+					cil_list_destroy(&rule->perms_str);
 				}
 				break;
 			}	

@@ -379,8 +379,11 @@ struct mls_constrain {
 };*/
 
 int cil_db_init(struct cil_db **);
+void cil_db_destroy(struct cil_db **);
 int cil_list_init(struct cil_list **);
+void cil_list_destroy (struct cil_list **);
 int cil_list_item_init(struct cil_list_item **);
+void cil_list_item_destroy(struct cil_list_item **);
 int cil_parse_to_list(struct cil_tree_node *, struct cil_list **, uint32_t);
 int cil_gen_perm_nodes(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_stack_init(struct cil_stack **);
@@ -388,7 +391,9 @@ int cil_stack_push(struct cil_stack *, void *);
 int cil_stack_pop(struct cil_stack *, void *);
 int cil_get_namespace_str(struct cil_stack *, char **);
 int cil_symtab_array_init(symtab_t [], uint32_t);
+void cil_symtab_array_destroy(symtab_t []);
 int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
+void cil_data_destroy(void **, uint32_t);
 
 int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
 void cil_destroy_block(struct cil_block *);

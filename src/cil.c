@@ -36,9 +36,9 @@ int cil_db_init(struct cil_db **db)
 
 void cil_db_destroy(struct cil_db **db)
 {
-	cil_tree_destroy((*db)->ast_root);
-	cil_symtab_array_destroy((*db)->global_symtab);
-	cil_symtab_array_destroy((*db)->local_symtab);
+	cil_tree_destroy(&(*db)->ast_root);
+	cil_symtab_array_destroy(&(*db)->global_symtab);
+	cil_symtab_array_destroy(&(*db)->local_symtab);
 	
 	*db = NULL;	
 
@@ -54,6 +54,18 @@ int cil_list_init(struct cil_list **list)
 	return SEPOL_OK;
 }
 
+void cil_list_destroy(struct cil_list **list)
+{
+	struct cil_list_item *item = (*list)->list;
+	struct cil_list_item *next = NULL; 
+	while (item != NULL)
+	{
+		next = item->next;
+		cil_list_item_destroy(&item);
+		item = next;
+	}
+	*list = NULL;	
+}
 
 int cil_list_item_init(struct cil_list_item **item)
 {
@@ -65,6 +77,85 @@ int cil_list_item_init(struct cil_list_item **item)
 	*item = new_item;
 
 	return SEPOL_OK;
+}
+
+void cil_list_item_destroy(struct cil_list_item **item)
+{
+	cil_data_destroy(&(*item)->data, (*item)->flavor);
+	free(*item);
+	*item = NULL;
+}
+
+void cil_data_destroy(void **data, uint32_t flavor)
+{
+	switch(flavor) {
+		case (CIL_ROOT) : {
+			free(*data);
+			break;
+		}
+		case (CIL_PARSER) : {
+			free(*data);
+			break;
+		}
+		case (CIL_AST_STR) : {
+			free(*data);
+			break;
+		}
+		case (CIL_BLOCK) : {
+			cil_destroy_block(*data);
+			break;
+		}
+		case (CIL_CLASS) : {
+			cil_destroy_class(*data);
+			break;
+		}
+		case (CIL_PERM) : {
+			cil_destroy_perm(*data);
+			break;
+		}
+		case (CIL_COMMON) : {
+			cil_destroy_common(*data);
+			break;
+		}
+		case (CIL_SID) : {
+			cil_destroy_sid(*data);
+			break;
+		}
+		case (CIL_AVRULE) : {
+			cil_destroy_avrule(*data);
+			break;
+		}
+		case (CIL_TYPE) : {
+			cil_destroy_type(*data);
+			break;
+		}
+		case (CIL_ATTR) : {
+			cil_destroy_type(*data);
+			break;
+		}
+		case (CIL_USER) : {
+			cil_destroy_user(*data);
+			break;
+		}
+		case (CIL_ROLE) : {
+			cil_destroy_role(*data);
+			break;
+		}
+		case (CIL_BOOL) : {
+			cil_destroy_bool(*data);
+			break;
+		}
+		case (CIL_TYPEALIAS) : {
+			cil_destroy_typealias(*data);
+			break;
+		}
+		default : {
+			printf("Unknown data flavor: %d\n", flavor);
+			break;
+		}
+	}
+	
+	*data = NULL;		
 }
 
 int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast_cl, uint32_t flavor)

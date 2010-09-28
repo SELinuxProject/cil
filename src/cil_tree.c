@@ -66,61 +66,7 @@ int cil_tree_node_init(struct cil_tree_node **node)
 
 void cil_tree_node_destroy(struct cil_tree_node **node)
 {
-	switch((*node)->flavor) {
-		case(CIL_PARSER) : {
-			free((*node)->data);
-			break;	
-		}
-		case(CIL_BLOCK) : { 
-			cil_destroy_block((*node)->data);	
-			break;
-		}
-		case(CIL_CLASS) : {
-			cil_destroy_class((*node)->data);
-			break;
-		}
-		case(CIL_PERM) : {
-			cil_destroy_perm((*node)->data);
-			break;
-		}
-		case(CIL_COMMON) : {
-			cil_destroy_common((*node)->data);
-			break;
-		}
-		case(CIL_SID) :{
-			cil_destroy_sid((*node)->data);
-			break;
-		}
-		case(CIL_AVRULE) : {
-			cil_destroy_avrule((*node)->data);
-			break;
-		}
-		case(CIL_TYPE) : {
-			cil_destroy_type((*node)->data);
-			break;
-		}
-		case(CIL_ATTR) : {
-			cil_destroy_type((*node)->data);
-			break;
-		}
-		case(CIL_USER) : {
-			cil_destroy_user((*node)->data);
-			break;
-		}
-		case(CIL_ROLE) : {
-			cil_destroy_role((*node)->data);
-			break;
-		}
-		case(CIL_BOOL) : {
-			cil_destroy_bool((*node)->data);
-			break;
-		}
-		case(CIL_TYPEALIAS) : {
-			cil_destroy_typealias((*node)->data);
-			break;
-		}
-	}
-
+	cil_data_destroy(&(*node)->data, (*node)->flavor);
 	free(*node);
 	*node = NULL;
 }
