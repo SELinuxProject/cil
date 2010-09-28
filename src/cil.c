@@ -37,8 +37,8 @@ int cil_db_init(struct cil_db **db)
 void cil_db_destroy(struct cil_db **db)
 {
 	cil_tree_destroy(&(*db)->ast_root);
-	cil_symtab_array_destroy(&(*db)->global_symtab);
-	cil_symtab_array_destroy(&(*db)->local_symtab);
+	cil_symtab_array_destroy((*db)->global_symtab);
+	cil_symtab_array_destroy((*db)->local_symtab);
 	
 	*db = NULL;	
 
