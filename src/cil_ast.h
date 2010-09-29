@@ -10,7 +10,7 @@ int cil_build_ast(struct cil_db *, struct cil_tree_node *, struct cil_tree_node 
 int cil_resolve_ast(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_name(struct cil_db *, struct cil_tree_node *, char *, uint32_t, struct cil_tree_node **);
 int cil_resolve_name_global(symtab_t, char *, void **);
-int cil_qualify_name(struct cil_tree *);
+int cil_qualify_name(struct cil_tree_node *);
 
 #endif /* CIL_AST_H_ */
 
