@@ -7,6 +7,7 @@
 
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, cil_symtab_datum_t *datum, struct cil_tree_node *node)
 {
+	// TODO CDS need to figure out how this is freed, as I do not believe destroying the symtab will do this
 	char *newkey = strdup(key);
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
 	if (rc != SEPOL_OK) {

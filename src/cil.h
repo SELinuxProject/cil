@@ -9,6 +9,7 @@
 /*
 	Tree/list node types
 */
+// TODO CDS Make declarative types greater than some define, so we can just check > some minimum
 #define CIL_ROOT		0
 #define CIL_PARSER		1
 #define CIL_AST_STR		2
@@ -109,6 +110,8 @@
 typedef uint32_t sepol_id_t;
 
 struct cil_db {
+	// TODO CDS this is not really a root, it is a tree
+	// Why do we have a separate tree data structure again?
 	struct cil_tree *ast_root;
 	symtab_t global_symtab[CIL_SYM_GLOBAL_NUM]; 	//Global namespace
 	symtab_t local_symtab[CIL_SYM_LOCAL_NUM];	//Local namespace for top level declarations

@@ -707,6 +707,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 void cil_destroy_type(struct cil_type *type)
 {
+	// TODO CDS need a datum_destroy() function now, since the datum allocates the key and needs to free it
 	free(type);
 }
 

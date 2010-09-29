@@ -12,6 +12,7 @@
 #include "../../src/cil_ast.h"
 #include "../../src/cil_parser.h"
 
+// TODO Check more in the data structures
 struct cil_file_data {
 	char *buffer;
 	uint32_t file_size;
@@ -137,6 +138,7 @@ void test_symtab_init(CuTest *tc) {
 	for (i=0; i<CIL_SYM_GLOBAL_NUM; i++) {
 	    rc = symtab_init(&test_new_db->global_symtab[i], CIL_SYM_SIZE);
 	    CuAssertIntEquals(tc, 0, rc);
+	    // TODO CDS add checks to make sure the symtab looks correct
 	}
 
 	free(test_new_db);
@@ -184,6 +186,7 @@ void test_cil_db_init(CuTest *tc) {
 
 // TODO: Reach SEPOL_ERR return in cil_db_init ( currently can't produce a method to do so )
 
+// TODO rewrite to use the gen_tree function
 void test_cil_parser(CuTest *tc) {
 	int rc = 0;
 	struct cil_file_data *data;
@@ -199,6 +202,7 @@ void test_cil_parser(CuTest *tc) {
 	rc = cil_parser(data->buffer, data->file_size + 2, &test_parse_root);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_parse_root);
+	// TODO add checking of the parse tree that is returned
 }
 
 void test_cil_lexer_setup(CuTest *tc) {
@@ -1261,6 +1265,7 @@ void test_cil_gen_avrule(CuTest *tc) {
 	}
 }
 
+// TODO CDS make negative test
 void test_cil_gen_avrule_notlist(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "write", ")", NULL};
 	struct cil_tree *tree;
