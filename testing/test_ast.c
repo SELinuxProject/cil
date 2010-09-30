@@ -64,6 +64,11 @@ int main(int argc, char *argv[])
 		printf("Parse tree destroyed\n\n");
 
 		printf("----------------------------------------------\n\n");
+		printf("Qualifying names\n");
+		cil_qualify_name(db->ast_root->root);
+		printf("Names fully qualified\n\n");
+
+		printf("----------------------------------------------\n\n");
 		printf("Resolving ast\n\n");
 		if (cil_resolve_ast(db, db->ast_root->root)) {
 			printf("Failed to resolve ast, exiting\n");

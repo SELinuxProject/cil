@@ -378,4 +378,73 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 	return SEPOL_OK;
 }
 
+int cil_qualify_name(struct cil_tree *tree)
+{
+	struct cil_tree_node *curr = tree;
+	uint16_t reverse = 0;
+	uint32_t length = 0;
+	char *fqp = (char *)calloc(1,sizeof(char));
+	char *fqn = (char *)calloc(1,sizeof(char));
+	char *uqn = NULL;
 
+	do {
+		if (curr->cl_head != NULL) {
+			if (!reverse) {
+				if (curr->flavor != CIL_ROOT) { // append name
+					length += strlen(((cil_symtab_datum_t*)curr->data)->name) + 1;
+					if ((fqp = (char *)realloc(fqp, length)) == NULL)
+						fqp = (char *)calloc(length, sizeof(char));
+					strcat(fqp, ((cil_symtab_datum_t*)curr->data)->name);
+					strcat(fqp, ".");
+				}
+				curr = curr->cl_head;
+			}
+			else {
+				length -= strlen(((cil_symtab_datum_t*)curr->data)->name) + 1;
+				
+				if ((fqp = (char *)realloc(fqp, length)) == NULL) 
+					fqp = (char *)calloc(length, sizeof(char));	
+				else
+					fqp[length] = '\0';
+				
+				if (curr->next != NULL) {
+					curr = curr->next;
+					reverse = 0;
+				}
+				else 
+					curr = curr->parent;
+			}
+		}
+		else if (((cil_symtab_datum_t*)curr->data)->name != NULL){
+			fqn = strdup(fqp);
+			uqn = ((cil_symtab_datum_t*)curr->data)->name; 
+
+			if ((fqn = (char *)realloc(fqn, length + strlen(uqn))) == NULL)
+				fqn = (char *)calloc(length + strlen(uqn), sizeof(char));
+
+			strcat(fqn, uqn);
+
+			((cil_symtab_datum_t*)curr->data)->name = fqn;	// Replace with new, fully qualified string
+
+			if (curr->next != NULL)
+				curr = curr->next;
+			else {
+				curr = curr->parent;
+				reverse = 1;
+			}
+			free(fqn);
+		}
+		else {
+			if (curr->next != NULL)
+				curr = curr->next;
+			else {
+				curr = curr->parent;
+				reverse = 1;
+			}
+		}	
+	} while (curr->flavor != CIL_ROOT);
+
+	free(fqp);
+
+	return SEPOL_OK;
+}

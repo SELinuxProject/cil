@@ -13,83 +13,83 @@
 #include "../../src/cil_parser.h"
 
 struct cil_file_data {
-    char *buffer;
-    uint32_t file_size;
+	char *buffer;
+	uint32_t file_size;
 };
 
 void set_cil_file_data(struct cil_file_data **data) {
-    struct cil_file_data *new_data = malloc(sizeof(struct cil_file_data));
-    FILE *file;
-    struct stat filedata;
-    uint32_t file_size;
-    char *buffer;
+	struct cil_file_data *new_data = malloc(sizeof(struct cil_file_data));
+	FILE *file;
+	struct stat filedata;
+	uint32_t file_size;
+	char *buffer;
 
-    file = fopen("testing/test.cil", "r");
-    if (!file) {
-        fprintf(stderr, "Could not open file\n");
-        exit(1);
-    }
-    if (stat("testing/test.cil", &filedata) == -1) {
-        printf("Could not stat file\n");
-        exit(1);
-    }
-    file_size = filedata.st_size;
+	file = fopen("testing/test.cil", "r");
+	if (!file) {
+	    fprintf(stderr, "Could not open file\n");
+	    exit(1);
+	}
+	if (stat("testing/test.cil", &filedata) == -1) {
+	    printf("Could not stat file\n");
+	    exit(1);
+	}
+	file_size = filedata.st_size;
 
-    buffer = malloc(file_size + 2);
-    fread(buffer, file_size, 1, file);
-    memset(buffer+file_size, 0, 2);
-    fclose(file);
+	buffer = malloc(file_size + 2);
+	fread(buffer, file_size, 1, file);
+	memset(buffer+file_size, 0, 2);
+	fclose(file);
 
 
-    new_data->buffer = buffer;
-    new_data->file_size = file_size;
+	new_data->buffer = buffer;
+	new_data->file_size = file_size;
 
-    *data = new_data;
+	*data = new_data;
 
 }
 
 void gen_test_tree(struct cil_tree **test_root, char *line[]) {
-    struct cil_tree *new_tree = malloc(sizeof(struct cil_tree));
-    struct cil_tree_node *node, *item, *current;
+	struct cil_tree *new_tree = malloc(sizeof(struct cil_tree));
+	struct cil_tree_node *node, *item, *current;
 
-    cil_tree_init(&new_tree);
-    new_tree->root->flavor = CIL_PARSER;
-    current = new_tree->root;
-    
-    char **i = line;
-    do {
-        if (*i == (char*)"(") {
-            cil_tree_node_init(&node);
-            node->parent = current;
-            node->flavor = CIL_PARSER;
-            node->line = 0;
-            if (current->cl_head == NULL)
-                current->cl_head = node;
-            else
-                current->cl_tail->next = node;
-            current->cl_tail = node;
-            current = node;
-        }
-        else if (*i == (char*)")")
-            current = current->parent;
-        else {
-            cil_tree_node_init(&item);
-            item->parent = current;
-            item->data = strdup(*i);
-            item->flavor = CIL_PARSER;
-            item->line = 0;
-            if (current->cl_head == NULL) {
-                current->cl_head = item;
-            }
-            else {
-                current->cl_tail->next = item;
-            }
-            current->cl_tail = item;
-        }
-        i++;
-    } while(*i != NULL);
+	cil_tree_init(&new_tree);
+	new_tree->root->flavor = CIL_PARSER;
+	current = new_tree->root;
+	
+	char **i = line;
+	do {
+	    if (*i == (char*)"(") {
+	        cil_tree_node_init(&node);
+	        node->parent = current;
+	        node->flavor = CIL_PARSER;
+	        node->line = 0;
+	        if (current->cl_head == NULL)
+	            current->cl_head = node;
+	        else
+	            current->cl_tail->next = node;
+	        current->cl_tail = node;
+	        current = node;
+	    }
+	    else if (*i == (char*)")")
+	        current = current->parent;
+	    else {
+	        cil_tree_node_init(&item);
+	        item->parent = current;
+	        item->data = strdup(*i);
+	        item->flavor = CIL_PARSER;
+	        item->line = 0;
+	        if (current->cl_head == NULL) {
+	            current->cl_head = item;
+	        }
+	        else {
+	            current->cl_tail->next = item;
+	        }
+	        current->cl_tail = item;
+	    }
+	    i++;
+	} while(*i != NULL);
 
-    *test_root = new_tree;
+	*test_root = new_tree;
 }
 
 void test_cil_tree_node_init(CuTest *tc) {
@@ -111,97 +111,94 @@ void test_cil_tree_node_init(CuTest *tc) {
 }
 
 void test_cil_tree_init(CuTest *tc) {
-    struct cil_tree *test_tree;
+	struct cil_tree *test_tree;
 
-    int rc = cil_tree_init(&test_tree);
+	int rc = cil_tree_init(&test_tree);
 
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_tree);
-    CuAssertPtrEquals(tc, NULL, test_tree->root->cl_head);
-    CuAssertPtrEquals(tc, NULL, test_tree->root->cl_tail);
-    CuAssertPtrEquals(tc, NULL, test_tree->root->parent);
-    CuAssertPtrEquals(tc, NULL, test_tree->root->data);
-    CuAssertPtrEquals(tc, NULL, test_tree->root->next);
-    CuAssertIntEquals(tc, 0, test_tree->root->flavor);
-    CuAssertIntEquals(tc, 0, test_tree->root->line);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_tree);
+	CuAssertPtrEquals(tc, NULL, test_tree->root->cl_head);
+	CuAssertPtrEquals(tc, NULL, test_tree->root->cl_tail);
+	CuAssertPtrEquals(tc, NULL, test_tree->root->parent);
+	CuAssertPtrEquals(tc, NULL, test_tree->root->data);
+	CuAssertPtrEquals(tc, NULL, test_tree->root->next);
+	CuAssertIntEquals(tc, 0, test_tree->root->flavor);
+	CuAssertIntEquals(tc, 0, test_tree->root->line);
 
-    free(test_tree);
+	free(test_tree);
 }
 
 void test_symtab_init(CuTest *tc) {
-    struct cil_db *test_new_db;
-    test_new_db = malloc(sizeof(struct cil_db));
+	struct cil_db *test_new_db;
+	test_new_db = malloc(sizeof(struct cil_db));
 
-    uint32_t rc = 0, i =0;
-    
-    for (i=0; i<CIL_SYM_GLOBAL_NUM; i++) {
-        rc = symtab_init(&test_new_db->global_symtab[i], CIL_SYM_SIZE);
-        CuAssertIntEquals(tc, 0, rc);
-    }
+	uint32_t rc = 0, i =0;
+	
+	for (i=0; i<CIL_SYM_GLOBAL_NUM; i++) {
+	    rc = symtab_init(&test_new_db->global_symtab[i], CIL_SYM_SIZE);
+	    CuAssertIntEquals(tc, 0, rc);
+	}
 
-    free(test_new_db);
+	free(test_new_db);
 }
 
 void test_symtab_init_no_table_neg(CuTest *tc) {
-    struct cil_db *test_new_db;
-    test_new_db = malloc(sizeof(struct cil_db));
+	struct cil_db *test_new_db;
+	test_new_db = malloc(sizeof(struct cil_db));
 
-    int rc = symtab_init(&test_new_db->global_symtab[0], (uint32_t)SIZE_MAX);
-    CuAssertIntEquals(tc, -1, rc);
+	int rc = symtab_init(&test_new_db->global_symtab[0], (uint32_t)SIZE_MAX);
+	CuAssertIntEquals(tc, -1, rc);
 
-    free(test_new_db);
+	free(test_new_db);
 }
 
 void test_cil_symtab_array_init(CuTest *tc) {
-    struct cil_db *test_new_db;
-    test_new_db = malloc(sizeof(struct cil_db));
+	struct cil_db *test_new_db;
+	test_new_db = malloc(sizeof(struct cil_db));
 
-    int rc = cil_symtab_array_init(test_new_db->global_symtab, CIL_SYM_GLOBAL_NUM);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_new_db->global_symtab);
+	int rc = cil_symtab_array_init(test_new_db->global_symtab, CIL_SYM_GLOBAL_NUM);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_new_db->global_symtab);
 
-    free(test_new_db);
+	free(test_new_db);
 }
 
 // TODO: Reach SEPOL_ERR return in cil_symtab_array_init ( currently can't produce a method to do so )
 void test_cil_symtab_array_init_null_symtab_neg(CuTest *tc) {
-    struct cil_db *test_new_db;
-    test_new_db = malloc(sizeof(struct cil_db));
+	symtab_t *test_symtab[1] = {NULL};
 
-    int rc = cil_symtab_array_init(test_new_db->global_symtab, CIL_SYM_GLOBAL_NUM);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
-
-    free(test_new_db); 
+	int rc = cil_symtab_array_init(test_symtab, 1);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_db_init(CuTest *tc) {
-    struct cil_db *test_db;
+	struct cil_db *test_db;
 
-    int rc = cil_db_init(&test_db);
+	int rc = cil_db_init(&test_db);
 
-    CuAssertIntEquals(tc, 0, rc);
-    CuAssertPtrNotNull(tc, test_db->ast_root);
-    CuAssertPtrNotNull(tc, test_db->global_symtab);
-    CuAssertPtrNotNull(tc, test_db->local_symtab);
+	CuAssertIntEquals(tc, 0, rc);
+	CuAssertPtrNotNull(tc, test_db->ast_root);
+	CuAssertPtrNotNull(tc, test_db->global_symtab);
+	CuAssertPtrNotNull(tc, test_db->local_symtab);
 }
 
-// TODO: Reach SEPOL_ERROR return in cil_db_init ( currently can't produce a method to do so )
+// TODO: Reach SEPOL_ERR return in cil_db_init ( currently can't produce a method to do so )
 
 void test_cil_parser(CuTest *tc) {
-    int rc = 0;
-    struct cil_file_data *data;
+	int rc = 0;
+	struct cil_file_data *data;
 
-    struct cil_tree *test_parse_root;
-    cil_tree_init(&test_parse_root);
+	struct cil_tree *test_parse_root;
+	cil_tree_init(&test_parse_root);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    set_cil_file_data(&data);
+	set_cil_file_data(&data);
 
-    rc = cil_parser(data->buffer, data->file_size + 2, &test_parse_root);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_parse_root);
+	rc = cil_parser(data->buffer, data->file_size + 2, &test_parse_root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_parse_root);
 }
 
 void test_cil_lexer_setup(CuTest *tc) {
@@ -269,1238 +266,1495 @@ void test_cil_lexer_next(CuTest *tc) {
 }
 
 void test_cil_stack_init(CuTest *tc) {
-    struct cil_stack *test_stack;
-    int rc = cil_stack_init(&test_stack);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrEquals(tc, NULL, test_stack->top);
+	struct cil_stack *test_stack;
+	int rc = cil_stack_init(&test_stack);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrEquals(tc, NULL, test_stack->top);
 }
 
 void test_cil_get_parent_symtab_block(CuTest *tc) {
-    symtab_t *symtab = NULL;
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	symtab_t *symtab = NULL;
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->parent->flavor = CIL_BLOCK;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->parent->flavor = CIL_BLOCK;
+	test_ast_node->line = 1;
 
-    int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, symtab);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, symtab);
 }
 
 void test_cil_get_parent_symtab_class(CuTest *tc) {
-    symtab_t *symtab = NULL;
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	symtab_t *symtab = NULL;
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->parent->flavor = CIL_CLASS;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->parent->flavor = CIL_CLASS;
+	test_ast_node->line = 1;
 
-    int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, symtab);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, symtab);
 }
 
 void test_cil_get_parent_symtab_root(CuTest *tc) {
-    symtab_t *symtab = NULL;
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	symtab_t *symtab = NULL;
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->parent->flavor = CIL_ROOT;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->parent->flavor = CIL_ROOT;
+	test_ast_node->line = 1;
 
-    int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, symtab);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, symtab);
 }
 
 void test_cil_get_parent_symtab_other_neg(CuTest *tc) {
-    symtab_t *symtab = NULL;
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	symtab_t *symtab = NULL;
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->parent->flavor = 1234567;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->parent->flavor = 1234567;
+	test_ast_node->line = 1;
 
-    int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
-    CuAssertPtrEquals(tc, symtab, NULL);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertPtrEquals(tc, symtab, NULL);
 }
 
 void test_cil_get_parent_symtab_null_neg(CuTest *tc) {
-    symtab_t *symtab = NULL;
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	symtab_t *symtab = NULL;
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = NULL;
-    test_ast_node->line = 1;
+	test_ast_node->parent = NULL;
+	test_ast_node->line = 1;
 
-    int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
-    CuAssertPtrEquals(tc, symtab, NULL);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertPtrEquals(tc, symtab, NULL);
 }
 
 void test_cil_get_parent_symtab_node_null_neg(CuTest *tc) {
-    symtab_t *symtab = NULL;
-    
-    struct cil_tree_node *test_ast_node = NULL;
+	symtab_t *symtab = NULL;
+	
+	struct cil_tree_node *test_ast_node = NULL;
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
-    CuAssertPtrEquals(tc, symtab, NULL);
-    CuAssertPtrEquals(tc, test_ast_node, NULL);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertPtrEquals(tc, symtab, NULL);
+	CuAssertPtrEquals(tc, test_ast_node, NULL);
 }
 
 void test_cil_get_parent_symtab_parent_null_neg(CuTest *tc) {
-    symtab_t *symtab = NULL;
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	symtab_t *symtab = NULL;
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = NULL;
-    test_ast_node->line = 1;
+	test_ast_node->parent = NULL;
+	test_ast_node->line = 1;
 
-    int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
-    CuAssertPtrEquals(tc, symtab, NULL);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertPtrEquals(tc, symtab, NULL);
 }
 
 void test_cil_symtab_insert(CuTest *tc) {
-    symtab_t *test_symtab = NULL;
-    char* test_name = "test";
-    struct cil_block *test_block = malloc(sizeof(struct cil_block));
+	symtab_t *test_symtab = NULL;
+	char* test_name = "test";
+	struct cil_block *test_block = malloc(sizeof(struct cil_block));
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);   
+	struct cil_db *test_db;
+	cil_db_init(&test_db);   
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    cil_symtab_array_init(test_block->symtab, CIL_SYM_LOCAL_NUM);
+	cil_symtab_array_init(test_block->symtab, CIL_SYM_LOCAL_NUM);
 
-    test_block->is_abstract = 0;
-    test_block->is_optional = 0;
-    test_block->condition = NULL;
+	test_block->is_abstract = 0;
+	test_block->is_optional = 0;
+	test_block->condition = NULL;
 
-    cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_LOCAL_BLOCKS);
+	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_LOCAL_BLOCKS);
 
-    int rc = cil_symtab_insert(test_symtab, (hashtab_key_t)test_name, (cil_symtab_datum_t*)test_block, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_symtab_insert(test_symtab, (hashtab_key_t)test_name, (cil_symtab_datum_t*)test_block, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_block(CuTest *tc) {
-    char *line[] = {"(", "block", "a", "(", "type", "log", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	char *line[] = {"(", "block", "a", "(", "type", "log", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, ((struct cil_block*)test_ast_node->data)->is_abstract, 0);
-    CuAssertIntEquals(tc, ((struct cil_block*)test_ast_node->data)->is_optional, 0);
-    CuAssertPtrEquals(tc, ((struct cil_block*)test_ast_node->data)->condition, NULL);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BLOCK);
+	int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, ((struct cil_block*)test_ast_node->data)->is_abstract, 0);
+	CuAssertIntEquals(tc, ((struct cil_block*)test_ast_node->data)->is_optional, 0);
+	CuAssertPtrEquals(tc, ((struct cil_block*)test_ast_node->data)->condition, NULL);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BLOCK);
 }
 
 void test_cil_gen_block_noname_neg(CuTest *tc) {
-    char *line[] = {"(", "block", "(", "type", "log", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	char *line[] = {"(", "block", "(", "type", "log", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_block_dbnull_neg(CuTest *tc) {
-    char *line[] = {"(", "block", "foo", "(", "type", "log", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	char *line[] = {"(", "block", "foo", "(", "type", "log", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db = NULL;
+	struct cil_db *test_db = NULL;
 
-    int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_block_treenull_neg(CuTest *tc) {
-    char *line[] = {"(", "block", "foo", "(", "type", "log", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	char *line[] = {"(", "block", "foo", "(", "type", "log", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    tree->root->cl_head->cl_head = NULL;
+	tree->root->cl_head->cl_head = NULL;
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_block_nodenull_neg(CuTest *tc) {
-    char *line[] = {"(", "block", "foo", "(", "type", "log", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
-    
-    struct cil_tree_node *test_ast_node = NULL;
+	char *line[] = {"(", "block", "foo", "(", "type", "log", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node = NULL;
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_block_nodeparentnull_neg(CuTest *tc) {
-    char *line[] = {"(", "block", "foo", "(", "type", "log", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
-    
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	char *line[] = {"(", "block", "foo", "(", "type", "log", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = NULL;
-    test_ast_node->line = 1;
+	test_ast_node->parent = NULL;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_class(CuTest *tc) { 
-    char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+void test_cil_destroy_block(CuTest *tc) {
+	char *line[] = {"(", "block", "a", "(", "type", "log", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	cil_gen_block(test_db, tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
 
-    int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->cl_tail);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_CLASS);
-}
-
-void test_cil_gen_class_noname_neg(CuTest *tc) { 
-    char *line[] = {"(", "class", "(", "read", "write", "open", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
-
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
-
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
-
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
-
-    int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	cil_destroy_block((struct cil_block*)test_ast_node->data);
+	CuAssertPtrEquals(tc, NULL,test_ast_node->data);
 }
 
 void test_cil_gen_perm(CuTest *tc) {
-    int rc = 0;
-    char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	int rc = 0;
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_current_perm = NULL;
-    struct cil_tree_node *test_new_ast = NULL;
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_current_perm = NULL;
+	struct cil_tree_node *test_new_ast = NULL;
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    test_current_perm = tree->root->cl_head->cl_head->next->next->cl_head;
+	test_current_perm = tree->root->cl_head->cl_head->next->next->cl_head;
 
-    while(test_current_perm != NULL) {
-        cil_tree_node_init(&test_new_ast);
-        test_new_ast->parent = test_ast_node;
-        test_new_ast->line = test_current_perm->line;
+	while(test_current_perm != NULL) {
+	    cil_tree_node_init(&test_new_ast);
+	    test_new_ast->parent = test_ast_node;
+	    test_new_ast->line = test_current_perm->line;
 
-        rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
-        CuAssertIntEquals(tc, SEPOL_OK, rc);
-        CuAssertPtrNotNull(tc, test_new_ast->data);
-        CuAssertIntEquals(tc, test_new_ast->flavor, CIL_PERM);
-        
-        test_current_perm = test_current_perm->next;
+	    rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
+	    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	    CuAssertPtrNotNull(tc, test_new_ast->data);
+	    CuAssertIntEquals(tc, test_new_ast->flavor, CIL_PERM);
+	    
+	    test_current_perm = test_current_perm->next;
 
-        if (test_ast_node->cl_head == NULL)
-            test_ast_node->cl_head = test_new_ast;
-        else
-            test_ast_node->cl_tail->next = test_new_ast;
+	    if (test_ast_node->cl_head == NULL)
+	        test_ast_node->cl_head = test_new_ast;
+	    else
+	        test_ast_node->cl_tail->next = test_new_ast;
 
-        test_ast_node->cl_tail = test_new_ast;
-    }
+	    test_ast_node->cl_tail = test_new_ast;
+	}
+}
+
+void test_cil_gen_perm_dbnull_neg(CuTest *tc) {
+	int rc = 0;
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_current_perm = NULL;
+	struct cil_tree_node *test_new_ast = NULL;
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+
+	test_current_perm = tree->root->cl_head->cl_head->next->next->cl_head;
+
+	cil_tree_node_init(&test_new_ast);
+	test_new_ast->parent = test_ast_node;
+	test_new_ast->line = test_current_perm->line;
+
+	rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_perm_currnull_neg(CuTest *tc) {
+	int rc = 0;
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_current_perm = NULL;
+	struct cil_tree_node *test_new_ast = NULL;
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
+
+	test_current_perm = NULL; 
+
+	cil_tree_node_init(&test_new_ast);
+	test_new_ast->parent = test_ast_node;
+
+	rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_perm_permexists_neg(CuTest *tc) {
+	int rc = 0;
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_current_perm = NULL;
+	struct cil_tree_node *test_new_ast = NULL;
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
+
+	test_current_perm = tree->root->cl_head->cl_head->next->next->cl_head;
+
+	cil_tree_node_init(&test_new_ast);
+	test_new_ast->parent = test_ast_node;
+	test_new_ast->line = test_current_perm->line;
+
+	struct cil_perm *test_perm = malloc(sizeof(struct cil_perm));
+	symtab_t *test_symtab = NULL;
+	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_LOCAL_PERMS);
+	cil_symtab_insert(test_symtab, (hashtab_key_t)"read", (cil_symtab_datum_t*)test_perm, test_new_ast);
+
+	rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
+	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+}
+
+void test_cil_gen_perm_nodenull_neg(CuTest *tc) {
+	int rc = 0;
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_current_perm = NULL;
+	struct cil_tree_node *test_new_ast = NULL;
+	struct cil_tree_node *test_ast_node;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_current_perm = tree->root->cl_head->cl_head->next->next->cl_head;
+
+	cil_tree_node_init(&test_new_ast);
+	test_new_ast->parent = test_ast_node;
+	test_new_ast->line = test_current_perm->line;
+
+	rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_perm_nodes(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	char *test_key = tree->root->cl_head->cl_head->next->data;
+	struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+	symtab_init(&test_cls->perms, CIL_SYM_SIZE);
+
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
+
+	cil_symtab_insert(&test_db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)test_key, (cil_symtab_datum_t*)test_cls, test_ast_node);
+
+	test_ast_node->data = test_cls;
+	test_ast_node->flavor = CIL_CLASS;
+
+	int rc = cil_gen_perm_nodes(test_db, tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_perm_nodes_failgen_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	char *test_key = tree->root->cl_head->cl_head->next->data;
+	struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+	//symtab_init(&test_cls->perms, CIL_SYM_SIZE);
+
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
+
+	cil_symtab_insert(&test_db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)test_key, (cil_symtab_datum_t*)test_cls, test_ast_node);
+
+	test_ast_node->data = test_cls;
+	test_ast_node->flavor = CIL_CLASS;
+
+	int rc = cil_gen_perm_nodes(test_db, tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_class(CuTest *tc) { 
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->cl_tail);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_CLASS);
+}
+
+void test_cil_gen_class_noname_neg(CuTest *tc) { 
+	char *line[] = {"(", "class", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_class_nodenull_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_class_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db = NULL;
+
+	int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_class_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	tree->root->cl_head->cl_head = NULL;
+
+	int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_class_noclass_neg(CuTest *tc) { 
+	char *line[] = {"(", "test", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_class_failgen_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_class(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->cl_tail);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_CLASS);
+
 }
 
 void test_cil_gen_perm_noname_neg(CuTest *tc) {
-    int rc = 0;
-    char *line[] = {"(", "class", "(", "read", "write", "open", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	int rc = 0;
+	char *line[] = {"(", "class", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_current_perm = NULL;
-    struct cil_tree_node *test_new_ast = NULL;
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_current_perm = NULL;
+	struct cil_tree_node *test_new_ast = NULL;
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    test_current_perm = tree->root->cl_head->cl_head->next->next->cl_head;
+	test_current_perm = tree->root->cl_head->cl_head->next->next->cl_head;
 
-    while(test_current_perm != NULL) {
-        cil_tree_node_init(&test_new_ast);
-        test_new_ast->parent = test_ast_node;
-        test_new_ast->line = test_current_perm->line;
+	while(test_current_perm != NULL) {
+	    cil_tree_node_init(&test_new_ast);
+	    test_new_ast->parent = test_ast_node;
+	    test_new_ast->line = test_current_perm->line;
 
-        rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
-        CuAssertIntEquals(tc, SEPOL_ERR, rc);
-        
-        test_current_perm = test_current_perm->next;
+	    rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
+	    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	    
+	    test_current_perm = test_current_perm->next;
 
-        if (test_ast_node->cl_head == NULL)
-            test_ast_node->cl_head = test_new_ast;
-        else
-            test_ast_node->cl_tail->next = test_new_ast;
+	    if (test_ast_node->cl_head == NULL)
+	        test_ast_node->cl_head = test_new_ast;
+	    else
+	        test_ast_node->cl_tail->next = test_new_ast;
 
-        test_ast_node->cl_tail = test_new_ast;
-    }
+	    test_ast_node->cl_tail = test_new_ast;
+	}
 }
 
 void test_cil_list_init(CuTest *tc) {
-    char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	int rc = cil_list_init(&test_avrule->perms_str);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
-
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
-
-    struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
-
-    int rc = cil_list_init(&test_avrule->perms_str);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-
-    free(test_avrule);   
+	free(test_avrule);   
 }
 
 // First seen in cil_gen_common
 void test_cil_parse_to_list(CuTest *tc) {
-    char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_current;
+	test_current = tree->root->cl_head->cl_head;
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
+	test_avrule->rule_kind = CIL_KEY_ALLOW;
+	test_avrule->src_str = strdup(test_current->next->data);
+	test_avrule->tgt_str = strdup(test_current->next->next->data);
+	test_avrule->obj_str = strdup(test_current->next->next->next->data);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	cil_list_init(&test_avrule->perms_str);
 
-    struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
-    struct cil_tree_node *test_current;
-    test_current = tree->root->cl_head->cl_head;
+	test_current = test_current->next->next->next->next->cl_head;
 
-    int rc = cil_parse_to_list(test_current->next->next->cl_head, &test_avrule->perms_str, CIL_COMMON);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_parse_to_list(test_current, &test_avrule->perms_str, CIL_AST_STR);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 
-    free(test_avrule);
+	free(test_avrule->perms_str);
+	test_avrule->perms_str = NULL;
+	free(test_avrule);
+}
+
+void test_cil_parse_to_list_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_current;
+	test_current = tree->root->cl_head->cl_head;
+
+	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
+	test_avrule->rule_kind = CIL_KEY_ALLOW;
+	test_avrule->src_str = strdup(test_current->next->data);
+	test_avrule->tgt_str = strdup(test_current->next->next->data);
+	test_avrule->obj_str = strdup(test_current->next->next->next->data);
+
+	cil_list_init(&test_avrule->perms_str);
+
+	test_current = NULL;
+
+	int rc = cil_parse_to_list(test_current, &test_avrule->perms_str, CIL_AST_STR);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+
+	free(test_avrule->perms_str);
+	test_avrule->perms_str = NULL;
+	free(test_avrule);
+}
+
+void test_cil_parse_to_list_listnull_neg(CuTest *tc) {
+	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_current;
+	test_current = tree->root->cl_head->cl_head;
+
+	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
+	test_avrule->rule_kind = CIL_KEY_ALLOW;
+	test_avrule->src_str = strdup(test_current->next->data);
+	test_avrule->tgt_str = strdup(test_current->next->next->data);
+	test_avrule->obj_str = strdup(test_current->next->next->next->data);
+
+	test_current = test_current->next->next->next->next->cl_head;
+
+	int rc = cil_parse_to_list(test_current, &test_avrule->perms_str, CIL_AST_STR);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+
+	free(test_avrule);
 }
 
 void test_cil_gen_common(CuTest *tc) {
-    char *line[] = {"(", "common", "test", "(", "read", "write", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "common", "test", "(", "read", "write", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_common(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_COMMON);
+	int rc = cil_gen_common(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_COMMON);
 }
 
 void test_cil_gen_sid(CuTest *tc) {
-    char *line[] = {"(", "sid", "test", "(", "blah", "blah", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "sid", "test", "(", "blah", "blah", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_sid(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_SID);
+	int rc = cil_gen_sid(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_SID);
 }
 
 void test_cil_gen_type(CuTest *tc) {
-    char *line[] = {"(", "type", "test", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "type", "test", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_type(test_db, tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPE);
+	int rc = cil_gen_type(test_db, tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPE);
 }
 
 void test_cil_gen_type_attr(CuTest *tc) {
-    char *line[] = {"(", "attribute", "test", "(", "test_attr", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "attribute", "test", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_type(test_db, tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_ATTR);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPE_ATTR);
+	int rc = cil_gen_type(test_db, tree->root->cl_head->cl_head, test_ast_node, CIL_ATTR);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ATTR);
 }
 
 void test_cil_gen_typealias(CuTest *tc) {
-    char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_typealias(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertStrEquals(tc, ((struct cil_typealias*)test_ast_node->data)->type_str, tree->root->cl_head->cl_head->next->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPEALIAS);
+	int rc = cil_gen_typealias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertStrEquals(tc, ((struct cil_typealias*)test_ast_node->data)->type_str, tree->root->cl_head->cl_head->next->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPEALIAS);
 }
 
 void test_cil_gen_typealias_incomplete_neg(CuTest *tc) {
-    char *line[] = {"(", "typealias", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "typealias", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_typealias(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_typealias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_typealias_incomplete_neg2(CuTest *tc) {
-    char *line[] = {"(", "typealias", ".test.type", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "typealias", ".test.type", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_typealias(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_typealias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_role(CuTest *tc) {
-    char *line[] = {"(", "role", "test_r", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "role", "test_r", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_role(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLE);
+	int rc = cil_gen_role(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLE);
 }
 
 void test_cil_gen_bool_true(CuTest *tc) {
-    char *line[] = {"(", "bool", "foo", "true", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "bool", "foo", "true", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_bool(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, ((struct cil_bool*)test_ast_node->data)->value, 1);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BOOL);
+	int rc = cil_gen_bool(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, ((struct cil_bool*)test_ast_node->data)->value, 1);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BOOL);
 }
 
 void test_cil_gen_bool_false(CuTest *tc) {
-    char *line[] = {"(", "bool", "bar", "false", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "bool", "bar", "false", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_bool(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertIntEquals(tc, ((struct cil_bool*)test_ast_node->data)->value, 0);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BOOL);
+	int rc = cil_gen_bool(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, ((struct cil_bool*)test_ast_node->data)->value, 0);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BOOL);
 }
 
 void test_cil_gen_bool_none_neg(CuTest *tc) {
-    char *line[] = {"(", "bool", "foo", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "bool", "foo", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_bool(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_bool(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_bool_notbool_neg(CuTest *tc) {
-    char *line[] = {"(", "bool", "foo", "bar", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "bool", "foo", "bar", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    int rc = cil_gen_bool(test_db, tree->root->cl_head->cl_head, test_ast_node);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_gen_bool(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_avrule(CuTest *tc) {
-    char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    struct cil_tree_node *test_current;
-    test_current = tree->root->cl_head->cl_head;
+	struct cil_tree_node *test_current;
+	test_current = tree->root->cl_head->cl_head;
 
-    int rc = cil_gen_avrule(test_current, test_ast_node, CIL_AVRULE_ALLOWED);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->src_str, test_current->next->data);
-    CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->tgt_str, test_current->next->next->data);
-    CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->obj_str, test_current->next->next->next->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_AVRULE);
-    CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_str);
+	int rc = cil_gen_avrule(test_current, test_ast_node, CIL_AVRULE_ALLOWED);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->src_str, test_current->next->data);
+	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->tgt_str, test_current->next->next->data);
+	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->obj_str, test_current->next->next->next->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_AVRULE);
+	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_str);
 
-    struct cil_list_item *test_list = ((struct cil_avrule*)test_ast_node->data)->perms_str->list;
-    test_current = test_current->next->next->next->next->cl_head;
+	struct cil_list_item *test_list = ((struct cil_avrule*)test_ast_node->data)->perms_str->list;
+	test_current = test_current->next->next->next->next->cl_head;
 
-    while(test_list != NULL) {
-        CuAssertIntEquals(tc, test_list->flavor, CIL_AST_STR);
-        CuAssertStrEquals(tc, test_list->data, test_current->data );
-        test_list = test_list->next;
-        test_current = test_current->next;
-    }
+	while(test_list != NULL) {
+	    CuAssertIntEquals(tc, test_list->flavor, CIL_AST_STR);
+	    CuAssertStrEquals(tc, test_list->data, test_current->data );
+	    test_list = test_list->next;
+	    test_current = test_current->next;
+	}
 }
-/*
+
 void test_cil_gen_avrule_notlist(CuTest *tc) {
-    char *line[] = {"(", "allow", "test", "foo", "bar", "write", ")", NULL};
-    struct cil_tree *tree;
-    gen_test_tree(&tree, line);
+	char *line[] = {"(", "allow", "test", "foo", "bar", "write", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
-    struct cil_tree_node *test_ast_node;
-    cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_ast_node->parent = test_db->ast_root->root;
-    test_ast_node->line = 1;
+	test_ast_node->parent = test_db->ast_root->root;
+	test_ast_node->line = 1;
 
-    struct cil_tree_node *test_current;
-    test_current = tree->root->cl_head->cl_head;
+	struct cil_tree_node *test_current;
+	test_current = tree->root->cl_head->cl_head;
 
-    int rc = cil_gen_avrule(test_db, test_current, test_ast_node, CIL_AVRULE_ALLOWED);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-    CuAssertPtrNotNull(tc, test_ast_node->data);
-    CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->src_str, test_current->next->data);
-    CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->tgt_str, test_current->next->next->data);
-    CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->obj_str, test_current->next->next->next->data);
-    CuAssertIntEquals(tc, test_ast_node->flavor, CIL_AVRULE);
-    CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_str);
+	int rc = cil_gen_avrule(test_current, test_ast_node, CIL_AVRULE_ALLOWED);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->src_str, test_current->next->data);
+	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->tgt_str, test_current->next->next->data);
+	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->obj_str, test_current->next->next->next->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_AVRULE);
+	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_str);
 }
-*/
-/*
-void test___cil_build_ast(CuTest *tc) {
-    char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
-
-    struct cil_stack *test_ns;
-    cil_stack_init(&test_ns);
-
-    char *test_ns_str = NULL;
-
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
-
-    int rc =__cil_build_ast(&test_db, test_ns, test_ns_str, test_tree->root, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_OK, tc);
-
-    free(test_ns);
-}   
-*/
 
 void test_cil_get_namespace_str(CuTest *tc) {
-    struct cil_stack *test_ns;
-    cil_stack_init(&test_ns);
+	struct cil_stack *test_ns;
+	cil_stack_init(&test_ns);
 
-    test_ns->top = malloc(sizeof(struct cil_stack_element));
-    test_ns->top->data = ".test.namespace";
+	test_ns->top = malloc(sizeof(struct cil_stack_element));
+	test_ns->top->data = ".test.namespace";
 
-    char *fake_ns = ".foo.bar";
+	char *fake_ns = ".foo.bar";
 
-    int rc = cil_get_namespace_str(test_ns, &fake_ns);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_get_namespace_str(test_ns, &fake_ns);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 
-    free(test_ns->top);
-    free(test_ns);
+	free(test_ns->top);
+	free(test_ns);
 }
 
 void test_cil_get_namespace_str_multi(CuTest *tc) {
-    struct cil_stack *test_ns;
-    cil_stack_init(&test_ns);
+	struct cil_stack *test_ns;
+	cil_stack_init(&test_ns);
 
-    test_ns->top = malloc(sizeof(struct cil_stack_element));
-    test_ns->top->data = ".test.namespace";
-    test_ns->top->next = malloc(sizeof(struct cil_stack_element));
-    test_ns->top->next->data = ".test.namespace2";
+	test_ns->top = malloc(sizeof(struct cil_stack_element));
+	test_ns->top->data = ".test.namespace";
+	test_ns->top->next = malloc(sizeof(struct cil_stack_element));
+	test_ns->top->next->data = ".test.namespace2";
 
-    char *fake_ns = ".foo.bar";
+	char *fake_ns = ".foo.bar";
 
-    int rc = cil_get_namespace_str(test_ns, &fake_ns);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);   
+	int rc = cil_get_namespace_str(test_ns, &fake_ns);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);   
 
-    free(test_ns->top);
-    free(test_ns->top->next);
-    free(test_ns);
+	free(test_ns->top);
+	free(test_ns->top->next);
+	free(test_ns);
+}
+
+void test_cil_get_namespace_str_topnull(CuTest *tc) {
+	struct cil_stack *test_ns;
+	cil_stack_init(&test_ns);
+
+	char *fake_ns = ".foo.bar";
+
+	int rc = cil_get_namespace_str(test_ns, &fake_ns);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_get_namespace_str_stacknull_neg(CuTest *tc) {
-    struct cil_stack *test_ns = NULL;
+	struct cil_stack *test_ns = NULL;
 
-    char *fake_ns = ".foo.bar";
+	char *fake_ns = ".foo.bar";
 
-    int rc = cil_get_namespace_str(test_ns, &fake_ns);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
-
-void test_cil_get_namespace_str_topnull_neg(CuTest *tc) {
-    struct cil_stack *test_ns;
-    cil_stack_init(&test_ns);
-
-    char *fake_ns = ".foo.bar";
-
-    printf("BLAH: %s\n", test_ns);
-    
-    int rc = cil_get_namespace_str(test_ns, &fake_ns);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_get_namespace_str(test_ns, &fake_ns);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_build_ast(CuTest *tc) {
-    char *line[] = {"(", "test", "\"qstring\"", ")", ";comment", NULL};
+	char *line[] = {"(", "test", "\"qstring\"", ")", ";comment", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_block(CuTest *tc) {
-    char *line[] = {"(", "block", "test", "(", "type", "log", ")", ")", NULL};
+	char *line[] = {"(", "block", "test", "(", "type", "log", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_class(CuTest *tc) {
-    char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_common(CuTest *tc) {
-    char *line[] = {"(", "common", "test", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "common", "test", "(", "read", "write", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_sid(CuTest *tc) {
-    char *line[] = {"(", "sid", "test", "(", "blah", "blah", ")", ")", NULL};
+	char *line[] = {"(", "sid", "test", "(", "blah", "blah", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_type(CuTest *tc) {
-    char *line[] = {"(", "type", "test", ")", NULL};
+	char *line[] = {"(", "type", "test", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_typeattr(CuTest *tc) {
-    char *line[] = {"(", "attribute", "test", "(", "test_attr", ")", NULL};
+	char *line[] = {"(", "attribute", "test", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_typealias(CuTest *tc) {
-    char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
+	char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_role(CuTest *tc) {
-    char *line[] = {"(", "role", "test_r", ")", NULL};
+	char *line[] = {"(", "role", "test_r", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_avrule(CuTest *tc) {
-    char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_build_ast_bool(CuTest *tc) {
-    char *line[] = {"(", "bool", "foo", "true", ")", NULL};
+	char *line[] = {"(", "bool", "foo", "true", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-/*void test_cil_build_ast_interface*/
-
 void test_cil_build_ast_null_neg(CuTest *tc) {
-    char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    test_tree->root = NULL;
+	test_tree->root = NULL;
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_db->ast_root->root = NULL;
+	test_db->ast_root->root = NULL;
 
-    int rc = cil_build_ast(test_db, test_tree);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_name(CuTest *tc) {
-    char *line[] = { "(", "block", "foo", "(", "typealias", "test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
+	char *line[] = { "(", "block", "foo", "(", "typealias", "test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    cil_build_ast(test_db, test_tree);
-    
-    struct cil_tree_node *test_curr = test_db->ast_root->root->cl_head->cl_head;
-    struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
-    struct cil_tree_node *type_node = NULL;
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	
+	struct cil_tree_node *test_curr = test_db->ast_root->root->cl_head->cl_head;
+	struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
+	struct cil_tree_node *type_node = NULL;
 
-    int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_resolve_name_global(CuTest *tc) {
-    char *line[] = { "(", "type", "test", ")", "(", "block", "foo", "(", "typealias", ".test", "type_t", ")", ")", NULL};
-
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
-
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
-
-    cil_build_ast(test_db, test_tree);
-    
-    struct cil_tree_node *test_curr = test_db->ast_root->root->cl_head->next->cl_head;
-    struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
-    struct cil_tree_node *type_node = NULL;
-
-    int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_resolve_name_global_nodot(CuTest *tc) {
-    char *line[] = { "(", "block", "foo", "(", "typealias", "foo.test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
-
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
-
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
-
-    cil_build_ast(test_db, test_tree);
-    
-    struct cil_tree_node *test_curr = test_db->ast_root->root->cl_head->cl_head;
-    struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
-    struct cil_tree_node *type_node = NULL;
-
-    int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_resolve_name_invalid_type_neg(CuTest *tc) {
-    char *line[] = { "(", "block", "foo", "(", "typealias", "foo.test2", "type_t", ")", "(", "type", "test", ")", ")", NULL};
+	char *line[] = { "(", "block", "foo", "(", "typealias", "foo.test2", "type_t", ")", "(", "type", "test", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    cil_build_ast(test_db, test_tree);
-    
-    struct cil_tree_node *test_curr = test_db->ast_root->root->cl_head->cl_head;
-    struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
-    struct cil_tree_node *type_node = NULL;
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
+	
+	struct cil_tree_node *test_curr = test_db->ast_root->root->cl_head->cl_head;
+	struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
+	struct cil_tree_node *type_node = NULL;
 
-    int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_ast_typealias(CuTest *tc) {
-    char *line[] = { "(", "block", "foo", "(", "typealias", ".foo.test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
+	char *line[] = { "(", "block", "foo", "(", "typealias", ".foo.test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    cil_build_ast(test_db, test_tree);
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
 
-    int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_resolve_ast_typealias_notype_neg(CuTest *tc) {
-    char *line[] = {"(", "block", "bar", "(", "typealias", ".bar.test", "type_t", ")", NULL};
+	char *line[] = {"(", "block", "bar", "(", "typealias", ".bar.test", "type_t", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    cil_build_ast(test_db, test_tree);
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
 
-    int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_ast_curr_null_neg(CuTest *tc) {
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    test_db->ast_root->root = NULL;
+	test_db->ast_root->root = NULL;
 
-    int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void blah() {
+	int blah;
 }
 
 void test_cil_resolve_ast_avrule(CuTest *tc) {
-    char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", \
-                    "(", "type", "test", ")", "(", "type", "foo", ")", \
-                    "(", "allow", "test", "foo", "bar", "(", "read", "write", \
-                    ")", ")", NULL};
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", \
+	                "(", "type", "test", ")", "(", "type", "foo", ")", \
+	                "(", "allow", "test", "foo", "bar", "(", "read", "write", \
+	                ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    cil_build_ast(test_db, test_tree);
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
 
-    int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_OK, rc);
+	int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_resolve_ast_avrule_src_nores_neg(CuTest *tc) {
-    char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
 
-    cil_build_ast(test_db, test_tree);
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
 
-    int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_ast_avrule_tgt_nores_neg(CuTest *tc) {
-    char *line[] = {"(", "type", "test", ")", "(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "type", "test", ")", "(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
-    
-    cil_build_ast(test_db, test_tree);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
 
-    int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_ast_avrule_class_nores_neg(CuTest *tc) {
-    char *line[] = {"(", "type", "test", ")", "(", "type", "foo", ")", "(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
-    
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	char *line[] = {"(", "type", "test", ")", "(", "type", "foo", ")", "(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
-    
-    cil_build_ast(test_db, test_tree);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
 
-    int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_ast_avrule_datum_null_neg(CuTest *tc) {
-    char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", \
-                    "(", "type", "test", ")", "(", "type", "foo", ")", \
-                    "(", "allow", "test", "foo", "bar", "(","fake", ")", ")", NULL};
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", \
+	                "(", "type", "test", ")", "(", "type", "foo", ")", \
+	                "(", "allow", "test", "foo", "bar", "(","fake", ")", ")", NULL};
 
-    struct cil_tree *test_tree;
-    gen_test_tree(&test_tree, line);
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
 
-    struct cil_db *test_db;
-    cil_db_init(&test_db);
-    
-    cil_build_ast(test_db, test_tree);
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast_root->root);
 
-    int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
-    CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	int rc = cil_resolve_ast(test_db, test_db->ast_root->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 CuSuite* CilTreeGetSuite() {
-    CuSuite* suite = CuSuiteNew();
-    SUITE_ADD_TEST(suite, test_cil_tree_node_init);
-    SUITE_ADD_TEST(suite, test_cil_tree_init);
-    SUITE_ADD_TEST(suite, test_cil_lexer_setup);
-    SUITE_ADD_TEST(suite, test_cil_lexer_next);
-    SUITE_ADD_TEST(suite, test_symtab_init);
-    SUITE_ADD_TEST(suite, test_symtab_init_no_table_neg);
-    SUITE_ADD_TEST(suite, test_cil_symtab_array_init);
-    SUITE_ADD_TEST(suite, test_cil_symtab_array_init_null_symtab_neg);
-    SUITE_ADD_TEST(suite, test_cil_db_init);
-    SUITE_ADD_TEST(suite, test_cil_parser);
-    SUITE_ADD_TEST(suite, test_cil_stack_init);
-    SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_block);
-    SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_class);
-    SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_root);
-    SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_other_neg);
-    SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_null_neg);
-    SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_node_null_neg);
-    SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_parent_null_neg);
-    SUITE_ADD_TEST(suite, test_cil_symtab_insert);
-    SUITE_ADD_TEST(suite, test_cil_gen_block);
-    SUITE_ADD_TEST(suite, test_cil_gen_block_noname_neg);
-    SUITE_ADD_TEST(suite, test_cil_gen_block_dbnull_neg);
-    SUITE_ADD_TEST(suite, test_cil_gen_block_treenull_neg);
-    SUITE_ADD_TEST(suite, test_cil_gen_block_nodenull_neg);
-    SUITE_ADD_TEST(suite, test_cil_gen_block_nodeparentnull_neg);
-    SUITE_ADD_TEST(suite, test_cil_gen_class);
-    SUITE_ADD_TEST(suite, test_cil_gen_class_noname_neg);
-    SUITE_ADD_TEST(suite, test_cil_gen_perm);
-//    SUITE_ADD_TEST(suite, test_cil_gen_perm_noname_neg);
-    SUITE_ADD_TEST(suite, test_cil_list_init);
-    SUITE_ADD_TEST(suite, test_cil_parse_to_list);
-    SUITE_ADD_TEST(suite, test_cil_gen_common);
-    SUITE_ADD_TEST(suite, test_cil_gen_sid);
-    SUITE_ADD_TEST(suite, test_cil_gen_type);
-    SUITE_ADD_TEST(suite, test_cil_gen_type_attr);
-    SUITE_ADD_TEST(suite, test_cil_gen_typealias);
-//    SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg);
-//    SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg2);
-    SUITE_ADD_TEST(suite, test_cil_gen_role);
-    SUITE_ADD_TEST(suite, test_cil_gen_bool_true);
-    SUITE_ADD_TEST(suite, test_cil_gen_bool_false);
-    SUITE_ADD_TEST(suite, test_cil_gen_bool_none_neg);
-    SUITE_ADD_TEST(suite, test_cil_gen_bool_notbool_neg);
-    SUITE_ADD_TEST(suite, test_cil_gen_avrule);
-//    SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist);
-    SUITE_ADD_TEST(suite, test_cil_get_namespace_str);
-    SUITE_ADD_TEST(suite, test_cil_get_namespace_str_multi);
-    SUITE_ADD_TEST(suite, test_cil_get_namespace_str_stacknull_neg);
-    SUITE_ADD_TEST(suite, test_cil_get_namespace_str_topnull_neg);
-    SUITE_ADD_TEST(suite, test_cil_build_ast);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_block);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_class);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_common);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_sid);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_type);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_typealias);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_role);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_bool);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_avrule);
-    SUITE_ADD_TEST(suite, test_cil_build_ast_null_neg);
-    SUITE_ADD_TEST(suite, test_cil_resolve_name);
-    SUITE_ADD_TEST(suite, test_cil_resolve_name_global);
-    SUITE_ADD_TEST(suite, test_cil_resolve_name_global_nodot);
-    SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
-    SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias);
-    SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
-    SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias_notype_neg);
-    SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule);
-    SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_src_nores_neg);
-    SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_tgt_nores_neg);
-    SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_class_nores_neg);
-    SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_datum_null_neg);
+	CuSuite* suite = CuSuiteNew();
+	SUITE_ADD_TEST(suite, test_cil_tree_node_init);
+	SUITE_ADD_TEST(suite, test_cil_tree_init);
+	SUITE_ADD_TEST(suite, test_cil_lexer_setup);
+	SUITE_ADD_TEST(suite, test_cil_lexer_next);
+	SUITE_ADD_TEST(suite, test_symtab_init);
+	SUITE_ADD_TEST(suite, test_symtab_init_no_table_neg);
+	SUITE_ADD_TEST(suite, test_cil_symtab_array_init);
+//  Cannot get symtab_init to fail
+//	SUITE_ADD_TEST(suite, test_cil_symtab_array_init_null_symtab_neg);
+	SUITE_ADD_TEST(suite, test_cil_db_init);
+	SUITE_ADD_TEST(suite, test_cil_parser);
+	SUITE_ADD_TEST(suite, test_cil_stack_init);
+	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_block);
+	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_class);
+	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_root);
+	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_other_neg);
+	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_node_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_parent_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_symtab_insert);
+	SUITE_ADD_TEST(suite, test_cil_gen_block);
+	SUITE_ADD_TEST(suite, test_cil_gen_block_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_block_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_block_treenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_block_nodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_block_nodeparentnull_neg);
+//  Not setting pointers to NULL, unable to verify
+//	SUITE_ADD_TEST(suite, test_cil_destroy_block);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_failgen_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_nodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_permexists_neg);
+//  Causes a segfault
+//	SUITE_ADD_TEST(suite, test_cil_gen_perm_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_list_init);
+	SUITE_ADD_TEST(suite, test_cil_parse_to_list);
+	SUITE_ADD_TEST(suite, test_cil_parse_to_list_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_parse_to_list_listnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_common);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid);
+	SUITE_ADD_TEST(suite, test_cil_gen_type);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_attr);
+	SUITE_ADD_TEST(suite, test_cil_gen_typealias);
+//  Causes a segfault
+//	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg);
+//	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg2);
+	SUITE_ADD_TEST(suite, test_cil_gen_role);
+	SUITE_ADD_TEST(suite, test_cil_gen_bool_true);
+	SUITE_ADD_TEST(suite, test_cil_gen_bool_false);
+	SUITE_ADD_TEST(suite, test_cil_gen_bool_none_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_bool_notbool_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
+//	Is a perm list with a single value, not surrounded by parenthesis, valid?
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist);
+	SUITE_ADD_TEST(suite, test_cil_get_namespace_str);
+	SUITE_ADD_TEST(suite, test_cil_get_namespace_str_multi);
+	SUITE_ADD_TEST(suite, test_cil_get_namespace_str_topnull);
+	SUITE_ADD_TEST(suite, test_cil_get_namespace_str_stacknull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_block);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_class);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_common);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sid);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_role);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_bool);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_avrule);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_name);
+	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias_notype_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_src_nores_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_tgt_nores_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_class_nores_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_datum_null_neg);
 
-    return suite;
+	return suite;
 }
