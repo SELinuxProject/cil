@@ -167,7 +167,7 @@ void test_cil_symtab_array_init(CuTest *tc) {
 
 // TODO: Reach SEPOL_ERR return in cil_symtab_array_init ( currently can't produce a method to do so )
 void test_cil_symtab_array_init_null_symtab_neg(CuTest *tc) {
-	symtab_t *test_symtab[1] = {NULL};
+	symtab_t *test_symtab = NULL;
 
 	int rc = cil_symtab_array_init(test_symtab, 1);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -600,7 +600,7 @@ void test_cil_gen_perm_dbnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	struct cil_db *test_db;
+	struct cil_db *test_db = NULL;
 
 	test_current_perm = tree->root->cl_head->cl_head->next->next->cl_head;
 
@@ -678,7 +678,7 @@ void test_cil_gen_perm_nodenull_neg(CuTest *tc) {
 
 	struct cil_tree_node *test_current_perm = NULL;
 	struct cil_tree_node *test_new_ast = NULL;
-	struct cil_tree_node *test_ast_node;
+	struct cil_tree_node *test_ast_node = NULL;
 
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
@@ -928,7 +928,7 @@ void test_cil_parse_to_list(CuTest *tc) {
 	test_current = tree->root->cl_head->cl_head;
 
 	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
-	test_avrule->rule_kind = CIL_KEY_ALLOW;
+	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = strdup(test_current->next->data);
 	test_avrule->tgt_str = strdup(test_current->next->next->data);
 	test_avrule->obj_str = strdup(test_current->next->next->next->data);
@@ -954,7 +954,7 @@ void test_cil_parse_to_list_currnull_neg(CuTest *tc) {
 	test_current = tree->root->cl_head->cl_head;
 
 	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
-	test_avrule->rule_kind = CIL_KEY_ALLOW;
+	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = strdup(test_current->next->data);
 	test_avrule->tgt_str = strdup(test_current->next->next->data);
 	test_avrule->obj_str = strdup(test_current->next->next->next->data);
@@ -980,7 +980,7 @@ void test_cil_parse_to_list_listnull_neg(CuTest *tc) {
 	test_current = tree->root->cl_head->cl_head;
 
 	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
-	test_avrule->rule_kind = CIL_KEY_ALLOW;
+	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = strdup(test_current->next->data);
 	test_avrule->tgt_str = strdup(test_current->next->next->data);
 	test_avrule->obj_str = strdup(test_current->next->next->next->data);
@@ -1366,7 +1366,7 @@ void test_cil_build_ast_dbnull_neg(CuTest *tc) {
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 
-	struct cil_db *null_db;
+	struct cil_db *null_db = NULL;
 
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
