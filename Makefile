@@ -60,9 +60,9 @@ parser: $(PARSER_TEST) $(ALL_SRCS)
 
 unit: $(TEST_SRCS) $(ALL_SRCS)
 	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
-	./unit_tests
 
 coverage: clean unit
+	./unit_tests
 	test -d cov || mkdir cov
 	export GCOV_PREFIX_STRIP=1
 	lcov --directory . --capture --output-file cov/app.info --ignore-errors source
