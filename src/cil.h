@@ -10,28 +10,17 @@
 	Tree/list node types
 */
 // TODO CDS Make declarative types greater than some define, so we can just check > some minimum
-#define CIL_ROOT		0
-#define CIL_PARSER		1
-#define CIL_AST_STR		2
+#define CIL_MIN_DECLARATIVE	500
+#define CIL_ROOT			0
+#define CIL_PARSER			1
+#define CIL_AST_STR			2
 #define CIL_SEPOL_ID		3
-#define CIL_BLOCK		4
-#define CIL_CLASS		5
-#define CIL_COMMON		6
-#define CIL_SID			7
-#define CIL_USER		8
-#define CIL_ROLE		9
-#define CIL_ROLE_TYPES		10
-#define CIL_TYPE		11
-#define CIL_ATTR		12
-#define CIL_TYPE_ATTR		13
-#define CIL_BOOL		14
-#define CIL_AVRULE		15
-#define CIL_ROLE_RULE		16
-#define CIL_SENS		17
+#define CIL_AVRULE			15
+#define CIL_SENS			17
 #define CIL_SENS_DOM		18
-#define CIL_CAT			19
-#define CIL_LEVEL		20
-#define CIL_SEARCH		21
+#define CIL_CAT				19
+#define CIL_LEVEL			20
+#define CIL_SEARCH			21
 #define CIL_TRANS_IF		22
 #define CIL_TRANS_CALL		23
 #define CIL_TRANS_INH_BLK	24
@@ -39,18 +28,48 @@
 #define CIL_TRANS_INH_ROLE	26
 #define CIL_TRANS_DEL		27
 #define CIL_TRANS_TRANS		28
-#define CIL_IN			29
-#define CIL_CONTEXT		30
-#define CIL_FILECON		31
-#define CIL_PORTCON		32
+#define CIL_IN				29
+#define CIL_CONTEXT			30
+#define CIL_FILECON			31
+#define CIL_PORTCON			32
 #define CIL_NETIFCON		33
-#define CIL_FSCON		34
-#define CIL_FS_USE		35
+#define CIL_FSCON			34
+#define CIL_FS_USE			35
 #define CIL_CONSTRAIN		36
 #define CIL_MLS_CONSTRAIN	37
-#define CIL_PERM		38
-#define CIL_TYPEALIAS		39
+#define CIL_PERM			38
 
+
+#define CIL_BLOCK			CIL_MIN_DECLARATIVE
+#define CIL_CLASS			CIL_MIN_DECLARATIVE + 1
+#define CIL_COMMON			CIL_MIN_DECLARATIVE + 2
+#define CIL_SID				CIL_MIN_DECLARATIVE + 3 
+#define CIL_USER			CIL_MIN_DECLARATIVE + 4 
+#define CIL_ROLE			CIL_MIN_DECLARATIVE + 5 
+#define CIL_ROLE_TYPES		CIL_MIN_DECLARATIVE + 6 
+#define CIL_TYPE			CIL_MIN_DECLARATIVE + 7 
+#define CIL_ATTR			CIL_MIN_DECLARATIVE + 8 
+#define CIL_TYPE_ATTR		CIL_MIN_DECLARATIVE + 9 
+#define CIL_BOOL			CIL_MIN_DECLARATIVE + 10
+#define CIL_ROLE_RULE		CIL_MIN_DECLARATIVE + 11
+#define CIL_TYPEALIAS		CIL_MIN_DECLARATIVE + 12
+
+/*
+#define CIL_BLOCK			4
+#define CIL_CLASS			5
+#define CIL_COMMON			6
+#define CIL_SID				7
+#define CIL_USER			8
+#define CIL_ROLE			9
+#define CIL_ROLE_TYPES		10
+#define CIL_TYPE			11
+#define CIL_ATTR			12
+#define CIL_TYPE_ATTR		13
+#define CIL_BOOL			14
+#define CIL_AVRULE			15
+#define CIL_ROLE_RULE		16
+#define CIL_TYPEALIAS		39
+*/
 /*
 	Keywords
 */
@@ -58,7 +77,7 @@
 #define CIL_KEY_CLASS		"class"
 #define CIL_KEY_PERM		"perm"
 #define CIL_KEY_COMMON		"common"
-#define CIL_KEY_SID		"sid"
+#define CIL_KEY_SID			"sid"
 #define CIL_KEY_USER		"user"
 #define CIL_KEY_ROLE 		"role"
 #define CIL_KEY_ROLETYPE	"roletype"
@@ -85,21 +104,21 @@
 #define CIL_SYM_GLOBAL_COMMONS		3
 #define CIL_SYM_GLOBAL_CLASSES		4
 #define CIL_SYM_GLOBAL_BOOLS		5
-#define CIL_SYM_GLOBAL_SENS		6
-#define CIL_SYM_GLOBAL_CATS		7
-#define CIL_SYM_GLOBAL_SIDS		8
+#define CIL_SYM_GLOBAL_SENS			6
+#define CIL_SYM_GLOBAL_CATS			7
+#define CIL_SYM_GLOBAL_SIDS			8
 #define CIL_SYM_GLOBAL_FILECONS		9
 #define CIL_SYM_GLOBAL_PORTCONS		10
 #define CIL_SYM_GLOBAL_NETIFCONS	11
 
-#define CIL_SYM_GLOBAL_NUM		12
+#define CIL_SYM_GLOBAL_NUM			12
 
 // Local symtabs
 #define CIL_SYM_LOCAL_BLOCKS		0
-#define CIL_SYM_LOCAL_TYPES		1
-#define CIL_SYM_LOCAL_ATTRS		2
+#define CIL_SYM_LOCAL_TYPES			1
+#define CIL_SYM_LOCAL_ATTRS			2
 #define CIL_SYM_LOCAL_ALIASES		3
-#define CIL_SYM_LOCAL_PERMS		4
+#define CIL_SYM_LOCAL_PERMS			4
 // TODO CDS this should be MACRO, not INTERFACE
 #define CIL_SYM_LOCAL_TRANS_INTERFACES	5
 
@@ -236,7 +255,7 @@ struct cil_avrule {
 	struct cil_class *obj;
 	struct cil_list *perms_str;
 	uint32_t perms;
-	
+
 };
 
 #define CIL_AVRULE_TRANSITION 16

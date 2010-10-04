@@ -391,51 +391,37 @@ int cil_qualify_name(struct cil_tree_node *root)
 	do {
 		if (curr->cl_head != NULL) {
 			if (!reverse) {
-				if (curr->flavor != CIL_ROOT) { // append name
-					// TODO CDS should not cast nodes that do not start with a cil_symtab_datum_t
+				if (curr->flavor >= CIL_MIN_DECLARATIVE) { // append name
 					strcat(fqp, ((cil_symtab_datum_t*)curr->data)->name);
 					strcat(fqp, ".");
 				}
-				curr = curr->cl_head;
 			}
 			else {
 				length = strlen(fqp) - (strlen(((cil_symtab_datum_t*)curr->data)->name) + 1);
 				fqp[length] = '\0';
-				
-				if (curr->next != NULL) {
-					curr = curr->next;
-					reverse = 0;
-				}
-				else 
-					curr = curr->parent;
 			}
 		}
-		// TODO CDS should not cast nodes that do not start with a cil_symtab_datum_t
-		else if (((cil_symtab_datum_t*)curr->data)->name != NULL){
+		else if (curr->flavor >= CIL_MIN_DECLARATIVE){
 			uqn = ((cil_symtab_datum_t*)curr->data)->name; 
 			length = strlen(fqp) + strlen(uqn) + 1;
 			fqn = malloc(length + 1);
-			strcpy(fqn, fqp);
 
+			strcpy(fqn, fqp);
 			strcat(fqn, uqn);
 
 			((cil_symtab_datum_t*)curr->data)->name = fqn;	// Replace with new, fully qualified string
+		}
 
-			if (curr->next != NULL)
-				curr = curr->next;
-			else {
-				curr = curr->parent;
-				reverse = 1;
-			}
+		if (curr->cl_head != NULL && !reverse) 
+			curr = curr->cl_head;
+		else if (curr->next != NULL) {
+			curr = curr->next;
+			reverse = 0;
 		}
 		else {
-			if (curr->next != NULL)
-				curr = curr->next;
-			else {
-				curr = curr->parent;
-				reverse = 1;
-			}
-		}	
+			curr = curr->parent;
+			reverse = 1;
+		}
 	} while (curr->flavor != CIL_ROOT);
 
 	return SEPOL_OK;

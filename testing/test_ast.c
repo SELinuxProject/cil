@@ -9,6 +9,7 @@
 #include "../src/cil_tree.h"
 #include "../src/cil_parser.h"
 #include "../src/cil_ast.h"
+#include "../src/cil_policy.h"
 
 #include <sepol/policydb/hashtab.h>
 
@@ -78,12 +79,16 @@ int main(int argc, char *argv[])
 		printf("Names fully qualified\n\n");
 
 		cil_tree_print(db->ast_root->root, 0);
-		
+
+		printf("----------------------------------------------\n\n");
+		printf("Generating policy\n");
+		cil_gen_policy(db->ast_root->root);
+		printf("Policy generated\n\n");
+	
 		printf("----------------------------------------------\n\n");
 		printf("Destroying db\n");
 		cil_db_destroy(&db);
 		printf("db destroyed\n\n");
-
 	}
 
 	return SEPOL_OK;
