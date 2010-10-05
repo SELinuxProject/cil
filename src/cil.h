@@ -255,7 +255,7 @@ struct cil_avrule {
 	struct cil_class *obj;
 	struct cil_list *perms_str;
 	uint32_t perms;
-
+	struct cil_list *perms_list;
 };
 
 #define CIL_AVRULE_TRANSITION 16

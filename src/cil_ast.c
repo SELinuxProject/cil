@@ -222,18 +222,40 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 						free(rule->obj_str);
 						rule->obj_str = NULL;
 					}
+					struct cil_tree_node *perm_node;
 					struct cil_list_item *perm = rule->perms_str->list;
-					uint32_t value;
-					while (	perm != NULL) {
-						rc = cil_symtab_get_value(&rule->obj->perms, (char*)perm->data, &value);
+					struct cil_list_item *list_item;
+					struct cil_list_item *list_tail;
+					struct cil_list *perms_list;
+					rc = cil_list_init(&perms_list);
+					if (rc != SEPOL_OK) {
+						printf("Failed to init perm node list\n");
+						return rc;
+					}
+					while (perm != NULL) {	
+						rc = cil_symtab_get_node(&rule->obj->perms, (char*)perm->data, &perm_node);
 						if (rc != SEPOL_OK) {
-							printf("Failed to get value from symtab\n");
+							printf("Failed to get node from symtab\n");
 							return rc;
 						}
-
-						rule->perms |= 1U << (value - 1);
+						rc = cil_list_item_init(&list_item);
+						if (rc != SEPOL_OK) {
+							printf("Failed to init perm node list item\n");
+							return rc;
+						}
+						list_item->flavor = CIL_PERM;
+						list_item->data = perm_node->data;
+						if (perms_list->list == NULL) {
+							perms_list->list = list_item;
+							list_tail = perms_list->list;
+						}
+						else {
+							list_tail->next = list_item;
+							list_tail = list_tail->next;
+						}
 						perm = perm->next;
 					}
+					rule->perms_list = perms_list;
 					cil_list_destroy(&rule->perms_str);
 				}
 				break;

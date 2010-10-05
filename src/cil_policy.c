@@ -63,8 +63,12 @@ int cil_name_to_policy(FILE *pFile, struct cil_tree_node *current)
 			char *src_str = ((cil_symtab_datum_t*)(struct cil_type*)rule->src)->name;
 			char *tgt_str = ((cil_symtab_datum_t*)(struct cil_type*)rule->tgt)->name;
 			char *obj_str = ((cil_symtab_datum_t*)(struct cil_type*)rule->obj)->name;
-//			struct cil_list *perm_list = 
+			struct cil_list_item *perm_item = rule->perms_list->list;
 			fprintf(pFile, "allow %s %s:%s { ", src_str, tgt_str, obj_str);
+			while (perm_item != NULL) {
+				fprintf(pFile, "%s ", ((struct cil_perm*)(perm_item->data))->datum.name);
+				perm_item = perm_item->next;
+			}
 			fprintf(pFile, "};\n");
 			break;
 		}
