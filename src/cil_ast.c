@@ -245,14 +245,11 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 						}
 						list_item->flavor = CIL_PERM;
 						list_item->data = perm_node->data;
-						if (perms_list->list == NULL) {
+						if (perms_list->list == NULL) 
 							perms_list->list = list_item;
-							list_tail = perms_list->list;
-						}
-						else {
+						else 
 							list_tail->next = list_item;
-							list_tail = list_tail->next;
-						}
+						list_tail = list_item;
 						perm = perm->next;
 					}
 					rule->perms_list = perms_list;

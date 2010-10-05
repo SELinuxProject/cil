@@ -170,8 +170,18 @@ void cil_tree_print_node(struct cil_tree_node *node)
 						item = item->next;
 					}
 				}
-				else
-					printf(" %d", rule->perms);
+				else {
+					item = rule->perms_list->list;
+					while(item != NULL) {
+						if (item->flavor == CIL_PERM)
+							printf(" %s", ((struct cil_perm*)item->data)->datum.name);
+						else {
+							printf("\n\n perms list contained uexpected data type\n");
+							break;
+						}
+						item = item->next;
+					}
+				}
 				printf(" )\n");
 			}
 			return;

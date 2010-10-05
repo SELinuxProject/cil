@@ -254,7 +254,6 @@ struct cil_avrule {
 	char *obj_str;
 	struct cil_class *obj;
 	struct cil_list *perms_str;
-	uint32_t perms;
 	struct cil_list *perms_list;
 };
 
