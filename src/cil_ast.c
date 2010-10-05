@@ -360,7 +360,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 			rc = cil_symtab_get_node(symtab, name, node);
 			if (rc != SEPOL_OK) {
 				free(global_name);
-				global_name = malloc(strlen(name)+2);
+				global_name = cil_malloc(strlen(name)+2);
 				strcpy(global_name, ".");
 				strncat(global_name, name, strlen(name));
 			}
@@ -368,7 +368,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 		else {
 			if (__cil_resolve_name_helper(db, ast_node, name, sym_index, node) != SEPOL_OK) {
 				free(global_name);
-				global_name = malloc(strlen(name)+2);
+				global_name = cil_malloc(strlen(name)+2);
 				strcpy(global_name, ".");
 				strncat(global_name, name, strlen(name));
 			}
@@ -423,7 +423,7 @@ int cil_qualify_name(struct cil_tree_node *root)
 		else if (curr->flavor >= CIL_MIN_DECLARATIVE){
 			uqn = ((struct cil_symtab_datum*)curr->data)->name; 
 			length = strlen(fqp) + strlen(uqn) + 1;
-			fqn = malloc(length + 1);
+			fqn = cil_malloc(length + 1);
 
 			strcpy(fqn, fqp);
 			strcat(fqn, uqn);
