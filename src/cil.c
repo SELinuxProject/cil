@@ -172,14 +172,11 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
 		new_item->data = strdup(parse_current->data);
-		if (ast_list->list == NULL) {
+		if (ast_list->list == NULL)
 			ast_list->list = new_item;
-			list_tail = ast_list->list;
-		}
-		else {
+		else
 			list_tail->next = new_item;
-			list_tail = list_tail->next;
-		}
+		list_tail = new_item;
 		parse_current = parse_current->next;
 	}
 
