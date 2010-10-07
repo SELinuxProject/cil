@@ -418,7 +418,7 @@ void test_cil_symtab_insert(CuTest *tc) {
 
 	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_LOCAL_BLOCKS);
 
-	int rc = cil_symtab_insert(test_symtab, (hashtab_key_t)test_name, (cil_symtab_datum_t*)test_block, test_ast_node);
+	int rc = cil_symtab_insert(test_symtab, (hashtab_key_t)test_name, (struct cil_symtab_datum*)test_block, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -664,7 +664,7 @@ void test_cil_gen_perm_permexists_neg(CuTest *tc) {
 	struct cil_perm *test_perm = malloc(sizeof(struct cil_perm));
 	symtab_t *test_symtab = NULL;
 	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_LOCAL_PERMS);
-	cil_symtab_insert(test_symtab, (hashtab_key_t)"read", (cil_symtab_datum_t*)test_perm, test_new_ast);
+	cil_symtab_insert(test_symtab, (hashtab_key_t)"read", (struct cil_symtab_datum*)test_perm, test_new_ast);
 
 	rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
 	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
@@ -711,7 +711,7 @@ void test_cil_gen_perm_nodes(CuTest *tc) {
 	test_ast_node->parent = test_db->ast_root->root;
 	test_ast_node->line = 1;
 
-	cil_symtab_insert(&test_db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)test_key, (cil_symtab_datum_t*)test_cls, test_ast_node);
+	cil_symtab_insert(&test_db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)test_key, (struct cil_symtab_datum*)test_cls, test_ast_node);
 
 	test_ast_node->data = test_cls;
 	test_ast_node->flavor = CIL_CLASS;
@@ -738,7 +738,7 @@ void test_cil_gen_perm_nodes_failgen_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast_root->root;
 	test_ast_node->line = 1;
 
-	cil_symtab_insert(&test_db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)test_key, (cil_symtab_datum_t*)test_cls, test_ast_node);
+	cil_symtab_insert(&test_db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)test_key, (struct cil_symtab_datum*)test_cls, test_ast_node);
 
 	test_ast_node->data = test_cls;
 	test_ast_node->flavor = CIL_CLASS;

@@ -5,7 +5,7 @@
 #include "cil_tree.h"
 #include "cil_symtab.h"
 
-int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, cil_symtab_datum_t *datum, struct cil_tree_node *node)
+int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node)
 {
 	// TODO CDS need to figure out how this is freed, as I do not believe destroying the symtab will do this
 	char *newkey = strdup(key);
@@ -25,7 +25,7 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, cil_symtab_datum_t *d
 
 int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node)
 {
-	cil_symtab_datum_t *datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)key);
+	struct cil_symtab_datum *datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
 	if (datum == NULL)
 		return SEPOL_ERR;
 
@@ -36,7 +36,7 @@ int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node
 
 int cil_symtab_get_value(symtab_t *symtab, char *key, uint32_t *value)
 {
-	cil_symtab_datum_t *datum = (cil_symtab_datum_t*)hashtab_search(symtab->table, (hashtab_key_t)key);
+	struct cil_symtab_datum *datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
 	if (datum == NULL)
 		return SEPOL_ERR;
 

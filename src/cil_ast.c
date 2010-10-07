@@ -411,24 +411,24 @@ int cil_qualify_name(struct cil_tree_node *root)
 		if (curr->cl_head != NULL) {
 			if (!reverse) {
 				if (curr->flavor >= CIL_MIN_DECLARATIVE) { // append name
-					strcat(fqp, ((cil_symtab_datum_t*)curr->data)->name);
+					strcat(fqp, ((struct cil_symtab_datum*)curr->data)->name);
 					strcat(fqp, ".");
 				}
 			}
 			else {
-				length = strlen(fqp) - (strlen(((cil_symtab_datum_t*)curr->data)->name) + 1);
+				length = strlen(fqp) - (strlen(((struct cil_symtab_datum*)curr->data)->name) + 1);
 				fqp[length] = '\0';
 			}
 		}
 		else if (curr->flavor >= CIL_MIN_DECLARATIVE){
-			uqn = ((cil_symtab_datum_t*)curr->data)->name; 
+			uqn = ((struct cil_symtab_datum*)curr->data)->name; 
 			length = strlen(fqp) + strlen(uqn) + 1;
 			fqn = malloc(length + 1);
 
 			strcpy(fqn, fqp);
 			strcat(fqn, uqn);
 
-			((cil_symtab_datum_t*)curr->data)->name = fqn;	// Replace with new, fully qualified string
+			((struct cil_symtab_datum*)curr->data)->name = fqn;	// Replace with new, fully qualified string
 		}
 
 		if (curr->cl_head != NULL && !reverse) 

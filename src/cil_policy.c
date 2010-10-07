@@ -10,7 +10,7 @@
 
 int cil_name_to_policy(FILE *pFile, struct cil_tree_node *current) 
 {
-	char *name = ((cil_symtab_datum_t*)current->data)->name;
+	char *name = ((struct cil_symtab_datum*)current->data)->name;
 	uint32_t flavor = current->flavor;
 
 	switch(flavor) {
@@ -23,7 +23,7 @@ int cil_name_to_policy(FILE *pFile, struct cil_tree_node *current)
 		}
 		case CIL_TYPEALIAS: {
 			struct cil_typealias *alias = (struct cil_typealias*)current->data;
-			fprintf(pFile, "typealias %s alias %s;\n", ((cil_symtab_datum_t*)alias->type)->name, name);
+			fprintf(pFile, "typealias %s alias %s;\n", ((struct cil_symtab_datum*)alias->type)->name, name);
 			break;
 		}
 		case CIL_ROLE: {
@@ -47,7 +47,7 @@ int cil_name_to_policy(FILE *pFile, struct cil_tree_node *current)
 
 			while (current != NULL) {
 				if (current->flavor == CIL_PERM)
-					fprintf(pFile, "%s ", ((cil_symtab_datum_t*)current->data)->name);
+					fprintf(pFile, "%s ", ((struct cil_symtab_datum*)current->data)->name);
 				else {
 					printf("Improper data type found in class permissions: %d\n", current->flavor);
 					return SEPOL_ERR;
@@ -60,9 +60,9 @@ int cil_name_to_policy(FILE *pFile, struct cil_tree_node *current)
 		}
 		case CIL_AVRULE: {
 			struct cil_avrule *rule = (struct cil_avrule*)current->data;
-			char *src_str = ((cil_symtab_datum_t*)(struct cil_type*)rule->src)->name;
-			char *tgt_str = ((cil_symtab_datum_t*)(struct cil_type*)rule->tgt)->name;
-			char *obj_str = ((cil_symtab_datum_t*)(struct cil_type*)rule->obj)->name;
+			char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
+			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
+			char *obj_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->obj)->name;
 			struct cil_list_item *perm_item = rule->perms_list->list;
 			fprintf(pFile, "allow %s %s:%s { ", src_str, tgt_str, obj_str);
 			while (perm_item != NULL) {
