@@ -25,12 +25,12 @@ void set_cil_file_data(struct cil_file_data **data) {
 	uint32_t file_size;
 	char *buffer;
 
-	file = fopen("testing/test.cil", "r");
+	file = fopen("testing/test.txt", "r");
 	if (!file) {
 	    fprintf(stderr, "Could not open file\n");
 	    exit(1);
 	}
-	if (stat("testing/test.cil", &filedata) == -1) {
+	if (stat("testing/test.txt", &filedata) == -1) {
 	    printf("Could not stat file\n");
 	    exit(1);
 	}
@@ -54,7 +54,7 @@ void gen_test_tree(struct cil_tree **test_root, char *line[]) {
 	struct cil_tree_node *node, *item, *current;
 
 	cil_tree_init(&new_tree);
-	new_tree->root->flavor = CIL_PARSER;
+	new_tree->root->flavor = CIL_ROOT;
 	current = new_tree->root;
 	
 	char **i = line;
