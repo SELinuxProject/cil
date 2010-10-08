@@ -13,7 +13,7 @@ int cil_db_init(struct cil_db **db)
 	int rc;	
 
 	struct cil_db *new_db;
-	new_db = malloc(sizeof(struct cil_db));
+	new_db = cil_malloc(sizeof(struct cil_db));
 
 	rc = cil_symtab_array_init(new_db->global_symtab, CIL_SYM_GLOBAL_NUM);
 	if (rc != SEPOL_OK) {
@@ -46,7 +46,7 @@ void cil_db_destroy(struct cil_db **db)
 
 int cil_list_init(struct cil_list **list)
 {
-	struct cil_list *new_list = malloc(sizeof(struct cil_list));
+	struct cil_list *new_list = cil_malloc(sizeof(struct cil_list));
 	new_list->list = NULL;
 
 	*list = new_list;
@@ -69,7 +69,7 @@ void cil_list_destroy(struct cil_list **list)
 
 int cil_list_item_init(struct cil_list_item **item)
 {
-	struct cil_list_item *new_item = malloc(sizeof(struct cil_list_item));
+	struct cil_list_item *new_item = cil_malloc(sizeof(struct cil_list_item));
 	new_item->next = NULL;
 	new_item->flavor = 0;
 	new_item->data = NULL;
@@ -215,8 +215,7 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 
 int cil_stack_init(struct cil_stack **stack)
 {
-	/* TODO CDS Big change - when you malloc, you need to check what you got back. malloc can fail */
-	struct cil_stack *new_stack = malloc(sizeof(struct cil_stack));
+	struct cil_stack *new_stack = cil_malloc(sizeof(struct cil_stack));
 	new_stack->top = NULL;
 	
 	*stack = new_stack;
@@ -230,7 +229,7 @@ int cil_stack_push(struct cil_stack *stack, void *data)
 		return SEPOL_ERR;
 
 	struct cil_stack_element *new_top;
-	new_top = malloc(sizeof(struct cil_stack_element));
+	new_top = cil_malloc(sizeof(struct cil_stack_element));
 	new_top->data = data;
 	new_top->next = stack->top;
 	stack->top = new_top;
@@ -286,7 +285,7 @@ int cil_get_namespace_str(struct cil_stack *stack, char **namespace)
 		current = current->next;
 		length += strlen(current->data) + 1;
 	}
-	new_namespace = malloc(length);
+	new_namespace = cil_malloc(length);
 	new_namespace[0] = '\0';
 	__namespace_helper(stack->top, new_namespace);
 	*namespace = new_namespace;
@@ -354,7 +353,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	int rc;
 	char *name;
-	struct cil_block *block = malloc(sizeof(struct cil_block));
+	struct cil_block *block = cil_malloc(sizeof(struct cil_block));
 	symtab_t *symtab = NULL;
 
 	rc = cil_symtab_array_init(block->symtab, CIL_SYM_LOCAL_NUM);
@@ -409,7 +408,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	int rc;
 	char *key = parse_current->next->data;
-	struct cil_class *cls = malloc(sizeof(struct cil_class));
+	struct cil_class *cls = cil_malloc(sizeof(struct cil_class));
 
 	rc = symtab_init(&cls->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
@@ -450,7 +449,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return SEPOL_ERR;
 
 	int rc = 0;
-	struct cil_perm *perm = malloc(sizeof(struct cil_perm));
+	struct cil_perm *perm = cil_malloc(sizeof(struct cil_perm));
 	// TODO CDS the rest of this function is done over and over again. Look at pulling it out into a helper function that can be called from cil_gen_*.
 	symtab_t *symtab = NULL;
 	char *key = (char*)parse_current->data;
@@ -495,7 +494,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 	int rc;
 	char *key = parse_current->next->data;
-	struct cil_common *common = malloc(sizeof(struct cil_common));
+	struct cil_common *common = cil_malloc(sizeof(struct cil_common));
 
 	rc = symtab_init(&common->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
@@ -533,7 +532,7 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 		return SEPOL_ERR;
 
 	int rc;
-	struct cil_sid * sid = malloc(sizeof(struct cil_sid));	
+	struct cil_sid * sid = cil_malloc(sizeof(struct cil_sid));	
 	char *key = parse_current->next->data;
 
 	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_SIDS], (hashtab_key_t)key, (struct cil_symtab_datum*)sid, ast_node);
@@ -564,7 +563,7 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	}
 
 	int rc;
-	struct cil_user *user = malloc(sizeof(struct cil_user));
+	struct cil_user *user = cil_malloc(sizeof(struct cil_user));
 	char *key = parse_current->next->data;
 
 	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_USERS], (hashtab_key_t)key, (struct cil_symtab_datum*)user, ast_node);
@@ -595,7 +594,7 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	}
 
 	int rc;
-	struct cil_role *role = malloc(sizeof(struct cil_role));
+	struct cil_role *role = cil_malloc(sizeof(struct cil_role));
 	char *key = parse_current->next->data;
 
 	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], (hashtab_key_t)key, (struct cil_symtab_datum*)role, ast_node);
@@ -625,7 +624,7 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 		return SEPOL_ERR;
 	}
 	
-	struct cil_avrule *rule = malloc(sizeof(struct cil_avrule));
+	struct cil_avrule *rule = cil_malloc(sizeof(struct cil_avrule));
 	rule->rule_kind = rule_kind;
 	rule->src_str = strdup(parse_current->next->data);
 	rule->tgt_str = strdup(parse_current->next->next->data);
@@ -675,7 +674,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	int rc;
 	char *key = (char*)parse_current->next->data; 
-	struct cil_type *type = malloc(sizeof(struct cil_type));
+	struct cil_type *type = cil_malloc(sizeof(struct cil_type));
 	symtab_t *symtab = NULL;
 
 	if (flavor == CIL_TYPE) {
@@ -721,7 +720,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	int rc;
 	struct cil_bool *boolean;
 	char *key = parse_current->next->data;
-	boolean = malloc(sizeof(struct cil_bool));
+	boolean = cil_malloc(sizeof(struct cil_bool));
 
 	if (!strcmp(parse_current->next->next->data, "true"))
 		boolean->value = 1;
@@ -755,7 +754,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		return SEPOL_ERR;
 
 	int rc;
-	struct cil_typealias *alias = malloc(sizeof(struct cil_typealias));
+	struct cil_typealias *alias = cil_malloc(sizeof(struct cil_typealias));
 	char *key = parse_current->next->next->data;
 	symtab_t *symtab;
 

@@ -2,6 +2,7 @@
 	#include <stdint.h>
 	#include <sepol/errcodes.h>
 	#include "cil_lexer.h"
+	#include "cil_mem.h"
 	char *value;
 	int line = 1;
 %}
@@ -41,7 +42,7 @@ int cil_lexer_next(struct token **tok)
 {
 	struct token *n;
 	/* TODO CDS who should free token? or just put n on the stack and don't worry about it */
-	n = malloc( sizeof(struct token));
+	n = cil_malloc(sizeof(struct token));
 	n->type = yylex();
 	n->value = value;
 	n->line = line;

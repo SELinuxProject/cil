@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "cil_symtab.h"
+#include "cil_mem.h"
 
 /*
 	Tree/list node types
