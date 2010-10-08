@@ -19,7 +19,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 	struct token *tok;
 
 	cil_tree_init(&tree);
-	tree->root->flavor = CIL_PARSER;
+	tree->root->flavor = CIL_ROOT;
 	current = tree->root;	
 
 	do {
