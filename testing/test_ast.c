@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
 	char *buffer;
 	FILE *file;
 	
-	struct cil_tree *parse_root;
-	cil_tree_init(&parse_root);
+	struct cil_tree *parse_tree;
+	cil_tree_init(&parse_tree);
 
 	struct cil_db *db;
 	cil_db_init(&db);
@@ -45,44 +45,44 @@ int main(int argc, char *argv[])
 
 		printf("----------------------------------------------\n\n");
 		printf("Building parse tree\n");
-		if (cil_parser(buffer, file_size + 2, &parse_root)) {
+		if (cil_parser(buffer, file_size + 2, &parse_tree)) {
 			printf("Failed to parse CIL policy, exiting\n");
 			return SEPOL_ERR;
 		}
-		cil_tree_print(parse_root->root, 0);
+		cil_tree_print(parse_tree->root, 0);
 
 		printf("----------------------------------------------\n\n");
 		printf("Building ast from parse tree\n\n");
-		if (cil_build_ast(db, parse_root->root, db->ast_root->root)) {
+		if (cil_build_ast(db, parse_tree->root, db->ast->root)) {
 			printf("Failed to build ast, exiting\n");
 			return SEPOL_ERR;
 		}
-		cil_tree_print(db->ast_root->root, 0);
+		cil_tree_print(db->ast->root, 0);
 	
 		printf("----------------------------------------------\n\n");
 		printf("Destroying parse tree\n");
-		cil_tree_destroy(&parse_root);
+		cil_tree_destroy(&parse_tree);
 		printf("Parse tree destroyed\n\n");
 
 		printf("----------------------------------------------\n\n");
 		printf("Resolving ast\n\n");
-		if (cil_resolve_ast(db, db->ast_root->root)) {
+		if (cil_resolve_ast(db, db->ast->root)) {
 			printf("Failed to resolve ast, exiting\n");
 			return SEPOL_ERR;
 		}
 
-		cil_tree_print(db->ast_root->root, 0);
+		cil_tree_print(db->ast->root, 0);
 		
 		printf("----------------------------------------------\n\n");
 		printf("Qualifying names\n");
-		cil_qualify_name(db->ast_root->root);
+		cil_qualify_name(db->ast->root);
 		printf("Names fully qualified\n\n");
 
-		cil_tree_print(db->ast_root->root, 0);
+		cil_tree_print(db->ast->root, 0);
 
 		printf("----------------------------------------------\n\n");
 		printf("Generating policy\n");
-		cil_gen_policy(db->ast_root->root);
+		cil_gen_policy(db->ast->root);
 		printf("Policy generated\n\n");
 	
 		printf("----------------------------------------------\n\n");

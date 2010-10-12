@@ -375,7 +375,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 			}
 		}
 		else {
-			if (__cil_resolve_name_helper(db, db->ast_root->root, global_name, sym_index, node)) {
+			if (__cil_resolve_name_helper(db, db->ast->root, global_name, sym_index, node)) {
 				free(global_name);
 				return SEPOL_ERR;
 			}

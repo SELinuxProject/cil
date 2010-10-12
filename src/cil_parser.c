@@ -7,7 +7,7 @@
 #include "cil_lexer.h"
 #include "cil.h"
 
-int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
+int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 {
 	cil_lexer_setup(buffer, size);
 
@@ -65,7 +65,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_root)
 	}
 	while (tok->type != 0);
 
-	*parse_root = tree;
+	*parse_tree = tree;
 
 	return SEPOL_OK;
 }
