@@ -253,45 +253,6 @@ int cil_stack_pop(struct cil_stack *stack, void *popped)
 	 return SEPOL_ERR;
 }
 
-static int __namespace_helper(struct cil_stack_element *current, char *namespace)
-{
-	if (current == NULL || namespace == NULL)
-		return SEPOL_ERR;
-	
-	/* TODO add error handling */
-	if (current->next != NULL) {
-		__namespace_helper(current->next, namespace);
-		strcat(namespace, ".");
-	}
-	strcat(namespace, current->data);
-	
-	return SEPOL_OK;
-}
-
-int cil_get_namespace_str(struct cil_stack *stack, char **namespace)
-{
-	if (stack == NULL)
-		return SEPOL_ERR;
-
-	char *new_namespace;
-	struct cil_stack_element *current = stack->top;
-	/* TODO add error handling */
-	if (current == NULL) {
-		new_namespace = NULL;
-		return SEPOL_OK;
-	}	
-	uint32_t length = strlen(current->data) + 2;
-	while (current->next != NULL) {
-		current = current->next;
-		length += strlen(current->data) + 1;
-	}
-	new_namespace = cil_malloc(length);
-	new_namespace[0] = '\0';
-	__namespace_helper(stack->top, new_namespace);
-	*namespace = new_namespace;
-	return SEPOL_OK;
-}
-
 int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 {
 	uint32_t i = 0, rc = 0;
