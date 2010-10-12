@@ -10,7 +10,7 @@
 
 int cil_db_init(struct cil_db **db)
 {
-	int rc;	
+	int rc = SEPOL_ERR;	
 
 	struct cil_db *new_db;
 	new_db = cil_malloc(sizeof(struct cil_db));
@@ -187,7 +187,7 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 
 int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node)
 {
-	int rc = 0;
+	int rc = SEPOL_ERR;
 	struct cil_tree_node *new_ast = NULL;
 
 	while(current_perm != NULL) {
@@ -272,7 +272,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return SEPOL_ERR;
 	}
 
-	int rc;
+	int rc = SEPOL_ERR;
 	char *name;
 	struct cil_block *block = cil_malloc(sizeof(struct cil_block));
 	symtab_t *symtab = NULL;
@@ -327,7 +327,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return SEPOL_ERR;
 	}
 
-	int rc;
+	int rc = SEPOL_ERR;
 	char *key = parse_current->next->data;
 	struct cil_class *cls = cil_malloc(sizeof(struct cil_class));
 
@@ -369,7 +369,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	int rc = 0;
+	int rc = SEPOL_ERR;
 	struct cil_perm *perm = cil_malloc(sizeof(struct cil_perm));
 	// TODO CDS the rest of this function is done over and over again. Look at pulling it out into a helper function that can be called from cil_gen_*.
 	symtab_t *symtab = NULL;
@@ -413,7 +413,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		return SEPOL_ERR;
 	}
 
-	int rc;
+	int rc = SEPOL_ERR;
 	char *key = parse_current->next->data;
 	struct cil_common *common = cil_malloc(sizeof(struct cil_common));
 
@@ -452,7 +452,7 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	int rc;
+	int rc = SEPOL_ERR;
 	struct cil_sid * sid = cil_malloc(sizeof(struct cil_sid));	
 	char *key = parse_current->next->data;
 
@@ -483,7 +483,7 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return SEPOL_ERR;
 	}
 
-	int rc;
+	int rc = SEPOL_ERR;
 	struct cil_user *user = cil_malloc(sizeof(struct cil_user));
 	char *key = parse_current->next->data;
 
@@ -514,7 +514,7 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return SEPOL_ERR;
 	}
 
-	int rc;
+	int rc = SEPOL_ERR;
 	struct cil_role *role = cil_malloc(sizeof(struct cil_role));
 	char *key = parse_current->next->data;
 
@@ -593,7 +593,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		}
 	}
 
-	int rc;
+	int rc = SEPOL_ERR;
 	char *key = (char*)parse_current->next->data; 
 	struct cil_type *type = cil_malloc(sizeof(struct cil_type));
 	symtab_t *symtab = NULL;
@@ -638,7 +638,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return SEPOL_ERR;
 	}
 
-	int rc;
+	int rc = SEPOL_ERR;
 	struct cil_bool *boolean;
 	char *key = parse_current->next->data;
 	boolean = cil_malloc(sizeof(struct cil_bool));
@@ -674,7 +674,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	int rc;
+	int rc = SEPOL_ERR;
 	struct cil_typealias *alias = cil_malloc(sizeof(struct cil_typealias));
 	char *key = parse_current->next->next->data;
 	symtab_t *symtab;

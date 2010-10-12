@@ -146,7 +146,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
-	int rc = 0;
+	int rc = SEPOL_ERR;
 	int reverse = 0;
 
 	if (current == NULL) {
@@ -273,7 +273,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, struct cil_tree_node **node)
 {
-	int rc = 0;
+	int rc = SEPOL_ERR;
 	char* name_dup = strdup(name);
 	char *tok_current = strtok(name_dup, ".");
 	char *tok_next = strtok(NULL, ".");
@@ -334,7 +334,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 		return SEPOL_ERR;
 	}
 
-	int rc = 0;
+	int rc = SEPOL_ERR;
 	// TODO CDS change to something more descriptive
 	char *global_name = strdup(name);
 	char first = *name;

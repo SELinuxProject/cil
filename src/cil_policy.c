@@ -89,7 +89,7 @@ int cil_gen_policy(struct cil_tree_node *root)
 
 	struct cil_tree_node *curr = root;
 	uint16_t reverse = 0;
-	int rc;
+	int rc = SEPOL_ERR;
 
 	do {
 		if (curr->cl_head != NULL) {
