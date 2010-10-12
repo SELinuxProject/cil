@@ -213,46 +213,6 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 	return SEPOL_OK;
 }
 
-int cil_stack_init(struct cil_stack **stack)
-{
-	struct cil_stack *new_stack = cil_malloc(sizeof(struct cil_stack));
-	new_stack->top = NULL;
-	
-	*stack = new_stack;
-
-	return SEPOL_OK;
-}
-
-int cil_stack_push(struct cil_stack *stack, void *data)
-{
-	if (stack == NULL || data == NULL)
-		return SEPOL_ERR;
-
-	struct cil_stack_element *new_top;
-	new_top = cil_malloc(sizeof(struct cil_stack_element));
-	new_top->data = data;
-	new_top->next = stack->top;
-	stack->top = new_top;
-
-	return SEPOL_OK;
-}
-
-int cil_stack_pop(struct cil_stack *stack, void *popped)
-{
-	if (stack == NULL)
-		return SEPOL_ERR;
-	
-	if (stack->top != NULL) {
-		struct cil_stack_element *new_top;
-		popped = stack->top->data;
-		new_top = stack->top->next;
-		free(stack->top);
-		stack->top = new_top;
-		return SEPOL_OK;
-	}
-	 return SEPOL_ERR;
-}
-
 int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 {
 	uint32_t i = 0, rc = 0;
