@@ -7,7 +7,6 @@
 #include "cil_parser.h"
 #include "cil.h"
 
-// TODO CDS think about switching to a loop instead of recursion
 int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
 	if (db == NULL || parse_tree == NULL || ast == NULL)
