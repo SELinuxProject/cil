@@ -269,13 +269,6 @@ void test_cil_lexer_next(CuTest *tc) {
    free(buffer);
 }
 
-void test_cil_stack_init(CuTest *tc) {
-	struct cil_stack *test_stack;
-	int rc = cil_stack_init(&test_stack);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, test_stack->top);
-}
-
 void test_cil_get_parent_symtab_block(CuTest *tc) {
 	symtab_t *symtab = NULL;
 	
@@ -1293,60 +1286,6 @@ void test_cil_gen_avrule_notlist(CuTest *tc) {
 	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_str);
 }
 
-void test_cil_get_namespace_str(CuTest *tc) {
-	struct cil_stack *test_ns;
-	cil_stack_init(&test_ns);
-
-	test_ns->top = malloc(sizeof(struct cil_stack_element));
-	test_ns->top->data = ".test.namespace";
-
-	char *fake_ns = ".foo.bar";
-
-	int rc = cil_get_namespace_str(test_ns, &fake_ns);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-
-	free(test_ns->top);
-	free(test_ns);
-}
-
-void test_cil_get_namespace_str_multi(CuTest *tc) {
-	struct cil_stack *test_ns;
-	cil_stack_init(&test_ns);
-
-	test_ns->top = malloc(sizeof(struct cil_stack_element));
-	test_ns->top->data = ".test.namespace";
-	test_ns->top->next = malloc(sizeof(struct cil_stack_element));
-	test_ns->top->next->data = ".test.namespace2";
-
-	char *fake_ns = ".foo.bar";
-
-	int rc = cil_get_namespace_str(test_ns, &fake_ns);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);   
-
-	free(test_ns->top);
-	free(test_ns->top->next);
-	free(test_ns);
-}
-
-void test_cil_get_namespace_str_topnull(CuTest *tc) {
-	struct cil_stack *test_ns;
-	cil_stack_init(&test_ns);
-
-	char *fake_ns = ".foo.bar";
-
-	int rc = cil_get_namespace_str(test_ns, &fake_ns);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_get_namespace_str_stacknull_neg(CuTest *tc) {
-	struct cil_stack *test_ns = NULL;
-
-	char *fake_ns = ".foo.bar";
-
-	int rc = cil_get_namespace_str(test_ns, &fake_ns);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
-
 void test_cil_build_ast(CuTest *tc) {
 	char *line[] = {"(", "test", "\"qstring\"", ")", ";comment", NULL};
 
@@ -1852,7 +1791,6 @@ CuSuite* CilTreeGetSuite() {
 //	SUITE_ADD_TEST(suite, test_cil_symtab_array_init_null_symtab_neg);
 	SUITE_ADD_TEST(suite, test_cil_db_init);
 	SUITE_ADD_TEST(suite, test_cil_parser);
-	SUITE_ADD_TEST(suite, test_cil_stack_init);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_block);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_class);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_root);
@@ -1904,10 +1842,6 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
 //	Is a perm list with a single value, not surrounded by parenthesis, valid?
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist);
-	SUITE_ADD_TEST(suite, test_cil_get_namespace_str);
-	SUITE_ADD_TEST(suite, test_cil_get_namespace_str_multi);
-	SUITE_ADD_TEST(suite, test_cil_get_namespace_str_topnull);
-	SUITE_ADD_TEST(suite, test_cil_get_namespace_str_stacknull_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_astnull_neg);
