@@ -411,7 +411,6 @@ int cil_gen_perm_nodes(struct cil_db *, struct cil_tree_node *, struct cil_tree_
 int cil_stack_init(struct cil_stack **);
 int cil_stack_push(struct cil_stack *, void *);
 int cil_stack_pop(struct cil_stack *, void *);
-int cil_get_namespace_str(struct cil_stack *, char **);
 int cil_symtab_array_init(symtab_t [], uint32_t);
 void cil_symtab_array_destroy(symtab_t []);
 int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
