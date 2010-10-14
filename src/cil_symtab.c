@@ -5,6 +5,11 @@
 #include "cil_tree.h"
 #include "cil_symtab.h"
 
+void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
+{
+	free(datum.name);
+}
+
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node)
 {
 	char *newkey = strdup(key);

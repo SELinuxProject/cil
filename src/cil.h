@@ -309,7 +309,7 @@ struct cil_transform_del {
 // This is the transform that modifies things in-place
 struct cil_transform_transform {
 	struct cil_search target;
-	// TODO: contents when we figure out what this will look like
+	// TODO: Transform contents when we figure out what this will look like
 };
 
 struct cil_in {
