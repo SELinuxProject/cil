@@ -1658,6 +1658,21 @@ void test_cil_resolve_name_invalid_type_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_resolve_typealias(CuTest *tc) {
+	char *line[] = { "(", "block", "foo", "(", "typealias", ".foo.test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_typealias(test_db, test_db->ast->root->cl_head->cl_head);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_ast_typealias(CuTest *tc) {
 	char *line[] = { "(", "block", "foo", "(", "typealias", ".foo.test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
 
@@ -1696,6 +1711,24 @@ void test_cil_resolve_ast_curr_null_neg(CuTest *tc) {
 
 	int rc = cil_resolve_ast(test_db, test_db->ast->root);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_avrule(CuTest *tc) {
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", \
+	                "(", "type", "test", ")", "(", "type", "foo", ")", \
+	                "(", "allow", "test", "foo", "bar", "(", "read", "write", \
+	                ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_avrule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_resolve_ast_avrule(CuTest *tc) {
@@ -1871,9 +1904,11 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_avrule_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias_notype_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_avrule);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_src_nores_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_tgt_nores_neg);
