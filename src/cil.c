@@ -231,7 +231,7 @@ void cil_symtab_array_destroy(symtab_t symtab[])
 {
 	int i=0;
 	for (i=0;i<CIL_SYM_LOCAL_NUM; i++) {
-		hashtab_destroy(symtab[i].table);
+		cil_symtab_destroy(symtab[i]);
 	}
 }
 
@@ -297,7 +297,6 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return rc;
 	}	
 	
-	/* TODO CDS look at hashtab_insert to see who owns the key (name in this case), to see if they need to be freed */
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)name, (struct cil_symtab_datum*)block, ast_node);
 	if (rc != SEPOL_OK) {
 		printf("Failed to insert block %s into symtab, rc: %d\n", name, rc);
@@ -312,6 +311,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 void cil_destroy_block(struct cil_block *block)
 {
+	cil_symtab_datum_destroy(block->datum);
 	cil_symtab_array_destroy(block->symtab);
 	free(block);
 }
@@ -359,6 +359,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 void cil_destroy_class(struct cil_class *cls)
 {
+	cil_symtab_datum_destroy(cls->datum);
 	hashtab_destroy(cls->perms.table);
 	
 	free(cls);
@@ -399,6 +400,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 void cil_destroy_perm(struct cil_perm *perm)
 {
+	cil_symtab_datum_destroy(perm->datum);
 	free(perm);
 }
 
@@ -443,6 +445,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 void cil_destroy_common(struct cil_common *common)
 {
+	cil_symtab_datum_destroy(common->datum);
 	hashtab_destroy(common->perms.table);
 	free(common);
 }
@@ -470,6 +473,7 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 
 void cil_destroy_sid(struct cil_sid *sid)
 {
+	cil_symtab_datum_destroy(sid->datum);
 	free(sid);
 }
 
@@ -501,6 +505,7 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 void cil_destroy_user(struct cil_user *user)
 {
+	cil_symtab_datum_destroy(user->datum);
 	free(user);
 }
 
@@ -532,6 +537,7 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 void cil_destroy_role(struct cil_role *role)
 {
+	cil_symtab_datum_destroy(role->datum);
 	free(role);
 }
 
@@ -624,7 +630,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 void cil_destroy_type(struct cil_type *type)
 {
-	// TODO CDS need a datum_destroy() function now, since the datum allocates the key and needs to free it
+	cil_symtab_datum_destroy(type->datum);
 	free(type);
 }
 
@@ -666,6 +672,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 void cil_destroy_bool(struct cil_bool *boolean)
 {
+	cil_symtab_datum_destroy(boolean->datum);
 	free(boolean);
 }
 
@@ -701,6 +708,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 void cil_destroy_typealias(struct cil_typealias *alias)
 {
+	cil_symtab_datum_destroy(alias->datum);
 	if (alias->type_str != NULL)
 		free(alias->type_str);
 	free(alias);

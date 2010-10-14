@@ -5,9 +5,13 @@
 #include "cil_tree.h"
 #include "cil_symtab.h"
 
+void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
+{
+	free(datum.name);
+}
+
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node)
 {
-	// TODO CDS need to figure out how this is freed, as I do not believe destroying the symtab will do this
 	char *newkey = strdup(key);
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
 	if (rc != SEPOL_OK) {
@@ -44,3 +48,16 @@ int cil_symtab_get_value(symtab_t *symtab, char *key, uint32_t *value)
 
 	return SEPOL_OK;
 }
+
+static int __cil_symtab_destroy_helper(hashtab_key_t key, hashtab_datum_t datum, void *args)
+{
+	free(key);
+	return SEPOL_OK;
+}
+
+void cil_symtab_destroy(symtab_t symtab)
+{
+	hashtab_map(symtab.table, &__cil_symtab_destroy_helper, NULL);
+	hashtab_destroy(symtab.table);
+}
+
