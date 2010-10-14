@@ -354,8 +354,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 	}
 
 	int rc = SEPOL_ERR;
-	// TODO CDS change to something more descriptive
-	char *global_name = strdup(name);
+	char *global_symtab_name = name;
 	char first = *name;
 
 	if (first != '.') {
@@ -368,40 +367,39 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 			}
 			rc = cil_symtab_get_node(symtab, name, node);
 			if (rc != SEPOL_OK) {
-				free(global_name);
-				global_name = cil_malloc(strlen(name)+2);
-				strcpy(global_name, ".");
-				strncat(global_name, name, strlen(name));
+				global_symtab_name = cil_malloc(strlen(name)+2);
+				strcpy(global_symtab_name, ".");
+				strncat(global_symtab_name, name, strlen(name));
 			}
 		}
 		else {
 			if (__cil_resolve_name_helper(db, ast_node, name, sym_index, node) != SEPOL_OK) {
-				free(global_name);
-				global_name = cil_malloc(strlen(name)+2);
-				strcpy(global_name, ".");
-				strncat(global_name, name, strlen(name));
+				global_symtab_name = cil_malloc(strlen(name)+2);
+				strcpy(global_symtab_name, ".");
+				strncat(global_symtab_name, name, strlen(name));
 			}
 		}
 	}
 		
-	first = *global_name;
+	first = *global_symtab_name;
 
 	if (first == '.') {
-		if (strrchr(global_name, '.') == global_name) { //Only one dot in name, check global symtabs
-			if (cil_symtab_get_node(&db->local_symtab[sym_index], global_name+1, node)) {
-				free(global_name);
+		if (strrchr(global_symtab_name, '.') == global_symtab_name) { //Only one dot in name, check global symtabs
+			if (cil_symtab_get_node(&db->local_symtab[sym_index], global_symtab_name+1, node)) {
+				free(global_symtab_name);
 				return SEPOL_ERR;
 			}
 		}
 		else {
-			if (__cil_resolve_name_helper(db, db->ast->root, global_name, sym_index, node)) {
-				free(global_name);
+			if (__cil_resolve_name_helper(db, db->ast->root, global_symtab_name, sym_index, node)) {
+				free(global_symtab_name);
 				return SEPOL_ERR;
 			}
 		}
 	}
 
-	free(global_name);
+	if (global_symtab_name != name)
+		free(global_symtab_name);
 
 	return SEPOL_OK;
 }

@@ -170,7 +170,10 @@ struct cil_user {
 	struct cil_symtab_datum datum;
 };
 
-/* TODO CDS need userrole statement to associate users with roles and userlevel statement to associate users with levels */
+struct cil_userrole {
+	struct cil_user *user;
+	struct cil_role *role;
+};
 
 struct cil_role {
 	struct cil_symtab_datum datum;
