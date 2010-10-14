@@ -231,7 +231,7 @@ void cil_symtab_array_destroy(symtab_t symtab[])
 {
 	int i=0;
 	for (i=0;i<CIL_SYM_LOCAL_NUM; i++) {
-		hashtab_destroy(symtab[i].table);
+		cil_symtab_destroy(symtab[i]);
 	}
 }
 

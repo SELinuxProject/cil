@@ -44,3 +44,16 @@ int cil_symtab_get_value(symtab_t *symtab, char *key, uint32_t *value)
 
 	return SEPOL_OK;
 }
+
+static int __cil_symtab_destroy_helper(hashtab_key_t key, hashtab_datum_t datum, void *args)
+{
+	free(key);
+	return SEPOL_OK;
+}
+
+void cil_symtab_destroy(symtab_t symtab)
+{
+	hashtab_map(symtab.table, &__cil_symtab_destroy_helper, NULL);
+	hashtab_destroy(symtab.table);
+}
+
