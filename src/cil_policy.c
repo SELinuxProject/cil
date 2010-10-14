@@ -55,6 +55,10 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		case CIL_BLOCK: {
 			break;  // Ignore
 		}
+		case CIL_ATTR: {
+			fprintf(file_arr[ATTRTYPES], "attribute %s;\n", name);
+			break;
+		}
 		case CIL_TYPE: {
 			fprintf(file_arr[ATTRTYPES], "type %s;\n", name);
 			break;
