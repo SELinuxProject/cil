@@ -38,8 +38,11 @@
 (bool foo true)
 (bool bar false)
 
-
 (type my_t)
 
 (class dir
 	(read write execute))
+
+(auditallow apache.process .apache.log file (write))
+(dontaudit new foobar file (open))
+(neverallow my_t bar file (read))

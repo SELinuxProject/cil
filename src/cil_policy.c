@@ -105,7 +105,24 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
 			char *obj_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->obj)->name;
 			struct cil_list_item *perm_item = rule->perms_list->list;
-			fprintf(file_arr[ALLOWS], "allow %s %s:%s { ", src_str, tgt_str, obj_str);
+			switch (rule->rule_kind) {
+				case CIL_AVRULE_ALLOWED:
+					fprintf(file_arr[ALLOWS], "allow %s %s:%s { ", src_str, tgt_str, obj_str);
+					break;
+				case CIL_AVRULE_AUDITALLOW:
+					fprintf(file_arr[ALLOWS], "auditallow %s %s:%s { ", src_str, tgt_str, obj_str);
+					break;
+				case CIL_AVRULE_DONTAUDIT:
+					fprintf(file_arr[ALLOWS], "dontaudit %s %s:%s { ", src_str, tgt_str, obj_str);
+					break;
+				case CIL_AVRULE_NEVERALLOW:
+					fprintf(file_arr[ALLOWS], "neverallow %s %s:%s { ", src_str, tgt_str, obj_str);
+					break;
+				default : {
+					printf("Unknown avrule kind: %d\n", rule->rule_kind);
+					return SEPOL_ERR;
+				}
+			}
 			while (perm_item != NULL) {
 				fprintf(file_arr[ALLOWS], "%s ", ((struct cil_perm*)(perm_item->data))->datum.name);
 				perm_item = perm_item->next;
