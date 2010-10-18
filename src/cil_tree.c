@@ -110,8 +110,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_CLASS : {
 			struct cil_class *cls = node->data;
-			printf("CLASS: %d (", cls->datum.value);
+			printf("CLASS: %d ", cls->datum.value);
 			
+			if (cls->common_str != NULL)
+				printf("inherits: %s ", cls->common_str);
+			else if (cls->common != NULL)
+				printf("inherits: %d ", cls->common->datum.value);
+			printf("(");
+
 			cil_tree_print_perms_list(node->cl_head);
 
 			printf(" )");

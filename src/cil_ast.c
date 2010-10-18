@@ -239,6 +239,26 @@ int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int cil_resolve_class(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_class *cls = (struct cil_class*)current->data;
+	struct cil_tree_node *common_node = NULL;
+	if (cls->common_str == NULL)
+		return SEPOL_OK;
+
+	if (cls->common_str != NULL) {
+		int rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_COMMONS], cls->common_str, &common_node);
+		if (rc != SEPOL_OK) {
+			printf("Name resolution failed for %s\n", cls->common_str);
+			return SEPOL_ERR;
+		}
+		cls->common = (struct cil_common*)(common_node->data);
+		free(cls->common_str);
+		cls->common_str = NULL;
+	}
+	return SEPOL_OK;
+}
+
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
@@ -266,13 +286,28 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 					if (rc != SEPOL_OK)
 						return rc;
 					break;
-				}	
+				}
 				default : {
-					printf("Default\n");
+					break;
 				}
 				
 			}
 		}
+		else {
+//			printf("FLAVOR: %d\n", current->flavor);
+			switch (current->flavor) {
+				case CIL_CLASS : {
+					printf("case class\n");
+					rc = cil_resolve_class(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
+				default : {
+					break;
+				}
+			}
+		}	
 
 		if (current->cl_head != NULL && !reverse)
 			current = current->cl_head;

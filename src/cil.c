@@ -318,18 +318,33 @@ void cil_destroy_block(struct cil_block *block)
 
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	int inherits = 0;
+
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	// TODO Update this check to work with common inherits
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head == NULL || parse_current->next->next->next != NULL) {
-		printf("Invalid class declaration (line: %d)\n", parse_current->line);
-		return SEPOL_ERR;
+	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+		goto failed_decl;	
+	}
+
+	if (parse_current->next->next->cl_head == NULL) {
+		if (strcmp(parse_current->next->next->data, "inherits") != 0) {
+			goto failed_decl;	
+		}
+		else if (parse_current->next->next->next == NULL || parse_current->next->next->next->cl_head != NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next != NULL) {
+			goto failed_decl;	
+		}
+		else
+			inherits = 1;
+	}
+	else if (parse_current->next->next->next != NULL) {	
+		goto failed_decl;	
 	}
 
 	int rc = SEPOL_ERR;
 	char *key = parse_current->next->data;
 	struct cil_class *cls = cil_malloc(sizeof(struct cil_class));
+	struct cil_tree_node *perms;
 
 	rc = symtab_init(&cls->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
@@ -338,6 +353,9 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	}
 
 	//TODO Syntax for inherit from common?
+
+	if (inherits) 
+		cls->common_str = strdup(parse_current->next->next->next->data);
 
 	rc = cil_symtab_insert(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)key, (struct cil_symtab_datum*)cls, ast_node);	
 	if (rc != SEPOL_OK) {
@@ -348,13 +366,24 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	ast_node->data = cls;
 	ast_node->flavor = CIL_CLASS;
 
-	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node);
+	if (inherits)
+		perms = parse_current->next->next->next->next->cl_head;
+	else
+		perms = parse_current->next->next->cl_head;
+
+	rc = cil_gen_perm_nodes(db, perms, ast_node);
 	if (rc != SEPOL_OK) {
 		printf("Class: failed to parse perms\n");
 		return SEPOL_ERR;
 	}
 
 	return SEPOL_OK;
+
+	failed_decl:
+		printf("Invalid class declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+		
+
 }
 
 void cil_destroy_class(struct cil_class *cls)
