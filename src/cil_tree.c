@@ -93,6 +93,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("BLOCK: %d\n", block->datum.value);
 			return;
 		}
+		case CIL_USER: {
+			struct cil_user *user = node->data;
+			printf("USER: %d\n", user->datum.value);
+			return;
+		}
 		case CIL_TYPE : {
 			struct cil_type *type = node->data;
 			printf("TYPE: %d\n", type->datum.value);

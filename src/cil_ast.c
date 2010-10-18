@@ -71,6 +71,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_USER)) {
+						rc = cil_gen_user(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_sid failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
 						rc = cil_gen_type(db, parse_current, ast_node, CIL_TYPE);
 						if (rc != SEPOL_OK) {
