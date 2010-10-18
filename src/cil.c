@@ -606,7 +606,10 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 		free(rule->tgt_str);
 	if (rule->obj_str != NULL)
 		free(rule->obj_str);
-	//TODO If perms_str is not null, destroy list
+	if (rule->perms_str != NULL)
+		cil_list_destroy(rule->perms_str);
+	if (rule->perms_list != NULL)
+		cil_list_destroy(rule->perms_list);
 	free(rule);
 }
 
