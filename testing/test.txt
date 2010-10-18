@@ -6,6 +6,9 @@
 (type bar)
 (type foobar)
 
+(common file
+	(ioctl read write create getattr setattr lock))
+
 (block apache
 	(type process)
 	(type tmp)
