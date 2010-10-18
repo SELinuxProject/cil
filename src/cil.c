@@ -352,8 +352,6 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return SEPOL_ERR;
 	}
 
-	//TODO Syntax for inherit from common?
-
 	if (inherits) 
 		cls->common_str = strdup(parse_current->next->next->next->data);
 
