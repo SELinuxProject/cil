@@ -197,9 +197,9 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				item = rule->perms_list->list;
 				while(item != NULL) {
 					if (item->flavor == CIL_PERM)
-						printf(" %s", ((struct cil_perm*)item->data)->datum.name);
+						printf(" %d", ((struct cil_perm*)item->data)->datum.value);
 					else {
-						printf("\n\n perms list contained uexpected data type\n");
+						printf("\n\n perms list contained unexpected data type\n");
 						break;
 					}
 					item = item->next;
