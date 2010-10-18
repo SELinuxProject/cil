@@ -149,47 +149,58 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		case CIL_AVRULE : {
 			struct cil_avrule *rule = node->data;
 			struct cil_list_item *item = NULL;
-			if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
-				printf("ALLOW:");
-				if (rule->src_str != NULL)
-					printf(" %s", rule->src_str);
-				else
-					printf(" %d", rule->src->datum.value);
-				if (rule->tgt_str != NULL)
-					printf(" %s", rule->tgt_str);
-				else
-					printf(" %d", rule->tgt->datum.value);
-				if (rule->obj_str != NULL)
-					printf(" %s", rule->obj_str);
-				else
-					printf(" %d", rule->obj->datum.value);
-				printf(" (");
-				if (rule->perms_str != NULL) {
-					item = rule->perms_str->list;
-					while(item != NULL) {
-						if (item->flavor == CIL_AST_STR)
-							printf(" %s", (char*)item->data);
-						else {
-							printf("\n\n perms list contained unexpected data type\n");
-							break;
-						}
-						item = item->next;
-					}
-				}
-				else {
-					item = rule->perms_list->list;
-					while(item != NULL) {
-						if (item->flavor == CIL_PERM)
-							printf(" %s", ((struct cil_perm*)item->data)->datum.name);
-						else {
-							printf("\n\n perms list contained uexpected data type\n");
-							break;
-						}
-						item = item->next;
-					}
-				}
-				printf(" )\n");
+			switch (rule->rule_kind) {
+				case CIL_AVRULE_ALLOWED:
+					printf("ALLOW:");
+					break;
+				case CIL_AVRULE_AUDITALLOW:
+					printf("AUDITALLOW:");
+					break;
+				case CIL_AVRULE_DONTAUDIT:
+					printf("DONTAUDIT:");
+					break;
+				case CIL_AVRULE_NEVERALLOW:
+					printf("NEVERALLOW:");
+					break;
 			}
+			if (rule->src_str != NULL)
+				printf(" %s", rule->src_str);
+			else
+				printf(" %d", rule->src->datum.value);
+			if (rule->tgt_str != NULL)
+				printf(" %s", rule->tgt_str);
+			else
+				printf(" %d", rule->tgt->datum.value);
+			if (rule->obj_str != NULL)
+				printf(" %s", rule->obj_str);
+			else
+				printf(" %d", rule->obj->datum.value);
+			printf(" (");
+			if (rule->perms_str != NULL) {
+				item = rule->perms_str->list;
+				while(item != NULL) {
+					if (item->flavor == CIL_AST_STR)
+						printf(" %s", (char*)item->data);
+					else {
+						printf("\n\n perms list contained unexpected data type\n");
+						break;
+					}
+					item = item->next;
+				}
+			}
+			else {
+				item = rule->perms_list->list;
+				while(item != NULL) {
+					if (item->flavor == CIL_PERM)
+						printf(" %s", ((struct cil_perm*)item->data)->datum.name);
+					else {
+						printf("\n\n perms list contained uexpected data type\n");
+						break;
+					}
+					item = item->next;
+				}
+			}
+			printf(" )\n");
 			return;
 		}
 		default : {

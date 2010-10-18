@@ -9,14 +9,15 @@
 
 #define SEPOL_DONE			555
 
-#define CLASSES				0
-#define INTERFACES			1
-#define ATTRTYPES			2
-#define ALIASES				3
-#define ALLOWS				4
+#define COMMONS				0
+#define CLASSES				1
+#define INTERFACES			2
+#define ATTRTYPES			3
+#define ALIASES				4
+#define ALLOWS				5
 
 #define BUFFER				1024
-#define NUM_POLICY_FILES 	5 
+#define NUM_POLICY_FILES 	6 
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 {
@@ -77,6 +78,28 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ATTRTYPES], "bool %s %s;\n", name, boolean);
 			break;
 		}
+		case CIL_COMMON: {
+			if (current->cl_head != NULL) {
+				current = current->cl_head;
+				fprintf(file_arr[COMMONS], "common %s { ", name);
+			}
+			else {
+				printf("No permissions given\n");
+				return SEPOL_ERR;
+			}
+
+			while (current != NULL) {	
+				if (current->flavor == CIL_PERM)
+					fprintf(file_arr[COMMONS], "%s ", ((struct cil_symtab_datum*)current->data)->name);
+				else {
+					printf("Improper data type found in common permissions: %d\n", current->flavor);
+					return SEPOL_ERR;
+				}
+				current = current->next;
+			}
+			fprintf(file_arr[COMMONS], "};\n");
+			return SEPOL_DONE;
+		}
 		case CIL_CLASS: {
 			if (current->cl_head != NULL) {
 				current = current->cl_head;
@@ -105,7 +128,24 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
 			char *obj_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->obj)->name;
 			struct cil_list_item *perm_item = rule->perms_list->list;
-			fprintf(file_arr[ALLOWS], "allow %s %s:%s { ", src_str, tgt_str, obj_str);
+			switch (rule->rule_kind) {
+				case CIL_AVRULE_ALLOWED:
+					fprintf(file_arr[ALLOWS], "allow %s %s:%s { ", src_str, tgt_str, obj_str);
+					break;
+				case CIL_AVRULE_AUDITALLOW:
+					fprintf(file_arr[ALLOWS], "auditallow %s %s:%s { ", src_str, tgt_str, obj_str);
+					break;
+				case CIL_AVRULE_DONTAUDIT:
+					fprintf(file_arr[ALLOWS], "dontaudit %s %s:%s { ", src_str, tgt_str, obj_str);
+					break;
+				case CIL_AVRULE_NEVERALLOW:
+					fprintf(file_arr[ALLOWS], "neverallow %s %s:%s { ", src_str, tgt_str, obj_str);
+					break;
+				default : {
+					printf("Unknown avrule kind: %d\n", rule->rule_kind);
+					return SEPOL_ERR;
+				}
+			}
 			while (perm_item != NULL) {
 				fprintf(file_arr[ALLOWS], "%s ", ((struct cil_perm*)(perm_item->data))->datum.name);
 				perm_item = perm_item->next;
@@ -133,6 +173,10 @@ int cil_gen_policy(struct cil_tree_node *root)
 	char *file_path_arr[NUM_POLICY_FILES];
 	char temp[32];
 
+	strcpy(temp,"/tmp/common-XXXXXX");
+	file_arr[COMMONS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[COMMONS] = strdup(temp);
+	
 	strcpy(temp, "/tmp/class-XXXXXX");
 	file_arr[CLASSES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[CLASSES] = strdup(temp);

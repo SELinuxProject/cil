@@ -115,6 +115,28 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						// So that the object and perms lists do not get parsed again
 						forced = 1;
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_AUDITALLOW)) {
+						rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_AUDITALLOW);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_avrule (auditallow) failed, rc: %d\n", rc);
+						}
+						forced = 1;
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_DONTAUDIT)) {
+						rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_DONTAUDIT);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_avrule (dontaudit) failed, rc: %d\n", rc);
+						}
+						forced = 1;
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_NEVERALLOW)) {
+						rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_NEVERALLOW);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_avrule (neverallow) failed, rc: %d\n", rc);
+							return rc;
+						}
+						forced = 1;
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_INTERFACE)) {
 						printf("new interface: %s\n", (char*)parse_current->next->data);
 						ast_node->flavor = CIL_TRANS_IF;
@@ -153,73 +175,71 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 
 	int rc = SEPOL_ERR;
 	
-	if (rule->rule_kind == CIL_AVRULE_ALLOWED) {
-		rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
-		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", rule->src_str);
-			return SEPOL_ERR;
-		}
-		else {
-			rule->src = (struct cil_type*)(src_node->data);
-			free(rule->src_str);
-			rule->src_str = NULL;
-		}
-						
-		rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
-		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", rule->tgt_str);
-			return SEPOL_ERR;
-			}
-		else {
-			rule->tgt = (struct cil_type*)(tgt_node->data);
-			free(rule->tgt_str);
-			rule->tgt_str = NULL;	
-		}
-	
-		rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
-		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", rule->obj_str);
-			return SEPOL_ERR;
-		}
-		else {
-			rule->obj = (struct cil_class*)(obj_node->data);
-			free(rule->obj_str);
-			rule->obj_str = NULL;
-		}
+	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->src_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->src = (struct cil_type*)(src_node->data);
+		free(rule->src_str);
+		rule->src_str = NULL;
+	}
+					
+	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->tgt_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->tgt = (struct cil_type*)(tgt_node->data);
+		free(rule->tgt_str);
+		rule->tgt_str = NULL;	
+	}
 
-		struct cil_tree_node *perm_node;
-		struct cil_list_item *perm = rule->perms_str->list;
-		struct cil_list_item *list_item;
-		struct cil_list_item *list_tail;
-		struct cil_list *perms_list;
-		rc = cil_list_init(&perms_list);
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->obj_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->obj = (struct cil_class*)(obj_node->data);
+		free(rule->obj_str);
+		rule->obj_str = NULL;
+	}
+	struct cil_tree_node *perm_node;
+	struct cil_list_item *perm = rule->perms_str->list;
+	struct cil_list_item *list_item;
+	struct cil_list_item *list_tail;
+	struct cil_list *perms_list;
+	rc = cil_list_init(&perms_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to init perm node list\n");
+		return rc;
+	}
+	while (perm != NULL) {	
+		rc = cil_symtab_get_node(&rule->obj->perms, (char*)perm->data, &perm_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to init perm node list\n");
+			printf("Failed to get node from symtab\n");
 			return rc;
 		}
-		while (perm != NULL) {	
-			rc = cil_symtab_get_node(&rule->obj->perms, (char*)perm->data, &perm_node);
-			if (rc != SEPOL_OK) {
-				printf("Failed to get node from symtab\n");
-				return rc;
-			}
-			rc = cil_list_item_init(&list_item);
-			if (rc != SEPOL_OK) {
-				printf("Failed to init perm node list item\n");
-				return rc;
-			}
-			list_item->flavor = CIL_PERM;
-			list_item->data = perm_node->data;
-			if (perms_list->list == NULL) 
-				perms_list->list = list_item;
-			else 
-				list_tail->next = list_item;
-			list_tail = list_item;
-			perm = perm->next;
+		rc = cil_list_item_init(&list_item);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init perm node list item\n");
+			return rc;
 		}
-		rule->perms_list = perms_list;
-		cil_list_destroy(&rule->perms_str);
+		list_item->flavor = CIL_PERM;
+		list_item->data = perm_node->data;
+		if (perms_list->list == NULL) 
+			perms_list->list = list_item;
+		else 
+			list_tail->next = list_item;
+		list_tail = list_item;
+		perm = perm->next;
 	}
+	rule->perms_list = perms_list;
+	cil_list_destroy(&rule->perms_str);
+
 	return SEPOL_OK;
 }
 
