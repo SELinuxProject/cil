@@ -280,8 +280,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	rc = cil_symtab_array_init(block->symtab, CIL_SYM_LOCAL_NUM);
 	if (rc != SEPOL_OK) {
 		printf("Failed to initialize symtab array\n");
-		free(block);
-		return rc;
+		goto gen_block_cleanup;
 	}
 
 	block->is_abstract = is_abstract;
@@ -292,21 +291,23 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
 	if (rc != SEPOL_OK) {
-		// TODO CDS create cleanup for this, since you need it after insert failure too
-		free(block);
-		return rc;
+		goto gen_block_cleanup;
 	}	
 	
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)name, (struct cil_symtab_datum*)block, ast_node);
 	if (rc != SEPOL_OK) {
 		printf("Failed to insert block %s into symtab, rc: %d\n", name, rc);
-		return rc;
+		goto gen_block_cleanup;
 	}
 
 	ast_node->data = block;
 	ast_node->flavor = CIL_BLOCK;
 
-	return SEPOL_OK;	
+	return SEPOL_OK;
+
+	gen_block_cleanup:	
+		free(block);
+		return rc;
 }
 
 void cil_destroy_block(struct cil_block *block)
