@@ -361,15 +361,12 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
 		if (rc != SEPOL_OK) {
 			printf("__cil_resolve_name_helper: cil_get_parent_symtab failed, rc: %d\n", rc);
-			// TODO add cleanup label
-			free(name_dup);
-			return rc;
+			goto resolve_name_helper_cleanup;
 		}
 	}
 
 	if (tok_next == NULL) {
-		free(name_dup);
-		return SEPOL_ERR;
+		goto resolve_name_helper_cleanup;
 	}
 
 	while (tok_current != NULL) {
@@ -377,8 +374,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
 			if (rc != SEPOL_OK) {
 				printf("__cil_resolve_name_helper: Failed to find table, block current: %s\n", tok_current);
-				free(name_dup);
-				return SEPOL_ERR;
+				goto resolve_name_helper_cleanup;
 			}
 			symtab = &(((struct cil_block*)tmp_node->data)->symtab[CIL_SYM_LOCAL_BLOCKS]);
 		}
@@ -388,8 +384,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
 			if (rc != SEPOL_OK) {
 				printf("__cil_resolve_name_helper: Failed to resolve name, current: %s\n", tok_current);
-				free(name_dup);
-				return SEPOL_ERR;
+				goto resolve_name_helper_cleanup;
 			}
 		}
 		tok_current = tok_next;
@@ -399,6 +394,13 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 	free(name_dup);	
 
 	return SEPOL_OK;
+
+	resolve_name_helper_cleanup:
+		free(name_dup);
+		if (rc)
+			return rc;
+		else
+			return SEPOL_ERR;
 }
 
 int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, struct cil_tree_node **node)
