@@ -782,7 +782,7 @@ int cil_gen_typeattr(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	if (parse_current->next == NULL || parse_current->next->next == NULL || \
 		parse_current->next->next->cl_head != NULL || parse_current->next->next->next != NULL ) {
-		printf("Invalid boolean declaration (line: %d)\n", parse_current->line);
+		printf("Invalid typeattribute declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
