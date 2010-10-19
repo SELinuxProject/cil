@@ -1924,7 +1924,6 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_none_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_notbool_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
-//	Is a perm list with a single value, not surrounded by parenthesis, valid?
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_user);
 	SUITE_ADD_TEST(suite, test_cil_gen_user_nouser_neg);
@@ -1948,7 +1947,6 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias);
-//	Can a typealias be defined using a namespace pointing to a type that is not declared?
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias_notype_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_role);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_role_neg);
