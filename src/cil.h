@@ -39,12 +39,8 @@
 #define CIL_CONSTRAIN		24
 #define CIL_MLS_CONSTRAIN	25
 #define CIL_PERM		26
-<<<<<<< HEAD
-
+#define CIL_USERROLE	27
 #define CIL_TYPE_ATTR	28
-=======
-#define CIL_USERROLE		27
->>>>>>> 1209ecebe4c40a2428517ab349a3bd7008a464ae
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
