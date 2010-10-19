@@ -39,7 +39,7 @@
 #define CIL_CONSTRAIN		24
 #define CIL_MLS_CONSTRAIN	25
 #define CIL_PERM		26
-
+#define CIL_USERROLE		27
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -65,6 +65,7 @@
 #define CIL_KEY_SID		"sid"
 #define CIL_KEY_USER		"user"
 #define CIL_KEY_ROLE 		"role"
+#define CIL_KEY_USERROLE	"userrole"
 #define CIL_KEY_ROLETYPE	"roletype"
 #define CIL_KEY_TYPE 		"type"
 #define CIL_KEY_ATTR		"attribute"
@@ -171,7 +172,9 @@ struct cil_user {
 };
 
 struct cil_userrole {
+	char *user_str;
 	struct cil_user *user;
+	char *role_str;
 	struct cil_role *role;
 };
 
