@@ -1580,8 +1580,8 @@ void test_cil_build_ast_typealias(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_build_ast_typealias_neg(CuTest *tc) {
-	char *line[] = {"(", "typealias", ".test.type", "type_t", ")", NULL};
+void test_cil_build_ast_typealias_notype_neg(CuTest *tc) {
+	char *line[] = {"(", "typealias", ".test.type", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1949,7 +1949,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias);
 //	Can a typealias be defined using a namespace pointing to a type that is not declared?
-	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias_notype_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_role);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_role_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_bool);
