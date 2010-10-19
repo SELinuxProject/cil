@@ -1301,6 +1301,24 @@ void test_cil_gen_user(CuTest *tc) {
 	CuAssertStrEquals(tc, tree->root->cl_head->cl_head->next->data, ((struct cil_symtab_datum*)test_ast_node->data)->name);
 }
 
+void test_cil_gen_user_nouser_neg(CuTest *tc) {
+	char *line[] = {"(", "user", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_user(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_build_ast(CuTest *tc) {
 	char *line[] = {"(", "test", "\"qstring\"", ")", ";comment", NULL};
 
@@ -1891,6 +1909,7 @@ CuSuite* CilTreeGetSuite() {
 //	Is a perm list with a single value, not surrounded by parenthesis, valid?
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_user);
+	SUITE_ADD_TEST(suite, test_cil_gen_user_nouser_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_astnull_neg);
