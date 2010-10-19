@@ -92,6 +92,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTR)) {
+						rc = cil_gen_typeattr(db, parse_current, ast_node, CIL_TYPE_ATTR);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_typeattr failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
 						rc = cil_gen_typealias(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
@@ -250,6 +257,33 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_typeattribute *typeattr = (struct  cil_typeattribute*)current->data;
+	struct cil_tree_node *type_node = NULL;
+	struct cil_tree_node *attr_node = NULL;
+	int rc = SEPOL_ERR;
+	rc = cil_resolve_name(db, current, typeattr->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", typeattr->type_str);
+		return SEPOL_ERR;
+	}
+	typeattr->type = (struct cil_type*)(type_node->data);
+	free(typeattr->type_str);
+	typeattr->type_str = NULL;
+
+	rc = cil_resolve_name(db, current, typeattr->attrib_str, CIL_SYM_LOCAL_ATTRS, &attr_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", typeattr->attrib_str);
+		return SEPOL_ERR;
+	}
+	typeattr->attrib = (struct cil_type*)(attr_node->data);
+	free(typeattr->attrib_str);
+	typeattr->attrib_str = NULL;
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_typealias *alias = (struct cil_typealias*)current->data;
@@ -300,6 +334,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		if (current->cl_head == NULL) {
 //			printf("FLAVOR: %d\n", current->flavor);
 			switch( current->flavor ) {
+				case CIL_TYPE_ATTR : {
+					printf("case typeattribute\n");
+					rc = cil_resolve_typeattr(db, current);
+					if (rc !=  SEPOL_OK)
+						return rc;
+					break;
+				}
 				case CIL_TYPEALIAS : {
 					printf("case typealias\n");
 					rc = cil_resolve_typealias(db, current);

@@ -149,6 +149,10 @@ void cil_data_destroy(void **data, uint32_t flavor)
 			cil_destroy_typealias(*data);
 			break;
 		}
+		case (CIL_TYPE_ATTR) : {
+			cil_destroy_typeattr(*data);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;
@@ -743,4 +747,30 @@ void cil_destroy_typealias(struct cil_typealias *alias)
 	if (alias->type_str != NULL)
 		free(alias->type_str);
 	free(alias);
+}
+
+int cil_gen_typeattr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || \
+		parse_current->next->next->cl_head != NULL || parse_current->next->next->next != NULL ) {
+		printf("Invalid boolean declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_typeattribute *typeattr = cil_malloc(sizeof(struct cil_typeattribute));
+	typeattr->type_str = strdup(parse_current->next->data);
+	typeattr->attrib_str = strdup(parse_current->next->next->data);
+
+	ast_node->data = typeattr;
+	ast_node->flavor = CIL_TYPE_ATTR;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_typeattr(struct cil_typeattribute *typeattr)
+{
+	free(typeattr);
 }
