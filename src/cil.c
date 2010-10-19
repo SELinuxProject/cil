@@ -733,6 +733,11 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid typealias declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
 	int rc = SEPOL_ERR;
 	struct cil_typealias *alias = cil_malloc(sizeof(struct cil_typealias));
 	char *key = parse_current->next->next->data;
