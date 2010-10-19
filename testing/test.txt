@@ -1,6 +1,7 @@
 (class file
 	(read write open))
 
+(user sysadm)
 (type new)
 (type foo)
 (type bar)
