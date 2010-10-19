@@ -579,7 +579,6 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 		return SEPOL_ERR;
 	}
 
-	int rc = SEPOL_ERR;
 	struct cil_userrole *userrole = cil_malloc(sizeof(struct cil_userrole));
 
 	userrole->user_str = strdup(parse_current->next->data);
@@ -630,9 +629,9 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 	if (rule->obj_str != NULL)
 		free(rule->obj_str);
 	if (rule->perms_str != NULL)
-		cil_list_destroy(rule->perms_str);
+		cil_list_destroy(&rule->perms_str);
 	if (rule->perms_list != NULL)
-		cil_list_destroy(rule->perms_list);
+		cil_list_destroy(&rule->perms_list);
 	free(rule);
 }
 
