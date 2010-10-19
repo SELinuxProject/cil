@@ -1258,8 +1258,7 @@ void test_cil_gen_avrule(CuTest *tc) {
 	}
 }
 
-// TODO CDS make negative test
-void test_cil_gen_avrule_notlist(CuTest *tc) {
+void test_cil_gen_avrule_notlist_neg(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "write", ")", NULL};
 	struct cil_tree *tree;
 	gen_test_tree(&tree, line);
@@ -1277,13 +1276,7 @@ void test_cil_gen_avrule_notlist(CuTest *tc) {
 	test_current = tree->root->cl_head->cl_head;
 
 	int rc = cil_gen_avrule(test_current, test_ast_node, CIL_AVRULE_ALLOWED);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrNotNull(tc, test_ast_node->data);
-	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->src_str, test_current->next->data);
-	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->tgt_str, test_current->next->next->data);
-	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->obj_str, test_current->next->next->next->data);
-	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_AVRULE);
-	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_str);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_user(CuTest *tc) {
@@ -1896,7 +1889,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_notbool_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
 //	Is a perm list with a single value, not surrounded by parenthesis, valid?
-	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_user);
 	SUITE_ADD_TEST(suite, test_cil_build_ast);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_dbnull_neg);
