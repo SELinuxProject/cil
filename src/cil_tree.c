@@ -113,6 +113,19 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("ROLE: %d\n", role->datum.value);
 			return;
 		}
+		case CIL_USERROLE : {
+			struct cil_userrole *userrole = node->data;
+			printf("USERROLE:");
+			if (userrole->user_str != NULL)
+				printf(" %s", userrole->user_str);
+			else if (userrole->user != NULL)
+				printf(" %d", userrole->user->datum.value);
+			if (userrole->role_str != NULL)
+				printf(" %s", userrole->role_str);
+			else if (userrole->role != NULL)
+				printf(" %d", userrole->role->datum.value);
+			return;
+		}
 		case CIL_CLASS : {
 			struct cil_class *cls = node->data;
 			printf("CLASS: %d ", cls->datum.value);

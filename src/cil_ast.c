@@ -113,6 +113,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_USERROLE)) {
+						rc = cil_gen_userrole(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_userrole failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
 						rc = cil_gen_bool(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
@@ -320,6 +327,32 @@ int cil_resolve_class(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_userrole *userrole = (struct cil_userrole*)current->data;
+	struct cil_tree_node *user_node = NULL;
+	struct cil_tree_node *role_node = NULL;
+	int rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_USERS], userrole->user_str, &user_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", userrole->user_str);
+		return SEPOL_ERR;
+	}
+	userrole->user = (struct cil_user*)(user_node->data);
+	free(userrole->user_str);
+	userrole->user_str = NULL;
+
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], userrole->role_str, &role_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", userrole->role_str);
+		return SEPOL_ERR;
+	}
+	userrole->role = (struct cil_role*)(role_node->data);
+	free(userrole->role_str);
+	userrole->role_str = NULL;
+
+	return SEPOL_OK;	
+}
+
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
@@ -351,6 +384,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				case CIL_AVRULE : {
 					printf("case avrule\n");
 					rc = cil_resolve_avrule(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
+				case CIL_USERROLE : {
+					printf("case userrole\n");
+					rc = cil_resolve_userrole(db, current);
 					if (rc != SEPOL_OK)
 						return rc;
 					break;

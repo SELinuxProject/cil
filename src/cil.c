@@ -573,6 +573,27 @@ void cil_destroy_role(struct cil_role *role)
 	free(role);
 }
 
+int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL) {
+		printf("Invalid userrole declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_userrole *userrole = cil_malloc(sizeof(struct cil_userrole));
+
+	userrole->user_str = strdup(parse_current->next->data);
+	userrole->role_str = strdup(parse_current->next->next->data);
+
+	ast_node->data = userrole;
+	ast_node->flavor = CIL_USERROLE;
+	
+	return SEPOL_OK;
+}
+
 int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
 	if (parse_current == NULL || ast_node == NULL)
@@ -612,9 +633,9 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 	if (rule->obj_str != NULL)
 		free(rule->obj_str);
 	if (rule->perms_str != NULL)
-		cil_list_destroy(rule->perms_str);
+		cil_list_destroy(&rule->perms_str);
 	if (rule->perms_list != NULL)
-		cil_list_destroy(rule->perms_list);
+		cil_list_destroy(&rule->perms_list);
 	free(rule);
 }
 
@@ -715,6 +736,11 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid typealias declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
 
 	int rc = SEPOL_ERR;
 	struct cil_typealias *alias = cil_malloc(sizeof(struct cil_typealias));
