@@ -416,5 +416,7 @@ int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *
 void cil_destroy_bool(struct cil_bool *);
 int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_typealias(struct cil_typealias *);
+int cil_gen_typeattr(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_typeattr(struct cil_typeattribute *);
 
 #endif
