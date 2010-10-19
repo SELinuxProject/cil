@@ -212,7 +212,7 @@ int cil_gen_policy(struct cil_tree_node *root)
 				if (curr->flavor != CIL_ROOT) {
 					rc = cil_name_to_policy(file_arr, curr);
 					if (rc != SEPOL_OK && rc != SEPOL_DONE) {
-						printf("Error converting node to policy %d\n", rc);
+						printf("Error converting node to policy %d\n", curr->flavor);
 						return SEPOL_ERR;
 					}
 				}
@@ -221,7 +221,7 @@ int cil_gen_policy(struct cil_tree_node *root)
 		else {
 			rc = cil_name_to_policy(file_arr, curr);
 			if (rc != SEPOL_OK && rc != SEPOL_DONE) {
-				printf("Error converting node to policy %d\n", rc);
+				printf("Error converting node to policy %d\n", curr->flavor);
 				return SEPOL_ERR;
 			}
 		}
