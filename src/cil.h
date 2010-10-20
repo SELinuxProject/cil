@@ -41,6 +41,9 @@
 #define CIL_PERM		26
 #define CIL_USERROLE	27
 #define CIL_TYPE_ATTR	28
+#define CIL_TYPE_RULE 	29
+#define CIL_ROLETRANS	30
+#define CIL_ROLEALLOW	31
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -52,8 +55,7 @@
 #define CIL_TYPE		CIL_MIN_DECLARATIVE + 7 
 #define CIL_ATTR		CIL_MIN_DECLARATIVE + 8 
 #define CIL_BOOL		CIL_MIN_DECLARATIVE + 9
-#define CIL_ROLE_RULE		CIL_MIN_DECLARATIVE + 10
-#define CIL_TYPEALIAS		CIL_MIN_DECLARATIVE + 11
+#define CIL_TYPEALIAS		CIL_MIN_DECLARATIVE + 10
 
 /*
 	Keywords
@@ -67,6 +69,8 @@
 #define CIL_KEY_ROLE 		"role"
 #define CIL_KEY_USERROLE	"userrole"
 #define CIL_KEY_ROLETYPE	"roletype"
+#define CIL_KEY_ROLETRANS	"roletransition"
+#define CIL_KEY_ROLEALLOW	"roleallow"
 #define CIL_KEY_TYPE 		"type"
 #define CIL_KEY_ATTR		"attribute"
 #define CIL_KEY_BOOL		"bool"
@@ -74,7 +78,9 @@
 #define CIL_KEY_AUDITALLOW	"auditallow"
 #define CIL_KEY_DONTAUDIT	"dontaudit"
 #define CIL_KEY_NEVERALLOW	"neverallow"
-#define CIL_KEY_TYPETRANS	"typetrans"
+#define CIL_KEY_TYPETRANS	"typetransition"
+#define CIL_KEY_TYPECHANGE	"typechange"
+#define CIL_KEY_TYPEMEMBER	"typemember"
 #define CIL_KEY_TYPEATTR	"typeattribute"
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_INTERFACE	"interface"
@@ -233,11 +239,11 @@ struct cil_avrule {
 	struct cil_list *perms_list;
 };
 
-#define CIL_AVRULE_TRANSITION 16
-#define CIL_AVRULE_MEMBER     32
-#define CIL_AVRULE_CHANGE     64
+#define CIL_TYPE_TRANSITION 16
+#define CIL_TYPE_MEMBER     32
+#define CIL_TYPE_CHANGE     64
 #define CIL_AVRULE_TYPE       (AVRULE_TRANSITION | AVRULE_MEMBER | AVRULE_CHANGE)
-struct cil_typerule {
+struct cil_type_rule {
 	uint32_t rule_kind;
 	char *src_str;
 	struct cil_type *src;
@@ -249,17 +255,20 @@ struct cil_typerule {
 	struct cil_type *result;
 };
 
-// Define role_rule kinds here
-struct cil_role_rule {
-	uint32_t rule_kind;
+struct cil_role_trans {
 	char *src_str;
 	struct cil_role *src;
 	char *tgt_str;	
+	struct cil_type *tgt;
+	char *result_str;
+	struct cil_role *result;
+};
+
+struct cil_role_allow {
+	char *src_str;
+	struct cil_role *src;
+	char *tgt_str;
 	struct cil_role *tgt;
-	/* TODO CDS this should match whatever cil_avrule does */
-	char *obj_str;
-	struct cil_class *obj;
-	struct cil_list *perms;	
 };
 
 struct cil_sens {
@@ -400,12 +409,20 @@ int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *)
 void cil_destroy_sid(struct cil_sid *);
 int cil_gen_avrule(struct cil_tree_node *, struct cil_tree_node *, uint32_t);
 void cil_destroy_avrule(struct cil_avrule *);
+int cil_gen_type_rule(struct cil_tree_node *, struct cil_tree_node *, uint32_t);
+void cil_destroy_type_rule(struct cil_type_rule *);
 int cil_gen_type(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
 void cil_destroy_type(struct cil_type *);
 int cil_gen_user(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_user(struct cil_user *);
 int cil_gen_role(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_role(struct cil_role *);
+int cil_gen_userrole(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_userrole(struct cil_userrole *);
+int cil_gen_roletrans(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_roletrans(struct cil_role_trans *);
+int cil_gen_roleallow(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_roleallow(struct cil_role_allow *);
 int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_bool(struct cil_bool *);
 int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

@@ -142,7 +142,7 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 			fprintf(file_arr[USERROLES], " %s",  ((struct cil_role*)current_role->data)->datum.name);
 			current_role = current_role->next;
 		}
-		fprintf(file_arr[USERROLES], " }\n"); 
+		fprintf(file_arr[USERROLES], " };\n"); 
 		current_user = current_user->next;
 	}
 	return SEPOL_OK;
@@ -259,6 +259,47 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 				perm_item = perm_item->next;
 			}
 			fprintf(file_arr[ALLOWS], "};\n");
+			break;
+		}
+		case CIL_TYPE_RULE: {
+			struct cil_type_rule *rule = (struct cil_type_rule*)current->data;
+			char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
+			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
+			char *obj_str = ((struct cil_symtab_datum*)(struct cil_class*)rule->obj)->name;
+			char *result_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->result)->name;
+			
+			switch (rule->rule_kind) {
+				case CIL_TYPE_TRANSITION:
+					fprintf(file_arr[ALLOWS], "type_transition %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
+					break;
+				case CIL_TYPE_CHANGE:
+					fprintf(file_arr[ALLOWS], "type_change %s %s : %s %s\n;", src_str, tgt_str, obj_str, result_str);
+					break;
+				case CIL_TYPE_MEMBER:
+					fprintf(file_arr[ALLOWS], "type_member %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
+					break;
+				default : {
+					printf("Unknown type_rule kind: %d\n", rule->rule_kind);
+					return SEPOL_ERR;
+				}
+			}
+			break;
+		}
+		case CIL_ROLETRANS: {
+			struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;
+			char *src_str = ((struct cil_symtab_datum*)(struct cil_role*)roletrans->src)->name;
+			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)roletrans->tgt)->name;
+			char *result_str = ((struct cil_symtab_datum*)(struct cil_role*)roletrans->result)->name;
+			
+			fprintf(file_arr[ALLOWS], "role_transition %s %s %s;\n", src_str, tgt_str, result_str);
+			break;
+		}
+		case CIL_ROLEALLOW: {
+			struct cil_role_allow *roleallow = (struct cil_role_allow*)current->data;
+			char *src_str = ((struct cil_symtab_datum*)(struct cil_role*)roleallow->src)->name;
+			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)roleallow->tgt)->name;
+			
+			fprintf(file_arr[ALLOWS], "roleallow %s %s;\n", src_str, tgt_str);
 			break;
 		}
 		default : {

@@ -120,6 +120,20 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_ROLETRANS)) {
+						rc = cil_gen_roletrans(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_roletrans failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_ROLEALLOW)) {
+						rc = cil_gen_roleallow(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_roleallow failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
 						rc = cil_gen_bool(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
@@ -157,6 +171,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 						forced = 1;
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANS)) {
+						rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_TRANSITION);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_type_rule (typetransition) failed, rc: %d\n", rc);
+							return rc;
+						}
 					}
 					else if (!strcmp(parse_current->data, CIL_KEY_INTERFACE)) {
 						printf("new interface: %s\n", (char*)parse_current->next->data);
@@ -264,6 +285,61 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_type_rule *rule = (struct cil_type_rule*)current->data;
+	struct cil_tree_node *src_node = NULL;
+	struct cil_tree_node *tgt_node = NULL;
+	struct cil_tree_node *obj_node = NULL;
+	struct cil_tree_node *result_node = NULL;
+	int rc = SEPOL_ERR;
+	
+	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->src_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->src = (struct cil_type*)(src_node->data);
+		free(rule->src_str);
+		rule->src_str = NULL;
+	}
+					
+	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->tgt_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->tgt = (struct cil_type*)(tgt_node->data);
+		free(rule->tgt_str);
+		rule->tgt_str = NULL;	
+	}
+
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->obj_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->obj = (struct cil_class*)(obj_node->data);
+		free(rule->obj_str);
+		rule->obj_str = NULL;
+	}
+
+	rc = cil_resolve_name(db, current, rule->result_str, CIL_SYM_LOCAL_TYPES, &result_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->result_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->result = (struct cil_type*)(result_node->data);
+		free(rule->result_str);
+		rule->result_str = NULL;
+	}
+	return SEPOL_OK;
+}
+
 int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_typeattribute *typeattr = (struct  cil_typeattribute*)current->data;
@@ -353,6 +429,80 @@ int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;	
 }
 
+int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;
+	struct cil_tree_node *src_node = NULL;
+	struct cil_tree_node *tgt_node = NULL;
+	struct cil_tree_node *result_node = NULL;
+	int rc = SEPOL_ERR;
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roletrans->src_str, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roletrans->src_str);
+		return SEPOL_ERR;
+	}
+	else {
+		roletrans->src = (struct cil_role*)(src_node->data);
+		free(roletrans->src_str);
+		roletrans->src_str = NULL;
+	}
+					
+	rc = cil_resolve_name(db, current, roletrans->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roletrans->tgt_str);
+		return SEPOL_ERR;
+	}
+	else {
+		roletrans->tgt = (struct cil_type*)(tgt_node->data);
+		free(roletrans->tgt_str);
+		roletrans->tgt_str = NULL;	
+	}
+
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roletrans->result_str, &result_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roletrans->result_str);
+		return SEPOL_ERR;
+	}
+	else {
+		roletrans->result = (struct cil_role*)(result_node->data);
+		free(roletrans->result_str);
+		roletrans->result_str = NULL;
+	}
+
+	return SEPOL_OK;	
+}
+
+int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_role_allow *roleallow = (struct cil_role_allow*)current->data;
+	struct cil_tree_node *src_node = NULL;
+	struct cil_tree_node *tgt_node = NULL;
+	int rc = SEPOL_ERR;
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roleallow->src_str, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roleallow->src_str);
+		return SEPOL_ERR;
+	}
+	else {
+		roleallow->src = (struct cil_role*)(src_node->data);
+		free(roleallow->src_str);
+		roleallow->src_str = NULL;
+	}
+				
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roleallow->tgt_str, &tgt_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roleallow->tgt_str);
+		return SEPOL_ERR;
+	}
+	else {
+		roleallow->tgt = (struct cil_role*)(tgt_node->data);
+		free(roleallow->tgt_str);
+		roleallow->tgt_str = NULL;
+	}
+
+	return SEPOL_OK;	
+}
+
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
@@ -388,9 +538,30 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 						return rc;
 					break;
 				}
+				case CIL_TYPE_RULE : {
+					printf("case type_rule\n");
+					rc = cil_resolve_type_rule(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
 				case CIL_USERROLE : {
 					printf("case userrole\n");
 					rc = cil_resolve_userrole(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
+				case CIL_ROLETRANS : {
+					printf("case roletransition\n");
+					rc = cil_resolve_roletrans(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
+				case CIL_ROLEALLOW : {
+					printf("case roleallow\n");
+					rc = cil_resolve_roleallow(db, current);
 					if (rc != SEPOL_OK)
 						return rc;
 					break;

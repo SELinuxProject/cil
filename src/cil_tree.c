@@ -124,6 +124,37 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s", userrole->role_str);
 			else if (userrole->role != NULL)
 				printf(" %s", userrole->role->datum.name);
+			printf("\n");
+			return;
+		}
+		case CIL_ROLETRANS : {
+			struct cil_role_trans *roletrans = node->data;
+			printf("ROLETRANSITION:");
+			if (roletrans->src_str != NULL)
+				printf(" %s", roletrans->src_str);
+			else
+				printf(" %s", roletrans->src->datum.name);
+			if (roletrans->tgt_str != NULL)
+				printf(" %s", roletrans->tgt_str);
+			else
+				printf(" %s", roletrans->tgt->datum.name);
+			if (roletrans->result_str != NULL)
+				printf(" %s\n", roletrans->result_str);
+			else
+				printf(" %s\n", roletrans->result->datum.name);
+			return;
+		}
+		case CIL_ROLEALLOW : {
+			struct cil_role_allow *roleallow = node->data;
+			printf("ROLEALLOW:");
+			if (roleallow->src_str != NULL)
+				printf(" %s", roleallow->src_str);
+			else
+				printf(" %s", roleallow->src->datum.name);
+			if (roleallow->tgt_str != NULL)
+				printf(" %s", roleallow->tgt_str);
+			else
+				printf(" %s", roleallow->tgt->datum.name);
 			return;
 		}
 		case CIL_CLASS : {
@@ -227,6 +258,37 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 			}
 			printf(" )\n");
+			return;
+		}
+		case CIL_TYPE_RULE : {
+			struct cil_type_rule *rule = node->data;
+			switch (rule->rule_kind) {
+				case CIL_TYPE_TRANSITION:
+					printf("TYPETRANSITION:");
+					break;
+				case CIL_TYPE_MEMBER:
+					printf("TYPEMEMBER:");
+					break;
+				case CIL_TYPE_CHANGE:
+					printf("TYPECHANGE:");
+					break;
+			}
+			if (rule->src_str != NULL)
+				printf(" %s", rule->src_str);
+			else
+				printf(" %s", rule->src->datum.name);
+			if (rule->tgt_str != NULL)
+				printf(" %s", rule->tgt_str);
+			else
+				printf(" %s", rule->tgt->datum.name);
+			if (rule->obj_str != NULL)
+				printf(" %s", rule->obj_str);
+			else
+				printf(" %s", rule->obj->datum.name);
+			if (rule->result_str != NULL)
+				printf(" %s\n", rule->result_str);
+			else
+				printf(" %s\n", rule->result->datum.name);
 			return;
 		}
 		default : {
