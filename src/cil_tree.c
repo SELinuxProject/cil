@@ -156,6 +156,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("BOOL: %d, value: %d\n", boolean->datum.value, boolean->value);
 			return;
 		}
+		case CIL_TYPE_ATTR : {
+			struct cil_typeattribute *typeattr = node->data;
+			if (typeattr->type_str != NULL && typeattr->attrib_str != NULL)
+				printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type_str, typeattr->attrib_str);
+			else
+				printf("TYPEATTR: type: %d, attribute: %d\n", typeattr->type->datum.value, typeattr->attrib->datum.value);
+			return;
+		}
 		case CIL_TYPEALIAS : {
 			struct cil_typealias *alias = node->data;
 			if (alias->type_str != NULL) 

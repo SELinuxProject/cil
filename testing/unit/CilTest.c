@@ -1915,9 +1915,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_type);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_attr);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias);
-//  Causes a segfault
-//	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg);
-//	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg2);
+	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg2);
 	SUITE_ADD_TEST(suite, test_cil_gen_role);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_true);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_false);

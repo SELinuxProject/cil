@@ -8,6 +8,7 @@
 
 int cil_build_ast(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_resolve_avrule(struct cil_db *, struct cil_tree_node *);
+int cil_resolve_typeattr(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_typealias(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_class(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_ast(struct cil_db *, struct cil_tree_node *);

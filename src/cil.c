@@ -149,6 +149,10 @@ void cil_data_destroy(void **data, uint32_t flavor)
 			cil_destroy_typealias(*data);
 			break;
 		}
+		case (CIL_TYPE_ATTR) : {
+			cil_destroy_typeattr(*data);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;
@@ -656,13 +660,9 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	struct cil_type *type = cil_malloc(sizeof(struct cil_type));
 	symtab_t *symtab = NULL;
 
-	if (flavor == CIL_TYPE) {
+	if (flavor == CIL_TYPE || flavor == CIL_ATTR) {
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_TYPES);
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)type, ast_node);
-	}
-	else if (flavor == CIL_ATTR) {
-		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ATTRS);
-		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)type, ast_node);	
 	}
 	else {
 		printf("Error: cil_gen_type called on invalid node\n");
@@ -743,7 +743,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	char *key = parse_current->next->next->data;
 	symtab_t *symtab;
 
-	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ALIASES);
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_TYPES);
 	if (rc != SEPOL_OK) {
 		free(alias);
 		return rc;
@@ -769,4 +769,30 @@ void cil_destroy_typealias(struct cil_typealias *alias)
 	if (alias->type_str != NULL)
 		free(alias->type_str);
 	free(alias);
+}
+
+int cil_gen_typeattr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || \
+		parse_current->next->next->cl_head != NULL || parse_current->next->next->next != NULL ) {
+		printf("Invalid typeattribute declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_typeattribute *typeattr = cil_malloc(sizeof(struct cil_typeattribute));
+	typeattr->type_str = strdup(parse_current->next->data);
+	typeattr->attrib_str = strdup(parse_current->next->next->data);
+
+	ast_node->data = typeattr;
+	ast_node->flavor = CIL_TYPE_ATTR;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_typeattr(struct cil_typeattribute *typeattr)
+{
+	free(typeattr);
 }

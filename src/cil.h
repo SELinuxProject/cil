@@ -39,7 +39,8 @@
 #define CIL_CONSTRAIN		24
 #define CIL_MLS_CONSTRAIN	25
 #define CIL_PERM		26
-#define CIL_USERROLE		27
+#define CIL_USERROLE	27
+#define CIL_TYPE_ATTR	28
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -50,10 +51,9 @@
 #define CIL_ROLE_TYPES		CIL_MIN_DECLARATIVE + 6 
 #define CIL_TYPE		CIL_MIN_DECLARATIVE + 7 
 #define CIL_ATTR		CIL_MIN_DECLARATIVE + 8 
-#define CIL_TYPE_ATTR		CIL_MIN_DECLARATIVE + 9 
-#define CIL_BOOL		CIL_MIN_DECLARATIVE + 10
-#define CIL_ROLE_RULE		CIL_MIN_DECLARATIVE + 11
-#define CIL_TYPEALIAS		CIL_MIN_DECLARATIVE + 12
+#define CIL_BOOL		CIL_MIN_DECLARATIVE + 9
+#define CIL_ROLE_RULE		CIL_MIN_DECLARATIVE + 10
+#define CIL_TYPEALIAS		CIL_MIN_DECLARATIVE + 11
 
 /*
 	Keywords
@@ -102,8 +102,6 @@
 // Local symtabs
 #define CIL_SYM_LOCAL_BLOCKS		0
 #define CIL_SYM_LOCAL_TYPES		1
-#define CIL_SYM_LOCAL_ATTRS		2
-#define CIL_SYM_LOCAL_ALIASES		3
 #define CIL_SYM_LOCAL_PERMS		4
 // TODO CDS this should be MACRO, not INTERFACE
 #define CIL_SYM_LOCAL_TRANS_INTERFACES	5
@@ -412,5 +410,7 @@ int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *
 void cil_destroy_bool(struct cil_bool *);
 int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_typealias(struct cil_typealias *);
+int cil_gen_typeattr(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_typeattr(struct cil_typeattribute *);
 
 #endif

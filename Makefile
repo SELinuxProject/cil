@@ -61,6 +61,7 @@ parser: $(PARSER_TEST) $(ALL_SRCS)
 unit: $(TEST_SRCS) $(ALL_SRCS)
 	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
 
+# Requires lcov 1.9+ (--ignore-errors)
 coverage: clean unit
 	./unit_tests
 	test -d cov || mkdir cov
