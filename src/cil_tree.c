@@ -124,6 +124,9 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s", userrole->role_str);
 			else if (userrole->role != NULL)
 				printf(" %d", userrole->role->datum.value);
+			printf("\n");
+			return;
+		}
 			return;
 		}
 		case CIL_CLASS : {
