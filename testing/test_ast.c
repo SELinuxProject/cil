@@ -72,7 +72,12 @@ int main(int argc, char *argv[])
 		}
 
 		cil_tree_print(db->ast->root, 0);
-		
+
+		printf("----------------------------------------------\n\n");
+		printf("Destroying AST symtabs\n");
+		cil_destroy_ast_symtabs(db->ast->root);
+		printf("Symtabs destroyed\n\n");
+	
 		printf("----------------------------------------------\n\n");
 		printf("Qualifying names\n");
 		cil_qualify_name(db->ast->root);

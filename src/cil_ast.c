@@ -549,6 +549,47 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 	return SEPOL_OK;
 }
 
+int cil_destroy_ast_symtabs(struct cil_tree_node *root)
+{
+	struct cil_tree_node *current = root;
+	uint16_t reverse = 0;
+	
+	do {
+		if (current->cl_head != NULL && !reverse) {
+			switch (current->flavor) {
+				case (CIL_ROOT) :
+					break;
+				case (CIL_BLOCK) : {
+					cil_symtab_array_destroy(((struct cil_block*)current->data)->symtab);
+					break;
+				}
+				case (CIL_CLASS) : {
+					cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
+					break;
+				}
+				case (CIL_COMMON) : {
+					cil_symtab_destroy(&((struct cil_common*)current->data)->perms);
+					break;
+				}
+				default : 
+					printf("destroy symtab error, wrong flavor node\n");
+			}
+			current = current->cl_head;
+		}
+		else if (current->next != NULL) {
+			current = current->next;
+			reverse = 0;
+		}
+		else {
+			current = current->parent;
+			reverse = 1;
+		}
+	}
+	while (current->flavor != CIL_ROOT);
+
+	return SEPOL_OK;
+}
+
 #define MAX_CIL_NAME_LENGTH 2048
 int cil_qualify_name(struct cil_tree_node *root)
 {
@@ -581,6 +622,7 @@ int cil_qualify_name(struct cil_tree_node *root)
 			strcat(fqn, uqn);
 
 			((struct cil_symtab_datum*)curr->data)->name = fqn;	// Replace with new, fully qualified string
+			free(uqn);
 		}
 
 		if (curr->cl_head != NULL && !reverse) 
@@ -597,3 +639,4 @@ int cil_qualify_name(struct cil_tree_node *root)
 
 	return SEPOL_OK;
 }
+

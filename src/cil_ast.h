@@ -14,6 +14,7 @@ int cil_resolve_class(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_ast(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_name(struct cil_db *, struct cil_tree_node *, char *, uint32_t, struct cil_tree_node **);
 int cil_resolve_name_global(symtab_t, char *, void **);
+int cil_destroy_ast_symtabs(struct cil_tree_node *);
 int cil_qualify_name(struct cil_tree_node *);
 
 #endif /* CIL_AST_H_ */

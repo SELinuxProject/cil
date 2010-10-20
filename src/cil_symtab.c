@@ -19,7 +19,6 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 		return rc;
 	}
 	else {
-		datum->value = ++symtab->nprim;
 		datum->node = node;
 		datum->name = newkey;
 	}
@@ -38,26 +37,11 @@ int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node
 	return SEPOL_OK;
 }
 
-int cil_symtab_get_value(symtab_t *symtab, char *key, uint32_t *value)
+void cil_symtab_destroy(symtab_t *symtab)
 {
-	struct cil_symtab_datum *datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
-	if (datum == NULL)
-		return SEPOL_ERR;
-
-	*value = datum->value;
-
-	return SEPOL_OK;
-}
-
-static int __cil_symtab_destroy_helper(hashtab_key_t key, hashtab_datum_t datum, void *args)
-{
-	free(key);
-	return SEPOL_OK;
-}
-
-void cil_symtab_destroy(symtab_t symtab)
-{
-	hashtab_map(symtab.table, &__cil_symtab_destroy_helper, NULL);
-	hashtab_destroy(symtab.table);
+	if (symtab->table != NULL){
+		hashtab_destroy(symtab->table);
+		symtab->table = NULL;
+	}
 }
 

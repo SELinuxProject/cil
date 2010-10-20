@@ -75,7 +75,7 @@ void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 {
 	while (current_perm != NULL) {
 		if (current_perm->flavor == CIL_PERM) {
-			printf(" %d", ((struct cil_perm *)current_perm->data)->datum.value);
+			printf(" %s", ((struct cil_perm *)current_perm->data)->datum.name);
 		}
 		else {
 			printf("\n\n perms list contained unexpected data type: %d\n", current_perm->flavor);
@@ -90,27 +90,27 @@ void cil_tree_print_node(struct cil_tree_node *node)
 	switch( node->flavor ) {
 		case CIL_BLOCK	: {
 			struct cil_block *block = node->data;
-			printf("BLOCK: %d\n", block->datum.value);
+			printf("BLOCK: %s\n", block->datum.name);
 			return;
 		}
 		case CIL_USER: {
 			struct cil_user *user = node->data;
-			printf("USER: %d\n", user->datum.value);
+			printf("USER: %s\n", user->datum.name);
 			return;
 		}
 		case CIL_TYPE : {
 			struct cil_type *type = node->data;
-			printf("TYPE: %d\n", type->datum.value);
+			printf("TYPE: %s\n", type->datum.name);
 			return;
 		}
 		case CIL_ATTR : {
 			struct cil_type *attr = node->data;
-			printf("ATTRIBUTE: %d\n", attr->datum.value);
+			printf("ATTRIBUTE: %s\n", attr->datum.name);
 			return;
 		}
 		case CIL_ROLE : {
 			struct cil_role *role = node->data;
-			printf("ROLE: %d\n", role->datum.value);
+			printf("ROLE: %s\n", role->datum.name);
 			return;
 		}
 		case CIL_USERROLE : {
@@ -119,21 +119,21 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			if (userrole->user_str != NULL)
 				printf(" %s", userrole->user_str);
 			else if (userrole->user != NULL)
-				printf(" %d", userrole->user->datum.value);
+				printf(" %s", userrole->user->datum.name);
 			if (userrole->role_str != NULL)
 				printf(" %s", userrole->role_str);
 			else if (userrole->role != NULL)
-				printf(" %d", userrole->role->datum.value);
+				printf(" %s", userrole->role->datum.name);
 			return;
 		}
 		case CIL_CLASS : {
 			struct cil_class *cls = node->data;
-			printf("CLASS: %d ", cls->datum.value);
+			printf("CLASS: %s ", cls->datum.name);
 			
 			if (cls->common_str != NULL)
 				printf("inherits: %s ", cls->common_str);
 			else if (cls->common != NULL)
-				printf("inherits: %d ", cls->common->datum.value);
+				printf("inherits: %s ", cls->common->datum.name);
 			printf("(");
 
 			cil_tree_print_perms_list(node->cl_head);
@@ -143,7 +143,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_COMMON : {
 			struct cil_common *common = node->data;
-			printf("COMMON: %d (", common->datum.value);
+			printf("COMMON: %s (", common->datum.name);
 		
 			cil_tree_print_perms_list(node->cl_head);
 	
@@ -153,7 +153,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_BOOL : {
 			struct cil_bool *boolean = node->data;
-			printf("BOOL: %d, value: %d\n", boolean->datum.value, boolean->value);
+			printf("BOOL: %s, value: %d\n", boolean->datum.name, boolean->value);
 			return;
 		}
 		case CIL_TYPE_ATTR : {
@@ -161,15 +161,15 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			if (typeattr->type_str != NULL && typeattr->attrib_str != NULL)
 				printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type_str, typeattr->attrib_str);
 			else
-				printf("TYPEATTR: type: %d, attribute: %d\n", typeattr->type->datum.value, typeattr->attrib->datum.value);
+				printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type->datum.name, typeattr->attrib->datum.name);
 			return;
 		}
 		case CIL_TYPEALIAS : {
 			struct cil_typealias *alias = node->data;
 			if (alias->type_str != NULL) 
-				printf("TYPEALIAS: %d, type: %s\n", alias->datum.value, alias->type_str);
+				printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type_str);
 			else
-				printf("TYPEALIAS: %d, type: %d\n", alias->datum.value, alias->type->datum.value);
+				printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type->datum.name);
 			return;
 		}
 		case CIL_AVRULE : {
@@ -192,15 +192,15 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			if (rule->src_str != NULL)
 				printf(" %s", rule->src_str);
 			else
-				printf(" %d", rule->src->datum.value);
+				printf(" %s", rule->src->datum.name);
 			if (rule->tgt_str != NULL)
 				printf(" %s", rule->tgt_str);
 			else
-				printf(" %d", rule->tgt->datum.value);
+				printf(" %s", rule->tgt->datum.name);
 			if (rule->obj_str != NULL)
 				printf(" %s", rule->obj_str);
 			else
-				printf(" %d", rule->obj->datum.value);
+				printf(" %s", rule->obj->datum.name);
 			printf(" (");
 			if (rule->perms_str != NULL) {
 				item = rule->perms_str->list;
@@ -218,7 +218,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				item = rule->perms_list->list;
 				while(item != NULL) {
 					if (item->flavor == CIL_PERM)
-						printf(" %d", ((struct cil_perm*)item->data)->datum.value);
+						printf(" %s", ((struct cil_perm*)item->data)->datum.name);
 					else {
 						printf("\n\n perms list contained unexpected data type\n");
 						break;

@@ -203,7 +203,6 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 			printf("CLASS: Failed to gen perm\n");
 			return SEPOL_ERR;
 		}
-		//printf("perm id: %d\n", ((struct cil_perm*)new_ast->data)->datum.value);
 
 		if (ast_node->cl_head == NULL) 
 			ast_node->cl_head = new_ast;
@@ -235,7 +234,7 @@ void cil_symtab_array_destroy(symtab_t symtab[])
 {
 	int i=0;
 	for (i=0;i<CIL_SYM_LOCAL_NUM; i++) {
-		cil_symtab_destroy(symtab[i]);
+		cil_symtab_destroy(&symtab[i]);
 	}
 }
 
@@ -392,7 +391,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 void cil_destroy_class(struct cil_class *cls)
 {
 	cil_symtab_datum_destroy(cls->datum);
-	hashtab_destroy(cls->perms.table);
+	cil_symtab_destroy(&cls->perms);
 	
 	free(cls);
 }
@@ -478,7 +477,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 void cil_destroy_common(struct cil_common *common)
 {
 	cil_symtab_datum_destroy(common->datum);
-	hashtab_destroy(common->perms.table);
+	cil_symtab_destroy(&common->perms);
 	free(common);
 }
 
