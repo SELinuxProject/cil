@@ -142,7 +142,7 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 			fprintf(file_arr[USERROLES], " %s",  ((struct cil_role*)current_role->data)->datum.name);
 			current_role = current_role->next;
 		}
-		fprintf(file_arr[USERROLES], " }\n"); 
+		fprintf(file_arr[USERROLES], " };\n"); 
 		current_user = current_user->next;
 	}
 	return SEPOL_OK;
