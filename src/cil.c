@@ -660,13 +660,9 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	struct cil_type *type = cil_malloc(sizeof(struct cil_type));
 	symtab_t *symtab = NULL;
 
-	if (flavor == CIL_TYPE) {
+	if (flavor == CIL_TYPE || flavor == CIL_ATTR) {
 		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_TYPES);
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)type, ast_node);
-	}
-	else if (flavor == CIL_ATTR) {
-		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ATTRS);
-		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)type, ast_node);	
 	}
 	else {
 		printf("Error: cil_gen_type called on invalid node\n");
@@ -747,7 +743,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	char *key = parse_current->next->next->data;
 	symtab_t *symtab;
 
-	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_ALIASES);
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_TYPES);
 	if (rc != SEPOL_OK) {
 		free(alias);
 		return rc;

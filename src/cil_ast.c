@@ -279,7 +279,7 @@ int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current)
 	free(typeattr->type_str);
 	typeattr->type_str = NULL;
 
-	rc = cil_resolve_name(db, current, typeattr->attrib_str, CIL_SYM_LOCAL_ATTRS, &attr_node);
+	rc = cil_resolve_name(db, current, typeattr->attrib_str, CIL_SYM_LOCAL_TYPES, &attr_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", typeattr->attrib_str);
 		return SEPOL_ERR;
