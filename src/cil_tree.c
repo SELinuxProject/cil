@@ -144,6 +144,17 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %d\n", roletrans->result->datum.value);
 			return;
 		}
+		case CIL_ROLEALLOW : {
+			struct cil_role_allow *roleallow = node->data;
+			printf("ROLEALLOW:");
+			if (roleallow->src_str != NULL)
+				printf(" %s", roleallow->src_str);
+			else
+				printf(" %d", roleallow->src->datum.value);
+			if (roleallow->tgt_str != NULL)
+				printf(" %s", roleallow->tgt_str);
+			else
+				printf(" %d", roleallow->tgt->datum.value);
 			return;
 		}
 		case CIL_CLASS : {

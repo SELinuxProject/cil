@@ -294,6 +294,14 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALLOWS], "role_transition %s %s %s;\n", src_str, tgt_str, result_str);
 			break;
 		}
+		case CIL_ROLEALLOW: {
+			struct cil_role_allow *roleallow = (struct cil_role_allow*)current->data;
+			char *src_str = ((struct cil_symtab_datum*)(struct cil_role*)roleallow->src)->name;
+			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)roleallow->tgt)->name;
+			
+			fprintf(file_arr[ALLOWS], "roleallow %s %s;\n", src_str, tgt_str);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			return SEPOL_ERR;

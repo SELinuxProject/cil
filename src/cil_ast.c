@@ -127,6 +127,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_ROLEALLOW)) {
+						rc = cil_gen_roleallow(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_roleallow failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
 						rc = cil_gen_bool(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
@@ -464,6 +471,38 @@ int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current)
 
 	return SEPOL_OK;	
 }
+
+int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_role_allow *roleallow = (struct cil_role_allow*)current->data;
+	struct cil_tree_node *src_node = NULL;
+	struct cil_tree_node *tgt_node = NULL;
+	int rc = SEPOL_ERR;
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roleallow->src_str, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roleallow->src_str);
+		return SEPOL_ERR;
+	}
+	else {
+		roleallow->src = (struct cil_role*)(src_node->data);
+		free(roleallow->src_str);
+		roleallow->src_str = NULL;
+	}
+				
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roleallow->tgt_str, &tgt_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roleallow->tgt_str);
+		return SEPOL_ERR;
+	}
+	else {
+		roleallow->tgt = (struct cil_role*)(tgt_node->data);
+		free(roleallow->tgt_str);
+		roleallow->tgt_str = NULL;
+	}
+
+	return SEPOL_OK;	
+}
+
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
@@ -516,6 +555,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				case CIL_ROLETRANS : {
 					printf("case roletransition\n");
 					rc = cil_resolve_roletrans(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
+				case CIL_ROLEALLOW : {
+					printf("case roleallow\n");
+					rc = cil_resolve_roleallow(db, current);
 					if (rc != SEPOL_OK)
 						return rc;
 					break;

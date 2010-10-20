@@ -149,6 +149,10 @@ void cil_data_destroy(void **data, uint32_t flavor)
 			cil_destroy_roletrans(*data);
 			break;
 		}
+		case (CIL_ROLEALLOW) : {
+			cil_destroy_roleallow(*data);
+			break;
+		}
 		case (CIL_BOOL) : {
 			cil_destroy_bool(*data);
 			break;
@@ -638,6 +642,41 @@ void cil_destroy_roletrans(struct cil_role_trans *roletrans)
 		free(roletrans->result_str);
 	free(roletrans);
 }
+
+int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+	
+	if (parse_current->next == NULL || \
+		parse_current->next->next == NULL || \
+		parse_current->next->next->next != NULL)
+	{
+		printf("Invalid roleallow declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_role_allow *roleallow = cil_malloc(sizeof(struct cil_role_allow));
+
+	roleallow->src_str = strdup(parse_current->next->data);
+	roleallow->tgt_str = strdup(parse_current->next->next->data);
+
+	ast_node->data = roleallow;
+	ast_node->flavor = CIL_ROLEALLOW;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_roleallow(struct cil_role_allow *roleallow)
+{
+	if (roleallow->src_str != NULL)
+		free(roleallow->src_str);
+	if (roleallow->tgt_str != NULL)
+		free(roleallow->tgt_str);
+	free(roleallow);
+}
+
+
 int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
 	if (parse_current == NULL || ast_node == NULL)
