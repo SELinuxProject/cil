@@ -68,7 +68,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			struct cil_typeattribute *typeattr = (struct cil_typeattribute*)current->data;
 			char *type_str = ((struct cil_symtab_datum*)typeattr->type)->name;
 			char *attr_str = ((struct cil_symtab_datum*)typeattr->attrib)->name;
-			fprintf(file_arr[ATTRTYPES], "typeattribute %s %s;\n", type_str, attr_str);
+			fprintf(file_arr[ALLOWS], "typeattribute %s %s;\n", type_str, attr_str);
 			break;
 		}
 		case CIL_TYPEALIAS: {
