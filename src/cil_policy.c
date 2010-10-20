@@ -272,6 +272,12 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 				case CIL_TYPE_TRANSITION:
 					fprintf(file_arr[ALLOWS], "type_transition %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
 					break;
+				case CIL_TYPE_CHANGE:
+					fprintf(file_arr[ALLOWS], "type_change %s %s : %s %s\n;", src_str, tgt_str, obj_str, result_str);
+					break;
+				case CIL_TYPE_MEMBER:
+					fprintf(file_arr[ALLOWS], "type_member %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
+					break;
 				default : {
 					printf("Unknown type_rule kind: %d\n", rule->rule_kind);
 					return SEPOL_ERR;

@@ -238,6 +238,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				case CIL_TYPE_TRANSITION:
 					printf("TYPETRANSITION:");
 					break;
+				case CIL_TYPE_MEMBER:
+					printf("TYPEMEMBER:");
+					break;
+				case CIL_TYPE_CHANGE:
+					printf("TYPECHANGE:");
+					break;
 			}
 			if (rule->src_str != NULL)
 				printf(" %s", rule->src_str);
