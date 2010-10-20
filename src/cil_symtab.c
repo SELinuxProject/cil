@@ -10,6 +10,8 @@ void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
 	free(datum.name);
 }
 
+/* This both initializes the datum and inserts it into the symtab.
+   Note that cil_symtab_datum_destroy() is the analog to the initializer portion */
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node)
 {
 	char *newkey = strdup(key);
