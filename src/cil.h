@@ -74,7 +74,7 @@
 #define CIL_KEY_AUDITALLOW	"auditallow"
 #define CIL_KEY_DONTAUDIT	"dontaudit"
 #define CIL_KEY_NEVERALLOW	"neverallow"
-#define CIL_KEY_TYPETRANS	"typetrans"
+#define CIL_KEY_TYPETRANS	"typetransition"
 #define CIL_KEY_TYPEATTR	"typeattribute"
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_INTERFACE	"interface"
