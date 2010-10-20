@@ -261,6 +261,24 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALLOWS], "};\n");
 			break;
 		}
+		case CIL_TYPE_RULE: {
+			struct cil_type_rule *rule = (struct cil_type_rule*)current->data;
+			char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
+			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
+			char *obj_str = ((struct cil_symtab_datum*)(struct cil_class*)rule->obj)->name;
+			char *result_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->result)->name;
+			
+			switch (rule->rule_kind) {
+				case CIL_TYPE_TRANSITION:
+					fprintf(file_arr[ALLOWS], "type_transition %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
+					break;
+				default : {
+					printf("Unknown type_rule kind: %d\n", rule->rule_kind);
+					return SEPOL_ERR;
+				}
+			}
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			return SEPOL_ERR;

@@ -41,6 +41,7 @@
 #define CIL_PERM		26
 #define CIL_USERROLE	27
 #define CIL_TYPE_ATTR	28
+#define CIL_TYPE_RULE 	29
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -400,6 +401,8 @@ int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *)
 void cil_destroy_sid(struct cil_sid *);
 int cil_gen_avrule(struct cil_tree_node *, struct cil_tree_node *, uint32_t);
 void cil_destroy_avrule(struct cil_avrule *);
+int cil_gen_type_rule(struct cil_tree_node *, struct cil_tree_node *, uint32_t);
+void cil_destroy_type_rule(struct cil_type_rule *);
 int cil_gen_type(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
 void cil_destroy_type(struct cil_type *);
 int cil_gen_user(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

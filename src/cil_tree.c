@@ -232,6 +232,31 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf(" )\n");
 			return;
 		}
+		case CIL_TYPE_RULE : {
+			struct cil_type_rule *rule = node->data;
+			switch (rule->rule_kind) {
+				case CIL_TYPE_TRANSITION:
+					printf("TYPETRANSITION:");
+					break;
+			}
+			if (rule->src_str != NULL)
+				printf(" %s", rule->src_str);
+			else
+				printf(" %d", rule->src->datum.value);
+			if (rule->tgt_str != NULL)
+				printf(" %s", rule->tgt_str);
+			else
+				printf(" %d", rule->tgt->datum.value);
+			if (rule->obj_str != NULL)
+				printf(" %s", rule->obj_str);
+			else
+				printf(" %d", rule->obj->datum.value);
+			if (rule->result_str != NULL)
+				printf(" %s\n", rule->result_str);
+			else
+				printf(" %d\n", rule->result->datum.value);
+			return;
+		}
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;

@@ -125,6 +125,10 @@ void cil_data_destroy(void **data, uint32_t flavor)
 			cil_destroy_avrule(*data);
 			break;
 		}
+		case (CIL_TYPE_RULE) : {
+			cil_destroy_type_rule(*data);
+			break;
+		}
 		case (CIL_TYPE) : {
 			cil_destroy_type(*data);
 			break;
@@ -636,6 +640,47 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 		cil_list_destroy(&rule->perms_str);
 	if (rule->perms_list != NULL)
 		cil_list_destroy(&rule->perms_list);
+	free(rule);
+}
+
+int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
+{
+	if (parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+	
+	if (parse_current->next == NULL || \
+		parse_current->next->next == NULL || \
+		parse_current->next->next->next == NULL || \
+		parse_current->next->next->next->next == NULL || \
+		parse_current->next->next->next->next->next != NULL) 
+	{
+		printf("Invalid type rule (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+	
+	struct cil_type_rule *rule = cil_malloc(sizeof(struct cil_type_rule));
+	rule->rule_kind = rule_kind;
+	rule->src_str = strdup(parse_current->next->data);
+	rule->tgt_str = strdup(parse_current->next->next->data);
+	rule->obj_str = strdup(parse_current->next->next->next->data);	
+	rule->result_str = strdup(parse_current->next->next->next->next->data);
+
+	ast_node->data = rule;
+	ast_node->flavor = CIL_TYPE_RULE;
+
+	return SEPOL_OK;	
+}
+
+void cil_destroy_type_rule(struct cil_type_rule *rule)
+{
+	if (rule->src_str != NULL)
+		free(rule->src_str);
+	if (rule->tgt_str != NULL)
+		free(rule->tgt_str);
+	if (rule->obj_str != NULL)
+		free(rule->obj_str);
+	if (rule->result_str != NULL)
+		free(rule->result_str);
 	free(rule);
 }
 

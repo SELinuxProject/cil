@@ -158,6 +158,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						}
 						forced = 1;
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANS)) {
+						rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_TRANSITION);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_type_rule (typetransition) failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_INTERFACE)) {
 						printf("new interface: %s\n", (char*)parse_current->next->data);
 						ast_node->flavor = CIL_TRANS_IF;
@@ -261,6 +268,61 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 	rule->perms_list = perms_list;
 	cil_list_destroy(&rule->perms_str);
 
+	return SEPOL_OK;
+}
+
+int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_type_rule *rule = (struct cil_type_rule*)current->data;
+	struct cil_tree_node *src_node = NULL;
+	struct cil_tree_node *tgt_node = NULL;
+	struct cil_tree_node *obj_node = NULL;
+	struct cil_tree_node *result_node = NULL;
+	int rc = SEPOL_ERR;
+	
+	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->src_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->src = (struct cil_type*)(src_node->data);
+		free(rule->src_str);
+		rule->src_str = NULL;
+	}
+					
+	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->tgt_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->tgt = (struct cil_type*)(tgt_node->data);
+		free(rule->tgt_str);
+		rule->tgt_str = NULL;	
+	}
+
+	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->obj_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->obj = (struct cil_class*)(obj_node->data);
+		free(rule->obj_str);
+		rule->obj_str = NULL;
+	}
+
+	rc = cil_resolve_name(db, current, rule->result_str, CIL_SYM_LOCAL_TYPES, &result_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->result_str);
+		return SEPOL_ERR;
+	}
+	else {
+		rule->result = (struct cil_type*)(result_node->data);
+		free(rule->result_str);
+		rule->result_str = NULL;
+	}
 	return SEPOL_OK;
 }
 
@@ -384,6 +446,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				case CIL_AVRULE : {
 					printf("case avrule\n");
 					rc = cil_resolve_avrule(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
+				case CIL_TYPE_RULE : {
+					printf("case type_rule\n");
+					rc = cil_resolve_type_rule(db, current);
 					if (rc != SEPOL_OK)
 						return rc;
 					break;
