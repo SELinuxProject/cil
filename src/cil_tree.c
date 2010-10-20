@@ -127,6 +127,23 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("\n");
 			return;
 		}
+		case CIL_ROLETRANS : {
+			struct cil_role_trans *roletrans = node->data;
+			printf("ROLETRANSITION:");
+			if (roletrans->src_str != NULL)
+				printf(" %s", roletrans->src_str);
+			else
+				printf(" %d", roletrans->src->datum.value);
+			if (roletrans->tgt_str != NULL)
+				printf(" %s", roletrans->tgt_str);
+			else
+				printf(" %d", roletrans->tgt->datum.value);
+			if (roletrans->result_str != NULL)
+				printf(" %s\n", roletrans->result_str);
+			else
+				printf(" %d\n", roletrans->result->datum.value);
+			return;
+		}
 			return;
 		}
 		case CIL_CLASS : {

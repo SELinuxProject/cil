@@ -42,6 +42,7 @@
 #define CIL_USERROLE	27
 #define CIL_TYPE_ATTR	28
 #define CIL_TYPE_RULE 	29
+#define CIL_ROLETRANS	30
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -67,6 +68,7 @@
 #define CIL_KEY_ROLE 		"role"
 #define CIL_KEY_USERROLE	"userrole"
 #define CIL_KEY_ROLETYPE	"roletype"
+#define CIL_KEY_ROLETRANS	"roletransition"
 #define CIL_KEY_TYPE 		"type"
 #define CIL_KEY_ATTR		"attribute"
 #define CIL_KEY_BOOL		"bool"
@@ -251,12 +253,14 @@ struct cil_type_rule {
 	struct cil_type *result;
 };
 
-// Define role_rule kinds here
-struct cil_role_rule {
-	uint32_t rule_kind;
+struct cil_role_trans {
 	char *src_str;
 	struct cil_role *src;
 	char *tgt_str;	
+	struct cil_type *tgt;
+	char *result_str;
+	struct cil_role *result;
+};
 	struct cil_role *tgt;
 	/* TODO CDS this should match whatever cil_avrule does */
 	char *obj_str;
@@ -410,6 +414,8 @@ int cil_gen_user(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *
 void cil_destroy_user(struct cil_user *);
 int cil_gen_role(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_role(struct cil_role *);
+int cil_gen_roletrans(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_roletrans(struct cil_role_trans *);
 int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_bool(struct cil_bool *);
 int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

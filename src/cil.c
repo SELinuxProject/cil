@@ -145,6 +145,10 @@ void cil_data_destroy(void **data, uint32_t flavor)
 			cil_destroy_role(*data);
 			break;
 		}
+		case (CIL_ROLETRANS) : {
+			cil_destroy_roletrans(*data);
+			break;
+		}
 		case (CIL_BOOL) : {
 			cil_destroy_bool(*data);
 			break;
@@ -598,6 +602,42 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 }
 
+int cil_gen_roletrans(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+	
+	if (parse_current->next == NULL || \
+		parse_current->next->next == NULL || \
+		parse_current->next->next->next == NULL || \
+		parse_current->next->next->next->next != NULL) 
+	{
+		printf("Invalid roletransition declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_role_trans *roletrans = cil_malloc(sizeof(struct cil_role_trans));
+
+	roletrans->src_str = strdup(parse_current->next->data);
+	roletrans->tgt_str = strdup(parse_current->next->next->data);
+	roletrans->result_str = strdup(parse_current->next->next->next->data);
+
+	ast_node->data = roletrans;
+	ast_node->flavor = CIL_ROLETRANS;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_roletrans(struct cil_role_trans *roletrans)
+{
+	if (roletrans->src_str != NULL)
+		free(roletrans->src_str);
+	if (roletrans->tgt_str != NULL)
+		free(roletrans->tgt_str);
+	if (roletrans->result_str != NULL)
+		free(roletrans->result_str);
+	free(roletrans);
+}
 int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
 	if (parse_current == NULL || ast_node == NULL)

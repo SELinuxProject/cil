@@ -12,6 +12,7 @@ int cil_resolve_typerule(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_typeattr(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_typealias(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_class(struct cil_db *, struct cil_tree_node *);
+int cil_resolve_roletrans(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_ast(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_name(struct cil_db *, struct cil_tree_node *, char *, uint32_t, struct cil_tree_node **);
 int cil_resolve_name_global(symtab_t, char *, void **);

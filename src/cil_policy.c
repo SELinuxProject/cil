@@ -285,6 +285,15 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			}
 			break;
 		}
+		case CIL_ROLETRANS: {
+			struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;
+			char *src_str = ((struct cil_symtab_datum*)(struct cil_role*)roletrans->src)->name;
+			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)roletrans->tgt)->name;
+			char *result_str = ((struct cil_symtab_datum*)(struct cil_role*)roletrans->result)->name;
+			
+			fprintf(file_arr[ALLOWS], "role_transition %s %s %s;\n", src_str, tgt_str, result_str);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			return SEPOL_ERR;
