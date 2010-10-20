@@ -233,11 +233,11 @@ struct cil_avrule {
 	struct cil_list *perms_list;
 };
 
-#define CIL_AVRULE_TRANSITION 16
-#define CIL_AVRULE_MEMBER     32
-#define CIL_AVRULE_CHANGE     64
+#define CIL_TYPE_TRANSITION 16
+#define CIL_TYPE_MEMBER     32
+#define CIL_TYPE_CHANGE     64
 #define CIL_AVRULE_TYPE       (AVRULE_TRANSITION | AVRULE_MEMBER | AVRULE_CHANGE)
-struct cil_typerule {
+struct cil_type_rule {
 	uint32_t rule_kind;
 	char *src_str;
 	struct cil_type *src;
