@@ -215,9 +215,11 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *tgt_node = NULL;
 	struct cil_tree_node *obj_node = NULL;
 
+	symtab_t *symtab = NULL;
+	
 	int rc = SEPOL_ERR;
 	
-	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
+	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, &src_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->src_str);
 		return SEPOL_ERR;
@@ -228,7 +230,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 		rule->src_str = NULL;
 	}
 					
-	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
+	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, &tgt_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->tgt_str);
 		return SEPOL_ERR;
@@ -239,7 +241,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 		rule->tgt_str = NULL;	
 	}
 
-	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
+	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, &obj_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->obj_str);
 		return SEPOL_ERR;
@@ -259,7 +261,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 		printf("Failed to init perm node list\n");
 		return rc;
 	}
-	while (perm != NULL) {	
+	while (perm != NULL) {
 		rc = cil_symtab_get_node(&rule->obj->perms, (char*)perm->data, &perm_node);
 		if (rc != SEPOL_OK) {
 			printf("Failed to get node from symtab\n");
@@ -292,9 +294,11 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *tgt_node = NULL;
 	struct cil_tree_node *obj_node = NULL;
 	struct cil_tree_node *result_node = NULL;
+	symtab_t *symtab = NULL;
+	
 	int rc = SEPOL_ERR;
 	
-	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_LOCAL_TYPES, &src_node);
+	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, &src_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->src_str);
 		return SEPOL_ERR;
@@ -305,7 +309,7 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current)
 		rule->src_str = NULL;
 	}
 					
-	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
+	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, &tgt_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->tgt_str);
 		return SEPOL_ERR;
@@ -316,7 +320,7 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current)
 		rule->tgt_str = NULL;	
 	}
 
-	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_CLASSES], rule->obj_str, &obj_node);
+	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, &obj_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->obj_str);
 		return SEPOL_ERR;
@@ -327,7 +331,7 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current)
 		rule->obj_str = NULL;
 	}
 
-	rc = cil_resolve_name(db, current, rule->result_str, CIL_SYM_LOCAL_TYPES, &result_node);
+	rc = cil_resolve_name(db, current, rule->result_str, CIL_SYM_TYPES, &result_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->result_str);
 		return SEPOL_ERR;
@@ -346,7 +350,7 @@ int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *type_node = NULL;
 	struct cil_tree_node *attr_node = NULL;
 	int rc = SEPOL_ERR;
-	rc = cil_resolve_name(db, current, typeattr->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+	rc = cil_resolve_name(db, current, typeattr->type_str, CIL_SYM_TYPES, &type_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", typeattr->type_str);
 		return SEPOL_ERR;
@@ -355,7 +359,7 @@ int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current)
 	free(typeattr->type_str);
 	typeattr->type_str = NULL;
 
-	rc = cil_resolve_name(db, current, typeattr->attrib_str, CIL_SYM_LOCAL_TYPES, &attr_node);
+	rc = cil_resolve_name(db, current, typeattr->attrib_str, CIL_SYM_TYPES, &attr_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", typeattr->attrib_str);
 		return SEPOL_ERR;
@@ -371,7 +375,7 @@ int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_typealias *alias = (struct cil_typealias*)current->data;
 	struct cil_tree_node *type_node = NULL;
-	int rc = cil_resolve_name(db, current, alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+	int rc = cil_resolve_name(db, current, alias->type_str, CIL_SYM_TYPES, &type_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", alias->type_str);
 		return SEPOL_ERR;
@@ -391,7 +395,7 @@ int cil_resolve_class(struct cil_db *db, struct cil_tree_node *current)
 		return SEPOL_OK;
 
 	if (cls->common_str != NULL) {
-		int rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_COMMONS], cls->common_str, &common_node);
+		int rc = cil_resolve_name(db, current, cls->common_str, CIL_SYM_COMMONS, &common_node);
 		if (rc != SEPOL_OK) {
 			printf("Name resolution failed for %s\n", cls->common_str);
 			return SEPOL_ERR;
@@ -408,20 +412,21 @@ int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_userrole *userrole = (struct cil_userrole*)current->data;
 	struct cil_tree_node *user_node = NULL;
 	struct cil_tree_node *role_node = NULL;
-	int rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_USERS], userrole->user_str, &user_node);
+
+	int rc = cil_resolve_name(db, current, userrole->user_str, CIL_SYM_USERS, &user_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", userrole->user_str);
 		return SEPOL_ERR;
-	}
+	} 
 	userrole->user = (struct cil_user*)(user_node->data);
 	free(userrole->user_str);
 	userrole->user_str = NULL;
 
-	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], userrole->role_str, &role_node);
+	rc = cil_resolve_name(db, current, userrole->role_str, CIL_SYM_ROLES, &role_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", userrole->role_str);
 		return SEPOL_ERR;
-	}
+	} 
 	userrole->role = (struct cil_role*)(role_node->data);
 	free(userrole->role_str);
 	userrole->role_str = NULL;
@@ -436,7 +441,8 @@ int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *tgt_node = NULL;
 	struct cil_tree_node *result_node = NULL;
 	int rc = SEPOL_ERR;
-	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roletrans->src_str, &src_node);
+
+	rc = cil_resolve_name(db, current, roletrans->src_str, CIL_SYM_ROLES, &src_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roletrans->src_str);
 		return SEPOL_ERR;
@@ -447,7 +453,7 @@ int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current)
 		roletrans->src_str = NULL;
 	}
 					
-	rc = cil_resolve_name(db, current, roletrans->tgt_str, CIL_SYM_LOCAL_TYPES, &tgt_node);
+	rc = cil_resolve_name(db, current, roletrans->tgt_str, CIL_SYM_TYPES, &tgt_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roletrans->tgt_str);
 		return SEPOL_ERR;
@@ -458,7 +464,7 @@ int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current)
 		roletrans->tgt_str = NULL;	
 	}
 
-	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roletrans->result_str, &result_node);
+	rc = cil_resolve_name(db, current, roletrans->result_str, CIL_SYM_ROLES, &result_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roletrans->result_str);
 		return SEPOL_ERR;
@@ -478,7 +484,8 @@ int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *src_node = NULL;
 	struct cil_tree_node *tgt_node = NULL;
 	int rc = SEPOL_ERR;
-	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roleallow->src_str, &src_node);
+	
+	rc = cil_resolve_name(db, current, roleallow->src_str, CIL_SYM_ROLES, &src_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roleallow->src_str);
 		return SEPOL_ERR;
@@ -488,8 +495,8 @@ int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current)
 		free(roleallow->src_str);
 		roleallow->src_str = NULL;
 	}
-				
-	rc = cil_symtab_get_node(&db->global_symtab[CIL_SYM_GLOBAL_ROLES], roleallow->tgt_str, &tgt_node);
+
+	rc = cil_resolve_name(db, current, roleallow->tgt_str, CIL_SYM_ROLES, &tgt_node);	
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roleallow->tgt_str);
 		return SEPOL_ERR;
@@ -614,10 +621,10 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 	struct cil_tree_node *tmp_node = NULL;
 
 	if (ast_node->flavor == CIL_ROOT) {
-		symtab = &(db->local_symtab[CIL_SYM_LOCAL_BLOCKS]);
+		symtab = &(db->symtab[CIL_SYM_BLOCKS]);
 	}
 	else {
-		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_BLOCKS);
 		if (rc != SEPOL_OK) {
 			printf("__cil_resolve_name_helper: cil_get_parent_symtab failed, rc: %d\n", rc);
 			goto resolve_name_helper_cleanup;
@@ -635,7 +642,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 				printf("__cil_resolve_name_helper: Failed to find table, block current: %s\n", tok_current);
 				goto resolve_name_helper_cleanup;
 			}
-			symtab = &(((struct cil_block*)tmp_node->data)->symtab[CIL_SYM_LOCAL_BLOCKS]);
+			symtab = &(((struct cil_block*)tmp_node->data)->symtab[CIL_SYM_BLOCKS]);
 		}
 		else {
 			//printf("type key: %s\n", tok_current); 
@@ -701,7 +708,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 
 	if (first == '.') {
 		if (strrchr(global_symtab_name, '.') == global_symtab_name) { //Only one dot in name, check global symtabs
-			if (cil_symtab_get_node(&db->local_symtab[sym_index], global_symtab_name+1, node)) {
+			if (cil_symtab_get_node(&db->symtab[sym_index], global_symtab_name+1, node)) {
 				free(global_symtab_name);
 				return SEPOL_ERR;
 			}

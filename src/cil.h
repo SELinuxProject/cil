@@ -85,43 +85,36 @@
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_INTERFACE	"interface"
 
+
 /*
 	Symbol Table Array Indices
 */
+#define CIL_SYM_FILENAMES	0
+#define CIL_SYM_BLOCKS		1
+#define CIL_SYM_USERS		2
+#define CIL_SYM_ROLES		3
+#define CIL_SYM_TYPES		4
+#define CIL_SYM_COMMONS		5
+#define CIL_SYM_CLASSES		6
+#define CIL_SYM_BOOLS		7
+#define CIL_SYM_SENS		8
+#define CIL_SYM_CATS		9
+#define CIL_SYM_SIDS		10
+#define CIL_SYM_FILECONS	11
+#define CIL_SYM_PORTCONS	12
+#define CIL_SYM_NETIFCONS	13
+#define CIL_SYM_MACROS		14
 
-// Global symtabs
-#define CIL_SYM_GLOBAL_FILENAMES	0
-#define CIL_SYM_GLOBAL_USERS		1
-#define CIL_SYM_GLOBAL_ROLES		2
-#define CIL_SYM_GLOBAL_COMMONS		3
-#define CIL_SYM_GLOBAL_CLASSES		4
-#define CIL_SYM_GLOBAL_BOOLS		5
-#define CIL_SYM_GLOBAL_SENS		6
-#define CIL_SYM_GLOBAL_CATS		7
-#define CIL_SYM_GLOBAL_SIDS		8
-#define CIL_SYM_GLOBAL_FILECONS		9
-#define CIL_SYM_GLOBAL_PORTCONS		10
-#define CIL_SYM_GLOBAL_NETIFCONS	11
-
-#define CIL_SYM_GLOBAL_NUM		12
-
-// Local symtabs
-#define CIL_SYM_LOCAL_BLOCKS		0
-#define CIL_SYM_LOCAL_TYPES		1
-#define CIL_SYM_LOCAL_PERMS		4
-// TODO CDS this should be MACRO, not INTERFACE
-#define CIL_SYM_LOCAL_TRANS_INTERFACES	5
-
-#define CIL_SYM_LOCAL_NUM		6
+#define CIL_SYM_NUM		15
 
 #define CIL_SYM_SIZE			256 	//TODO Need to determine symtab sizes
+
 
 typedef uint32_t sepol_id_t;
 
 struct cil_db {
 	struct cil_tree *ast;
-	symtab_t global_symtab[CIL_SYM_GLOBAL_NUM]; 	//Global namespace
-	symtab_t local_symtab[CIL_SYM_LOCAL_NUM];	//Local namespace for top level declarations
+	symtab_t symtab[CIL_SYM_NUM];
 };
 
 struct cil_list {
@@ -141,7 +134,7 @@ struct cil_search {
 
 struct cil_block {
 	struct cil_symtab_datum datum;
-	symtab_t symtab[CIL_SYM_LOCAL_NUM];
+	symtab_t symtab[CIL_SYM_NUM];
 	/* TODO CDS eventually, these should probably become a flags bit vector */
 	uint16_t is_abstract;
 	uint16_t is_optional;
