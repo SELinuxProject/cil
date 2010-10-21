@@ -155,6 +155,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s", roleallow->tgt_str);
 			else
 				printf(" %s", roleallow->tgt->datum.name);
+			printf("\n");
 			return;
 		}
 		case CIL_CLASS : {
