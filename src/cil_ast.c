@@ -120,6 +120,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_ROLETYPE)) {
+						rc = cil_gen_roletype(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_roletype failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_ROLETRANS)) {
 						rc = cil_gen_roletrans(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
@@ -434,6 +441,33 @@ int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;	
 }
 
+int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_roletype *roletype = (struct cil_roletype*)current->data;
+	struct cil_tree_node *role_node = NULL;
+	struct cil_tree_node *type_node = NULL;
+	
+	int rc = cil_resolve_name(db, current, roletype->role_str, CIL_SYM_ROLES, &role_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roletype->role_str);
+		return SEPOL_ERR;
+	}
+	roletype->role = (struct cil_role*)(role_node->data);
+	free(roletype->role_str);
+	roletype->role_str = NULL;
+	
+	rc = cil_resolve_name(db, current, roletype->type_str, CIL_SYM_TYPES, &type_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roletype->type_str);
+		return SEPOL_ERR;
+	}
+	roletype->type = (struct cil_type*)(type_node->data);
+	free(roletype->type_str);
+	roletype->type_str = NULL;
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;
@@ -555,6 +589,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				case CIL_USERROLE : {
 					printf("case userrole\n");
 					rc = cil_resolve_userrole(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
+				case CIL_ROLETYPE : {
+					printf("case roletype\n");
+					rc = cil_resolve_roletype(db, current);
 					if (rc != SEPOL_OK)
 						return rc;
 					break;
@@ -800,7 +841,7 @@ int cil_qualify_name(struct cil_tree_node *root)
 			strcat(fqn, uqn);
 
 			((struct cil_symtab_datum*)curr->data)->name = fqn;	// Replace with new, fully qualified string
-			free(uqn);
+	//		free(uqn);
 		}
 
 		if (curr->cl_head != NULL && !reverse) 

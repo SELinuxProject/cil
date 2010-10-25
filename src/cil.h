@@ -39,11 +39,12 @@
 #define CIL_CONSTRAIN		24
 #define CIL_MLS_CONSTRAIN	25
 #define CIL_PERM		26
-#define CIL_USERROLE	27
-#define CIL_TYPE_ATTR	28
-#define CIL_TYPE_RULE 	29
-#define CIL_ROLETRANS	30
-#define CIL_ROLEALLOW	31
+#define CIL_USERROLE		27
+#define CIL_TYPE_ATTR		28
+#define CIL_TYPE_RULE 		29
+#define CIL_ROLETRANS		30
+#define CIL_ROLEALLOW		31
+#define CIL_ROLETYPE		32 
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -51,7 +52,6 @@
 #define CIL_SID			CIL_MIN_DECLARATIVE + 3 
 #define CIL_USER		CIL_MIN_DECLARATIVE + 4 
 #define CIL_ROLE		CIL_MIN_DECLARATIVE + 5 
-#define CIL_ROLE_TYPES		CIL_MIN_DECLARATIVE + 6 
 #define CIL_TYPE		CIL_MIN_DECLARATIVE + 7 
 #define CIL_ATTR		CIL_MIN_DECLARATIVE + 8 
 #define CIL_BOOL		CIL_MIN_DECLARATIVE + 9
@@ -107,7 +107,7 @@
 
 #define CIL_SYM_NUM		15
 
-#define CIL_SYM_SIZE			256 	//TODO Need to determine symtab sizes
+#define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
 
 typedef uint32_t sepol_id_t;
@@ -186,7 +186,7 @@ struct cil_role_dominates {
 	struct cil_role *dominates;
 };
 
-struct cil_role_types {
+struct cil_roletype {
 	char *role_str;
 	struct cil_role *role;
 	char *type_str;
@@ -388,7 +388,7 @@ int cil_gen_perm_nodes(struct cil_db *, struct cil_tree_node *, struct cil_tree_
 int cil_symtab_array_init(symtab_t [], uint32_t);
 void cil_symtab_array_destroy(symtab_t []);
 int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
-void cil_data_destroy(void **, uint32_t);
+void cil_destroy_data(void **, uint32_t);
 
 int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
 void cil_destroy_block(struct cil_block *);
@@ -412,6 +412,8 @@ int cil_gen_role(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *
 void cil_destroy_role(struct cil_role *);
 int cil_gen_userrole(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_userrole(struct cil_userrole *);
+int cil_gen_roletype(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_roletype(struct cil_roletype *);
 int cil_gen_roletrans(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_roletrans(struct cil_role_trans *);
 int cil_gen_roleallow(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

@@ -74,12 +74,12 @@ int cil_list_item_init(struct cil_list_item **item)
 
 void cil_list_item_destroy(struct cil_list_item **item)
 {
-	cil_data_destroy(&(*item)->data, (*item)->flavor);
+	cil_destroy_data(&(*item)->data, (*item)->flavor);
 	free(*item);
 	*item = NULL;
 }
 
-void cil_data_destroy(void **data, uint32_t flavor)
+void cil_destroy_data(void **data, uint32_t flavor)
 {
 	switch(flavor) {
 		case (CIL_ROOT) : {
@@ -156,6 +156,14 @@ void cil_data_destroy(void **data, uint32_t flavor)
 		}
 		case (CIL_TYPE_ATTR) : {
 			cil_destroy_typeattr(*data);
+			break;
+		}
+		case (CIL_ROLETYPE) : {
+			cil_destroy_roletype(*data);
+			break;
+		}
+		case (CIL_USERROLE) : { 
+			cil_destroy_userrole(*data);
 			break;
 		}
 		default : {
@@ -632,6 +640,36 @@ void cil_destroy_role(struct cil_role *role)
 	free(role);
 }
 
+int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL) {
+		printf("Invalid roletype declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+	
+	struct cil_roletype *roletype = cil_malloc(sizeof(struct cil_roletype));
+
+	roletype->role_str = strdup(parse_current->next->data);
+	roletype->type_str = strdup(parse_current->next->next->data);
+
+	ast_node->data = roletype;
+	ast_node->flavor = CIL_ROLETYPE;
+	
+	return SEPOL_OK;
+}
+
+void cil_destroy_roletype(struct cil_roletype *roletype)
+{
+	if (roletype->role_str != NULL)
+		free(roletype->role_str);
+	if (roletype->type_str != NULL)
+		free(roletype->type_str);
+	free(roletype);
+}
+
 int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -651,6 +689,15 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 	ast_node->flavor = CIL_USERROLE;
 	
 	return SEPOL_OK;
+}
+
+void cil_destroy_userrole(struct cil_userrole *userrole)
+{
+	if (userrole->user_str != NULL)
+		free(userrole->user_str);
+	if (userrole->role_str != NULL)
+		free(userrole->role_str);
+	free(userrole);
 }
 
 int cil_gen_roletrans(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
