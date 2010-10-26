@@ -6,6 +6,7 @@
 #include "cil_tree.h" 
 #include "cil_lexer.h"
 #include "cil.h"
+#include "cil_mem.h"
 
 int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 {
@@ -48,7 +49,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 		else if ((tok->type == SYMBOL) || (tok->type == QSTRING)) {
 			cil_tree_node_init(&item);
 			item->parent = current;
-			item->data = strdup(tok->value);
+			item->data = cil_strdup(tok->value);
 			item->flavor = CIL_PARSER;
 			item->line = tok->line;
 			if (current->cl_head == NULL)

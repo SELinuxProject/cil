@@ -8,6 +8,7 @@
 #include "../../src/cil_tree.h"
 #include "../../src/cil_lexer.h"
 #include "../../src/cil.h"
+#include "../../src/cil_mem.h"
 #include "../../src/cil_symtab.h"
 #include "../../src/cil_ast.h"
 #include "../../src/cil_parser.h"
@@ -76,7 +77,7 @@ void gen_test_tree(struct cil_tree **test_root, char *line[]) {
 	    else {
 	        cil_tree_node_init(&item);
 	        item->parent = current;
-	        item->data = strdup(*i);
+	        item->data = cil_strdup(*i);
 	        item->flavor = CIL_PARSER;
 	        item->line = 0;
 	        if (current->cl_head == NULL) {
@@ -922,9 +923,9 @@ void test_cil_parse_to_list(CuTest *tc) {
 
 	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
-	test_avrule->src_str = strdup(test_current->next->data);
-	test_avrule->tgt_str = strdup(test_current->next->next->data);
-	test_avrule->obj_str = strdup(test_current->next->next->next->data);
+	test_avrule->src_str = cil_strdup(test_current->next->data);
+	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
+	test_avrule->obj_str = cil_strdup(test_current->next->next->next->data);
 
 	cil_list_init(&test_avrule->perms_str);
 
@@ -948,9 +949,9 @@ void test_cil_parse_to_list_currnull_neg(CuTest *tc) {
 
 	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
-	test_avrule->src_str = strdup(test_current->next->data);
-	test_avrule->tgt_str = strdup(test_current->next->next->data);
-	test_avrule->obj_str = strdup(test_current->next->next->next->data);
+	test_avrule->src_str = cil_strdup(test_current->next->data);
+	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
+	test_avrule->obj_str = cil_strdup(test_current->next->next->next->data);
 
 	cil_list_init(&test_avrule->perms_str);
 
@@ -974,9 +975,9 @@ void test_cil_parse_to_list_listnull_neg(CuTest *tc) {
 
 	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
-	test_avrule->src_str = strdup(test_current->next->data);
-	test_avrule->tgt_str = strdup(test_current->next->next->data);
-	test_avrule->obj_str = strdup(test_current->next->next->next->data);
+	test_avrule->src_str = cil_strdup(test_current->next->data);
+	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
+	test_avrule->obj_str = cil_strdup(test_current->next->next->next->data);
 
 	test_current = test_current->next->next->next->next->cl_head;
 

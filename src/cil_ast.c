@@ -6,6 +6,7 @@
 #include "cil_tree.h"
 #include "cil_parser.h"
 #include "cil.h"
+#include "cil_mem.h"
 
 int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
@@ -655,7 +656,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, struct cil_tree_node **node)
 {
 	int rc = SEPOL_ERR;
-	char* name_dup = strdup(name);
+	char* name_dup = cil_strdup(name);
 	char *tok_current = strtok(name_dup, ".");
 	char *tok_next = strtok(NULL, ".");
 	symtab_t *symtab = NULL;
@@ -841,7 +842,7 @@ int cil_qualify_name(struct cil_tree_node *root)
 			strcat(fqn, uqn);
 
 			((struct cil_symtab_datum*)curr->data)->name = fqn;	// Replace with new, fully qualified string
-	//		free(uqn);
+			free(uqn);
 		}
 
 		if (curr->cl_head != NULL && !reverse) 
