@@ -28,12 +28,11 @@ void *cil_malloc(size_t size)
 
 void *cil_strdup(char *str)
 {
+	if (str == NULL)
+		return NULL;
 	void *mem = strdup(str);
-	if (mem == NULL){
-		if (str == NULL)
-			return NULL;
+	if (mem == NULL) 
 		(*cil_malloc_error_handler)();
-	}
 	return mem;
 }
 
