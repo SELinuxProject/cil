@@ -1108,3 +1108,9 @@ int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, str
 		cil_destroy_category(cat);
 		return rc;
 }
+
+void cil_destroy_category(struct cil_cat *cat)
+{
+	cil_symtab_datum_destroy(cat->datum);
+	free(cat);
+}
