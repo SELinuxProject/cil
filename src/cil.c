@@ -1032,3 +1032,70 @@ void cil_destroy_typeattr(struct cil_typeattribute *typeattr)
 {
 	free(typeattr);
 }
+
+int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+	
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL || parse_current->next->next->next == NULL || parse_current->next->next->next->cl_head != NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head != NULL || parse_current->next->next->next->next->next == NULL || parse_current->next->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next->next == NULL || parse_current->next->next->next->next->next->next->cl_head == NULL) {
+		printf("Invalid context declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_context *context = cil_malloc(sizeof(struct cil_context));
+	char *key = (char*)parse_current->next->data;
+	symtab_t *symtab = NULL;
+
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CONTEXTS);
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)context, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert context: %s, rc: %d\n", key, rc);
+		return SEPOL_ERR;
+	}
+	
+	context->user_str = cil_strdup(parse_current->next->next->data);
+	context->role_str = cil_strdup(parse_current->next->next->next->data);
+	context->type_str = cil_strdup(parse_current->next->next->next->next->data);
+
+	if (parse_current->next->next->next->next->next->cl_head == NULL)
+		context->low_str = cil_strdup(parse_current->next->next->next->next->next->data);
+	else {
+		struct cil_level *low = cil_malloc(sizeof(struct cil_level));
+		low->sens_str = cil_strdup(parse_current->next->next->next->next->next->cl_head->data);
+		cil_list_init(&low->cats_str);
+		//From parse tree to ast here
+	}
+	if (parse_current->next->next->next->next->next->next->cl_head == NULL)
+		context->high_str = cil_strdup(parse_current->next->next->next->next->next->next->data);
+	else {
+		struct cil_level *high = cil_malloc(sizeof(struct cil_level));
+		high->sens_str = cil_strdup(parse_current->next->next->next->next->next->next->cl_head->data);
+		cil_list_init(&high->cats_str);
+		//From parse tree to ast here
+	}
+
+	ast_node->data = context;
+	ast_node->flavor = CIL_CONTEXT;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_context(struct cil_context *context)
+{
+	if (context->user_str != NULL)
+		free(context->user_str);
+	if (context->role_str != NULL)
+		free(context->role_str);
+	if (context->type_str != NULL)
+		free(context->type_str);
+	if (context->low_str != NULL)
+		free(context->low_str);
+	if (context->high_str != NULL)
+		free(context->high_str);
+//	if (context->low != NULL)
+//		cil_destroy_level(low);
+//	if (context->high != NULL)
+//		cil_destroy_level(high);	
+}

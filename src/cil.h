@@ -30,21 +30,20 @@
 #define CIL_TRANS_DEL		15
 #define CIL_TRANS_TRANS		16
 #define CIL_IN			17
-#define CIL_CONTEXT		18
-#define CIL_FILECON		19
-#define CIL_PORTCON		20
-#define CIL_NETIFCON		21
-#define CIL_FSCON		22
-#define CIL_FS_USE		23
-#define CIL_CONSTRAIN		24
-#define CIL_MLS_CONSTRAIN	25
-#define CIL_PERM		26
-#define CIL_USERROLE		27
-#define CIL_TYPE_ATTR		28
-#define CIL_TYPE_RULE 		29
-#define CIL_ROLETRANS		30
-#define CIL_ROLEALLOW		31
-#define CIL_ROLETYPE		32 
+#define CIL_FILECON		18
+#define CIL_PORTCON		19
+#define CIL_NETIFCON		20
+#define CIL_FSCON		21
+#define CIL_FS_USE		22
+#define CIL_CONSTRAIN		23
+#define CIL_MLS_CONSTRAIN	24
+#define CIL_PERM		25
+#define CIL_USERROLE		26
+#define CIL_TYPE_ATTR		27
+#define CIL_TYPE_RULE 		28
+#define CIL_ROLETRANS		29
+#define CIL_ROLEALLOW		30
+#define CIL_ROLETYPE		31 
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -56,6 +55,7 @@
 #define CIL_ATTR		CIL_MIN_DECLARATIVE + 8 
 #define CIL_BOOL		CIL_MIN_DECLARATIVE + 9
 #define CIL_TYPEALIAS		CIL_MIN_DECLARATIVE + 10
+#define CIL_CONTEXT		CIL_MIN_DECLARATIVE + 11
 
 /*
 	Keywords
@@ -84,6 +84,7 @@
 #define CIL_KEY_TYPEATTR	"typeattribute"
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_INTERFACE	"interface"
+#define CIL_KEY_CONTEXT		"context"
 
 
 /*
@@ -104,8 +105,9 @@
 #define CIL_SYM_PORTCONS	12
 #define CIL_SYM_NETIFCONS	13
 #define CIL_SYM_MACROS		14
+#define CIL_SYM_CONTEXTS	15
 
-#define CIL_SYM_NUM		15
+#define CIL_SYM_NUM		16
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
@@ -279,7 +281,8 @@ struct cil_cat {
 struct cil_level {
 	char *sens_str;
 	struct cil_sens *sens;
-	struct cil_list_item *cats;	
+	struct cil_list *cats_str;
+	struct cil_list *cats;	
 };
 
 struct cil_transform_interface {
@@ -319,32 +322,35 @@ struct cil_in {
 };
 
 struct cil_context {
+	struct cil_symtab_datum datum;
 	char *user_str;
 	struct cil_user *user;
 	char *role_str;
 	struct cil_role *role;
 	char *type_str;
 	struct cil_type *type;
-	struct cil_level low;
-	struct cil_level high;
+	char *low_str;
+	struct cil_level *low;
+	char *high_str;
+	struct cil_level *high;
 };
 
 struct cil_filecon {
 	struct cil_symtab_datum datum;
-	struct cil_context context;
+	struct cil_context *context;
 };
 
 struct cil_portcon {
 	struct cil_symtab_datum datum; 
-	struct cil_context context;
+	struct cil_context *context;
 	char *proto_str;
 	sepol_id_t proto;
 };
 
 struct cil_netifcon {
 	struct cil_symtab_datum datum;
-	struct cil_context if_context;
-	struct cil_context packet_context;
+	struct cil_context *if_context;
+	struct cil_context *packet_context;
 };
 
 /* There is no fs declaration, but we will create a cil_fs on demand when the cil_fscon or cil_fs_use statements need one */
