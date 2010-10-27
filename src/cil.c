@@ -169,6 +169,26 @@ void cil_data_destroy(void **data, uint32_t flavor)
 			cil_destroy_typeattr(*data);
 			break;
 		}
+		case (CIL_SENS) : {
+			cil_destroy_sensitivity(*data);
+			break;
+		}
+		case (CIL_SENSALIAS) : {
+			cil_destroy_sensalias(*data);
+			break;
+		}
+		case (CIL_CAT) : {
+			cil_destroy_category(*data);
+			break;
+		}
+		case (CIL_CATALIAS) : {
+			cil_destroy_catalias(*data);
+			break;
+		}
+		case (CIL_CATSET) : {
+			cil_destroy_catset(*data);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;
