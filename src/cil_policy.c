@@ -58,9 +58,9 @@ static int __cil_user_list_insert_user(struct cil_list_item **current_user, stru
 	new_data->user = user;
 	cil_list_init(&new_data->roles);
 	if (role != NULL) {
-		cil_list_item_init(&new_data->roles->list);
-		new_data->roles->list->data = role;
-		new_data->roles->list->flavor = CIL_ROLE;
+		cil_list_item_init(&new_data->roles->head);
+		new_data->roles->head->data = role;
+		new_data->roles->head->flavor = CIL_ROLE;
 	}
 	new_user->flavor = CIL_USERROLE;
 	new_user->data = new_data;
@@ -77,23 +77,23 @@ int cil_user_list_insert(struct cil_list *list, struct cil_user *user, struct ci
 	if (list == NULL || user == NULL) 
 		return SEPOL_ERR;
 
-	struct cil_list_item *current_user = list->list;
+	struct cil_list_item *current_user = list->head;
 	struct cil_list_item *current_role = NULL;
 	int rc = SEPOL_ERR;
 
 	if (current_user == NULL) {
-		__cil_user_list_insert_user(&list->list, user, role);
+		__cil_user_list_insert_user(&list->head, user, role);
 	}
 	while(current_user != NULL) {
 		if ((struct cil_user_list_item*)current_user->data != NULL) {
 			if (((struct cil_user_list_item*)current_user->data)->user != NULL && ((struct cil_user_list_item*)current_user->data)->user == user) {
-				current_role = ((struct cil_user_list_item*)current_user->data)->roles->list;
+				current_role = ((struct cil_user_list_item*)current_user->data)->roles->head;
 				if (current_role == NULL) {
 					struct cil_list_item *new_role = NULL;
 					cil_list_item_init(&new_role);
 					new_role->data = role;
 					new_role->flavor = CIL_ROLE;
-					((struct cil_user_list_item*)current_user->data)->roles->list = new_role;
+					((struct cil_user_list_item*)current_user->data)->roles->head = new_role;
 					return SEPOL_OK;
 				}
 				while (current_role != NULL) {
@@ -131,14 +131,14 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 	if (userroles == NULL) 
 		return SEPOL_OK;
 	
-	struct cil_list_item *current_user = userroles->list;
+	struct cil_list_item *current_user = userroles->head;
 	while (current_user != NULL) {
-		if (((struct cil_user_list_item*)current_user->data)->roles->list == NULL) {
+		if (((struct cil_user_list_item*)current_user->data)->roles->head == NULL) {
 			printf("No roles associated with user %s (line %d)\n",  ((struct cil_user_list_item*)current_user->data)->user->datum.name,  ((struct cil_user_list_item*)current_user->data)->user->datum.node->line);
 			return SEPOL_ERR;
 		}
 		fprintf(file_arr[USERROLES], "user %s roles {", ((struct cil_user_list_item*)current_user->data)->user->datum.name);
-		struct cil_list_item *current_role = ((struct cil_user_list_item*)current_user->data)->roles->list;
+		struct cil_list_item *current_role = ((struct cil_user_list_item*)current_user->data)->roles->head;
 		while (current_role != NULL) {
 			fprintf(file_arr[USERROLES], " %s",  ((struct cil_role*)current_role->data)->datum.name);
 			current_role = current_role->next;
@@ -236,7 +236,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
 			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
 			char *obj_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->obj)->name;
-			struct cil_list_item *perm_item = rule->perms_list->list;
+			struct cil_list_item *perm_item = rule->perms_list->head;
 			switch (rule->rule_kind) {
 				case CIL_AVRULE_ALLOWED:
 					fprintf(file_arr[ALLOWS], "allow %s %s:%s { ", src_str, tgt_str, obj_str);
@@ -301,6 +301,21 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)roleallow->tgt)->name;
 			
 			fprintf(file_arr[ALLOWS], "roleallow %s %s;\n", src_str, tgt_str);
+			break;
+		}
+		case CIL_SENS: {
+			break;
+		}
+		case CIL_SENSALIAS: {
+			break;
+		}
+		case CIL_CAT: {
+			break;
+		}
+		case CIL_CATALIAS: {
+			break;
+		}
+		case CIL_CATSET: {
 			break;
 		}
 		case CIL_ROLETYPE : {

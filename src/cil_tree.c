@@ -249,7 +249,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s", rule->obj->datum.name);
 			printf(" (");
 			if (rule->perms_str != NULL) {
-				item = rule->perms_str->list;
+				item = rule->perms_str->head;
 				while(item != NULL) {
 					if (item->flavor == CIL_AST_STR)
 						printf(" %s", (char*)item->data);
@@ -261,7 +261,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 			}
 			else {
-				item = rule->perms_list->list;
+				item = rule->perms_list->head;
 				while(item != NULL) {
 					if (item->flavor == CIL_PERM)
 						printf(" %s", ((struct cil_perm*)item->data)->datum.name);
@@ -304,6 +304,60 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s\n", rule->result_str);
 			else
 				printf(" %s\n", rule->result->datum.name);
+			return;
+		}
+		case CIL_SENS : {
+			struct cil_sens *sens = node->data;
+			printf("SENSITIVITY: %s\n", sens->datum.name);
+			return;
+		}
+		case CIL_SENSALIAS : {
+			struct cil_sensalias *alias = node->data;
+			if (alias->sens_str != NULL) 
+				printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens_str);
+			else
+				printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens->datum.name);
+			return;
+		}
+		case CIL_CAT : {
+			struct cil_cat *cat = node->data;
+			printf("CATEGORY: %s\n", cat->datum.name);
+			return;
+		}
+		case CIL_CATALIAS : {
+			struct cil_catalias *alias = node->data;
+			if (alias->cat_str != NULL) 
+				printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat_str);
+			else
+				printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat->datum.name);
+			return;
+		}
+		case CIL_CATSET : {
+			struct cil_catset *catset = node->data;
+			struct cil_list_item *cat;
+			struct cil_list_item *parent;
+			if (catset->cat_list_str != NULL)
+				cat = catset->cat_list_str->head;
+			else
+				cat = catset->cat_list->head;
+			printf("CATSET: %s (",catset->datum.name);
+			while (cat != NULL) {
+				if (cat->flavor == CIL_LIST) {
+					parent = cat;
+					cat = ((struct cil_list*)cat->data)->head;
+					printf(" (");
+					while (cat != NULL) {
+						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+						cat = cat->next;
+					}
+					printf(" )");
+					cat = parent;
+				}
+				else
+					printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+				cat = cat->next;
+			}
+			printf(" )\n");
 			return;
 		}
 		default : {

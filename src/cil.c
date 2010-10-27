@@ -41,7 +41,7 @@ void cil_db_destroy(struct cil_db **db)
 int cil_list_init(struct cil_list **list)
 {
 	struct cil_list *new_list = cil_malloc(sizeof(struct cil_list));
-	new_list->list = NULL;
+	new_list->head = NULL;
 
 	*list = new_list;
 	
@@ -50,10 +50,21 @@ int cil_list_init(struct cil_list **list)
 
 void cil_list_destroy(struct cil_list **list)
 {
-	struct cil_list_item *item = (*list)->list;
-	struct cil_list_item *next = NULL; 
+	struct cil_list_item *item = (*list)->head;
+	struct cil_list_item *next = NULL;
+	struct cil_list_item *parent = NULL;
 	while (item != NULL)
 	{
+		if (item->flavor == CIL_LIST) {
+			parent = item;
+			item = ((struct cil_list*)item->data)->head;
+			while (item != NULL) {
+				next = item->next;
+				cil_list_item_destroy(&item);
+				item = next;
+			}
+			item = parent;
+		}
 		next = item->next;
 		cil_list_item_destroy(&item);
 		item = next;
@@ -159,6 +170,26 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_typeattr(*data);
 			break;
 		}
+		case (CIL_SENS) : {
+			cil_destroy_sensitivity(*data);
+			break;
+		}
+		case (CIL_SENSALIAS) : {
+			cil_destroy_sensalias(*data);
+			break;
+		}
+		case (CIL_CAT) : {
+			cil_destroy_category(*data);
+			break;
+		}
+		case (CIL_CATALIAS) : {
+			cil_destroy_catalias(*data);
+			break;
+		}
+		case (CIL_CATSET) : {
+			cil_destroy_catset(*data);
+			break;
+		}
 		case (CIL_ROLETYPE) : {
 			cil_destroy_roletype(*data);
 			break;
@@ -190,8 +221,8 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
 		new_item->data = cil_strdup(parse_current->data);
-		if (ast_list->list == NULL)
-			ast_list->list = new_item;
+		if (ast_list->head == NULL)
+			ast_list->head = new_item;
 		else
 			list_tail->next = new_item;
 		list_tail = new_item;
@@ -1033,6 +1064,318 @@ void cil_destroy_typeattr(struct cil_typeattribute *typeattr)
 	free(typeattr);
 }
 
+int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next != NULL || parse_current->next->cl_head != NULL) {
+		printf("Invalid sensitivity declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_sens *sens = cil_malloc(sizeof(struct cil_sens));
+	char *key = parse_current->next->data;
+	symtab_t *symtab = NULL;
+	
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_SENS);
+	if (rc != SEPOL_OK) {
+		goto gen_sens_cleanup;
+	}
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)sens, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert sensitivity into symtab\n");
+		goto gen_sens_cleanup;
+	}
+
+	ast_node->data = sens;
+	ast_node->flavor = CIL_SENS;
+
+	return SEPOL_OK;
+
+	gen_sens_cleanup:
+		cil_destroy_sensitivity(sens);
+		return rc;
+}
+
+void cil_destroy_sensitivity(struct cil_sens *sens)
+{
+	cil_symtab_datum_destroy(sens->datum);
+	free(sens);
+}
+
+int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid sensitivityalias declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_sensalias *alias = cil_malloc(sizeof(struct cil_sensalias));
+	char *key = parse_current->next->next->data;
+	symtab_t *symtab;
+
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_SENS);
+	if (rc != SEPOL_OK) {
+		goto gen_sensalias_cleanup;
+	}
+	
+	alias->sens_str = cil_strdup(parse_current->next->data);
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)alias, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert alias into symtab\n");
+		goto gen_sensalias_cleanup;
+	}
+
+	ast_node->data = alias;
+	ast_node->flavor = CIL_SENSALIAS;
+
+	return SEPOL_OK;
+	
+	gen_sensalias_cleanup:
+		cil_destroy_sensalias(alias);
+		return rc;
+}
+
+void cil_destroy_sensalias(struct cil_sensalias *alias)
+{
+	cil_symtab_datum_destroy(alias->datum);
+	if (alias->sens_str != NULL)
+		free(alias->sens_str);
+	free(alias);
+}
+
+int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next != NULL || parse_current->next->cl_head != NULL) {
+		printf("Invalid category declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_cat *cat = cil_malloc(sizeof(struct cil_cat));
+	char *key = parse_current->next->data;
+	symtab_t *symtab = NULL;
+	
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CATS);
+	if (rc != SEPOL_OK) {
+		goto gen_cat_cleanup;
+	}
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)cat, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert sensitivity into symtab\n");
+		goto gen_cat_cleanup;
+	}
+
+	ast_node->data = cat;
+	ast_node->flavor = CIL_CAT;
+
+	return SEPOL_OK;
+
+	gen_cat_cleanup:
+		cil_destroy_category(cat);
+		return rc;
+}
+
+void cil_destroy_category(struct cil_cat *cat)
+{
+	cil_symtab_datum_destroy(cat->datum);
+	free(cat);
+}
+
+int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid sensitivityalias declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	
+	struct cil_catalias *alias = cil_malloc(sizeof(struct cil_catalias));
+	char *key = parse_current->next->next->data;
+	symtab_t *symtab;
+
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CATS);
+	if (rc != SEPOL_OK) {
+		goto gen_catalias_cleanup;
+	}
+	
+	alias->cat_str = cil_strdup(parse_current->next->data);
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)alias, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert alias into symtab\n");
+		goto gen_catalias_cleanup;
+	}
+
+	ast_node->data = alias;
+	ast_node->flavor = CIL_CATALIAS;
+
+	return SEPOL_OK;
+	
+	gen_catalias_cleanup:
+		cil_destroy_catalias(alias);
+		return rc;
+}
+
+void cil_destroy_catalias(struct cil_catalias *alias)
+{
+	cil_symtab_datum_destroy(alias->datum);
+	if (alias->cat_str != NULL)
+		free(alias->cat_str);
+	free(alias);
+}
+
+int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list **ast_cl, uint32_t flavor)
+{
+	struct cil_list *sub_list;
+	struct cil_list_item *new_item;
+	struct cil_list_item *list_tail;
+	struct cil_list_item *sub_list_tail;
+	struct cil_list *ast_list = *ast_cl;
+	struct cil_tree_node *parent;
+	int rc = SEPOL_ERR;
+	
+	if (parse_current == NULL || ast_list == NULL)
+		return SEPOL_ERR;
+	
+	while (parse_current != NULL) {
+		cil_list_item_init(&new_item);
+		if (parse_current->cl_head == NULL) {
+			new_item->flavor = flavor;
+			new_item->data = cil_strdup(parse_current->data);
+			if (ast_list->head == NULL)
+				ast_list->head = new_item;
+			else
+				list_tail->next = new_item;
+			list_tail = new_item;
+		}
+		else {
+			if (parse_current->cl_head->next == NULL || parse_current->cl_head->next->next != NULL) {
+				printf("Error: invalid category range\n");
+				return SEPOL_ERR;
+			}
+			rc = cil_list_init(&sub_list);
+			if (rc != SEPOL_OK) {
+				printf("Failed to init category range sublist\n");
+				return rc;
+			}
+			new_item->flavor = CIL_LIST;
+			new_item->data = sub_list;
+
+			if (ast_list->head == NULL)
+				ast_list->head = new_item;
+			else
+				list_tail->next = new_item;
+			list_tail = new_item;
+
+			parent = parse_current;
+			parse_current = parse_current->cl_head;
+
+			while (parse_current != NULL) {
+				rc = cil_list_item_init(&new_item);
+				if (rc != SEPOL_OK) {
+					printf("Failed to init categoryset range list item\n");
+					return rc;
+				}
+				new_item->flavor = flavor;
+				new_item->data = cil_strdup(parse_current->data);
+				if (sub_list->head == NULL)
+					sub_list->head = new_item;
+				else
+					sub_list_tail->next = new_item;
+				sub_list_tail = new_item;
+				parse_current = parse_current->next;
+			}
+			parse_current = parent;
+		}
+		parse_current = parse_current->next;
+	}
+
+	*ast_cl = ast_list;
+
+	return SEPOL_OK;
+}
+
+int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || \
+		parse_current->next->next == NULL) {
+		printf("Invalid categoryset declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next->next->cl_head != NULL) {
+		//cil_gen_catset_range(db, parse_current, ast_node);
+	}
+	else if (parse_current->next->next->next == NULL) {
+		printf("Invalid categoryset declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	char *key = parse_current->next->data;
+	struct cil_catset *catset = cil_malloc(sizeof(struct cil_catset));
+	symtab_t *symtab;
+
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CATS);
+	if (rc != SEPOL_OK) {
+		goto gen_catset_cleanup;
+	}
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)catset, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert categoryset into symtab\n");
+		goto gen_catset_cleanup;
+	}
+
+	rc = cil_list_init(&catset->cat_list_str);
+	if (rc != SEPOL_OK) {
+		printf("Failed to init category list\n");
+		goto gen_catset_cleanup;
+	}
+
+	rc = cil_catset_to_list(parse_current->next->next, &catset->cat_list_str, CIL_AST_STR);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create categoryset list\n");
+		return rc;
+	}
+
+	ast_node->data = catset;
+	ast_node->flavor = CIL_CATSET;
+
+	return SEPOL_OK;
+
+	gen_catset_cleanup:
+		cil_destroy_catset(catset);
+		return rc;	
+}
+
+void cil_destroy_catset(struct cil_catset *catset)
+{
+	cil_symtab_datum_destroy(catset->datum);
+	cil_list_destroy(catset->cat_list);
+	free(catset);
+}
+
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -1043,12 +1386,11 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		return SEPOL_ERR;
 	}
 
-	int rc = SEPOL_ERR;
 	struct cil_context *context = cil_malloc(sizeof(struct cil_context));
 	char *key = (char*)parse_current->next->data;
 	symtab_t *symtab = NULL;
 
-	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CONTEXTS);
+	int rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CONTEXTS);
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)context, ast_node);
 	if (rc != SEPOL_OK) {
 		printf("Failed to insert context: %s, rc: %d\n", key, rc);
