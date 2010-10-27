@@ -50,9 +50,20 @@ int cil_list_init(struct cil_list **list)
 void cil_list_destroy(struct cil_list **list)
 {
 	struct cil_list_item *item = (*list)->head;
-	struct cil_list_item *next = NULL; 
+	struct cil_list_item *next = NULL;
+	struct cil_list_item *parent = NULL;
 	while (item != NULL)
 	{
+		if (item->flavor == CIL_LIST) {
+			parent = item;
+			item = ((struct cil_list*)item->data)->head;
+			while (item != NULL) {
+				next = item->next;
+				cil_list_item_destroy(&item);
+				item = next;
+			}
+			item = parent;
+		}
 		next = item->next;
 		cil_list_item_destroy(&item);
 		item = next;
