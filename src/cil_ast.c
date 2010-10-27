@@ -554,6 +554,22 @@ int cil_resolve_sensalias(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int cil_resolve_catalias(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_catalias *alias = (struct cil_catalias*)current->data;
+	struct cil_tree_node *cat_node = NULL;
+	int rc = cil_resolve_name(db, current, alias->cat_str, CIL_SYM_CATS, &cat_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", alias->cat_str);
+		return SEPOL_ERR;
+	}
+	alias->cat = (struct cil_cat*)(cat_node->data);
+	free(alias->cat_str);
+	alias->cat_str = NULL;
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
