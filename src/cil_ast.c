@@ -308,8 +308,17 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 	while (perm != NULL) {
 		rc = cil_symtab_get_node(&rule->obj->perms, (char*)perm->data, &perm_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to get node from symtab\n");
-			return rc;
+			if (rule->obj->common != NULL) {
+				rc = cil_symtab_get_node(&rule->obj->common->perms, (char*)perm->data, &perm_node);
+				if (rc != SEPOL_OK) {
+					printf("Failed to find perm in class or common symtabs\n");
+					return rc;
+				}
+			}
+			else {
+				printf("Failed to find perm in class symtab\n");
+				return rc;
+			}
 		}
 		rc = cil_list_item_init(&list_item);
 		if (rc != SEPOL_OK) {
