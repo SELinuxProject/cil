@@ -1026,3 +1026,49 @@ void cil_destroy_sensitivity(struct cil_sens *sens)
 	cil_symtab_datum_destroy(sens->datum);
 	free(sens);
 }
+
+int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid sensitivityalias declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_sensalias *alias = cil_malloc(sizeof(struct cil_sensalias));
+	char *key = parse_current->next->next->data;
+	symtab_t *symtab;
+
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_SENS);
+	if (rc != SEPOL_OK) {
+		goto gen_sensalias_cleanup;
+	}
+	
+	alias->sens_str = strdup(parse_current->next->data);
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)alias, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert alias into symtab\n");
+		goto gen_sensalias_cleanup;
+	}
+
+	ast_node->data = alias;
+	ast_node->flavor = CIL_SENSALIAS;
+
+	return SEPOL_OK;
+	
+	gen_sensalias_cleanup:
+		cil_destroy_sensalias(alias);
+		return rc;
+}
+
+void cil_destroy_sensalias(struct cil_sensalias *alias)
+{
+	cil_symtab_datum_destroy(alias->datum);
+	if (alias->sens_str != NULL)
+		free(alias->sens_str);
+	free(alias);
+}

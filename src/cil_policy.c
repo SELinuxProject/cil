@@ -305,6 +305,9 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		case CIL_SENS: {
 			break;
 		}
+		case CIL_SENSALIAS: {
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			return SEPOL_ERR;

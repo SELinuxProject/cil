@@ -297,6 +297,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("SENSITIVITY: %s\n", sens->datum.name);
 			return;
 		}
+		case CIL_SENSALIAS : {
+			struct cil_sensalias *alias = node->data;
+			if (alias->sens_str != NULL) 
+				printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens_str);
+			else
+				printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens->datum.name);
+			return;
+		}
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;
