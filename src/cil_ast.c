@@ -211,6 +211,14 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_CATSET)) {
+						rc = cil_gen_catset(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_catset (categoryset) failed, rc: %d\n", rc);
+							return rc;
+						}
+						forced = 1;
+					}
 				}
 			}
 		}
@@ -570,6 +578,101 @@ int cil_resolve_catalias(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_catset *catset = (struct cil_catset*)current->data;
+	struct cil_tree_node *cat_node = NULL;
+	struct cil_list_item *curr_cat = catset->cat_list_str->head;
+	struct cil_list_item *list_item;
+	struct cil_list_item *list_tail;
+	struct cil_list_item *sub_list_tail;
+	struct cil_list_item *parent;
+	struct cil_list *res_cat_list;
+	struct cil_list *sub_list;
+	symtab_t *symtab = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_CATS);
+	if (rc != SEPOL_OK) {
+		printf("Failed to get parent symtab\n");
+		return rc;
+	}
+	rc = cil_list_init(&res_cat_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to init category node list\n");
+		return rc;
+	}
+	while (curr_cat != NULL) {
+		rc = cil_list_item_init(&list_item);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init category node list item\n");
+			return rc;
+		}
+		if (curr_cat->flavor == CIL_LIST) {
+			rc = cil_list_init(&sub_list);
+			if (rc != SEPOL_OK) {
+				printf("Failed to init category range sublist\n");
+				return rc;
+			}
+			list_item->flavor = CIL_LIST;
+			list_item->data = sub_list;
+
+			if (res_cat_list->head == NULL)
+				res_cat_list->head = list_item;
+			else
+				list_tail->next = list_item;
+			list_tail = list_item;
+
+			parent = curr_cat;
+			curr_cat = ((struct cil_list*)curr_cat->data)->head;
+
+			while (curr_cat != NULL) {
+				rc = cil_symtab_get_node(symtab, (char*)curr_cat->data, &cat_node);
+				if (rc != SEPOL_OK) {
+					printf("Failed to get node from symtab\n");
+					return rc;
+				}
+				rc = cil_list_item_init(&list_item);
+				if (rc != SEPOL_OK) {
+					printf("Failed to init category node list item\n");
+					return rc;
+				}
+				list_item->flavor = CIL_CAT;
+				list_item->data = cat_node->data;
+				if (sub_list->head == NULL)
+					sub_list->head = list_item;
+				else
+					sub_list_tail->next = list_item;
+				sub_list_tail = list_item;
+				curr_cat = curr_cat->next;
+			}
+			curr_cat = parent;
+		}
+		else {
+			rc = cil_symtab_get_node(symtab, (char*)curr_cat->data, &cat_node);
+			if (rc != SEPOL_OK) {
+				printf("Failed to get node from symtab\n");
+				return rc;
+			}
+			list_item->flavor = CIL_CAT;
+			list_item->data = cat_node->data;
+			if (res_cat_list->head == NULL) 
+				res_cat_list->head = list_item;
+			else 
+				list_tail->next = list_item;
+			list_tail = list_item;
+		}
+		curr_cat = curr_cat->next;
+	}
+	
+	catset->cat_list = res_cat_list;
+	cil_list_destroy(&catset->cat_list_str);
+	free(catset->cat_list_str);
+	catset->cat_list_str = NULL;
+	
+	return SEPOL_OK;
+}
+
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
@@ -643,6 +746,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				case CIL_CATALIAS : {
 					printf("case categoryalias\n");
 					rc = cil_resolve_catalias(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
+				case CIL_CATSET : {
+					printf("case categoryset\n");
+					rc = cil_resolve_catset(db, current);
 					if (rc != SEPOL_OK)
 						return rc;
 					break;

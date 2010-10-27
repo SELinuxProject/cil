@@ -318,6 +318,34 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat->datum.name);
 			return;
 		}
+		case CIL_CATSET : {
+			struct cil_catset *catset = node->data;
+			struct cil_list_item *cat;
+			struct cil_list_item *parent;
+			if (catset->cat_list_str != NULL)
+				cat = catset->cat_list_str->head;
+			else
+				cat = catset->cat_list->head;
+			printf("CATSET: %s (",catset->datum.name);
+			while (cat != NULL) {
+				if (cat->flavor == CIL_LIST) {
+					parent = cat;
+					cat = ((struct cil_list*)cat->data)->head;
+					printf(" (");
+					while (cat != NULL) {
+						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+						cat = cat->next;
+					}
+					printf(" )");
+					cat = parent;
+				}
+				else
+					printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+				cat = cat->next;
+			}
+			printf(" )\n");
+			return;
+		}
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;
