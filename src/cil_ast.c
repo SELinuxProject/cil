@@ -538,6 +538,22 @@ int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;	
 }
 
+int cil_resolve_sensalias(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_sensalias *alias = (struct cil_sensalias*)current->data;
+	struct cil_tree_node *sens_node = NULL;
+	int rc = cil_resolve_name(db, current, alias->sens_str, CIL_SYM_SENS, &sens_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", alias->sens_str);
+		return SEPOL_ERR;
+	}
+	alias->sens = (struct cil_sens*)(sens_node->data);
+	free(alias->sens_str);
+	alias->sens_str = NULL;
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
