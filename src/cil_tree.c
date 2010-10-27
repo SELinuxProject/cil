@@ -310,6 +310,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("CATEGORY: %s\n", cat->datum.name);
 			return;
 		}
+		case CIL_CATALIAS : {
+			struct cil_catalias *alias = node->data;
+			if (alias->cat_str != NULL) 
+				printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat_str);
+			else
+				printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat->datum.name);
+			return;
+		}
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;

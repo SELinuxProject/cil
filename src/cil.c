@@ -1114,3 +1114,50 @@ void cil_destroy_category(struct cil_cat *cat)
 	cil_symtab_datum_destroy(cat->datum);
 	free(cat);
 }
+
+int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+		printf("Invalid sensitivityalias declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	
+	struct cil_catalias *alias = cil_malloc(sizeof(struct cil_catalias));
+	char *key = parse_current->next->next->data;
+	symtab_t *symtab;
+
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CATS);
+	if (rc != SEPOL_OK) {
+		goto gen_catalias_cleanup;
+	}
+	
+	alias->cat_str = strdup(parse_current->next->data);
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)alias, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert alias into symtab\n");
+		goto gen_catalias_cleanup;
+	}
+
+	ast_node->data = alias;
+	ast_node->flavor = CIL_CATALIAS;
+
+	return SEPOL_OK;
+	
+	gen_catalias_cleanup:
+		cil_destroy_catalias(alias);
+		return rc;
+}
+
+void cil_destroy_catalias(struct cil_catalias *alias)
+{
+	cil_symtab_datum_destroy(alias->datum);
+	if (alias->cat_str != NULL)
+		free(alias->cat_str);
+	free(alias);
+}
