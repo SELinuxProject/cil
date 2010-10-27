@@ -1161,3 +1161,74 @@ void cil_destroy_catalias(struct cil_catalias *alias)
 		free(alias->cat_str);
 	free(alias);
 }
+
+int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list **ast_cl, uint32_t flavor)
+{
+	struct cil_list *sub_list;
+	struct cil_list_item *new_item;
+	struct cil_list_item *list_tail;
+	struct cil_list_item *sub_list_tail;
+	struct cil_list *ast_list = *ast_cl;
+	struct cil_tree_node *parent;
+	int rc = SEPOL_ERR;
+	
+	if (parse_current == NULL || ast_list == NULL)
+		return SEPOL_ERR;
+	
+	while (parse_current != NULL) {
+		cil_list_item_init(&new_item);
+		if (parse_current->cl_head == NULL) {
+			new_item->flavor = flavor;
+			new_item->data = strdup(parse_current->data);
+			if (ast_list->head == NULL)
+				ast_list->head = new_item;
+			else
+				list_tail->next = new_item;
+			list_tail = new_item;
+		}
+		else {
+			if (parse_current->cl_head->next == NULL || parse_current->cl_head->next->next != NULL) {
+				printf("Error: invalid category range\n");
+				return SEPOL_ERR;
+			}
+			rc = cil_list_init(&sub_list);
+			if (rc != SEPOL_OK) {
+				printf("Failed to init category range sublist\n");
+				return rc;
+			}
+			new_item->flavor = CIL_LIST;
+			new_item->data = sub_list;
+
+			if (ast_list->head == NULL)
+				ast_list->head = new_item;
+			else
+				list_tail->next = new_item;
+			list_tail = new_item;
+
+			parent = parse_current;
+			parse_current = parse_current->cl_head;
+
+			while (parse_current != NULL) {
+				rc = cil_list_item_init(&new_item);
+				if (rc != SEPOL_OK) {
+					printf("Failed to init categoryset range list item\n");
+					return rc;
+				}
+				new_item->flavor = flavor;
+				new_item->data = strdup(parse_current->data);
+				if (sub_list->head == NULL)
+					sub_list->head = new_item;
+				else
+					sub_list_tail->next = new_item;
+				sub_list_tail = new_item;
+				parse_current = parse_current->next;
+			}
+			parse_current = parent;
+		}
+		parse_current = parse_current->next;
+	}
+
+	*ast_cl = ast_list;
+
+	return SEPOL_OK;
+}
