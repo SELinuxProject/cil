@@ -640,6 +640,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 						return rc;
 					break;
 				}
+				case CIL_CATALIAS : {
+					printf("case categoryalias\n");
+					rc = cil_resolve_catalias(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
 				default : {
 					break;
 				}
