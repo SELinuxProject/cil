@@ -4,6 +4,7 @@
 #include <string.h>
 #include "cil_tree.h"
 #include "cil_symtab.h"
+#include "cil_mem.h"
 
 void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
 {

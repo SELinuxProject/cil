@@ -227,6 +227,14 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						}
 						forced = 1;
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
+						rc = cil_gen_context(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_context failed, rc: %d\n", rc);
+							return rc;
+						}
+						forced = 1;
+					}
 				}
 			}
 		}
@@ -259,8 +267,6 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *tgt_node = NULL;
 	struct cil_tree_node *obj_node = NULL;
 
-	symtab_t *symtab = NULL;
-	
 	int rc = SEPOL_ERR;
 	
 	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, &src_node);
@@ -347,7 +353,6 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *tgt_node = NULL;
 	struct cil_tree_node *obj_node = NULL;
 	struct cil_tree_node *result_node = NULL;
-	symtab_t *symtab = NULL;
 	
 	int rc = SEPOL_ERR;
 	
@@ -717,6 +722,82 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_level *level = (struct cil_level*)current->data;
+
+	return SEPOL_OK;
+}
+
+int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_context *context = (struct cil_context*)current->data;
+	struct cil_tree_node *user_node = NULL;
+	struct cil_tree_node *role_node = NULL;
+	struct cil_tree_node *type_node = NULL;
+	struct cil_tree_node *low_node = NULL;
+	struct cil_tree_node *high_node = NULL;
+
+	int rc = SEPOL_ERR;
+	char *error = NULL;
+
+	rc = cil_resolve_name(db, current, context->user_str, CIL_SYM_USERS, &user_node);
+	if (rc != SEPOL_OK) {
+		error = context->user_str;
+		goto resolve_context_cleanup;
+	}
+	context->user = (struct cil_user*)user_node->data;
+	free(context->user_str);
+	context->user_str = NULL;
+
+	rc = cil_resolve_name(db, current, context->role_str, CIL_SYM_ROLES, &role_node);
+	if (rc != SEPOL_OK) {
+		error = context->role_str;
+		goto resolve_context_cleanup;
+	}
+	context->role = (struct cil_role*)role_node->data;
+	free(context->role_str);
+	context->role_str = NULL;	
+
+	rc = cil_resolve_name(db, current, context->type_str, CIL_SYM_TYPES, &type_node);
+	if (rc != SEPOL_OK) {
+		error = context->type_str;
+		goto resolve_context_cleanup;
+	}
+	context->type = (struct cil_type*)type_node->data;
+	free(context->type_str);
+	context->type_str = NULL;
+
+	if (context->low_str != NULL) {
+		rc = cil_resolve_name(db, current, context->low_str, CIL_SYM_LEVELS, &low_node);
+		if (rc != SEPOL_OK) {
+			error = context->low_str;
+			goto resolve_context_cleanup;
+		}
+		context->low = (struct cil_level*)low_node->data;
+		free(context->low_str);
+		context->low_str = NULL;
+	}
+
+	if (context->high_str != NULL) {
+		rc = cil_resolve_name(db, current, context->high_str, CIL_SYM_LEVELS, &high_node);
+		if (rc != SEPOL_OK) {
+			error = context->high_str;
+			goto resolve_context_cleanup;
+		}
+		context->high = (struct cil_level*)high_node->data;
+		free(context->high_str);
+		context->high_str = NULL;
+	}
+
+	return SEPOL_OK;
+
+	resolve_context_cleanup:
+		printf("Name resolution failed for %s\n", error);
+		return SEPOL_ERR;
+}
+
+
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
@@ -808,7 +889,15 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 						return rc;
 					break;
 				}
+				case CIL_CONTEXT : {
+					printf("case context\n");
+					rc = cil_resolve_context(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
 				default : {
+					//printf("flavor: %d\n", current->flavor);
 					break;
 				}
 				

@@ -360,6 +360,32 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf(" )\n");
 			return;
 		}
+		case CIL_CONTEXT : {
+			struct cil_context *context = node->data;
+			printf("CONTEXT %s:", context->datum.name);
+			if (context->user_str != NULL)
+				printf(" %s", context->user_str);
+			else if (context->user != NULL)
+				printf(" %s", context->user->datum.name);
+			if (context->role_str != NULL)
+				printf(" %s", context->role_str);
+			else if (context->role != NULL)
+				printf(" %s", context->role->datum.name);
+			if (context->type_str != NULL)
+				printf(" %s", context->type_str);
+			else if (context->type != NULL)
+				printf(" %s", context->type->datum.name);
+			if (context->low_str != NULL)
+				printf(" %s", context->low_str);
+			else if (context->low != NULL)
+				printf(" print low");
+			if (context->high_str != NULL)
+				printf(" %s", context->high_str);
+			else if (context->high != NULL)
+				printf(" print high");
+			printf("\n");
+			return;
+		}	
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;

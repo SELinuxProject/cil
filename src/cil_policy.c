@@ -218,8 +218,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 				return SEPOL_ERR;
 			}
 
-			printf("checking common for class %s\n", ((struct cil_class*)current->data)->datum.name);
-
 			if (((struct cil_class*)current->data)->common != NULL) 
 				fprintf(file_arr[CLASSES], "inherits %s ", ((struct cil_class*)current->data)->common->datum.name);
 

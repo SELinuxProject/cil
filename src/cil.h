@@ -114,8 +114,9 @@
 #define CIL_SYM_NETIFCONS	13
 #define CIL_SYM_MACROS		14
 #define CIL_SYM_CONTEXTS	15
+#define CIL_SYM_LEVELS		16
 
-#define CIL_SYM_NUM		16
+#define CIL_SYM_NUM		17
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
@@ -415,7 +416,7 @@ int cil_list_init(struct cil_list **);
 void cil_list_destroy (struct cil_list **);
 int cil_list_item_init(struct cil_list_item **);
 void cil_list_item_destroy(struct cil_list_item **);
-int cil_parse_to_list(struct cil_tree_node *, struct cil_list **, uint32_t);
+int cil_parse_to_list(struct cil_tree_node *, struct cil_list *, uint32_t);
 int cil_gen_perm_nodes(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_symtab_array_init(symtab_t [], uint32_t);
 void cil_symtab_array_destroy(symtab_t []);
@@ -464,8 +465,11 @@ int cil_gen_sensalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_n
 void cil_destroy_sensalias(struct cil_sensalias *);
 int cil_gen_catalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_catalias(struct cil_catalias *);
-int cil_catset_to_list(struct cil_tree_node *, struct cil_list **, uint32_t);
+int cil_catset_to_list(struct cil_tree_node *, struct cil_list *, uint32_t);
 int cil_gen_catset(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_catset(struct cil_catset *);
+int cil_gen_context(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_context(struct cil_context *);
+
 
 #endif

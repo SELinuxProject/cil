@@ -207,29 +207,26 @@ void cil_destroy_data(void **data, uint32_t flavor)
 	*data = NULL;		
 }
 
-int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast_cl, uint32_t flavor)
+int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_cl, uint32_t flavor)
 {
 	struct cil_list_item *new_item;
 	struct cil_tree_node *parse_current = parse_cl_head;
 	struct cil_list_item *list_tail;
-	struct cil_list *ast_list = *ast_cl;
 	
-	if (parse_current == NULL || ast_list == NULL)
+	if (parse_current == NULL || ast_cl == NULL)
 		return SEPOL_ERR;
 	
 	while(parse_current != NULL) {
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
 		new_item->data = cil_strdup(parse_current->data);
-		if (ast_list->head == NULL)
-			ast_list->head = new_item;
+		if (ast_cl->head == NULL)
+			ast_cl->head = new_item;
 		else
 			list_tail->next = new_item;
 		list_tail = new_item;
 		parse_current = parse_current->next;
 	}
-
-	*ast_cl = ast_list;
 
 	return SEPOL_OK;
 } 
@@ -826,7 +823,7 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	}
 	
 
-	cil_parse_to_list(parse_current->next->next->next->next->cl_head, &rule->perms_str, CIL_AST_STR);
+	cil_parse_to_list(parse_current->next->next->next->next->cl_head, rule->perms_str, CIL_AST_STR);
 
 	ast_node->data = rule;
 	ast_node->flavor = CIL_AVRULE;
@@ -1241,13 +1238,13 @@ void cil_destroy_catalias(struct cil_catalias *alias)
 	free(alias);
 }
 
-int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list **ast_cl, uint32_t flavor)
+int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl, uint32_t flavor)
 {
 	struct cil_list *sub_list;
 	struct cil_list_item *new_item;
 	struct cil_list_item *list_tail;
 	struct cil_list_item *sub_list_tail;
-	struct cil_list *ast_list = *ast_cl;
+	struct cil_list *ast_list = ast_cl;
 	struct cil_tree_node *parent;
 	int rc = SEPOL_ERR;
 	
@@ -1307,7 +1304,7 @@ int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list **as
 		parse_current = parse_current->next;
 	}
 
-	*ast_cl = ast_list;
+	ast_cl = ast_list;
 
 	return SEPOL_OK;
 }
@@ -1353,7 +1350,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto gen_catset_cleanup;
 	}
 
-	rc = cil_catset_to_list(parse_current->next->next, &catset->cat_list_str, CIL_AST_STR);
+	rc = cil_catset_to_list(parse_current->next->next, catset->cat_list_str, CIL_AST_STR);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create categoryset list\n");
 		return rc;
@@ -1372,7 +1369,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 void cil_destroy_catset(struct cil_catset *catset)
 {
 	cil_symtab_datum_destroy(catset->datum);
-	cil_list_destroy(catset->cat_list);
+	cil_list_destroy(&catset->cat_list);
 	free(catset);
 }
 
@@ -1381,7 +1378,12 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 	
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL || parse_current->next->next->next == NULL || parse_current->next->next->next->cl_head != NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head != NULL || parse_current->next->next->next->next->next == NULL || parse_current->next->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next->next == NULL || parse_current->next->next->next->next->next->next->cl_head == NULL) {
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL
+	|| parse_current->next->next->next == NULL || parse_current->next->next->next->cl_head != NULL
+	|| parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head != NULL
+	|| parse_current->next->next->next->next->next == NULL
+	|| parse_current->next->next->next->next->next->next == NULL) { 
 		printf("Invalid context declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -1401,21 +1403,44 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	context->role_str = cil_strdup(parse_current->next->next->next->data);
 	context->type_str = cil_strdup(parse_current->next->next->next->next->data);
 
+	context->low_str = NULL;
+	context->high_str = NULL;
+
 	if (parse_current->next->next->next->next->next->cl_head == NULL)
 		context->low_str = cil_strdup(parse_current->next->next->next->next->next->data);
 	else {
 		struct cil_level *low = cil_malloc(sizeof(struct cil_level));
 		low->sens_str = cil_strdup(parse_current->next->next->next->next->next->cl_head->data);
-		cil_list_init(&low->cats_str);
-		//From parse tree to ast here
+		if (parse_current->next->next->next->next->next->cl_head->next != NULL) {
+			rc = cil_list_init(&low->cats_str);
+			if (rc != SEPOL_OK) {
+				printf("Failed to init category list\n");
+				return rc;
+			}
+			rc = cil_catset_to_list(parse_current->next->next->next->next->next->cl_head->next, low->cats_str, CIL_AST_STR);
+			if (rc != SEPOL_OK) {
+				printf("Failed to parse low categories to list\n");
+				return rc;
+			}
+			context->low = low;
+		}
 	}
 	if (parse_current->next->next->next->next->next->next->cl_head == NULL)
 		context->high_str = cil_strdup(parse_current->next->next->next->next->next->next->data);
 	else {
 		struct cil_level *high = cil_malloc(sizeof(struct cil_level));
 		high->sens_str = cil_strdup(parse_current->next->next->next->next->next->next->cl_head->data);
-		cil_list_init(&high->cats_str);
-		//From parse tree to ast here
+		rc = cil_list_init(&high->cats_str);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init category list\n");
+			return rc;
+		}
+		rc = cil_catset_to_list(parse_current->next->next->next->next->next->next->cl_head->next, high->cats_str, CIL_AST_STR);
+		if (rc != SEPOL_OK) {
+			printf("Failed to parse high categories to list\n");
+			return rc;
+		}
+		context->high = high;
 	}
 
 	ast_node->data = context;
