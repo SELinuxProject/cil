@@ -1369,7 +1369,8 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 void cil_destroy_catset(struct cil_catset *catset)
 {
 	cil_symtab_datum_destroy(catset->datum);
-	cil_list_destroy(&catset->cat_list);
+	if (catset->cat_list != NULL)
+		cil_list_destroy(&catset->cat_list);
 	free(catset);
 }
 
