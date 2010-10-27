@@ -17,9 +17,7 @@
 #define CIL_AST_STR		2
 #define CIL_SEPOL_ID		3
 #define CIL_AVRULE		4
-#define CIL_SENS		5
 #define CIL_SENS_DOM		6
-#define CIL_CAT			7
 #define CIL_LEVEL		8
 #define CIL_SEARCH		9
 #define CIL_TRANS_IF		10
@@ -44,6 +42,7 @@
 #define CIL_TYPE_RULE 	29
 #define CIL_ROLETRANS	30
 #define CIL_ROLEALLOW	31
+#define CIL_LIST		32
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -56,7 +55,11 @@
 #define CIL_ATTR		CIL_MIN_DECLARATIVE + 8 
 #define CIL_BOOL		CIL_MIN_DECLARATIVE + 9
 #define CIL_TYPEALIAS		CIL_MIN_DECLARATIVE + 10
-
+#define CIL_SENS		CIL_MIN_DECLARATIVE + 11
+#define CIL_CAT			CIL_MIN_DECLARATIVE + 12
+#define CIL_SENSALIAS	CIL_MIN_DECLARATIVE + 13
+#define CIL_CATALIAS	CIL_MIN_DECLARATIVE + 14
+#define CIL_CATSET		CIL_MIN_DECLARATIVE + 15
 /*
 	Keywords
 */
@@ -84,7 +87,11 @@
 #define CIL_KEY_TYPEATTR	"typeattribute"
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_INTERFACE	"interface"
-
+#define CIL_KEY_SENSITIVITY	"sensitivity"
+#define CIL_KEY_SENSALIAS	"sensitivityalias"
+#define CIL_KEY_CATEGORY	"category"
+#define CIL_KEY_CATALIAS	"categoryalias"
+#define CIL_KEY_CATSET		"categoryset"
 
 /*
 	Symbol Table Array Indices
@@ -118,7 +125,7 @@ struct cil_db {
 };
 
 struct cil_list {
-	struct cil_list_item *list;
+	struct cil_list_item *head;
 };
 
 struct cil_list_item {
@@ -268,12 +275,30 @@ struct cil_sens {
 	struct cil_symtab_datum datum;
 };
 
+struct cil_sensalias {
+	struct cil_symtab_datum datum;
+	char *sens_str;
+	struct cil_sens *sens;
+};
+
 struct cil_sens_dominates {
 	struct cil_list_item *sens;
 };
 
 struct cil_cat {
 	struct cil_symtab_datum datum;
+};
+
+struct cil_catalias {
+	struct cil_symtab_datum datum;
+	char *cat_str;
+	struct cil_cat *cat;
+};
+
+struct cil_catset {
+	struct cil_symtab_datum datum;
+	struct cil_list *cat_list_str;
+	struct cil_list *cat_list;
 };
 
 struct cil_level {
@@ -422,5 +447,16 @@ int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_n
 void cil_destroy_typealias(struct cil_typealias *);
 int cil_gen_typeattr(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_typeattr(struct cil_typeattribute *);
+int cil_gen_sensitivity(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_sensitivity(struct cil_sens *);
+int cil_gen_category(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_category(struct cil_cat *);
+int cil_gen_sensalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_sensalias(struct cil_sensalias *);
+int cil_gen_catalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_catalias(struct cil_catalias *);
+int cil_catset_to_list(struct cil_tree_node *, struct cil_list **, uint32_t);
+int cil_gen_catset(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_catset(struct cil_catset *);
 
 #endif

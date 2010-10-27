@@ -252,7 +252,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 		rule->obj_str = NULL;
 	}
 	struct cil_tree_node *perm_node;
-	struct cil_list_item *perm = rule->perms_str->list;
+	struct cil_list_item *perm = rule->perms_str->head;
 	struct cil_list_item *list_item;
 	struct cil_list_item *list_tail;
 	struct cil_list *perms_list;
@@ -274,8 +274,8 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 		}
 		list_item->flavor = CIL_PERM;
 		list_item->data = perm_node->data;
-		if (perms_list->list == NULL) 
-			perms_list->list = list_item;
+		if (perms_list->head == NULL) 
+			perms_list->head = list_item;
 		else 
 			list_tail->next = list_item;
 		list_tail = list_item;

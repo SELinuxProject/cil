@@ -40,7 +40,7 @@ void cil_db_destroy(struct cil_db **db)
 int cil_list_init(struct cil_list **list)
 {
 	struct cil_list *new_list = cil_malloc(sizeof(struct cil_list));
-	new_list->list = NULL;
+	new_list->head = NULL;
 
 	*list = new_list;
 	
@@ -49,7 +49,7 @@ int cil_list_init(struct cil_list **list)
 
 void cil_list_destroy(struct cil_list **list)
 {
-	struct cil_list_item *item = (*list)->list;
+	struct cil_list_item *item = (*list)->head;
 	struct cil_list_item *next = NULL; 
 	while (item != NULL)
 	{
@@ -181,8 +181,8 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
 		new_item->data = strdup(parse_current->data);
-		if (ast_list->list == NULL)
-			ast_list->list = new_item;
+		if (ast_list->head == NULL)
+			ast_list->head = new_item;
 		else
 			list_tail->next = new_item;
 		list_tail = new_item;

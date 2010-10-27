@@ -235,7 +235,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s", rule->obj->datum.name);
 			printf(" (");
 			if (rule->perms_str != NULL) {
-				item = rule->perms_str->list;
+				item = rule->perms_str->head;
 				while(item != NULL) {
 					if (item->flavor == CIL_AST_STR)
 						printf(" %s", (char*)item->data);
@@ -247,7 +247,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 			}
 			else {
-				item = rule->perms_list->list;
+				item = rule->perms_list->head;
 				while(item != NULL) {
 					if (item->flavor == CIL_PERM)
 						printf(" %s", ((struct cil_perm*)item->data)->datum.name);
