@@ -984,3 +984,45 @@ void cil_destroy_typeattr(struct cil_typeattribute *typeattr)
 {
 	free(typeattr);
 }
+
+int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next != NULL || parse_current->next->cl_head != NULL) {
+		printf("Invalid sensitivity declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_sens *sens = cil_malloc(sizeof(struct cil_sens));
+	char *key = parse_current->next->data;
+	symtab_t *symtab = NULL;
+	
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_SENS);
+	if (rc != SEPOL_OK) {
+		goto gen_sens_cleanup;
+	}
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)sens, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert sensitivity into symtab\n");
+		goto gen_sens_cleanup;
+	}
+
+	ast_node->data = sens;
+	ast_node->flavor = CIL_SENS;
+
+	return SEPOL_OK;
+
+	gen_sens_cleanup:
+		cil_destroy_sensitivity(sens);
+		return rc;
+}
+
+void cil_destroy_sensitivity(struct cil_sens *sens)
+{
+	cil_symtab_datum_destroy(sens->datum);
+	free(sens);
+}

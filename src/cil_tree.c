@@ -292,6 +292,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s\n", rule->result->datum.name);
 			return;
 		}
+		case CIL_SENS : {
+			struct cil_sens *sens = node->data;
+			printf("SENSITIVITY: %s\n", sens->datum.name);
+			return;
+		}
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;

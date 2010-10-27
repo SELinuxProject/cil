@@ -302,6 +302,9 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALLOWS], "roleallow %s %s;\n", src_str, tgt_str);
 			break;
 		}
+		case CIL_SENS: {
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			return SEPOL_ERR;

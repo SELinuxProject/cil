@@ -183,6 +183,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						printf("new interface: %s\n", (char*)parse_current->next->data);
 						ast_node->flavor = CIL_TRANS_IF;
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_SENSITIVITY)) {
+						rc = cil_gen_sensitivity(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_sensitivity (sensitivity) failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 				}
 			}
 		}
