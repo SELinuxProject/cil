@@ -7,6 +7,7 @@
 #include "cil_symtab.h"
 #include "cil_tree.h"
 #include "cil.h"
+#include "cil_mem.h"
 
 int cil_db_init(struct cil_db **db)
 {
@@ -85,12 +86,12 @@ int cil_list_item_init(struct cil_list_item **item)
 
 void cil_list_item_destroy(struct cil_list_item **item)
 {
-	cil_data_destroy(&(*item)->data, (*item)->flavor);
+	cil_destroy_data(&(*item)->data, (*item)->flavor);
 	free(*item);
 	*item = NULL;
 }
 
-void cil_data_destroy(void **data, uint32_t flavor)
+void cil_destroy_data(void **data, uint32_t flavor)
 {
 	switch(flavor) {
 		case (CIL_ROOT) : {
@@ -189,6 +190,14 @@ void cil_data_destroy(void **data, uint32_t flavor)
 			cil_destroy_catset(*data);
 			break;
 		}
+		case (CIL_ROLETYPE) : {
+			cil_destroy_roletype(*data);
+			break;
+		}
+		case (CIL_USERROLE) : { 
+			cil_destroy_userrole(*data);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;
@@ -211,7 +220,7 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list **ast
 	while(parse_current != NULL) {
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
-		new_item->data = strdup(parse_current->data);
+		new_item->data = cil_strdup(parse_current->data);
 		if (ast_list->head == NULL)
 			ast_list->head = new_item;
 		else
@@ -395,7 +404,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	}
 
 	if (inherits) 
-		cls->common_str = strdup(parse_current->next->next->next->data);
+		cls->common_str = cil_strdup(parse_current->next->next->next->data);
 
 	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CLASSES);
 	if (rc != SEPOL_OK) {
@@ -663,6 +672,36 @@ void cil_destroy_role(struct cil_role *role)
 	free(role);
 }
 
+int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL) {
+		printf("Invalid roletype declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+	
+	struct cil_roletype *roletype = cil_malloc(sizeof(struct cil_roletype));
+
+	roletype->role_str = cil_strdup(parse_current->next->data);
+	roletype->type_str = cil_strdup(parse_current->next->next->data);
+
+	ast_node->data = roletype;
+	ast_node->flavor = CIL_ROLETYPE;
+	
+	return SEPOL_OK;
+}
+
+void cil_destroy_roletype(struct cil_roletype *roletype)
+{
+	if (roletype->role_str != NULL)
+		free(roletype->role_str);
+	if (roletype->type_str != NULL)
+		free(roletype->type_str);
+	free(roletype);
+}
+
 int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -675,13 +714,22 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	struct cil_userrole *userrole = cil_malloc(sizeof(struct cil_userrole));
 
-	userrole->user_str = strdup(parse_current->next->data);
-	userrole->role_str = strdup(parse_current->next->next->data);
+	userrole->user_str = cil_strdup(parse_current->next->data);
+	userrole->role_str = cil_strdup(parse_current->next->next->data);
 
 	ast_node->data = userrole;
 	ast_node->flavor = CIL_USERROLE;
 	
 	return SEPOL_OK;
+}
+
+void cil_destroy_userrole(struct cil_userrole *userrole)
+{
+	if (userrole->user_str != NULL)
+		free(userrole->user_str);
+	if (userrole->role_str != NULL)
+		free(userrole->role_str);
+	free(userrole);
 }
 
 int cil_gen_roletrans(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -700,9 +748,9 @@ int cil_gen_roletrans(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	struct cil_role_trans *roletrans = cil_malloc(sizeof(struct cil_role_trans));
 
-	roletrans->src_str = strdup(parse_current->next->data);
-	roletrans->tgt_str = strdup(parse_current->next->next->data);
-	roletrans->result_str = strdup(parse_current->next->next->next->data);
+	roletrans->src_str = cil_strdup(parse_current->next->data);
+	roletrans->tgt_str = cil_strdup(parse_current->next->next->data);
+	roletrans->result_str = cil_strdup(parse_current->next->next->next->data);
 
 	ast_node->data = roletrans;
 	ast_node->flavor = CIL_ROLETRANS;
@@ -736,8 +784,8 @@ int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	struct cil_role_allow *roleallow = cil_malloc(sizeof(struct cil_role_allow));
 
-	roleallow->src_str = strdup(parse_current->next->data);
-	roleallow->tgt_str = strdup(parse_current->next->next->data);
+	roleallow->src_str = cil_strdup(parse_current->next->data);
+	roleallow->tgt_str = cil_strdup(parse_current->next->next->data);
 
 	ast_node->data = roleallow;
 	ast_node->flavor = CIL_ROLEALLOW;
@@ -767,9 +815,9 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	
 	struct cil_avrule *rule = cil_malloc(sizeof(struct cil_avrule));
 	rule->rule_kind = rule_kind;
-	rule->src_str = strdup(parse_current->next->data);
-	rule->tgt_str = strdup(parse_current->next->next->data);
-	rule->obj_str = strdup(parse_current->next->next->next->data);	
+	rule->src_str = cil_strdup(parse_current->next->data);
+	rule->tgt_str = cil_strdup(parse_current->next->next->data);
+	rule->obj_str = cil_strdup(parse_current->next->next->next->data);	
 
 	if(cil_list_init(&rule->perms_str)) {
 		printf("failed to init perm list\n");
@@ -818,10 +866,10 @@ int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node 
 	
 	struct cil_type_rule *rule = cil_malloc(sizeof(struct cil_type_rule));
 	rule->rule_kind = rule_kind;
-	rule->src_str = strdup(parse_current->next->data);
-	rule->tgt_str = strdup(parse_current->next->next->data);
-	rule->obj_str = strdup(parse_current->next->next->next->data);	
-	rule->result_str = strdup(parse_current->next->next->next->next->data);
+	rule->src_str = cil_strdup(parse_current->next->data);
+	rule->tgt_str = cil_strdup(parse_current->next->next->data);
+	rule->obj_str = cil_strdup(parse_current->next->next->next->data);	
+	rule->result_str = cil_strdup(parse_current->next->next->next->next->data);
 
 	ast_node->data = rule;
 	ast_node->flavor = CIL_TYPE_RULE;
@@ -964,7 +1012,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto gen_typealias_cleanup;
 	}
 	
-	alias->type_str = strdup(parse_current->next->data);
+	alias->type_str = cil_strdup(parse_current->next->data);
 
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)alias, ast_node);
 	if (rc != SEPOL_OK) {
@@ -1002,8 +1050,8 @@ int cil_gen_typeattr(struct cil_db *db, struct cil_tree_node *parse_current, str
 	}
 
 	struct cil_typeattribute *typeattr = cil_malloc(sizeof(struct cil_typeattribute));
-	typeattr->type_str = strdup(parse_current->next->data);
-	typeattr->attrib_str = strdup(parse_current->next->next->data);
+	typeattr->type_str = cil_strdup(parse_current->next->data);
+	typeattr->attrib_str = cil_strdup(parse_current->next->next->data);
 
 	ast_node->data = typeattr;
 	ast_node->flavor = CIL_TYPE_ATTR;
@@ -1078,7 +1126,7 @@ int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto gen_sensalias_cleanup;
 	}
 	
-	alias->sens_str = strdup(parse_current->next->data);
+	alias->sens_str = cil_strdup(parse_current->next->data);
 
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)alias, ast_node);
 	if (rc != SEPOL_OK) {
@@ -1167,7 +1215,7 @@ int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto gen_catalias_cleanup;
 	}
 	
-	alias->cat_str = strdup(parse_current->next->data);
+	alias->cat_str = cil_strdup(parse_current->next->data);
 
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)alias, ast_node);
 	if (rc != SEPOL_OK) {
@@ -1210,7 +1258,7 @@ int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list **as
 		cil_list_item_init(&new_item);
 		if (parse_current->cl_head == NULL) {
 			new_item->flavor = flavor;
-			new_item->data = strdup(parse_current->data);
+			new_item->data = cil_strdup(parse_current->data);
 			if (ast_list->head == NULL)
 				ast_list->head = new_item;
 			else
@@ -1246,7 +1294,7 @@ int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list **as
 					return rc;
 				}
 				new_item->flavor = flavor;
-				new_item->data = strdup(parse_current->data);
+				new_item->data = cil_strdup(parse_current->data);
 				if (sub_list->head == NULL)
 					sub_list->head = new_item;
 				else

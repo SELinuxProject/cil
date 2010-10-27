@@ -14,7 +14,7 @@ void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
    Note that cil_symtab_datum_destroy() is the analog to the initializer portion */
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node)
 {
-	char *newkey = strdup(key);
+	char *newkey = cil_strdup(key);
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
 	if (rc != SEPOL_OK) {
 		free(newkey);

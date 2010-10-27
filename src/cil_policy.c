@@ -6,6 +6,7 @@
 #include <sepol/errcodes.h>
 #include "cil_tree.h" 
 #include "cil.h"
+#include "cil_mem.h"
 #include "cil_policy.h"
 
 #define SEPOL_DONE			555
@@ -317,7 +318,14 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		case CIL_CATSET: {
 			break;
 		}
-
+		case CIL_ROLETYPE : {
+			struct cil_roletype *roletype = (struct cil_roletype*)current->data;
+			char *role_str = ((struct cil_symtab_datum*)(struct cil_role*)roletype->role)->name;
+			char *type_str = ((struct cil_symtab_datum*)(struct cil_type*)roletype->type)->name;
+		
+			fprintf(file_arr[ALIASES], "role %s types %s\n", role_str, type_str);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			return SEPOL_ERR;
@@ -343,31 +351,31 @@ int cil_gen_policy(struct cil_tree_node *root)
 
 	strcpy(temp,"/tmp/common-XXXXXX");
 	file_arr[COMMONS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[COMMONS] = strdup(temp);
+	file_path_arr[COMMONS] = cil_strdup(temp);
 	
 	strcpy(temp, "/tmp/class-XXXXXX");
 	file_arr[CLASSES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[CLASSES] = strdup(temp);
+	file_path_arr[CLASSES] = cil_strdup(temp);
 
 	strcpy(temp, "/tmp/interf-XXXXXX");
 	file_arr[INTERFACES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[INTERFACES] = strdup(temp);
+	file_path_arr[INTERFACES] = cil_strdup(temp);
 	
 	strcpy(temp, "/tmp/attrtypes-XXXXXX");
 	file_arr[ATTRTYPES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[ATTRTYPES] = strdup(temp);
+	file_path_arr[ATTRTYPES] = cil_strdup(temp);
 	
 	strcpy(temp, "/tmp/aliases-XXXXXX");
 	file_arr[ALIASES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[ALIASES] = strdup(temp);
+	file_path_arr[ALIASES] = cil_strdup(temp);
 	
 	strcpy(temp, "/tmp/allows-XXXXXX");
 	file_arr[ALLOWS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[ALLOWS] = strdup(temp);
+	file_path_arr[ALLOWS] = cil_strdup(temp);
 	
 	strcpy(temp, "/tmp/userroles-XXXXXX");
 	file_arr[USERROLES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[USERROLES] = strdup(temp);
+	file_path_arr[USERROLES] = cil_strdup(temp);
 
 	policy_file = fopen("policy.conf", "w+");	
 

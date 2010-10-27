@@ -13,6 +13,7 @@ int cil_resolve_typeattr(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_typealias(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_class(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_userrole(struct cil_db *, struct cil_tree_node *);
+int cil_resolve_roletype(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_roletrans(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_roleallow(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_sensalias(struct cil_db *, struct cil_tree_node *);

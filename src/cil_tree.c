@@ -66,7 +66,7 @@ int cil_tree_node_init(struct cil_tree_node **node)
 
 void cil_tree_node_destroy(struct cil_tree_node **node)
 {
-	cil_data_destroy(&(*node)->data, (*node)->flavor);
+	cil_destroy_data(&(*node)->data, (*node)->flavor);
 	free(*node);
 	*node = NULL;
 }
@@ -124,6 +124,20 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s", userrole->role_str);
 			else if (userrole->role != NULL)
 				printf(" %s", userrole->role->datum.name);
+			printf("\n");
+			return;
+		}
+		case CIL_ROLETYPE : {
+			struct cil_roletype *roletype = node->data;
+			printf("ROLETYPE:");
+			if (roletype->role_str != NULL)
+				printf(" %s", roletype->role_str);
+			else if (roletype->role != NULL)
+				printf(" %s", roletype->role->datum.name);
+			if (roletype->type_str != NULL)
+				printf(" %s", roletype->type_str);
+			else if (roletype->type != NULL)
+				printf(" %s", roletype->type->datum.name);
 			printf("\n");
 			return;
 		}
