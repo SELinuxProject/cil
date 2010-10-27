@@ -197,6 +197,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_CATEGORY)) {
+						rc = cil_gen_category(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_category (category) failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 				}
 			}
 		}
