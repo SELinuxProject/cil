@@ -211,13 +211,22 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		}
 		case CIL_CLASS: {
 			if (current->cl_head != NULL) {
-				current = current->cl_head;
-				fprintf(file_arr[CLASSES], "class %s { ", name);
+				fprintf(file_arr[CLASSES], "class %s ", ((struct cil_class*)(current->data))->datum.name);
 			}
-			else {
+			else if (((struct cil_class*)current->data)->common == NULL) {
 				printf("No permissions given\n");
 				return SEPOL_ERR;
 			}
+
+			printf("checking common for class %s\n", ((struct cil_class*)current->data)->datum.name);
+
+			if (((struct cil_class*)current->data)->common != NULL) 
+				fprintf(file_arr[CLASSES], "inherits %s ", ((struct cil_class*)current->data)->common->datum.name);
+
+			fprintf(file_arr[CLASSES], "{ ");
+
+			if (current->cl_head != NULL) 
+				current = current->cl_head;
 
 			while (current != NULL) {
 				if (current->flavor == CIL_PERM)
