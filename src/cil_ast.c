@@ -633,6 +633,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 						return rc;
 					break;
 				}
+				case CIL_SENSALIAS : {
+					printf("case sensitivityalias\n");
+					rc = cil_resolve_sensalias(db, current);
+					if (rc != SEPOL_OK)
+						return rc;
+					break;
+				}
 				default : {
 					break;
 				}
