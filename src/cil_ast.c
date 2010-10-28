@@ -341,7 +341,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 		perm = perm->next;
 	}
 	rule->perms_list = perms_list;
-	cil_list_destroy(&rule->perms_str);
+	cil_list_destroy(&rule->perms_str, 1);
 
 	return SEPOL_OK;
 }
@@ -686,7 +686,7 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 					printf("Failed to init category node list item\n");
 					return rc;
 				}
-				list_item->flavor = CIL_CAT;
+				list_item->flavor = cat_node->flavor;
 				list_item->data = cat_node->data;
 				if (sub_list->head == NULL)
 					sub_list->head = list_item;
@@ -703,7 +703,7 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 				printf("Failed to get node from symtab\n");
 				return rc;
 			}
-			list_item->flavor = CIL_CAT;
+			list_item->flavor = cat_node->flavor;
 			list_item->data = cat_node->data;
 			if (res_cat_list->head == NULL) 
 				res_cat_list->head = list_item;
@@ -715,7 +715,7 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 	}
 	
 	catset->cat_list = res_cat_list;
-	cil_list_destroy(&catset->cat_list_str);
+	cil_list_destroy(&catset->cat_list_str, 1);
 	free(catset->cat_list_str);
 	catset->cat_list_str = NULL;
 	

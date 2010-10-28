@@ -48,7 +48,7 @@ int cil_list_init(struct cil_list **list)
 	return SEPOL_OK;
 }
 
-void cil_list_destroy(struct cil_list **list)
+void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
 {
 	struct cil_list_item *item = (*list)->head;
 	struct cil_list_item *next = NULL;
@@ -60,13 +60,13 @@ void cil_list_destroy(struct cil_list **list)
 			item = ((struct cil_list*)item->data)->head;
 			while (item != NULL) {
 				next = item->next;
-				cil_list_item_destroy(&item);
+				cil_list_item_destroy(&item, destroy_data);
 				item = next;
 			}
 			item = parent;
 		}
 		next = item->next;
-		cil_list_item_destroy(&item);
+		cil_list_item_destroy(&item, destroy_data);
 		item = next;
 	}
 	*list = NULL;	
@@ -84,9 +84,10 @@ int cil_list_item_init(struct cil_list_item **item)
 	return SEPOL_OK;
 }
 
-void cil_list_item_destroy(struct cil_list_item **item)
+void cil_list_item_destroy(struct cil_list_item **item, uint8_t destroy_data)
 {
-	cil_destroy_data(&(*item)->data, (*item)->flavor);
+	if (destroy_data) 
+		cil_destroy_data(&(*item)->data, (*item)->flavor);
 	free(*item);
 	*item = NULL;
 }
@@ -840,9 +841,9 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 	if (rule->obj_str != NULL)
 		free(rule->obj_str);
 	if (rule->perms_str != NULL)
-		cil_list_destroy(&rule->perms_str);
+		cil_list_destroy(&rule->perms_str, 1);
 	if (rule->perms_list != NULL)
-		cil_list_destroy(&rule->perms_list);
+		cil_list_destroy(&rule->perms_list, 0);
 	free(rule);
 }
 
@@ -1369,8 +1370,10 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 void cil_destroy_catset(struct cil_catset *catset)
 {
 	cil_symtab_datum_destroy(catset->datum);
-	if (catset->cat_list != NULL)
-		cil_list_destroy(&catset->cat_list);
+	if (catset->cat_list_str != NULL)
+		cil_list_destroy(&catset->cat_list_str, 1);
+	if (catset->cat_list != NULL) 
+		cil_list_destroy(&catset->cat_list, 0);
 	free(catset);
 }
 

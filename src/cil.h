@@ -413,9 +413,9 @@ struct mls_constrain {
 int cil_db_init(struct cil_db **);
 void cil_db_destroy(struct cil_db **);
 int cil_list_init(struct cil_list **);
-void cil_list_destroy (struct cil_list **);
+void cil_list_destroy (struct cil_list **, uint8_t);
 int cil_list_item_init(struct cil_list_item **);
-void cil_list_item_destroy(struct cil_list_item **);
+void cil_list_item_destroy(struct cil_list_item **, uint8_t);
 int cil_parse_to_list(struct cil_tree_node *, struct cil_list *, uint32_t);
 int cil_gen_perm_nodes(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_symtab_array_init(symtab_t [], uint32_t);
