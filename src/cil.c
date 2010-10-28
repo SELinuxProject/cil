@@ -1421,7 +1421,7 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 				printf("Failed to init category list\n");
 				return rc;
 			}
-			rc = cil_catset_to_list(parse_current->next->next->next->next->next->cl_head->next, low->cats_str, CIL_AST_STR);
+			rc = cil_catset_to_list(parse_current->next->next->next->next->next->cl_head->next->cl_head, low->cats_str, CIL_AST_STR);
 			if (rc != SEPOL_OK) {
 				printf("Failed to parse low categories to list\n");
 				return rc;
@@ -1439,7 +1439,7 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 			printf("Failed to init category list\n");
 			return rc;
 		}
-		rc = cil_catset_to_list(parse_current->next->next->next->next->next->next->cl_head->next, high->cats_str, CIL_AST_STR);
+		rc = cil_catset_to_list(parse_current->next->next->next->next->next->next->cl_head->next->cl_head, high->cats_str, CIL_AST_STR);
 		if (rc != SEPOL_OK) {
 			printf("Failed to parse high categories to list\n");
 			return rc;
