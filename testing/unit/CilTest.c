@@ -136,8 +136,8 @@ void test_symtab_init(CuTest *tc) {
 
 	uint32_t rc = 0, i =0;
 	
-	for (i=0; i<CIL_SYM_GLOBAL_NUM; i++) {
-	    rc = symtab_init(&test_new_db->global_symtab[i], CIL_SYM_SIZE);
+	for (i=0; i<CIL_SYM_NUM; i++) {
+	    rc = symtab_init(&test_new_db->symtab[i], CIL_SYM_SIZE);
 	    CuAssertIntEquals(tc, 0, rc);
 	    // TODO CDS add checks to make sure the symtab looks correct
 	}
@@ -149,7 +149,7 @@ void test_symtab_init_no_table_neg(CuTest *tc) {
 	struct cil_db *test_new_db;
 	test_new_db = malloc(sizeof(struct cil_db));
 
-	int rc = symtab_init(&test_new_db->global_symtab[0], (uint32_t)SIZE_MAX);
+	int rc = symtab_init(&test_new_db->symtab[0], (uint32_t)SIZE_MAX);
 	CuAssertIntEquals(tc, -1, rc);
 
 	free(test_new_db);
@@ -159,9 +159,9 @@ void test_cil_symtab_array_init(CuTest *tc) {
 	struct cil_db *test_new_db;
 	test_new_db = malloc(sizeof(struct cil_db));
 
-	int rc = cil_symtab_array_init(test_new_db->global_symtab, CIL_SYM_GLOBAL_NUM);
+	int rc = cil_symtab_array_init(test_new_db->symtab, CIL_SYM_NUM);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrNotNull(tc, test_new_db->global_symtab);
+	CuAssertPtrNotNull(tc, test_new_db->symtab);
 
 	free(test_new_db);
 }
@@ -181,8 +181,8 @@ void test_cil_db_init(CuTest *tc) {
 
 	CuAssertIntEquals(tc, 0, rc);
 	CuAssertPtrNotNull(tc, test_db->ast);
-	CuAssertPtrNotNull(tc, test_db->global_symtab);
-	CuAssertPtrNotNull(tc, test_db->local_symtab);
+	CuAssertPtrNotNull(tc, test_db->symtab);
+	CuAssertPtrNotNull(tc, test_db->symtab);
 }
 
 // TODO: Reach SEPOL_ERR return in cil_db_init ( currently can't produce a method to do so )
@@ -283,7 +283,7 @@ void test_cil_get_parent_symtab_block(CuTest *tc) {
 	test_ast_node->parent->flavor = CIL_BLOCK;
 	test_ast_node->line = 1;
 
-	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_BLOCKS);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, symtab);
 }
@@ -301,7 +301,7 @@ void test_cil_get_parent_symtab_class(CuTest *tc) {
 	test_ast_node->parent->flavor = CIL_CLASS;
 	test_ast_node->line = 1;
 
-	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_BLOCKS);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, symtab);
 }
@@ -319,7 +319,7 @@ void test_cil_get_parent_symtab_root(CuTest *tc) {
 	test_ast_node->parent->flavor = CIL_ROOT;
 	test_ast_node->line = 1;
 
-	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_BLOCKS);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, symtab);
 }
@@ -337,7 +337,7 @@ void test_cil_get_parent_symtab_other_neg(CuTest *tc) {
 	test_ast_node->parent->flavor = 1234567;
 	test_ast_node->line = 1;
 
-	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_BLOCKS);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertPtrEquals(tc, symtab, NULL);
 }
@@ -354,7 +354,7 @@ void test_cil_get_parent_symtab_null_neg(CuTest *tc) {
 	test_ast_node->parent = NULL;
 	test_ast_node->line = 1;
 
-	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_BLOCKS);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertPtrEquals(tc, symtab, NULL);
 }
@@ -367,7 +367,7 @@ void test_cil_get_parent_symtab_node_null_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_BLOCKS);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertPtrEquals(tc, symtab, NULL);
 	CuAssertPtrEquals(tc, test_ast_node, NULL);
@@ -385,7 +385,7 @@ void test_cil_get_parent_symtab_parent_null_neg(CuTest *tc) {
 	test_ast_node->parent = NULL;
 	test_ast_node->line = 1;
 
-	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_LOCAL_BLOCKS);
+	int rc = cil_get_parent_symtab(test_db, test_ast_node, &symtab, CIL_SYM_BLOCKS);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertPtrEquals(tc, symtab, NULL);
 }
@@ -404,13 +404,13 @@ void test_cil_symtab_insert(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	cil_symtab_array_init(test_block->symtab, CIL_SYM_LOCAL_NUM);
+	cil_symtab_array_init(test_block->symtab, CIL_SYM_NUM);
 
 	test_block->is_abstract = 0;
 	test_block->is_optional = 0;
 	test_block->condition = NULL;
 
-	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_LOCAL_BLOCKS);
+	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_BLOCKS);
 
 	int rc = cil_symtab_insert(test_symtab, (hashtab_key_t)test_name, (struct cil_symtab_datum*)test_block, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -657,7 +657,7 @@ void test_cil_gen_perm_permexists_neg(CuTest *tc) {
 
 	struct cil_perm *test_perm = malloc(sizeof(struct cil_perm));
 	symtab_t *test_symtab = NULL;
-	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_LOCAL_PERMS);
+	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, NULL);
 	cil_symtab_insert(test_symtab, (hashtab_key_t)"read", (struct cil_symtab_datum*)test_perm, test_new_ast);
 
 	rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
@@ -705,7 +705,7 @@ void test_cil_gen_perm_nodes(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	cil_symtab_insert(&test_db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)test_key, (struct cil_symtab_datum*)test_cls, test_ast_node);
+	cil_symtab_insert(&test_db->symtab[CIL_SYM_CLASSES], (hashtab_key_t)test_key, (struct cil_symtab_datum*)test_cls, test_ast_node);
 
 	test_ast_node->data = test_cls;
 	test_ast_node->flavor = CIL_CLASS;
@@ -732,7 +732,7 @@ void test_cil_gen_perm_nodes_failgen_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	cil_symtab_insert(&test_db->global_symtab[CIL_SYM_GLOBAL_CLASSES], (hashtab_key_t)test_key, (struct cil_symtab_datum*)test_cls, test_ast_node);
+	cil_symtab_insert(&test_db->symtab[CIL_SYM_CLASSES], (hashtab_key_t)test_key, (struct cil_symtab_datum*)test_cls, test_ast_node);
 
 	test_ast_node->data = test_cls;
 	test_ast_node->flavor = CIL_CLASS;
@@ -931,7 +931,7 @@ void test_cil_parse_to_list(CuTest *tc) {
 
 	test_current = test_current->next->next->next->next->cl_head;
 
-	int rc = cil_parse_to_list(test_current, &test_avrule->perms_str, CIL_AST_STR);
+	int rc = cil_parse_to_list(test_current, test_avrule->perms_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 
 	free(test_avrule->perms_str);
@@ -957,7 +957,7 @@ void test_cil_parse_to_list_currnull_neg(CuTest *tc) {
 
 	test_current = NULL;
 
-	int rc = cil_parse_to_list(test_current, &test_avrule->perms_str, CIL_AST_STR);
+	int rc = cil_parse_to_list(test_current, test_avrule->perms_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 
 	free(test_avrule->perms_str);
@@ -981,7 +981,7 @@ void test_cil_parse_to_list_listnull_neg(CuTest *tc) {
 
 	test_current = test_current->next->next->next->next->cl_head;
 
-	int rc = cil_parse_to_list(test_current, &test_avrule->perms_str, CIL_AST_STR);
+	int rc = cil_parse_to_list(test_current, test_avrule->perms_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 
 	free(test_avrule);
@@ -1222,6 +1222,31 @@ void test_cil_gen_bool_notbool_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_roleallow(CuTest *tc) {
+	char *line[] = {"(", "roleallow", "staff_r", "sysadm_r", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+	
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_current;
+	test_current = tree->root->cl_head->cl_head;
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+	
+	int rc = cil_gen_roleallow(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertStrEquals(tc, ((struct cil_role_allow*)test_ast_node->data)->src_str, test_current->next->data);
+	CuAssertStrEquals(tc, ((struct cil_role_allow*)test_ast_node->data)->tgt_str, test_current->next->next->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLEALLOW);
+}
+
 void test_cil_gen_avrule(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 	struct cil_tree *tree;
@@ -1248,7 +1273,7 @@ void test_cil_gen_avrule(CuTest *tc) {
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_AVRULE);
 	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_str);
 
-	struct cil_list_item *test_list = ((struct cil_avrule*)test_ast_node->data)->perms_str->list;
+	struct cil_list_item *test_list = ((struct cil_avrule*)test_ast_node->data)->perms_str->head;
 	test_current = test_current->next->next->next->next->cl_head;
 
 	while(test_list != NULL) {
@@ -1687,7 +1712,7 @@ void test_cil_resolve_name(CuTest *tc) {
 	struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
 	struct cil_tree_node *type_node = NULL;
 
-	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_TYPES, &type_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1706,7 +1731,7 @@ void test_cil_resolve_name_invalid_type_neg(CuTest *tc) {
 	struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
 	struct cil_tree_node *type_node = NULL;
 
-	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_LOCAL_TYPES, &type_node);
+	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_TYPES, &type_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
