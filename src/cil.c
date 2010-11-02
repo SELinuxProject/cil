@@ -287,7 +287,6 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 		return SEPOL_ERR;
 
 	if (ast_node->parent != NULL) {
-		printf("sym_index: %d\n", cil_sym_index);
 		if (ast_node->parent->flavor == CIL_BLOCK && cil_sym_index < CIL_SYM_NUM) 
 			*symtab = &((struct cil_block*)ast_node->parent->data)->symtab[cil_sym_index];
 		else if (ast_node->parent->flavor == CIL_CLASS) 

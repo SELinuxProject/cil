@@ -798,7 +798,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 }
 
 
-int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
+int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
 {
 	int rc = SEPOL_ERR;
 	int reverse = 0;
@@ -811,111 +811,131 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	do {
 		if (current->cl_head == NULL) {
 //			printf("FLAVOR: %d\n", current->flavor);
-			switch( current->flavor ) {
-				case CIL_TYPE_ATTR : {
-					printf("case typeattribute\n");
-					rc = cil_resolve_typeattr(db, current);
-					if (rc !=  SEPOL_OK)
-						return rc;
+			switch (pass) {
+				case 1 : {
+					//dominance
+					//catorder
 					break;
 				}
-				case CIL_TYPEALIAS : {
-					printf("case typealias\n");
-					rc = cil_resolve_typealias(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
+				case 2 : {
+					//sensitivitycategory
 					break;
 				}
-				case CIL_AVRULE : {
-					printf("case avrule\n");
-					rc = cil_resolve_avrule(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
+				case 3 : {
+					switch (current->flavor) {
+						case CIL_TYPE_ATTR : {
+							printf("case typeattribute\n");
+							rc = cil_resolve_typeattr(db, current);
+							if (rc !=  SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_TYPEALIAS : {
+							printf("case typealias\n");
+							rc = cil_resolve_typealias(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_AVRULE : {
+							printf("case avrule\n");
+							rc = cil_resolve_avrule(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_TYPE_RULE : {
+							printf("case type_rule\n");
+							rc = cil_resolve_type_rule(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_USERROLE : {
+							printf("case userrole\n");
+							rc = cil_resolve_userrole(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_ROLETYPE : {
+							printf("case roletype\n");
+							rc = cil_resolve_roletype(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_ROLETRANS : {
+							printf("case roletransition\n");
+							rc = cil_resolve_roletrans(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_ROLEALLOW : {
+							printf("case roleallow\n");
+							rc = cil_resolve_roleallow(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_SENSALIAS : {
+							printf("case sensitivityalias\n");
+							rc = cil_resolve_sensalias(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_CATALIAS : {
+							printf("case categoryalias\n");
+							rc = cil_resolve_catalias(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_CATSET : {
+							printf("case categoryset\n");
+							rc = cil_resolve_catset(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_CONTEXT : {
+							printf("case context\n");
+							rc = cil_resolve_context(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						default : 
+							break;
+					}
+					break;	
 				}
-				case CIL_TYPE_RULE : {
-					printf("case type_rule\n");
-					rc = cil_resolve_type_rule(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
+				default : 
 					break;
-				}
-				case CIL_USERROLE : {
-					printf("case userrole\n");
-					rc = cil_resolve_userrole(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
-				}
-				case CIL_ROLETYPE : {
-					printf("case roletype\n");
-					rc = cil_resolve_roletype(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
-				}
-				case CIL_ROLETRANS : {
-					printf("case roletransition\n");
-					rc = cil_resolve_roletrans(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
-				}
-				case CIL_ROLEALLOW : {
-					printf("case roleallow\n");
-					rc = cil_resolve_roleallow(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
-				}
-				case CIL_SENSALIAS : {
-					printf("case sensitivityalias\n");
-					rc = cil_resolve_sensalias(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
-				}
-				case CIL_CATALIAS : {
-					printf("case categoryalias\n");
-					rc = cil_resolve_catalias(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
-				}
-				case CIL_CATSET : {
-					printf("case categoryset\n");
-					rc = cil_resolve_catset(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
-				}
-				case CIL_CONTEXT : {
-					printf("case context\n");
-					rc = cil_resolve_context(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
-				}
-				default : {
-					//printf("flavor: %d\n", current->flavor);
-					break;
-				}
-				
 			}
 		}
 		else {
 //			printf("FLAVOR: %d\n", current->flavor);
-			switch (current->flavor) {
-				case CIL_CLASS : {
-					printf("case class\n");
-					rc = cil_resolve_class(db, current);
-					if (rc != SEPOL_OK)
-						return rc;
-					break;
+			switch (pass) {
+				case 1 : {
+					switch (current->flavor) {
+						case CIL_CLASS : {
+							printf("case class\n");
+							rc = cil_resolve_class(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						default : 
+							break;
+					}
+			
+					break;	
 				}
-				default : {
+				default :
 					break;
-				}
 			}
 		}	
 
