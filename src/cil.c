@@ -287,15 +287,19 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 		return SEPOL_ERR;
 
 	if (ast_node->parent != NULL) {
-		if (ast_node->parent->flavor == CIL_BLOCK) 
+		printf("sym_index: %d\n", cil_sym_index);
+		if (ast_node->parent->flavor == CIL_BLOCK && cil_sym_index < CIL_SYM_NUM) 
 			*symtab = &((struct cil_block*)ast_node->parent->data)->symtab[cil_sym_index];
 		else if (ast_node->parent->flavor == CIL_CLASS) 
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
 		else if (ast_node->parent->flavor == CIL_COMMON)
 			*symtab = &((struct cil_common*)ast_node->parent->data)->perms;
-		else if (ast_node->parent->flavor == CIL_ROOT) 
+		else if (ast_node->parent->flavor == CIL_ROOT && cil_sym_index < CIL_SYM_NUM)
 			*symtab = &db->symtab[cil_sym_index];
-		
+		else if (cil_sym_index >= CIL_SYM_NUM) {
+			printf("Invalid index passed to cil_get_parent_symtab\n");
+			return SEPOL_ERR;
+		}
 		else {
 			printf("Failed to get symtab from parent node\n");
 			return SEPOL_ERR;
@@ -460,7 +464,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	symtab_t *symtab = NULL;
 	char *key = (char*)parse_current->data;
 
-	rc = cil_get_parent_symtab(db, ast_node, &symtab, 0);
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_UNKNOWN);
 	if (rc != SEPOL_OK) {
 		goto gen_perm_cleanup;
 	}

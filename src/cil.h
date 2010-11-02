@@ -117,6 +117,7 @@
 #define CIL_SYM_LEVELS		16
 
 #define CIL_SYM_NUM		17
+#define CIL_SYM_UNKNOWN		18
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
