@@ -1249,6 +1249,97 @@ void test_cil_gen_roleallow(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_gen_roleallow_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "roleallow", "foo", "bar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db = NULL;
+
+	int rc = cil_gen_roleallow(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roleallow_currnull_neg(CuTest *tc) {
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_roleallow(test_db, NULL, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc); 
+}
+
+void test_cil_gen_roleallow_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "roleallow", "foo", "bar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	int rc = cil_gen_roleallow(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roleallow_srcnull_neg(CuTest *tc) {
+	char *line[] = {"(", "roleallow", NULL, "bar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roleallow(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roleallow_tgtnull_neg(CuTest *tc) {
+	char *line[] = {"(", "roleallow", "foo", "bar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next->next = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roleallow(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roleallow_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "roleallow", "foo", "bar", "extra", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roleallow(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_avrule(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 	struct cil_tree *tree;
@@ -1754,6 +1845,38 @@ void test_cil_resolve_roleallow(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_roleallow_srcdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "bar", ")", \
+			"(", "roleallow", "foo", "bar", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_roleallow(test_db, test_db->ast->root->cl_head->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_roleallow_tgtdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "foo", ")", \
+			"(", "roleallow", "foo", "bar", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_roleallow(test_db, test_db->ast->root->cl_head->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_ast_roleallow(CuTest *tc) {
 	char *line[] = {"(", "role", "foo", ")", \
 			"(", "role", "bar", ")", \
@@ -2044,8 +2167,17 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow_srcdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow_tgtdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias);
 	SUITE_ADD_TEST(suite, test_cil_gen_roleallow);
+	SUITE_ADD_TEST(suite, test_cil_gen_roleallow_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roleallow_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roleallow_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roleallow_srcnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roleallow_tgtnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roleallow_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias_notype_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule);
