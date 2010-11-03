@@ -2,6 +2,9 @@
 	(read write open))
 
 (user sysadm)
+(role sysadm_r)
+(userrole sysadm sysadm_r)
+
 (type new)
 (type foo)
 (type bar)
