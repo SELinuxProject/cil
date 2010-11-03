@@ -1242,11 +1242,11 @@ void test_cil_gen_roleallow(CuTest *tc) {
 	test_ast_node->line = 1;
 	
 	int rc = cil_gen_roleallow(test_db, tree->root->cl_head->cl_head, test_ast_node);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 	CuAssertStrEquals(tc, ((struct cil_role_allow*)test_ast_node->data)->src_str, test_current->next->data);
 	CuAssertStrEquals(tc, ((struct cil_role_allow*)test_ast_node->data)->tgt_str, test_current->next->next->data);
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLEALLOW);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_avrule(CuTest *tc) {
@@ -1737,6 +1737,41 @@ void test_cil_resolve_name_invalid_type_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_resolve_roleallow(CuTest *tc) {
+	char *line[] = {"(", "role", "foo", ")", \
+			"(", "role", "bar", ")", \
+			"(", "roleallow", "foo", "bar", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_roleallow(test_db, test_db->ast->root->cl_head->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_ast_roleallow(CuTest *tc) {
+	char *line[] = {"(", "role", "foo", ")", \
+			"(", "role", "bar", ")", \
+			"(", "roleallow", "foo", "bar", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
+	
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_typealias(CuTest *tc) {
 	char *line[] = { "(", "block", "foo", "(", "typealias", ".foo.test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
 
@@ -2010,6 +2045,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias);
+	SUITE_ADD_TEST(suite, test_cil_gen_roleallow);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias_notype_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule);
@@ -2018,6 +2054,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_tgt_nores_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_class_nores_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_datum_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roleallow);
 
 	return suite;
 }
