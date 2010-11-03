@@ -3,7 +3,7 @@
 
 /* Wrapped malloc that catches errors and calls the error callback */
 void *cil_malloc(size_t size);
-void *cil_strdup(char *);
+char *cil_strdup(char *);
 void cil_set_malloc_error_handler(void (*handler)());
 
 #endif /* CIL_MEM_H_ */
