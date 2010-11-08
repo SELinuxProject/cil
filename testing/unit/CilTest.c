@@ -1049,7 +1049,7 @@ void test_cil_gen_type(CuTest *tc) {
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPE);
 }
 
-void test_cil_gen_type_attr(CuTest *tc) {
+void test_cil_gen_type_attribute(CuTest *tc) {
 	char *line[] = {"(", "attribute", "test", NULL};
 	struct cil_tree *tree;
 	gen_test_tree(&tree, line);
@@ -1067,6 +1067,131 @@ void test_cil_gen_type_attr(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ATTR);
+}
+
+void test_cil_gen_typeattr(CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "bar", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertStrEquals(tc, ((struct cil_typeattribute*)test_ast_node->data)->type_str, tree->root->cl_head->cl_head->next->data);
+	CuAssertStrEquals(tc, ((struct cil_typeattribute*)test_ast_node->data)->attr_str, tree->root->cl_head->cl_head->next->next->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPE_ATTR);
+}
+
+void test_cil_gen_typeattr_dbnull_neg (CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "bar", ")", NULL};
+	struct  cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db = NULL;
+
+	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssert(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_typeattr_currnull_neg (CuTest *tc) {
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_typeattr(test_db, NULL, test_ast_node);
+	CuAssert(tc, SEPOL_ERR, rc); 	
+}
+
+void test_cil_gen_typeattr_astnull_neg (CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "bar", ")", NULL};
+	struct  cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssert(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_typeattr_typenull_neg (CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "bar" ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssert(tc, SEPOL_ERR, rc);	
+}
+
+void test_cil_gen_typeattr_attrnull_neg (CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "bar" ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next->next = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssert(tc, SEPOL_ERR, rc);	
+}
+
+void test_cil_gen_typeattr_attrlist_neg (CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "(", "bar", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssert(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_typeattr_extra_neg (CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "bar", "extra", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssert(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_typealias(CuTest *tc) {
@@ -1291,10 +1416,12 @@ void test_cil_gen_roleallow_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_roleallow_srcnull_neg(CuTest *tc) {
-	char *line[] = {"(", "roleallow", NULL, "bar", ")", NULL};
+	char *line[] = {"(", "roleallow", "foo", "bar", ")", NULL};
 	
 	struct cil_tree *tree;
 	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next = NULL;
 
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
@@ -1660,7 +1787,7 @@ void test_cil_build_ast_type_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_build_ast_typeattr(CuTest *tc) {
+void test_cil_build_ast_type_attribute(CuTest *tc) {
 	char *line[] = {"(", "attribute", "test", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1673,7 +1800,7 @@ void test_cil_build_ast_typeattr(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_build_ast_typeattr_neg(CuTest *tc) {
+void test_cil_build_ast_type_attribute_neg(CuTest *tc) {
 	char *line[] = {"(", "attribute", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2124,7 +2251,15 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_common);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid);
 	SUITE_ADD_TEST(suite, test_cil_gen_type);
-	SUITE_ADD_TEST(suite, test_cil_gen_type_attr);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattr);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_typenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_attrnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_attrlist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg2);
@@ -2154,8 +2289,8 @@ CuSuite* CilTreeGetSuite() {
 //	SUITE_ADD_TEST(suite, test_cil_build_ast_sid_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_attribute);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_attribute_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias_notype_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_role);

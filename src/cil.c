@@ -1052,7 +1052,7 @@ int cil_gen_typeattr(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	struct cil_typeattribute *typeattr = cil_malloc(sizeof(struct cil_typeattribute));
 	typeattr->type_str = cil_strdup(parse_current->next->data);
-	typeattr->attrib_str = cil_strdup(parse_current->next->next->data);
+	typeattr->attr_str = cil_strdup(parse_current->next->next->data);
 
 	ast_node->data = typeattr;
 	ast_node->flavor = CIL_TYPE_ATTR;

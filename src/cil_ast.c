@@ -417,14 +417,14 @@ int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current)
 	free(typeattr->type_str);
 	typeattr->type_str = NULL;
 
-	rc = cil_resolve_name(db, current, typeattr->attrib_str, CIL_SYM_TYPES, &attr_node);
+	rc = cil_resolve_name(db, current, typeattr->attr_str, CIL_SYM_TYPES, &attr_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", typeattr->attrib_str);
+		printf("Name resolution failed for %s\n", typeattr->attr_str);
 		return SEPOL_ERR;
 	}
-	typeattr->attrib = (struct cil_type*)(attr_node->data);
-	free(typeattr->attrib_str);
-	typeattr->attrib_str = NULL;
+	typeattr->attr = (struct cil_type*)(attr_node->data);
+	free(typeattr->attr_str);
+	typeattr->attr_str = NULL;
 
 	return SEPOL_OK;
 }

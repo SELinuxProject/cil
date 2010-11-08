@@ -212,8 +212,8 @@ struct cil_type	{//Also used for attributes
 struct cil_typeattribute {
 	char *type_str;
 	struct cil_type *type;
-	char *attrib_str;
-	struct cil_type *attrib;
+	char *attr_str;
+	struct cil_type *attr;
 };
 
 struct cil_typealias {
