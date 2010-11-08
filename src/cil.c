@@ -1258,6 +1258,7 @@ int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list *ast
 	while (parse_current != NULL) {
 		cil_list_item_init(&new_item);
 		if (parse_current->cl_head == NULL) {
+			/* TODO CDS do not pass flavor in, since the function assumes the data will be a string. Just hardcode to CIL_AST_STR */
 			new_item->flavor = flavor;
 			new_item->data = cil_strdup(parse_current->data);
 			if (ast_list->head == NULL)
@@ -1267,6 +1268,7 @@ int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list *ast
 			list_tail = new_item;
 		}
 		else {
+			/* TODO CDS use recursion here, calling cil_catset_list() for the sublist */
 			if (parse_current->cl_head->next == NULL || parse_current->cl_head->next->next != NULL) {
 				printf("Error: invalid category range\n");
 				return SEPOL_ERR;
@@ -1324,6 +1326,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		return SEPOL_ERR;
 	}
 
+	/* TODO CDS checks should allow for 0, 1, or more categories */
 	if (parse_current->next->next->cl_head != NULL) {
 		//cil_gen_catset_range(db, parse_current, ast_node);
 	}

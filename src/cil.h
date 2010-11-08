@@ -140,7 +140,7 @@ struct cil_list_item {
 };
 
 struct cil_search {
-	//Design
+	//Waiting on design
 	int x; //temporary while attempting to get this to compile
 };
 
@@ -157,7 +157,6 @@ struct cil_block {
 struct cil_class {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
-	//(class msg inherits ipc (send receive))
 	char *common_str;
 	struct cil_common *common;
 };
@@ -191,6 +190,7 @@ struct cil_role {
 	struct cil_symtab_datum datum;
 };
 
+/* TODO Waiting on design */
 struct cil_role_dominates {
 	char *role_str;
 	struct cil_role *role;
