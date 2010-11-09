@@ -230,42 +230,42 @@ void test_cil_lexer_next(CuTest *tc) {
 
    cil_lexer_setup(buffer, str_size + 2);
 
-   struct token *test_tok;
+   struct token test_tok;
 
    int rc = cil_lexer_next(&test_tok);
    CuAssertIntEquals(tc, SEPOL_OK, rc);
 
-   CuAssertIntEquals(tc, OPAREN, test_tok->type);
-   CuAssertStrEquals(tc, "(", test_tok->value);
-   CuAssertIntEquals(tc, 1, test_tok->line);
+   CuAssertIntEquals(tc, OPAREN, test_tok.type);
+   CuAssertStrEquals(tc, "(", test_tok.value);
+   CuAssertIntEquals(tc, 1, test_tok.line);
 
    rc = cil_lexer_next(&test_tok);
    CuAssertIntEquals(tc, SEPOL_OK, rc);
    
-   CuAssertIntEquals(tc, SYMBOL, test_tok->type);
-   CuAssertStrEquals(tc, "test", test_tok->value);
-   CuAssertIntEquals(tc, 1, test_tok->line);
+   CuAssertIntEquals(tc, SYMBOL, test_tok.type);
+   CuAssertStrEquals(tc, "test", test_tok.value);
+   CuAssertIntEquals(tc, 1, test_tok.line);
  
    rc = cil_lexer_next(&test_tok);
    CuAssertIntEquals(tc, SEPOL_OK, rc);
    
-   CuAssertIntEquals(tc, QSTRING, test_tok->type);
-   CuAssertStrEquals(tc, "\"qstring\"", test_tok->value);
-   CuAssertIntEquals(tc, 1, test_tok->line);
+   CuAssertIntEquals(tc, QSTRING, test_tok.type);
+   CuAssertStrEquals(tc, "\"qstring\"", test_tok.value);
+   CuAssertIntEquals(tc, 1, test_tok.line);
  
    rc = cil_lexer_next(&test_tok);
    CuAssertIntEquals(tc, SEPOL_OK, rc);
    
-   CuAssertIntEquals(tc, CPAREN, test_tok->type);
-   CuAssertStrEquals(tc, ")", test_tok->value);
-   CuAssertIntEquals(tc, 1, test_tok->line);
+   CuAssertIntEquals(tc, CPAREN, test_tok.type);
+   CuAssertStrEquals(tc, ")", test_tok.value);
+   CuAssertIntEquals(tc, 1, test_tok.line);
 
    rc = cil_lexer_next(&test_tok);
    CuAssertIntEquals(tc, SEPOL_OK, rc);
   
-   CuAssertIntEquals(tc, COMMENT, test_tok->type);
-   CuAssertStrEquals(tc, ";comment", test_tok->value);
-   CuAssertIntEquals(tc, 1, test_tok->line);
+   CuAssertIntEquals(tc, COMMENT, test_tok.type);
+   CuAssertStrEquals(tc, ";comment", test_tok.value);
+   CuAssertIntEquals(tc, 1, test_tok.line);
 
    free(buffer);
 }
@@ -1102,7 +1102,7 @@ void test_cil_gen_typeattr_dbnull_neg (CuTest *tc) {
 	struct cil_db *test_db = NULL;
 
 	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
-	CuAssert(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_typeattr_currnull_neg (CuTest *tc) {
@@ -1113,7 +1113,7 @@ void test_cil_gen_typeattr_currnull_neg (CuTest *tc) {
 	cil_db_init(&test_db);
 
 	int rc = cil_gen_typeattr(test_db, NULL, test_ast_node);
-	CuAssert(tc, SEPOL_ERR, rc); 	
+	CuAssertIntEquals(tc, SEPOL_ERR, rc); 	
 }
 
 void test_cil_gen_typeattr_astnull_neg (CuTest *tc) {
@@ -1127,7 +1127,7 @@ void test_cil_gen_typeattr_astnull_neg (CuTest *tc) {
 	cil_db_init(&test_db);
 
 	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
-	CuAssert(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_typeattr_typenull_neg (CuTest *tc) {
@@ -1144,7 +1144,7 @@ void test_cil_gen_typeattr_typenull_neg (CuTest *tc) {
 	cil_db_init(&test_db);
 
 	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
-	CuAssert(tc, SEPOL_ERR, rc);	
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);	
 }
 
 void test_cil_gen_typeattr_attrnull_neg (CuTest *tc) {
@@ -1161,7 +1161,7 @@ void test_cil_gen_typeattr_attrnull_neg (CuTest *tc) {
 	cil_db_init(&test_db);
 
 	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
-	CuAssert(tc, SEPOL_ERR, rc);	
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);	
 }
 
 void test_cil_gen_typeattr_attrlist_neg (CuTest *tc) {
@@ -1176,7 +1176,7 @@ void test_cil_gen_typeattr_attrlist_neg (CuTest *tc) {
 	cil_db_init(&test_db);
 
 	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
-	CuAssert(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_typeattr_extra_neg (CuTest *tc) {
@@ -1191,7 +1191,7 @@ void test_cil_gen_typeattr_extra_neg (CuTest *tc) {
 	cil_db_init(&test_db);
 
 	int rc = cil_gen_typeattr(test_db, tree->root->cl_head->cl_head, test_ast_node);
-	CuAssert(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_typealias(CuTest *tc) {

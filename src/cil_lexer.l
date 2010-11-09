@@ -38,16 +38,11 @@ int cil_lexer_setup(char *buffer, uint32_t size)
 	return SEPOL_OK;
 }
 
-int cil_lexer_next(struct token **tok)
+int cil_lexer_next(struct token *tok)
 {
-	struct token *n;
-	/* TODO CDS who should free token? or just put n on the stack and don't worry about it */
-	n = cil_malloc(sizeof(struct token));
-	n->type = yylex();
-	n->value = value;
-	n->line = line;
-	
-	*tok = n;
+	tok->type = yylex();
+	tok->value = value;
+	tok->line = line;
 	
 	return SEPOL_OK;
 }
