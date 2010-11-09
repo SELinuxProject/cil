@@ -121,9 +121,6 @@
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
-
-typedef uint32_t sepol_id_t;
-
 struct cil_db {
 	struct cil_tree *ast;
 	symtab_t symtab[CIL_SYM_NUM];
@@ -321,7 +318,7 @@ struct cil_transform_interface {
 struct cil_transform_call {
 	struct cil_list_item *params;
 	char *interface_str;
-	sepol_id_t interface; 
+	//interface; 
 };
 
 #define CIL_INHERIT_BLOCK 1
@@ -330,7 +327,7 @@ struct cil_transform_call {
 struct cil_transform_inherit {
 	struct cil_symtab_datum datum;
 	char *inherit_from_str;
-	sepol_id_t inherit_from;
+	void *inherit_from;
 	struct cil_list_item *except;
 	uint32_t flavor;	
 };
@@ -372,7 +369,7 @@ struct cil_portcon {
 	struct cil_symtab_datum datum; 
 	struct cil_context *context;
 	char *proto_str;
-	sepol_id_t proto;
+	//proto;
 };
 
 struct cil_netifcon {
@@ -388,7 +385,7 @@ struct cil_fs {
 
 struct cil_fscon {
 	char *fs_str;
-	sepol_id_t fs;
+	struct cil_fs *fs;
 	char *path;
 	struct cil_context context;
 };
@@ -399,7 +396,7 @@ struct cil_fscon {
 struct cil_fs_use {
 	uint32_t flavor;
 	char *fs_str;
-	sepol_id_t fs;
+	struct cil_fs *fs;
 	struct cil_context context;
 };
 
