@@ -4,14 +4,18 @@
 #include <sys/stat.h>
 #include <sepol/policydb/symtab.h>
 #include <sepol/policydb/policydb.h>
+
 #include "CuTest.h"
-#include "../../src/cil_tree.h"
-#include "../../src/cil_lexer.h"
+
 #include "../../src/cil.h"
 #include "../../src/cil_mem.h"
+#include "../../src/cil_tree.h"
 #include "../../src/cil_symtab.h"
-#include "../../src/cil_ast.h"
+#include "../../src/cil_lexer.h"
 #include "../../src/cil_parser.h"
+#include "../../src/cil_build_ast.h"
+#include "../../src/cil_resolve_ast.h"
+#include "../../src/cil_fqn.h"
 
 // TODO Check more in the data structures
 struct cil_file_data {
