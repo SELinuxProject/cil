@@ -550,7 +550,6 @@ int cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int
 		while (curr_new != NULL) {
 			if (curr_main->data == curr_new->data) {
 				if (curr_new->next == NULL) {
-					printf("PREPEND\n");
 					rc = __cil_catorder_prepend(primary, new, curr_main, curr_new, success);
 					if (rc != SEPOL_OK) {
 						printf("Failed to prepend categoryorder sublist to primary list\n");
@@ -559,7 +558,6 @@ int cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int
 					return SEPOL_OK;
 				}
 				else {
-					printf("APPEND\n");
 					rc = __cil_catorder_append(primary, new, curr_main, curr_new, success);
 					if (rc != SEPOL_OK) {
 						printf("Failed to append categoryorder sublist to primary list\n");
@@ -615,7 +613,6 @@ int cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 			if (success) 
 				break;
 			else if (catorder_sublist->next == NULL) { 
-				printf("NEW LIST\n");
 				catorder_sublist->next = edge_node;
 				break;
 			}
@@ -628,19 +625,13 @@ int cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 				catorder_lists = catorder_head;
 				while (catorder_lists != NULL) {
 					if (catorder_sublist != catorder_lists) {
-						printf("SUCCESS: %d\n", success);
 						rc = cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, ((struct cil_list_item*)catorder_lists)->data, &success);
 						if (rc != SEPOL_OK) {
 							printf("Failed combining categoryorder lists into one\n");
 							return rc;
 						}
-						if (success) {
-							printf("BEFORE: \n");
-							cil_print_list_lists(db->catorder);
+						if (success) 
 							cil_catorder_remove_list(db->catorder, catorder_lists->data);
-							printf("AFTER: \n");
-							cil_print_list_lists(db->catorder);
-						}
 					}
 					catorder_lists = catorder_lists->next;
 				}
@@ -736,9 +727,8 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 			return rc;
 		}
 	}
-	printf("\n");
-	cil_print_list_lists(db->catorder);
-	return SEPOL_OK;
+	
+    return SEPOL_OK;
 }
 
 int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
