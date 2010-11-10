@@ -2219,6 +2219,23 @@ void test_cil_resolve_ast_roleallow(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_ast_roleallow_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "foo", ")", \
+			"(", "roleallow", "foo", "bar", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
+	
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_typeattr(CuTest *tc) {
 	char *line[] = {"(", "type", "foo", ")", 
 			"(", "attribute", "bar", ")", 
@@ -2751,6 +2768,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_class_nores_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_datum_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roleallow);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roleallow_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_tgtdecl_neg);
