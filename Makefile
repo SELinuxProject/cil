@@ -29,8 +29,8 @@ LDFLAGS = -lfl
 COVCFLAGS = -fprofile-arcs -ftest-coverage
 
 ifeq ($(DEBUG),1)
-	export CFLAGS = -g3 -O0 -gdwarf-2 -fno-strict-aliasing -Wall -Wshadow -Werror
-	export LDFLAGS = -g
+	export CFLAGS = -g3 -O0 -gdwarf-2 -fno-strict-aliasing -Wall -Wshadow
+	export LDFLAGS += -g
 endif
 
 CFLAGS ?= -Wall -W -Wundef -Wshadow -Wmissing-noreturn -Wmissing-format-attribute $(LIBS)

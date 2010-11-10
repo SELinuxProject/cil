@@ -43,6 +43,7 @@
 #define CIL_ROLETRANS		28
 #define CIL_ROLEALLOW		29
 #define CIL_ROLETYPE		30 
+#define CIL_CATORDER        31
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -94,6 +95,7 @@
 #define CIL_KEY_CATEGORY	"category"
 #define CIL_KEY_CATALIAS	"categoryalias"
 #define CIL_KEY_CATSET		"categoryset"
+#define CIL_KEY_CATORDER    "categoryorder"
 
 /*
 	Symbol Table Array Indices
@@ -124,16 +126,7 @@
 struct cil_db {
 	struct cil_tree *ast;
 	symtab_t symtab[CIL_SYM_NUM];
-};
-
-struct cil_list {
-	struct cil_list_item *head;
-};
-
-struct cil_list_item {
-	struct cil_list_item *next;
-	uint32_t flavor;
-	void *data;
+    struct cil_list *catorder;
 };
 
 struct cil_search {
@@ -303,6 +296,10 @@ struct cil_catset {
 	struct cil_list *cat_list;
 };
 
+struct cil_catorder {
+    struct cil_list *cat_list_str;
+};
+
 struct cil_level {
 	char *sens_str;
 	struct cil_sens *sens;
@@ -410,10 +407,6 @@ struct mls_constrain {
 
 int cil_db_init(struct cil_db **);
 void cil_db_destroy(struct cil_db **);
-int cil_list_init(struct cil_list **);
-void cil_list_destroy (struct cil_list **, uint8_t);
-int cil_list_item_init(struct cil_list_item **);
-void cil_list_item_destroy(struct cil_list_item **, uint8_t);
 int cil_symtab_array_init(symtab_t [], uint32_t);
 void cil_symtab_array_destroy(symtab_t []);
 int cil_destroy_ast_symtabs(struct cil_tree_node *);
