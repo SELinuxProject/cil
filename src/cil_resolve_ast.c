@@ -5,6 +5,7 @@
 #include "cil.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
+#include "cil_list.h"
 #include "cil_resolve_ast.h"
 
 int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "cil_tree.h"
+#include "cil_list.h"
 #include "cil.h"
 #include "cil_parser.h"
 

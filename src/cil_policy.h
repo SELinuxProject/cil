@@ -2,6 +2,7 @@
 #define CIL_POLICY_H_
 
 #include "cil_tree.h"
+#include "cil_list.h"
 #include "cil.h"
 
 struct cil_user_list_item {

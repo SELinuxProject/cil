@@ -7,6 +7,7 @@
 #include "cil.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
+#include "cil_list.h"
 #include "cil_symtab.h"
 #include "cil_build_ast.h"
 
@@ -37,60 +38,6 @@ void cil_db_destroy(struct cil_db **db)
 	
 	*db = NULL;	
 
-}
-
-int cil_list_init(struct cil_list **list)
-{
-	struct cil_list *new_list = cil_malloc(sizeof(struct cil_list));
-	new_list->head = NULL;
-
-	*list = new_list;
-	
-	return SEPOL_OK;
-}
-
-void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
-{
-	struct cil_list_item *item = (*list)->head;
-	struct cil_list_item *next = NULL;
-	struct cil_list_item *parent = NULL;
-	while (item != NULL)
-	{
-		if (item->flavor == CIL_LIST) {
-			parent = item;
-			item = ((struct cil_list*)item->data)->head;
-			while (item != NULL) {
-				next = item->next;
-				cil_list_item_destroy(&item, destroy_data);
-				item = next;
-			}
-			item = parent;
-		}
-		next = item->next;
-		cil_list_item_destroy(&item, destroy_data);
-		item = next;
-	}
-	*list = NULL;	
-}
-
-int cil_list_item_init(struct cil_list_item **item)
-{
-	struct cil_list_item *new_item = cil_malloc(sizeof(struct cil_list_item));
-	new_item->next = NULL;
-	new_item->flavor = 0;
-	new_item->data = NULL;
-
-	*item = new_item;
-
-	return SEPOL_OK;
-}
-
-void cil_list_item_destroy(struct cil_list_item **item, uint8_t destroy_data)
-{
-	if (destroy_data) 
-		cil_destroy_data(&(*item)->data, (*item)->flavor);
-	free(*item);
-	*item = NULL;
 }
 
 void cil_destroy_data(void **data, uint32_t flavor)

@@ -5,6 +5,7 @@
 #include "cil.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
+#include "cil_list.h"
 #include "cil_parser.h"
 #include "cil_build_ast.h"
 

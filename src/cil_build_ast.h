@@ -5,6 +5,7 @@
 
 #include "cil.h"
 #include "cil_tree.h"
+#include "cil_list.h"
 
 int cil_parse_to_list(struct cil_tree_node *, struct cil_list *, uint32_t);
 int cil_gen_perm_nodes(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

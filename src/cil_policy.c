@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <sepol/errcodes.h>
-#include "cil_tree.h" 
+#include "cil_tree.h"
+#include "cil_list.h"
 #include "cil.h"
 #include "cil_mem.h"
 #include "cil_policy.h"

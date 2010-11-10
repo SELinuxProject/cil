@@ -126,16 +126,6 @@ struct cil_db {
 	symtab_t symtab[CIL_SYM_NUM];
 };
 
-struct cil_list {
-	struct cil_list_item *head;
-};
-
-struct cil_list_item {
-	struct cil_list_item *next;
-	uint32_t flavor;
-	void *data;
-};
-
 struct cil_search {
 	//Waiting on design
 	int x; //temporary while attempting to get this to compile
@@ -410,10 +400,6 @@ struct mls_constrain {
 
 int cil_db_init(struct cil_db **);
 void cil_db_destroy(struct cil_db **);
-int cil_list_init(struct cil_list **);
-void cil_list_destroy (struct cil_list **, uint8_t);
-int cil_list_item_init(struct cil_list_item **);
-void cil_list_item_destroy(struct cil_list_item **, uint8_t);
 int cil_symtab_array_init(symtab_t [], uint32_t);
 void cil_symtab_array_destroy(symtab_t []);
 int cil_destroy_ast_symtabs(struct cil_tree_node *);
