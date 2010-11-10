@@ -477,6 +477,270 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int __cil_catorder_append(struct cil_list *main_list, struct cil_list *new_list, struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
+{
+	if (main_list_item == NULL || new_list_item == NULL)
+		return SEPOL_ERR;
+
+	if (main_list_item->data == new_list_item->data && main_list_item->next == NULL) { 
+		main_list_item->next = new_list_item->next;
+		*success = 1;
+		return SEPOL_OK;
+	}
+	else {
+		while (main_list_item != NULL || new_list_item != NULL) {
+			if (main_list_item->data != new_list_item->data) {
+				printf("Error: categoryorder adjacency mismatch\n");
+				return SEPOL_ERR;
+			}
+			main_list_item = main_list_item->next;
+			new_list_item = new_list_item->next;
+		}
+		*success = 1;
+		return SEPOL_OK;
+	}
+
+	return SEPOL_OK;
+}
+
+int __cil_catorder_prepend(struct cil_list *main_list, struct cil_list *new_list, struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
+{
+	if (main_list_item == NULL || new_list_item == NULL)
+		return SEPOL_ERR;
+
+	if (new_list_item->next != NULL) {
+		printf("Invalid list item given to prepend to list: Has next item\n");
+		return SEPOL_ERR;
+	}
+
+	struct cil_list_item *new_list_iter;
+	int rc = SEPOL_ERR;
+
+	if (main_list_item == main_list->head) {
+		new_list_iter = new_list->head;
+		while (new_list_iter != NULL) {
+			if (new_list_iter->next == new_list_item) {
+				new_list_iter->next = NULL;
+				rc = cil_prepend_to_list(main_list, new_list_iter);
+				if (rc != SEPOL_OK) {
+					printf("Failed to prepend item to list\n");
+					return rc;
+				}
+				*success = 1;
+				return SEPOL_OK;
+			}
+		}
+		return SEPOL_ERR;
+	}
+	else {
+		printf("Error: Attempting to prepend to not the head of the list\n");
+		return SEPOL_ERR;
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int *success)
+{
+	struct cil_list_item *curr_main = primary->head;
+	struct cil_list_item *curr_new;
+	int rc = SEPOL_ERR;
+	while (curr_main != NULL) {
+		curr_new = new->head;
+		while (curr_new != NULL) {
+			if (curr_main->data == curr_new->data) {
+				if (curr_new->next == NULL) {
+					printf("PREPEND\n");
+					rc = __cil_catorder_prepend(primary, new, curr_main, curr_new, success);
+					if (rc != SEPOL_OK) {
+						printf("Failed to prepend categoryorder sublist to primary list\n");
+						return rc;
+					}
+					return SEPOL_OK;
+				}
+				else {
+					printf("APPEND\n");
+					rc = __cil_catorder_append(primary, new, curr_main, curr_new, success);
+					if (rc != SEPOL_OK) {
+						printf("Failed to append categoryorder sublist to primary list\n");
+						return rc;
+					}
+					return SEPOL_OK;
+				}
+			}
+			curr_new = curr_new->next;
+		}
+		curr_main = curr_main->next;
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_catorder_remove_list(struct cil_list *catorder, struct cil_list *remove_item)
+{
+	struct cil_list_item *list_item;
+	struct cil_list_item *new_next;
+
+	list_item = catorder->head;
+	while (list_item->next != NULL) {
+		if (list_item->next->data == remove_item) {
+			list_item->next = list_item->next->next;
+			return SEPOL_OK;
+		}
+		list_item = list_item->next;
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
+{
+	struct cil_list_item *catorder_head;
+	struct cil_list_item *catorder_sublist;
+	struct cil_list_item *catorder_lists;
+	struct cil_list_item *edge_node;
+	int success = 0;
+	int rc = SEPOL_ERR;
+
+	catorder_head = db->catorder->head;
+	catorder_sublist = catorder_head;
+	edge_node = cat_edges->head;
+	while (edge_node != NULL) {
+		while (catorder_sublist != NULL) {
+			rc = cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, edge_node->data, &success); 
+			if (rc != SEPOL_OK) {
+				printf("Failed to merge categoryorder sublist with main list\n");
+				return rc;
+			}
+			if (success) 
+				break;
+			else if (catorder_sublist->next == NULL) { 
+				printf("NEW LIST\n");
+				catorder_sublist->next = edge_node;
+				break;
+			}
+			catorder_sublist = catorder_sublist->next;
+		}
+		if (success) {
+			success = 0;
+			catorder_sublist = catorder_head;
+			while (catorder_sublist != NULL) {
+				catorder_lists = catorder_head;
+				while (catorder_lists != NULL) {
+					if (catorder_sublist != catorder_lists) {
+						printf("SUCCESS: %d\n", success);
+						rc = cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, ((struct cil_list_item*)catorder_lists)->data, &success);
+						if (rc != SEPOL_OK) {
+							printf("Failed combining categoryorder lists into one\n");
+							return rc;
+						}
+						if (success) {
+							printf("BEFORE: \n");
+							cil_print_list_lists(db->catorder);
+							cil_catorder_remove_list(db->catorder, catorder_lists->data);
+							printf("AFTER: \n");
+							cil_print_list_lists(db->catorder);
+						}
+					}
+					catorder_lists = catorder_lists->next;
+				}
+				catorder_sublist = catorder_sublist->next; 
+			}
+		}
+		edge_node = edge_node->next;
+	}
+}
+
+int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_catorder *catorder = (struct cil_catorder*)current->data;
+	struct cil_tree_node *cat_node = NULL;
+	struct cil_list_item *curr_cat = catorder->cat_list_str->head;
+	struct cil_list_item *list_item;
+	struct cil_list_item *list_tail = NULL;
+	struct cil_list_item *edge_node;
+	struct cil_list_item *edges_list_tail = NULL;
+	struct cil_list *cat_list;
+	struct cil_list *edges_list;
+	struct cil_list *edge = NULL;
+	symtab_t *symtab = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_list_init(&cat_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to init category list\n");
+		return rc;
+	}
+	rc = cil_list_init(&edges_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to init list of category pairs\n");
+	}
+	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_CATS);
+	if (rc != SEPOL_OK) {
+		printf("Failed to get parent symtab\n");
+		return rc;
+	}
+	while (curr_cat != NULL) {
+		rc = cil_list_item_init(&list_item);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init category node list item\n");
+			return rc;
+		}
+		rc = cil_symtab_get_node(symtab, (char*)curr_cat->data, &cat_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to get node from symtab\n");
+			return rc;
+		}
+		list_item->flavor = cat_node->flavor;
+		list_item->data = cat_node->data;
+		if (cat_list->head == NULL)
+			cat_list->head = list_item;
+		else
+			list_tail->next = list_item;
+
+		if (edge == NULL) {
+			rc = cil_list_init(&edge);
+			if (list_tail == NULL) 
+				edge->head = list_item;
+			else
+				edge->head = list_tail; 
+		}
+		else { 
+			rc = cil_list_item_init(&edge_node);
+			edge->head->next = list_item;
+			edge_node->data = edge;
+			if (edges_list->head == NULL) 
+				edges_list->head = edge_node;
+			else 
+				edges_list_tail->next = edge_node;
+			edges_list_tail = edge_node;
+			edge = NULL;
+		}
+		list_tail = list_item;
+		curr_cat = curr_cat->next;
+	}
+
+	if (db->catorder->head == NULL) {
+		rc = cil_list_item_init(&list_item);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init category node sublist item\n");
+			return rc;
+		}
+		list_item->data = cat_list; 
+		db->catorder->head = list_item;
+	}
+	else {
+		rc = cil_catorder_order(db, edges_list);
+		if (rc != SEPOL_OK) {
+			printf("Failed to order categoryorder\n");
+			return rc;
+		}
+	}
+	printf("\n");
+	cil_print_list_lists(db->catorder);
+	return SEPOL_OK;
+}
+
 int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_context *context = (struct cil_context*)current->data;
@@ -563,6 +827,15 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t p
 				case 1 : {
 					//dominance
 					//catorder
+                    switch (current->flavor) {
+                        case CIL_CATORDER : {
+                            printf("case categoryorder\n");
+                            rc = cil_resolve_catorder(db, current);
+                            if (rc != SEPOL_OK)
+                                return rc;
+                            break;
+                        }
+                    }
 					break;
 				}
 				case 2 : {

@@ -25,7 +25,7 @@ int cil_db_init(struct cil_db **db)
 	}
 
 	cil_tree_init(&new_db->ast);
-	
+    cil_list_init(&new_db->catorder);
 	*db = new_db;
 
 	return SEPOL_OK;

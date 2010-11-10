@@ -1135,6 +1135,34 @@ void cil_destroy_catset(struct cil_catset *catset)
 	free(catset);
 }
 
+int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+    if (db == NULL || parse_current == NULL || ast_node == NULL)
+        return SEPOL_ERR;
+
+    if (parse_current->next == NULL || parse_current->next->cl_head == NULL) {
+        printf("Invalid categoryorder declaration (line %d)\n", parse_current->line);
+        return SEPOL_ERR;
+    }
+
+    int rc = SEPOL_ERR;
+    struct cil_catorder *catorder = cil_malloc(sizeof(struct cil_catorder));
+    rc = cil_list_init(&catorder->cat_list_str);
+    if (rc != SEPOL_OK) {
+        printf("Failed to init category list\n");
+        return rc;
+    }
+    rc = cil_catset_to_list(parse_current->next, catorder->cat_list_str, CIL_AST_STR);
+    if (rc != SEPOL_OK) {
+        printf("Failed to create category list\n");
+        return rc;
+    }
+    ast_node->data = catorder;
+    ast_node->flavor = CIL_CATORDER;
+
+    return SEPOL_OK;
+}
+
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -1448,6 +1476,14 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						}
 						forced = 1;
 					}
+                    else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
+            			rc = cil_gen_catorder(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_catorder failed, rc: %d\n", rc);
+							return rc;
+						}
+                        forced = 1;
+                    }
 					else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
 						rc = cil_gen_context(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {

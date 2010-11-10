@@ -43,6 +43,7 @@
 #define CIL_ROLETRANS		28
 #define CIL_ROLEALLOW		29
 #define CIL_ROLETYPE		30 
+#define CIL_CATORDER        31
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -94,6 +95,7 @@
 #define CIL_KEY_CATEGORY	"category"
 #define CIL_KEY_CATALIAS	"categoryalias"
 #define CIL_KEY_CATSET		"categoryset"
+#define CIL_KEY_CATORDER    "categoryorder"
 
 /*
 	Symbol Table Array Indices
@@ -124,6 +126,7 @@
 struct cil_db {
 	struct cil_tree *ast;
 	symtab_t symtab[CIL_SYM_NUM];
+    struct cil_list *catorder;
 };
 
 struct cil_search {
@@ -291,6 +294,10 @@ struct cil_catset {
 	struct cil_symtab_datum datum;
 	struct cil_list *cat_list_str;
 	struct cil_list *cat_list;
+};
+
+struct cil_catorder {
+    struct cil_list *cat_list_str;
 };
 
 struct cil_level {
