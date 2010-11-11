@@ -99,10 +99,12 @@ int cil_user_list_insert(struct cil_list *list, struct cil_user *user, struct ci
 				}
 				while (current_role != NULL) {
 					if (current_role == role) {
+						/* TODO CDS make this a break, as duplicates do not hurt */
 						printf("Duplicate declaration of userrole\n");
 						return SEPOL_ERR;
 					}
 					if (current_role->next == NULL) {
+						/* TODO CDS factor this out since it is copied/pasted from above */
 						struct cil_list_item *new_role = NULL;
 						cil_list_item_init(&new_role);
 						new_role->data = role;

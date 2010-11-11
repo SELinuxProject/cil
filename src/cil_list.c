@@ -10,6 +10,7 @@
 #include "cil_symtab.h"
 #include "cil_build_ast.h"
 
+/* TODO CDS if it cannot return an error, then have the return value be void to indicate that */
 int cil_list_init(struct cil_list **list)
 {
 	struct cil_list *new_list = cil_malloc(sizeof(struct cil_list));
