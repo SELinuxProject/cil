@@ -1224,13 +1224,13 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		return SEPOL_ERR;
 
 	int rc = SEPOL_ERR;
-	struct cil_context *context = cil_malloc(sizeof(struct cil_context));
 
 	if (parse_current->next == NULL || parse_current->next->next == NULL) {
 		printf("Invalid context declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
+	struct cil_context *context = cil_malloc(sizeof(struct cil_context));
 	// Syntax for 'context' statements (named)
 	if (parse_current->next->next->cl_head != NULL) {
 		if (parse_current->next->next->next != NULL
@@ -1243,7 +1243,7 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		|| parse_current->next->next->cl_head->next->next->next == NULL
 		|| parse_current->next->next->cl_head->next->next->next->next == NULL) {
 			printf("Invalid context declaration (line: %d)\n", parse_current->line);
-			return SEPOL_ERR;
+			goto gen_context_cleanup;
 		}
 
 		char *key = (char*)parse_current->next->data;
@@ -1253,20 +1253,20 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)context, ast_node);
 		if (rc != SEPOL_OK) {
 			printf("Failed to insert context: %s, rc: %d\n", key, rc);
-			return SEPOL_ERR;
+			goto gen_context_cleanup;
 		}
 	
 		rc = cil_fill_context(parse_current->next->next->cl_head, context);
 		if (rc != SEPOL_OK) {
 			printf("Failed to fill context, rc: %d\n", rc);
-			return SEPOL_ERR;
+			goto gen_context_cleanup;
 		}
 	}
 	else {
 		rc = cil_fill_context(parse_current, context);
 		if (rc != SEPOL_OK) {
 			printf("Failed to fill context, rc: %d\n", rc);
-			return SEPOL_ERR;
+			goto gen_context_cleanup;
 		}
 	}
 
@@ -1274,6 +1274,10 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	ast_node->flavor = CIL_CONTEXT;
 
 	return SEPOL_OK;
+	
+	gen_context_cleanup:
+		cil_destroy_context(context);
+		return SEPOL_ERR;
 }
 
 void cil_destroy_context(struct cil_context *context)
