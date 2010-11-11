@@ -1163,51 +1163,33 @@ int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, str
     return SEPOL_OK;
 }
 
-int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	if (db == NULL || parse_current == NULL || ast_node == NULL)
+/* Fills in context starting from user */
+int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context) 
+{	
+	if (user_node == NULL || context == NULL) 
 		return SEPOL_ERR;
+
+	int rc = SEPOL_ERR;
 	
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL
-	|| parse_current->next->next->next == NULL || parse_current->next->next->next->cl_head != NULL
-	|| parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head != NULL
-	|| parse_current->next->next->next->next->next == NULL
-	|| parse_current->next->next->next->next->next->next == NULL) { 
-		printf("Invalid context declaration (line: %d)\n", parse_current->line);
-		return SEPOL_ERR;
-	}
-
-	struct cil_context *context = cil_malloc(sizeof(struct cil_context));
-	char *key = (char*)parse_current->next->data;
-	symtab_t *symtab = NULL;
-
-	int rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CONTEXTS);
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)context, ast_node);
-	if (rc != SEPOL_OK) {
-		printf("Failed to insert context: %s, rc: %d\n", key, rc);
-		return SEPOL_ERR;
-	}
+	context->user_str = cil_strdup(user_node->data);
+	context->role_str = cil_strdup(user_node->next->data);
+	context->type_str = cil_strdup(user_node->next->next->data);
 	
-	context->user_str = cil_strdup(parse_current->next->next->data);
-	context->role_str = cil_strdup(parse_current->next->next->next->data);
-	context->type_str = cil_strdup(parse_current->next->next->next->next->data);
-
 	context->low_str = NULL;
 	context->high_str = NULL;
 
-	if (parse_current->next->next->next->next->next->cl_head == NULL)
-		context->low_str = cil_strdup(parse_current->next->next->next->next->next->data);
+	if (user_node->next->next->next->cl_head == NULL)
+		context->low_str = cil_strdup(user_node->next->next->next->next->data);
 	else {
 		struct cil_level *low = cil_malloc(sizeof(struct cil_level));
-		low->sens_str = cil_strdup(parse_current->next->next->next->next->next->cl_head->data);
-		if (parse_current->next->next->next->next->next->cl_head->next != NULL) {
+		low->sens_str = cil_strdup(user_node->next->next->next->cl_head->data);
+		if (user_node->next->next->next->cl_head->next != NULL) {
 			rc = cil_list_init(&low->cats_str);
 			if (rc != SEPOL_OK) {
 				printf("Failed to init category list\n");
 				return rc;
 			}
-			rc = cil_catset_to_list(parse_current->next->next->next->next->next->cl_head->next->cl_head, low->cats_str, CIL_AST_STR);
+			rc = cil_catset_to_list(user_node->next->next->next->cl_head->next, low->cats_str, CIL_AST_STR);
 			if (rc != SEPOL_OK) {
 				printf("Failed to parse low categories to list\n");
 				return rc;
@@ -1215,22 +1197,77 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 			context->low = low;
 		}
 	}
-	if (parse_current->next->next->next->next->next->next->cl_head == NULL)
-		context->high_str = cil_strdup(parse_current->next->next->next->next->next->next->data);
+	if (user_node->next->next->next->next->cl_head == NULL)
+		context->high_str = cil_strdup(user_node->next->next->next->next->data);
 	else {
 		struct cil_level *high = cil_malloc(sizeof(struct cil_level));
-		high->sens_str = cil_strdup(parse_current->next->next->next->next->next->next->cl_head->data);
+		high->sens_str = cil_strdup(user_node->next->next->next->next->cl_head->data);
 		rc = cil_list_init(&high->cats_str);
 		if (rc != SEPOL_OK) {
 			printf("Failed to init category list\n");
 			return rc;
 		}
-		rc = cil_catset_to_list(parse_current->next->next->next->next->next->next->cl_head->next->cl_head, high->cats_str, CIL_AST_STR);
+		rc = cil_catset_to_list(user_node->next->next->next->next->cl_head->next, high->cats_str, CIL_AST_STR);
 		if (rc != SEPOL_OK) {
 			printf("Failed to parse high categories to list\n");
 			return rc;
 		}
 		context->high = high;
+	}
+
+	return SEPOL_OK;
+} 
+
+int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	int rc = SEPOL_ERR;
+	struct cil_context *context = cil_malloc(sizeof(struct cil_context));
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+		printf("Invalid context declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	// Syntax for 'context' statements (named)
+	if (parse_current->next->next->cl_head != NULL) {
+		if (parse_current->next->next->next != NULL
+		|| parse_current->next->next->cl_head == NULL
+		|| parse_current->next->next->cl_head->cl_head != NULL
+		|| parse_current->next->next->cl_head->next == NULL
+ 		|| parse_current->next->next->cl_head->next->cl_head != NULL
+		|| parse_current->next->next->cl_head->next->next == NULL
+		|| parse_current->next->next->cl_head->next->next->cl_head != NULL
+		|| parse_current->next->next->cl_head->next->next->next == NULL
+		|| parse_current->next->next->cl_head->next->next->next->next == NULL) {
+			printf("Invalid context declaration (line: %d)\n", parse_current->line);
+			return SEPOL_ERR;
+		}
+
+		char *key = (char*)parse_current->next->data;
+		symtab_t *symtab = NULL;
+
+		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_CONTEXTS);
+		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)context, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to insert context: %s, rc: %d\n", key, rc);
+			return SEPOL_ERR;
+		}
+	
+		rc = cil_fill_context(parse_current->next->next->cl_head, context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill context, rc: %d\n", rc);
+			return SEPOL_ERR;
+		}
+	}
+	else {
+		rc = cil_fill_context(parse_current, context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill context, rc: %d\n", rc);
+			return SEPOL_ERR;
+		}
 	}
 
 	ast_node->data = context;
@@ -1255,6 +1292,78 @@ void cil_destroy_context(struct cil_context *context)
 //		cil_destroy_level(low);
 //	if (context->high != NULL)
 //		cil_destroy_level(high);	
+}
+
+int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node) {
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	int rc = SEPOL_ERR;
+
+	if (parse_current->next == NULL
+	|| parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL
+	|| parse_current->next->next->next == NULL
+	|| (parse_current->next->next->cl_head != NULL && parse_current->next->next->next->cl_head == NULL)
+	|| (parse_current->next->next->cl_head == NULL && parse_current->next->next->next->cl_head != NULL)) {
+		printf("Invalid netifcon declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+	
+	struct cil_netifcon *netifcon = cil_malloc(sizeof(struct cil_netifcon));
+	char *netif = (char*)parse_current->next->data;
+	
+	rc = cil_symtab_insert(&db->netif, (hashtab_key_t)netif, (struct cil_symtab_datum*)netifcon, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("failed to insert network interface %s into symtab, rc: %d\n", netif, rc);
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next->next->cl_head == NULL) {
+		netifcon->if_context_str = cil_strdup(parse_current->next->next->data);
+	}
+	else {
+		netifcon->if_context = cil_malloc(sizeof(struct cil_context));
+		rc = cil_fill_context(parse_current->next->next->cl_head, netifcon->if_context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill interface context\n");
+			goto gen_netifcon_cleanup;
+		}
+	}
+
+	if (parse_current->next->next->next->cl_head == NULL ) {
+		netifcon->packet_context_str = cil_strdup(parse_current->next->next->next->data);
+	}
+	else {
+		netifcon->packet_context = cil_malloc(sizeof(struct cil_context));
+		rc = cil_fill_context(parse_current->next->next->next->cl_head, netifcon->packet_context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill packet context\n");
+			goto gen_netifcon_cleanup;
+		}
+	}
+
+	ast_node->data = netifcon;
+	ast_node->flavor = CIL_NETIFCON; 
+
+	return SEPOL_OK;
+
+	gen_netifcon_cleanup:
+		cil_destroy_netifcon(netifcon);
+		return SEPOL_ERR;
+}
+
+void cil_destroy_netifcon(struct cil_netifcon *netifcon)
+{
+	cil_symtab_datum_destroy(netifcon->datum);
+	if (netifcon->if_context_str != NULL)
+		free(netifcon->if_context_str);
+	else if (netifcon->if_context != NULL)
+		cil_destroy_context(netifcon->if_context);
+	if (netifcon->packet_context_str != NULL)
+		free(netifcon->packet_context_str);
+	else if (netifcon->packet_context != NULL)
+		cil_destroy_context(netifcon->packet_context);
 }
 
 int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
@@ -1476,18 +1585,26 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						}
 						forced = 1;
 					}
-                    else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
-            			rc = cil_gen_catorder(db, parse_current, ast_node);
+					else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
+						rc  = cil_gen_catorder(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
 							printf("cil_gen_catorder failed, rc: %d\n", rc);
 							return rc;
 						}
-                        forced = 1;
-                    }
+						forced = 1;
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
 						rc = cil_gen_context(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
 							printf("cil_gen_context failed, rc: %d\n", rc);
+							return rc;
+						}
+						forced = 1;
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_NETIFCON)) {
+						rc = cil_gen_netifcon(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_netifcon failed, rc: %d\n", rc);
 							return rc;
 						}
 						forced = 1;

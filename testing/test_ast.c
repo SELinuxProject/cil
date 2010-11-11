@@ -10,6 +10,7 @@
 #include "../src/cil_parser.h"
 #include "../src/cil_build_ast.h"
 #include "../src/cil_resolve_ast.h"
+#include "../src/cil_fqn.h"
 #include "../src/cil_policy.h"
 
 #include <sepol/policydb/hashtab.h>

@@ -386,7 +386,22 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" print high");
 			printf("\n");
 			return;
-		}	
+		}
+		case CIL_NETIFCON : {
+			struct cil_netifcon *netifcon = node->data;
+			printf("NETIFCON %s", netifcon->datum.name);
+			if (netifcon->if_context_str != NULL)
+				printf(" %s", netifcon->if_context_str);
+			else if (netifcon->if_context != NULL)
+				printf(" if_context");
+			if (netifcon->packet_context_str != NULL)
+				printf(" %s", netifcon->packet_context_str);
+			else if (netifcon->packet_context != NULL)
+				printf(" packet_context");
+			printf("\n");
+			return;
+		}
+					
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;

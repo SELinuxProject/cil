@@ -90,6 +90,7 @@
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_INTERFACE	"interface"
 #define CIL_KEY_CONTEXT		"context"
+#define CIL_KEY_NETIFCON	"netifcon"
 #define CIL_KEY_SENSITIVITY	"sensitivity"
 #define CIL_KEY_SENSALIAS	"sensitivityalias"
 #define CIL_KEY_CATEGORY	"category"
@@ -126,7 +127,8 @@
 struct cil_db {
 	struct cil_tree *ast;
 	symtab_t symtab[CIL_SYM_NUM];
-    struct cil_list *catorder;
+	symtab_t netif;
+	struct cil_list *catorder;
 };
 
 struct cil_search {
@@ -371,7 +373,9 @@ struct cil_portcon {
 
 struct cil_netifcon {
 	struct cil_symtab_datum datum;
+	char *if_context_str;
 	struct cil_context *if_context;
+	char *packet_context_str;
 	struct cil_context *packet_context;
 };
 
