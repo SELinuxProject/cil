@@ -79,9 +79,14 @@ int cil_append_to_list(struct cil_list *list, struct cil_list_item *item)
 	if (list == NULL || item == NULL)
 		return SEPOL_ERR;
 
+	if (list->head == NULL) {
+		list->head = item;
+		return SEPOL_OK;
+	}
+
 	struct cil_list_item *curr_item = list->head;
 
-	while (curr_item->next != NULL)
+	while (curr_item->next != NULL) 
 		curr_item = curr_item->next;
 	
 	curr_item->next = item;
