@@ -369,7 +369,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 int cil_gen_policy(struct cil_db *db)
 {
 	struct cil_tree_node *curr = db->ast->root;
-	struct cil_list_item *catorder = db->catorder->head->data;
+	struct cil_list_item *catorder;
 	int rc = SEPOL_ERR;
 	int reverse = 0;
 	FILE *policy_file;
@@ -414,9 +414,13 @@ int cil_gen_policy(struct cil_db *db)
 
 	policy_file = fopen("policy.conf", "w+");
 
-	while (catorder != NULL) {
-		cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
-		catorder = catorder->next;
+	if (db->catorder->head != NULL) {
+		catorder = db->catorder->head->data;
+
+		while (catorder != NULL) {
+			cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
+			catorder = catorder->next;
+		}
 	}
 
 	do {
