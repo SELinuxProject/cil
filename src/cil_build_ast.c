@@ -990,43 +990,29 @@ void cil_destroy_catalias(struct cil_catalias *alias)
 	free(alias);
 }
 
-int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl, uint32_t flavor)
+int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl)
 {
-    if (parse_current == NULL || ast_cl == NULL)
+	if (parse_current == NULL || ast_cl == NULL)
 		return SEPOL_ERR;
 
 	struct cil_list *sub_list;
 	struct cil_list_item *new_item;
 	struct cil_list_item *list_tail;
-	struct cil_list_item *sub_list_tail;
-	struct cil_tree_node *parent;
-    struct cil_tree_node *curr = parse_current;
-	int rc = SEPOL_ERR;
+	struct cil_tree_node *curr = parse_current;
 	
-    if (parse_current->cl_head == NULL) {
-        printf("Error: Invalid list\n");
-        return SEPOL_ERR;
-    }
+	if (parse_current->cl_head == NULL) {
+		printf("Error: Invalid list\n");
+		return SEPOL_ERR;
+	}
 
-    curr = curr->cl_head;
+	curr = curr->cl_head;
 	while (curr != NULL) {
 		cil_list_item_init(&new_item);
 		if (curr->cl_head == NULL) {
-			/* TODO CDS do not pass flavor in, since the function assumes the data will be a string. Just hardcode to CIL_AST_STR */
-			new_item->flavor = flavor;
+			new_item->flavor = CIL_AST_STR;
 			new_item->data = cil_strdup(curr->data);
-			if (ast_cl->head == NULL)
-				ast_cl->head = new_item;
-			else
-				list_tail->next = new_item;
-			list_tail = new_item;
 		}
 		else {
-			/* TODO CDS use recursion here, calling cil_catset_list() for the sublist */
-/*			if (parse_current->cl_head->next == NULL || parse_current->cl_head->next->next != NULL) {
-				printf("Error: invalid category range\n");
-				return SEPOL_ERR;
-			}*/
 			rc = cil_list_init(&sub_list);
 			if (rc != SEPOL_OK) {
 				printf("Failed to init category range sublist\n");
@@ -1034,37 +1020,17 @@ int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list *ast
 			}
 			new_item->flavor = CIL_LIST;
 			new_item->data = sub_list;
-
-			if (ast_cl->head == NULL)
-				ast_cl->head = new_item;
-			else
-				list_tail->next = new_item;
-			list_tail = new_item;
-
-			parent = curr;
-			curr = curr->cl_head;
-
-			while (curr != NULL) {
-				rc = cil_list_item_init(&new_item);
-				if (rc != SEPOL_OK) {
-					printf("Failed to init categoryset range list item\n");
-					return rc;
-				}
-				new_item->flavor = flavor;
-				new_item->data = cil_strdup(curr->data);
-				if (sub_list->head == NULL)
-					sub_list->head = new_item;
-				else
-					sub_list_tail->next = new_item;
-				sub_list_tail = new_item;
-		        curr = curr->next;
-			}
-			curr = parent;
+			cil_catset_to_list(curr, sub_list);
 		}
+		if (ast_cl->head == NULL)
+			ast_cl->head = new_item;
+		else
+			list_tail->next = new_item;
+		list_tail = new_item;
 		curr = curr->next;
 	}
 	
-    return SEPOL_OK;
+	return SEPOL_OK;
 }
 
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -1109,7 +1075,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto gen_catset_cleanup;
 	}
 
-	rc = cil_catset_to_list(parse_current->next->next, catset->cat_list_str, CIL_AST_STR);
+	rc = cil_catset_to_list(parse_current->next->next, catset->cat_list_str);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create categoryset list\n");
 		return rc;
@@ -1198,7 +1164,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 				printf("Failed to init category list\n");
 				return rc;
 			}
-			rc = cil_catset_to_list(user_node->next->next->next->cl_head->next, low->cats_str, CIL_AST_STR);
+			rc = cil_catset_to_list(user_node->next->next->next->cl_head->next, low->cats_str);
 			if (rc != SEPOL_OK) {
 				printf("Failed to parse low categories to list\n");
 				return rc;
@@ -1216,7 +1182,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 			printf("Failed to init category list\n");
 			return rc;
 		}
-		rc = cil_catset_to_list(user_node->next->next->next->next->cl_head->next, high->cats_str, CIL_AST_STR);
+		rc = cil_catset_to_list(user_node->next->next->next->next->cl_head->next, high->cats_str);
 		if (rc != SEPOL_OK) {
 			printf("Failed to parse high categories to list\n");
 			return rc;
