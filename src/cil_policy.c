@@ -366,9 +366,10 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-int cil_gen_policy(struct cil_tree_node *root)
+int cil_gen_policy(struct cil_db *db)
 {
-	struct cil_tree_node *curr = root;
+	struct cil_tree_node *curr = db->ast->root;
+	struct cil_list_item *catorder = db->catorder->head->data;
 	int rc = SEPOL_ERR;
 	int reverse = 0;
 	FILE *policy_file;
@@ -411,7 +412,12 @@ int cil_gen_policy(struct cil_tree_node *root)
 	file_arr[USERROLES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[USERROLES] = cil_strdup(temp);
 
-	policy_file = fopen("policy.conf", "w+");	
+	policy_file = fopen("policy.conf", "w+");
+
+	while (catorder != NULL) {
+		cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
+		catorder = catorder->next;
+	}
 
 	do {
 		if (curr->cl_head != NULL) {

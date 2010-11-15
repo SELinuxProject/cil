@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
 		printf("----------------------------------------------\n\n");
 		printf("Generating policy\n");
-		cil_gen_policy(db->ast->root);
+		cil_gen_policy(db);
 		printf("Policy generated\n\n");
 	
 		printf("----------------------------------------------\n\n");
