@@ -198,9 +198,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	uint32_t flavor = current->flavor;
 
 	switch(flavor) {
-		case CIL_BLOCK: {
-			break;  // Ignore
-		}
 		case CIL_ATTR: {
 			fprintf(file_arr[ATTRTYPES], "attribute %s;\n", name);
 			break;
@@ -353,21 +350,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALLOWS], "roleallow %s %s;\n", src_str, tgt_str);
 			break;
 		}
-		case CIL_SENS: {
-			break;
-		}
-		case CIL_SENSALIAS: {
-			break;
-		}
-		case CIL_CAT: {
-			break;
-		}
-		case CIL_CATALIAS: {
-			break;
-		}
-		case CIL_CATSET: {
-			break;
-		}
 		case CIL_ROLETYPE : {
 			struct cil_roletype *roletype = (struct cil_roletype*)current->data;
 			char *role_str = ((struct cil_symtab_datum*)(struct cil_role*)roletype->role)->name;
@@ -377,8 +359,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			break;
 		}
 		default : {
-			printf("Unknown data flavor: %d\n", flavor);
-			return SEPOL_ERR;
 			break;
 		}
 	}
