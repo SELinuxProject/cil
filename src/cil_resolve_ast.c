@@ -54,11 +54,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_list_item *list_item;
 	struct cil_list_item *list_tail;
 	struct cil_list *perms_list;
-	rc = cil_list_init(&perms_list);
-	if (rc != SEPOL_OK) {
-		printf("Failed to init perm node list\n");
-		return rc;
-	}
+	cil_list_init(&perms_list);
 	while (perm != NULL) {
 		rc = cil_symtab_get_node(&rule->obj->perms, (char*)perm->data, &perm_node);
 		if (rc != SEPOL_OK) {
@@ -74,11 +70,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 				return rc;
 			}
 		}
-		rc = cil_list_item_init(&list_item);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init perm node list item\n");
-			return rc;
-		}
+		cil_list_item_init(&list_item);
 		list_item->flavor = CIL_PERM;
 		list_item->data = perm_node->data;
 		if (perms_list->head == NULL) 
@@ -562,26 +554,15 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 	symtab_t *symtab = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_list_init(&cat_list);
-	if (rc != SEPOL_OK) {
-		printf("Failed to init category list\n");
-		return rc;
-	}
-	rc = cil_list_init(&edges_list);
-	if (rc != SEPOL_OK) {
-		printf("Failed to init list of category pairs\n");
-	}
+	cil_list_init(&cat_list);
+	cil_list_init(&edges_list);
 	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_CATS);
 	if (rc != SEPOL_OK) {
 		printf("Failed to get parent symtab\n");
 		return rc;
 	}
 	while (curr_cat != NULL) {
-		rc = cil_list_item_init(&list_item);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init category node list item\n");
-			return rc;
-		}
+		cil_list_item_init(&list_item);
 		rc = cil_symtab_get_node(symtab, (char*)curr_cat->data, &cat_node);
 		if (rc != SEPOL_OK) {
 			printf("Failed to get node from symtab\n");
@@ -595,14 +576,14 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 			list_tail->next = list_item;
 
 		if (edge == NULL) {
-			rc = cil_list_init(&edge);
+			cil_list_init(&edge);
 			if (list_tail == NULL) 
 				edge->head = list_item;
 			else
 				edge->head = list_tail; 
 		}
 		else { 
-			rc = cil_list_item_init(&edge_node);
+			cil_list_item_init(&edge_node);
 			edge->head->next = list_item;
 			edge_node->data = edge;
 			if (edges_list->head == NULL) 
@@ -617,11 +598,7 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 	}
 
 	if (db->catorder->head == NULL) {
-		rc = cil_list_item_init(&list_item);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init category node sublist item\n");
-			return rc;
-		}
+		cil_list_item_init(&list_item);
 		list_item->data = cat_list; 
 		db->catorder->head = list_item;
 	}

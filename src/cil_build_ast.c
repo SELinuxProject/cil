@@ -568,13 +568,7 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	rule->tgt_str = cil_strdup(parse_current->next->next->data);
 	rule->obj_str = cil_strdup(parse_current->next->next->next->data);	
 
-	if(cil_list_init(&rule->perms_str)) {
-		printf("failed to init perm list\n");
-		cil_destroy_avrule(rule);
-		return SEPOL_ERR;
-	}
-	
-
+	cil_list_init(&rule->perms_str);
 	cil_parse_to_list(parse_current->next->next->next->next->cl_head, rule->perms_str, CIL_AST_STR);
 
 	ast_node->data = rule;
@@ -1019,11 +1013,7 @@ int cil_catset_to_list(struct cil_tree_node *parse_current, struct cil_list *ast
 			new_item->data = cil_strdup(curr->data);
 		}
 		else {
-			rc = cil_list_init(&sub_list);
-			if (rc != SEPOL_OK) {
-				printf("Failed to init category range sublist\n");
-				return rc;
-			}
+			cil_list_init(&sub_list);
 			new_item->flavor = CIL_LIST;
 			new_item->data = sub_list;
 			cil_catset_to_list(curr, sub_list);
@@ -1075,11 +1065,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto gen_catset_cleanup;
 	}
 
-	rc = cil_list_init(&catset->cat_list_str);
-	if (rc != SEPOL_OK) {
-		printf("Failed to init category list\n");
-		goto gen_catset_cleanup;
-	}
+	cil_list_init(&catset->cat_list_str);
 
 	rc = cil_catset_to_list(parse_current->next->next, catset->cat_list_str);
 	if (rc != SEPOL_OK) {
@@ -1206,11 +1192,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 		struct cil_level *low = cil_malloc(sizeof(struct cil_level));
 		low->sens_str = cil_strdup(user_node->next->next->next->cl_head->data);
 		if (user_node->next->next->next->cl_head->next != NULL) {
-			rc = cil_list_init(&low->cats_str);
-			if (rc != SEPOL_OK) {
-				printf("Failed to init category list\n");
-				return rc;
-			}
+			cil_list_init(&low->cats_str);
 			rc = cil_catset_to_list(user_node->next->next->next->cl_head->next, low->cats_str);
 			if (rc != SEPOL_OK) {
 				printf("Failed to parse low categories to list\n");
@@ -1224,11 +1206,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	else {
 		struct cil_level *high = cil_malloc(sizeof(struct cil_level));
 		high->sens_str = cil_strdup(user_node->next->next->next->next->cl_head->data);
-		rc = cil_list_init(&high->cats_str);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init category list\n");
-			return rc;
-		}
+		cil_list_init(&high->cats_str);
 		rc = cil_catset_to_list(user_node->next->next->next->next->cl_head->next, high->cats_str);
 		if (rc != SEPOL_OK) {
 			printf("Failed to parse high categories to list\n");
