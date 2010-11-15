@@ -1060,7 +1060,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	rc = cil_catset_to_list(parse_current->next->next, catset->cat_list_str);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create categoryset list\n");
-		return rc;
+		goto gen_catset_cleanup;
 	}
 
 	ast_node->data = catset;
