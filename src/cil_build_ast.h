@@ -56,6 +56,7 @@ int cil_catset_to_list(struct cil_tree_node *, struct cil_list *, uint32_t);
 int cil_gen_catset(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_catset(struct cil_catset *);
 int cil_gen_catorder(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_catorder(struct cil_catorder *);
 int cil_gen_context(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_context(struct cil_context *);
 

@@ -361,6 +361,21 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf(" )\n");
 			return;
 		}
+		case CIL_CATORDER : {
+			struct cil_catorder *catorder = node->data;
+			struct cil_list_item *cat;
+			if (catorder->cat_list_str != NULL)
+				cat = catorder->cat_list_str->head;
+			else
+				return;
+			printf("CATORDER: (");
+			while (cat != NULL) {
+				printf(" %s", (char*)cat->data);
+				cat = cat->next;
+			}
+			printf(" )\n");
+			return;
+		}
 		case CIL_CONTEXT : {
 			struct cil_context *context = node->data;
 			printf("CONTEXT %s:", context->datum.name);

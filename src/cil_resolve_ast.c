@@ -477,7 +477,7 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-int __cil_catorder_append(struct cil_list *main_list, struct cil_list *new_list, struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
+int __cil_catorder_append(struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
 {
 	if (main_list_item == NULL || new_list_item == NULL)
 		return SEPOL_ERR;
@@ -558,7 +558,7 @@ int cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int
 					return SEPOL_OK;
 				}
 				else {
-					rc = __cil_catorder_append(primary, new, curr_main, curr_new, success);
+					rc = __cil_catorder_append(curr_main, curr_new, success);
 					if (rc != SEPOL_OK) {
 						printf("Failed to append categoryorder sublist to primary list\n");
 						return rc;
@@ -577,7 +577,6 @@ int cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int
 int cil_catorder_remove_list(struct cil_list *catorder, struct cil_list *remove_item)
 {
 	struct cil_list_item *list_item;
-	struct cil_list_item *new_next;
 
 	list_item = catorder->head;
 	while (list_item->next != NULL) {
@@ -640,6 +639,7 @@ int cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 		}
 		edge_node = edge_node->next;
 	}
+	return SEPOL_OK;
 }
 
 int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
@@ -817,15 +817,15 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t p
 				case 1 : {
 					//dominance
 					//catorder
-                    switch (current->flavor) {
-                        case CIL_CATORDER : {
-                            printf("case categoryorder\n");
-                            rc = cil_resolve_catorder(db, current);
-                            if (rc != SEPOL_OK)
-                                return rc;
-                            break;
-                        }
-                    }
+					switch (current->flavor) {
+						case CIL_CATORDER : {
+							printf("case categoryorder\n");
+							rc = cil_resolve_catorder(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+					}
 					break;
 				}
 				case 2 : {
