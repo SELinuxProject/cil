@@ -759,6 +759,81 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 	
 	return SEPOL_OK;
 }
+
+int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_tree_node *cat_node = NULL;
+	struct cil_tree_node *sens_node = NULL;
+	struct cil_senscat *senscat = (struct cil_senscat*)current->data;
+	struct cil_list *sub_list;
+	struct cil_list_item *curr = senscat->cat_list_str->head;
+	struct cil_list_item *curr_range_cat;
+	int rc = SEPOL_ERR;
+	symtab_t *symtab = NULL;
+	char *key = NULL;
+
+	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_SENS);
+	if (rc != SEPOL_OK) {
+		printf("Failed to get parent symtab\n");
+		return rc;
+	}
+
+	rc = cil_symtab_get_node(symtab, (char*)senscat->sens_str, &sens_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to get sensitivity node\n");
+		return rc;
+	}
+
+	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_CATS);
+	if (rc != SEPOL_OK) {
+		printf("Failed to get parent symtab\n");
+		return rc;
+	}
+
+	while (curr != NULL) {
+		if (curr->flavor == CIL_LIST) {
+			cil_list_init(&sub_list);
+			__cil_resolve_cat_range(db, current, (struct cil_list*)curr->data, sub_list);
+			curr_range_cat = sub_list->head;
+			while (curr_range_cat != NULL) {
+				key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
+				rc = cil_symtab_get_node(symtab, key, &cat_node);
+				if (rc != SEPOL_OK) {
+					printf("Failed to get node from symtab\n");
+					return rc;
+				}
+				rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
+				if (rc != SEPOL_OK) {
+					printf("Failed to inset into symtab\n");
+					return rc;
+				}
+				curr_range_cat = curr_range_cat->next;
+			}
+		}
+		else {
+			rc = cil_symtab_get_node(symtab, (char*)curr->data, &cat_node);
+			if (rc != SEPOL_OK) {
+				printf("Failed to get node from symtab\n");
+				return rc;
+			}
+			key = cil_strdup(curr->data);
+			rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
+			if (rc != SEPOL_OK) {
+				printf("Failed to inset into symtab\n");
+				return rc;
+			}
+		}
+		curr = curr->next;
+	}
+	cil_list_destroy(&senscat->cat_list_str, 1);
+	free(senscat->cat_list_str);
+	free(senscat->sens_str);
+	senscat->cat_list_str = NULL;
+
+	return SEPOL_OK;
+}
+
+
 int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_context *context = (struct cil_context*)current->data;
@@ -858,6 +933,15 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t p
 				}
 				case 2 : {
 					//sensitivitycategory
+					switch (current->flavor) {
+						case CIL_SENSCAT : {
+							printf("case sensitivitycategory\n");
+							rc = cil_resolve_senscat(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+					}
 					break;
 				}
 				case 3 : {

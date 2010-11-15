@@ -828,6 +828,12 @@ int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, 
 	char *key = parse_current->next->data;
 	symtab_t *symtab = NULL;
 	
+	rc = symtab_init(&sens->cats, CIL_SYM_SIZE);
+	if (rc != SEPOL_OK) {
+		printf("Categories symtab init failed\n");
+		goto gen_sens_cleanup;
+	}
+
 	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_SENS);
 	if (rc != SEPOL_OK) {
 		goto gen_sens_cleanup;
@@ -1136,6 +1142,47 @@ void cil_destroy_catorder(struct cil_catorder *catorder)
 		cil_list_destroy(&catorder->cat_list_str, 1);
 	free(catorder);
 }
+
+int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next->cl_head == NULL) {
+		printf("Invalid sensitivitycategory declaration (line %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_senscat *senscat = cil_malloc(sizeof(struct cil_senscat));
+
+	senscat->sens_str = cil_strdup(parse_current->next->data);
+
+	cil_list_init(&senscat->cat_list_str);
+	
+	rc = cil_catset_to_list(parse_current->next->next, senscat->cat_list_str);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create category list\n");
+		goto gen_senscat_cleanup;
+	}
+	ast_node->data = senscat;
+	ast_node->flavor = CIL_SENSCAT;
+
+	printf("CRAP: %s\n", ((struct cil_senscat*)ast_node->data)->sens_str);
+	return SEPOL_OK;
+
+	gen_senscat_cleanup:
+		cil_destroy_senscat(senscat);
+		return rc;
+}
+
+void cil_destroy_senscat(struct cil_senscat *senscat)
+{
+	if (senscat->sens_str != NULL)
+		free(senscat->sens_str);
+	if (senscat->cat_list_str != NULL)
+		cil_list_destroy(&senscat->cat_list_str, 1);
+	free(senscat);
 }
 
 /* Fills in context starting from user */
@@ -1568,6 +1615,14 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						rc = cil_gen_catorder(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
 							printf("cil_gen_catorder failed, rc: %d\n", rc);
+							return rc;
+						}
+						forced = 1;
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_SENSCAT)) {
+						rc = cil_gen_senscat(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_senscat failed, rc: %d\n", rc);
 							return rc;
 						}
 						forced = 1;

@@ -376,6 +376,34 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf(" )\n");
 			return;
 		}
+		case CIL_SENSCAT : {
+			struct cil_senscat *senscat = node->data;
+			struct cil_list_item *cat;
+			struct cil_list_item *parent;
+			if (senscat->cat_list_str != NULL)
+				cat = senscat->cat_list_str->head;
+			else
+				return;
+			printf("SENSCAT: %s (", senscat->sens_str);
+			while (cat != NULL) {
+				if (cat->flavor == CIL_LIST) {
+					parent = cat;
+					cat = ((struct cil_list*)cat->data)->head;
+					printf(" (");
+					while (cat != NULL) {
+						printf(" %s", (char*)cat->data);
+						cat = cat->next;
+					}
+					printf(" )");
+					cat = parent;
+				}
+				else
+					printf(" %s", (char*)cat->data);
+				cat = cat->next;
+			}
+			printf(" )\n");
+			return;
+		}
 		case CIL_CONTEXT : {
 			struct cil_context *context = node->data;
 			printf("CONTEXT %s:", context->datum.name);

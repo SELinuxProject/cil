@@ -44,6 +44,7 @@
 #define CIL_ROLEALLOW		29
 #define CIL_ROLETYPE		30 
 #define CIL_CATORDER		31
+#define CIL_SENSCAT		32
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -97,6 +98,7 @@
 #define CIL_KEY_CATALIAS	"categoryalias"
 #define CIL_KEY_CATSET		"categoryset"
 #define CIL_KEY_CATORDER	"categoryorder"
+#define CIL_KEY_SENSCAT		"sensitivitycategory"
 
 /*
 	Symbol Table Array Indices
@@ -270,6 +272,7 @@ struct cil_role_allow {
 
 struct cil_sens {
 	struct cil_symtab_datum datum;
+	symtab_t cats;
 };
 
 struct cil_sensalias {
@@ -301,6 +304,10 @@ struct cil_catset {
 struct cil_catorder {
 	struct cil_list *cat_list_str;
 };
+
+struct cil_senscat {
+	char *sens_str;
+	struct cil_list *cat_list_str;
 };
 
 struct cil_level {
