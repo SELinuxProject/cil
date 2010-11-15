@@ -1034,17 +1034,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || \
-		parse_current->next->next == NULL) {
-		printf("Invalid categoryset declaration (line: %d)\n", parse_current->line);
-		return SEPOL_ERR;
-	}
-
-	/* TODO CDS checks should allow for 0, 1, or more categories */
-	if (parse_current->next->next->cl_head != NULL) {
-		//cil_gen_catset_range(db, parse_current, ast_node);
-	}
-	else if (parse_current->next->next->next == NULL) {
+	if (parse_current->next == NULL || parse_current->next->next == NULL) {
 		printf("Invalid categoryset declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
