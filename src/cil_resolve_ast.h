@@ -7,7 +7,7 @@
 #include "cil_tree.h"
 
 int cil_resolve_avrule(struct cil_db *, struct cil_tree_node *);
-int cil_resolve_typerule(struct cil_db *, struct cil_tree_node *);
+int cil_resolve_type_rule(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_typeattr(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_typealias(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_class(struct cil_db *, struct cil_tree_node *);

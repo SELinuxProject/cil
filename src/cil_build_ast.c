@@ -481,9 +481,9 @@ void cil_destroy_userrole(struct cil_userrole *userrole)
 	free(userrole);
 }
 
-int cil_gen_roletrans(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	if (db == NULL || parse_current == NULL || ast_node == NULL)
+	if (parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 	
 	if (parse_current->next == NULL || \
@@ -1535,7 +1535,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						}
 					}
 					else if (!strcmp(parse_current->data, CIL_KEY_ROLETRANS)) {
-						rc = cil_gen_roletrans(db, parse_current, ast_node);
+						rc = cil_gen_roletrans(parse_current, ast_node);
 						if (rc != SEPOL_OK) {
 							printf("cil_gen_roletrans failed, rc: %d\n", rc);
 							return rc;
@@ -1597,6 +1597,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_CHANGE);
 						if (rc != SEPOL_OK) {
 							printf("cil_gen_type_rule (typechange) failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_TYPEMEMBER)) {
+						rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_MEMBER);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_type_rule (typemember) failed, rc: %d\n", rc);
 							return rc;
 						}
 					}
