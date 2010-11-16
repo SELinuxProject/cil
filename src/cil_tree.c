@@ -410,17 +410,55 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf(" )\n");
 			return;
 		}
-						printf(" %s", (char*)cat->data);
-						cat = cat->next;
+		case CIL_LEVEL : {
+			struct cil_level *level = node->data;
+			struct cil_list_item *cat;
+			struct cil_list_item *parent;
+			printf("LEVEL: %s", level->datum.name);
+			if (level->sens_str != NULL)
+				printf(" %s", level->sens_str);
+			else if (level->sens != NULL)
+				printf(" %s", level->sens->datum.name);
+			printf(" (");
+			if (level->cat_list_str != NULL) {
+				cat = level->cat_list_str->head;
+				while (cat != NULL) {
+					if (cat->flavor == CIL_LIST) {
+						parent = cat;
+						cat = ((struct cil_list *)cat->data)->head;
+						printf(" (");
+						while (cat != NULL) {
+							printf(" %s", (char*)cat->data);
+							cat = cat->next;
+						}
+						printf(" )");
+						cat = parent;
 					}
-					printf(" )");
-					cat = parent;
+					else
+						printf(" %s", (char*)cat->data);
+					cat = cat->next;
 				}
-				else
-					printf(" %s", (char*)cat->data);
-				cat = cat->next;
 			}
-			printf(" )\n");
+			else if (level->cat_list != NULL) {
+				cat = level->cat_list->head;
+				while (cat != NULL) {
+					if (cat->flavor == CIL_LIST) {
+						parent = cat;
+						cat = ((struct cil_list *)cat->data)->head;
+						printf(" (");
+						while (cat != NULL) {
+							printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+							cat = cat->next;
+						}
+						printf(" )");
+						cat = parent;
+					}
+					else
+						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+					cat = cat->next;
+				}
+			}
+			printf(" )");
 			return;
 		}
 		case CIL_CONTEXT : {

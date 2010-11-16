@@ -1144,7 +1144,6 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	ast_node->data = senscat;
 	ast_node->flavor = CIL_SENSCAT;
 
-	printf("CRAP: %s\n", ((struct cil_senscat*)ast_node->data)->sens_str);
 	return SEPOL_OK;
 
 	gen_senscat_cleanup:
@@ -1159,6 +1158,61 @@ void cil_destroy_senscat(struct cil_senscat *senscat)
 	if (senscat->cat_list_str != NULL)
 		cil_list_destroy(&senscat->cat_list_str, 1);
 	free(senscat);
+}
+
+int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+		printf("Invalid level declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	char *key = parse_current->next->data;
+	struct cil_level *level = cil_malloc(sizeof(struct cil_level));
+	symtab_t *symtab;
+
+	rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_LEVELS);
+	if (rc != SEPOL_OK) {
+		goto gen_level_cleanup;
+	}
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)level, ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert level into symtab\n");
+		goto gen_level_cleanup;
+	}
+
+	level->sens_str = cil_strdup(parse_current->next->next->data);
+	cil_list_init(&level->cat_list_str);
+
+	rc = cil_catset_to_list(parse_current->next->next->next, level->cat_list_str);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create level category list\n");
+		goto gen_level_cleanup;
+	}
+
+	ast_node->data = level;
+	ast_node->flavor = CIL_LEVEL;
+
+	return SEPOL_OK;
+
+	gen_level_cleanup:
+		cil_destroy_level(level);
+		return rc;	
+}
+
+void cil_destroy_level(struct cil_level *level)
+{
+	cil_symtab_datum_destroy(level->datum);
+	if (level->cat_list_str != NULL)
+		cil_list_destroy(&level->cat_list_str, 1);
+	if (level->cat_list != NULL) 
+		cil_list_destroy(&level->cat_list, 0);
+	free(level);
 }
 
 /* Fills in context starting from user */
@@ -1598,6 +1652,14 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						rc = cil_gen_senscat(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
 							printf("cil_gen_senscat failed, rc: %d\n", rc);
+							return rc;
+						}
+						forced = 1;
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_LEVEL)) {
+						rc = cil_gen_level(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_level failed, rc: %d\n", rc);
 							return rc;
 						}
 						forced = 1;

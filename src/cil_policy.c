@@ -15,13 +15,16 @@
 #define COMMONS				0
 #define CLASSES				1
 #define INTERFACES			2
-#define ATTRTYPES			3
-#define ALIASES				4
-#define ALLOWS				5
-#define USERROLES			6
+#define SENS				3
+#define CATS				4
+#define LEVELS				5
+#define ATTRTYPES			6
+#define ALIASES				7
+#define ALLOWS				8
+#define USERROLES			9
 
 #define BUFFER				1024
-#define NUM_POLICY_FILES 	7 
+#define NUM_POLICY_FILES 	10
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 {
@@ -154,15 +157,15 @@ int cil_cat_to_policy(FILE **file_arr, struct cil_list *cats)
 	struct cil_list_item *curr_cat = cats->head;
 	while (curr_cat != NULL) {
 		if (((struct cil_multimap_item*)curr_cat->data)->values->head == NULL) 
-			fprintf(file_arr[USERROLES], "category %s;\n", ((struct cil_multimap_item*)curr_cat->data)->key->name);
+			fprintf(file_arr[CATS], "category %s;\n", ((struct cil_multimap_item*)curr_cat->data)->key->name);
 		else {
-			fprintf(file_arr[USERROLES], "category %s alias", ((struct cil_multimap_item*)curr_cat->data)->key->name);
+			fprintf(file_arr[CATS], "category %s alias", ((struct cil_multimap_item*)curr_cat->data)->key->name);
 			struct cil_list_item *curr_catalias = ((struct cil_multimap_item*)curr_cat->data)->values->head;
 			while (curr_catalias != NULL) {
-				fprintf(file_arr[USERROLES], " %s",  ((struct cil_cat*)curr_catalias->data)->datum.name);
+				fprintf(file_arr[CATS], " %s",  ((struct cil_cat*)curr_catalias->data)->datum.name);
 				curr_catalias = curr_catalias->next;
 			}
-			fprintf(file_arr[USERROLES], ";\n"); 
+			fprintf(file_arr[CATS], ";\n"); 
 		}
 		curr_cat = curr_cat->next;
 	}
@@ -177,15 +180,15 @@ int cil_sens_to_policy(FILE **file_arr, struct cil_list *sens)
 	struct cil_list_item *curr_sens = sens->head;
 	while (curr_sens != NULL) {
 		if (((struct cil_multimap_item*)curr_sens->data)->values->head == NULL) 
-			fprintf(file_arr[USERROLES], "sensitivity %s;\n", ((struct cil_multimap_item*)curr_sens->data)->key->name);
+			fprintf(file_arr[SENS], "sensitivity %s;\n", ((struct cil_multimap_item*)curr_sens->data)->key->name);
 		else {
-			fprintf(file_arr[USERROLES], "sensitivity %s alias", ((struct cil_multimap_item*)curr_sens->data)->key->name);
+			fprintf(file_arr[SENS], "sensitivity %s alias", ((struct cil_multimap_item*)curr_sens->data)->key->name);
 			struct cil_list_item *curr_sensalias = ((struct cil_multimap_item*)curr_sens->data)->values->head;
 			while (curr_sensalias != NULL) {
-				fprintf(file_arr[USERROLES], " %s",  ((struct cil_sens*)curr_sensalias->data)->datum.name);
+				fprintf(file_arr[SENS], " %s",  ((struct cil_sens*)curr_sensalias->data)->datum.name);
 				curr_sensalias = curr_sensalias->next;
 			}
-			fprintf(file_arr[USERROLES], ";\n"); 
+			fprintf(file_arr[SENS], ";\n"); 
 		}
 		curr_sens = curr_sens->next;
 	}
@@ -358,6 +361,36 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALIASES], "role %s types %s\n", role_str, type_str);
 			break;
 		}
+		case CIL_LEVEL : {
+			struct cil_level *level = (struct cil_level*)current->data;
+			struct cil_list_item *cat = level->cat_list->head;
+			struct cil_list_item *curr;
+			struct cil_list_item *start_range;
+			struct cil_list_item *end_range;
+			char *sens_str = level->sens->datum.name;
+			fprintf(file_arr[LEVELS], "level %s:", sens_str);
+			while (cat != NULL) {
+				if (cat->flavor == CIL_LIST) {
+					curr = ((struct cil_list*)cat->data)->head;
+					start_range = curr;
+					while (curr != NULL) {
+						if (curr->next == NULL) {
+							end_range = curr;
+							break;
+						}
+						curr = curr->next;
+					}
+					fprintf(file_arr[LEVELS], "%s.%s", ((struct cil_cat*)start_range->data)->datum.name, ((struct cil_cat*)end_range->data)->datum.name);
+				}
+				else
+					fprintf(file_arr[LEVELS], "%s", ((struct cil_cat*)cat->data)->datum.name);
+				if (cat->next != NULL)
+					fprintf(file_arr[LEVELS], ",");
+				cat = cat->next;
+			}
+			fprintf(file_arr[LEVELS], ";\n");
+			break;
+		}
 		default : {
 			break;
 		}
@@ -395,6 +428,18 @@ int cil_gen_policy(struct cil_db *db)
 	strcpy(temp, "/tmp/interf-XXXXXX");
 	file_arr[INTERFACES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[INTERFACES] = cil_strdup(temp);
+
+	strcpy(temp, "/tmp/sens-XXXXXX");
+	file_arr[SENS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[SENS] = cil_strdup(temp);
+
+	strcpy(temp, "/tmp/cats-XXXXXX");
+	file_arr[CATS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[CATS] = cil_strdup(temp);
+
+	strcpy(temp, "/tmp/levels-XXXXXX");
+	file_arr[LEVELS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[LEVELS] = cil_strdup(temp);
 	
 	strcpy(temp, "/tmp/attrtypes-XXXXXX");
 	file_arr[ATTRTYPES] = fdopen(mkstemp(temp), "w+");
@@ -416,7 +461,6 @@ int cil_gen_policy(struct cil_db *db)
 
 	if (db->catorder->head != NULL) {
 		catorder = db->catorder->head->data;
-
 		while (catorder != NULL) {
 			cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
 			catorder = catorder->next;
@@ -491,7 +535,6 @@ int cil_gen_policy(struct cil_db *db)
 		printf("Error creating policy.conf\n");
 		return SEPOL_ERR;
 	}
-
 
 	rc = cil_cat_to_policy(file_arr, cats);
 	if (rc != SEPOL_OK) {

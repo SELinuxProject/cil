@@ -367,13 +367,6 @@ int cil_resolve_catalias(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
-{
-	struct cil_level *level = (struct cil_level*)current->data;
-
-	return SEPOL_OK;
-}
-
 int __cil_catorder_append(struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
 {
 	if (main_list_item == NULL || new_list_item == NULL)
@@ -779,6 +772,7 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 		}
 		curr = curr->next;
 	}
+
 	cil_list_destroy(&senscat->cat_list_str, 1);
 	free(senscat->cat_list_str);
 	free(senscat->sens_str);
@@ -788,9 +782,80 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int __cil_verify_sens_cats(struct cil_sens *sens, struct cil_list *cat_list)
+{
+	struct cil_tree_node *cat_node = NULL;
+	struct cil_list_item *curr_cat = cat_list->head;
+	symtab_t *symtab = &sens->cats;
+	char *key = NULL;
+	int rc = SEPOL_ERR;
+
+	while (curr_cat != NULL) {
+		if (curr_cat->flavor == CIL_LIST) {
+			rc = __cil_verify_sens_cats(sens, curr_cat->data);
+			if (rc != SEPOL_OK) {
+				printf("Category sublist contains invalid category for sensitivity: %s\n", sens->datum.name);
+				return rc;
+			}
+		}
+		else {
+			key = ((struct cil_cat*)curr_cat->data)->datum.name;
+			rc = cil_symtab_get_node(symtab, key, &cat_node);
+			if (rc != SEPOL_OK) {
+				printf("Category has not been associated with this sensitivity: %s\n", key);
+				return rc;
+			}
+		}
+		curr_cat = curr_cat->next;
+	}
+	
 	return SEPOL_OK;
 }
 
+int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_level *level = (struct cil_level*)current->data;
+	struct cil_tree_node *sens_node = NULL;
+	struct cil_list *res_cat_list;
+	int rc = SEPOL_ERR;
+	symtab_t *symtab = NULL;
+
+	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_SENS);
+	if (rc != SEPOL_OK) {
+		printf("Failed to get parent symtab\n");
+		return rc;
+	}
+	
+	rc = cil_symtab_get_node(symtab, (char*)level->sens_str, &sens_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to get sensitivity node\n");
+		return rc;
+	}
+
+	level->sens = (struct cil_sens*)sens_node->data;
+
+	cil_list_init(&res_cat_list);
+	rc = cil_resolve_cat_list(db, current, level->cat_list_str, res_cat_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve category list\n");
+		return rc;
+	}
+
+	rc = __cil_verify_sens_cats(sens_node->data, res_cat_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to verify sensitivitycategory relationship\n");
+		return rc;
+	}
+
+	level->cat_list = res_cat_list;
+	cil_list_destroy(&level->cat_list_str, 1);
+	free(level->cat_list_str);
+	free(level->sens_str);
+	level->cat_list_str = NULL;
+	level->sens_str = NULL;
+	
+	return SEPOL_OK;
+}
 
 int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 {
@@ -977,6 +1042,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t p
 						case CIL_CATSET : {
 							printf("case categoryset\n");
 							rc = cil_resolve_catset(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_LEVEL : {
+							printf("case level\n");
+							rc = cil_resolve_level(db, current);
 							if (rc != SEPOL_OK)
 								return rc;
 							break;

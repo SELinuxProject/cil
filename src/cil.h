@@ -99,6 +99,7 @@
 #define CIL_KEY_CATSET		"categoryset"
 #define CIL_KEY_CATORDER	"categoryorder"
 #define CIL_KEY_SENSCAT		"sensitivitycategory"
+#define CIL_KEY_LEVEL		"level"
 
 /*
 	Symbol Table Array Indices
@@ -311,6 +312,7 @@ struct cil_senscat {
 };
 
 struct cil_level {
+	struct cil_symtab_datum datum;
 	char *sens_str;
 	struct cil_sens *sens;
 	struct cil_list *cat_list_str;
