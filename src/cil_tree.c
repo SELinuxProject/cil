@@ -380,17 +380,36 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			struct cil_senscat *senscat = node->data;
 			struct cil_list_item *cat;
 			struct cil_list_item *parent;
-			if (senscat->cat_list_str != NULL)
-				cat = senscat->cat_list_str->head;
+			printf("SENSCAT:");
+			if (senscat->sens_str != NULL)
+				printf(" %s", senscat->sens_str);
 			else
+				printf(" [processed]");
+			if (senscat->cat_list_str != NULL) {
+				cat = senscat->cat_list_str->head;
+				while (cat != NULL) {
+					if (cat->flavor == CIL_LIST) {
+						parent = cat;
+						cat = ((struct cil_list*)cat->data)->head;
+						printf(" (");
+						while (cat != NULL) {
+							printf(" %s", (char*)cat->data);
+							cat = cat->next;
+						}
+						printf(" )");
+						cat = parent;
+					}
+					else
+						printf(" %s", (char*)cat->data);
+					cat = cat->next;
+				}
+			}
+			else
+				printf("\n");
 				return;
-			printf("SENSCAT: %s (", senscat->sens_str);
-			while (cat != NULL) {
-				if (cat->flavor == CIL_LIST) {
-					parent = cat;
-					cat = ((struct cil_list*)cat->data)->head;
-					printf(" (");
-					while (cat != NULL) {
+			printf(" )\n");
+			return;
+		}
 						printf(" %s", (char*)cat->data);
 						cat = cat->next;
 					}
