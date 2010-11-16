@@ -683,15 +683,13 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_tree_node *current, st
 	return SEPOL_OK;	
 }
 
-int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
+int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *cat_list, struct cil_list *res_cat_list)
 {
 	struct cil_tree_node *cat_node = NULL;
-	struct cil_catset *catset = (struct cil_catset*)current->data;
-	struct cil_list *res_cat_list;
 	struct cil_list *sub_list;
-	struct cil_list_item *curr = catset->cat_list_str->head;
 	struct cil_list_item *new_item;
 	struct cil_list_item *list_tail;
+	struct cil_list_item *curr = cat_list->head;
 	int rc = SEPOL_ERR;
 	symtab_t *symtab = NULL;
 
@@ -700,8 +698,6 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 		printf("Failed to get parent symtab\n");
 		return rc;
 	}
-
-	cil_list_init(&res_cat_list);
 
 	while (curr != NULL) {
 		cil_list_item_init(&new_item);
@@ -728,6 +724,18 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 		curr = curr->next;
 	}
 
+	return SEPOL_OK;
+}
+
+int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_catset *catset = (struct cil_catset*)current->data;
+	struct cil_list *res_cat_list;
+	int rc = SEPOL_ERR;
+
+	cil_list_init(&res_cat_list);
+	rc = cil_resolve_cat_list(db, current, catset->cat_list_str, res_cat_list);
+	
 	catset->cat_list = res_cat_list;
 	cil_list_destroy(&catset->cat_list_str, 1);
 	free(catset->cat_list_str);
