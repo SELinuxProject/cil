@@ -1160,6 +1160,29 @@ void cil_destroy_senscat(struct cil_senscat *senscat)
 	free(senscat);
 }
 
+int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
+{
+	int rc = SEPOL_ERR;
+
+	if (sens == NULL || level == NULL)
+		return SEPOL_ERR;
+
+	level->sens_str = cil_strdup(sens->data);
+
+	if (sens->next == NULL)
+		return SEPOL_OK;
+
+	cil_list_init(&level->cat_list_str);
+
+	rc = cil_catset_to_list(sens->next, level->cat_list_str);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create level category list\n");
+		return rc;
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -1186,12 +1209,9 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto gen_level_cleanup;
 	}
 
-	level->sens_str = cil_strdup(parse_current->next->next->data);
-	cil_list_init(&level->cat_list_str);
-
-	rc = cil_catset_to_list(parse_current->next->next->next, level->cat_list_str);
+	rc = cil_fill_level(parse_current->next->next, level);
 	if (rc != SEPOL_OK) {
-		printf("Failed to create level category list\n");
+		printf("Failed to populate level\n");
 		goto gen_level_cleanup;
 	}
 

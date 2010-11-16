@@ -59,6 +59,7 @@ int cil_gen_catorder(struct cil_db *, struct cil_tree_node *, struct cil_tree_no
 void cil_destroy_catorder(struct cil_catorder *);
 int cil_gen_senscat(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_senscat(struct cil_senscat *);
+int cil_fill_level(struct cil_tree_node *, struct cil_level *);
 int cil_gen_level(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_level(struct cil_level *);
 int cil_gen_context(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
