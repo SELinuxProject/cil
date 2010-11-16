@@ -1208,6 +1208,8 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 void cil_destroy_level(struct cil_level *level)
 {
 	cil_symtab_datum_destroy(level->datum);
+	if (level->sens_str != NULL)
+		free(level->sens_str);
 	if (level->cat_list_str != NULL)
 		cil_list_destroy(&level->cat_list_str, 1);
 	if (level->cat_list != NULL) 
