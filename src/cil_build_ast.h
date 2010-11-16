@@ -34,7 +34,7 @@ int cil_gen_userrole(struct cil_db *, struct cil_tree_node *, struct cil_tree_no
 void cil_destroy_userrole(struct cil_userrole *);
 int cil_gen_roletype(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_roletype(struct cil_roletype *);
-int cil_gen_roletrans(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_roletrans(struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_roletrans(struct cil_role_trans *);
 int cil_gen_roleallow(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_roleallow(struct cil_role_allow *);

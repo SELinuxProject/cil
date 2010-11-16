@@ -1275,6 +1275,104 @@ void test_cil_gen_role(CuTest *tc) {
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLE);
 }
 
+void test_cil_gen_roletrans(CuTest *tc) {
+	char *line[] = {"(", "roletransition", "foo_r",  "bar_t",  "foobar_r", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_roletrans(tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLETRANS);
+}
+
+void test_cil_gen_roletrans_currnull_neg(CuTest *tc) {
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletrans(NULL, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc); 	
+}
+
+void test_cil_gen_roletrans_astnull_neg (CuTest *tc) {
+	char *line[] = {"(", "roletransition" "foo_r", "bar_t", "foobar_r", ")", NULL};
+	struct  cil_tree *tree;
+	gen_test_tree(&tree, line);
+	
+	struct cil_tree_node *test_ast_node = NULL;
+
+	int rc = cil_gen_roletrans(tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roletrans_srcnull_neg(CuTest *tc) {
+	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletrans(tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roletrans_tgtnull_neg(CuTest *tc) {
+	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next->next = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletrans(tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roletrans_resultnull_neg(CuTest *tc) {
+	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next->next->next = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletrans(tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roletrans_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "foobar_r", "extra", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletrans(tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_bool_true(CuTest *tc) {
 	char *line[] = {"(", "bool", "foo", "true", ")", NULL};
 	struct cil_tree *tree;
@@ -2316,6 +2414,32 @@ void test_cil_build_ast_role_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_build_ast_roletrans(CuTest *tc) {
+	char *line[] = {"{", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_build_ast(test_db, tree->root, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_build_ast_roletrans_neg(CuTest *tc) {
+	char *line[] = {"(", "roletransition", "foo_r", "bar_t", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_build_ast(test_db, tree->root, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_build_ast_avrule(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 
@@ -2565,6 +2689,144 @@ void test_cil_resolve_ast_roleallow_neg(CuTest *tc) {
 
 	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
 	
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_roletrans(CuTest *tc) {
+	char *line[] = {"(", "role", "foo_r", ")",
+			"(", "type", "bar_t", ")",
+			"(", "role", "foobar_r", ")", 
+			"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_roletrans(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_roletrans_srcdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "bar_t", ")",
+			"(", "role", "foobar_r", ")", 
+			"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_roletrans(test_db, test_db->ast->root->cl_head->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_roletrans_tgtdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "foo_r", ")",
+			"(", "role", "foobar_r", ")", 
+			"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_roletrans(test_db, test_db->ast->root->cl_head->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_roletrans_resultdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "foo_r", ")",
+			"(", "type", "bar_t", ")", 
+			"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_roletrans(test_db, test_db->ast->root->cl_head->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_ast_roletrans(CuTest *tc) {
+	char *line[] = {"(", "role", "foo_r", ")",
+			"(", "type", "bar_t", ")",
+			"(", "role", "foobar_r", ")", 
+			"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_ast_roletrans_srcdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "bar_t", ")",
+			"(", "role", "foobar_r", ")", 
+			"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_ast_roletrans_tgtdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "foo_r", ")",
+			"(", "role", "foobar_r", ")", 
+			"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_ast_roletrans_resultdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "foo_r", ")",
+			"(", "type", "bar_t", ")",
+			"(", "roletransition", "foo_r", "bar_t", "foobar_r", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -3289,6 +3551,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg2);
 	SUITE_ADD_TEST(suite, test_cil_gen_role);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletrans);	
+	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_srcnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_tgtnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_resultnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_true);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_false);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_none_neg);
@@ -3346,6 +3615,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias_notype_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_role);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_role_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_roletrans);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_roletrans_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_bool);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_bool_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_avrule);
@@ -3364,6 +3635,14 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr_attrdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typeattr_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_srcdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_tgtdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_resultdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roletrans);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roletrans_srcdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roletrans_tgtdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roletrans_resultdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow_tgtdecl_neg);
