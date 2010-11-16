@@ -313,8 +313,8 @@ struct cil_senscat {
 struct cil_level {
 	char *sens_str;
 	struct cil_sens *sens;
-	struct cil_list *cats_str;
-	struct cil_list *cats;	
+	struct cil_list *cat_list_str;
+	struct cil_list *cat_list;	
 };
 
 struct cil_transform_interface {
