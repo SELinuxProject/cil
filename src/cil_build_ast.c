@@ -1556,6 +1556,13 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							return rc;
 						}
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_TYPEMEMBER)) {
+						rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_MEMBER);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_type_rule (typemember) failed, rc: %d\n", rc);
+							return rc;
+						}
+					}
 					else if (!strcmp(parse_current->data, CIL_KEY_INTERFACE)) {
 						printf("new interface: %s\n", (char*)parse_current->next->data);
 						ast_node->flavor = CIL_TRANS_IF;

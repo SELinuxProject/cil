@@ -1815,6 +1815,149 @@ void test_cil_gen_type_rule_change_extra_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_type_rule_member(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_type_rule(tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertStrEquals(tc, ((struct cil_type_rule*)test_ast_node->data)->src_str, tree->root->cl_head->cl_head->next->data);
+	CuAssertStrEquals(tc, ((struct cil_type_rule*)test_ast_node->data)->tgt_str, tree->root->cl_head->cl_head->next->next->data);
+	CuAssertStrEquals(tc, ((struct cil_type_rule*)test_ast_node->data)->obj_str, tree->root->cl_head->cl_head->next->next->next->data);
+	CuAssertStrEquals(tc, ((struct cil_type_rule*)test_ast_node->data)->result_str, tree->root->cl_head->cl_head->next->next->next->next->data);
+	CuAssertIntEquals(tc, ((struct cil_type_rule*)test_ast_node->data)->rule_kind, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPE_RULE);
+}
+
+void test_cil_gen_type_rule_member_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_type_rule(NULL, test_ast_node, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc); 
+}
+
+void test_cil_gen_type_rule_member_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	int rc = cil_gen_type_rule(tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}	
+
+void test_cil_gen_type_rule_member_srcnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	tree->root->cl_head->cl_head->next = NULL;
+	
+	int rc = cil_gen_type_rule(tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_type_rule_member_tgtnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	tree->root->cl_head->cl_head->next->next = NULL;
+
+	int rc = cil_gen_type_rule(tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_type_rule_member_objnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	tree->root->cl_head->cl_head->next->next->next = NULL;
+
+	int rc = cil_gen_type_rule(tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_type_rule_member_resultnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	tree->root->cl_head->cl_head->next->next->next->next = NULL;
+
+	int rc = cil_gen_type_rule(tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_type_rule_member_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", "extra", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_type_rule(tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_MEMBER);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_user(CuTest *tc) {
 	char *line[] = {"(", "user", "sysadm", ")", NULL};
 	struct cil_tree *tree;
@@ -2246,6 +2389,32 @@ void test_cil_build_ast_type_rule_change(CuTest *tc) {
 
 void test_cil_build_ast_type_rule_change_neg(CuTest *tc) {
 	char *line[] = {"(", "typechange", "foo", "bar", "file", "foobar", "extra",  ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);	
+	
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_build_ast(test_db, tree->root, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_build_ast_type_rule_member(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);	
+	
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_build_ast(test_db, tree->root, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_build_ast_type_rule_member_neg(CuTest *tc) {
+	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", "extra",  ")", NULL};
 	
 	struct cil_tree *tree;
 	gen_test_tree(&tree, line);	
@@ -2847,6 +3016,97 @@ void test_cil_resolve_type_rule_change_resultdecl_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_resolve_type_rule_member(CuTest *tc) {
+	char *line[] = {"(", "type", "foo", ")",
+			"(", "type", "bar", ")",
+			"(", "class", "file", "(", "write", ")", ")",
+			"(", "type", "foobar", ")", 
+			"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_type_rule(test_db, test_db->ast->root->cl_head->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_type_rule_member_srcdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "bar", ")",
+			"(", "class", "file", "(", "write", ")", ")",
+			"(", "type", "foobar", ")", 
+			"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_type_rule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_type_rule_member_tgtdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "foo", ")",
+			"(", "class", "file", "(", "write", ")", ")",
+			"(", "type", "foobar", ")", 
+			"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_type_rule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_type_rule_member_objdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "foo", ")",
+			"(", "type", "bar", ")",
+			"(", "type", "foobar", ")", 
+			"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_type_rule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_type_rule_member_resultdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "foo", ")",
+			"(", "type", "bar", ")",
+			"(", "class", "file", "(", "write", ")", ")",
+			"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_type_rule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_ast_type_rule_transition(CuTest *tc) {
 	char *line[] = {"(", "type", "foo", ")",
 			"(", "type", "bar", ")",
@@ -2914,6 +3174,47 @@ void test_cil_resolve_ast_type_rule_change_neg(CuTest *tc) {
 			"(", "class", "file", "(", "write", ")", ")",
 			"(", "type", "foobar", ")",
 			"(", "typechange", "foo", "bar", "file", "foobar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	cil_resolve_ast(test_db, test_db->ast->root, 1);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_ast_type_rule_member(CuTest *tc) {
+	char *line[] = {"(", "type", "foo", ")",
+			"(", "type", "bar", ")",
+			"(", "class", "file", "(", "write", ")", ")",
+			"(", "type", "foobar", ")",
+			"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	cil_resolve_ast(test_db, test_db->ast->root, 1);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root, 3);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_ast_type_rule_member_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "foo", ")",
+			"(", "class", "file", "(", "write", ")", ")",
+			"(", "type", "foobar", ")",
+			"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
 	
 	struct cil_tree *tree;
 	gen_test_tree(&tree, line);
@@ -3016,6 +3317,14 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change_objnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change_resultnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_srcnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_tgtnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_objnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_resultnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_user);
 	SUITE_ADD_TEST(suite, test_cil_gen_user_nouser_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_user_xsinfo_neg);
@@ -3051,6 +3360,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_transition_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_change);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_change_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
@@ -3090,10 +3401,17 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_change_tgtdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_change_objdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_change_resultdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member);
+	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member_srcdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member_tgtdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member_objdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member_resultdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_transition);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_transition_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_change);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_change_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_member);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_member_neg);
 
 	return suite;
 }
