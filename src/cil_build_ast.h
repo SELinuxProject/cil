@@ -61,6 +61,8 @@ int cil_gen_senscat(struct cil_db *, struct cil_tree_node *, struct cil_tree_nod
 void cil_destroy_senscat(struct cil_senscat *);
 int cil_gen_context(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_context(struct cil_context *);
+int cil_gen_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_netifcon(struct cil_netifcon *);
 
 int cil_build_ast(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 

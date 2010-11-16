@@ -912,8 +912,8 @@ void test_cil_gen_perm_noname_neg(CuTest *tc) {
 void test_cil_list_init(CuTest *tc) {
 	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
 
-	int rc = cil_list_init(&test_avrule->perms_str);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	cil_list_init(&test_avrule->perms_str);
+	CuAssertPtrNotNull(tc, test_avrule->perms_str);
 
 	free(test_avrule);   
 }
@@ -1554,8 +1554,6 @@ void test_cil_gen_type_rule_transition(CuTest *tc) {
 }
 
 void test_cil_gen_type_rule_transition_currnull_neg(CuTest *tc) {
-	char *line[] = {"(", "typetransition", "foo", "bar", "file", "foobar", ")", NULL};
-	
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
@@ -1697,8 +1695,6 @@ void test_cil_gen_type_rule_change(CuTest *tc) {
 }
 
 void test_cil_gen_type_rule_change_currnull_neg(CuTest *tc) {
-	char *line[] = {"(", "typechange", "foo", "bar", "file", "foobar", ")", NULL};
-	
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
@@ -1840,8 +1836,6 @@ void test_cil_gen_type_rule_member(CuTest *tc) {
 }
 
 void test_cil_gen_type_rule_member_currnull_neg(CuTest *tc) {
-	char *line[] = {"(", "typemember", "foo", "bar", "file", "foobar", ")", NULL};
-	
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
