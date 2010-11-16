@@ -624,7 +624,6 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_tree_node *current, st
 	}
 
 	struct cil_tree_node *cat_node = NULL;
-	struct cil_list *sub_list;
 	struct cil_list_item *curr = cat_list->head;
 	struct cil_list_item *catorder = ((struct cil_list*)db->catorder->head->data)->head;
 	struct cil_list_item *curr_catorder = catorder;
