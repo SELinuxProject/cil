@@ -805,6 +805,10 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 	free(senscat->cat_list_str);
 	free(senscat->sens_str);
 	senscat->cat_list_str = NULL;
+	senscat->sens_str = NULL;
+
+	return SEPOL_OK;
+}
 
 	return SEPOL_OK;
 }
