@@ -613,7 +613,7 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
     return SEPOL_OK;
 }
 
-int __cil_resolve_cat_range(struct cil_db *db, struct cil_tree_node *current, struct cil_list *cat_list, struct cil_list *res_list)
+int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct cil_list *res_list)
 {
 	if (cat_list == NULL || res_list == NULL)
 		return SEPOL_ERR;
@@ -623,61 +623,31 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_tree_node *current, st
 		return SEPOL_ERR;
 	}
 
-	struct cil_tree_node *cat_node = NULL;
-	struct cil_list_item *curr = cat_list->head;
+	struct cil_list_item *curr_cat = cat_list->head;
 	struct cil_list_item *catorder = ((struct cil_list*)db->catorder->head->data)->head;
 	struct cil_list_item *curr_catorder = catorder;
 	struct cil_list_item *new_item;
 	struct cil_list_item *list_tail;
-	struct cil_list_item *start_range = curr;
-	struct cil_list_item *end_range = curr->next;
-	symtab_t *symtab = NULL;
-	int rc = SEPOL_ERR;
 
-	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_CATS);
-	if (rc != SEPOL_OK) {
-		printf("Failed to get parent symtab\n");
-		return rc;
-	}
-
-	while (curr != NULL) {
-		cil_list_item_init(&new_item);
-		rc = cil_symtab_get_node(symtab, (char*)curr->data, &cat_node);
-		if (rc != SEPOL_OK) {
-			printf("Failed to get node from symtab\n");
-			return rc;
-		}
-		new_item->flavor = cat_node->flavor;
-		new_item->data = cat_node->data;
-		if (res_list->head == NULL)
-			res_list->head = new_item;
-		else
-			list_tail->next = new_item;
-		list_tail = new_item;
-
-		if (!strcmp((char*)start_range->data, (char*)((struct cil_cat*)cat_node->data)->datum.name)) {
+	while (curr_catorder != NULL) {
+		if (!strcmp((char*)curr_cat->data, (char*)((struct cil_cat*)curr_catorder->data)->datum.name)) {
 			while (curr_catorder != NULL) {
-				if (!strcmp((char*)start_range->data, (char*)((struct cil_cat*)curr_catorder->data)->datum.name)) {
-					curr_catorder = curr_catorder->next;
-					while (strcmp((char*)end_range->data, (char*)((struct cil_cat*)curr_catorder->data)->datum.name)) {
-						if (res_list->head == NULL)
-							res_list->head = curr_catorder;
-						else
-							list_tail->next = curr_catorder;
-						list_tail = curr_catorder;
-						curr_catorder = curr_catorder->next;
-						if (curr_catorder == NULL) {
-							printf("Invalid category range\n");
-							return SEPOL_ERR;
-						}
-					}
-					break;
-				}
+				cil_list_item_init(&new_item);
+				new_item->flavor = curr_catorder->flavor;
+				new_item->data = curr_catorder->data;
+				if (res_list->head == NULL)
+					res_list->head = new_item;
+				else
+					list_tail->next = new_item;
+				list_tail = new_item;
+				if (!strcmp((char*)curr_cat->next->data, (char*)((struct cil_cat*)curr_catorder->data)->datum.name))
+					return SEPOL_OK;
 				curr_catorder = curr_catorder->next;
 			}
-			curr_catorder = catorder;
+			printf("Invalid category range\n");
+			return SEPOL_ERR;
 		}
-		curr = curr->next;
+		curr_catorder = curr_catorder->next;
 	}
 
 	return SEPOL_OK;	
@@ -705,7 +675,7 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 			cil_list_init(&sub_list);
 			new_item->flavor = CIL_LIST;
 			new_item->data = sub_list;
-			__cil_resolve_cat_range(db, current, (struct cil_list*)curr->data, sub_list);
+			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
 		}
 		else {
 			rc = cil_symtab_get_node(symtab, (char*)curr->data, &cat_node);
@@ -777,7 +747,7 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 	while (curr != NULL) {
 		if (curr->flavor == CIL_LIST) {
 			cil_list_init(&sub_list);
-			__cil_resolve_cat_range(db, current, (struct cil_list*)curr->data, sub_list);
+			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
 			curr_range_cat = sub_list->head;
 			while (curr_range_cat != NULL) {
 				key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
