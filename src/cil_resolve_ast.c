@@ -655,11 +655,11 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_tree_node *current, st
 			list_tail->next = new_item;
 		list_tail = new_item;
 
-		if (strcmp((char*)start_range->data, (char*)((struct cil_cat*)cat_node->data)->datum.name) == 0) {
+		if (!strcmp((char*)start_range->data, (char*)((struct cil_cat*)cat_node->data)->datum.name)) {
 			while (curr_catorder != NULL) {
-				if (strcmp((char*)start_range->data, (char*)((struct cil_cat*)curr_catorder->data)->datum.name) == 0) {
+				if (!strcmp((char*)start_range->data, (char*)((struct cil_cat*)curr_catorder->data)->datum.name)) {
 					curr_catorder = curr_catorder->next;
-					while (strcmp((char*)end_range->data, (char*)((struct cil_cat*)curr_catorder->data)->datum.name) != 0) {
+					while (strcmp((char*)end_range->data, (char*)((struct cil_cat*)curr_catorder->data)->datum.name)) {
 						if (res_list->head == NULL)
 							res_list->head = curr_catorder;
 						else
