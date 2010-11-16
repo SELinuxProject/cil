@@ -51,72 +51,66 @@ int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 	return SEPOL_OK;
 }
 
-static int __cil_user_list_insert_user(struct cil_list_item **current_user, struct cil_user *user, struct cil_role *role)
+static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
-	struct cil_list_item *new_user = NULL;
-	cil_list_item_init(&new_user);
-	struct cil_user_list_item *new_data = cil_malloc(sizeof(struct cil_user_list_item));
-	new_data->user = user;
-	cil_list_init(&new_data->roles);
-	if (role != NULL) {
-		cil_list_item_init(&new_data->roles->head);
-		new_data->roles->head->data = role;
-		new_data->roles->head->flavor = CIL_ROLE;
+	struct cil_list_item *new_key = NULL;
+	cil_list_item_init(&new_key);
+	struct cil_multimap_item *new_data = cil_malloc(sizeof(struct cil_multimap_item));
+	new_data->key = key;
+	cil_list_init(&new_data->values);
+	if (value != NULL) {
+		cil_list_item_init(&new_data->values->head);
+		new_data->values->head->data = value;
+		new_data->values->head->flavor = val_flavor;
 	}
-	new_user->flavor = CIL_USERROLE;
-	new_user->data = new_data;
-	if (*current_user == NULL)
-		*current_user = new_user;
+	new_key->flavor = key_flavor;
+	new_key->data = new_data;
+	if (*curr_key == NULL)
+		*curr_key = new_key;
 	else
-		(*current_user)->next = new_user;
+		(*curr_key)->next = new_key;
 
 	return SEPOL_OK;
 }
 
-int cil_user_list_insert(struct cil_list *list, struct cil_user *user, struct cil_role *role)
+int cil_multimap_insert(struct cil_list *list, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
-	if (list == NULL || user == NULL) 
+	if (list == NULL || key == NULL) 
 		return SEPOL_ERR;
 
-	struct cil_list_item *current_user = list->head;
-	struct cil_list_item *current_role = NULL;
-	int rc = SEPOL_ERR;
+	struct cil_list_item *curr_key = list->head;
+	struct cil_list_item *curr_value = NULL;
 
-	if (current_user == NULL) {
-		__cil_user_list_insert_user(&list->head, user, role);
-	}
-	while(current_user != NULL) {
-		if ((struct cil_user_list_item*)current_user->data != NULL) {
-			if (((struct cil_user_list_item*)current_user->data)->user != NULL && ((struct cil_user_list_item*)current_user->data)->user == user) {
-				current_role = ((struct cil_user_list_item*)current_user->data)->roles->head;
-				if (current_role == NULL) {
-					struct cil_list_item *new_role = NULL;
-					cil_list_item_init(&new_role);
-					new_role->data = role;
-					new_role->flavor = CIL_ROLE;
-					((struct cil_user_list_item*)current_user->data)->roles->head = new_role;
+	if (curr_key == NULL) 
+		__cil_multimap_insert_key(&list->head, key, value, key_flavor, val_flavor);
+	while(curr_key != NULL) {
+		if ((struct cil_multimap_item*)curr_key->data != NULL) {
+			if (((struct cil_multimap_item*)curr_key->data)->key != NULL && ((struct cil_multimap_item*)curr_key->data)->key == key) {
+				curr_value = ((struct cil_multimap_item*)curr_key->data)->values->head;
+
+				struct cil_list_item *new_value = NULL;
+				cil_list_item_init(&new_value);
+				new_value->data = value;
+				new_value->flavor = val_flavor;
+
+				if (curr_value == NULL) {
+					((struct cil_multimap_item*)curr_key->data)->values->head = new_value;
 					return SEPOL_OK;
 				}
-				while (current_role != NULL) {
-					if (current_role == role) {
-						/* TODO CDS make this a break, as duplicates do not hurt */
-						printf("Duplicate declaration of userrole\n");
-						return SEPOL_ERR;
+				while (curr_value != NULL) {
+					if (curr_value == (struct cil_list_item*)value) {
+						free(new_value);
+						break;
 					}
-					if (current_role->next == NULL) {
-						/* TODO CDS factor this out since it is copied/pasted from above */
-						struct cil_list_item *new_role = NULL;
-						cil_list_item_init(&new_role);
-						new_role->data = role;
-						new_role->flavor = CIL_ROLE;
-						current_role->next = new_role;
+					if (curr_value->next == NULL) {
+						curr_value->next = new_value;
 						return SEPOL_OK;
 					}
-					current_role = current_role->next;
+					curr_value = curr_value->next;
 				}
 			}	
-			else if (current_user->next == NULL) {
-				__cil_user_list_insert_user(&current_user, user, role);
+			else if (curr_key->next == NULL) {
+				__cil_multimap_insert_key(&curr_key, key, value, key_flavor, val_flavor);
 				return SEPOL_OK;
 			}
 		}
@@ -124,7 +118,7 @@ int cil_user_list_insert(struct cil_list *list, struct cil_user *user, struct ci
 			printf("No data in list item\n");
 			return SEPOL_ERR;
 		}
-		current_user = current_user->next;
+		curr_key = curr_key->next;
 	}
 	return SEPOL_OK;
 }
@@ -136,12 +130,12 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 	
 	struct cil_list_item *current_user = userroles->head;
 	while (current_user != NULL) {
-		if (((struct cil_user_list_item*)current_user->data)->roles->head == NULL) {
-			printf("No roles associated with user %s (line %d)\n",  ((struct cil_user_list_item*)current_user->data)->user->datum.name,  ((struct cil_user_list_item*)current_user->data)->user->datum.node->line);
+		if (((struct cil_multimap_item*)current_user->data)->values->head == NULL) {
+			printf("No roles associated with user %s (line %d)\n",  ((struct cil_multimap_item*)current_user->data)->key->name,  ((struct cil_multimap_item*)current_user->data)->key->node->line);
 			return SEPOL_ERR;
 		}
-		fprintf(file_arr[USERROLES], "user %s roles {", ((struct cil_user_list_item*)current_user->data)->user->datum.name);
-		struct cil_list_item *current_role = ((struct cil_user_list_item*)current_user->data)->roles->head;
+		fprintf(file_arr[USERROLES], "user %s roles {", ((struct cil_multimap_item*)current_user->data)->key->name);
+		struct cil_list_item *current_role = ((struct cil_multimap_item*)current_user->data)->values->head;
 		while (current_role != NULL) {
 			fprintf(file_arr[USERROLES], " %s",  ((struct cil_role*)current_role->data)->datum.name);
 			current_role = current_role->next;
@@ -152,15 +146,58 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 	return SEPOL_OK;
 }
 
+int cil_cat_to_policy(FILE **file_arr, struct cil_list *cats)
+{
+	if (cats == NULL) 
+		return SEPOL_OK;
+	
+	struct cil_list_item *curr_cat = cats->head;
+	while (curr_cat != NULL) {
+		if (((struct cil_multimap_item*)curr_cat->data)->values->head == NULL) 
+			fprintf(file_arr[USERROLES], "category %s;\n", ((struct cil_multimap_item*)curr_cat->data)->key->name);
+		else {
+			fprintf(file_arr[USERROLES], "category %s alias", ((struct cil_multimap_item*)curr_cat->data)->key->name);
+			struct cil_list_item *curr_catalias = ((struct cil_multimap_item*)curr_cat->data)->values->head;
+			while (curr_catalias != NULL) {
+				fprintf(file_arr[USERROLES], " %s",  ((struct cil_cat*)curr_catalias->data)->datum.name);
+				curr_catalias = curr_catalias->next;
+			}
+			fprintf(file_arr[USERROLES], ";\n"); 
+		}
+		curr_cat = curr_cat->next;
+	}
+	return SEPOL_OK;
+}
+
+int cil_sens_to_policy(FILE **file_arr, struct cil_list *sens)
+{
+	if (sens == NULL) 
+		return SEPOL_OK;
+	
+	struct cil_list_item *curr_sens = sens->head;
+	while (curr_sens != NULL) {
+		if (((struct cil_multimap_item*)curr_sens->data)->values->head == NULL) 
+			fprintf(file_arr[USERROLES], "sensitivity %s;\n", ((struct cil_multimap_item*)curr_sens->data)->key->name);
+		else {
+			fprintf(file_arr[USERROLES], "sensitivity %s alias", ((struct cil_multimap_item*)curr_sens->data)->key->name);
+			struct cil_list_item *curr_sensalias = ((struct cil_multimap_item*)curr_sens->data)->values->head;
+			while (curr_sensalias != NULL) {
+				fprintf(file_arr[USERROLES], " %s",  ((struct cil_sens*)curr_sensalias->data)->datum.name);
+				curr_sensalias = curr_sensalias->next;
+			}
+			fprintf(file_arr[USERROLES], ";\n"); 
+		}
+		curr_sens = curr_sens->next;
+	}
+	return SEPOL_OK;
+}
+
 int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current) 
 {
 	char *name = ((struct cil_symtab_datum*)current->data)->name;
 	uint32_t flavor = current->flavor;
 
 	switch(flavor) {
-		case CIL_BLOCK: {
-			break;  // Ignore
-		}
 		case CIL_ATTR: {
 			fprintf(file_arr[ATTRTYPES], "attribute %s;\n", name);
 			break;
@@ -313,21 +350,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALLOWS], "roleallow %s %s;\n", src_str, tgt_str);
 			break;
 		}
-		case CIL_SENS: {
-			break;
-		}
-		case CIL_SENSALIAS: {
-			break;
-		}
-		case CIL_CAT: {
-			break;
-		}
-		case CIL_CATALIAS: {
-			break;
-		}
-		case CIL_CATSET: {
-			break;
-		}
 		case CIL_ROLETYPE : {
 			struct cil_roletype *roletype = (struct cil_roletype*)current->data;
 			char *role_str = ((struct cil_symtab_datum*)(struct cil_role*)roletype->role)->name;
@@ -337,8 +359,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			break;
 		}
 		default : {
-			printf("Unknown data flavor: %d\n", flavor);
-			return SEPOL_ERR;
 			break;
 		}
 	}
@@ -346,9 +366,10 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-int cil_gen_policy(struct cil_tree_node *root)
+int cil_gen_policy(struct cil_db *db)
 {
-	struct cil_tree_node *curr = root;
+	struct cil_tree_node *curr = db->ast->root;
+	struct cil_list_item *catorder;
 	int rc = SEPOL_ERR;
 	int reverse = 0;
 	FILE *policy_file;
@@ -358,6 +379,10 @@ int cil_gen_policy(struct cil_tree_node *root)
 
 	struct cil_list *users;
 	cil_list_init(&users);
+	struct cil_list *cats;
+	cil_list_init(&cats);
+	struct cil_list *sens;
+	cil_list_init(&sens);
 
 	strcpy(temp,"/tmp/common-XXXXXX");
 	file_arr[COMMONS] = fdopen(mkstemp(temp), "w+");
@@ -387,7 +412,16 @@ int cil_gen_policy(struct cil_tree_node *root)
 	file_arr[USERROLES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[USERROLES] = cil_strdup(temp);
 
-	policy_file = fopen("policy.conf", "w+");	
+	policy_file = fopen("policy.conf", "w+");
+
+	if (db->catorder->head != NULL) {
+		catorder = db->catorder->head->data;
+
+		while (catorder != NULL) {
+			cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
+			catorder = catorder->next;
+		}
+	}
 
 	do {
 		if (curr->cl_head != NULL) {
@@ -402,17 +436,34 @@ int cil_gen_policy(struct cil_tree_node *root)
 			}
 		}
 		else {
-			if (curr->flavor == CIL_USERROLE) {
-				cil_user_list_insert(users, ((struct cil_userrole*)curr->data)->user, ((struct cil_userrole*)curr->data)->role);
-			}
-			else if (curr->flavor == CIL_USER) {
-				cil_user_list_insert(users, (struct cil_user*)curr->data, NULL);
-			}
-			else {
-				rc = cil_name_to_policy(file_arr, curr);
-				if (rc != SEPOL_OK && rc != SEPOL_DONE) {
-					printf("Error converting node to policy %d\n", rc);
-					return SEPOL_ERR;
+			switch (curr->flavor) {
+				case CIL_USER: {
+					cil_multimap_insert(users, curr->data, NULL, CIL_USERROLE, 0);
+					break;
+				}
+				case CIL_USERROLE: {
+					cil_multimap_insert(users, &((struct cil_userrole*)curr->data)->user->datum, &((struct cil_userrole*)curr->data)->role->datum, CIL_USERROLE, CIL_ROLE);
+					break;
+				}
+				case CIL_CATALIAS: {
+					cil_multimap_insert(cats, &((struct cil_catalias*)curr->data)->cat->datum, curr->data, CIL_CAT, CIL_CATALIAS);
+					break;
+				}
+				case CIL_SENS: {
+					cil_multimap_insert(sens, curr->data, NULL, CIL_SENS, 0);
+					break;
+				}
+				case CIL_SENSALIAS: {
+					cil_multimap_insert(sens, &((struct cil_sensalias*)curr->data)->sens->datum, curr->data, CIL_SENS, CIL_SENSALIAS);
+					break;
+				}
+				default : {
+					rc = cil_name_to_policy(file_arr, curr);
+					if (rc != SEPOL_OK && rc != SEPOL_DONE) {
+						printf("Error converting node to policy %d\n", rc);
+						return SEPOL_ERR;
+					}
+					break;
 				}
 			}
 		}
@@ -430,6 +481,19 @@ int cil_gen_policy(struct cil_tree_node *root)
 	} while (curr->flavor != CIL_ROOT);
 
 	rc = cil_userrole_to_policy(file_arr, users);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return SEPOL_ERR;
+	}
+
+	rc = cil_sens_to_policy(file_arr, sens);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return SEPOL_ERR;
+	}
+
+
+	rc = cil_cat_to_policy(file_arr, cats);
 	if (rc != SEPOL_OK) {
 		printf("Error creating policy.conf\n");
 		return SEPOL_ERR;

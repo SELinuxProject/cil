@@ -141,6 +141,14 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_catset(*data);
 			break;
 		}
+		case (CIL_CATORDER) : {
+			cil_destroy_catorder(*data);
+			break;
+		}
+		case (CIL_SENSCAT) : {
+			cil_destroy_senscat(*data);
+			break;
+		}
 		case (CIL_ROLETYPE) : {
 			cil_destroy_roletype(*data);
 			break;

@@ -10,15 +10,12 @@
 #include "cil_symtab.h"
 #include "cil_build_ast.h"
 
-/* TODO CDS if it cannot return an error, then have the return value be void to indicate that */
-int cil_list_init(struct cil_list **list)
+void cil_list_init(struct cil_list **list)
 {
 	struct cil_list *new_list = cil_malloc(sizeof(struct cil_list));
 	new_list->head = NULL;
 
 	*list = new_list;
-	
-	return SEPOL_OK;
 }
 
 void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
@@ -45,7 +42,7 @@ void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
 	*list = NULL;	
 }
 
-int cil_list_item_init(struct cil_list_item **item)
+void cil_list_item_init(struct cil_list_item **item)
 {
 	struct cil_list_item *new_item = cil_malloc(sizeof(struct cil_list_item));
 	new_item->next = NULL;
@@ -53,8 +50,6 @@ int cil_list_item_init(struct cil_list_item **item)
 	new_item->data = NULL;
 
 	*item = new_item;
-
-	return SEPOL_OK;
 }
 
 void cil_list_item_destroy(struct cil_list_item **item, uint8_t destroy_data)
@@ -84,9 +79,14 @@ int cil_append_to_list(struct cil_list *list, struct cil_list_item *item)
 	if (list == NULL || item == NULL)
 		return SEPOL_ERR;
 
+	if (list->head == NULL) {
+		list->head = item;
+		return SEPOL_OK;
+	}
+
 	struct cil_list_item *curr_item = list->head;
 
-	while (curr_item->next != NULL)
+	while (curr_item->next != NULL) 
 		curr_item = curr_item->next;
 	
 	curr_item->next = item;
