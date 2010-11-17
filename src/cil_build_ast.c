@@ -1188,7 +1188,7 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 			level->sens_str = NULL;
 		}
 		if (level->cat_list_str != NULL) {
-			cil_list_destroy(level->cat_list_str, 1);
+			cil_list_destroy(&level->cat_list_str, 1);
 			level->cat_list_str = NULL;
 		}
 		return rc;

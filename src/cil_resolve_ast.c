@@ -787,9 +787,8 @@ int __cil_verify_sens_cats(struct cil_sens *sens, struct cil_list *cat_list)
 	return SEPOL_OK;
 }
 
-int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
+int __cil_resolve_level_helper(struct cil_db *db, struct cil_tree_node *current, struct cil_level *level)
 {
-	struct cil_level *level = (struct cil_level*)current->data;
 	struct cil_tree_node *sens_node = NULL;
 	struct cil_list *res_cat_list;
 	int rc = SEPOL_ERR;
@@ -821,6 +820,16 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
 	free(level->sens_str);
 	level->cat_list_str = NULL;
 	level->sens_str = NULL;
+
+	return SEPOL_OK;
+}
+
+int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_level *level = (struct cil_level*)current->data;
+	int rc = __cil_resolve_level_helper(db, current, level);
+	if (rc != SEPOL_OK) 
+		return rc;
 	
 	return SEPOL_OK;
 }
@@ -875,7 +884,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 		context->low_str = NULL;
 	}
 	else if (context->low != NULL) {
-		rc = cil_resolve_level(db, context->low);
+		rc = __cil_resolve_level_helper(db, current, context->low);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_context: Failed to resolve low level, rc: %d\n", rc);
 			goto resolve_context_cleanup;
@@ -891,6 +900,13 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 		context->high = (struct cil_level*)high_node->data;
 		free(context->high_str);
 		context->high_str = NULL;
+	}
+	else if (context->high != NULL) {
+		rc = __cil_resolve_level_helper(db, current, context->high);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_context: Failed to resolve high level, rc: %d\n", rc);
+			goto resolve_context_cleanup;
+		}
 	}
 
 	return SEPOL_OK;
