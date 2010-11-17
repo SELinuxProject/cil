@@ -916,7 +916,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 		return SEPOL_ERR;
 }
 
-int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
+int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
 {
 	int rc = SEPOL_ERR;
 	int reverse = 0;
@@ -1095,6 +1095,23 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t p
 			reverse = 1;
 		}
 	} while (current->flavor != CIL_ROOT);
+	return SEPOL_OK;
+}
+
+int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
+{
+	if (db == NULL || current == NULL)
+		return SEPOL_ERR;
+
+	int rc = SEPOL_ERR;
+
+	printf("---------- Pass 1 ----------\n");
+	__cil_resolve_ast_helper(db, current, 1);
+	printf("---------- Pass 2 ----------\n");
+	__cil_resolve_ast_helper(db, current, 2);
+	printf("---------- Pass 3 ----------\n");
+	__cil_resolve_ast_helper(db, current, 3);
+
 	return SEPOL_OK;
 }
 
