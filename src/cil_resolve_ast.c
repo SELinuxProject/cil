@@ -1002,7 +1002,6 @@ int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, u
 			switch (pass) {
 				case 1 : {
 					//dominance
-					//catorder
 					switch (current->flavor) {
 						case CIL_CATORDER : {
 							printf("case categoryorder\n");
@@ -1015,7 +1014,6 @@ int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, u
 					break;
 				}
 				case 2 : {
-					//sensitivitycategory
 					switch (current->flavor) {
 						case CIL_SENSCAT : {
 							printf("case sensitivitycategory\n");
