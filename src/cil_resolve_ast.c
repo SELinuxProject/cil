@@ -544,21 +544,16 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_list *cat_list;
 	struct cil_list *edges_list;
 	struct cil_list *edge = NULL;
-	symtab_t *symtab = NULL;
 	int rc = SEPOL_ERR;
 
 	cil_list_init(&cat_list);
 	cil_list_init(&edges_list);
-	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_CATS);
-	if (rc != SEPOL_OK) {
-		printf("Failed to get parent symtab\n");
-		return rc;
-	}
+	
 	while (curr_cat != NULL) {
 		cil_list_item_init(&list_item);
-		rc = cil_symtab_get_node(symtab, (char*)curr_cat->data, &cat_node);
+		rc = cil_resolve_name(db, current, (char*)curr_cat->data, CIL_SYM_CATS, &cat_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to get node from symtab\n");
+			printf("Failed to resolve category name\n");
 			return rc;
 		}
 		list_item->flavor = cat_node->flavor;
@@ -654,14 +649,7 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 	struct cil_list_item *list_tail;
 	struct cil_list_item *curr = cat_list->head;
 	int rc = SEPOL_ERR;
-	symtab_t *symtab = NULL;
-
-	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_CATS);
-	if (rc != SEPOL_OK) {
-		printf("Failed to get parent symtab\n");
-		return rc;
-	}
-
+	
 	while (curr != NULL) {
 		cil_list_item_init(&new_item);
 		if (curr->flavor == CIL_LIST) {
@@ -671,9 +659,9 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
 		}
 		else {
-			rc = cil_symtab_get_node(symtab, (char*)curr->data, &cat_node);
+			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, &cat_node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to get node from symtab\n");
+				printf("Failed to resolve category name\n");
 				return rc;
 			}
 			new_item->flavor = cat_node->flavor;
@@ -716,27 +704,14 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_list_item *curr = senscat->cat_list_str->head;
 	struct cil_list_item *curr_range_cat;
 	int rc = SEPOL_ERR;
-	symtab_t *symtab = NULL;
 	char *key = NULL;
-
-	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_SENS);
-	if (rc != SEPOL_OK) {
-		printf("Failed to get parent symtab\n");
-		return rc;
-	}
-
-	rc = cil_symtab_get_node(symtab, (char*)senscat->sens_str, &sens_node);
+	
+	rc = cil_resolve_name(db, current, (char*)senscat->sens_str, CIL_SYM_SENS, &sens_node);
 	if (rc != SEPOL_OK) {
 		printf("Failed to get sensitivity node\n");
 		return rc;
 	}
-
-	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_CATS);
-	if (rc != SEPOL_OK) {
-		printf("Failed to get parent symtab\n");
-		return rc;
-	}
-
+	
 	while (curr != NULL) {
 		if (curr->flavor == CIL_LIST) {
 			cil_list_init(&sub_list);
@@ -744,29 +719,29 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 			curr_range_cat = sub_list->head;
 			while (curr_range_cat != NULL) {
 				key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
-				rc = cil_symtab_get_node(symtab, key, &cat_node);
+				rc = cil_resolve_name(db, current, key, CIL_SYM_CATS, &cat_node);
 				if (rc != SEPOL_OK) {
-					printf("Failed to get node from symtab\n");
+					printf("Failed to resolve category name\n");
 					return rc;
 				}
 				rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
 				if (rc != SEPOL_OK) {
-					printf("Failed to inset into symtab\n");
+					printf("Failed to insert category into sensitivitycategory symtab\n");
 					return rc;
 				}
 				curr_range_cat = curr_range_cat->next;
 			}
 		}
 		else {
-			rc = cil_symtab_get_node(symtab, (char*)curr->data, &cat_node);
+			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, &cat_node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to get node from symtab\n");
+				printf("Failed to resolve category name\n");
 				return rc;
 			}
 			key = cil_strdup(curr->data);
 			rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
 			if (rc != SEPOL_OK) {
-				printf("Failed to inset into symtab\n");
+				printf("Failed to insert category into sensitivitycategory symtab\n");
 				return rc;
 			}
 		}
