@@ -460,7 +460,7 @@ int cil_gen_policy(struct cil_db *db)
 	policy_file = fopen("policy.conf", "w+");
 
 	if (db->catorder->head != NULL) {
-		catorder = db->catorder->head->data;
+		catorder = db->catorder->head;
 		while (catorder != NULL) {
 			cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
 			catorder = catorder->next;

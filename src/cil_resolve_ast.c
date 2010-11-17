@@ -542,6 +542,68 @@ int __cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 	return SEPOL_OK;
 }
 
+int __cil_verify_catorder(struct cil_db *db, struct cil_tree_node *current)
+{
+	if (db == NULL || current == NULL)
+		return SEPOL_ERR;
+
+	struct cil_list_item *catorder;
+	int reverse = 0;
+	int found = 0;
+	int empty = 0;
+
+	if (db->catorder == NULL || db->catorder->head == NULL)
+		empty = 1;
+	else {
+		catorder = db->catorder->head;
+		if (db->catorder->head->next != NULL) {
+			printf("Disjoint category ordering exists\n");
+			return SEPOL_ERR;
+		}
+		
+		if (db->catorder->head->data != NULL) 
+			db->catorder->head = ((struct cil_list*)db->catorder->head->data)->head;
+	}
+
+	/* Verify no categories exist or all categories are ordered */
+	do {
+		if (current->cl_head == NULL) {
+			if (current->flavor == CIL_CAT) {
+				if (empty)
+					return SEPOL_ERR;
+				catorder = db->catorder->head;
+				while (catorder != NULL) {
+					if (catorder->data == current->data) {
+						found = 1;
+						break;
+					}
+					catorder = catorder->next;
+				}
+				if (!found) {
+					printf("Category not ordered: %s\n", ((struct cil_cat*)current->data)->datum.name);
+					return SEPOL_ERR;
+				}
+				found = 0;
+			}
+		}
+
+		if (current->cl_head != NULL && !reverse)
+			current = current->cl_head;
+		else if (current->next != NULL && reverse) {
+			current = current->next;
+			reverse = 0;
+		}
+		else if (current->next != NULL)
+			current = current->next;
+		else {
+			current = current->parent;
+			reverse = 1;
+		}
+	} while (current->flavor != CIL_ROOT);
+	
+	return SEPOL_OK;
+}
+
 int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_catorder *catorder = (struct cil_catorder*)current->data;
@@ -620,7 +682,7 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct
 	}
 
 	struct cil_list_item *curr_cat = cat_list->head;
-	struct cil_list_item *catorder = ((struct cil_list*)db->catorder->head->data)->head;
+	struct cil_list_item *catorder = db->catorder->head;
 	struct cil_list_item *curr_catorder = catorder;
 	struct cil_list_item *new_item;
 	struct cil_list_item *list_tail;
@@ -1115,6 +1177,12 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 	printf("---------- Pass 1 ----------\n");
 	__cil_resolve_ast_helper(db, current, 1);
+	printf("----- Verify Catorder ------\n");
+	rc = __cil_verify_catorder(db, current);
+	if (rc != SEPOL_OK) {
+		printf("Failed to verify categoryorder\n");
+		return rc;
+	}
 	printf("---------- Pass 2 ----------\n");
 	__cil_resolve_ast_helper(db, current, 2);
 	printf("---------- Pass 3 ----------\n");
