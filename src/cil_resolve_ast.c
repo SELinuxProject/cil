@@ -430,7 +430,7 @@ int __cil_catorder_prepend(struct cil_list *main_list, struct cil_list *new_list
 	return SEPOL_OK;
 }
 
-int cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int *success)
+int __cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int *success)
 {
 	struct cil_list_item *curr_main = primary->head;
 	struct cil_list_item *curr_new;
@@ -464,7 +464,7 @@ int cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int
 	return SEPOL_OK;
 }
 
-int cil_catorder_remove_list(struct cil_list *catorder, struct cil_list *remove_item)
+int __cil_catorder_remove_list(struct cil_list *catorder, struct cil_list *remove_item)
 {
 	struct cil_list_item *list_item;
 
@@ -480,7 +480,7 @@ int cil_catorder_remove_list(struct cil_list *catorder, struct cil_list *remove_
 	return SEPOL_OK;
 }
 
-int cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
+int __cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 {
 	struct cil_list_item *catorder_head;
 	struct cil_list_item *catorder_sublist;
@@ -494,7 +494,7 @@ int cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 	edge_node = cat_edges->head;
 	while (edge_node != NULL) {
 		while (catorder_sublist != NULL) {
-			rc = cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, edge_node->data, &success); 
+			rc = __cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, edge_node->data, &success); 
 			if (rc != SEPOL_OK) {
 				printf("Failed to merge categoryorder sublist with main list\n");
 				return rc;
@@ -514,13 +514,13 @@ int cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 				catorder_lists = catorder_head;
 				while (catorder_lists != NULL) {
 					if (catorder_sublist != catorder_lists) {
-						rc = cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, ((struct cil_list_item*)catorder_lists)->data, &success);
+						rc = __cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, ((struct cil_list_item*)catorder_lists)->data, &success);
 						if (rc != SEPOL_OK) {
 							printf("Failed combining categoryorder lists into one\n");
 							return rc;
 						}
 						if (success) 
-							cil_catorder_remove_list(db->catorder, catorder_lists->data);
+							__cil_catorder_remove_list(db->catorder, catorder_lists->data);
 					}
 					catorder_lists = catorder_lists->next;
 				}
@@ -596,7 +596,7 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 		db->catorder->head = list_item;
 	}
 	else {
-		rc = cil_catorder_order(db, edges_list);
+		rc = __cil_catorder_order(db, edges_list);
 		if (rc != SEPOL_OK) {
 			printf("Failed to order categoryorder\n");
 			return rc;
@@ -925,8 +925,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 		return SEPOL_ERR;
 }
 
-
-int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
+int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
 {
 	int rc = SEPOL_ERR;
 	int reverse = 0;
