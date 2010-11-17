@@ -432,6 +432,9 @@ int __cil_catorder_prepend(struct cil_list *main_list, struct cil_list *new_list
 
 int __cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int *success)
 {
+	if (primary == NULL && new == NULL)
+		return SEPOL_ERR;
+
 	struct cil_list_item *curr_main = primary->head;
 	struct cil_list_item *curr_new;
 	int rc = SEPOL_ERR;
@@ -494,10 +497,16 @@ int __cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 	edge_node = cat_edges->head;
 	while (edge_node != NULL) {
 		while (catorder_sublist != NULL) {
-			rc = __cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, edge_node->data, &success); 
-			if (rc != SEPOL_OK) {
-				printf("Failed to merge categoryorder sublist with main list\n");
-				return rc;
+			if (catorder_sublist->data == NULL) {
+				catorder_sublist->data = edge_node->data;
+				break;
+			}
+			else {
+				rc = __cil_catorder_merge_lists(catorder_sublist->data, edge_node->data, &success);
+				if (rc != SEPOL_OK) {
+					printf("Failed to merge categoryorder sublist with main list\n");
+					return rc;
+				}
 			}
 			if (success) 
 				break;
@@ -514,7 +523,7 @@ int __cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 				catorder_lists = catorder_head;
 				while (catorder_lists != NULL) {
 					if (catorder_sublist != catorder_lists) {
-						rc = __cil_catorder_merge_lists(((struct cil_list_item*)catorder_sublist)->data, ((struct cil_list_item*)catorder_lists)->data, &success);
+						rc = __cil_catorder_merge_lists(catorder_sublist->data, catorder_lists->data, &success);
 						if (rc != SEPOL_OK) {
 							printf("Failed combining categoryorder lists into one\n");
 							return rc;
@@ -527,6 +536,7 @@ int __cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 				catorder_sublist = catorder_sublist->next; 
 			}
 		}
+		catorder_sublist = catorder_head;
 		edge_node = edge_node->next;
 	}
 	return SEPOL_OK;
@@ -538,16 +548,16 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *cat_node = NULL;
 	struct cil_list_item *curr_cat = catorder->cat_list_str->head;
 	struct cil_list_item *list_item;
+	struct cil_list_item *copy_item;
 	struct cil_list_item *list_tail = NULL;
 	struct cil_list_item *edge_node;
-	struct cil_list_item *edges_list_tail = NULL;
+	struct cil_list_item *edge_list_tail = NULL;
 	struct cil_list *cat_list;
-	struct cil_list *edges_list;
-	struct cil_list *edge = NULL;
+	struct cil_list *edge_list;
 	int rc = SEPOL_ERR;
 
 	cil_list_init(&cat_list);
-	cil_list_init(&edges_list);
+	cil_list_init(&edge_list);
 	
 	while (curr_cat != NULL) {
 		cil_list_item_init(&list_item);
@@ -558,28 +568,29 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 		}
 		list_item->flavor = cat_node->flavor;
 		list_item->data = cat_node->data;
-		if (cat_list->head == NULL)
+
+		if (cat_list->head == NULL && list_tail == NULL)
 			cat_list->head = list_item;
+		else if (cat_list->head == NULL && list_tail != NULL) {
+			cil_list_item_init(&copy_item);
+			copy_item->flavor = list_tail->flavor;
+			copy_item->data = list_tail->data;
+			cat_list->head = copy_item;
+			cat_list->head->next = list_item;
+		}
 		else
 			list_tail->next = list_item;
-
-		if (edge == NULL) {
-			cil_list_init(&edge);
-			if (list_tail == NULL) 
-				edge->head = list_item;
-			else
-				edge->head = list_tail; 
-		}
-		else { 
+			
+		if (list_tail != NULL) {
 			cil_list_item_init(&edge_node);
-			edge->head->next = list_item;
-			edge_node->data = edge;
-			if (edges_list->head == NULL) 
-				edges_list->head = edge_node;
-			else 
-				edges_list_tail->next = edge_node;
-			edges_list_tail = edge_node;
-			edge = NULL;
+			edge_node->flavor = CIL_LIST;
+			edge_node->data = cat_list;
+			if (edge_list->head == NULL)
+				edge_list->head = edge_node;
+			else
+				edge_list_tail->next = edge_node;
+			edge_list_tail = edge_node;
+			cil_list_init(&cat_list);
 		}
 		list_tail = list_item;
 		curr_cat = curr_cat->next;
@@ -587,18 +598,15 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 
 	if (db->catorder->head == NULL) {
 		cil_list_item_init(&list_item);
-		list_item->data = cat_list; 
 		db->catorder->head = list_item;
 	}
-	else {
-		rc = __cil_catorder_order(db, edges_list);
-		if (rc != SEPOL_OK) {
-			printf("Failed to order categoryorder\n");
-			return rc;
-		}
+	rc = __cil_catorder_order(db, edge_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to order categoryorder\n");
+		return rc;
 	}
 	
-    return SEPOL_OK;
+	return SEPOL_OK;
 }
 
 int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct cil_list *res_list)
