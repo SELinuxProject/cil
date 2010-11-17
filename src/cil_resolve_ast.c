@@ -793,15 +793,8 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_tree_node *sens_node = NULL;
 	struct cil_list *res_cat_list;
 	int rc = SEPOL_ERR;
-	symtab_t *symtab = NULL;
-
-	rc = cil_get_parent_symtab(db, current, &symtab, CIL_SYM_SENS);
-	if (rc != SEPOL_OK) {
-		printf("Failed to get parent symtab\n");
-		return rc;
-	}
 	
-	rc = cil_symtab_get_node(symtab, (char*)level->sens_str, &sens_node);
+	rc = cil_resolve_name(db, current, (char*)level->sens_str, CIL_SYM_SENS, &sens_node);
 	if (rc != SEPOL_OK) {
 		printf("Failed to get sensitivity node\n");
 		return rc;
