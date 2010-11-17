@@ -1177,10 +1177,22 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 	rc = cil_catset_to_list(sens->next, level->cat_list_str);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create level category list\n");
-		return rc;
+		goto cil_fill_level_cleanup;
 	}
 
 	return SEPOL_OK;
+
+	cil_fill_level_cleanup:
+		if (level->sens_str != NULL) {
+			free(level->sens_str);
+			level->sens_str = NULL;
+		}
+		if (level->cat_list_str != NULL) {
+			cil_list_destroy(level->cat_list_str, 1);
+			level->cat_list_str = NULL;
+		}
+		return rc;
+
 }
 
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -1253,35 +1265,58 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	context->high_str = NULL;
 
 	if (user_node->next->next->next->cl_head == NULL)
-		context->low_str = cil_strdup(user_node->next->next->next->next->data);
+		context->low_str = cil_strdup(user_node->next->next->next->data);
 	else {
-		struct cil_level *low = cil_malloc(sizeof(struct cil_level));
-		low->sens_str = cil_strdup(user_node->next->next->next->cl_head->data);
-		if (user_node->next->next->next->cl_head->next != NULL) {
-			cil_list_init(&low->cat_list_str);
-			rc = cil_catset_to_list(user_node->next->next->next->cl_head->next, low->cat_list_str);
-			if (rc != SEPOL_OK) {
-				printf("Failed to parse low categories to list\n");
-				return rc;
-			}
-			context->low = low;
+		context->low = cil_malloc(sizeof(struct cil_level));
+		rc = cil_fill_level(user_node->next->next->next->cl_head, context->low);
+		if (rc != SEPOL_OK) {
+			printf("cil_fill_context: Failed to fill low level, rc: %d\n", rc); 
+			goto cil_fill_context_cleanup;
 		}
 	}
 	if (user_node->next->next->next->next->cl_head == NULL)
 		context->high_str = cil_strdup(user_node->next->next->next->next->data);
 	else {
-		struct cil_level *high = cil_malloc(sizeof(struct cil_level));
-		high->sens_str = cil_strdup(user_node->next->next->next->next->cl_head->data);
-		cil_list_init(&high->cat_list_str);
-		rc = cil_catset_to_list(user_node->next->next->next->next->cl_head->next, high->cat_list_str);
+		context->high = cil_malloc(sizeof(struct cil_level));
+		rc = cil_fill_level(user_node->next->next->next->next->cl_head, context->high);
 		if (rc != SEPOL_OK) {
-			printf("Failed to parse high categories to list\n");
-			return rc;
+			printf("cil_fill_context: Failed to fill high level, rc %d\n", rc);
+			goto cil_fill_context_cleanup;
 		}
-		context->high = high;
 	}
 
 	return SEPOL_OK;
+	
+	cil_fill_context_cleanup:
+		if (context->user_str != NULL) {
+			free(context->user_str);
+			context->user_str = NULL;
+		}
+		if (context->role_str != NULL) {
+			free(context->role_str);
+			context->role_str = NULL;
+		}
+		if (context->type_str != NULL) {
+			free(context->type_str);
+			context->type_str = NULL;
+		}
+		if (context->low_str != NULL) {
+			free(context->low_str);
+			context->low_str = NULL;
+		}
+		if (context->low != NULL) {
+			cil_destroy_level(context->low);
+			context->low = NULL;
+		}
+		if (context->high_str != NULL) {
+			free(context->high_str);
+			context->high_str = NULL;
+		}
+		if (context->high != NULL) {
+			cil_destroy_level(context->high);
+			context->high = NULL;
+		}
+		return rc;
 } 
 
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)

@@ -86,6 +86,82 @@ void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 	}
 }
 
+void cil_tree_print_level(struct cil_level *level)
+{
+	struct cil_list_item *cat;
+	struct cil_list_item *parent;
+	if (level->sens_str != NULL)
+		printf(" %s", level->sens_str);
+	else if (level->sens != NULL)
+		printf(" %s", level->sens->datum.name);
+	printf(" (");
+	if (level->cat_list_str != NULL) {
+		cat = level->cat_list_str->head;
+		while (cat != NULL) {
+			if (cat->flavor == CIL_LIST) {
+				parent = cat;
+				cat = ((struct cil_list *)cat->data)->head;
+				printf(" (");
+				while (cat != NULL) {
+					printf(" %s", (char*)cat->data);
+					cat = cat->next;
+				}
+				printf(" )");
+				cat = parent;
+			}
+			else
+				printf(" %s", (char*)cat->data);
+				cat = cat->next;
+			}
+	}
+	else if (level->cat_list != NULL) {
+		cat = level->cat_list->head;
+		while (cat != NULL) {
+			if (cat->flavor == CIL_LIST) {
+				parent = cat;
+				cat = ((struct cil_list *)cat->data)->head;
+				printf(" (");
+				while (cat != NULL) {
+					printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+					cat = cat->next;
+				}
+				printf(" )");
+				cat = parent;
+			}
+			else
+				printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+			cat = cat->next;
+		}
+	}
+	printf(" )");
+	return;
+}
+
+void cil_tree_print_context(struct cil_context *context)
+{
+	if (context->user_str != NULL)
+		printf(" %s", context->user_str);
+	else if (context->user != NULL)
+		printf(" %s", context->user->datum.name);
+	if (context->role_str != NULL)
+		printf(" %s", context->role_str);
+	else if (context->role != NULL)
+		printf(" %s", context->role->datum.name);
+	if (context->type_str != NULL)
+		printf(" %s", context->type_str);
+	else if (context->type != NULL)
+		printf(" %s", context->type->datum.name);
+	if (context->low_str != NULL)
+		printf(" %s", context->low_str);
+	else if (context->low != NULL) 
+		cil_tree_print_level(context->low);	
+	if (context->high_str != NULL)
+		printf(" %s", context->high_str);
+	else if (context->high != NULL)
+		cil_tree_print_level(context->high);
+	return;
+}
+
 void cil_tree_print_node(struct cil_tree_node *node)
 {
 	switch( node->flavor ) {
@@ -412,78 +488,15 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_LEVEL : {
 			struct cil_level *level = node->data;
-			struct cil_list_item *cat;
-			struct cil_list_item *parent;
-			printf("LEVEL: %s", level->datum.name);
-			if (level->sens_str != NULL)
-				printf(" %s", level->sens_str);
-			else if (level->sens != NULL)
-				printf(" %s", level->sens->datum.name);
-			printf(" (");
-			if (level->cat_list_str != NULL) {
-				cat = level->cat_list_str->head;
-				while (cat != NULL) {
-					if (cat->flavor == CIL_LIST) {
-						parent = cat;
-						cat = ((struct cil_list *)cat->data)->head;
-						printf(" (");
-						while (cat != NULL) {
-							printf(" %s", (char*)cat->data);
-							cat = cat->next;
-						}
-						printf(" )");
-						cat = parent;
-					}
-					else
-						printf(" %s", (char*)cat->data);
-					cat = cat->next;
-				}
-			}
-			else if (level->cat_list != NULL) {
-				cat = level->cat_list->head;
-				while (cat != NULL) {
-					if (cat->flavor == CIL_LIST) {
-						parent = cat;
-						cat = ((struct cil_list *)cat->data)->head;
-						printf(" (");
-						while (cat != NULL) {
-							printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-							cat = cat->next;
-						}
-						printf(" )");
-						cat = parent;
-					}
-					else
-						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-					cat = cat->next;
-				}
-			}
-			printf(" )");
+			printf("LEVEL %s:", level->datum.name); 
+			cil_tree_print_level(level);
+			printf("\n");
 			return;
 		}
 		case CIL_CONTEXT : {
 			struct cil_context *context = node->data;
 			printf("CONTEXT %s:", context->datum.name);
-			if (context->user_str != NULL)
-				printf(" %s", context->user_str);
-			else if (context->user != NULL)
-				printf(" %s", context->user->datum.name);
-			if (context->role_str != NULL)
-				printf(" %s", context->role_str);
-			else if (context->role != NULL)
-				printf(" %s", context->role->datum.name);
-			if (context->type_str != NULL)
-				printf(" %s", context->type_str);
-			else if (context->type != NULL)
-				printf(" %s", context->type->datum.name);
-			if (context->low_str != NULL)
-				printf(" %s", context->low_str);
-			else if (context->low != NULL)
-				printf(" print low");
-			if (context->high_str != NULL)
-				printf(" %s", context->high_str);
-			else if (context->high != NULL)
-				printf(" print high");
+			cil_tree_print_context(context);
 			printf("\n");
 			return;
 		}

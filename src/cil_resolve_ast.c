@@ -906,6 +906,13 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 		free(context->low_str);
 		context->low_str = NULL;
 	}
+	else if (context->low != NULL) {
+		rc = cil_resolve_level(db, context->low);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_context: Failed to resolve low level, rc: %d\n", rc);
+			goto resolve_context_cleanup;
+		}
+	}
 
 	if (context->high_str != NULL) {
 		rc = cil_resolve_name(db, current, context->high_str, CIL_SYM_LEVELS, &high_node);
