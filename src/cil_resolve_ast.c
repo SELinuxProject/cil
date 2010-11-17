@@ -900,7 +900,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 		return SEPOL_ERR;
 }
 
-int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
+int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
 {
 	int rc = SEPOL_ERR;
 	int reverse = 0;
