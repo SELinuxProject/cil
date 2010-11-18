@@ -519,12 +519,18 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("NETIFCON %s", netifcon->datum.name);
 			if (netifcon->if_context_str != NULL)
 				printf(" %s", netifcon->if_context_str);
-			else if (netifcon->if_context != NULL)
-				printf(" if_context");
+			else if (netifcon->if_context != NULL) {
+				printf(" (");
+				cil_tree_print_context(netifcon->if_context);
+				printf(" )");
+			}
 			if (netifcon->packet_context_str != NULL)
 				printf(" %s", netifcon->packet_context_str);
-			else if (netifcon->packet_context != NULL)
-				printf(" packet_context");
+			else if (netifcon->packet_context != NULL) {
+				printf(" (");
+				cil_tree_print_context(netifcon->packet_context);
+				printf(" )");
+			}
 			printf("\n");
 			return;
 		}

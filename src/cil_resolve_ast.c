@@ -857,7 +857,7 @@ int __cil_verify_sens_cats(struct cil_sens *sens, struct cil_list *cat_list)
 	return SEPOL_OK;
 }
 
-int __cil_resolve_level_helper(struct cil_db *db, struct cil_tree_node *current, struct cil_level *level)
+int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct cil_level *level)
 {
 	struct cil_tree_node *sens_node = NULL;
 	struct cil_list *res_cat_list;
@@ -894,19 +894,8 @@ int __cil_resolve_level_helper(struct cil_db *db, struct cil_tree_node *current,
 	return SEPOL_OK;
 }
 
-int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current)
+int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct cil_context *context)
 {
-	struct cil_level *level = (struct cil_level*)current->data;
-	int rc = __cil_resolve_level_helper(db, current, level);
-	if (rc != SEPOL_OK) 
-		return rc;
-	
-	return SEPOL_OK;
-}
-
-int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
-{
-	struct cil_context *context = (struct cil_context*)current->data;
 	struct cil_tree_node *user_node = NULL;
 	struct cil_tree_node *role_node = NULL;
 	struct cil_tree_node *type_node = NULL;
@@ -954,7 +943,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 		context->low_str = NULL;
 	}
 	else if (context->low != NULL) {
-		rc = __cil_resolve_level_helper(db, current, context->low);
+		rc = cil_resolve_level(db, current, context->low);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_context: Failed to resolve low level, rc: %d\n", rc);
 			goto resolve_context_cleanup;
@@ -972,7 +961,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 		context->high_str = NULL;
 	}
 	else if (context->high != NULL) {
-		rc = __cil_resolve_level_helper(db, current, context->high);
+		rc = cil_resolve_level(db, current, context->high);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_context: Failed to resolve high level, rc: %d\n", rc);
 			goto resolve_context_cleanup;
@@ -984,6 +973,33 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current)
 	resolve_context_cleanup:
 		printf("Name resolution failed for %s\n", error);
 		return SEPOL_ERR;
+}
+
+int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_netifcon *netifcon = (struct cil_netifcon*)current->data;
+	struct cil_tree_node *ifcon_node = NULL;
+	struct cil_tree_node *packcon_node = NULL;
+
+	int rc = SEPOL_ERR;
+
+	if (netifcon->if_context_str != NULL) {
+		rc = cil_resolve_name(db, current, netifcon->if_context_str, CIL_SYM_CONTEXTS, &ifcon_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_netifcon: Failed to resolve interface context: %s, rc: %d\n", netifcon->if_context_str, rc);
+			return rc;
+		}
+	}
+
+	if (netifcon->packet_context_str != NULL) {
+		rc = cil_resolve_name(db, current, netifcon->packet_context_str, CIL_SYM_CONTEXTS, &packcon_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_netifcon: Failed to resolve packet context: %s, rc: %d\n", netifcon->packet_context_str, rc);
+			return rc;
+		}
+	}
+
+	return SEPOL_OK;
 }
 
 int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
@@ -1106,16 +1122,23 @@ int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, u
 						}
 						case CIL_LEVEL : {
 							printf("case level\n");
-							rc = cil_resolve_level(db, current);
+							rc = cil_resolve_level(db, current, (struct cil_level*)current->data);
 							if (rc != SEPOL_OK)
 								return rc;
 							break;
 						}
 						case CIL_CONTEXT : {
 							printf("case context\n");
-							rc = cil_resolve_context(db, current);
+							rc = cil_resolve_context(db, current, (struct cil_context*)current->data);
 							if (rc != SEPOL_OK)
 								return rc;
+							break;
+						}
+						case CIL_NETIFCON : {
+							printf("case netifcon\n");
+							rc = cil_resolve_netifcon(db, current);
+							if (rc != SEPOL_OK)
+								return rc;	
 							break;
 						}
 						default : 
@@ -1174,7 +1197,11 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	int rc = SEPOL_ERR;
 
 	printf("---------- Pass 1 ----------\n");
-	__cil_resolve_ast_helper(db, current, 1);
+	rc = __cil_resolve_ast_helper(db, current, 1);
+	if (rc != SEPOL_OK) {
+		printf("cil_resolve_ast: Pass 1 failed\n");
+		return rc;
+	}
 	printf("----- Verify Catorder ------\n");
 	rc = __cil_verify_catorder(db, current);
 	if (rc != SEPOL_OK) {
@@ -1182,9 +1209,17 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		return rc;
 	}
 	printf("---------- Pass 2 ----------\n");
-	__cil_resolve_ast_helper(db, current, 2);
+	rc = __cil_resolve_ast_helper(db, current, 2);
+	if (rc != SEPOL_OK) {
+		printf("cil_resolve_ast: Pass 2 failed\n");
+		return rc;
+	}
 	printf("---------- Pass 3 ----------\n");
-	__cil_resolve_ast_helper(db, current, 3);
+	rc = __cil_resolve_ast_helper(db, current, 3);
+	if (rc != SEPOL_OK) {
+		printf("cil_resolve_ast: Pass 3 failed\n");
+		return rc;
+	}
 
 	return SEPOL_OK;
 }

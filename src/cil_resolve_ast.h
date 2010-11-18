@@ -20,8 +20,8 @@ int cil_resolve_catalias(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_catorder(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_cat_list(struct cil_db *, struct cil_tree_node *, struct cil_list *, struct cil_list *);
 int cil_resolve_catset(struct cil_db *, struct cil_tree_node *);
-int cil_resolve_level(struct cil_db *, struct cil_tree_node *); 
-int cil_resolve_context(struct cil_db *, struct cil_tree_node *);
+int cil_resolve_level(struct cil_db *, struct cil_tree_node *, struct cil_level *); 
+int cil_resolve_context(struct cil_db *, struct cil_tree_node *, struct cil_context *);
 
 int cil_resolve_ast(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_name(struct cil_db *, struct cil_tree_node *, char *, uint32_t, struct cil_tree_node **);
