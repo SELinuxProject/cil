@@ -154,24 +154,24 @@ void cil_tree_print_context(struct cil_context *context)
 	if (context->low_str != NULL)
 		printf(" %s", context->low_str);
 	else if (context->low != NULL) {
-		if (context->low->datum.name != NULL)
-			printf(" %s", context->low->datum.name);
-		else {
+//		if (context->low->datum.name != NULL)
+//			printf(" %s", context->low->datum.name);
+//		else {
 			printf(" (");
 			cil_tree_print_level(context->low);
 			printf(" )");
-		}
+//		}
 	}
 	if (context->high_str != NULL)
 		printf(" %s", context->high_str);
 	else if (context->high != NULL) {
-		if (context->high->datum.name != NULL)
-			printf(" %s", context->high->datum.name);
-		else {
+//		if (context->high->datum.name != NULL)
+//			printf(" %s", context->high->datum.name);
+//		else {
 			printf(" (");
 			cil_tree_print_level(context->high);
 			printf(" )");
-		}
+//		}
 	}
 	return;
 }

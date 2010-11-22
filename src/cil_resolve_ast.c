@@ -989,12 +989,32 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current)
 			printf("cil_resolve_netifcon: Failed to resolve interface context: %s, rc: %d\n", netifcon->if_context_str, rc);
 			return rc;
 		}
+		netifcon->if_context = (struct cil_context*)ifcon_node->data;
+		free(netifcon->if_context_str);
+		netifcon->if_context_str = NULL;
+	}
+	else {
+		rc = cil_resolve_context(db, current, netifcon->if_context);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_netifcon: Failed to resolve OTF interface context\n");
+			return rc;
+		}
 	}
 
 	if (netifcon->packet_context_str != NULL) {
 		rc = cil_resolve_name(db, current, netifcon->packet_context_str, CIL_SYM_CONTEXTS, &packcon_node);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_netifcon: Failed to resolve packet context: %s, rc: %d\n", netifcon->packet_context_str, rc);
+			return rc;
+		}
+		netifcon->packet_context = (struct cil_context*)packcon_node->data;
+		free(netifcon->packet_context_str);
+		netifcon->packet_context_str = NULL;
+	}
+	else {
+		rc = cil_resolve_context(db, current, netifcon->packet_context);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_netifcon: Failed to resolve OTF packet context\n");
 			return rc;
 		}
 	}
