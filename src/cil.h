@@ -133,6 +133,7 @@ struct cil_db {
 	symtab_t symtab[CIL_SYM_NUM];
 	symtab_t netif;
 	struct cil_list *catorder;
+	struct cil_list *dominance;
 };
 
 struct cil_search {
@@ -284,7 +285,7 @@ struct cil_sensalias {
 };
 
 struct cil_sens_dominates {
-	struct cil_list_item *sens;
+	struct cil_list *sens_list_str;
 };
 
 struct cil_cat {
