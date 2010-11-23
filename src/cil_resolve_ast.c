@@ -8,6 +8,44 @@
 #include "cil_list.h"
 #include "cil_resolve_ast.h"
 
+int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *perm_list_str, struct cil_list *res_list_perms)
+{
+	struct cil_tree_node *perm_node;
+	struct cil_list_item *perm = perm_list_str->head;
+	struct cil_list_item *list_item;
+	struct cil_list_item *list_tail;
+	int rc = SEPOL_ERR;
+	while (perm != NULL) {
+		rc = cil_symtab_get_node(&class->perms, (char*)perm->data, &perm_node);
+		if (rc != SEPOL_OK) {
+			if (class->common != NULL) {
+				rc = cil_symtab_get_node(&class->common->perms, (char*)perm->data, &perm_node);
+				if (rc != SEPOL_OK) {
+					printf("Failed to find perm in class or common symtabs\n");
+					return rc;
+				}
+			}
+			else {
+				printf("Failed to find perm in class symtab\n");
+				return rc;
+			}
+		}
+		if (res_list_perms != NULL) {
+			cil_list_item_init(&list_item);
+			list_item->flavor = CIL_PERM;
+			list_item->data = perm_node->data;
+			if (res_list_perms->head == NULL) 
+				res_list_perms->head = list_item;
+			else 
+				list_tail->next = list_item;
+			list_tail = list_item;
+		}
+		perm = perm->next;
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_avrule *rule = (struct cil_avrule*)current->data;
@@ -49,36 +87,12 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current)
 		free(rule->obj_str);
 		rule->obj_str = NULL;
 	}
-	struct cil_tree_node *perm_node;
-	struct cil_list_item *perm = rule->perms_str->head;
-	struct cil_list_item *list_item;
-	struct cil_list_item *list_tail;
 	struct cil_list *perms_list;
 	cil_list_init(&perms_list);
-	while (perm != NULL) {
-		rc = cil_symtab_get_node(&rule->obj->perms, (char*)perm->data, &perm_node);
-		if (rc != SEPOL_OK) {
-			if (rule->obj->common != NULL) {
-				rc = cil_symtab_get_node(&rule->obj->common->perms, (char*)perm->data, &perm_node);
-				if (rc != SEPOL_OK) {
-					printf("Failed to find perm in class or common symtabs\n");
-					return rc;
-				}
-			}
-			else {
-				printf("Failed to find perm in class symtab\n");
-				return rc;
-			}
-		}
-		cil_list_item_init(&list_item);
-		list_item->flavor = CIL_PERM;
-		list_item->data = perm_node->data;
-		if (perms_list->head == NULL) 
-			perms_list->head = list_item;
-		else 
-			list_tail->next = list_item;
-		list_tail = list_item;
-		perm = perm->next;
+	rc = __cil_resolve_perm_list(rule->obj, rule->perms_str, perms_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve perm list\n");
+		return rc;
 	}
 	rule->perms_list = perms_list;
 	cil_list_destroy(&rule->perms_str, 1);
