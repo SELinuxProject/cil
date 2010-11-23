@@ -154,24 +154,24 @@ void cil_tree_print_context(struct cil_context *context)
 	if (context->low_str != NULL)
 		printf(" %s", context->low_str);
 	else if (context->low != NULL) {
-		if (context->low->datum.name != NULL)
-			printf(" %s", context->low->datum.name);
-		else {
+//		if (context->low->datum.name != NULL)
+//			printf(" %s", context->low->datum.name);
+//		else {
 			printf(" (");
 			cil_tree_print_level(context->low);
 			printf(" )");
-		}
+//		}
 	}
 	if (context->high_str != NULL)
 		printf(" %s", context->high_str);
 	else if (context->high != NULL) {
-		if (context->high->datum.name != NULL)
-			printf(" %s", context->high->datum.name);
-		else {
+//		if (context->high->datum.name != NULL)
+//			printf(" %s", context->high->datum.name);
+//		else {
 			printf(" (");
 			cil_tree_print_level(context->high);
 			printf(" )");
-		}
+//		}
 	}
 	return;
 }
@@ -584,7 +584,18 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("\n");
 			return;
 		}
-					
+		case CIL_SID : {
+			struct cil_sid *sid = node->data;
+			printf("SID %s:", sid->datum.name);
+			if (sid->context_str != NULL)
+				printf(" %s", sid->context_str);
+			else
+				cil_tree_print_context(sid->context);
+			printf("\n");
+
+			return;
+		}
+	
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;

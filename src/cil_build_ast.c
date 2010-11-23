@@ -305,6 +305,12 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
+	if (parse_current->next == NULL || parse_current->next->next == NULL
+	|| parse_current->next->next->next != NULL) {
+		printf("Invalid sid declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
 	int rc = SEPOL_ERR;
 	struct cil_sid * sid = cil_malloc(sizeof(struct cil_sid));	
 	char *key = parse_current->next->data;
@@ -321,6 +327,17 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 		goto gen_sid_cleanup;	
 	}
 
+	if (parse_current->next->next->cl_head == NULL) 
+		sid->context_str = cil_strdup(parse_current->next->next->data);
+	else {
+		sid->context = cil_malloc(sizeof(struct cil_context));
+		rc = cil_fill_context(parse_current->next->next->cl_head, sid->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill sid context\n");
+			goto gen_sid_cleanup;
+		}
+	}
+
 	ast_node->data = sid;
 	ast_node->flavor = CIL_SID;
 
@@ -334,6 +351,10 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 void cil_destroy_sid(struct cil_sid *sid)
 {
 	cil_symtab_datum_destroy(sid->datum);
+	if (sid->context_str != NULL)
+		free(sid->context_str);
+	else if (sid->context != NULL && sid->context->datum.name == NULL)
+		cil_destroy_context(sid->context);
 	free(sid);
 }
 
@@ -1314,7 +1335,6 @@ int cil_gen_mlsconstrain(struct cil_db *db, struct cil_tree_node *parse_current,
 		printf("Failed to build constrain expression tree\n");
 		goto gen_mlsconstrain_cleanup;
 	}
-	print_tree(mlscon->expr->root);
 
 	ast_node->data = mlscon;
 	ast_node->flavor = CIL_MLSCONSTRAIN;
@@ -1348,8 +1368,14 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	if (user_node == NULL || context == NULL) 
 		return SEPOL_ERR;
 
+	if (user_node->next == NULL || user_node->next->next == NULL
+	|| user_node->next->next->next == NULL || user_node->next->next->next->next == NULL) {
+		printf("Invalid context (line: %d)\n", user_node->line);
+		return SEPOL_ERR;
+	}
+
 	int rc = SEPOL_ERR;
-	
+
 	context->user_str = cil_strdup(user_node->data);
 	context->role_str = cil_strdup(user_node->next->data);
 	context->type_str = cil_strdup(user_node->next->next->data);
@@ -1367,6 +1393,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 			goto cil_fill_context_cleanup;
 		}
 	}
+
 	if (user_node->next->next->next->next->cl_head == NULL)
 		context->high_str = cil_strdup(user_node->next->next->next->next->data);
 	else {
@@ -1627,11 +1654,12 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 							printf("cil_gen_sid failed, rc: %d\n", rc);
 							return rc;
 						}
+						forced = 1;
 					}
 					else if (!strcmp(parse_current->data, CIL_KEY_USER)) {
 						rc = cil_gen_user(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
-							printf("cil_gen_sid failed, rc: %d\n", rc);
+							printf("cil_gen_user failed, rc: %d\n", rc);
 							return rc;
 						}
 					}

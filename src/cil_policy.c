@@ -12,20 +12,28 @@
 
 #define SEPOL_DONE			555
 
-#define COMMONS				0
-#define CLASSES				1
-#define INTERFACES			2
-#define SENS				3
-#define CATS				4
-#define LEVELS				5
-#define MLSCONSTRAIN			6
-#define ATTRTYPES			7
-#define ALIASES				8
-#define ALLOWS				9
-#define USERROLES			10
+#define CLASS_DECL			0
+#define ISIDS				1
+#define COMMONS				2
+#define CLASSES				3
+#define INTERFACES			4
+#define SENS				5
+//TODO dominance
+#define CATS				6
+#define LEVELS				7
+#define MLSCONSTRAIN			8
+//TODO policycaps
+#define ATTRTYPES			9
+#define ALIASES				10
+#define ALLOWS				11
+#define USERROLES			12
+//TODO constrain
+//fs_use, genfscon, portcon
+#define SIDS				13
+#define NETIFCONS			14 
 
 #define BUFFER				1024
-#define NUM_POLICY_FILES 	11
+#define NUM_POLICY_FILES		15
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 {
@@ -230,6 +238,50 @@ int cil_print_constrain_expr(FILE **file_arr, struct cil_tree_node *root)
 	return SEPOL_OK;
 }
 
+void cil_level_to_policy(FILE **file_arr, uint32_t file_index, struct cil_level *level)
+{
+	struct cil_list_item *cat = level->cat_list->head;
+	struct cil_list_item *curr;
+	struct cil_list_item *start_range;
+	struct cil_list_item *end_range;
+	char *sens_str = level->sens->datum.name;
+
+	fprintf(file_arr[file_index], "%s:", sens_str);
+	while (cat != NULL) {
+		if (cat->flavor == CIL_LIST) {
+			curr = ((struct cil_list*)cat->data)->head;
+			start_range = curr;
+			while (curr != NULL) {
+				if (curr->next == NULL) {
+					end_range = curr;
+					break;
+				}
+				curr = curr->next;
+			}
+			fprintf(file_arr[file_index], "%s.%s", ((struct cil_cat*)start_range->data)->datum.name, ((struct cil_cat*)end_range->data)->datum.name);
+		}
+		else
+			fprintf(file_arr[file_index], "%s", ((struct cil_cat*)cat->data)->datum.name);
+		if (cat->next != NULL)
+			fprintf(file_arr[file_index], ",");
+		cat = cat->next;
+	}
+}
+
+void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_context *context)
+{
+	struct cil_user *user = context->user;
+	struct cil_role *role = context->role;
+	struct cil_type *type = context->type;
+	struct cil_level *low = context->low;
+	struct cil_level *high = context->high;
+
+	fprintf(file_arr[file_index], "%s:%s:%s:", user->datum.name, role->datum.name, type->datum.name);
+	cil_level_to_policy(file_arr, file_index, low);
+	fprintf(file_arr[file_index], " - ");
+	cil_level_to_policy(file_arr, file_index, high);
+}
+
 int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current) 
 {
 	char *name = ((struct cil_symtab_datum*)current->data)->name;
@@ -288,6 +340,8 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			return SEPOL_DONE;
 		}
 		case CIL_CLASS: {
+			fprintf(file_arr[CLASS_DECL], "class %s\n", ((struct cil_class*)current->data)->datum.name);
+
 			if (current->cl_head != NULL) {
 				fprintf(file_arr[CLASSES], "class %s ", ((struct cil_class*)(current->data))->datum.name);
 			}
@@ -397,32 +451,8 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			break;
 		}
 		case CIL_LEVEL : {
-			struct cil_level *level = (struct cil_level*)current->data;
-			struct cil_list_item *cat = level->cat_list->head;
-			struct cil_list_item *curr;
-			struct cil_list_item *start_range;
-			struct cil_list_item *end_range;
-			char *sens_str = level->sens->datum.name;
-			fprintf(file_arr[LEVELS], "level %s:", sens_str);
-			while (cat != NULL) {
-				if (cat->flavor == CIL_LIST) {
-					curr = ((struct cil_list*)cat->data)->head;
-					start_range = curr;
-					while (curr != NULL) {
-						if (curr->next == NULL) {
-							end_range = curr;
-							break;
-						}
-						curr = curr->next;
-					}
-					fprintf(file_arr[LEVELS], "%s.%s", ((struct cil_cat*)start_range->data)->datum.name, ((struct cil_cat*)end_range->data)->datum.name);
-				}
-				else
-					fprintf(file_arr[LEVELS], "%s", ((struct cil_cat*)cat->data)->datum.name);
-				if (cat->next != NULL)
-					fprintf(file_arr[LEVELS], ",");
-				cat = cat->next;
-			}
+			fprintf(file_arr[LEVELS], "level ");
+			cil_level_to_policy(file_arr, LEVELS, (struct cil_level*)current->data);
 			fprintf(file_arr[LEVELS], ";\n");
 			break;
 		}
@@ -449,6 +479,26 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[MLSCONSTRAIN], "}\n\t");
 			cil_print_constrain_expr(file_arr, mlscon->expr->root);
 			fprintf(file_arr[MLSCONSTRAIN], ";\n");
+			break;
+		}
+		case CIL_NETIFCON : {
+			struct cil_netifcon *netifcon = (struct cil_netifcon*)current->data;
+			fprintf(file_arr[NETIFCONS], "netifcon %s ", netifcon->datum.name);
+			cil_context_to_policy(file_arr, NETIFCONS, netifcon->if_context);
+			fprintf(file_arr[NETIFCONS], " ");
+			cil_context_to_policy(file_arr, NETIFCONS, netifcon->packet_context);
+			fprintf(file_arr[NETIFCONS], "\n");
+			
+			break;
+		}
+		case CIL_SID : {
+			struct cil_sid *sid = (struct cil_sid*)current->data;
+			fprintf(file_arr[ISIDS], "sid %s\n", sid->datum.name);
+		
+			fprintf(file_arr[SIDS], "sid %s ", sid->datum.name);
+			cil_context_to_policy(file_arr, SIDS, sid->context);
+			fprintf(file_arr[SIDS], "\n");
+			break;
 		}
 		default : {
 			break;
@@ -475,6 +525,14 @@ int cil_gen_policy(struct cil_db *db)
 	cil_list_init(&cats);
 	struct cil_list *sens;
 	cil_list_init(&sens);
+
+	strcpy(temp, "/tmp/classdecl-XXXXXX");
+	file_arr[CLASS_DECL] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[CLASS_DECL] = cil_strdup(temp);
+
+	strcpy(temp, "/tmp/isids-XXXXXX");
+	file_arr[ISIDS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[ISIDS] = cil_strdup(temp);
 
 	strcpy(temp,"/tmp/common-XXXXXX");
 	file_arr[COMMONS] = fdopen(mkstemp(temp), "w+");
@@ -519,6 +577,14 @@ int cil_gen_policy(struct cil_db *db)
 	strcpy(temp, "/tmp/userroles-XXXXXX");
 	file_arr[USERROLES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[USERROLES] = cil_strdup(temp);
+
+	strcpy(temp, "/tmp/sids-XXXXXX");
+	file_arr[SIDS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[SIDS] = cil_strdup(temp);
+
+	strcpy(temp, "/tmp/netifcons-XXXXXX");
+	file_arr[NETIFCONS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[NETIFCONS] = cil_strdup(temp);
 
 	policy_file = fopen("policy.conf", "w+");
 
