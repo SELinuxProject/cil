@@ -65,7 +65,7 @@ int cil_list_get_tail(struct cil_list *list, struct cil_list_item *tail)
 	return SEPOL_OK;
 }
 
-int cil_append_to_list(struct cil_list *list, struct cil_list_item *item)
+int cil_list_append_item(struct cil_list *list, struct cil_list_item *item)
 {
 	if (list == NULL || item == NULL)
 		return SEPOL_ERR;
@@ -85,7 +85,7 @@ int cil_append_to_list(struct cil_list *list, struct cil_list_item *item)
 	return SEPOL_OK;
 }
 
-int cil_prepend_to_list(struct cil_list *list, struct cil_list_item *item) 
+int cil_list_prepend_item(struct cil_list *list, struct cil_list_item *item) 
 {
 	if (list == NULL || item == NULL)
 		return SEPOL_ERR;

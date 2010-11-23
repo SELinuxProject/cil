@@ -425,7 +425,7 @@ int __cil_catorder_prepend(struct cil_list *main_list, struct cil_list *new_list
 		while (new_list_iter != NULL) {
 			if (new_list_iter->next == new_list_item) {
 				new_list_iter->next = NULL;
-				rc = cil_prepend_to_list(main_list, new_list_iter);
+				rc = cil_list_prepend_item(main_list, new_list_iter);
 				if (rc != SEPOL_OK) {
 					printf("Failed to prepend item to list\n");
 					return rc;
