@@ -35,7 +35,7 @@
 #define CIL_FSCON		20
 #define CIL_FS_USE		21
 #define CIL_CONSTRAIN		22
-#define CIL_MLS_CONSTRAIN	23
+#define CIL_MLSCONSTRAIN	23
 #define CIL_PERM		24
 #define CIL_USERROLE		25
 #define CIL_TYPE_ATTR		26
@@ -100,6 +100,7 @@
 #define CIL_KEY_CATORDER	"categoryorder"
 #define CIL_KEY_SENSCAT		"sensitivitycategory"
 #define CIL_KEY_LEVEL		"level"
+#define CIL_KEY_MLSCONSTRAIN	"mlsconstrain"
 
 /*
 	Symbol Table Array Indices
@@ -413,11 +414,17 @@ struct cil_fs_use {
 
 /*struct constrain {
 	//Design
-};
-
-struct mls_constrain {
-	//Design
 };*/
+
+#define CIL_CONSTRAIN_KEYS "t1 t2 r1 r2 u1 u2 l1 l2 h1 h2"
+#define CIL_CONSTRAIN_OPER "== != eq dom domby incomp and or"
+struct cil_mlsconstrain {
+	struct cil_list *class_list_str;
+	struct cil_list *class_list;
+	struct cil_list *perm_list_str;
+	struct cil_list *perm_list;
+	struct cil_tree *expr;
+};
 
 int cil_db_init(struct cil_db **);
 void cil_db_destroy(struct cil_db **);

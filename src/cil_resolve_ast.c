@@ -908,6 +908,97 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 	return SEPOL_OK;
 }
 
+int __cil_resolve_constrain_expr(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *expr_root)
+{
+	struct cil_tree_node *curr = expr_root;
+	struct cil_tree_node *attr_node;
+	int rc = SEPOL_ERR;
+
+	while (curr != NULL) {
+		if (curr->cl_head == NULL) {
+			if (strstr(CIL_CONSTRAIN_OPER, (char*)curr->data) == NULL && strstr(CIL_CONSTRAIN_KEYS, (char*)curr->data) == NULL) {
+				rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_TYPES, &attr_node);
+				if (rc != SEPOL_OK) {
+					printf("Name resolution failed for: %s\n", (char*)curr->data);
+					return rc;
+				}
+				free(curr->data);
+				curr->data = NULL;
+				curr->flavor = attr_node->flavor;
+				curr->data = attr_node->data;
+			}
+		}
+		else {
+			rc = __cil_resolve_constrain_expr(db, current, curr->cl_head);
+			if (rc != SEPOL_OK) {
+				printf("Failed resolving constrain expression\n");
+				return rc;
+			}
+		}
+		curr = curr->next;
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_resolve_mlsconstrain(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_mlsconstrain *mlscon = (struct cil_mlsconstrain*)current->data;
+	struct cil_tree_node *class_node;
+	struct cil_list_item *curr_class = mlscon->class_list_str->head;
+	struct cil_list_item *new_item;
+	struct cil_list *class_list;
+	struct cil_list *perm_list;
+	int rc = SEPOL_ERR;
+
+	cil_list_init(&class_list);
+	cil_list_init(&perm_list);
+	while (curr_class != NULL) {
+		rc = cil_resolve_name(db, current, (char*)curr_class->data, CIL_SYM_CLASSES, &class_node);
+		if (rc != SEPOL_OK) {
+			printf("Name resolution failed for: %s\n", (char*)curr_class->data);
+			return rc;
+		}
+		rc = __cil_resolve_perm_list((struct cil_class*)class_node->data, mlscon->perm_list_str, NULL);
+		if (rc != SEPOL_OK) {
+			printf("Failed to verify perm list\n");
+			return rc;
+		}
+		cil_list_item_init(&new_item);
+		new_item->flavor = CIL_CLASS;
+		new_item->data = class_node->data;
+		rc = cil_list_append_item(class_list, new_item);
+		if (rc != SEPOL_OK) {
+			printf("Failed to append to class list\n");
+			return rc;
+		}
+		curr_class = curr_class->next;
+	}
+
+	rc = __cil_resolve_perm_list((struct cil_class*)class_node->data, mlscon->perm_list_str, perm_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve perm list\n");
+		return rc;
+	}
+
+	rc = __cil_resolve_constrain_expr(db, current, mlscon->expr->root);
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve constrain expression\n");
+		return rc;
+	}
+
+	mlscon->class_list = class_list;
+	mlscon->perm_list = perm_list;
+	cil_list_destroy(&mlscon->class_list_str, 1);
+	cil_list_destroy(&mlscon->perm_list_str, 1);
+	free(mlscon->class_list_str);
+	free(mlscon->perm_list_str);
+	mlscon->class_list_str = NULL;
+	mlscon->perm_list_str = NULL;
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct cil_context *context)
 {
 	struct cil_tree_node *user_node = NULL;
@@ -1137,6 +1228,13 @@ int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, u
 						case CIL_LEVEL : {
 							printf("case level\n");
 							rc = cil_resolve_level(db, current, (struct cil_level*)current->data);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_MLSCONSTRAIN : {
+							printf ("case mlsconstrain\n");
+							rc = cil_resolve_mlsconstrain(db, current);
 							if (rc != SEPOL_OK)
 								return rc;
 							break;

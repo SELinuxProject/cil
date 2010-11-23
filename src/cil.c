@@ -157,6 +157,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_level(*data);
 			break;
 		}
+		case (CIL_MLSCONSTRAIN) : {
+			cil_destroy_mlsconstrain(*data);
+			break;
+		}
 		case (CIL_ROLETYPE) : {
 			cil_destroy_roletype(*data);
 			break;

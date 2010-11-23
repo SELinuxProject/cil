@@ -18,13 +18,14 @@
 #define SENS				3
 #define CATS				4
 #define LEVELS				5
-#define ATTRTYPES			6
-#define ALIASES				7
-#define ALLOWS				8
-#define USERROLES			9
+#define MLSCONSTRAIN			6
+#define ATTRTYPES			7
+#define ALIASES				8
+#define ALLOWS				9
+#define USERROLES			10
 
 #define BUFFER				1024
-#define NUM_POLICY_FILES 	10
+#define NUM_POLICY_FILES 	11
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 {
@@ -192,6 +193,40 @@ int cil_sens_to_policy(FILE **file_arr, struct cil_list *sens)
 		}
 		curr_sens = curr_sens->next;
 	}
+	return SEPOL_OK;
+}
+
+int cil_print_constrain_expr(FILE **file_arr, struct cil_tree_node *root)
+{
+	struct cil_tree_node *curr = root;
+	int rc = SEPOL_ERR;
+
+	if (curr->flavor == CIL_ROOT)
+		curr = curr->cl_head;
+
+	while (curr != NULL) {
+		if (curr->cl_head != NULL) {
+			fprintf(file_arr[MLSCONSTRAIN], "( ");
+			rc = cil_print_constrain_expr(file_arr, curr->cl_head);
+			if (rc != SEPOL_OK) {
+				printf("Failed to print constrain expression\n");
+				return rc;
+			}
+		}
+		else {
+			if (curr->flavor == CIL_AST_STR)
+				fprintf(file_arr[MLSCONSTRAIN], "%s", (char*)curr->data);
+			else
+				fprintf(file_arr[MLSCONSTRAIN], "%s", ((struct cil_type*)curr->data)->datum.name);
+		}
+		if (curr->next != NULL) 
+			fprintf(file_arr[MLSCONSTRAIN], " %s ", (char*)curr->parent->data);
+		else if (curr->parent->flavor != CIL_ROOT) 
+			fprintf(file_arr[MLSCONSTRAIN], " )");
+
+		curr = curr->next;
+	}
+
 	return SEPOL_OK;
 }
 
@@ -391,6 +426,30 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[LEVELS], ";\n");
 			break;
 		}
+		case CIL_MLSCONSTRAIN : {
+			struct cil_mlsconstrain *mlscon = (struct cil_mlsconstrain*)current->data;
+			struct cil_list_item *class_curr = mlscon->class_list->head;
+			struct cil_list_item *perm_curr = mlscon->perm_list->head;
+			fprintf(file_arr[MLSCONSTRAIN], "mlsconstrain ");
+			if (class_curr->next == NULL)
+				fprintf(file_arr[MLSCONSTRAIN], "%s ", ((struct cil_class*)class_curr->data)->datum.name);
+			else {
+				fprintf(file_arr[MLSCONSTRAIN], "{ ");
+				while (class_curr != NULL) {
+					fprintf(file_arr[MLSCONSTRAIN], "%s ", ((struct cil_class*)class_curr->data)->datum.name);
+					class_curr = class_curr->next;
+				}
+				fprintf(file_arr[MLSCONSTRAIN], "}\n\t\t");
+			}
+			fprintf(file_arr[MLSCONSTRAIN], "{ ");
+			while (perm_curr != NULL) {
+				fprintf(file_arr[MLSCONSTRAIN], "%s ", ((struct cil_perm*)perm_curr->data)->datum.name);
+				perm_curr = perm_curr->next;
+			}
+			fprintf(file_arr[MLSCONSTRAIN], "}\n\t");
+			cil_print_constrain_expr(file_arr, mlscon->expr->root);
+			fprintf(file_arr[MLSCONSTRAIN], ";\n");
+		}
 		default : {
 			break;
 		}
@@ -440,7 +499,11 @@ int cil_gen_policy(struct cil_db *db)
 	strcpy(temp, "/tmp/levels-XXXXXX");
 	file_arr[LEVELS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[LEVELS] = cil_strdup(temp);
-	
+
+	strcpy(temp, "/tmp/mlscon-XXXXXX");
+	file_arr[MLSCONSTRAIN] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[MLSCONSTRAIN] = cil_strdup(temp);
+
 	strcpy(temp, "/tmp/attrtypes-XXXXXX");
 	file_arr[ATTRTYPES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[ATTRTYPES] = cil_strdup(temp);

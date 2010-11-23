@@ -1249,6 +1249,99 @@ void cil_destroy_level(struct cil_level *level)
 	free(level);
 }
 
+int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_tree_node *expr_root)
+{
+	struct cil_tree_node *curr = parse_current;
+	struct cil_tree_node *expr_curr = expr_root;
+	struct cil_tree_node *new_node = NULL;
+	int rc = SEPOL_ERR;
+
+	while (curr != NULL) {
+		if (curr->cl_head == NULL) {
+			cil_tree_node_init(&new_node);
+			new_node->parent = expr_curr;
+			new_node->line = expr_curr->line;
+			new_node->data = cil_strdup(curr->data);
+			new_node->flavor = CIL_AST_STR;
+			if (expr_curr->cl_head == NULL)
+				expr_curr->cl_head = new_node;
+			else
+				expr_curr->cl_tail->next = new_node;
+			expr_curr->cl_tail = new_node;
+			if (strstr(CIL_CONSTRAIN_OPER, curr->data) != NULL) 
+				expr_curr = new_node;
+		}
+		else {
+			rc = __cil_build_constrain_tree(curr->cl_head, expr_curr);
+			if (rc != SEPOL_OK) {
+				printf("Error building constrain expression tree\n");
+				return rc;
+			}
+		}
+		curr = curr->next;
+	}
+	expr_curr = expr_curr->parent;
+	
+	return SEPOL_OK;
+}
+
+int cil_gen_mlsconstrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+	
+	if (parse_current->next == NULL || 
+		parse_current->next->cl_head == NULL || 
+		parse_current->next->next == NULL || 
+		parse_current->next->next->cl_head == NULL || 
+		parse_current->next->next->next == NULL || 
+		parse_current->next->next->next->cl_head == NULL) {
+		printf("Invalid mlsconstrain declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_mlsconstrain *mlscon = cil_malloc(sizeof(struct cil_mlsconstrain));
+	int rc = SEPOL_ERR;
+
+	cil_list_init(&mlscon->class_list_str);
+	cil_parse_to_list(parse_current->next->cl_head, mlscon->class_list_str, CIL_AST_STR);
+	cil_list_init(&mlscon->perm_list_str);
+	cil_parse_to_list(parse_current->next->next->cl_head, mlscon->perm_list_str, CIL_AST_STR);
+
+	cil_tree_init(&mlscon->expr);
+	rc = __cil_build_constrain_tree(parse_current->next->next->next->cl_head, mlscon->expr->root);
+	if (rc != SEPOL_OK) {
+		printf("Failed to build constrain expression tree\n");
+		goto gen_mlsconstrain_cleanup;
+	}
+	print_tree(mlscon->expr->root);
+
+	ast_node->data = mlscon;
+	ast_node->flavor = CIL_MLSCONSTRAIN;
+
+	return SEPOL_OK;
+
+	gen_mlsconstrain_cleanup:
+		cil_destroy_mlsconstrain(mlscon);
+		return rc;
+		
+}
+
+void cil_destroy_mlsconstrain(struct cil_mlsconstrain *mlscon)
+{
+	if (mlscon->class_list_str != NULL)
+		cil_list_destroy(&mlscon->class_list_str, 1);
+	if (mlscon->class_list != NULL)
+		cil_list_destroy(&mlscon->class_list, 0);
+	if (mlscon->perm_list_str != NULL)
+		cil_list_destroy(&mlscon->perm_list_str, 1);
+	if (mlscon->perm_list != NULL)
+		cil_list_destroy(&mlscon->perm_list, 0);
+	if (mlscon->expr != NULL)
+		cil_tree_destroy(&mlscon->expr);
+	free(mlscon);
+}
+
 /* Fills in context starting from user */
 int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context) 
 {	
@@ -1728,6 +1821,15 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						}
 						forced = 1;
 					}
+					else if (!strcmp(parse_current->data, CIL_KEY_MLSCONSTRAIN)) {
+						rc = cil_gen_mlsconstrain(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_mlsconstrain failed, rc: %d\n", rc);
+							return rc;
+						}
+						forced = 1;
+					}
+
 					else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
 						rc = cil_gen_context(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
