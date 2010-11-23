@@ -57,6 +57,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			free(*data);
 			break;
 		}
+		case (CIL_LIST) : {
+			free(*data);	
+			break;
+		}
 		case (CIL_BLOCK) : {
 			cil_destroy_block(*data);
 			break;
