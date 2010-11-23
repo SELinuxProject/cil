@@ -12,20 +12,28 @@
 
 #define SEPOL_DONE			555
 
-#define COMMONS				0
-#define CLASSES				1
-#define INTERFACES			2
-#define SENS				3
-#define CATS				4
-#define LEVELS				5
-#define ATTRTYPES			6
-#define ALIASES				7
-#define ALLOWS				8
-#define USERROLES			9
-#define NETIFCONS			10
+#define CLASS_DECL			0
+#define ISIDS				1
+#define COMMONS				2
+#define CLASSES				3
+#define INTERFACES			4
+#define SENS				5
+//TODO dominance
+#define CATS				6
+#define LEVELS				7
+//TODO mlsconstrain
+//TODO policycaps
+#define ATTRTYPES			8
+#define ALIASES				9
+#define ALLOWS				10
+#define USERROLES			11
+//TODO constrain
+//fs_use, genfscon, portcon
+#define SIDS				12
+#define NETIFCONS			13 
 
 #define BUFFER				1024
-#define NUM_POLICY_FILES		11
+#define NUM_POLICY_FILES		14
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 {
@@ -298,6 +306,8 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			return SEPOL_DONE;
 		}
 		case CIL_CLASS: {
+			fprintf(file_arr[CLASS_DECL], "class %s\n", ((struct cil_class*)current->data)->datum.name);
+
 			if (current->cl_head != NULL) {
 				fprintf(file_arr[CLASSES], "class %s ", ((struct cil_class*)(current->data))->datum.name);
 			}
@@ -422,6 +432,15 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			
 			break;
 		}
+		case CIL_SID : {
+			struct cil_sid *sid = (struct cil_sid*)current->data;
+			fprintf(file_arr[ISIDS], "sid %s\n", sid->datum.name);
+		
+			fprintf(file_arr[SIDS], "sid %s ", sid->datum.name);
+			cil_context_to_policy(file_arr, SIDS, sid->context);
+			fprintf(file_arr[SIDS], "\n");
+			break;
+		}
 		default : {
 			break;
 		}
@@ -447,6 +466,14 @@ int cil_gen_policy(struct cil_db *db)
 	cil_list_init(&cats);
 	struct cil_list *sens;
 	cil_list_init(&sens);
+
+	strcpy(temp, "/tmp/classdecl-XXXXXX");
+	file_arr[CLASS_DECL] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[CLASS_DECL] = cil_strdup(temp);
+
+	strcpy(temp, "/tmp/isids-XXXXXX");
+	file_arr[ISIDS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[ISIDS] = cil_strdup(temp);
 
 	strcpy(temp,"/tmp/common-XXXXXX");
 	file_arr[COMMONS] = fdopen(mkstemp(temp), "w+");
@@ -488,6 +515,9 @@ int cil_gen_policy(struct cil_db *db)
 	file_arr[USERROLES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[USERROLES] = cil_strdup(temp);
 
+	strcpy(temp, "/tmp/sids-XXXXXX");
+	file_arr[SIDS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[SIDS] = cil_strdup(temp);
 
 	strcpy(temp, "/tmp/netifcons-XXXXXX");
 	file_arr[NETIFCONS] = fdopen(mkstemp(temp), "w+");

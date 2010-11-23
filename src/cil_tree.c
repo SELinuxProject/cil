@@ -534,7 +534,18 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			printf("\n");
 			return;
 		}
-					
+		case CIL_SID : {
+			struct cil_sid *sid = node->data;
+			printf("SID %s:", sid->datum.name);
+			if (sid->context_str != NULL)
+				printf(" %s", sid->context_str);
+			else
+				cil_tree_print_context(sid->context);
+			printf("\n");
+
+			return;
+		}
+	
 		default : {
 			printf("CIL FLAVOR: %d\n", node->flavor);
 			return;

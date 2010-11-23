@@ -167,6 +167,7 @@ struct cil_common {
 
 struct cil_sid {
 	struct cil_symtab_datum datum;
+	char *context_str;
 	struct cil_context *context;
 };
 
