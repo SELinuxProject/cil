@@ -3565,8 +3565,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_common);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_common_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_sid);
-//	Causes a segfault
-//	SUITE_ADD_TEST(suite, test_cil_build_ast_sid_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sid_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_attribute);
