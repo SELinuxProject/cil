@@ -1014,7 +1014,7 @@ void test_cil_gen_common(CuTest *tc) {
 }
 
 void test_cil_gen_sid(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah", "blah", ")", ")", NULL};
+	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 	struct cil_tree *tree;
 	gen_test_tree(&tree, line);
 
@@ -2261,7 +2261,7 @@ void test_cil_build_ast_common_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_sid(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah", "blah", ")", ")", NULL};
+	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
