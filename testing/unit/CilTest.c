@@ -67,7 +67,7 @@ void gen_test_tree(struct cil_tree **test_root, char *line[]) {
 	    if (*i == (char*)"(") {
 	        cil_tree_node_init(&node);
 	        node->parent = current;
-	        node->flavor = CIL_PARSER;
+	        node->flavor = CIL_PARSE_NODE;
 	        node->line = 0;
 	        if (current->cl_head == NULL)
 	            current->cl_head = node;
@@ -82,7 +82,7 @@ void gen_test_tree(struct cil_tree **test_root, char *line[]) {
 	        cil_tree_node_init(&item);
 	        item->parent = current;
 	        item->data = cil_strdup(*i);
-	        item->flavor = CIL_PARSER;
+	        item->flavor = CIL_PARSE_NODE;
 	        item->line = 0;
 	        if (current->cl_head == NULL) {
 	            current->cl_head = item;

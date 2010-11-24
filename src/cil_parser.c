@@ -29,7 +29,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 			paren_count++;
 			cil_tree_node_init(&node);
 			node->parent = current;
-			node->flavor = CIL_PARSER;
+			node->flavor = CIL_PARSE_NODE;
 			node->line = tok.line;
 			if (current->cl_head == NULL)
 				current->cl_head = node;
@@ -50,7 +50,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 			cil_tree_node_init(&item);
 			item->parent = current;
 			item->data = cil_strdup(tok.value);
-			item->flavor = CIL_PARSER;
+			item->flavor = CIL_PARSE_NODE;
 			item->line = tok.line;
 			if (current->cl_head == NULL)
 				current->cl_head = item;

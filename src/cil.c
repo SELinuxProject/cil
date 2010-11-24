@@ -49,7 +49,7 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			free(*data);
 			break;
 		}
-		case (CIL_PARSER) : {
+		case (CIL_PARSE_NODE) : {
 			free(*data);
 			break;
 		}

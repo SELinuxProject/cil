@@ -72,6 +72,53 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
 	*node = NULL;
 }
 
+int cil_tree_walk(uint32_t mode, struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *forced, struct cil_list *other), int (*finished_branch)(struct cil_tree_node *node, uint32_t *forced, struct cil_list *other), struct cil_list *other)
+{
+	if (start_node == NULL)
+		return SEPOL_ERR;
+
+	struct cil_tree_node *node = start_node;
+	uint32_t reverse = 0;
+	uint32_t forced = 0;
+
+	uint32_t rc = SEPOL_ERR;
+
+	do {
+		if (node->cl_head == NULL) {
+			if (!reverse) {
+				if (node->parent->cl_head == node) {
+					rc = (*process_node)(node, &forced, other);
+					if (rc != SEPOL_OK) {
+						printf("Failed to process node\n");
+						return rc;
+					}
+				}
+			}
+		}
+
+		if (node->cl_head != NULL && !reverse)
+			node = node->cl_head;
+		else if (node->next != NULL && reverse) {
+			node = node->next;
+			reverse = 0;
+		}
+		else if (node->next != NULL && !forced) 
+			node = node->next;
+		else {
+			rc = (*finished_branch)(node, &forced, other);
+			if (rc != SEPOL_OK) {
+				printf("Failed to process branch\n");
+				return rc;
+			}
+			node = node->parent;
+			reverse = 1;
+			forced = 0;
+		}
+	} while (node != start_node);
+	
+	return SEPOL_OK;
+}
+
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 {
 	while (current_perm != NULL) {
@@ -613,7 +660,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 //		printf("cil_tree_print: current not null\n");
 		if (current->cl_head == NULL) {
 //			printf("cil_tree_print: current->cl_head is null\n");
-			if (current->flavor == CIL_PARSER) {
+			if (current->flavor == CIL_PARSE_NODE) {
 				if (current->parent->cl_head == current)
 					printf("%s", (char*)current->data);
 				else
@@ -634,7 +681,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 					printf("\t");
 				printf("(");
 
-				if (current->flavor != CIL_PARSER) 
+				if (current->flavor != CIL_PARSE_NODE) 
 					cil_tree_print_node(current);
 			}
 			cil_tree_print(current->cl_head, depth + 1);
@@ -644,7 +691,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 			if ((current->parent != NULL) && (current->parent->cl_tail == current) && (current->parent->parent != NULL)) {
 				if (current->flavor == CIL_PERM)
 					printf(")\n");
-				else if (current->flavor != CIL_PARSER) {
+				else if (current->flavor != CIL_PARSE_NODE) {
 					for (x = 0; x<depth-1; x++)
 						printf("\t");
 					printf(")\n");
