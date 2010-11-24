@@ -18,7 +18,6 @@
 #define CLASSES				3
 #define INTERFACES			4
 #define SENS				5
-//TODO dominance
 #define CATS				6
 #define LEVELS				7
 #define MLSCONSTRAIN			8
