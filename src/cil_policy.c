@@ -201,6 +201,15 @@ int cil_sens_to_policy(FILE **file_arr, struct cil_list *sens)
 		}
 		curr_sens = curr_sens->next;
 	}
+
+	curr_sens = sens->head;
+	fprintf(file_arr[SENS], "dominance { ");
+	while (curr_sens != NULL) {
+		fprintf(file_arr[SENS], "%s ", ((struct cil_multimap_item*)curr_sens->data)->key->name);
+		curr_sens = curr_sens->next;
+	}
+	fprintf(file_arr[SENS], "};\n");
+
 	return SEPOL_OK;
 }
 
@@ -512,6 +521,7 @@ int cil_gen_policy(struct cil_db *db)
 {
 	struct cil_tree_node *curr = db->ast->root;
 	struct cil_list_item *catorder;
+	struct cil_list_item *dominance;
 	int rc = SEPOL_ERR;
 	int reverse = 0;
 	FILE *policy_file;
@@ -596,6 +606,14 @@ int cil_gen_policy(struct cil_db *db)
 		}
 	}
 
+	if (db->dominance->head != NULL) {
+		dominance = db->dominance->head;
+		while (dominance != NULL) {
+			cil_multimap_insert(sens, dominance->data, NULL, CIL_SENS, 0);
+			dominance = dominance->next;
+		}
+	}
+
 	do {
 		if (curr->cl_head != NULL) {
 			if (!reverse) {
@@ -620,10 +638,6 @@ int cil_gen_policy(struct cil_db *db)
 				}
 				case CIL_CATALIAS: {
 					cil_multimap_insert(cats, &((struct cil_catalias*)curr->data)->cat->datum, curr->data, CIL_CAT, CIL_CATALIAS);
-					break;
-				}
-				case CIL_SENS: {
-					cil_multimap_insert(sens, curr->data, NULL, CIL_SENS, 0);
 					break;
 				}
 				case CIL_SENSALIAS: {

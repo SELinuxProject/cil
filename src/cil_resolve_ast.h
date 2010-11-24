@@ -18,6 +18,7 @@ int cil_resolve_roleallow(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_sensalias(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_catalias(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_catorder(struct cil_db *, struct cil_tree_node *);
+int cil_resolve_dominance(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_cat_list(struct cil_db *, struct cil_tree_node *, struct cil_list *, struct cil_list *);
 int cil_resolve_catset(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_level(struct cil_db *, struct cil_tree_node *, struct cil_level *); 

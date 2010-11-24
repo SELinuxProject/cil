@@ -1140,6 +1140,42 @@ void cil_destroy_catorder(struct cil_catorder *catorder)
 	free(catorder);
 }
 
+int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+	
+	if (parse_current->next == NULL || parse_current->next->cl_head == NULL) {
+		printf("Invalid dominance declaration (line %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_sens_dominates *dom = cil_malloc(sizeof(struct cil_sens_dominates));
+	cil_list_init(&dom->sens_list_str);
+	
+	rc = cil_set_to_list(parse_current->next, dom->sens_list_str);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create sensitivity list\n");
+		goto gen_dominance_cleanup;
+	}
+	ast_node->data = dom;
+	ast_node->flavor = CIL_DOMINANCE;
+
+	return SEPOL_OK;
+
+	gen_dominance_cleanup:
+		cil_destroy_dominance(dom);
+		return rc;
+}
+
+void cil_destroy_dominance(struct cil_sens_dominates *dom)
+{
+	if (dom->sens_list_str != NULL)
+		cil_list_destroy(&dom->sens_list_str, 1);
+	free(dom);
+}
+
 int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -1829,6 +1865,14 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 						rc = cil_gen_catorder(db, parse_current, ast_node);
 						if (rc != SEPOL_OK) {
 							printf("cil_gen_catorder failed, rc: %d\n", rc);
+							return rc;
+						}
+						forced = 1;
+					}
+					else if (!strcmp(parse_current->data, CIL_KEY_DOMINANCE)) {
+						rc = cil_gen_dominance(db, parse_current, ast_node);
+						if (rc != SEPOL_OK) {
+							printf("cil_gen_dominance failed, rc: %d\n", rc);
 							return rc;
 						}
 						forced = 1;
