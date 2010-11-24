@@ -150,6 +150,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_catorder(*data);
 			break;
 		}
+		case (CIL_DOMINANCE) : {
+			cil_destroy_dominance(*data);
+			break;
+		}
 		case (CIL_SENSCAT) : {
 			cil_destroy_senscat(*data);
 			break;
