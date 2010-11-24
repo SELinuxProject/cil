@@ -182,10 +182,6 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_netifcon(*data);
 			break;
 		}
-		case (CIL_DOMINANCE) : {
-			cil_destroy_dominance(*data);
-			break;
-		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;
