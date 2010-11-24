@@ -52,11 +52,13 @@ int cil_gen_sensalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_n
 void cil_destroy_sensalias(struct cil_sensalias *);
 int cil_gen_catalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_catalias(struct cil_catalias *);
-int cil_catset_to_list(struct cil_tree_node *, struct cil_list *);
+int cil_set_to_list(struct cil_tree_node *, struct cil_list *);
 int cil_gen_catset(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_catset(struct cil_catset *);
 int cil_gen_catorder(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_catorder(struct cil_catorder *);
+int cil_gen_dominance(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_dominance(struct cil_sens_dominates *);
 int cil_gen_senscat(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_senscat(struct cil_senscat *);
 int cil_fill_level(struct cil_tree_node *, struct cil_level *);

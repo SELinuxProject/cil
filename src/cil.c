@@ -26,6 +26,7 @@ int cil_db_init(struct cil_db **db)
 
 	cil_tree_init(&new_db->ast);
 	cil_list_init(&new_db->catorder);
+	cil_list_init(&new_db->dominance);
 	symtab_init(&new_db->netif, CIL_SYM_SIZE);
 
 	*db = new_db;
@@ -175,6 +176,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 		}
 		case (CIL_NETIFCON) : {
 			cil_destroy_netifcon(*data);
+			break;
+		}
+		case (CIL_DOMINANCE) : {
+			cil_destroy_dominance(*data);
 			break;
 		}
 		default : {

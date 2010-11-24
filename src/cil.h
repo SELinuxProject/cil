@@ -46,7 +46,8 @@
 #define CIL_ROLEALLOW		31
 #define CIL_ROLETYPE		32 
 #define CIL_CATORDER		33
-#define CIL_SENSCAT		34
+#define CIL_DOMINANCE		34
+#define CIL_SENSCAT		35
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -100,6 +101,7 @@
 #define CIL_KEY_CATALIAS	"categoryalias"
 #define CIL_KEY_CATSET		"categoryset"
 #define CIL_KEY_CATORDER	"categoryorder"
+#define CIL_KEY_DOMINANCE	"dominance"
 #define CIL_KEY_SENSCAT		"sensitivitycategory"
 #define CIL_KEY_LEVEL		"level"
 #define CIL_KEY_MLSCONSTRAIN	"mlsconstrain"

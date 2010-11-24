@@ -14,6 +14,10 @@
 	(ioctl read write create getattr setattr lock))
 
 (sensitivity s0)
+(sensitivity s1)
+(sensitivity s2)
+(sensitivity s3)
+(sensitivity s4)
 
 (category c0)
 (categoryalias c0 cat)
@@ -62,6 +66,8 @@
 ;(categoryorder (c3 c5))
 ;(categoryorder (c2 c3))
 ;(categoryorder (c4 c0))
+
+(dominance (s0 s1 s2 s3 s4))
 
 (categoryset somecats (c0 c1 c2 c3 c4 (c5 c10))) 
 

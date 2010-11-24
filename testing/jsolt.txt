@@ -46,6 +46,7 @@
 
 (sensitivity s0)
 (sensitivity s1)
+(dominance (s0 s1))
 (category c0)
 (category c255)
 (categoryorder (c0 c255))

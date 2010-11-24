@@ -381,7 +381,7 @@ int cil_resolve_catalias(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-int __cil_catorder_append(struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
+int __cil_set_append(struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
 {
 	if (main_list_item == NULL || new_list_item == NULL)
 		return SEPOL_ERR;
@@ -407,7 +407,7 @@ int __cil_catorder_append(struct cil_list_item *main_list_item, struct cil_list_
 	return SEPOL_OK;
 }
 
-int __cil_catorder_prepend(struct cil_list *main_list, struct cil_list *new_list, struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
+int __cil_set_prepend(struct cil_list *main_list, struct cil_list *new_list, struct cil_list_item *main_list_item, struct cil_list_item *new_list_item, int *success)
 {
 	if (main_list_item == NULL || new_list_item == NULL)
 		return SEPOL_ERR;
@@ -444,7 +444,7 @@ int __cil_catorder_prepend(struct cil_list *main_list, struct cil_list *new_list
 	return SEPOL_OK;
 }
 
-int __cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, int *success)
+int __cil_set_merge_lists(struct cil_list *primary, struct cil_list *new, int *success)
 {
 	if (primary == NULL && new == NULL)
 		return SEPOL_ERR;
@@ -457,7 +457,7 @@ int __cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, i
 		while (curr_new != NULL) {
 			if (curr_main->data == curr_new->data) {
 				if (curr_new->next == NULL) {
-					rc = __cil_catorder_prepend(primary, new, curr_main, curr_new, success);
+					rc = __cil_set_prepend(primary, new, curr_main, curr_new, success);
 					if (rc != SEPOL_OK) {
 						printf("Failed to prepend categoryorder sublist to primary list\n");
 						return rc;
@@ -465,7 +465,7 @@ int __cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, i
 					return SEPOL_OK;
 				}
 				else {
-					rc = __cil_catorder_append(curr_main, curr_new, success);
+					rc = __cil_set_append(curr_main, curr_new, success);
 					if (rc != SEPOL_OK) {
 						printf("Failed to append categoryorder sublist to primary list\n");
 						return rc;
@@ -481,7 +481,7 @@ int __cil_catorder_merge_lists(struct cil_list *primary, struct cil_list *new, i
 	return SEPOL_OK;
 }
 
-int __cil_catorder_remove_list(struct cil_list *catorder, struct cil_list *remove_item)
+int __cil_set_remove_list(struct cil_list *catorder, struct cil_list *remove_item)
 {
 	struct cil_list_item *list_item;
 
@@ -497,26 +497,26 @@ int __cil_catorder_remove_list(struct cil_list *catorder, struct cil_list *remov
 	return SEPOL_OK;
 }
 
-int __cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
+int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 {
-	struct cil_list_item *catorder_head;
-	struct cil_list_item *catorder_sublist;
-	struct cil_list_item *catorder_lists;
+	struct cil_list_item *order_head;
+	struct cil_list_item *order_sublist;
+	struct cil_list_item *order_lists;
 	struct cil_list_item *edge_node;
 	int success = 0;
 	int rc = SEPOL_ERR;
 
-	catorder_head = db->catorder->head;
-	catorder_sublist = catorder_head;
-	edge_node = cat_edges->head;
+	order_head = order->head;
+	order_sublist = order_head;
+	edge_node = edges->head;
 	while (edge_node != NULL) {
-		while (catorder_sublist != NULL) {
-			if (catorder_sublist->data == NULL) {
-				catorder_sublist->data = edge_node->data;
+		while (order_sublist != NULL) {
+			if (order_sublist->data == NULL) {
+				order_sublist->data = edge_node->data;
 				break;
 			}
 			else {
-				rc = __cil_catorder_merge_lists(catorder_sublist->data, edge_node->data, &success);
+				rc = __cil_set_merge_lists(order_sublist->data, edge_node->data, &success);
 				if (rc != SEPOL_OK) {
 					printf("Failed to merge categoryorder sublist with main list\n");
 					return rc;
@@ -524,33 +524,33 @@ int __cil_catorder_order(struct cil_db *db, struct cil_list *cat_edges)
 			}
 			if (success) 
 				break;
-			else if (catorder_sublist->next == NULL) { 
-				catorder_sublist->next = edge_node;
+			else if (order_sublist->next == NULL) { 
+				order_sublist->next = edge_node;
 				break;
 			}
-			catorder_sublist = catorder_sublist->next;
+			order_sublist = order_sublist->next;
 		}
 		if (success) {
 			success = 0;
-			catorder_sublist = catorder_head;
-			while (catorder_sublist != NULL) {
-				catorder_lists = catorder_head;
-				while (catorder_lists != NULL) {
-					if (catorder_sublist != catorder_lists) {
-						rc = __cil_catorder_merge_lists(catorder_sublist->data, catorder_lists->data, &success);
+			order_sublist = order_head;
+			while (order_sublist != NULL) {
+				order_lists = order_head;
+				while (order_lists != NULL) {
+					if (order_sublist != order_lists) {
+						rc = __cil_set_merge_lists(order_sublist->data, order_lists->data, &success);
 						if (rc != SEPOL_OK) {
 							printf("Failed combining categoryorder lists into one\n");
 							return rc;
 						}
 						if (success) 
-							__cil_catorder_remove_list(db->catorder, catorder_lists->data);
+							__cil_set_remove_list(order, order_lists->data);
 					}
-					catorder_lists = catorder_lists->next;
+					order_lists = order_lists->next;
 				}
-				catorder_sublist = catorder_sublist->next; 
+				order_sublist = order_sublist->next; 
 			}
 		}
-		catorder_sublist = catorder_head;
+		order_sublist = order_head;
 		edge_node = edge_node->next;
 	}
 	return SEPOL_OK;
@@ -676,9 +676,137 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 		cil_list_item_init(&list_item);
 		db->catorder->head = list_item;
 	}
-	rc = __cil_catorder_order(db, edge_list);
+	rc = __cil_set_order(db->catorder, edge_list);
 	if (rc != SEPOL_OK) {
 		printf("Failed to order categoryorder\n");
+		return rc;
+	}
+	
+	return SEPOL_OK;
+}
+
+int __cil_verify_dominance(struct cil_db *db, struct cil_tree_node *current)
+{
+	if (db == NULL || current == NULL)
+		return SEPOL_ERR;
+
+	struct cil_list_item *dominance;
+	int reverse = 0;
+	int found = 0;
+	int empty = 0;
+
+	if (db->dominance == NULL || db->dominance->head == NULL)
+		empty = 1;
+	else {
+		dominance = db->dominance->head;
+		if (db->dominance->head->next != NULL) {
+			printf("Disjoint category ordering exists\n");
+			return SEPOL_ERR;
+		}
+		
+		if (db->dominance->head->data != NULL) 
+			db->dominance->head = ((struct cil_list*)db->dominance->head->data)->head;
+	}
+
+	/* Verify no sensitivities exist or all sensitivities are ordered */
+	do {
+		if (current->cl_head == NULL) {
+			if (current->flavor == CIL_SENS) {
+				if (empty)
+					return SEPOL_ERR;
+				dominance = db->dominance->head;
+				while (dominance != NULL) {
+					if (dominance->data == current->data) {
+						found = 1;
+						break;
+					}
+					dominance = dominance->next;
+				}
+				if (!found) {
+					printf("Sensitivity dominance not declared: %s\n", ((struct cil_sens*)current->data)->datum.name);
+					return SEPOL_ERR;
+				}
+				found = 0;
+			}
+		}
+
+		if (current->cl_head != NULL && !reverse)
+			current = current->cl_head;
+		else if (current->next != NULL && reverse) {
+			current = current->next;
+			reverse = 0;
+		}
+		else if (current->next != NULL)
+			current = current->next;
+		else {
+			current = current->parent;
+			reverse = 1;
+		}
+	} while (current->flavor != CIL_ROOT);
+	
+	return SEPOL_OK;
+}
+
+int cil_resolve_dominance(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_sens_dominates *dom = (struct cil_sens_dominates*)current->data;
+	struct cil_tree_node *sens_node = NULL;
+	struct cil_list_item *curr_sens = dom->sens_list_str->head;
+	struct cil_list_item *list_item;
+	struct cil_list_item *copy_item;
+	struct cil_list_item *list_tail = NULL;
+	struct cil_list_item *edge_node;
+	struct cil_list_item *edge_list_tail = NULL;
+	struct cil_list *sens_list;
+	struct cil_list *edge_list;
+	int rc = SEPOL_ERR;
+
+	cil_list_init(&sens_list);
+	cil_list_init(&edge_list);
+	
+	while (curr_sens != NULL) {
+		cil_list_item_init(&list_item);
+		rc = cil_resolve_name(db, current, (char*)curr_sens->data, CIL_SYM_SENS, &sens_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve sensitivity name: %s\n", (char*)curr_sens->data);
+			return rc;
+		}
+		list_item->flavor = sens_node->flavor;
+		list_item->data = sens_node->data;
+
+		if (sens_list->head == NULL && list_tail == NULL)
+			sens_list->head = list_item;
+		else if (sens_list->head == NULL && list_tail != NULL) {
+			cil_list_item_init(&copy_item);
+			copy_item->flavor = list_tail->flavor;
+			copy_item->data = list_tail->data;
+			sens_list->head = copy_item;
+			sens_list->head->next = list_item;
+		}
+		else
+			list_tail->next = list_item;
+			
+		if (list_tail != NULL) {
+			cil_list_item_init(&edge_node);
+			edge_node->flavor = CIL_LIST;
+			edge_node->data = sens_list;
+			if (edge_list->head == NULL)
+				edge_list->head = edge_node;
+			else
+				edge_list_tail->next = edge_node;
+			edge_list_tail = edge_node;
+			cil_list_init(&sens_list);
+		}
+		list_tail = list_item;
+		curr_sens = curr_sens->next;
+	}
+	if (db->dominance->head == NULL) {
+		cil_list_item_init(&list_item);
+		db->dominance->head = list_item;
+	}
+	rc = __cil_set_order(db->dominance, edge_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to order dominance\n");
 		return rc;
 	}
 	
@@ -1170,11 +1298,17 @@ int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, u
 //			printf("FLAVOR: %d\n", current->flavor);
 			switch (pass) {
 				case 1 : {
-					//dominance
 					switch (current->flavor) {
 						case CIL_CATORDER : {
 							printf("case categoryorder\n");
 							rc = cil_resolve_catorder(db, current);
+							if (rc != SEPOL_OK)
+								return rc;
+							break;
+						}
+						case CIL_DOMINANCE : {
+							printf("case dominance\n");
+							rc = cil_resolve_dominance(db, current);
 							if (rc != SEPOL_OK)
 								return rc;
 							break;
@@ -1373,6 +1507,12 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	rc = __cil_verify_catorder(db, current);
 	if (rc != SEPOL_OK) {
 		printf("Failed to verify categoryorder\n");
+		return rc;
+	}
+	printf("----- Verify Dominance -----\n");
+	rc = __cil_verify_dominance(db, current);
+	if (rc != SEPOL_OK) {
+		printf("Failed to verify dominance\n");
 		return rc;
 	}
 	printf("---------- Pass 2 ----------\n");
