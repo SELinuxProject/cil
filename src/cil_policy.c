@@ -605,6 +605,7 @@ int cil_gen_policy(struct cil_db *db)
 	struct cil_list *sens;
 	cil_list_init(&sens);
 
+	/* TODO CDS prefix temp filenames with cil_ */
 	strcpy(temp, "/tmp/classdecl-XXXXXX");
 	file_arr[CLASS_DECL] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[CLASS_DECL] = cil_strdup(temp);
@@ -675,6 +676,7 @@ int cil_gen_policy(struct cil_db *db)
 		}
 	}
 
+	/* TODO CDS This does not need a multimap, it can just be written out (we think) */
 	if (db->dominance->head != NULL) {
 		dominance = db->dominance->head;
 		while (dominance != NULL) {
@@ -698,6 +700,7 @@ int cil_gen_policy(struct cil_db *db)
 	other->head->next->next->next->flavor = CIL_FILES;
 	other->head->next->next->next->data = file_arr;
 
+	/* TODO CDS check return value */
 	cil_tree_walk(0, curr, __cil_gen_policy_node_helper, NULL, other);
 
 	rc = cil_userrole_to_policy(file_arr, users);
