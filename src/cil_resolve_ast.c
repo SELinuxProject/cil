@@ -1283,212 +1283,207 @@ int cil_resolve_sid(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;	
 }
 
-int __cil_resolve_ast_helper(struct cil_db *db, struct cil_tree_node *current, uint32_t pass)
+int __cil_resolve_ast_node_helper(struct cil_tree_node *node, uint32_t *forced, struct cil_list *other)
 {
 	int rc = SEPOL_ERR;
-	int reverse = 0;
 
-	if (current == NULL) {
-		printf("Error: Can't resolve NULL tree\n");
+	if (node == NULL || other == NULL || other->head == NULL)
 		return SEPOL_ERR;
+
+	int *pass = NULL;
+	struct cil_db *db = NULL;
+
+	if (other->head->flavor == CIL_DB)
+		db = (struct cil_db*)other->head->data;
+	else
+		return SEPOL_ERR;	
+		
+	if (other->head->next->flavor == CIL_INT)
+		pass = (int*)other->head->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (node->cl_head == NULL) {
+		switch (*pass) {
+			case 1 : {
+				switch (node->flavor) {
+					case CIL_CATORDER : {
+						printf("case categoryorder\n");
+						rc = cil_resolve_catorder(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_DOMINANCE : {
+						printf("case dominance\n");
+						rc = cil_resolve_dominance(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+				}
+				break;
+			}
+			case 2 : {
+				switch (node->flavor) {
+					case CIL_SENSCAT : {
+						printf("case sensitivitycategory\n");
+						rc = cil_resolve_senscat(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+				}
+				break;
+			}
+			case 3 : {
+				switch (node->flavor) {
+					case CIL_TYPE_ATTR : {
+						printf("case typeattribute\n");
+						rc = cil_resolve_typeattr(db, node);
+						if (rc !=  SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_TYPEALIAS : {
+						printf("case typealias\n");
+						rc = cil_resolve_typealias(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_AVRULE : {
+						printf("case avrule\n");
+						rc = cil_resolve_avrule(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_TYPE_RULE : {
+						printf("case type_rule\n");
+						rc = cil_resolve_type_rule(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_USERROLE : {
+						printf("case userrole\n");
+						rc = cil_resolve_userrole(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_ROLETYPE : {
+						printf("case roletype\n");
+						rc = cil_resolve_roletype(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_ROLETRANS : {
+						printf("case roletransition\n");
+						rc = cil_resolve_roletrans(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_ROLEALLOW : {
+						printf("case roleallow\n");
+						rc = cil_resolve_roleallow(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_SENSALIAS : {
+						printf("case sensitivityalias\n");
+						rc = cil_resolve_sensalias(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_CATALIAS : {
+						printf("case categoryalias\n");
+						rc = cil_resolve_catalias(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_CATSET : {
+						printf("case categoryset\n");
+						rc = cil_resolve_catset(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_LEVEL : {
+						printf("case level\n");
+						rc = cil_resolve_level(db, node, (struct cil_level*)node->data);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_MLSCONSTRAIN : {
+						printf ("case mlsconstrain\n");
+						rc = cil_resolve_mlsconstrain(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_CONTEXT : {
+						printf("case context\n");
+						rc = cil_resolve_context(db, node, (struct cil_context*)node->data);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					case CIL_NETIFCON : {
+						printf("case netifcon\n");
+						rc = cil_resolve_netifcon(db, node);
+						if (rc != SEPOL_OK)
+							return rc;	
+						break;
+					}
+					case CIL_SID : {
+						printf("case sid\n");
+						rc = cil_resolve_sid(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
+					default : 
+						break;
+				}
+				break;	
+			}
+			default : 
+				break;
+		}
 	}
-
-	do {
-		if (current->cl_head == NULL) {
-//			printf("FLAVOR: %d\n", current->flavor);
-			switch (pass) {
-				case 1 : {
-					switch (current->flavor) {
-						case CIL_CATORDER : {
-							printf("case categoryorder\n");
-							rc = cil_resolve_catorder(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_DOMINANCE : {
-							printf("case dominance\n");
-							rc = cil_resolve_dominance(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
+	else {
+		switch (*pass) {
+			case 1 : {
+				switch (node->flavor) {
+					case CIL_CLASS : {
+						printf("case class\n");
+						rc = cil_resolve_class(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
 					}
-					break;
+					default : 
+						break;
 				}
-				case 2 : {
-					switch (current->flavor) {
-						case CIL_SENSCAT : {
-							printf("case sensitivitycategory\n");
-							rc = cil_resolve_senscat(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-					}
-					break;
-				}
-				case 3 : {
-					switch (current->flavor) {
-						case CIL_TYPE_ATTR : {
-							printf("case typeattribute\n");
-							rc = cil_resolve_typeattr(db, current);
-							if (rc !=  SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_TYPEALIAS : {
-							printf("case typealias\n");
-							rc = cil_resolve_typealias(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_AVRULE : {
-							printf("case avrule\n");
-							rc = cil_resolve_avrule(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_TYPE_RULE : {
-							printf("case type_rule\n");
-							rc = cil_resolve_type_rule(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_USERROLE : {
-							printf("case userrole\n");
-							rc = cil_resolve_userrole(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_ROLETYPE : {
-							printf("case roletype\n");
-							rc = cil_resolve_roletype(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_ROLETRANS : {
-							printf("case roletransition\n");
-							rc = cil_resolve_roletrans(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_ROLEALLOW : {
-							printf("case roleallow\n");
-							rc = cil_resolve_roleallow(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_SENSALIAS : {
-							printf("case sensitivityalias\n");
-							rc = cil_resolve_sensalias(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_CATALIAS : {
-							printf("case categoryalias\n");
-							rc = cil_resolve_catalias(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_CATSET : {
-							printf("case categoryset\n");
-							rc = cil_resolve_catset(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_LEVEL : {
-							printf("case level\n");
-							rc = cil_resolve_level(db, current, (struct cil_level*)current->data);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_MLSCONSTRAIN : {
-							printf ("case mlsconstrain\n");
-							rc = cil_resolve_mlsconstrain(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_CONTEXT : {
-							printf("case context\n");
-							rc = cil_resolve_context(db, current, (struct cil_context*)current->data);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						case CIL_NETIFCON : {
-							printf("case netifcon\n");
-							rc = cil_resolve_netifcon(db, current);
-							if (rc != SEPOL_OK)
-								return rc;	
-							break;
-						}
-						case CIL_SID : {
-							printf("case sid\n");
-							rc = cil_resolve_sid(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						default : 
-							break;
-					}
-					break;	
-				}
-				default : 
-					break;
-			}
-		}
-		else {
-//			printf("FLAVOR: %d\n", current->flavor);
-			switch (pass) {
-				case 1 : {
-					switch (current->flavor) {
-						case CIL_CLASS : {
-							printf("case class\n");
-							rc = cil_resolve_class(db, current);
-							if (rc != SEPOL_OK)
-								return rc;
-							break;
-						}
-						default : 
-							break;
-					}
 			
-					break;	
-				}
-				default :
-					break;
+				break;	
 			}
-		}	
-
-		if (current->cl_head != NULL && !reverse)
-			current = current->cl_head;
-		else if (current->next != NULL && reverse) {
-			current = current->next;
-			reverse = 0;
+			default :
+				break;
 		}
-		else if (current->next != NULL)
-			current = current->next;
-		else {
-			current = current->parent;
-			reverse = 1;
-		}
-	} while (current->flavor != CIL_ROOT);
+	}	
+		
 	return SEPOL_OK;
 }
+
 
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
@@ -1497,8 +1492,18 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 	int rc = SEPOL_ERR;
 
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 1;
+	other->head->next->data = &pass;
+
 	printf("---------- Pass 1 ----------\n");
-	rc = __cil_resolve_ast_helper(db, current, 1);
+	rc = cil_tree_walk(0, current, __cil_resolve_ast_node_helper, NULL, other);	
 	if (rc != SEPOL_OK) {
 		printf("cil_resolve_ast: Pass 1 failed\n");
 		return rc;
@@ -1516,13 +1521,15 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		return rc;
 	}
 	printf("---------- Pass 2 ----------\n");
-	rc = __cil_resolve_ast_helper(db, current, 2);
+	pass = 2;
+	rc = cil_tree_walk(0, current, __cil_resolve_ast_node_helper, NULL, other);	
 	if (rc != SEPOL_OK) {
 		printf("cil_resolve_ast: Pass 2 failed\n");
 		return rc;
 	}
 	printf("---------- Pass 3 ----------\n");
-	rc = __cil_resolve_ast_helper(db, current, 3);
+	pass = 3;
+	rc = cil_tree_walk(0, current, __cil_resolve_ast_node_helper, NULL, other);	
 	if (rc != SEPOL_OK) {
 		printf("cil_resolve_ast: Pass 3 failed\n");
 		return rc;
