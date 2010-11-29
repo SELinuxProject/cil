@@ -750,6 +750,7 @@ int __cil_verify_dominance(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+/* TODO CDS see what of this can be factored out to be used by resolve_catorder as well */
 int cil_resolve_dominance(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_sens_dominates *dom = (struct cil_sens_dominates*)current->data;
