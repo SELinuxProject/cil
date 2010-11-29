@@ -1292,7 +1292,7 @@ int cil_resolve_sid(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;	
 }
 
-int __cil_resolve_ast_node_helper(struct cil_tree_node *node, uint32_t *forced, struct cil_list *other)
+int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
 {
 	int rc = SEPOL_ERR;
 
@@ -1512,7 +1512,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	other->head->next->data = &pass;
 
 	printf("---------- Pass 1 ----------\n");
-	rc = cil_tree_walk(0, current, __cil_resolve_ast_node_helper, NULL, other);	
+	rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, NULL, other);	
 	if (rc != SEPOL_OK) {
 		printf("cil_resolve_ast: Pass 1 failed\n");
 		return rc;
@@ -1531,14 +1531,14 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	}
 	printf("---------- Pass 2 ----------\n");
 	pass = 2;
-	rc = cil_tree_walk(0, current, __cil_resolve_ast_node_helper, NULL, other);	
+	rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, NULL, other);	
 	if (rc != SEPOL_OK) {
 		printf("cil_resolve_ast: Pass 2 failed\n");
 		return rc;
 	}
 	printf("---------- Pass 3 ----------\n");
 	pass = 3;
-	rc = cil_tree_walk(0, current, __cil_resolve_ast_node_helper, NULL, other);	
+	rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, NULL, other);	
 	if (rc != SEPOL_OK) {
 		printf("cil_resolve_ast: Pass 3 failed\n");
 		return rc;

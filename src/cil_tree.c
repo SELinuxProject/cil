@@ -72,21 +72,32 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
 	*node = NULL;
 }
 
-int cil_tree_walk(uint32_t mode, struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *forced, struct cil_list *other), int (*finished_branch)(struct cil_tree_node *node, uint32_t *forced, struct cil_list *other), struct cil_list *other)
+/* Perform depth-first walk of the tree
+   Parameters:
+   start_node:          root node to start walking from
+   process_node:        function to call when visiting a node
+                        Takes parameters:
+                            node:     node being visited
+                            finished: boolean indicating to the tree walker that it should move on from this branch
+                            other:    additional data
+   finished_branch:     function to call when finished with a branch of the tree before walking back up
+   other:               any additional data to be passed to process_node() and finished_branch()
+*/
+int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other), int (*finished_branch)(struct cil_tree_node *node, struct cil_list *other), struct cil_list *other)
 {
 	if (start_node == NULL)
 		return SEPOL_ERR;
 
 	struct cil_tree_node *node = start_node;
 	uint32_t reverse = 0;
-	uint32_t forced = 0;
+	uint32_t finished = 0;
 
 	uint32_t rc = SEPOL_ERR;
 
 	do {
 		if (!reverse) {
 			if (process_node != NULL) {
-				rc = (*process_node)(node, &forced, other);
+				rc = (*process_node)(node, &finished, other);
 				if (rc != SEPOL_OK) {
 					printf("Failed to process node\n");
 					return rc;
@@ -100,11 +111,11 @@ int cil_tree_walk(uint32_t mode, struct cil_tree_node *start_node, int (*process
 			node = node->next;
 			reverse = 0;
 		}
-		else if (node->next != NULL && !forced) 
+		else if (node->next != NULL && !finished) 
 			node = node->next;
 		else {
 			if (finished_branch != NULL) {
-				rc = (*finished_branch)(node, &forced, other);
+				rc = (*finished_branch)(node, other);
 				if (rc != SEPOL_OK) {
 					printf("Failed to process branch\n");
 					return rc;
@@ -112,7 +123,7 @@ int cil_tree_walk(uint32_t mode, struct cil_tree_node *start_node, int (*process
 			}
 			node = node->parent;
 			reverse = 1;
-			forced = 0;
+			finished = 0;
 		}
 	} while (node != start_node);
 	

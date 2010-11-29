@@ -517,7 +517,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 }
 
 /* other is a list containing users list, sensitivities list, categories list, and the file array */
-int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *forced, struct cil_list *other)
+int __cil_gen_policy_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
 {
 	if (other == NULL || other->head == NULL || other->head->next == NULL || other->head->next->next == NULL)
 		return SEPOL_ERR;
@@ -701,7 +701,7 @@ int cil_gen_policy(struct cil_db *db)
 	other->head->next->next->next->data = file_arr;
 
 	/* TODO CDS check return value */
-	cil_tree_walk(0, curr, __cil_gen_policy_node_helper, NULL, other);
+	cil_tree_walk(curr, __cil_gen_policy_node_helper, NULL, other);
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {

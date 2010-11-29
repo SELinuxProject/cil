@@ -1478,7 +1478,7 @@ void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 
 
 /* other is a list of 2 items. head should be ast_current, head->next should be db */
-int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *forced, struct cil_list *other)
+int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, struct cil_list *other)
 {
 	if (other == NULL || other->head == NULL || other->head->next == NULL)
 		return SEPOL_ERR;
@@ -1531,7 +1531,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 				// To avoid parsing list of perms again
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
 				rc = cil_gen_common(db, parse_current, ast_node);
@@ -1539,7 +1539,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_common failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
 				rc = cil_gen_sid(db, parse_current, ast_node);
@@ -1547,7 +1547,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_sid failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_USER)) {
 				rc = cil_gen_user(db, parse_current, ast_node);
@@ -1633,21 +1633,21 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 				// So that the object and perms lists do not get parsed again
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_AUDITALLOW)) {
 				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_AUDITALLOW);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_avrule (auditallow) failed, rc: %d\n", rc);
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_DONTAUDIT)) {
 				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_DONTAUDIT);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_avrule (dontaudit) failed, rc: %d\n", rc);
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_NEVERALLOW)) {
 				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_NEVERALLOW);
@@ -1655,7 +1655,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_avrule (neverallow) failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANS)) {
 				rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_TRANSITION);
@@ -1716,7 +1716,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_catset (categoryset) failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
 				rc = cil_gen_catorder(db, parse_current, ast_node);
@@ -1724,7 +1724,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_catorder failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_DOMINANCE)) {
 				rc = cil_gen_dominance(db, parse_current, ast_node);
@@ -1732,7 +1732,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_dominance failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SENSCAT)) {
 				rc = cil_gen_senscat(db, parse_current, ast_node);
@@ -1740,7 +1740,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_senscat failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_LEVEL)) {
 				rc = cil_gen_level(db, parse_current, ast_node);
@@ -1748,7 +1748,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_level failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_MLSCONSTRAIN)) {
 				rc = cil_gen_mlsconstrain(db, parse_current, ast_node);
@@ -1756,7 +1756,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_mlsconstrain failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 
 			else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
@@ -1765,7 +1765,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_context failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_NETIFCON)) {
 				rc = cil_gen_netifcon(db, parse_current, ast_node);
@@ -1773,7 +1773,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_netifcon failed, rc: %d\n", rc);
 					return rc;
 				}
-				*forced = 1;
+				*finished = 1;
 			}
 
 		}
@@ -1782,7 +1782,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	return SEPOL_OK;
 }
 
-int __cil_build_ast_branch_helper(struct cil_tree_node *parse_current, uint32_t *forced, struct cil_list *other)
+int __cil_build_ast_branch_helper(__attribute__((unused)) struct cil_tree_node *parse_current, struct cil_list *other)
 {
 	if (other == NULL || other->head == NULL)
 		return SEPOL_ERR;
@@ -1811,7 +1811,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	other->head->next->data = db;
 	other->head->next->flavor = CIL_DB;	
 
-	rc = cil_tree_walk(0, parse_tree, __cil_build_ast_node_helper, __cil_build_ast_branch_helper, other); 
+	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_branch_helper, other); 
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		return rc;
