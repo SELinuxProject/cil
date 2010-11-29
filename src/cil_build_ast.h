@@ -67,6 +67,7 @@ void cil_destroy_level(struct cil_level *);
 int cil_gen_mlsconstrain(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_mlsconstrain(struct cil_mlsconstrain *);
 int cil_gen_context(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_fill_context(struct cil_tree_node *, struct cil_context *);
 void cil_destroy_context(struct cil_context *);
 int cil_gen_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_netifcon(struct cil_netifcon *);
