@@ -1168,6 +1168,7 @@ int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_t
 	struct cil_tree_node *new_node = NULL;
 	int rc = SEPOL_ERR;
 
+	/* TODO CDS add some error checking */
 	while (curr != NULL) {
 		if (curr->cl_head == NULL) {
 			cil_tree_node_init(&new_node);

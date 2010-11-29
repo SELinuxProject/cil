@@ -579,10 +579,12 @@ int __cil_verify_catorder(struct cil_db *db, struct cil_tree_node *current)
 			db->catorder->head = ((struct cil_list*)db->catorder->head->data)->head;
 	}
 
+	/* TODO CDS switch to using tree walker */
 	/* Verify no categories exist or all categories are ordered */
 	do {
 		if (current->cl_head == NULL) {
 			if (current->flavor == CIL_CAT) {
+				/* TODO CDS log an error message if empty */
 				if (empty)
 					return SEPOL_ERR;
 				catorder = db->catorder->head;
@@ -685,6 +687,7 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+/* TODO CDS think about if we can factor our some of this to be used by both verify_catorder and verify_dominance */
 int __cil_verify_dominance(struct cil_db *db, struct cil_tree_node *current)
 {
 	if (db == NULL || current == NULL)
