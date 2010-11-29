@@ -516,13 +516,83 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+/* other is a list containing users list, sensitivities list, categories list, and the file array */
+int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *forced, struct cil_list *other)
+{
+	if (other == NULL || other->head == NULL || other->head->next == NULL || other->head->next->next == NULL)
+		return SEPOL_ERR;
+	
+	uint32_t rc = SEPOL_ERR;
+	struct cil_list *users = NULL, *sens = NULL, *cats = NULL;
+	FILE **file_arr = NULL;
+
+	if (other->head->flavor == CIL_LIST)
+		users = other->head->data;
+	else
+		return SEPOL_ERR;
+
+	if (other->head->next->flavor == CIL_LIST)
+		sens = other->head->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (other->head->next->next->flavor == CIL_LIST)
+		cats = other->head->next->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (other->head->next->next->next->flavor == CIL_FILES)
+		file_arr = other->head->next->next->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (node->cl_head != NULL) {
+		if (node->flavor != CIL_ROOT) {
+			rc = cil_name_to_policy(file_arr, node);
+			if (rc != SEPOL_OK && rc != SEPOL_DONE) {
+				printf("Error converting node to policy %d\n", node->flavor);
+				return SEPOL_ERR;
+			}
+		}
+	}
+	else {
+		switch (node->flavor) {
+			case CIL_USER: {
+				cil_multimap_insert(users, node->data, NULL, CIL_USERROLE, 0);
+				break;
+			}
+			case CIL_USERROLE: {
+				cil_multimap_insert(users, &((struct cil_userrole*)node->data)->user->datum, &((struct cil_userrole*)node->data)->role->datum, CIL_USERROLE, CIL_ROLE);
+				break;
+			}
+			case CIL_CATALIAS: {
+				cil_multimap_insert(cats, &((struct cil_catalias*)node->data)->cat->datum, node->data, CIL_CAT, CIL_CATALIAS);
+				break;
+			}
+			case CIL_SENSALIAS: {
+				cil_multimap_insert(sens, &((struct cil_sensalias*)node->data)->sens->datum, node->data, CIL_SENS, CIL_SENSALIAS);
+				break;
+			}
+			default : {
+				rc = cil_name_to_policy(file_arr, node);
+				if (rc != SEPOL_OK && rc != SEPOL_DONE) {
+					printf("Error converting node to policy %d\n", rc);
+					return SEPOL_ERR;
+				}
+				break;
+			}
+		}
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_gen_policy(struct cil_db *db)
 {
 	struct cil_tree_node *curr = db->ast->root;
 	struct cil_list_item *catorder;
 	struct cil_list_item *dominance;
 	int rc = SEPOL_ERR;
-	int reverse = 0;
 	FILE *policy_file;
 	FILE **file_arr = cil_malloc(sizeof(FILE*) * NUM_POLICY_FILES);
 	char *file_path_arr[NUM_POLICY_FILES];
@@ -613,58 +683,22 @@ int cil_gen_policy(struct cil_db *db)
 		}
 	}
 
-	do {
-		if (curr->cl_head != NULL) {
-			if (!reverse) {
-				if (curr->flavor != CIL_ROOT) {
-					rc = cil_name_to_policy(file_arr, curr);
-					if (rc != SEPOL_OK && rc != SEPOL_DONE) {
-						printf("Error converting node to policy %d\n", curr->flavor);
-						return SEPOL_ERR;
-					}
-				}
-			}
-		}
-		else {
-			switch (curr->flavor) {
-				case CIL_USER: {
-					cil_multimap_insert(users, curr->data, NULL, CIL_USERROLE, 0);
-					break;
-				}
-				case CIL_USERROLE: {
-					cil_multimap_insert(users, &((struct cil_userrole*)curr->data)->user->datum, &((struct cil_userrole*)curr->data)->role->datum, CIL_USERROLE, CIL_ROLE);
-					break;
-				}
-				case CIL_CATALIAS: {
-					cil_multimap_insert(cats, &((struct cil_catalias*)curr->data)->cat->datum, curr->data, CIL_CAT, CIL_CATALIAS);
-					break;
-				}
-				case CIL_SENSALIAS: {
-					cil_multimap_insert(sens, &((struct cil_sensalias*)curr->data)->sens->datum, curr->data, CIL_SENS, CIL_SENSALIAS);
-					break;
-				}
-				default : {
-					rc = cil_name_to_policy(file_arr, curr);
-					if (rc != SEPOL_OK && rc != SEPOL_DONE) {
-						printf("Error converting node to policy %d\n", rc);
-						return SEPOL_ERR;
-					}
-					break;
-				}
-			}
-		}
-	
-		if (curr->cl_head != NULL && !reverse && rc != SEPOL_DONE)
-			curr = curr->cl_head;
-		else if (curr->next != NULL) {
-			curr = curr->next;
-			reverse = 0;
-		}
-		else {
-			curr = curr->parent;
-			reverse = 1;
-		}
-	} while (curr->flavor != CIL_ROOT);
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->flavor = CIL_LIST;
+	other->head->data = users;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_LIST;
+	other->head->next->data = sens;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->flavor = CIL_LIST;
+	other->head->next->next->data = cats;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->flavor = CIL_FILES;
+	other->head->next->next->next->data = file_arr;
+
+	cil_tree_walk(0, curr, __cil_gen_policy_node_helper, NULL, other);
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {
