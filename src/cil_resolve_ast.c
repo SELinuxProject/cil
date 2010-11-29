@@ -873,6 +873,7 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 			new_item->flavor = CIL_LIST;
 			new_item->data = sub_list;
 			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+			/* TODO CDS check return code */
 		}
 		else {
 			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, &cat_node);
@@ -902,6 +903,7 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 
 	cil_list_init(&res_cat_list);
 	rc = cil_resolve_cat_list(db, current, catset->cat_list_str, res_cat_list);
+	/* TODO CDS check this return code */
 	
 	catset->cat_list = res_cat_list;
 	cil_list_destroy(&catset->cat_list_str, 1);
@@ -931,6 +933,7 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 	while (curr != NULL) {
 		if (curr->flavor == CIL_LIST) {
 			cil_list_init(&sub_list);
+			/* TODO CDS check return code */
 			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
 			curr_range_cat = sub_list->head;
 			while (curr_range_cat != NULL) {
@@ -940,6 +943,7 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 					printf("Failed to resolve category name\n");
 					return rc;
 				}
+				/* TODO CDS This seems fragile - using the symtab abstraction sometimes but then dropping to the hashtab level when necessary (and it is necessary as using cil_symtab_insert() would reset the name field in the datum). */
 				rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
 				if (rc != SEPOL_OK) {
 					printf("Failed to insert category into sensitivitycategory symtab\n");
@@ -949,6 +953,7 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 			}
 		}
 		else {
+			/* TODO CDS make this a helper function so it can be called here and above */
 			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, &cat_node);
 			if (rc != SEPOL_OK) {
 				printf("Failed to resolve category name\n");
