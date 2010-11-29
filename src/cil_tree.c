@@ -84,14 +84,12 @@ int cil_tree_walk(uint32_t mode, struct cil_tree_node *start_node, int (*process
 	uint32_t rc = SEPOL_ERR;
 
 	do {
-		if (node->cl_head == NULL) {
-			if (!reverse) {
-				if (node->parent->cl_head == node) {
-					rc = (*process_node)(node, &forced, other);
-					if (rc != SEPOL_OK) {
-						printf("Failed to process node\n");
-						return rc;
-					}
+		if (!reverse) {
+			if (process_node != NULL) {
+				rc = (*process_node)(node, &forced, other);
+				if (rc != SEPOL_OK) {
+					printf("Failed to process node\n");
+					return rc;
 				}
 			}
 		}
@@ -105,10 +103,12 @@ int cil_tree_walk(uint32_t mode, struct cil_tree_node *start_node, int (*process
 		else if (node->next != NULL && !forced) 
 			node = node->next;
 		else {
-			rc = (*finished_branch)(node, &forced, other);
-			if (rc != SEPOL_OK) {
-				printf("Failed to process branch\n");
-				return rc;
+			if (finished_branch != NULL) {
+				rc = (*finished_branch)(node, &forced, other);
+				if (rc != SEPOL_OK) {
+					printf("Failed to process branch\n");
+					return rc;
+				}
 			}
 			node = node->parent;
 			reverse = 1;

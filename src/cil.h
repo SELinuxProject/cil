@@ -18,7 +18,7 @@
 #define CIL_PARSE_NODE		3
 #define CIL_AST_STR		4
 #define CIL_LIST		5
-#define CIL_SEPOL_ID		6
+#define CIL_INT			6
 #define CIL_AVRULE		7
 #define CIL_SENS_DOM		8
 #define CIL_LEVEL		9
