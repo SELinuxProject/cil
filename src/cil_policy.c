@@ -675,13 +675,14 @@ int cil_gen_policy(struct cil_db *db)
 		}
 	}
 
-	/* TODO CDS This does not need a multimap, it can just be written out (we think) */
 	if (db->dominance->head != NULL) {
 		dominance = db->dominance->head;
-		while (dominance != NULL) {
-			cil_multimap_insert(sens, dominance->data, NULL, CIL_SENS, 0);
+		fprintf(file_arr[SENS], "dominance { ");
+		while (dominance != NULL) { 
+			fprintf(file_arr[SENS], "%s ", ((struct cil_sens*)dominance->data)->datum.name);
 			dominance = dominance->next;
 		}
+		fprintf(file_arr[SENS], "};\n");
 	}
 
 	struct cil_list *other;
