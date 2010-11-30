@@ -559,8 +559,7 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 /* other is a cil_list containing order, ordered, empty, and found */
 int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other)
 {
-	int *empty = NULL, *found = NULL;
-	uint32_t *flavor = NULL;
+	uint32_t *empty = NULL, *found = NULL, *flavor = NULL;
 	struct cil_list_item *ordered = NULL;
 	struct cil_list *order = NULL;	
 
@@ -580,12 +579,12 @@ int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finishe
 		return SEPOL_ERR;
 
 	if (other->head->next->next->flavor == CIL_INT)
-		empty = (int*)other->head->next->next->data;
+		empty = (uint32_t*)other->head->next->next->data;
 	else
 		return SEPOL_ERR;
 
 	if (other->head->next->next->next->flavor == CIL_INT)
-		found = (int*)other->head->next->next->next->data;
+		found = (uint32_t*)other->head->next->next->next->data;
 	else
 		return SEPOL_ERR;
 

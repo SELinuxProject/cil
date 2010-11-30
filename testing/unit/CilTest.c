@@ -1052,7 +1052,7 @@ void test_cil_gen_sid_noname_neg(CuTest *tc) {
 }
 
 void test_cil_gen_sid_empty_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", ")" NULL};
+	char *line[] = {"(", "sid", ")", NULL};
 	struct cil_tree *tree;
 	gen_test_tree(&tree, line);
 
