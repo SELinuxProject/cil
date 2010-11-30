@@ -886,7 +886,10 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 
 	cil_list_init(&res_cat_list);
 	rc = cil_resolve_cat_list(db, current, catset->cat_list_str, res_cat_list);
-	/* TODO CDS check this return code */
+	if (rc != SEPOL_OK) {
+		printf("cil_resolve_catset: cil_resolve_cat_list failed, rc: %d\n", rc);
+		return rc;
+	}
 	
 	catset->cat_list = res_cat_list;
 	cil_list_destroy(&catset->cat_list_str, 1);
