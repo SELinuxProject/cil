@@ -556,17 +556,75 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 	return SEPOL_OK;
 }
 
-int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current)
+/* other is a cil_list containing order, ordered, empty, and found */
+int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other)
+{
+	int *empty = NULL, *found = NULL, *flavor = NULL;
+	struct cil_list_item *ordered = NULL;
+	struct cil_list *order = NULL;	
+
+	if (other == NULL || other->head == NULL || other->head->next == NULL
+	|| other->head->next->next == NULL || other->head->next->next->next == NULL
+	|| other->head->next->next->next->next == NULL)
+		return SEPOL_ERR;
+
+	if (other->head->flavor == CIL_LIST)
+		order = (struct cil_list*)other->head->data;
+	else
+		return SEPOL_ERR;
+
+	if (other->head->next->flavor == CIL_LIST_ITEM)
+		ordered = (struct cil_list_item*)other->head->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (other->head->next->next->flavor == CIL_INT)
+		empty = (int*)other->head->next->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (other->head->next->next->next->flavor == CIL_INT)
+		found = (int*)other->head->next->next->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (other->head->next->next->next->next->flavor == CIL_INT)
+		flavor = (int*)other->head->next->next->next->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (node->flavor == flavor) {
+		if (*empty) {
+			printf("Error: ordering is empty\n");
+			return SEPOL_ERR;
+		}
+		ordered = order->head;
+		while (ordered != NULL) {
+			if (ordered->data == node->data) {
+				*found = 1;
+				break;
+			}
+			ordered = ordered->next;
+		}
+		if (!(*found)) {
+			printf("Item not ordered: %s\n", ((struct cil_symtab_datum*)node->data)->name);
+			return SEPOL_ERR;
+		}
+		*found = 0;
+	}
+	
+	return SEPOL_OK;
+}
+
+int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, uint32_t flavor)
 {
 	if (order == NULL || current == NULL)
 		return SEPOL_ERR;
 
 	struct cil_list_item *ordered;
-	int reverse = 0;
 	int found = 0;
 	int empty = 0;
-
-	printf("order: %p\n", order);
+	int rc = SEPOL_ERR;
 
 	if (order->head == NULL)
 		empty = 1;
@@ -581,44 +639,29 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current)
 			order->head = ((struct cil_list*)ordered->data)->head;
 	}
 
-	/* TODO CDS switch to using tree walker */
-	do {
-		if (current->cl_head == NULL) {
-			if (current->flavor == order->head->flavor) {
-				if (empty) {
-					printf("Error: ordering is empty\n");
-					return SEPOL_ERR;
-				}
-				ordered = order->head;
-				while (ordered != NULL) {
-						printf("hi\n");
-					if (ordered->data == current->data) {
-						found = 1;
-						break;
-					}
-					ordered = ordered->next;
-				}
-				if (!found) {
-					printf("Item not ordered: %s\n", ((struct cil_symtab_datum*)current->data)->name);
-					return SEPOL_ERR;
-				}
-				found = 0;
-			}
-		}
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->flavor = CIL_LIST;
+	other->head->data = order;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_LIST_ITEM;
+	other->head->next->data = ordered;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->flavor = CIL_INT;
+	other->head->next->next->data = &found;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->flavor = CIL_INT;
+	other->head->next->next->next->data = &empty;
+	cil_list_item_init(&other->head->next->next->next->next);
+	other->head->next->next->next->next->flavor = CIL_INT;
+	other->head->next->next->next->next->data = &flavor;
 
-		if (current->cl_head != NULL && !reverse)
-			current = current->cl_head;
-		else if (current->next != NULL && reverse) {
-			current = current->next;
-			reverse = 0;
-		}
-		else if (current->next != NULL)
-			current = current->next;
-		else {
-			current = current->parent;
-			reverse = 1;
-		}
-	} while (current->flavor != CIL_ROOT);
+	rc = cil_tree_walk(current, __cil_verify_order_node_helper, NULL, other); 
+	if (rc != SEPOL_OK) {
+		printf("Failed to verify category order\n");
+		return rc;
+	}
 	
 	return SEPOL_OK;
 }
@@ -1458,13 +1501,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		return rc;
 	}
 	printf("----- Verify Catorder ------\n");
-	rc = __cil_verify_order(db->catorder, current);
+	rc = __cil_verify_order(db->catorder, current, CIL_CAT);
 	if (rc != SEPOL_OK) {
 		printf("Failed to verify categoryorder\n");
 		return rc;
 	}
 	printf("----- Verify Dominance -----\n");
-	rc = __cil_verify_order(db->dominance, current);
+	rc = __cil_verify_order(db->dominance, current, CIL_SENS);
 	if (rc != SEPOL_OK) {
 		printf("Failed to verify dominance\n");
 		return rc;
