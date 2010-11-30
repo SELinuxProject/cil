@@ -1033,6 +1033,44 @@ void test_cil_gen_sid(CuTest *tc) {
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_SID);
 }
 
+void test_cil_gen_sid_namedcontext(CuTest *tc) {
+	char *line[] = {"(", "sid", "test", "something", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_sid(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_SID);
+}
+
+void test_cil_gen_sid_halfcontext_neg(CuTest *tc) {
+	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_sid(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_sid_noname_neg(CuTest *tc) {
 	char *line[] = {"(", "sid", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 	struct cil_tree *tree;
@@ -1149,6 +1187,25 @@ void test_cil_gen_sid_astnodenull_neg(CuTest *tc) {
 
 	int rc = cil_gen_sid(test_db, tree->root->cl_head->cl_head, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_sid_insertnode_neg(CuTest *tc) {
+	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_sid(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sid(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
 }
 
 void test_cil_gen_type(CuTest *tc) {
@@ -3832,7 +3889,81 @@ void test_cil_resolve_ast_type_rule_member_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_resolve_sid(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "categoryorder", "(", "c0", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
 
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next);
+
+	int rc = cil_resolve_sid(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_sid_named_levels(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "categoryorder", "(", "c0", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "level", "low", "s0", "(", "c0", ")", ")",
+			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next);
+	struct cil_tree_node *level = test_db->ast->root->cl_head->next->next->next->next->next->next->next;
+	cil_resolve_level(test_db, level, (struct cil_level*)level->data);
+	cil_resolve_level(test_db, level->next, (struct cil_level*)level->next->data);
+	int rc = cil_resolve_sid(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_sid_named_context(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "categoryorder", "(", "c0", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "context", "con", "(", "blah_u", "blah_r", "blah_t", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
+			"(", "sid", "test", "con", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next);
+	struct cil_tree_node *context = test_db->ast->root->cl_head->next->next->next->next->next->next->next;
+	cil_resolve_context(test_db, context, (struct cil_context*)context->data);
+
+	int rc = cil_resolve_sid(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
 
 CuSuite* CilTreeGetSuite() {
 	CuSuite* suite = CuSuiteNew();
@@ -3885,6 +4016,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_parse_to_list_listnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_common);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_namedcontext);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_halfcontext_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_empty_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_nocontext_neg);
@@ -3892,6 +4025,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_pcurrnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_astnodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_insertnode_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute);
 	SUITE_ADD_TEST(suite, test_cil_gen_typeattr);
@@ -4049,6 +4183,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_change_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_member);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_member_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sid);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
 
 	return suite;
 }
