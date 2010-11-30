@@ -855,8 +855,11 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 			cil_list_init(&sub_list);
 			new_item->flavor = CIL_LIST;
 			new_item->data = sub_list;
-			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
-			/* TODO CDS check return code */
+			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+			if (rc != SEPOL_OK) {
+				printf("cil_resolve_cat_list: __cil_resolve_cat_range failed, rc: %d\n", rc);
+				return rc;
+			}
 		}
 		else {
 			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, &cat_node);
@@ -919,8 +922,11 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 	while (curr != NULL) {
 		if (curr->flavor == CIL_LIST) {
 			cil_list_init(&sub_list);
-			/* TODO CDS check return code */
-			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+			if (rc != SEPOL_OK) {
+				printf("cil_resolve_senscat: __cil_resolve_cat_range failed, rc: %d\n", rc);
+				return rc;
+			}
 			curr_range_cat = sub_list->head;
 			while (curr_range_cat != NULL) {
 				key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
