@@ -201,14 +201,6 @@ int cil_sens_to_policy(FILE **file_arr, struct cil_list *sens)
 		curr_sens = curr_sens->next;
 	}
 
-	curr_sens = sens->head;
-	fprintf(file_arr[SENS], "dominance { ");
-	while (curr_sens != NULL) {
-		fprintf(file_arr[SENS], "%s ", ((struct cil_multimap_item*)curr_sens->data)->key->name);
-		curr_sens = curr_sens->next;
-	}
-	fprintf(file_arr[SENS], "};\n");
-
 	return SEPOL_OK;
 }
 
