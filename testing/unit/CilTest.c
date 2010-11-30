@@ -2801,6 +2801,32 @@ void test_cil_build_ast_bool_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_build_ast_sensitivity(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_build_ast(test_db, tree->root, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_build_ast_sensitivity_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", "extra", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_build_ast(test_db, tree->root, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_name(CuTest *tc) {
 	char *line[] = { "(", "block", "foo", "(", "typealias", "test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
 
@@ -3836,6 +3862,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_change_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sensitivity);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sensitivity_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
