@@ -859,6 +859,25 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
+int __cil_senscat_insert(struct cil_db *db, struct cil_tree_node *current, hashtab_t *hashtab, char *key)
+{
+	struct cil_tree_node *cat_node = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, key, CIL_SYM_CATS, &cat_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve category name\n");
+		return rc;
+	}
+	rc = hashtab_insert(hashtab, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert category into sensitivitycategory symtab\n");
+		return rc;
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_tree_node *cat_node = NULL;
@@ -887,33 +906,33 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 			curr_range_cat = sub_list->head;
 			while (curr_range_cat != NULL) {
 				key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
-				rc = cil_resolve_name(db, current, key, CIL_SYM_CATS, &cat_node);
+				rc = __cil_senscat_insert(db, current, ((struct cil_sens*)sens_node->data)->cats.table, key);
+				if (rc != SEPOL_OK) {
+					printf("Failed to insert category into sensitivity symtab\n");
+					return rc;
+				}
+/*				rc = cil_resolve_name(db, current, key, CIL_SYM_CATS, &cat_node);
 				if (rc != SEPOL_OK) {
 					printf("Failed to resolve category name\n");
 					return rc;
-				}
+				}*/
 				/* TODO CDS This seems fragile - using the symtab abstraction sometimes but then dropping to the hashtab level when necessary (and it is necessary as using cil_symtab_insert() would reset the name field in the datum). */
-				rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
+/*				rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
 				if (rc != SEPOL_OK) {
 					printf("Failed to insert category into sensitivitycategory symtab\n");
 					return rc;
-				}
+				}*/
 				curr_range_cat = curr_range_cat->next;
 			}
 		}
 		else {
-			/* TODO CDS make this a helper function so it can be called here and above */
-			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, &cat_node);
-			if (rc != SEPOL_OK) {
-				printf("Failed to resolve category name\n");
-				return rc;
-			}
 			key = cil_strdup(curr->data);
-			rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
+			rc = __cil_senscat_insert(db, current, ((struct cil_sens*)sens_node->data)->cats.table, key);
 			if (rc != SEPOL_OK) {
-				printf("Failed to insert category into sensitivitycategory symtab\n");
+				printf("Failed to insert category into sensitivity symtab\n");
 				return rc;
 			}
+			/* TODO CDS make this a helper function so it can be called here and above */
 		}
 		curr = curr->next;
 	}
