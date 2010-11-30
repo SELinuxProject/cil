@@ -2339,6 +2339,133 @@ void test_cil_gen_sensitivity_extra_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }	
 
+void test_cil_gen_category(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_category(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_category_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_category(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_category_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	int rc = cil_gen_category(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_category_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_category(test_db, NULL, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_category_catnull_neg(CuTest *tc){
+	char *line[] = {"(", "category", "c0", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_category(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_category_catlist_neg(CuTest *tc){
+	char *line[] = {"(", "category", "(", "c0", ")", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_category(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_category_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", "extra", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_category(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_build_ast(CuTest *tc) {
 	char *line[] = {"(", "test", "\"qstring\"", ")", ";comment", NULL};
 
@@ -3827,6 +3954,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_sensnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_senslist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_category);
+	SUITE_ADD_TEST(suite, test_cil_gen_category_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_category_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_category_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_category_catnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_category_catlist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_category_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_astnull_neg);
