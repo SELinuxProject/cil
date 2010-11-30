@@ -3812,6 +3812,32 @@ void test_cil_resolve_sid_named_levels(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_sid_named_context(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "categoryorder", "(", "c0", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "context", "con", "(", "blah_u", "blah_r", "blah_t", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
+			"(", "sid", "test", "con", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next);
+	struct cil_tree_node *context = test_db->ast->root->cl_head->next->next->next->next->next->next->next;
+	cil_resolve_context(test_db, context, (struct cil_context*)context->data);
+
+	int rc = cil_resolve_sid(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 CuSuite* CilTreeGetSuite() {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, test_cil_tree_node_init);
@@ -4025,6 +4051,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_member_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
 
 	return suite;
 }
