@@ -605,64 +605,63 @@ int cil_gen_policy(struct cil_db *db)
 	struct cil_list *sens;
 	cil_list_init(&sens);
 
-	/* TODO CDS prefix temp filenames with cil_ */
-	strcpy(temp, "/tmp/classdecl-XXXXXX");
+	strcpy(temp, "/tmp/cil_classdecl-XXXXXX");
 	file_arr[CLASS_DECL] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[CLASS_DECL] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/isids-XXXXXX");
+	strcpy(temp, "/tmp/cil_isids-XXXXXX");
 	file_arr[ISIDS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[ISIDS] = cil_strdup(temp);
 
-	strcpy(temp,"/tmp/common-XXXXXX");
+	strcpy(temp,"/tmp/cil_common-XXXXXX");
 	file_arr[COMMONS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[COMMONS] = cil_strdup(temp);
 	
-	strcpy(temp, "/tmp/class-XXXXXX");
+	strcpy(temp, "/tmp/cil_class-XXXXXX");
 	file_arr[CLASSES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[CLASSES] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/interf-XXXXXX");
+	strcpy(temp, "/tmp/cil_interf-XXXXXX");
 	file_arr[INTERFACES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[INTERFACES] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/sens-XXXXXX");
+	strcpy(temp, "/tmp/cil_sens-XXXXXX");
 	file_arr[SENS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[SENS] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/cats-XXXXXX");
+	strcpy(temp, "/tmp/cil_cats-XXXXXX");
 	file_arr[CATS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[CATS] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/levels-XXXXXX");
+	strcpy(temp, "/tmp/cil_levels-XXXXXX");
 	file_arr[LEVELS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[LEVELS] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/mlscon-XXXXXX");
+	strcpy(temp, "/tmp/cil_mlscon-XXXXXX");
 	file_arr[MLSCONSTRAIN] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[MLSCONSTRAIN] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/attrtypes-XXXXXX");
+	strcpy(temp, "/tmp/cil_attrtypes-XXXXXX");
 	file_arr[ATTRTYPES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[ATTRTYPES] = cil_strdup(temp);
 	
-	strcpy(temp, "/tmp/aliases-XXXXXX");
+	strcpy(temp, "/tmp/cil_aliases-XXXXXX");
 	file_arr[ALIASES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[ALIASES] = cil_strdup(temp);
 	
-	strcpy(temp, "/tmp/allows-XXXXXX");
+	strcpy(temp, "/tmp/cil_allows-XXXXXX");
 	file_arr[ALLOWS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[ALLOWS] = cil_strdup(temp);
 	
-	strcpy(temp, "/tmp/userroles-XXXXXX");
+	strcpy(temp, "/tmp/cil_userroles-XXXXXX");
 	file_arr[USERROLES] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[USERROLES] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/sids-XXXXXX");
+	strcpy(temp, "/tmp/cil_sids-XXXXXX");
 	file_arr[SIDS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[SIDS] = cil_strdup(temp);
 
-	strcpy(temp, "/tmp/netifcons-XXXXXX");
+	strcpy(temp, "/tmp/cil_netifcons-XXXXXX");
 	file_arr[NETIFCONS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[NETIFCONS] = cil_strdup(temp);
 
