@@ -857,7 +857,7 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 			new_item->data = sub_list;
 			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
 			if (rc != SEPOL_OK) {
-				printf("cil_resolve_cat_list: __cil_resolve_cat_range failed, rc: %d\n", rc);
+				printf("Failed to resolve category range\n");
 				return rc;
 			}
 		}
@@ -890,7 +890,7 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 	cil_list_init(&res_cat_list);
 	rc = cil_resolve_cat_list(db, current, catset->cat_list_str, res_cat_list);
 	if (rc != SEPOL_OK) {
-		printf("cil_resolve_catset: cil_resolve_cat_list failed, rc: %d\n", rc);
+		printf("Failed to resolve category list\n");
 		return rc;
 	}
 	
@@ -902,9 +902,28 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
+int __cil_senscat_insert(struct cil_db *db, struct cil_tree_node *current, hashtab_t hashtab, char *key)
 {
 	struct cil_tree_node *cat_node = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, key, CIL_SYM_CATS, &cat_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve category name\n");
+		return rc;
+	}
+	/* TODO CDS This seems fragile - using the symtab abstraction sometimes but then dropping to the hashtab level when necessary (and it is necessary as using cil_symtab_insert() would reset the name field in the datum). */
+	rc = hashtab_insert(hashtab, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
+	if (rc != SEPOL_OK) {
+		printf("Failed to insert category into sensitivitycategory symtab\n");
+		return rc;
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
+{
 	struct cil_tree_node *sens_node = NULL;
 	struct cil_senscat *senscat = (struct cil_senscat*)current->data;
 	struct cil_list *sub_list;
@@ -924,37 +943,25 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 			cil_list_init(&sub_list);
 			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
 			if (rc != SEPOL_OK) {
-				printf("cil_resolve_senscat: __cil_resolve_cat_range failed, rc: %d\n", rc);
+				printf("Failed to resolve category range\n");
 				return rc;
 			}
 			curr_range_cat = sub_list->head;
 			while (curr_range_cat != NULL) {
 				key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
-				rc = cil_resolve_name(db, current, key, CIL_SYM_CATS, &cat_node);
+				rc = __cil_senscat_insert(db, current, ((struct cil_sens*)sens_node->data)->cats.table, key);
 				if (rc != SEPOL_OK) {
-					printf("Failed to resolve category name\n");
-					return rc;
-				}
-				/* TODO CDS This seems fragile - using the symtab abstraction sometimes but then dropping to the hashtab level when necessary (and it is necessary as using cil_symtab_insert() would reset the name field in the datum). */
-				rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
-				if (rc != SEPOL_OK) {
-					printf("Failed to insert category into sensitivitycategory symtab\n");
+					printf("Failed to insert category into sensitivity symtab\n");
 					return rc;
 				}
 				curr_range_cat = curr_range_cat->next;
 			}
 		}
 		else {
-			/* TODO CDS make this a helper function so it can be called here and above */
-			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, &cat_node);
-			if (rc != SEPOL_OK) {
-				printf("Failed to resolve category name\n");
-				return rc;
-			}
 			key = cil_strdup(curr->data);
-			rc = hashtab_insert(((struct cil_sens*)sens_node->data)->cats.table, (hashtab_key_t)key, (hashtab_datum_t)cat_node->data);
+			rc = __cil_senscat_insert(db, current, ((struct cil_sens*)sens_node->data)->cats.table, key);
 			if (rc != SEPOL_OK) {
-				printf("Failed to insert category into sensitivitycategory symtab\n");
+				printf("Failed to insert category into sensitivity symtab\n");
 				return rc;
 			}
 		}
