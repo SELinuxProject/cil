@@ -556,47 +556,50 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 	return SEPOL_OK;
 }
 
-int __cil_verify_catorder(struct cil_db *db, struct cil_tree_node *current)
+int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current)
 {
-	if (db == NULL || current == NULL)
+	if (order == NULL || current == NULL)
 		return SEPOL_ERR;
 
-	struct cil_list_item *catorder;
+	struct cil_list_item *ordered;
 	int reverse = 0;
 	int found = 0;
 	int empty = 0;
 
-	if (db->catorder == NULL || db->catorder->head == NULL)
+	printf("order: %p\n", order);
+
+	if (order->head == NULL)
 		empty = 1;
 	else {
-		catorder = db->catorder->head;
-		if (db->catorder->head->next != NULL) {
+		ordered = order->head;
+		if (ordered->next != NULL) {
 			printf("Disjoint category ordering exists\n");
 			return SEPOL_ERR;
 		}
 		
-		if (db->catorder->head->data != NULL) 
-			db->catorder->head = ((struct cil_list*)db->catorder->head->data)->head;
+		if (ordered->data != NULL) 
+			order->head = ((struct cil_list*)ordered->data)->head;
 	}
 
 	/* TODO CDS switch to using tree walker */
-	/* Verify no categories exist or all categories are ordered */
 	do {
 		if (current->cl_head == NULL) {
-			if (current->flavor == CIL_CAT) {
-				/* TODO CDS log an error message if empty */
-				if (empty)
+			if (current->flavor == order->head->flavor) {
+				if (empty) {
+					printf("Error: ordering is empty\n");
 					return SEPOL_ERR;
-				catorder = db->catorder->head;
-				while (catorder != NULL) {
-					if (catorder->data == current->data) {
+				}
+				ordered = order->head;
+				while (ordered != NULL) {
+						printf("hi\n");
+					if (ordered->data == current->data) {
 						found = 1;
 						break;
 					}
-					catorder = catorder->next;
+					ordered = ordered->next;
 				}
 				if (!found) {
-					printf("Category not ordered: %s\n", ((struct cil_cat*)current->data)->datum.name);
+					printf("Item not ordered: %s\n", ((struct cil_symtab_datum*)current->data)->name);
 					return SEPOL_ERR;
 				}
 				found = 0;
@@ -683,69 +686,6 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 		printf("Failed to order categoryorder\n");
 		return rc;
 	}
-	
-	return SEPOL_OK;
-}
-
-/* TODO CDS think about if we can factor our some of this to be used by both verify_catorder and verify_dominance */
-int __cil_verify_dominance(struct cil_db *db, struct cil_tree_node *current)
-{
-	if (db == NULL || current == NULL)
-		return SEPOL_ERR;
-
-	struct cil_list_item *dominance;
-	int reverse = 0;
-	int found = 0;
-	int empty = 0;
-
-	if (db->dominance == NULL || db->dominance->head == NULL)
-		empty = 1;
-	else {
-		dominance = db->dominance->head;
-		if (db->dominance->head->next != NULL) {
-			printf("Disjoint category ordering exists\n");
-			return SEPOL_ERR;
-		}
-		
-		if (db->dominance->head->data != NULL) 
-			db->dominance->head = ((struct cil_list*)db->dominance->head->data)->head;
-	}
-
-	/* Verify no sensitivities exist or all sensitivities are ordered */
-	do {
-		if (current->cl_head == NULL) {
-			if (current->flavor == CIL_SENS) {
-				if (empty)
-					return SEPOL_ERR;
-				dominance = db->dominance->head;
-				while (dominance != NULL) {
-					if (dominance->data == current->data) {
-						found = 1;
-						break;
-					}
-					dominance = dominance->next;
-				}
-				if (!found) {
-					printf("Sensitivity dominance not declared: %s\n", ((struct cil_sens*)current->data)->datum.name);
-					return SEPOL_ERR;
-				}
-				found = 0;
-			}
-		}
-
-		if (current->cl_head != NULL && !reverse)
-			current = current->cl_head;
-		else if (current->next != NULL && reverse) {
-			current = current->next;
-			reverse = 0;
-		}
-		else if (current->next != NULL)
-			current = current->next;
-		else {
-			current = current->parent;
-			reverse = 1;
-		}
-	} while (current->flavor != CIL_ROOT);
 	
 	return SEPOL_OK;
 }
@@ -1518,13 +1458,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		return rc;
 	}
 	printf("----- Verify Catorder ------\n");
-	rc = __cil_verify_catorder(db, current);
+	rc = __cil_verify_order(db->catorder, current);
 	if (rc != SEPOL_OK) {
 		printf("Failed to verify categoryorder\n");
 		return rc;
 	}
 	printf("----- Verify Dominance -----\n");
-	rc = __cil_verify_dominance(db, current);
+	rc = __cil_verify_order(db->dominance, current);
 	if (rc != SEPOL_OK) {
 		printf("Failed to verify dominance\n");
 		return rc;
