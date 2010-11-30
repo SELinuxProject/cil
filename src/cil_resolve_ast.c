@@ -812,8 +812,11 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 			cil_list_init(&sub_list);
 			new_item->flavor = CIL_LIST;
 			new_item->data = sub_list;
-			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
-			/* TODO CDS check return code */
+			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve category range\n");
+				return rc;
+			}
 		}
 		else {
 			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, &cat_node);
@@ -843,7 +846,10 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current)
 
 	cil_list_init(&res_cat_list);
 	rc = cil_resolve_cat_list(db, current, catset->cat_list_str, res_cat_list);
-	/* TODO CDS check this return code */
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve category list\n");
+		return rc;
+	}
 	
 	catset->cat_list = res_cat_list;
 	cil_list_destroy(&catset->cat_list_str, 1);
@@ -873,8 +879,11 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current)
 	while (curr != NULL) {
 		if (curr->flavor == CIL_LIST) {
 			cil_list_init(&sub_list);
-			/* TODO CDS check return code */
-			__cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve category range\n");
+				return rc;
+			}
 			curr_range_cat = sub_list->head;
 			while (curr_range_cat != NULL) {
 				key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
