@@ -666,41 +666,38 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, ui
 	return SEPOL_OK;
 }
 
-int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
+int __cil_create_edge_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *order, uint32_t sym_flavor, struct cil_list *edge_list)
 {
-	struct cil_catorder *catorder = (struct cil_catorder*)current->data;
-	struct cil_tree_node *cat_node = NULL;
-	struct cil_list_item *curr_cat = catorder->cat_list_str->head;
+	struct cil_tree_node *node = NULL;
+	struct cil_list_item *curr = order->head;
 	struct cil_list_item *list_item;
 	struct cil_list_item *copy_item;
 	struct cil_list_item *list_tail = NULL;
 	struct cil_list_item *edge_node;
 	struct cil_list_item *edge_list_tail = NULL;
-	struct cil_list *cat_list;
-	struct cil_list *edge_list;
+	struct cil_list *node_list;
 	int rc = SEPOL_ERR;
 
-	cil_list_init(&cat_list);
-	cil_list_init(&edge_list);
-	
-	while (curr_cat != NULL) {
+	cil_list_init(&node_list);
+
+	while (curr != NULL) {
 		cil_list_item_init(&list_item);
-		rc = cil_resolve_name(db, current, (char*)curr_cat->data, CIL_SYM_CATS, &cat_node);
+		rc = cil_resolve_name(db, current, (char*)curr->data, sym_flavor, &node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve category name: %s\n", (char*)curr_cat->data);
+			printf("Failed to resolve name: %s\n", (char*)curr->data);
 			return rc;
 		}
-		list_item->flavor = cat_node->flavor;
-		list_item->data = cat_node->data;
+		list_item->flavor = node->flavor;
+		list_item->data = node->data;
 
-		if (cat_list->head == NULL && list_tail == NULL)
-			cat_list->head = list_item;
-		else if (cat_list->head == NULL && list_tail != NULL) {
+		if (node_list->head == NULL && list_tail == NULL)
+			node_list->head = list_item;
+		else if (node_list->head == NULL && list_tail != NULL) {
 			cil_list_item_init(&copy_item);
 			copy_item->flavor = list_tail->flavor;
 			copy_item->data = list_tail->data;
-			cat_list->head = copy_item;
-			cat_list->head->next = list_item;
+			node_list->head = copy_item;
+			node_list->head->next = list_item;
 		}
 		else
 			list_tail->next = list_item;
@@ -708,16 +705,34 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 		if (list_tail != NULL) {
 			cil_list_item_init(&edge_node);
 			edge_node->flavor = CIL_LIST;
-			edge_node->data = cat_list;
+			edge_node->data = node_list;
 			if (edge_list->head == NULL)
 				edge_list->head = edge_node;
 			else
 				edge_list_tail->next = edge_node;
 			edge_list_tail = edge_node;
-			cil_list_init(&cat_list);
+			cil_list_init(&node_list);
 		}
 		list_tail = list_item;
-		curr_cat = curr_cat->next;
+		curr = curr->next;
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
+{
+	struct cil_catorder *catorder = (struct cil_catorder*)current->data;
+	struct cil_list_item *list_item;
+	struct cil_list *edge_list;
+	int rc = SEPOL_ERR;
+
+	cil_list_init(&edge_list);
+
+	rc = __cil_create_edge_list(db, current, catorder->cat_list_str, CIL_SYM_CATS, edge_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create category edge list\n");
+		return rc;
 	}
 
 	if (db->catorder->head == NULL) {
@@ -733,60 +748,21 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-/* TODO CDS see what of this can be factored out to be used by resolve_catorder as well */
 int cil_resolve_dominance(struct cil_db *db, struct cil_tree_node *current)
 {
 	struct cil_sens_dominates *dom = (struct cil_sens_dominates*)current->data;
-	struct cil_tree_node *sens_node = NULL;
-	struct cil_list_item *curr_sens = dom->sens_list_str->head;
 	struct cil_list_item *list_item;
-	struct cil_list_item *copy_item;
-	struct cil_list_item *list_tail = NULL;
-	struct cil_list_item *edge_node;
-	struct cil_list_item *edge_list_tail = NULL;
-	struct cil_list *sens_list;
 	struct cil_list *edge_list;
 	int rc = SEPOL_ERR;
-
-	cil_list_init(&sens_list);
+	
 	cil_list_init(&edge_list);
 	
-	while (curr_sens != NULL) {
-		cil_list_item_init(&list_item);
-		rc = cil_resolve_name(db, current, (char*)curr_sens->data, CIL_SYM_SENS, &sens_node);
-		if (rc != SEPOL_OK) {
-			printf("Failed to resolve sensitivity name: %s\n", (char*)curr_sens->data);
-			return rc;
-		}
-		list_item->flavor = sens_node->flavor;
-		list_item->data = sens_node->data;
-
-		if (sens_list->head == NULL && list_tail == NULL)
-			sens_list->head = list_item;
-		else if (sens_list->head == NULL && list_tail != NULL) {
-			cil_list_item_init(&copy_item);
-			copy_item->flavor = list_tail->flavor;
-			copy_item->data = list_tail->data;
-			sens_list->head = copy_item;
-			sens_list->head->next = list_item;
-		}
-		else
-			list_tail->next = list_item;
-			
-		if (list_tail != NULL) {
-			cil_list_item_init(&edge_node);
-			edge_node->flavor = CIL_LIST;
-			edge_node->data = sens_list;
-			if (edge_list->head == NULL)
-				edge_list->head = edge_node;
-			else
-				edge_list_tail->next = edge_node;
-			edge_list_tail = edge_node;
-			cil_list_init(&sens_list);
-		}
-		list_tail = list_item;
-		curr_sens = curr_sens->next;
+	rc = __cil_create_edge_list(db, current, dom->sens_list_str, CIL_SYM_SENS, edge_list);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create sensitivity edge list\n");
+		return rc;
 	}
+
 	if (db->dominance->head == NULL) {
 		cil_list_item_init(&list_item);
 		db->dominance->head = list_item;
