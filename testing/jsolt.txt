@@ -52,6 +52,8 @@
 (categoryorder (c0 c255))
 (sensitivitycategory s0 (c0))
 (sensitivitycategory s1 ((c0 c255)))
+(sensitivityalias s0 unclassified)
+
 (level low s0 (c0))
 (level high s1 ((c0 c255)))
 

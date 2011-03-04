@@ -2396,6 +2396,149 @@ void test_cil_gen_sensitivity_extra_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }	
 
+void test_cil_gen_sensalias(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_sensalias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_sensalias_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_sensalias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_sensalias_currnull_neg(CuTest *tc) {
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_sensalias(test_db, NULL, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_sensalias_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init (&test_db);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	int rc = cil_gen_sensalias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_sensalias_sensnull_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_sensalias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_sensalias_senslist_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "(", "s0", "s1", ")", "alias", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_sensalias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_sensalias_aliasnull_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	tree->root->cl_head->cl_head->next->next = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_sensalias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_sensalias_aliaslist_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "(", "alias", "alias2", ")", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_sensalias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_sensalias_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", "extra", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_sensalias(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_category(CuTest *tc) {
 	char *line[] = {"(", "category", "c0", ")", NULL};
 
@@ -4088,6 +4231,15 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_sensnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_senslist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_sensnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_senslist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_aliasnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_aliaslist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_currnull_neg);

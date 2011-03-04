@@ -60,6 +60,10 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 	struct cil_tree_node *new_ast = NULL;
 
 	while(current_perm != NULL) {
+		if (current_perm->cl_head != NULL) {
+			printf("Invalid permission declaration\n");
+			return SEPOL_ERR;
+		}
 		cil_tree_node_init(&new_ast);
 		new_ast->parent = ast_node;
 		new_ast->line = current_perm->line;
@@ -791,7 +795,8 @@ int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL \
+	 || parse_current->next->cl_head != NULL || parse_current->next->next->cl_head != NULL ) {
 		printf("Invalid sensitivityalias declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -805,7 +810,7 @@ int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto gen_sensalias_cleanup;
 	
 	alias->sens_str = cil_strdup(parse_current->next->data);
-	
+
 	return SEPOL_OK;
 	
 	gen_sensalias_cleanup:
