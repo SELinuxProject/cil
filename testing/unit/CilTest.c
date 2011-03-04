@@ -3154,6 +3154,32 @@ void test_cil_build_ast_sensitivity_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_build_ast_sensalias(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_build_ast(test_db, tree->root, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_build_ast_sensalias_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", "extra", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_build_ast(test_db, tree->root, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_name(CuTest *tc) {
 	char *line[] = { "(", "block", "foo", "(", "typealias", "test", "type_t", ")", "(", "type", "test", ")", ")", NULL};
 
@@ -3272,6 +3298,66 @@ void test_cil_resolve_ast_roleallow_neg(CuTest *tc) {
 
 	int rc = cil_resolve_ast(test_db, test_db->ast->root);	
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_ast_sensalias(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+			"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_ast_sensalias_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_ast(test_db, test_db->ast->root);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_sensalias(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+			"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+	int rc = cil_resolve_sensalias(test_db, test_db->ast->root->cl_head->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_sensalias_sensdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	int rc = cil_resolve_sensalias(test_db, test_db->ast->root->cl_head);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_resolve_roletrans(CuTest *tc) {
@@ -4284,6 +4370,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_sensitivity);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_sensitivity_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sensalias);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sensalias_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
@@ -4292,6 +4380,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr_attrdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typeattr_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sensalias);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_sensalias);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_sensalias_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_tgtdecl_neg);
