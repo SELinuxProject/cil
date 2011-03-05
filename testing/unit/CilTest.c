@@ -17,6 +17,9 @@
 #include "../../src/cil_resolve_ast.h"
 #include "../../src/cil_fqn.h"
 
+#include "test_cil_tree.h"
+#include "test_cil_symtab.h"
+
 // TODO Check more in the data structures
 struct cil_file_data {
 	char *buffer;
@@ -96,86 +99,6 @@ void gen_test_tree(struct cil_tree **test_root, char *line[]) {
 	} while(*i != NULL);
 
 	*test_root = new_tree;
-}
-
-void test_cil_tree_node_init(CuTest *tc) {
-   struct cil_tree_node *test_node;
-
-   int rc = cil_tree_node_init(&test_node);
-
-   CuAssertIntEquals(tc, SEPOL_OK, rc);
-   CuAssertPtrNotNull(tc, test_node);
-   CuAssertPtrEquals(tc, NULL, test_node->cl_head);
-   CuAssertPtrEquals(tc, NULL, test_node->cl_tail);
-   CuAssertPtrEquals(tc, NULL, test_node->parent);
-   CuAssertPtrEquals(tc, NULL, test_node->data);
-   CuAssertPtrEquals(tc, NULL, test_node->next);
-   CuAssertIntEquals(tc, 0, test_node->flavor);
-   CuAssertIntEquals(tc, 0, test_node->line);
-
-   free(test_node);
-}
-
-void test_cil_tree_init(CuTest *tc) {
-	struct cil_tree *test_tree;
-
-	int rc = cil_tree_init(&test_tree);
-
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrNotNull(tc, test_tree);
-	CuAssertPtrEquals(tc, NULL, test_tree->root->cl_head);
-	CuAssertPtrEquals(tc, NULL, test_tree->root->cl_tail);
-	CuAssertPtrEquals(tc, NULL, test_tree->root->parent);
-	CuAssertPtrEquals(tc, NULL, test_tree->root->data);
-	CuAssertPtrEquals(tc, NULL, test_tree->root->next);
-	CuAssertIntEquals(tc, 0, test_tree->root->flavor);
-	CuAssertIntEquals(tc, 0, test_tree->root->line);
-
-	free(test_tree);
-}
-
-void test_symtab_init(CuTest *tc) {
-	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
-
-	uint32_t rc = 0, i =0;
-	
-	for (i=0; i<CIL_SYM_NUM; i++) {
-	    rc = symtab_init(&test_new_db->symtab[i], CIL_SYM_SIZE);
-	    CuAssertIntEquals(tc, 0, rc);
-	    // TODO CDS add checks to make sure the symtab looks correct
-	}
-
-	free(test_new_db);
-}
-
-void test_symtab_init_no_table_neg(CuTest *tc) {
-	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
-
-	int rc = symtab_init(&test_new_db->symtab[0], (uint32_t)SIZE_MAX);
-	CuAssertIntEquals(tc, -1, rc);
-
-	free(test_new_db);
-}
-
-void test_cil_symtab_array_init(CuTest *tc) {
-	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
-
-	int rc = cil_symtab_array_init(test_new_db->symtab, CIL_SYM_NUM);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrNotNull(tc, test_new_db->symtab);
-
-	free(test_new_db);
-}
-
-// TODO: Reach SEPOL_ERR return in cil_symtab_array_init ( currently can't produce a method to do so )
-void test_cil_symtab_array_init_null_symtab_neg(CuTest *tc) {
-	symtab_t *test_symtab = NULL;
-
-	int rc = cil_symtab_array_init(test_symtab, 1);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_db_init(CuTest *tc) {
