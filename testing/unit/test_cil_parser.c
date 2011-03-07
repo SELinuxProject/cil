@@ -2,6 +2,7 @@
 
 #include "CuTest.h"
 #include "CilTest.h"
+#include "test_cil_parser.h"
 
 #include "../../src/cil_parser.h"
 #include "../../src/cil.h"

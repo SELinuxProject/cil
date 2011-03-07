@@ -1,6 +1,7 @@
 #include <sepol/policydb/policydb.h>
 
 #include "CuTest.h"
+#include "test_cil_lexer.h"
 
 #include "../../src/cil_lexer.h"
 
