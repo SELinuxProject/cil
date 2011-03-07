@@ -6,6 +6,7 @@
 #include <sepol/policydb/policydb.h>
 
 #include "CuTest.h"
+#include "CilTest.h"
 
 #include "../../src/cil.h"
 #include "../../src/cil_mem.h"
@@ -19,12 +20,7 @@
 
 #include "test_cil_tree.h"
 #include "test_cil_symtab.h"
-
-// TODO Check more in the data structures
-struct cil_file_data {
-	char *buffer;
-	uint32_t file_size;
-};
+#include "test_cil_parser.h"
 
 void set_cil_file_data(struct cil_file_data **data) {
 	struct cil_file_data *new_data = malloc(sizeof(struct cil_file_data));
@@ -113,25 +109,6 @@ void test_cil_db_init(CuTest *tc) {
 }
 
 // TODO: Reach SEPOL_ERR return in cil_db_init ( currently can't produce a method to do so )
-
-// TODO rewrite to use the gen_tree function
-void test_cil_parser(CuTest *tc) {
-	int rc = 0;
-	struct cil_file_data *data;
-
-	struct cil_tree *test_parse_root;
-	cil_tree_init(&test_parse_root);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	set_cil_file_data(&data);
-
-	rc = cil_parser(data->buffer, data->file_size + 2, &test_parse_root);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrNotNull(tc, test_parse_root);
-	// TODO add checking of the parse tree that is returned
-}
 
 void test_cil_lexer_setup(CuTest *tc) {
    char *test_str = "(test \"qstring\");comment\n";
