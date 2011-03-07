@@ -2,50 +2,32 @@
 
 #include "CuTest.h"
 
+#include "../../src/cil_tree.h"
 #include "../../src/cil_symtab.h"
 #include "../../src/cil.h"
 
-void test_symtab_init(CuTest *tc) {
-	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
-
-	uint32_t rc = 0, i =0;
-	
-	for (i=0; i<CIL_SYM_NUM; i++) {
-	    rc = symtab_init(&test_new_db->symtab[i], CIL_SYM_SIZE);
-	    CuAssertIntEquals(tc, 0, rc);
-	    // TODO CDS add checks to make sure the symtab looks correct
-	}
-
-	free(test_new_db);
-}
-
-void test_symtab_init_no_table_neg(CuTest *tc) {
-	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
-
-	int rc = symtab_init(&test_new_db->symtab[0], (uint32_t)SIZE_MAX);
-	CuAssertIntEquals(tc, -1, rc);
-
-	free(test_new_db);
-}
-
-void test_cil_symtab_array_init(CuTest *tc) {
-	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
-
-	int rc = cil_symtab_array_init(test_new_db->symtab, CIL_SYM_NUM);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrNotNull(tc, test_new_db->symtab);
-
-	free(test_new_db);
-}
-
-// TODO: Reach SEPOL_ERR return in cil_symtab_array_init ( currently can't produce a method to do so )
-void test_cil_symtab_array_init_null_symtab_neg(CuTest *tc) {
+void test_cil_symtab_insert(CuTest *tc) {
 	symtab_t *test_symtab = NULL;
+	char* test_name = "test";
+	struct cil_block *test_block = malloc(sizeof(struct cil_block));
 
-	int rc = cil_symtab_array_init(test_symtab, 1);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);   
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_symtab_array_init(test_block->symtab, CIL_SYM_NUM);
+
+	test_block->is_abstract = 0;
+	test_block->is_optional = 0;
+	test_block->condition = NULL;
+
+	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_BLOCKS);
+
+	int rc = cil_symtab_insert(test_symtab, (hashtab_key_t)test_name, (struct cil_symtab_datum*)test_block, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
-
