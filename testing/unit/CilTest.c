@@ -21,6 +21,7 @@
 #include "test_cil_tree.h"
 #include "test_cil_symtab.h"
 #include "test_cil_parser.h"
+#include "test_cil_lexer.h"
 
 void set_cil_file_data(struct cil_file_data **data) {
 	struct cil_file_data *new_data = malloc(sizeof(struct cil_file_data));
@@ -109,70 +110,6 @@ void test_cil_db_init(CuTest *tc) {
 }
 
 // TODO: Reach SEPOL_ERR return in cil_db_init ( currently can't produce a method to do so )
-
-void test_cil_lexer_setup(CuTest *tc) {
-   char *test_str = "(test \"qstring\");comment\n";
-   uint32_t str_size = strlen(test_str);
-   char *buffer = malloc(str_size + 2);
-
-   memset(buffer+str_size, 0, 2);
-   strncpy(buffer, test_str, str_size);
-
-   int rc = cil_lexer_setup(buffer, str_size + 2);
-   CuAssertIntEquals(tc, SEPOL_OK, rc);
-
-   free(buffer);
-}
-
-void test_cil_lexer_next(CuTest *tc) {
-   char *test_str = "(test \"qstring\") ;comment\n";
-   uint32_t str_size = strlen(test_str);
-   char *buffer = malloc(str_size + 2);
-
-   memset(buffer+str_size, 0, 2);
-   strcpy(buffer, test_str);
-
-   cil_lexer_setup(buffer, str_size + 2);
-
-   struct token test_tok;
-
-   int rc = cil_lexer_next(&test_tok);
-   CuAssertIntEquals(tc, SEPOL_OK, rc);
-
-   CuAssertIntEquals(tc, OPAREN, test_tok.type);
-   CuAssertStrEquals(tc, "(", test_tok.value);
-   CuAssertIntEquals(tc, 1, test_tok.line);
-
-   rc = cil_lexer_next(&test_tok);
-   CuAssertIntEquals(tc, SEPOL_OK, rc);
-   
-   CuAssertIntEquals(tc, SYMBOL, test_tok.type);
-   CuAssertStrEquals(tc, "test", test_tok.value);
-   CuAssertIntEquals(tc, 1, test_tok.line);
- 
-   rc = cil_lexer_next(&test_tok);
-   CuAssertIntEquals(tc, SEPOL_OK, rc);
-   
-   CuAssertIntEquals(tc, QSTRING, test_tok.type);
-   CuAssertStrEquals(tc, "\"qstring\"", test_tok.value);
-   CuAssertIntEquals(tc, 1, test_tok.line);
- 
-   rc = cil_lexer_next(&test_tok);
-   CuAssertIntEquals(tc, SEPOL_OK, rc);
-   
-   CuAssertIntEquals(tc, CPAREN, test_tok.type);
-   CuAssertStrEquals(tc, ")", test_tok.value);
-   CuAssertIntEquals(tc, 1, test_tok.line);
-
-   rc = cil_lexer_next(&test_tok);
-   CuAssertIntEquals(tc, SEPOL_OK, rc);
-  
-   CuAssertIntEquals(tc, COMMENT, test_tok.type);
-   CuAssertStrEquals(tc, ";comment", test_tok.value);
-   CuAssertIntEquals(tc, 1, test_tok.line);
-
-   free(buffer);
-}
 
 void test_cil_get_parent_symtab_block(CuTest *tc) {
 	symtab_t *symtab = NULL;
