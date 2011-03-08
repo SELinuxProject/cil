@@ -647,6 +647,32 @@ void test_cil_gen_perm_nodes_failgen_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_perm_nodes_inval_perm(CuTest *tc) {
+  	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	char *test_key = tree->root->cl_head->cl_head->next->data;
+	struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_symtab_insert(&test_db->symtab[CIL_SYM_CLASSES], (hashtab_key_t)test_key, (struct cil_symtab_datum*)test_cls, test_ast_node);
+
+	test_ast_node->data = test_cls;
+	test_ast_node->flavor = CIL_CLASS;
+
+	int rc = cil_gen_perm_nodes(test_db, tree->root, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_class(CuTest *tc) { 
 	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
 	struct cil_tree *tree;
@@ -1106,6 +1132,56 @@ void test_cil_gen_sid_insertnode_neg(CuTest *tc) {
 	cil_gen_sid(test_db, tree->root->cl_head->cl_head, test_ast_node);
 	int rc = cil_gen_sid(test_db, tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+}
+
+void test_cil_set_to_list(CuTest *tc) {
+  char *line[] = {"(", "foo1", "foo2", "(", "foo3", ")", ")", NULL};
+  struct cil_tree *tree;
+  struct cil_list *cil_l;
+  struct cil_list *sub_list = NULL;
+
+  gen_test_tree(&tree, line);
+  cil_list_init(&cil_l);
+
+  int rc = cil_set_to_list(tree->root->cl_head, cil_l);
+  sub_list = (struct cil_list *)cil_l->head->next->next->data;
+
+  CuAssertIntEquals(tc, SEPOL_OK, rc);
+  CuAssertStrEquals(tc, "foo1", (char*)cil_l->head->data);
+  CuAssertStrEquals(tc, "foo2", (char*)cil_l->head->next->data);
+  CuAssertStrEquals(tc, "foo3", (char*)sub_list->head->data);
+}
+
+void test_cil_set_to_list_cil_tree_node_null(CuTest *tc) {
+  struct cil_list *cil_l = NULL;
+  int rc = cil_set_to_list(NULL, cil_l);
+
+  CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_set_to_list_cl_head_null(CuTest *tc) {
+  struct cil_list *cil_l;
+  struct cil_tree *tree = NULL;
+  char *line[] = {"(", "foo", "bar", ")", NULL};
+
+  cil_list_init(&cil_l);
+  gen_test_tree(&tree, line);
+  tree->root->cl_head = NULL;
+
+  int rc = cil_set_to_list(tree->root, cil_l);
+
+  CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+
+void test_cil_set_to_list_cil_list_null(CuTest *tc) {
+  char *line[] = {"(", "foo1", "foo2", "foo3", ")", NULL};
+  struct cil_tree *tree = NULL;
+  gen_test_tree(&tree, line);
+
+  int rc = cil_set_to_list(tree->root, NULL);
+
+  CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_type(CuTest *tc) {
@@ -4096,6 +4172,10 @@ void test_cil_resolve_sid_named_context(CuTest *tc) {
 
 CuSuite* CilTreeGetSuite() {
 	CuSuite* suite = CuSuiteNew();
+	SUITE_ADD_TEST(suite, test_cil_set_to_list_cil_list_null);
+	SUITE_ADD_TEST(suite, test_cil_set_to_list_cil_tree_node_null);
+	SUITE_ADD_TEST(suite, test_cil_set_to_list);
+	SUITE_ADD_TEST(suite, test_cil_set_to_list_cl_head_null);
 	SUITE_ADD_TEST(suite, test_cil_tree_node_init);
 	SUITE_ADD_TEST(suite, test_cil_tree_init);
 	SUITE_ADD_TEST(suite, test_cil_lexer_setup);
@@ -4329,6 +4409,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_inval_perm);
 
 	return suite;
 }
