@@ -9,14 +9,6 @@
 #include "CilTest.h"
 
 #include "../../src/cil.h"
-#include "../../src/cil_mem.h"
-#include "../../src/cil_tree.h"
-#include "../../src/cil_symtab.h"
-#include "../../src/cil_lexer.h"
-#include "../../src/cil_parser.h"
-#include "../../src/cil_build_ast.h"
-#include "../../src/cil_resolve_ast.h"
-#include "../../src/cil_fqn.h"
 
 #include "test_cil.h"
 #include "test_cil_tree.h"
