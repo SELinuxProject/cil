@@ -127,20 +127,19 @@ void test_symtab_init_no_table_neg(CuTest *tc) {
 	free(test_new_db);
 }
 
-
 CuSuite* CilTreeGetSuite() {
 	CuSuite* suite = CuSuiteNew();
-	SUITE_ADD_TEST(suite, test_cil_tree_node_init);
-	SUITE_ADD_TEST(suite, test_cil_tree_init);
-	SUITE_ADD_TEST(suite, test_cil_lexer_setup);
-	SUITE_ADD_TEST(suite, test_cil_lexer_next);
+
+	/* CilTest.c */
 	SUITE_ADD_TEST(suite, test_symtab_init);
 	SUITE_ADD_TEST(suite, test_symtab_init_no_table_neg);
+
+
+	/* test_cil.c */
 	SUITE_ADD_TEST(suite, test_cil_symtab_array_init);
-//  Cannot get symtab_init to fail
-//	SUITE_ADD_TEST(suite, test_cil_symtab_array_init_null_symtab_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_db_init);
-	SUITE_ADD_TEST(suite, test_cil_parser);
+
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_block);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_class);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_root);
@@ -148,36 +147,80 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_node_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_parent_null_neg);
+
+
+	/* test_cil_list.c */
+	SUITE_ADD_TEST(suite, test_cil_list_init);
+
+
+	/* test_cil_symtab.c */
 	SUITE_ADD_TEST(suite, test_cil_symtab_insert);
+
+
+	/* test_cil_tree.c */
+	SUITE_ADD_TEST(suite, test_cil_tree_init);
+	SUITE_ADD_TEST(suite, test_cil_tree_node_init);
+
+
+	/* test_cil_lexer.c */
+	SUITE_ADD_TEST(suite, test_cil_lexer_setup);
+	SUITE_ADD_TEST(suite, test_cil_lexer_next);
+
+
+	/* test_cil_parser.c */
+	SUITE_ADD_TEST(suite, test_cil_parser);
+
+
+	/* test_cil_build_ast.c */
+	SUITE_ADD_TEST(suite, test_cil_build_ast);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_treenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_suberr_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_parse_to_list);
+	SUITE_ADD_TEST(suite, test_cil_parse_to_list_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_parse_to_list_listnull_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_set_to_list);
+	SUITE_ADD_TEST(suite, test_cil_set_to_list_listnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_set_to_list_tree_node_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_set_to_list_cl_head_null_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_block);
 	SUITE_ADD_TEST(suite, test_cil_gen_block_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_block_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_block_treenull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_block_nodenull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_block_nodeparentnull_neg);
-//  Not setting pointers to NULL, unable to verify
-//	SUITE_ADD_TEST(suite, test_cil_destroy_block);
-	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes);
-	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_failgen_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_class);
-	SUITE_ADD_TEST(suite, test_cil_gen_class_noname_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_class_nodenull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_class_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_class_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_class_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_block);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_block_neg);
+
 	//SUITE_ADD_TEST(suite, test_cil_gen_perm);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodenull_neg);
 	//This needs to be fixed. Looks for perms in CIL_ROOT should be CLASS or COMMON
 	//SUITE_ADD_TEST(suite, test_cil_gen_perm_permexists_neg);
-//  Causes a segfault
-//	SUITE_ADD_TEST(suite, test_cil_gen_perm_noname_neg);
-	SUITE_ADD_TEST(suite, test_cil_list_init);
-	SUITE_ADD_TEST(suite, test_cil_parse_to_list);
-	SUITE_ADD_TEST(suite, test_cil_parse_to_list_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_parse_to_list_listnull_neg);
+	// Causes a segfault
+	//SUITE_ADD_TEST(suite, test_cil_gen_perm_noname_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_failgen_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_gen_class);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_nodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_class);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_class_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_common);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_common);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_common_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_sid);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_namedcontext);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_halfcontext_neg);
@@ -189,8 +232,16 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_pcurrnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_astnodenull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sid_insertnode_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sid);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sid_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_type);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_attribute);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_attribute_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_currnull_neg);
@@ -199,11 +250,19 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_attrnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_attrlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg2);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias_notype_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_role);
-	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_role);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_role_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_roletrans);	
 	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_astnull_neg);
@@ -211,12 +270,21 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_tgtnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_resultnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_roletrans);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_roletrans_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_true);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_false);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_none_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_notbool_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_bool);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_bool_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_avrule);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_avrule_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_transition);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_transition_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_transition_astnull_neg);
@@ -225,6 +293,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_transition_objnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_transition_resultnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_transition_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_transition);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_transition_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change_astnull_neg);
@@ -233,7 +304,11 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change_objnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change_resultnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_change_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_change);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_change_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member);
+	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_srcnull_neg);
@@ -241,9 +316,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_objnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_resultnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_member_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_user);
 	SUITE_ADD_TEST(suite, test_cil_gen_user_nouser_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_user_xsinfo_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_currnull_neg);
@@ -251,6 +330,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_sensnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_senslist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sensitivity);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sensitivity_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_sensalias);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_currnull_neg);
@@ -260,6 +342,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_aliasnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_aliaslist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensalias_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sensalias);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_sensalias_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_category);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_currnull_neg);
@@ -267,56 +352,29 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_category_catnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_catlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_treenull_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_suberr_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_block);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_block_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_class);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_class_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_common);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_common_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_sid);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_sid_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_attribute);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_attribute_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_typeattr_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_typealias_notype_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_role);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_role_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_roletrans);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_roletrans_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_bool);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_bool_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_avrule);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_avrule_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_transition);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_transition_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_change);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_change_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_type_rule_member_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_sensitivity);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_sensitivity_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_sensalias);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_sensalias_neg);
+
+
+	/* test_cil_resolve_ast.c */
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_inval_perm_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias_notype_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr_typedecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr_attrdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typeattr_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_sensalias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_sensalias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_sensalias_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_tgtdecl_neg);
@@ -325,44 +383,48 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roletrans_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roletrans_tgtdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roletrans_resultdecl_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow_tgtdecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_typealias_notype_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roleallow);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roleallow_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_src_nores_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_tgt_nores_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_class_nores_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_avrule_datum_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roleallow);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_roleallow_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_transition);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_transition_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_transition_tgtdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_transition_objdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_transition_resultdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_transition);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_transition_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_change);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_change_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_change_tgtdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_change_objdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_change_resultdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_change);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_change_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member_tgtdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member_objdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_type_rule_member_resultdecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_transition);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_transition_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_change);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_change_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_member);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_type_rule_member_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
+
 
 	return suite;
 }

@@ -7,6 +7,11 @@ void test_cil_parse_to_list(CuTest *);
 void test_cil_parse_to_list_currnull_neg(CuTest *);
 void test_cil_parse_to_list_listnull_neg(CuTest *);
 
+void test_cil_set_to_list(CuTest *);
+void test_cil_set_to_list_tree_node_null_neg(CuTest *);
+void test_cil_set_to_list_cl_head_null_neg(CuTest *);
+void test_cil_set_to_list_listnull_neg(CuTest *);
+
 void test_cil_gen_block(CuTest *);
 void test_cil_gen_block_noname_neg(CuTest *);
 void test_cil_gen_block_dbnull_neg(CuTest *);
@@ -24,6 +29,7 @@ void test_cil_gen_perm_nodenull_neg(CuTest *);
 
 void test_cil_gen_perm_nodes(CuTest *);
 void test_cil_gen_perm_nodes_failgen_neg(CuTest *);
+void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *);
 
 void test_cil_gen_class(CuTest *);
 void test_cil_gen_class_noname_neg(CuTest *);
