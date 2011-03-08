@@ -20,6 +20,7 @@
 
 #include "test_cil.h"
 #include "test_cil_tree.h"
+#include "test_cil_list.h"
 #include "test_cil_symtab.h"
 #include "test_cil_parser.h"
 #include "test_cil_lexer.h"
@@ -126,14 +127,6 @@ void test_symtab_init_no_table_neg(CuTest *tc) {
 	free(test_new_db);
 }
 
-void test_cil_list_init(CuTest *tc) {
-	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
-
-	cil_list_init(&test_avrule->perms_str);
-	CuAssertPtrNotNull(tc, test_avrule->perms_str);
-
-	free(test_avrule);   
-}
 
 // First seen in cil_gen_common
 void test_cil_parse_to_list(CuTest *tc) {
