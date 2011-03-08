@@ -3,6 +3,10 @@
 
 #include "CuTest.h"
 
+void test_cil_parse_to_list(CuTest *);
+void test_cil_parse_to_list_currnull_neg(CuTest *);
+void test_cil_parse_to_list_listnull_neg(CuTest *);
+
 void test_cil_gen_block(CuTest *);
 void test_cil_gen_block_noname_neg(CuTest *);
 void test_cil_gen_block_dbnull_neg(CuTest *);
