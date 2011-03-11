@@ -1020,3 +1020,48 @@ void test_cil_resolve_sid_named_context(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_userrole(CuTest *tc) {
+	char *line[] = {"(", "role",  "staff_r", ")",
+			"(", "user", "staff_u", ")",
+			"(", "userrole", "staff_u", "staff_r", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_userrole(test_db, test_db->ast->root->cl_head->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_userrole_no_user(CuTest *tc) {
+	char *line[] = {"(", "role",  "staff_r", ")",
+			"(", "userrole", "staff_u", "staff_r", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_userrole(test_db, test_db->ast->root->cl_head->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_userrole_no_role(CuTest *tc) {
+	char *line[] = {"(", "user", "staff_u", ")",
+			"(", "userrole", "staff_u", "staff_r", ")", NULL};
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_userrole(test_db, test_db->ast->root->cl_head->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}

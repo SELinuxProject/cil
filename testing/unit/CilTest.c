@@ -122,6 +122,19 @@ void test_symtab_init_no_table_neg(CuTest *tc) {
 CuSuite* CilTreeGetSuite() {
 	CuSuite* suite = CuSuiteNew();
 
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_current_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_cil_db_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_ast_node_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_current_next_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_curr_next_cl_head_not_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_curr_next_next_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_curr_next_next_cl_head_not_null);
+	
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrole);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrole_no_user);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrole_no_role);
+
 	/* CilTest.c */
 	SUITE_ADD_TEST(suite, test_symtab_init);
 	SUITE_ADD_TEST(suite, test_symtab_init_no_table_neg);
@@ -417,6 +430,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
 
+	
 
 	return suite;
 }

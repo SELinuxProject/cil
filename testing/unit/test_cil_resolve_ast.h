@@ -73,4 +73,8 @@ void test_cil_resolve_sid(CuTest *);
 void test_cil_resolve_sid_named_levels(CuTest *);
 void test_cil_resolve_sid_named_context(CuTest *);
 
+void test_cil_resolve_userrole(CuTest *tc);
+void test_cil_resolve_userrole_no_user(CuTest *tc);
+void test_cil_resolve_userrole_no_role(CuTest *tc);
+
 #endif
