@@ -345,6 +345,18 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_category_catlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_extra_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_catset);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_namenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_setnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_namelist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_nodefail_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_notset_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catset_settolistfail_neg);
+	
 
 	/* test_cil_resolve_ast.c */
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);

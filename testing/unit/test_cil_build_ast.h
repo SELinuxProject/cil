@@ -154,6 +154,17 @@ void test_cil_gen_category_catnull_neg(CuTest *);
 void test_cil_gen_category_catlist_neg(CuTest *);
 void test_cil_gen_category_extra_neg(CuTest *);
 
+void test_cil_gen_catset(CuTest *);
+void test_cil_gen_catset_dbnull_neg(CuTest *);
+void test_cil_gen_catset_currnull_neg(CuTest *);
+void test_cil_gen_catset_astnull_neg(CuTest *);
+void test_cil_gen_catset_namenull_neg(CuTest *);
+void test_cil_gen_catset_setnull_neg(CuTest *);
+void test_cil_gen_catset_namelist_neg(CuTest *);
+void test_cil_gen_catset_extra_neg(CuTest *);
+void test_cil_gen_catset_nodefail_neg(CuTest *);
+void test_cil_gen_catset_notset_neg(CuTest *);
+void test_cil_gen_catset_settolistfail_neg(CuTest *);
 
 /*
 cil_build_ast test cases
