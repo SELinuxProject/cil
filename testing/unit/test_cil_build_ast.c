@@ -498,7 +498,7 @@ void test_cil_gen_perm_nodes_failgen_neg(CuTest *tc) {
 }
 
 void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *tc) {
-  	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+	char *line[] = {"(", "class", "file", "(", "read", "(", "write", "open", ")", ")", NULL};
 	struct cil_tree *tree;
 	gen_test_tree(&tree, line);
 
@@ -510,6 +510,7 @@ void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *tc) {
 
 	char *test_key = tree->root->cl_head->cl_head->next->data;
 	struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+	symtab_init(&test_cls->perms, CIL_SYM_SIZE);
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -519,7 +520,7 @@ void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *tc) {
 	test_ast_node->data = test_cls;
 	test_ast_node->flavor = CIL_CLASS;
 
-	int rc = cil_gen_perm_nodes(test_db, tree->root, test_ast_node);
+	int rc = cil_gen_perm_nodes(test_db, tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
