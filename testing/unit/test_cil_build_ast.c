@@ -2897,9 +2897,6 @@ void test_cil_gen_userrole_ast_node_NULL(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-
-
-
 void test_cil_gen_userrole_parse_current_next_null(CuTest *tc) {
 	char *line[] = {"(", "userrole", ")", NULL};
 	
@@ -2961,5 +2958,243 @@ void test_cil_gen_userrole_parse_curr_next_next_cl_head_not_null(CuTest *tc) {
 
 	int rc = cil_gen_userrole(test_db, tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+// roletypes
+void test_cil_gen_roletype(CuTest *tc) {
+	char *line[] = {"(", "roletype", "admin_r", "admin_t", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletype(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_roletype_parse_current_NULL(CuTest *tc) {
+	char *line[] = {"(", "roletype", "admin_r", "admin_t", ")", NULL};
+	
+	struct cil_tree *tree = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletype(test_db, tree, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roletype_cil_db_NULL(CuTest *tc) {
+	char *line[] = {"(", "roletype", "admin_r", "admin_t", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db = NULL;
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletype(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_roletype_ast_node_NULL(CuTest *tc) {
+	char *line[] = {"(", "roletype", "admin_r", "admin_t", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node = NULL;
+
+	int rc = cil_gen_roletype(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+
+void test_cil_gen_roletype_parse_current_next_null(CuTest *tc) {
+	char *line[] = {"(", "roletype", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletype(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+//2nd case okay
+void test_cil_gen_roletype_parse_curr_next_cl_head_not_null(CuTest *tc) {
+	char *line[] = {"(", "roletype", "(", "admin_r", ")", "admin_t", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletype(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+// 3rd case okay
+void test_cil_gen_roletype_parse_curr_next_next_null(CuTest *tc) {
+	char *line[] = {"(", "(", "roletype", "admin_r", ")", "admin_t", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletype(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+void test_cil_gen_roletype_parse_curr_next_next_cl_head_not_null(CuTest *tc) {
+	char *line[] = {"(", "roletype", "admin_r", "(", "admin_t", ")", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_roletype(test_db, tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_build_ast_node_helper_userrole_neg(CuTest *tc) {
+	char *line[] = {"(", "userrole", "staff_u", "(", "staff_r", ")", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *cil_l;
+	cil_list_init(&cil_l);
+
+	cil_list_item_init(&cil_l->head);
+	cil_list_item_init(&cil_l->head->next);
+	cil_l->head->data = cil_l->head->next;
+	cil_l->head->flavor = CIL_AST_NODE;
+	cil_l->head->next->flavor = CIL_DB;
+	cil_l->head->next->data = test_db;
+	
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	uint32_t *finished = NULL;
+
+	int rc = __cil_build_ast_node_helper(tree->root->cl_head->cl_head, finished, cil_l);
+
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_build_ast_node_helper_roletype_neg(CuTest *tc) {
+	char *line[] = {"(", "roletype", "(", "admin_r", ")", "admin_t", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *cil_l;
+	cil_list_init(&cil_l);
+
+	cil_list_item_init(&cil_l->head);
+	cil_list_item_init(&cil_l->head->next);
+	cil_l->head->data = cil_l->head->next;
+	cil_l->head->flavor = CIL_AST_NODE;
+	cil_l->head->next->flavor = CIL_DB;
+	cil_l->head->next->data = test_db;
+	
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	uint32_t *finished = NULL;
+
+	int rc = __cil_build_ast_node_helper(tree->root->cl_head->cl_head, finished, cil_l);
+
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_build_ast_node_helper_userrole(CuTest *tc) {
+	char *line[] = {"(", "userrole", "staff_u", "staff_r", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *cil_l;
+	cil_list_init(&cil_l);
+
+	cil_list_item_init(&cil_l->head);
+	cil_list_item_init(&cil_l->head->next);
+	cil_l->head->data = cil_l->head->next;
+	cil_l->head->flavor = CIL_AST_NODE;
+	cil_l->head->next->flavor = CIL_DB;
+	cil_l->head->next->data = test_db;
+
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	uint32_t *finished = NULL;
+
+	int rc = __cil_build_ast_node_helper(tree->root->cl_head->cl_head, finished, cil_l);
+
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_build_ast_node_helper_roletype(CuTest *tc) {
+	char *line[] = {"(", "roletype", "admin_r", "admin_t", ")", NULL};
+	
+	struct cil_tree *tree;
+	gen_test_tree(&tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *cil_l;
+	cil_list_init(&cil_l);
+
+	cil_list_item_init(&cil_l->head);
+	cil_list_item_init(&cil_l->head->next);
+	cil_l->head->data = cil_l->head->next;
+	cil_l->head->flavor = CIL_AST_NODE;
+	cil_l->head->next->flavor = CIL_DB;
+	cil_l->head->next->data = test_db;
+	
+	cil_build_ast(test_db, tree->root, test_db->ast->root);
+
+	uint32_t *finished = NULL;
+
+	int rc = __cil_build_ast_node_helper(tree->root->cl_head->cl_head, finished, cil_l);
+
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
