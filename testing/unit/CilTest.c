@@ -18,6 +18,7 @@
 #include "test_cil_lexer.h"
 #include "test_cil_build_ast.h"
 #include "test_cil_resolve_ast.h"
+#include "test_cil_fqn.h"
 
 void set_cil_file_data(struct cil_file_data **data) {
 	struct cil_file_data *new_data = malloc(sizeof(struct cil_file_data));
@@ -121,6 +122,47 @@ void test_symtab_init_no_table_neg(CuTest *tc) {
 
 CuSuite* CilTreeGetSuite() {
 	CuSuite* suite = CuSuiteNew();
+
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_parse_current_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_cil_db_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_ast_node_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_parse_current_next_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_parse_curr_next_cl_head_not_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_parse_curr_next_next_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_parse_curr_next_next_cl_head_not_null);
+
+	SUITE_ADD_TEST(suite, test_cil_qualify_name);
+	SUITE_ADD_TEST(suite, test_cil_qualify_name_cil_flavor);
+	
+	SUITE_ADD_TEST(suite, test_resolve_ast_node_helper_userrole_no_user_neg);
+	SUITE_ADD_TEST(suite, test_resolve_ast_node_helper_userrole);
+
+	SUITE_ADD_TEST(suite, test_resolve_ast_node_helper_roletype_no_role_neg);
+	SUITE_ADD_TEST(suite, test_resolve_ast_node_helper_roletype);
+
+	SUITE_ADD_TEST(suite, test_build_ast_node_helper_userrole_neg);
+	SUITE_ADD_TEST(suite, test_build_ast_node_helper_roletype_neg);
+	SUITE_ADD_TEST(suite, test_build_ast_node_helper_userrole);
+	SUITE_ADD_TEST(suite, test_build_ast_node_helper_roletype);
+
+
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_current_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_cil_db_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_ast_node_NULL);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_current_next_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_curr_next_cl_head_not_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_curr_next_next_null);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_curr_next_next_cl_head_not_null);
+	
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletype);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_no_type);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_no_role);
+
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrole);	
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrole_no_user);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrole_no_role);
 
 	/* CilTest.c */
 	SUITE_ADD_TEST(suite, test_symtab_init);
@@ -429,6 +471,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
 
+	
 
 	return suite;
 }
