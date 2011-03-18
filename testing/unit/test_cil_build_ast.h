@@ -175,56 +175,56 @@ void test_cil_build_ast_astnull_neg(CuTest *);
 void test_cil_build_ast_suberr_neg(CuTest *);
 void test_cil_build_ast_treenull_neg(CuTest *);
 
-void test_cil_build_ast_block(CuTest *);
-void test_cil_build_ast_block_neg(CuTest *);
+void test_cil_build_ast_node_helper_block(CuTest *);
+void test_cil_build_ast_node_helper_block_neg(CuTest *);
 
-void test_cil_build_ast_class(CuTest *);
-void test_cil_build_ast_class_neg(CuTest *);
+void test_cil_build_ast_node_helper_class(CuTest *);
+void test_cil_build_ast_node_helper_class_neg(CuTest *);
 
-void test_cil_build_ast_common(CuTest *);
-void test_cil_build_ast_common_neg(CuTest *);
+void test_cil_build_ast_node_helper_common(CuTest *);
+void test_cil_build_ast_node_helper_common_neg(CuTest *);
 
-void test_cil_build_ast_sid(CuTest *);
-void test_cil_build_ast_sid_neg(CuTest *);
+void test_cil_build_ast_node_helper_sid(CuTest *);
+void test_cil_build_ast_node_helper_sid_neg(CuTest *);
 
-void test_cil_build_ast_type(CuTest *);
-void test_cil_build_ast_type_neg(CuTest *);
+void test_cil_build_ast_node_helper_type(CuTest *);
+void test_cil_build_ast_node_helper_type_neg(CuTest *);
 
-void test_cil_build_ast_type_attribute(CuTest *);
-void test_cil_build_ast_type_attribute_neg(CuTest *);
+void test_cil_build_ast_node_helper_type_attribute(CuTest *);
+void test_cil_build_ast_node_helper_type_attribute_neg(CuTest *);
 
-void test_cil_build_ast_typeattr(CuTest *);
-void test_cil_build_ast_typeattr_neg(CuTest *);
+void test_cil_build_ast_node_helper_typeattr(CuTest *);
+void test_cil_build_ast_node_helper_typeattr_neg(CuTest *);
 
-void test_cil_build_ast_typealias(CuTest *);
-void test_cil_build_ast_typealias_notype_neg(CuTest *);
+void test_cil_build_ast_node_helper_typealias(CuTest *);
+void test_cil_build_ast_node_helper_typealias_notype_neg(CuTest *);
 
-void test_cil_build_ast_role(CuTest *);
-void test_cil_build_ast_role_neg(CuTest *);
+void test_cil_build_ast_node_helper_role(CuTest *);
+void test_cil_build_ast_node_helper_role_neg(CuTest *);
 
-void test_cil_build_ast_roletrans(CuTest *);
-void test_cil_build_ast_roletrans_neg(CuTest *);
+void test_cil_build_ast_node_helper_roletrans(CuTest *);
+void test_cil_build_ast_node_helper_roletrans_neg(CuTest *);
 
-void test_cil_build_ast_avrule(CuTest *);
-void test_cil_build_ast_avrule_neg(CuTest *);
+void test_cil_build_ast_node_helper_avrule(CuTest *);
+void test_cil_build_ast_node_helper_avrule_neg(CuTest *);
 
-void test_cil_build_ast_type_rule_transition(CuTest *);
-void test_cil_build_ast_type_rule_transition_neg(CuTest *);
+void test_cil_build_ast_node_helper_type_rule_transition(CuTest *);
+void test_cil_build_ast_node_helper_type_rule_transition_neg(CuTest *);
 
-void test_cil_build_ast_type_rule_change(CuTest *);
-void test_cil_build_ast_type_rule_change_neg(CuTest *);
+void test_cil_build_ast_node_helper_type_rule_change(CuTest *);
+void test_cil_build_ast_node_helper_type_rule_change_neg(CuTest *);
 
-void test_cil_build_ast_type_rule_member(CuTest *);
-void test_cil_build_ast_type_rule_member_neg(CuTest *);
+void test_cil_build_ast_node_helper_type_rule_member(CuTest *);
+void test_cil_build_ast_node_helper_type_rule_member_neg(CuTest *);
 
-void test_cil_build_ast_bool(CuTest *);
-void test_cil_build_ast_bool_neg(CuTest *);
+void test_cil_build_ast_node_helper_bool(CuTest *);
+void test_cil_build_ast_node_helper_bool_neg(CuTest *);
 
-void test_cil_build_ast_sensitivity(CuTest *);
-void test_cil_build_ast_sensitivity_neg(CuTest *);
+void test_cil_build_ast_node_helper_sensitivity(CuTest *);
+void test_cil_build_ast_node_helper_sensitivity_neg(CuTest *);
 
-void test_cil_build_ast_sensalias(CuTest *);
-void test_cil_build_ast_sensalias_neg(CuTest *);
+void test_cil_build_ast_node_helper_sensalias(CuTest *);
+void test_cil_build_ast_node_helper_sensalias_neg(CuTest *);
 
 
 #endif

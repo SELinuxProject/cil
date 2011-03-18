@@ -8,6 +8,8 @@ UNITDIR ?= $(TESTDIR)/unit
 
 LEX = flex
 
+DEBUG=1
+
 AST_NAME = ast
 PARSER_NAME = parser
 
