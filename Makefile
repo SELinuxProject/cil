@@ -31,11 +31,11 @@ LDFLAGS = -lfl
 COVCFLAGS = -fprofile-arcs -ftest-coverage
 
 ifeq ($(DEBUG),1)
-	export CFLAGS = -g3 -O0 -gdwarf-2 -fno-strict-aliasing -Wall -Wshadow
+	export CFLAGS = -g3 -O0 -gdwarf-2 -fno-strict-aliasing -Wall -Werror -Wshadow
 	export LDFLAGS += -g
 endif
 
-CFLAGS ?= -Wall -W -Wundef -Wshadow -Wmissing-noreturn -Wmissing-format-attribute $(LIBS)
+CFLAGS ?= -Wall -Werror -W -Wundef -Wshadow -Wmissing-noreturn -Wmissing-format-attribute $(LIBS)
 override CFLAGS += -I$(INCLUDEDIR) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
 
 ARCH := $(patsubst i%86,i386,$(shell uname -m))
