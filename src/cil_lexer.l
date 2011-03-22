@@ -7,6 +7,9 @@
 	int line = 1;
 %}
 
+%option nounput
+%option noinput
+
 digit		[0-9]
 alpha		[a-zA-Z]
 spec_char	[\[\]\.\@\=\/\*\-\_\$\%\@\+\-\!]

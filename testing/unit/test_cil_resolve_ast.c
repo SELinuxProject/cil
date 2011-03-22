@@ -6,6 +6,8 @@
 #include "../../src/cil_build_ast.h"
 #include "../../src/cil_resolve_ast.h"
 
+int __cil_resolve_ast_node_helper(struct cil_tree_node *, uint32_t *, struct cil_list *);
+
 void test_cil_resolve_name(CuTest *tc) {
 	char *line[] = { "(", "block", "foo", 
 				"(", "typealias", "test", "type_t", ")", 

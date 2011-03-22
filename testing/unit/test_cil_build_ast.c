@@ -8,6 +8,8 @@
 
 #include "../../src/cil_tree.h"
 
+int __cil_build_ast_node_helper(struct cil_tree_node *, uint32_t *, struct cil_list *);
+
 // First seen in cil_gen_common
 void test_cil_parse_to_list(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
