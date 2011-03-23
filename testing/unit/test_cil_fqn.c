@@ -4,6 +4,7 @@
 #include "CilTest.h"
 
 #include "../../src/cil_fqn.h"
+#include "../../src/cil_build_ast.h"
 
 void test_cil_qualify_name(CuTest *tc) {
 	char *line[] = {"(", "category", "c0", ")",
