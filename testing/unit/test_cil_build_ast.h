@@ -3,15 +3,6 @@
 
 #include "CuTest.h"
 
-void test_cil_gen_userrole(CuTest *tc);
-void test_cil_gen_userrole_parse_current_NULL(CuTest *tc);
-void test_cil_gen_userrole_cil_db_NULL(CuTest *tc);
-void test_cil_gen_userrole_ast_node_NULL(CuTest *tc);
-void test_cil_gen_userrole_parse_current_next_null(CuTest *tc);
-void test_cil_gen_userrole_parse_curr_next_cl_head_not_null(CuTest *tc);
-void test_cil_gen_userrole_parse_curr_next_next_null(CuTest *tc);
-void test_cil_gen_userrole_parse_curr_next_next_cl_head_not_null(CuTest *tc);
-
 void test_cil_parse_to_list(CuTest *);
 void test_cil_parse_to_list_currnull_neg(CuTest *);
 void test_cil_parse_to_list_listnull_neg(CuTest *);
@@ -235,17 +226,27 @@ void test_cil_build_ast_node_helper_sensitivity_neg(CuTest *);
 void test_cil_build_ast_node_helper_sensalias(CuTest *);
 void test_cil_build_ast_node_helper_sensalias_neg(CuTest *);
 
+void test_cil_gen_roletype(CuTest *tc);
+void test_cil_gen_roletype_parse_current_null_neg(CuTest *tc);
+void test_cil_gen_roletype_cil_db_null_neg(CuTest *tc);
+void test_cil_gen_roletype_ast_node_null_neg(CuTest *tc);
+void test_cil_gen_roletype_missing_role_and_type_neg(CuTest *tc);
+void test_cil_gen_roletype_role_sublist_neg(CuTest *tc);
+void test_cil_gen_roletype_roletype_sublist_neg(CuTest *tc);
+void test_cil_gen_roletype_type_sublist_neg(CuTest *tc);
+
+void test_cil_gen_userrole(CuTest *tc);
+void test_cil_gen_userrole_parse_current_null_neg(CuTest *tc);
+void test_cil_gen_userrole_cil_db_null_neg(CuTest *tc);
+void test_cil_gen_userrole_ast_node_null_neg(CuTest *tc);
+void test_cil_gen_userrole_missing_user_and_role_neg(CuTest *tc);
+void test_cil_gen_userrole_user_sublist_neg(CuTest *tc);
+void test_cil_gen_userrole_userrole_sublist_neg(CuTest *tc);
+void test_cil_gen_userrole_role_sublist_neg(CuTest *tc);
+
 void test_build_ast_node_helper_userrole_neg(CuTest *tc);
 void test_build_ast_node_helper_roletype_neg(CuTest *tc);
 void test_build_ast_node_helper_userrole(CuTest *tc);
 void test_build_ast_node_helper_roletype(CuTest *tc);
 
-void test_cil_gen_roletype(CuTest *tc);
-void test_cil_gen_roletype_parse_current_NULL(CuTest *tc);
-void test_cil_gen_roletype_cil_db_NULL(CuTest *tc);
-void test_cil_gen_roletype_ast_node_NULL(CuTest *tc);
-void test_cil_gen_roletype_parse_current_next_null(CuTest *tc);
-void test_cil_gen_roletype_parse_curr_next_cl_head_not_null(CuTest *tc);
-void test_cil_gen_roletype_parse_curr_next_next_null(CuTest *tc);
-void test_cil_gen_roletype_parse_curr_next_next_cl_head_not_null(CuTest *tc);
 #endif
