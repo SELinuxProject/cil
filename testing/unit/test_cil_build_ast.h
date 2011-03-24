@@ -40,6 +40,7 @@ void test_cil_gen_class_noclass_neg(CuTest *);
 void test_cil_gen_class_failgen_neg(CuTest *);
 
 void test_cil_gen_common(CuTest *);
+//TODO: cil_gen_common negative test cases
 
 void test_cil_gen_sid(CuTest *);
 void test_cil_gen_sid_namedcontext(CuTest *);
@@ -55,6 +56,7 @@ void test_cil_gen_sid_insertnode_neg(CuTest *);
 
 void test_cil_gen_type(CuTest *);
 void test_cil_gen_type_attribute(CuTest *);
+//TODO: cil_gen_type negative test cases (both for type and attribute)
 
 void test_cil_gen_typeattr(CuTest *);
 void test_cil_gen_typeattr_dbnull_neg(CuTest *);
@@ -71,6 +73,7 @@ void test_cil_gen_typealias_incomplete_neg(CuTest *);
 void test_cil_gen_typealias_incomplete_neg2(CuTest *);
 
 void test_cil_gen_role(CuTest *);
+//TODO: cil_gen_role negative test cases
 
 void test_cil_gen_roletrans(CuTest *);
 void test_cil_gen_roletrans_currnull_neg(CuTest *);
@@ -95,6 +98,7 @@ void test_cil_gen_roleallow_extra_neg(CuTest *);
 
 void test_cil_gen_avrule(CuTest *);
 void test_cil_gen_avrule_notlist_neg(CuTest *);
+//TODO: cil_gen_avrule should have more negative test cases
 
 void test_cil_gen_type_rule_transition(CuTest *);
 void test_cil_gen_type_rule_transition_currnull_neg(CuTest *);
@@ -122,7 +126,6 @@ void test_cil_gen_type_rule_member_tgtnull_neg(CuTest *);
 void test_cil_gen_type_rule_member_objnull_neg(CuTest *);
 void test_cil_gen_type_rule_member_resultnull_neg(CuTest *);
 void test_cil_gen_type_rule_member_extra_neg(CuTest *);
-
 
 void test_cil_gen_user(CuTest *);
 void test_cil_gen_user_nouser_neg(CuTest *);

@@ -30,8 +30,10 @@ void test_cil_resolve_typeattr_typedecl_neg(CuTest *);
 void test_cil_resolve_typeattr_attrdecl_neg(CuTest *);
 
 void test_cil_resolve_typealias(CuTest *);
+//TODO: cil_resolve_typealias negative test cases
 
 void test_cil_resolve_avrule(CuTest *);
+//TODO: cil_resolve_avrule negative test cases
 
 void test_cil_resolve_type_rule_transition(CuTest *);
 void test_cil_resolve_type_rule_transition_srcdecl_neg(CuTest *);
@@ -54,6 +56,7 @@ void test_cil_resolve_type_rule_member_resultdecl_neg(CuTest *);
 void test_cil_resolve_sid(CuTest *);
 void test_cil_resolve_sid_named_levels(CuTest *);
 void test_cil_resolve_sid_named_context(CuTest *);
+//TODO: cil_resolve_sid negative test cases
 
 void test_cil_resolve_roletype(CuTest *tc);
 void test_cil_resolve_roletype_type_neg(CuTest *tc);
@@ -100,7 +103,7 @@ void test_cil_resolve_ast_node_helper_type_rule_change_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_type_rule_member(CuTest *);
 void test_cil_resolve_ast_node_helper_type_rule_member_neg(CuTest *);
 
-// Missing cases for sid
+// TODO cil_resolve_ast_node_helper test cases for sid
 
 void test_cil_resolve_ast_node_helper_roletype(CuTest *tc);
 void test_cil_resolve_ast_node_helper_roletype_role_neg(CuTest *tc);
