@@ -166,6 +166,33 @@ void test_cil_gen_catset_nodefail_neg(CuTest *);
 void test_cil_gen_catset_notset_neg(CuTest *);
 void test_cil_gen_catset_settolistfail_neg(CuTest *);
 
+void test_cil_gen_catalias(CuTest *);
+void test_cil_gen_catalias_dbnull_neg(CuTest *);
+void test_cil_gen_catalias_currnull_neg(CuTest *);
+void test_cil_gen_catalias_astnull_neg(CuTest *);
+void test_cil_gen_catalias_catnull_neg(CuTest *);
+void test_cil_gen_catalias_aliasnull_neg(CuTest *);
+void test_cil_gen_catalias_extra_neg(CuTest *);
+
+void test_cil_gen_roletype(CuTest *tc);
+void test_cil_gen_roletype_currnull_neg(CuTest *tc);
+void test_cil_gen_roletype_dbnull_neg(CuTest *tc);
+void test_cil_gen_roletype_astnull_neg(CuTest *tc);
+void test_cil_gen_roletype_empty_neg(CuTest *tc);
+void test_cil_gen_roletype_rolelist_neg(CuTest *tc);
+void test_cil_gen_roletype_roletype_sublist_neg(CuTest *tc);
+void test_cil_gen_roletype_typelist_neg(CuTest *tc);
+
+void test_cil_gen_userrole(CuTest *tc);
+void test_cil_gen_userrole_currnull_neg(CuTest *tc);
+void test_cil_gen_userrole_dbnull_neg(CuTest *tc);
+void test_cil_gen_userrole_astnull_neg(CuTest *tc);
+void test_cil_gen_userrole_empty_neg(CuTest *tc);
+void test_cil_gen_userrole_userlist_neg(CuTest *tc);
+void test_cil_gen_userrole_userrole_sublist_neg(CuTest *tc);
+void test_cil_gen_userrole_rolelist_neg(CuTest *tc);
+
+
 /*
 cil_build_ast test cases
 */
@@ -226,27 +253,16 @@ void test_cil_build_ast_node_helper_sensitivity_neg(CuTest *);
 void test_cil_build_ast_node_helper_sensalias(CuTest *);
 void test_cil_build_ast_node_helper_sensalias_neg(CuTest *);
 
-void test_cil_gen_roletype(CuTest *tc);
-void test_cil_gen_roletype_parse_current_null_neg(CuTest *tc);
-void test_cil_gen_roletype_cil_db_null_neg(CuTest *tc);
-void test_cil_gen_roletype_ast_node_null_neg(CuTest *tc);
-void test_cil_gen_roletype_missing_role_and_type_neg(CuTest *tc);
-void test_cil_gen_roletype_role_sublist_neg(CuTest *tc);
-void test_cil_gen_roletype_roletype_sublist_neg(CuTest *tc);
-void test_cil_gen_roletype_type_sublist_neg(CuTest *tc);
+void test_cil_build_ast_node_helper_catset(CuTest *tc);
+void test_cil_build_ast_node_helper_catset_neg(CuTest *tc);
 
-void test_cil_gen_userrole(CuTest *tc);
-void test_cil_gen_userrole_parse_current_null_neg(CuTest *tc);
-void test_cil_gen_userrole_cil_db_null_neg(CuTest *tc);
-void test_cil_gen_userrole_ast_node_null_neg(CuTest *tc);
-void test_cil_gen_userrole_missing_user_and_role_neg(CuTest *tc);
-void test_cil_gen_userrole_user_sublist_neg(CuTest *tc);
-void test_cil_gen_userrole_userrole_sublist_neg(CuTest *tc);
-void test_cil_gen_userrole_role_sublist_neg(CuTest *tc);
+void test_cil_build_ast_node_helper_catalias(CuTest *tc);
+void test_cil_build_ast_node_helper_catalias_neg(CuTest *tc);
 
-void test_build_ast_node_helper_userrole_neg(CuTest *tc);
-void test_build_ast_node_helper_roletype_neg(CuTest *tc);
-void test_build_ast_node_helper_userrole(CuTest *tc);
-void test_build_ast_node_helper_roletype(CuTest *tc);
+void test_cil_build_ast_node_helper_roletype(CuTest *tc);
+void test_cil_build_ast_node_helper_roletype_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_userrole(CuTest *tc);
+void test_cil_build_ast_node_helper_userrole_neg(CuTest *tc);
 
 #endif

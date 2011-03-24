@@ -357,31 +357,41 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_catset_nodefail_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_catset_notset_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_catset_settolistfail_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_catset);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_catset_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_gen_catalias);
+	SUITE_ADD_TEST(suite, test_cil_gen_catalias_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catalias_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catalias_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catalias_catnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catalias_aliasnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catalias_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_catalias);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_catalias_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_roletype);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletype_parse_current_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletype_cil_db_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletype_ast_node_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletype_missing_role_and_type_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletype_role_sublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_empty_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_rolelist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_roletype_roletype_sublist_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletype_type_sublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletype_typelist_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roletype);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roletype_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_userrole);
-	SUITE_ADD_TEST(suite, test_cil_gen_userrole_parse_current_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_userrole_cil_db_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_userrole_ast_node_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_userrole_missing_user_and_role_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_userrole_user_sublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_empty_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_userlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_userrole_userrole_sublist_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_userrole_role_sublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userrole_rolelist_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_userrole);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_userrole_neg);
 	
-	SUITE_ADD_TEST(suite, test_build_ast_node_helper_userrole_neg);
-	SUITE_ADD_TEST(suite, test_build_ast_node_helper_roletype_neg);
-	SUITE_ADD_TEST(suite, test_build_ast_node_helper_userrole);
-	SUITE_ADD_TEST(suite, test_build_ast_node_helper_roletype);
-
-
 	/* test_cil_resolve_ast.c */
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_inval_perm_neg);
@@ -453,19 +463,20 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
 
-	SUITE_ADD_TEST(suite, test_resolve_ast_node_helper_userrole);
-	SUITE_ADD_TEST(suite, test_resolve_ast_node_helper_userrole_no_user_neg);
-
-	SUITE_ADD_TEST(suite, test_resolve_ast_node_helper_roletype);
-	SUITE_ADD_TEST(suite, test_resolve_ast_node_helper_roletype_no_role_neg);
-
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype);
-	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_no_type_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_no_role_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_type_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_role_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletype);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletype_role_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletype_type_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_userrole);	
-	SUITE_ADD_TEST(suite, test_cil_resolve_userrole_no_user_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_userrole_no_role_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrole_user_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrole_role_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userrole);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userrole_user_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userrole_role_neg);
+
 
 	
 	/* test_cil_fqn.c */
