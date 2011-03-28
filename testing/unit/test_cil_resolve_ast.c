@@ -125,6 +125,7 @@ void test_cil_resolve_sensalias(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
 	int rc = cil_resolve_sensalias(test_db, test_db->ast->root->cl_head->next);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -139,8 +140,40 @@ void test_cil_resolve_sensalias_sensdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
 	int rc = cil_resolve_sensalias(test_db, test_db->ast->root->cl_head);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_catalias(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")", 
+			"(", "categoryalias", "c0", "red", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_catalias(test_db, test_db->ast->root->cl_head->next);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_catalias_catdecl_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryalias", "c0", "red", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_catalias(test_db, test_db->ast->root->cl_head);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);	
 }
 
 void test_cil_resolve_roletrans(CuTest *tc) {
@@ -802,7 +835,7 @@ void test_cil_resolve_ast_node_helper_roleallow_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -831,7 +864,7 @@ void test_cil_resolve_ast_node_helper_sensalias(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -859,13 +892,70 @@ void test_cil_resolve_ast_node_helper_sensalias_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, other);	
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertPtrEquals(tc, NULL, finished);
+}
+
+void test_cil_resolve_ast_node_helper_catalias(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")", 
+			"(", "categoryalias", "c0", "red", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 3;
+	other->head->next->data = &pass;
+
+	uint32_t *finished = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, other);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
+}
+
+void test_cil_resolve_ast_node_helper_catalias_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryalias", "c0", "red", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 3;
+	other->head->next->data = &pass;
+
+	uint32_t *finished = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, other);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertPtrEquals(tc, NULL, finished);	
 }
 
 void test_cil_resolve_ast_node_helper_roletrans(CuTest *tc) {
@@ -890,7 +980,7 @@ void test_cil_resolve_ast_node_helper_roletrans(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -920,7 +1010,7 @@ void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -950,7 +1040,7 @@ void test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -980,7 +1070,7 @@ void test_cil_resolve_ast_node_helper_roletrans_resultdecl_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1010,7 +1100,7 @@ void test_cil_resolve_ast_node_helper_typeattr(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1039,7 +1129,7 @@ void test_cil_resolve_ast_node_helper_typeattr_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1069,7 +1159,7 @@ void test_cil_resolve_ast_node_helper_typealias(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1098,7 +1188,7 @@ void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1129,7 +1219,7 @@ void test_cil_resolve_ast_node_helper_avrule(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1157,7 +1247,7 @@ void test_cil_resolve_ast_node_helper_avrule_src_nores_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1186,7 +1276,7 @@ void test_cil_resolve_ast_node_helper_avrule_tgt_nores_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1216,7 +1306,7 @@ void test_cil_resolve_ast_node_helper_avrule_class_nores_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1246,7 +1336,7 @@ void test_cil_resolve_ast_node_helper_avrule_datum_null_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1278,7 +1368,7 @@ void test_cil_resolve_ast_node_helper_type_rule_transition(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1309,7 +1399,7 @@ void test_cil_resolve_ast_node_helper_type_rule_transition_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1341,7 +1431,7 @@ void test_cil_resolve_ast_node_helper_type_rule_change(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1372,7 +1462,7 @@ void test_cil_resolve_ast_node_helper_type_rule_change_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1404,7 +1494,7 @@ void test_cil_resolve_ast_node_helper_type_rule_member(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1435,7 +1525,7 @@ void test_cil_resolve_ast_node_helper_type_rule_member_neg(CuTest *tc) {
 	int pass = 3;
 	other->head->next->data = &pass;
 
-	uint32_t *finished = 0;
+	uint32_t *finished = NULL;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1461,7 +1551,7 @@ void test_cil_resolve_ast_node_helper_roletype(CuTest *tc) {
 	struct cil_list *cil_l;
 	cil_list_init(&cil_l);
 
-	uint32_t finished = 0;
+	uint32_t *finished = NULL;
 
 	cil_list_item_init(&cil_l->head);
 	cil_l->head->data = test_db;
@@ -1473,8 +1563,8 @@ void test_cil_resolve_ast_node_helper_roletype(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, cil_l);
-	CuAssertIntEquals(tc, finished, 0);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, cil_l);
+	CuAssertPtrEquals(tc, NULL, finished);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1494,7 +1584,7 @@ void test_cil_resolve_ast_node_helper_roletype_role_neg(CuTest *tc) {
 	struct cil_list *cil_l;
 	cil_list_init(&cil_l);
 
-	uint32_t finished = 0;
+	uint32_t *finished = NULL;
 
 	cil_list_item_init(&cil_l->head);
 	cil_l->head->data = test_db;
@@ -1506,8 +1596,8 @@ void test_cil_resolve_ast_node_helper_roletype_role_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, cil_l);
-	CuAssertIntEquals(tc, finished, 0);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, cil_l);
+	CuAssertPtrEquals(tc, NULL, finished);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1527,7 +1617,7 @@ void test_cil_resolve_ast_node_helper_roletype_type_neg(CuTest *tc) {
 	struct cil_list *cil_l;
 	cil_list_init(&cil_l);
 
-	uint32_t finished = 0;
+	uint32_t *finished = NULL;
 
 	cil_list_item_init(&cil_l->head);
 	cil_l->head->data = test_db;
@@ -1539,8 +1629,8 @@ void test_cil_resolve_ast_node_helper_roletype_type_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, cil_l);
-	CuAssertIntEquals(tc, finished, 0);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, cil_l);
+	CuAssertPtrEquals(tc, NULL, finished);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1561,7 +1651,7 @@ void test_cil_resolve_ast_node_helper_userrole(CuTest *tc) {
 	struct cil_list *cil_l;
 	cil_list_init(&cil_l);
 
-	uint32_t finished = 0;
+	uint32_t *finished = NULL;
 
 	cil_list_item_init(&cil_l->head);
 	cil_l->head->data = test_db;
@@ -1573,8 +1663,8 @@ void test_cil_resolve_ast_node_helper_userrole(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, cil_l);
-	CuAssertIntEquals(tc, finished, 0);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, cil_l);
+	CuAssertPtrEquals(tc, NULL, finished);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1594,7 +1684,7 @@ void test_cil_resolve_ast_node_helper_userrole_user_neg(CuTest *tc) {
 	struct cil_list *cil_l;
 	cil_list_init(&cil_l);
 
-	uint32_t finished = 0;
+	uint32_t *finished = NULL;
 
 	cil_list_item_init(&cil_l->head);
 	cil_l->head->data = test_db;
@@ -1606,8 +1696,8 @@ void test_cil_resolve_ast_node_helper_userrole_user_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, cil_l);
-	CuAssertIntEquals(tc, finished, 0);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, cil_l);
+	CuAssertPtrEquals(tc, NULL, finished);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1627,7 +1717,7 @@ void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc) {
 	struct cil_list *cil_l;
 	cil_list_init(&cil_l);
 
-	uint32_t finished = 0;
+	uint32_t *finished = NULL;
 
 	cil_list_item_init(&cil_l->head);
 	cil_l->head->data = test_db;
@@ -1639,7 +1729,7 @@ void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, cil_l);
-	CuAssertIntEquals(tc, finished, 0);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, cil_l);
+	CuAssertPtrEquals(tc, NULL, finished);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
