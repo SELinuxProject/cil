@@ -176,6 +176,42 @@ void test_cil_resolve_catalias_catdecl_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);	
 }
 
+void test_cil_resolve_catset(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "somecats", "(", "c0", "c1", "c2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_catset(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_catset_catlist_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "somecats", "(", "c0", "c1", "c2", "c4", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_catset(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_roletrans(CuTest *tc) {
 	char *line[] = {"(", "role", "foo_r", ")",
 			"(", "type", "bar_t", ")",
@@ -956,6 +992,67 @@ void test_cil_resolve_ast_node_helper_catalias_neg(CuTest *tc) {
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, other);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertPtrEquals(tc, NULL, finished);	
+}
+
+void test_cil_resolve_ast_node_helper_catset(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "somecats", "(", "c0", "c1", "c2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 3;
+	other->head->next->data = &pass;
+
+	uint32_t *finished = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, other);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
+}
+
+void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "categoryset", "somecats", "(", "c0", "c1", "c2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 3;
+	other->head->next->data = &pass;
+
+	uint32_t *finished = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, other);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
 }
 
 void test_cil_resolve_ast_node_helper_roletrans(CuTest *tc) {

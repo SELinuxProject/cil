@@ -23,6 +23,9 @@ void test_cil_resolve_sensalias_sensdecl_neg(CuTest *);
 void test_cil_resolve_catalias(CuTest *);
 void test_cil_resolve_catalias_catdecl_neg(CuTest *);
 
+void test_cil_resolve_catset(CuTest *);
+void test_cil_resolve_catset_catlist_neg(CuTest *);
+
 void test_cil_resolve_roletrans(CuTest *);
 void test_cil_resolve_roletrans_srcdecl_neg(CuTest *);
 void test_cil_resolve_roletrans_tgtdecl_neg(CuTest *);
@@ -82,6 +85,9 @@ void test_cil_resolve_ast_node_helper_sensalias_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_catalias(CuTest *);
 void test_cil_resolve_ast_node_helper_catalias_neg(CuTest *);
+
+void test_cil_resolve_ast_node_helper_catset(CuTest *);
+void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_roletrans(CuTest *);
 void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *);
