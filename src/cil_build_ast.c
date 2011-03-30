@@ -131,26 +131,12 @@ void cil_destroy_block(struct cil_block *block)
 
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	int inherits = 0;
-
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL) {
-		goto failed_decl;	
-	}
-
-	if (parse_current->next->next->cl_head == NULL) {
-		if (strcmp(parse_current->next->next->data, "inherits") != 0) {
-			goto failed_decl;	
-		}
-		else if (parse_current->next->next->next == NULL || parse_current->next->next->next->cl_head != NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next != NULL) {
-			goto failed_decl;	
-		}
-		else
-			inherits = 1;
-	}
-	else if (parse_current->next->next->next != NULL) {	
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL || parse_current->next->next->cl_head == NULL
+	|| parse_current->next->next->next != NULL) {
 		goto failed_decl;	
 	}
 
@@ -165,17 +151,11 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto gen_class_cleanup;
 	}
 
-	if (inherits) 
-		cls->common_str = cil_strdup(parse_current->next->next->next->data);
-
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cls, (hashtab_key_t)key, CIL_SYM_CLASSES, CIL_CLASS);
 	if (rc != SEPOL_OK) 
 		goto gen_class_cleanup;
 
-	if (inherits)
-		perms = parse_current->next->next->next->next->cl_head;
-	else
-		perms = parse_current->next->next->cl_head;
+	perms = parse_current->next->next->cl_head;
 
 	rc = cil_gen_perm_nodes(db, perms, ast_node);
 	if (rc != SEPOL_OK) {
@@ -280,6 +260,38 @@ void cil_destroy_common(struct cil_common *common)
 	free(common);
 }
 
+int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL
+	|| parse_current->next->next->next != NULL) {
+		printf("Invalid classcommon declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_classcommon *clscom = cil_malloc(sizeof(struct cil_classcommon));
+
+	clscom->class_str = cil_strdup(parse_current->next->data);
+	clscom->common_str = cil_strdup(parse_current->next->next->data);
+
+	ast_node->data = clscom;
+	ast_node->flavor = CIL_CLASSCOMMON;
+	
+	return SEPOL_OK;
+
+}
+
+void cil_destroy_classcommon(struct cil_classcommon *clscom)
+{
+	if (clscom->class_str != NULL)
+		free(clscom->class_str);
+	if (clscom->common_str != NULL)
+		free(clscom->common_str);		
+	free(clscom);
+}
+
 int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -292,7 +304,7 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 	}
 
 	int rc = SEPOL_ERR;
-	struct cil_sid * sid = cil_malloc(sizeof(struct cil_sid));	
+	struct cil_sid *sid = cil_malloc(sizeof(struct cil_sid));	
 	char *key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)sid, (hashtab_key_t)key, CIL_SYM_SIDS, CIL_SID);
@@ -1549,6 +1561,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 				*finished = 1;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_CLASSCOMMON)) {
+				rc = cil_gen_classcommon(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_classcommon failed, rc: %d\n", rc);
+					return rc;
+				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
 				rc = cil_gen_sid(db, parse_current, ast_node);

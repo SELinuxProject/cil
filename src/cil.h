@@ -50,6 +50,7 @@
 #define CIL_CATORDER		35
 #define CIL_DOMINANCE		36
 #define CIL_SENSCAT		37
+#define CIL_CLASSCOMMON		38
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -75,6 +76,7 @@
 #define CIL_KEY_CLASS		"class"
 #define CIL_KEY_PERM		"perm"
 #define CIL_KEY_COMMON		"common"
+#define CIL_KEY_CLASSCOMMON	"classcommon"
 #define CIL_KEY_SID		"sid"
 #define CIL_KEY_USER		"user"
 #define CIL_KEY_ROLE 		"role"
@@ -160,7 +162,6 @@ struct cil_block {
 struct cil_class {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
-	char *common_str;
 	struct cil_common *common;
 };
 
@@ -172,6 +173,14 @@ struct cil_common {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
 };
+
+struct cil_classcommon {
+	char *class_str;
+	struct cil_class *class;
+	char *common_str;
+	struct cil_common *common;
+};
+	
 
 struct cil_sid {
 	struct cil_symtab_datum datum;

@@ -343,9 +343,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			struct cil_class *cls = node->data;
 			printf("CLASS: %s ", cls->datum.name);
 			
-			if (cls->common_str != NULL)
-				printf("inherits: %s ", cls->common_str);
-			else if (cls->common != NULL)
+			if (cls->common != NULL)
 				printf("inherits: %s ", cls->common->datum.name);
 			printf("(");
 
@@ -362,7 +360,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 	
 			printf(" )");
 			return;
-							
+		}
+		case CIL_CLASSCOMMON : {
+			struct cil_classcommon *clscom = node->data;
+			if (clscom->class_str != NULL && clscom->common_str != NULL)
+				printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
+			else
+				printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class->datum.name, clscom->common->datum.name);
+			return;
 		}
 		case CIL_BOOL : {
 			struct cil_bool *boolean = node->data;

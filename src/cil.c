@@ -78,6 +78,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_common(*data);
 			break;
 		}
+		case (CIL_CLASSCOMMON) : {
+			cil_destroy_classcommon(*data);
+			break;
+		}
 		case (CIL_SID) : {
 			cil_destroy_sid(*data);
 			break;
