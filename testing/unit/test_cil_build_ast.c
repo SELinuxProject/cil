@@ -804,7 +804,8 @@ void test_cil_gen_common_permsublist_neg(CuTest *tc) {
         test_ast_node->line = 1;
 
         int rc = cil_gen_common(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+        
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_common_noperms_neg(CuTest *tc) {
@@ -823,7 +824,8 @@ void test_cil_gen_common_noperms_neg(CuTest *tc) {
         test_ast_node->line = 1;
 
         int rc = cil_gen_common(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+       
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_sid(CuTest *tc) {
@@ -1516,6 +1518,7 @@ void test_cil_gen_role_extrarole_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	int rc = cil_gen_role(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1535,6 +1538,7 @@ void test_cil_gen_role_noname_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	int rc = cil_gen_role(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
