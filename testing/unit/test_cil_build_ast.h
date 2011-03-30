@@ -88,7 +88,11 @@ void test_cil_gen_typealias_incomplete_neg(CuTest *);
 void test_cil_gen_typealias_incomplete_neg2(CuTest *);
 
 void test_cil_gen_role(CuTest *);
-//TODO: cil_gen_role negative test cases
+void test_cil_gen_role_dbnull_neg(CuTest *tc);
+void test_cil_gen_role_currnull_neg(CuTest *tc);
+void test_cil_gen_role_astnull_neg(CuTest *tc);
+void test_cil_gen_role_extrarole_neg(CuTest *tc);
+void test_cil_gen_role_noname_neg(CuTest *tc);
 
 void test_cil_gen_roletrans(CuTest *);
 void test_cil_gen_roletrans_currnull_neg(CuTest *);

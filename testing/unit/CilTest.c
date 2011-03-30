@@ -270,6 +270,11 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typealias_notype_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_role);
+	SUITE_ADD_TEST(suite, test_cil_gen_role_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_role_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_role_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_role_extrarole_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_role_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_role);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_role_neg);
 
