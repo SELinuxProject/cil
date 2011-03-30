@@ -4,8 +4,10 @@
 
 (common ipc (mem))
 (common file (read write execute))
-(class file inherits file (open))
-(class msg inherits ipc (send receive))
+(class file (open))
+(classcommon file file)
+(class msg (send receive))
+(classcommon msg ipc)
 (class dir (read))
 
 (user sysadm)
@@ -27,6 +29,7 @@
 (roletype sysadm_r global1)
 
 (allow global1 global2 file (execute))
+(allow kernel_t etc_t msg (mem))
 
 (userrole sysadm sysadm_r)
 (userrole sysadm audadm_r)

@@ -18,6 +18,8 @@ int cil_gen_class(struct cil_db *, struct cil_tree_node *, struct cil_tree_node 
 void cil_destroy_class(struct cil_class *);
 int cil_gen_common(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_common(struct cil_common *);
+int cil_gen_classcommon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_classcommon(struct cil_classcommon *);
 int cil_gen_sid(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_sid(struct cil_sid *);
 int cil_gen_avrule(struct cil_tree_node *, struct cil_tree_node *, uint32_t);

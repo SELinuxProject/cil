@@ -199,23 +199,32 @@ int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-int cil_resolve_class(struct cil_db *db, struct cil_tree_node *current)
+int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current)
 {
-	struct cil_class *cls = (struct cil_class*)current->data;
+	struct cil_classcommon *clscom = (struct cil_classcommon*)current->data;
+	struct cil_tree_node *class_node = NULL;
 	struct cil_tree_node *common_node = NULL;
-	if (cls->common_str == NULL)
-		return SEPOL_OK;
 
-	if (cls->common_str != NULL) {
-		int rc = cil_resolve_name(db, current, cls->common_str, CIL_SYM_COMMONS, &common_node);
-		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", cls->common_str);
-			return SEPOL_ERR;
-		}
-		cls->common = (struct cil_common*)(common_node->data);
-		free(cls->common_str);
-		cls->common_str = NULL;
+	int rc = cil_resolve_name(db, current, clscom->class_str, CIL_SYM_CLASSES, &class_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", clscom->class_str);
+		return SEPOL_ERR;
 	}
+	clscom->class = (struct cil_class*)(class_node->data);
+	free(clscom->class_str);
+	clscom->class_str = NULL;
+
+	rc = cil_resolve_name(db, current, clscom->common_str, CIL_SYM_COMMONS, &common_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", clscom->common_str);
+		return SEPOL_ERR;
+	}
+	clscom->common = (struct cil_common*)(common_node->data);
+	free(clscom->common_str);
+	clscom->common_str = NULL;
+
+	clscom->class->common = clscom->common;
+
 	return SEPOL_OK;
 }
 
@@ -1317,6 +1326,13 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 							return rc;
 						break;
 					}
+					case CIL_CLASSCOMMON : {
+						printf("case classcommon\n");
+						rc = cil_resolve_classcommon(db, node);
+						if (rc != SEPOL_OK)
+							return rc;
+						break;
+					}
 				}
 				break;
 			}
@@ -1447,13 +1463,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		switch (*pass) {
 			case 1 : {
 				switch (node->flavor) {
-					case CIL_CLASS : {
-						printf("case class\n");
-						rc = cil_resolve_class(db, node);
-						if (rc != SEPOL_OK)
-							return rc;
-						break;
-					}
 					default : 
 						break;
 				}
