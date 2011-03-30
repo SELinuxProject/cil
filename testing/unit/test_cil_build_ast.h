@@ -116,8 +116,16 @@ void test_cil_gen_roleallow_tgtnull_neg(CuTest *);
 void test_cil_gen_roleallow_extra_neg(CuTest *);
 
 void test_cil_gen_avrule(CuTest *);
+void test_cil_gen_avrule_currnull_neg(CuTest *tc);
+void test_cil_gen_avrule_astnull_neg(CuTest *tc);
+void test_cil_gen_avrule_sourcedomainnull_neg(CuTest *tc);
+void test_cil_gen_avrule_targetdomainnull_neg(CuTest *tc);
+void test_cil_gen_avrule_objectclassnull_neg(CuTest *tc);
+void test_cil_gen_avrule_permsnull_neg(CuTest *tc);
 void test_cil_gen_avrule_notlist_neg(CuTest *);
-//TODO: cil_gen_avrule should have more negative test cases
+void test_cil_gen_avrule_twolists_neg(CuTest *);
+//TODO: add cases to cover  parse_current->next->cl_head != NULL || parse_current->next->next->cl_head != NULL 
+// || parse_current->next->next->next->cl_head != NULL
 
 void test_cil_gen_type_rule_transition(CuTest *);
 void test_cil_gen_type_rule_transition_currnull_neg(CuTest *);
@@ -254,8 +262,17 @@ void test_cil_build_ast_node_helper_role_neg(CuTest *);
 void test_cil_build_ast_node_helper_roletrans(CuTest *);
 void test_cil_build_ast_node_helper_roletrans_neg(CuTest *);
 
-void test_cil_build_ast_node_helper_avrule(CuTest *);
-void test_cil_build_ast_node_helper_avrule_neg(CuTest *);
+void test_cil_build_ast_node_helper_avrule_allow(CuTest *);
+void test_cil_build_ast_node_helper_avrule_allow_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_avrule_auditallow(CuTest *);
+void test_cil_build_ast_node_helper_avrule_auditallow_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_avrule_dontaudit(CuTest *);
+void test_cil_build_ast_node_helper_avrule_dontaudit_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_avrule_neverallow(CuTest *);
+void test_cil_build_ast_node_helper_avrule_neverallow_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_type_rule_transition(CuTest *);
 void test_cil_build_ast_node_helper_type_rule_transition_neg(CuTest *);

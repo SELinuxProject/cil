@@ -296,9 +296,24 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_bool_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_sourcedomainnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_targetdomainnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_objectclassnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permsnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_twolists_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_allow);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_allow_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_auditallow);
+// TODO: uncomment
+//	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_auditallow_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_dontaudit);
+// TODO: uncomment
+//	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_dontaudit_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_neverallow);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_neverallow_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_transition);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_rule_transition_currnull_neg);
