@@ -47,7 +47,6 @@ void test_cil_gen_common_noname_neg(CuTest *tc);
 void test_cil_gen_common_twoperms_neg(CuTest *tc);
 void test_cil_gen_common_permsublist_neg(CuTest *tc);
 void test_cil_gen_common_noperms_neg(CuTest *tc);
-//TODO: cil_gen_common negative test cases
 
 void test_cil_gen_sid(CuTest *);
 void test_cil_gen_sid_namedcontext(CuTest *);
