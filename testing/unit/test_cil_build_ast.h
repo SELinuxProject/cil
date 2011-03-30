@@ -87,6 +87,11 @@ void test_cil_gen_typealias(CuTest *);
 void test_cil_gen_typealias(CuTest *);
 void test_cil_gen_typealias_incomplete_neg(CuTest *);
 void test_cil_gen_typealias_incomplete_neg2(CuTest *);
+void test_cil_gen_typealias_extratype_neg(CuTest *);
+void test_cil_gen_typealias_dbnull_neg(CuTest *tc);
+void test_cil_gen_typealias_currnull_neg(CuTest *tc);
+void test_cil_gen_typealias_astnull_neg(CuTest *tc);
+
 
 void test_cil_gen_role(CuTest *);
 void test_cil_gen_role_dbnull_neg(CuTest *tc);
