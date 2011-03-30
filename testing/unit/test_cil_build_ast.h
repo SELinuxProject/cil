@@ -65,11 +65,12 @@ void test_cil_gen_type_dbnull_neg(CuTest *tc);
 void test_cil_gen_type_currnull_neg(CuTest *tc);
 void test_cil_gen_type_astnull_neg(CuTest *tc);
 void test_cil_gen_type_extra_neg(CuTest *tc);
+void test_cil_gen_type_invalid_node_neg(CuTest *tc);
+
 void test_cil_gen_type_attribute(CuTest *);
 void test_cil_gen_type_attribute_dbnull_neg(CuTest *tc);
 void test_cil_gen_type_attribute_currnull_neg(CuTest *tc);
 void test_cil_gen_type_attribute_astnull_neg(CuTest *tc);
-void test_cil_gen_type_invalid_node_neg(CuTest *tc);
 void test_cil_gen_type_attribute_extra_neg(CuTest *tc);
 //TODO: cil_gen_type negative test case for when flavor isn't type or attribute
 
