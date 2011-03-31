@@ -515,6 +515,11 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context_wrongname_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context_invaliduser_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context_sidcontextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sid); 
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sid_neg); 
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_type_neg);

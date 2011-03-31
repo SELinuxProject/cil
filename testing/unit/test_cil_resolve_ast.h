@@ -62,7 +62,11 @@ void test_cil_resolve_type_rule_member_resultdecl_neg(CuTest *);
 void test_cil_resolve_sid(CuTest *);
 void test_cil_resolve_sid_named_levels(CuTest *);
 void test_cil_resolve_sid_named_context(CuTest *);
-//TODO: cil_resolve_sid negative test cases
+void test_cil_resolve_sid_named_context_wrongname_neg(CuTest *tc);
+void test_cil_resolve_sid_named_context_invaliduser_neg(CuTest *tc);
+void test_cil_resolve_sid_named_context_sidcontextnull_neg(CuTest *tc);
+void test_cil_resolve_ast_node_helper_sid(CuTest *tc);
+void test_cil_resolve_ast_node_helper_sid_neg(CuTest *tc);
 
 void test_cil_resolve_roletype(CuTest *tc);
 void test_cil_resolve_roletype_type_neg(CuTest *tc);

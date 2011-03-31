@@ -718,6 +718,81 @@ void test_cil_resolve_sid_named_context(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_sid_named_context_wrongname_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "categoryorder", "(", "c0", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "context", "con", "(", "blah_u", "blah_r", "blah_t", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
+			"(", "sid", "test", "foo", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next);
+	struct cil_tree_node *context = test_db->ast->root->cl_head->next->next->next->next->next->next->next;
+	cil_resolve_context(test_db, context, (struct cil_context*)context->data);
+
+	int rc = cil_resolve_sid(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_sid_named_context_invaliduser_neg(CuTest *tc) {
+           char *line[] = {"(", "category", "c0", ")",
+                        "(", "categoryorder", "(", "c0", ")", ")",
+                        "(", "sensitivity", "s0", ")",
+                        "(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+                        "(", "type", "blah_t", ")",
+                        "(", "role", "blah_r", ")",
+                        "(", "user", "blah_u", ")",
+                        "(", "sid", "test", "(", "", "blah_r", "blah_t", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next);
+
+        int rc = cil_resolve_sid(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_sid_named_context_sidcontextnull_neg(CuTest *tc) {
+           char *line[] = {"(", "category", "c0", ")",
+                        "(", "categoryorder", "(", "c0", ")", ")",
+                        "(", "sensitivity", "s0", ")",
+                        "(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+                        "(", "type", "blah_t", ")",
+                        "(", "role", "blah_r", ")",
+                        "(", "user", "blah_u", ")",
+                        "(", "sid", "test", "(", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next);
+
+        int rc = cil_resolve_sid(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_roletype(CuTest *tc) {
 	char *line[] = {"(", "role",  "admin_r", ")",
 			"(", "type", "admin_t", ")",
@@ -1830,3 +1905,76 @@ void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc) {
 	CuAssertPtrEquals(tc, NULL, finished);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
+
+void test_cil_resolve_ast_node_helper_sid(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "categoryorder", "(", "c0", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "level", "low", "s0", "(", "c0", ")", ")",
+			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", NULL};
+        
+	struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        struct cil_list *other;
+        cil_list_init(&other);
+        cil_list_item_init(&other->head);
+        other->head->data = test_db;
+        other->head->flavor = CIL_DB;
+        cil_list_item_init(&other->head->next);
+        other->head->next->flavor = CIL_INT;
+        int pass = 3;
+        other->head->next->data = &pass;
+
+        uint32_t finished = 0;
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, &finished, other);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+        CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_resolve_ast_node_helper_sid_neg(CuTest *tc) {
+       	char *line[] = {"(", "category", "c0", ")",
+                        "(", "categoryorder", "(", "c0", ")", ")",
+                        "(", "sensitivity", "s0", ")",
+                        "(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+                        "(", "type", "blah_t", ")",
+                        "(", "role", "blah_r", ")",
+                        "(", "user", "blah_u", ")",
+                        "(", "sid", "test", "(", "", "blah_r", "blah_t", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+ 
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        struct cil_list *other;
+        cil_list_init(&other);
+        cil_list_item_init(&other->head);
+        other->head->data = test_db;
+        other->head->flavor = CIL_DB;
+        cil_list_item_init(&other->head->next);
+        other->head->next->flavor = CIL_INT;
+        int pass = 3;
+        other->head->next->data = &pass;
+
+        uint32_t finished = 0;
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next, &finished, other);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+        CuAssertIntEquals(tc, 0, finished);
+}
+
