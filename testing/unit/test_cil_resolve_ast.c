@@ -348,6 +348,22 @@ void test_cil_resolve_typealias(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_typealias_neg(CuTest *tc) {
+	char *line[] = {"(", "block", "foo", 
+				"(", "type", "test", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_typealias(test_db, test_db->ast->root->cl_head->cl_head);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_avrule(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 

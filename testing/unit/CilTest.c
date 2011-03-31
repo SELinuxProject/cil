@@ -442,6 +442,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typealias_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typealias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typealias_notype_neg);
 
