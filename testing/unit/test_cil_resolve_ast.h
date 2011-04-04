@@ -38,6 +38,11 @@ void test_cil_resolve_typeattr_attrdecl_neg(CuTest *);
 void test_cil_resolve_typealias(CuTest *);
 void test_cil_resolve_typealias_neg(CuTest *);
 
+void test_cil_resolve_classcommon(CuTest *);
+void test_cil_resolve_classcommon_no_class_neg(CuTest *);
+void test_cil_resolve_classcommon_neg(CuTest *);
+void test_cil_resolve_classcommon_no_common_neg(CuTest *);
+
 void test_cil_resolve_avrule(CuTest *);
 //TODO: cil_resolve_avrule negative test cases
 
@@ -126,4 +131,7 @@ void test_cil_resolve_ast_node_helper_roletype_type_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_userrole(CuTest *tc);
 void test_cil_resolve_ast_node_helper_userrole_user_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc);
+
+void test_cil_resolve_ast_node_helper_classcommon(CuTest *tc);
+void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc);
 #endif

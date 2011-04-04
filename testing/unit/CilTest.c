@@ -433,7 +433,16 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_userrole_rolelist_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_userrole);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_userrole_neg);
-	
+
+	SUITE_ADD_TEST(suite, test_cil_gen_classcommon);
+	SUITE_ADD_TEST(suite, test_cil_gen_classcommon_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classcommon_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classcommon_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classcommon_missingclassname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classcommon_noperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classcommon_extraperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_classcommon);	
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_classcommon_neg);	
 	/* test_cil_resolve_ast.c */
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_inval_perm_neg);
@@ -445,6 +454,12 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typealias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typealias_notype_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon_no_class_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon_no_common_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_classcommon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_classcommon_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr_typedecl_neg);

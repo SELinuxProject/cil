@@ -228,6 +228,13 @@ void test_cil_gen_userrole_userlist_neg(CuTest *tc);
 void test_cil_gen_userrole_userrole_sublist_neg(CuTest *tc);
 void test_cil_gen_userrole_rolelist_neg(CuTest *tc);
 
+void test_cil_gen_classcommon(CuTest *tc);
+void test_cil_gen_classcommon_dbnull_neg(CuTest *tc);
+void test_cil_gen_classcommon_currnull_neg(CuTest *tc);
+void test_cil_gen_classcommon_astnull_neg(CuTest *tc);
+void test_cil_gen_classcommon_missingclassname_neg(CuTest *tc);
+void test_cil_gen_classcommon_noperms_neg(CuTest *tc);
+void test_cil_gen_classcommon_extraperms_neg(CuTest *tc);
 
 /*
 cil_build_ast test cases
@@ -309,5 +316,8 @@ void test_cil_build_ast_node_helper_roletype_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_userrole(CuTest *tc);
 void test_cil_build_ast_node_helper_userrole_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_classcommon(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_classcommon_neg(CuTest *tc);
 
 #endif
