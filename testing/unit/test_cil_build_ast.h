@@ -37,6 +37,12 @@ void test_cil_gen_class_nodenull_neg(CuTest *);
 void test_cil_gen_class_dbnull_neg(CuTest *);
 void test_cil_gen_class_currnull_neg(CuTest *);
 void test_cil_gen_class_noclass_neg(CuTest *);
+void test_cil_gen_class_noclassname_neg(CuTest *);
+void test_cil_gen_class_namesublist_neg(CuTest *);
+void test_cil_gen_class_noperms_neg(CuTest *);
+void test_cil_gen_class_permsnotinlist_neg(CuTest *);
+void test_cil_gen_class_extrapermlist_neg(CuTest *);
+void test_cil_gen_class_listinlist_neg(CuTest *);
 void test_cil_gen_class_failgen_neg(CuTest *);
 
 void test_cil_gen_common(CuTest *);

@@ -206,7 +206,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_class_nodenull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_class_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_noclassname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_namesublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_noperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_permsnotinlist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_extrapermlist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_listinlist_neg);
+	//test_cil_gen_class_failgen_neg
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class_neg);
 
