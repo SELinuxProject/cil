@@ -4680,6 +4680,56 @@ void test_cil_build_ast_node_helper_roletrans_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
+void test_cil_build_ast_node_helper_roleallow(CuTest *tc) {
+        char *line[] = {"(", "roleallow", "staff_r", "sysadm_r", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	cil_list_item_init(&other->head->next);
+	other->head->next->data = test_db;
+	other->head->next->flavor = CIL_DB; 
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, other);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_roleallow_neg(CuTest *tc) {
+        char *line[] = {"(", "roleallow", "staff_r", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	cil_list_item_init(&other->head->next);
+	other->head->next->data = test_db;
+	other->head->next->flavor = CIL_DB; 
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, other);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
 void test_cil_build_ast_node_helper_avrule_allow(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 

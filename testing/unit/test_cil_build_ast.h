@@ -295,6 +295,9 @@ void test_cil_build_ast_node_helper_role_neg(CuTest *);
 void test_cil_build_ast_node_helper_roletrans(CuTest *);
 void test_cil_build_ast_node_helper_roletrans_neg(CuTest *);
 
+void test_cil_build_ast_node_helper_roleallow(CuTest *);
+void test_cil_build_ast_node_helper_roleallow_neg(CuTest *);
+
 void test_cil_build_ast_node_helper_avrule_allow(CuTest *);
 void test_cil_build_ast_node_helper_avrule_allow_neg(CuTest *);
 
