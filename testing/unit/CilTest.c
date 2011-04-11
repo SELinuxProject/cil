@@ -519,6 +519,10 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roleallow_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule);
+	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_firsttype_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_secondtype_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_class_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_perm_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_avrule);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_avrule_src_nores_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_avrule_tgt_nores_neg);

@@ -47,7 +47,10 @@ void test_cil_resolve_classcommon_neg(CuTest *);
 void test_cil_resolve_classcommon_no_common_neg(CuTest *);
 
 void test_cil_resolve_avrule(CuTest *);
-//TODO: cil_resolve_avrule negative test cases
+void test_cil_resolve_avrule_firsttype_neg(CuTest *);
+void test_cil_resolve_avrule_secondtype_neg(CuTest *);
+void test_cil_resolve_avrule_class_neg(CuTest *);
+void test_cil_resolve_avrule_perm_neg(CuTest *);
 
 void test_cil_resolve_type_rule_transition(CuTest *);
 void test_cil_resolve_type_rule_transition_srcdecl_neg(CuTest *);

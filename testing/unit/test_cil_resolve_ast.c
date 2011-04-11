@@ -469,6 +469,78 @@ void test_cil_resolve_avrule(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_avrule_firsttype_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
+	                "(", "type", "test", ")", 
+			"(", "type", "foo", ")", 
+	                "(", "allow", "fail1", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_avrule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_avrule_secondtype_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
+	                "(", "type", "test", ")", 
+			"(", "type", "foo", ")", 
+	                "(", "allow", "test", "fail2", "bar", "(", "read", "write", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_avrule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_avrule_class_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
+	                "(", "type", "test", ")", 
+			"(", "type", "foo", ")", 
+	                "(", "allow", "test", "foo", "fail3", "(", "read", "write", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_avrule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_avrule_perm_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
+	                "(", "type", "test", ")", 
+			"(", "type", "foo", ")", 
+	                "(", "allow", "test", "foo", "bar", "(", "execute", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_avrule(test_db, test_db->ast->root->cl_head->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_type_rule_transition(CuTest *tc) {
 	char *line[] = {"(", "type", "foo", ")",
 			"(", "type", "bar", ")",
