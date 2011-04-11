@@ -98,7 +98,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	int rc = SEPOL_ERR;
 	char *name;
 	struct cil_block *block = cil_malloc(sizeof(struct cil_block));
-	cil_symtab_datum_init(block->datum);
+	cil_symtab_datum_init(&block->datum);
 
 	rc = cil_symtab_array_init(block->symtab, CIL_SYM_NUM);
 	if (rc != SEPOL_OK) {
@@ -144,7 +144,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	int rc = SEPOL_ERR;
 	char *key = parse_current->next->data;
 	struct cil_class *cls = cil_malloc(sizeof(struct cil_class));
-	cil_symtab_datum_init(cls->datum);
+	cil_symtab_datum_init(&cls->datum);
 	struct cil_tree_node *perms;
 
 	rc = symtab_init(&cls->perms, CIL_SYM_SIZE);
@@ -192,7 +192,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	int rc = SEPOL_ERR;
 	struct cil_perm *perm = cil_malloc(sizeof(struct cil_perm));
-	cil_symtab_datum_init(perm->datum);
+	cil_symtab_datum_init(&perm->datum);
 	char *key = (char*)parse_current->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)perm, (hashtab_key_t)key, CIL_SYM_UNKNOWN, CIL_PERM);
@@ -231,7 +231,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	int rc = SEPOL_ERR;
 	char *key = parse_current->next->data;
 	struct cil_common *common = cil_malloc(sizeof(struct cil_common));
-	cil_symtab_datum_init(common->datum);
+	cil_symtab_datum_init(&common->datum);
 
 	rc = symtab_init(&common->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
@@ -309,7 +309,7 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 
 	int rc = SEPOL_ERR;
 	struct cil_sid *sid = cil_malloc(sizeof(struct cil_sid));	
-	cil_symtab_datum_init(sid->datum);
+	cil_symtab_datum_init(&sid->datum);
 	char *key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)sid, (hashtab_key_t)key, CIL_SYM_SIDS, CIL_SID);
@@ -356,7 +356,7 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	int rc = SEPOL_ERR;
 	struct cil_user *user = cil_malloc(sizeof(struct cil_user));
-	cil_symtab_datum_init(user->datum);
+	cil_symtab_datum_init(&user->datum);
 	char *key = parse_current->next->data;
 	
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)user, (hashtab_key_t)key, CIL_SYM_USERS, CIL_USER);
@@ -388,7 +388,7 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	int rc = SEPOL_ERR;
 	struct cil_role *role = cil_malloc(sizeof(struct cil_role));
-	cil_symtab_datum_init(role->datum);
+	cil_symtab_datum_init(&role->datum);
 	char *key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)role, (hashtab_key_t)key, CIL_SYM_ROLES, CIL_ROLE);
@@ -639,7 +639,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	int rc = SEPOL_ERR;
 	char *key = (char*)parse_current->next->data; 
 	struct cil_type *type = cil_malloc(sizeof(struct cil_type));
-	cil_symtab_datum_init(type->datum);
+	cil_symtab_datum_init(&type->datum);
 	symtab_t *symtab = NULL;
 
 	if (flavor == CIL_TYPE || flavor == CIL_ATTR) {
@@ -684,7 +684,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	int rc = SEPOL_ERR;
 	struct cil_bool *boolean = cil_malloc(sizeof(struct cil_bool));
-	cil_symtab_datum_init(boolean->datum);
+	cil_symtab_datum_init(&boolean->datum);
 	char *key = parse_current->next->data;
 
 	if (!strcmp(parse_current->next->next->data, "true"))
@@ -725,7 +725,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	int rc = SEPOL_ERR;
 	struct cil_typealias *alias = cil_malloc(sizeof(struct cil_typealias));
-	cil_symtab_datum_init(alias->datum);
+	cil_symtab_datum_init(&alias->datum);
 	char *key = parse_current->next->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPEALIAS);
@@ -787,7 +787,7 @@ int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, 
 
 	int rc = SEPOL_ERR;
 	struct cil_sens *sens = cil_malloc(sizeof(struct cil_sens));
-	cil_symtab_datum_init(sens->datum);
+	cil_symtab_datum_init(&sens->datum);
 	char *key = parse_current->next->data;
 	
 	rc = symtab_init(&sens->cats, CIL_SYM_SIZE);
@@ -826,7 +826,7 @@ int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	int rc = SEPOL_ERR;
 	struct cil_sensalias *alias = cil_malloc(sizeof(struct cil_sensalias));
-	cil_symtab_datum_init(alias->datum);
+	cil_symtab_datum_init(&alias->datum);
 	char *key = parse_current->next->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_SENS, CIL_SENSALIAS);
@@ -862,7 +862,7 @@ int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	int rc = SEPOL_ERR;
 	struct cil_cat *cat = cil_malloc(sizeof(struct cil_cat));
-	cil_symtab_datum_init(cat->datum);
+	cil_symtab_datum_init(&cat->datum);
 	char *key = parse_current->next->data;
 	
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cat, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CAT);
@@ -895,7 +895,7 @@ int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, str
 	int rc = SEPOL_ERR;
 	
 	struct cil_catalias *alias = cil_malloc(sizeof(struct cil_catalias));
-	cil_symtab_datum_init(alias->datum);
+	cil_symtab_datum_init(&alias->datum);
 	char *key = parse_current->next->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CATALIAS);
@@ -973,7 +973,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	int rc = SEPOL_ERR;
 	char *key = parse_current->next->data;
 	struct cil_catset *catset = cil_malloc(sizeof(struct cil_catset));
-	cil_symtab_datum_init(catset->datum);
+	cil_symtab_datum_init(&catset->datum);
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)catset, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CATSET);
 	if (rc != SEPOL_OK) 
@@ -1165,7 +1165,7 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	int rc = SEPOL_ERR;
 	char *key = parse_current->next->data;
 	struct cil_level *level = cil_malloc(sizeof(struct cil_level));
-	cil_symtab_datum_init(level->datum);
+	cil_symtab_datum_init(&level->datum);
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)level, (hashtab_key_t)key, CIL_SYM_LEVELS, CIL_LEVEL);
 	if (rc != SEPOL_OK) 
@@ -1381,7 +1381,7 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	struct cil_context *context = cil_malloc(sizeof(struct cil_context));
-	cil_symtab_datum_init(context->datum);
+	cil_symtab_datum_init(&context->datum);
 	// Syntax for 'context' statements (named)
 	if (parse_current->next->next->cl_head != NULL) {
 		if (parse_current->next->next->next != NULL
@@ -1459,7 +1459,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	}
 	
 	struct cil_netifcon *netifcon = cil_malloc(sizeof(struct cil_netifcon));
-	cil_symtab_datum_init(netifcon->datum);
+	cil_symtab_datum_init(&netifcon->datum);
 	char *netif = (char*)parse_current->next->data;
 	
 	rc = cil_symtab_insert(&db->netif, (hashtab_key_t)netif, (struct cil_symtab_datum*)netifcon, ast_node);

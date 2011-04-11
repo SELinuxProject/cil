@@ -6,10 +6,10 @@
 #include "cil_symtab.h"
 #include "cil_mem.h"
 
-void cil_symtab_datum_init(struct cil_symtab_datum datum)
+void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 {
-	datum.name = NULL;
-	datum.node = NULL;
+	datum->name = NULL;
+	datum->node = NULL;
 }
 
 void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
