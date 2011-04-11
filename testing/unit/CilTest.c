@@ -181,6 +181,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_set_to_list_cl_head_null_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_block);
+	SUITE_ADD_TEST(suite, test_cil_gen_block_justblock_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_block_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_block_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_block_treenull_neg);

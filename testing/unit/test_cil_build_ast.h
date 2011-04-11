@@ -13,6 +13,7 @@ void test_cil_set_to_list_cl_head_null_neg(CuTest *);
 void test_cil_set_to_list_listnull_neg(CuTest *);
 
 void test_cil_gen_block(CuTest *);
+void test_cil_gen_block_justblock_neg(CuTest *);
 void test_cil_gen_block_noname_neg(CuTest *);
 void test_cil_gen_block_dbnull_neg(CuTest *);
 void test_cil_gen_block_treenull_neg(CuTest *);

@@ -164,6 +164,25 @@ void test_cil_gen_block(CuTest *tc) {
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BLOCK);
 }
 
+void test_cil_gen_block_justblock_neg(CuTest *tc) {
+	char *line[] = {"(", "block", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, 0, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_block_noname_neg(CuTest *tc) {
 	char *line[] = {"(", "block", "(", "type", "log", ")", ")", NULL};
 
