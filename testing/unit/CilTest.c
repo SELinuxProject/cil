@@ -449,6 +449,15 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_classcommon_extraperms_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_classcommon);	
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_classcommon_neg);	
+
+	SUITE_ADD_TEST(suite, test_cil_gen_dominance);
+	SUITE_ADD_TEST(suite, test_cil_gen_dominance_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_dominance_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_dominance_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_dominance_nosensitivities_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_dominance_nosublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_dominance);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_dominance_neg);
 	/* test_cil_resolve_ast.c */
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_inval_perm_neg);
@@ -482,6 +491,12 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_catalias_catdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catalias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catalias_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_resolve_dominance);
+	SUITE_ADD_TEST(suite, test_cil_resolve_dominance_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dominance);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dominance_neg);
+	//TODO: test for __cil_set_order
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_catset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_catset_catlist_neg);
