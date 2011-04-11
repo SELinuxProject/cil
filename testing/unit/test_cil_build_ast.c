@@ -1275,6 +1275,25 @@ void test_cil_gen_type_invalid_node_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_type_extratype_nottypeorattr_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "fail", "fail2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_type(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_BOOL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_type_attribute(CuTest *tc) {
 	char *line[] = {"(", "attribute", "test", NULL};
 

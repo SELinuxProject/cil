@@ -73,6 +73,7 @@ void test_cil_gen_type_currnull_neg(CuTest *tc);
 void test_cil_gen_type_astnull_neg(CuTest *tc);
 void test_cil_gen_type_extra_neg(CuTest *tc);
 void test_cil_gen_type_invalid_node_neg(CuTest *tc);
+void test_cil_gen_type_extratype_nottypeorattr_neg(CuTest *tc);
 
 void test_cil_gen_type_attribute(CuTest *);
 void test_cil_gen_type_attribute_dbnull_neg(CuTest *tc);
