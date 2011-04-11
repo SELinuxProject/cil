@@ -168,6 +168,9 @@ void test_cil_gen_type_rule_member_resultnull_neg(CuTest *);
 void test_cil_gen_type_rule_member_extra_neg(CuTest *);
 
 void test_cil_gen_user(CuTest *);
+void test_cil_gen_user_dbnull_neg(CuTest *);
+void test_cil_gen_user_currnull_neg(CuTest *);
+void test_cil_gen_user_astnull_neg(CuTest *);
 void test_cil_gen_user_nouser_neg(CuTest *);
 void test_cil_gen_user_xsinfo_neg(CuTest *);
 
@@ -270,6 +273,9 @@ void test_cil_build_ast_node_helper_common_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_sid(CuTest *);
 void test_cil_build_ast_node_helper_sid_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_user(CuTest *);
+void test_cil_build_ast_node_helper_user_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_type(CuTest *);
 void test_cil_build_ast_node_helper_type_neg(CuTest *);

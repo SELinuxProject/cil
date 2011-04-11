@@ -362,8 +362,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type_rule_member_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_user);
+	SUITE_ADD_TEST(suite, test_cil_gen_user_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_user_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_user_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_user_nouser_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_user_xsinfo_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_user);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_user_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_dbnull_neg);
