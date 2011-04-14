@@ -4054,11 +4054,129 @@ void test_cil_gen_classcommon_extraperms_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_catorder(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c255", ")",
+			"(", "categoryorder", "(", "c0", "c255", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_catorder(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_catorder_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c255", ")",
+			"(", "categoryorder", "(", "c0", "c255", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_catorder(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catorder_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c255", ")",
+			"(", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_catorder(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catorder_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c255", ")",
+			"(", "categoryorder", "(", "c0", "c255", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	int rc = cil_gen_catorder(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catorder_missingcats_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c255", ")",
+			"(", "categoryorder", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_catorder(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catorder_nosublist_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c255", ")",
+			"(", "categoryorder", "c0", "c255", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_catorder(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_dominance(CuTest *tc) {
-	char *line[] = {"(", "sensitivity", "s0", ")",
-			"(", "sensitivity", "s1", ")",
-			"(", "sensitivity", "s2", ")",
-			"(", "dominance", "(", "s0", "s1", ")", ")", NULL};
+        char *line[] = {"(", "sensitivity", "s0", ")",
+                        "(", "sensitivity", "s1", ")",
+                        "(", "sensitivity", "s2", ")",
+                        "(", "dominance", "(", "s0", "s1", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -5382,6 +5500,56 @@ void test_cil_build_ast_node_helper_catset(CuTest *tc) {
 
 void test_cil_build_ast_node_helper_catset_neg(CuTest *tc) {
 	char *line[] = {"(", "categoryset", "somecats", "(", "c0", "c1", "c2", ")", "extra", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	cil_list_item_init(&other->head->next);
+	other->head->next->data = test_db;
+	other->head->next->flavor = CIL_DB;
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, other);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished); 
+}
+
+void test_cil_build_ast_node_helper_catorder(CuTest *tc) {
+	char *line[] = {"(", "categoryorder", "(", "c0", "c1", "c2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	cil_list_item_init(&other->head->next);
+	other->head->next->data = test_db;
+	other->head->next->flavor = CIL_DB;
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, other);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 1, finished); 
+}
+
+void test_cil_build_ast_node_helper_catorder_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryorder", "c0", "c1", "c2", "extra", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

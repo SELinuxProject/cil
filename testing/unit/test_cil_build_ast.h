@@ -253,6 +253,13 @@ void test_cil_gen_classcommon_missingclassname_neg(CuTest *tc);
 void test_cil_gen_classcommon_noperms_neg(CuTest *tc);
 void test_cil_gen_classcommon_extraperms_neg(CuTest *tc);
 
+void test_cil_gen_catorder(CuTest *tc);
+void test_cil_gen_catorder_dbnull_neg(CuTest *tc);
+void test_cil_gen_catorder_currnull_neg(CuTest *tc);
+void test_cil_gen_catorder_astnull_neg(CuTest *tc);
+void test_cil_gen_catorder_missingcats_neg(CuTest *tc);
+void test_cil_gen_catorder_nosublist_neg(CuTest *tc);
+
 void test_cil_gen_dominance(CuTest *tc);
 void test_cil_gen_dominance_dbnull_neg(CuTest *tc);
 void test_cil_gen_dominance_currnull_neg(CuTest *tc);
@@ -337,6 +344,9 @@ void test_cil_build_ast_node_helper_sensalias_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_catset(CuTest *tc);
 void test_cil_build_ast_node_helper_catset_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_catorder(CuTest *tc);
+void test_cil_build_ast_node_helper_catorder_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_catalias(CuTest *tc);
 void test_cil_build_ast_node_helper_catalias_neg(CuTest *tc);
