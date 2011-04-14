@@ -119,7 +119,13 @@ void test_cil_gen_roletrans_extra_neg(CuTest *);
 void test_cil_gen_bool_true(CuTest *);
 void test_cil_gen_bool_false(CuTest *);
 void test_cil_gen_bool_none_neg(CuTest *);
+void test_cil_gen_bool_dbnull_neg(CuTest *);
+void test_cil_gen_bool_currnull_neg(CuTest *);
+void test_cil_gen_bool_astnull_neg(CuTest *);
 void test_cil_gen_bool_notbool_neg(CuTest *);
+void test_cil_gen_bool_boolname_neg(CuTest *);
+void test_cil_gen_bool_extraname_false_neg(CuTest *);
+void test_cil_gen_bool_extraname_true_neg(CuTest *);
 
 void test_cil_gen_roleallow(CuTest *);
 void test_cil_gen_roleallow_dbnull_neg(CuTest *);
