@@ -267,6 +267,13 @@ void test_cil_gen_dominance_astnull_neg(CuTest *tc);
 void test_cil_gen_dominance_nosensitivities_neg(CuTest *tc);
 void test_cil_gen_dominance_nosublist_neg(CuTest *tc);
 
+void test_cil_gen_senscat(CuTest *tc);
+void test_cil_gen_senscat_dbnull_neg(CuTest *tc);
+void test_cil_gen_senscat_currnull_neg(CuTest *tc);
+void test_cil_gen_senscat_astnull_neg(CuTest *tc);
+void test_cil_gen_senscat_nosensitivities_neg(CuTest *tc);
+void test_cil_gen_senscat_nosublist_neg(CuTest *tc);
+
 /*
 cil_build_ast test cases
 */
@@ -362,4 +369,7 @@ void test_cil_build_ast_node_helper_gen_classcommon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_dominance(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_dominance_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_senscat(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc);
 #endif
