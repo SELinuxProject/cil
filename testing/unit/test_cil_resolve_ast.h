@@ -23,6 +23,9 @@ void test_cil_resolve_sensalias_sensdecl_neg(CuTest *);
 void test_cil_resolve_catalias(CuTest *);
 void test_cil_resolve_catalias_catdecl_neg(CuTest *);
 
+void test_cil_resolve_catorder(CuTest *);
+void test_cil_resolve_catorder_neg(CuTest *);
+
 void test_cil_resolve_dominance(CuTest *);
 void test_cil_resolve_dominance_neg(CuTest *);
 
@@ -91,6 +94,9 @@ void test_cil_resolve_userrole_role_neg(CuTest *tc);
 /*
 	__cil_resolve_ast_node_helper test cases
 */
+
+void test_cil_resolve_ast_node_helper_catorder(CuTest *);
+void test_cil_resolve_ast_node_helper_catorder_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_dominance(CuTest *);
 void test_cil_resolve_ast_node_helper_dominance_neg(CuTest *);

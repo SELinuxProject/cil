@@ -524,6 +524,11 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catalias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catalias_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_catorder);
+	SUITE_ADD_TEST(suite, test_cil_resolve_catorder_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catorder);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catorder_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_dominance);
 	SUITE_ADD_TEST(suite, test_cil_resolve_dominance_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dominance);
