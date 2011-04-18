@@ -13,6 +13,8 @@
 #include "../src/cil_fqn.h"
 #include "../src/cil_policy.h"
 
+#include "../src/cil_copy_ast.h"
+
 #include <sepol/policydb/hashtab.h>
 
 int main(int argc, char *argv[])
@@ -24,6 +26,12 @@ int main(int argc, char *argv[])
 	
 	struct cil_tree *parse_tree;
 	cil_tree_init(&parse_tree);
+
+	struct cil_tree *copy_ast;
+	cil_tree_init(&copy_ast);
+
+	struct cil_db *copy_db;
+	cil_db_init(&copy_db);
 
 	struct cil_db *db;
 	cil_db_init(&db);
@@ -65,6 +73,16 @@ int main(int argc, char *argv[])
 		printf("Destroying parse tree\n");
 		cil_tree_destroy(&parse_tree);
 		printf("Parse tree destroyed\n\n");
+
+
+		printf("----------------------------------------------\n\n");
+		printf("Copying AST \n");
+		if (cil_copy_ast(copy_db, db->ast->root, copy_ast->root)) {
+			printf("Failed to copy ast, exiting\n");
+			return SEPOL_ERR;
+		}
+		printf("copy complete\n");
+		cil_tree_print(copy_ast->root, 0);
 
 /*		printf("----------------------------------------------\n\n");
 		printf("Resolving ast ... 1\n\n");

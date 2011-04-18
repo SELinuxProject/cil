@@ -69,5 +69,5 @@
 (context if_default (system_u object_r etc_t low (s1 ((c0 c255)))))
 (context packet_default (system_u object_r etc_t low high))
 
-(netifcon eth0 if_default, packet_default)
+(netifcon eth0 if_default packet_default)
 (netifcon eth1 (system_u object_r netif_t low high) (system_u object_r netif_t low high))

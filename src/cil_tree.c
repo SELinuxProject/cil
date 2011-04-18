@@ -88,7 +88,10 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 	if (start_node == NULL)
 		return SEPOL_ERR;
 
-	struct cil_tree_node *node = start_node;
+	if (start_node->cl_head == NULL)
+		return SEPOL_OK;
+
+	struct cil_tree_node *node = start_node->cl_head;
 	uint32_t reverse = 0;
 	uint32_t finished = 0;
 
@@ -239,7 +242,7 @@ void cil_print_expr_tree(struct cil_tree_node *expr_root)
 	struct cil_tree_node *curr = expr_root;
 
 	while (curr != NULL) {
-		if (curr->flavor == CIL_AST_STR)
+		if (curr->flavor == CIL_MLSCONSTRAIN_NODE)
 			printf("%s ", (char*)curr->data);
 		else if (curr->flavor != CIL_ROOT)
 			printf("%s ", ((struct cil_type*)curr->data)->datum.name);
@@ -254,414 +257,460 @@ void cil_print_expr_tree(struct cil_tree_node *expr_root)
 
 void cil_tree_print_node(struct cil_tree_node *node)
 {
-	switch( node->flavor ) {
-		case CIL_BLOCK	: {
-			struct cil_block *block = node->data;
-			printf("BLOCK: %s\n", block->datum.name);
-			return;
-		}
-		case CIL_USER: {
-			struct cil_user *user = node->data;
-			printf("USER: %s\n", user->datum.name);
-			return;
-		}
-		case CIL_TYPE : {
-			struct cil_type *type = node->data;
-			printf("TYPE: %s\n", type->datum.name);
-			return;
-		}
-		case CIL_ATTR : {
-			struct cil_type *attr = node->data;
-			printf("ATTRIBUTE: %s\n", attr->datum.name);
-			return;
-		}
-		case CIL_ROLE : {
-			struct cil_role *role = node->data;
-			printf("ROLE: %s\n", role->datum.name);
-			return;
-		}
-		case CIL_USERROLE : {
-			struct cil_userrole *userrole = node->data;
-			printf("USERROLE:");
-			if (userrole->user_str != NULL)
-				printf(" %s", userrole->user_str);
-			else if (userrole->user != NULL)
-				printf(" %s", userrole->user->datum.name);
-			if (userrole->role_str != NULL)
-				printf(" %s", userrole->role_str);
-			else if (userrole->role != NULL)
-				printf(" %s", userrole->role->datum.name);
-			printf("\n");
-			return;
-		}
-		case CIL_ROLETYPE : {
-			struct cil_roletype *roletype = node->data;
-			printf("ROLETYPE:");
-			if (roletype->role_str != NULL)
-				printf(" %s", roletype->role_str);
-			else if (roletype->role != NULL)
-				printf(" %s", roletype->role->datum.name);
-			if (roletype->type_str != NULL)
-				printf(" %s", roletype->type_str);
-			else if (roletype->type != NULL)
-				printf(" %s", roletype->type->datum.name);
-			printf("\n");
-			return;
-		}
-		case CIL_ROLETRANS : {
-			struct cil_role_trans *roletrans = node->data;
-			printf("ROLETRANSITION:");
-			if (roletrans->src_str != NULL)
-				printf(" %s", roletrans->src_str);
-			else
-				printf(" %s", roletrans->src->datum.name);
-			if (roletrans->tgt_str != NULL)
-				printf(" %s", roletrans->tgt_str);
-			else
-				printf(" %s", roletrans->tgt->datum.name);
-			if (roletrans->result_str != NULL)
-				printf(" %s\n", roletrans->result_str);
-			else
-				printf(" %s\n", roletrans->result->datum.name);
-			return;
-		}
-		case CIL_ROLEALLOW : {
-			struct cil_role_allow *roleallow = node->data;
-			printf("ROLEALLOW:");
-			if (roleallow->src_str != NULL)
-				printf(" %s", roleallow->src_str);
-			else
-				printf(" %s", roleallow->src->datum.name);
-			if (roleallow->tgt_str != NULL)
-				printf(" %s", roleallow->tgt_str);
-			else
-				printf(" %s", roleallow->tgt->datum.name);
-			printf("\n");
-			return;
-		}
-		case CIL_CLASS : {
-			struct cil_class *cls = node->data;
-			printf("CLASS: %s ", cls->datum.name);
-			
-			if (cls->common != NULL)
-				printf("inherits: %s ", cls->common->datum.name);
-			printf("(");
-
-			cil_tree_print_perms_list(node->cl_head);
-
-			printf(" )");
-			return;
-		}
-		case CIL_COMMON : {
-			struct cil_common *common = node->data;
-			printf("COMMON: %s (", common->datum.name);
-		
-			cil_tree_print_perms_list(node->cl_head);
-	
-			printf(" )");
-			return;
-		}
-		case CIL_CLASSCOMMON : {
-			struct cil_classcommon *clscom = node->data;
-			if (clscom->class_str != NULL && clscom->common_str != NULL)
-				printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
-			else
-				printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class->datum.name, clscom->common->datum.name);
-			return;
-		}
-		case CIL_BOOL : {
-			struct cil_bool *boolean = node->data;
-			printf("BOOL: %s, value: %d\n", boolean->datum.name, boolean->value);
-			return;
-		}
-		case CIL_TYPE_ATTR : {
-			struct cil_typeattribute *typeattr = node->data;
-			if (typeattr->type_str != NULL && typeattr->attr_str != NULL)
-				printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type_str, typeattr->attr_str);
-			else
-				printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type->datum.name, typeattr->attr->datum.name);
-			return;
-		}
-		case CIL_TYPEALIAS : {
-			struct cil_typealias *alias = node->data;
-			if (alias->type_str != NULL) 
-				printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type_str);
-			else
-				printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type->datum.name);
-			return;
-		}
-		case CIL_AVRULE : {
-			struct cil_avrule *rule = node->data;
-			struct cil_list_item *item = NULL;
-			switch (rule->rule_kind) {
-				case CIL_AVRULE_ALLOWED:
-					printf("ALLOW:");
-					break;
-				case CIL_AVRULE_AUDITALLOW:
-					printf("AUDITALLOW:");
-					break;
-				case CIL_AVRULE_DONTAUDIT:
-					printf("DONTAUDIT:");
-					break;
-				case CIL_AVRULE_NEVERALLOW:
-					printf("NEVERALLOW:");
-					break;
-			}
-			if (rule->src_str != NULL)
-				printf(" %s", rule->src_str);
-			else
-				printf(" %s", rule->src->datum.name);
-			if (rule->tgt_str != NULL)
-				printf(" %s", rule->tgt_str);
-			else
-				printf(" %s", rule->tgt->datum.name);
-			if (rule->obj_str != NULL)
-				printf(" %s", rule->obj_str);
-			else
-				printf(" %s", rule->obj->datum.name);
-			printf(" (");
-			if (rule->perms_str != NULL) {
-				item = rule->perms_str->head;
-				while(item != NULL) {
-					if (item->flavor == CIL_AST_STR)
-						printf(" %s", (char*)item->data);
-					else {
-						printf("\n\n perms list contained unexpected data type\n");
-						break;
-					}
-					item = item->next;
-				}
-			}
-			else {
-				item = rule->perms_list->head;
-				while(item != NULL) {
-					if (item->flavor == CIL_PERM)
-						printf(" %s", ((struct cil_perm*)item->data)->datum.name);
-					else {
-						printf("\n\n perms list contained unexpected data type\n");
-						break;
-					}
-					item = item->next;
-				}
-			}
-			printf(" )\n");
-			return;
-		}
-		case CIL_TYPE_RULE : {
-			struct cil_type_rule *rule = node->data;
-			switch (rule->rule_kind) {
-				case CIL_TYPE_TRANSITION:
-					printf("TYPETRANSITION:");
-					break;
-				case CIL_TYPE_MEMBER:
-					printf("TYPEMEMBER:");
-					break;
-				case CIL_TYPE_CHANGE:
-					printf("TYPECHANGE:");
-					break;
-			}
-			if (rule->src_str != NULL)
-				printf(" %s", rule->src_str);
-			else
-				printf(" %s", rule->src->datum.name);
-			if (rule->tgt_str != NULL)
-				printf(" %s", rule->tgt_str);
-			else
-				printf(" %s", rule->tgt->datum.name);
-			if (rule->obj_str != NULL)
-				printf(" %s", rule->obj_str);
-			else
-				printf(" %s", rule->obj->datum.name);
-			if (rule->result_str != NULL)
-				printf(" %s\n", rule->result_str);
-			else
-				printf(" %s\n", rule->result->datum.name);
-			return;
-		}
-		case CIL_SENS : {
-			struct cil_sens *sens = node->data;
-			printf("SENSITIVITY: %s\n", sens->datum.name);
-			return;
-		}
-		case CIL_SENSALIAS : {
-			struct cil_sensalias *alias = node->data;
-			if (alias->sens_str != NULL) 
-				printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens_str);
-			else
-				printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens->datum.name);
-			return;
-		}
-		case CIL_CAT : {
-			struct cil_cat *cat = node->data;
-			printf("CATEGORY: %s\n", cat->datum.name);
-			return;
-		}
-		case CIL_CATALIAS : {
-			struct cil_catalias *alias = node->data;
-			if (alias->cat_str != NULL) 
-				printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat_str);
-			else
-				printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat->datum.name);
-			return;
-		}
-		case CIL_CATSET : {
-			struct cil_catset *catset = node->data;
-			struct cil_list_item *cat;
-			struct cil_list_item *parent;
-			if (catset->cat_list_str != NULL)
-				cat = catset->cat_list_str->head;
-			else
-				cat = catset->cat_list->head;
-			printf("CATSET: %s (",catset->datum.name);
-			while (cat != NULL) {
-				if (cat->flavor == CIL_LIST) {
-					parent = cat;
-					cat = ((struct cil_list*)cat->data)->head;
-					printf(" (");
-					while (cat != NULL) {
-						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-						cat = cat->next;
-					}
-					printf(" )");
-					cat = parent;
-				}
-				else
-					printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-				cat = cat->next;
-			}
-			printf(" )\n");
-			return;
-		}
-		case CIL_CATORDER : {
-			struct cil_catorder *catorder = node->data;
-			struct cil_list_item *cat;
-			if (catorder->cat_list_str != NULL)
-				cat = catorder->cat_list_str->head;
-			else
+	if (node->data == NULL) {
+		printf("FLAVOR: %d", node->flavor);
+		return;
+	}
+	else {
+		switch( node->flavor ) {
+			case CIL_BLOCK	: {
+				struct cil_block *block = node->data;
+				printf("BLOCK: %s\n", block->datum.name);
 				return;
-			printf("CATORDER: (");
-			while (cat != NULL) {
-				printf(" %s", (char*)cat->data);
-				cat = cat->next;
 			}
-			printf(" )\n");
-			return;
-		}
-		case CIL_SENSCAT : {
-			struct cil_senscat *senscat = node->data;
-			struct cil_list_item *cat;
-			struct cil_list_item *parent;
-			printf("SENSCAT:");
-			if (senscat->sens_str != NULL)
-				printf(" %s", senscat->sens_str);
-			else
-				printf(" [processed]");
-			if (senscat->cat_list_str != NULL) {
-				cat = senscat->cat_list_str->head;
+			case CIL_USER: {
+				struct cil_user *user = node->data;
+				printf("USER: %s\n", user->datum.name);
+				return;
+			}
+			case CIL_TYPE : {
+				struct cil_type *type = node->data;
+				printf("TYPE: %s\n", type->datum.name);
+				return;
+			}
+			case CIL_ATTR : {
+				struct cil_type *attr = node->data;
+				printf("ATTRIBUTE: %s\n", attr->datum.name);
+				return;
+			}
+			case CIL_ROLE : {
+				struct cil_role *role = node->data;
+				printf("ROLE: %s\n", role->datum.name);
+				return;
+			}
+			case CIL_USERROLE : {
+				struct cil_userrole *userrole = node->data;
+				printf("USERROLE:");
+				if (userrole->user_str != NULL)
+					printf(" %s", userrole->user_str);
+				else if (userrole->user != NULL)
+					printf(" %s", userrole->user->datum.name);
+				if (userrole->role_str != NULL)
+					printf(" %s", userrole->role_str);
+				else if (userrole->role != NULL)
+					printf(" %s", userrole->role->datum.name);
+				printf("\n");
+				return;
+			}
+			case CIL_ROLETYPE : {
+				struct cil_roletype *roletype = node->data;
+				printf("ROLETYPE:");
+				if (roletype->role_str != NULL)
+					printf(" %s", roletype->role_str);
+				else if (roletype->role != NULL)
+					printf(" %s", roletype->role->datum.name);
+				if (roletype->type_str != NULL)
+					printf(" %s", roletype->type_str);
+				else if (roletype->type != NULL)
+					printf(" %s", roletype->type->datum.name);
+				printf("\n");
+				return;
+			}
+			case CIL_ROLETRANS : {
+				struct cil_role_trans *roletrans = node->data;
+				printf("ROLETRANSITION:");
+				if (roletrans->src_str != NULL)
+					printf(" %s", roletrans->src_str);
+				else
+					printf(" %s", roletrans->src->datum.name);
+				if (roletrans->tgt_str != NULL)
+					printf(" %s", roletrans->tgt_str);
+				else
+					printf(" %s", roletrans->tgt->datum.name);
+				if (roletrans->result_str != NULL)
+					printf(" %s\n", roletrans->result_str);
+				else
+					printf(" %s\n", roletrans->result->datum.name);
+				return;
+			}
+			case CIL_ROLEALLOW : {
+				struct cil_role_allow *roleallow = node->data;
+				printf("ROLEALLOW:");
+				if (roleallow->src_str != NULL)
+					printf(" %s", roleallow->src_str);
+				else
+					printf(" %s", roleallow->src->datum.name);
+				if (roleallow->tgt_str != NULL)
+					printf(" %s", roleallow->tgt_str);
+				else
+					printf(" %s", roleallow->tgt->datum.name);
+				printf("\n");
+				return;
+			}
+			case CIL_CLASS : {
+				struct cil_class *cls = node->data;
+				printf("CLASS: %s ", cls->datum.name);
+				
+				if (cls->common != NULL)
+					printf("inherits: %s ", cls->common->datum.name);
+				printf("(");
+	
+				cil_tree_print_perms_list(node->cl_head);
+	
+				printf(" )");
+				return;
+			}
+			case CIL_COMMON : {
+				struct cil_common *common = node->data;
+				printf("COMMON: %s (", common->datum.name);
+		
+				cil_tree_print_perms_list(node->cl_head);
+	
+				printf(" )");
+				return;
+			}
+			case CIL_CLASSCOMMON : {
+				struct cil_classcommon *clscom = node->data;
+				if (clscom->class_str != NULL && clscom->common_str != NULL)
+					printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
+				else
+					printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class->datum.name, clscom->common->datum.name);
+				return;
+			}
+			case CIL_BOOL : {
+				struct cil_bool *boolean = node->data;
+				printf("BOOL: %s, value: %d\n", boolean->datum.name, boolean->value);
+				return;
+			}
+			case CIL_TYPE_ATTR : {
+				struct cil_typeattribute *typeattr = node->data;
+				if (typeattr->type_str != NULL && typeattr->attr_str != NULL)
+					printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type_str, typeattr->attr_str);
+				else
+					printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type->datum.name, typeattr->attr->datum.name);
+				return;
+			}
+			case CIL_TYPEALIAS : {
+				struct cil_typealias *alias = node->data;
+				if (alias->type_str != NULL) 
+					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type_str);
+				else
+					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type->datum.name);
+				return;
+			}
+			case CIL_AVRULE : {
+				struct cil_avrule *rule = node->data;
+				struct cil_list_item *item = NULL;
+				switch (rule->rule_kind) {
+					case CIL_AVRULE_ALLOWED :  {
+						printf("ALLOW:");
+						break;
+					}
+					case CIL_AVRULE_AUDITALLOW : {
+						printf("AUDITALLOW:");
+						break;
+					}
+					case CIL_AVRULE_DONTAUDIT : {
+						printf("DONTAUDIT:");
+						break;
+					}
+					case CIL_AVRULE_NEVERALLOW : {
+						printf("NEVERALLOW:");
+						break;
+					}
+				}	
+				if (rule->src_str != NULL)
+					printf(" %s", rule->src_str);
+				else
+					printf(" %s", rule->src->datum.name);
+				if (rule->tgt_str != NULL)
+					printf(" %s", rule->tgt_str);
+				else
+					printf(" %s", rule->tgt->datum.name);
+				if (rule->obj_str != NULL)
+					printf(" %s", rule->obj_str);
+				else
+					printf(" %s", rule->obj->datum.name);
+				printf(" (");
+				if (rule->perms_str != NULL) {
+					item = rule->perms_str->head;
+					while(item != NULL) {
+						if (item->flavor == CIL_AST_STR)
+							printf(" %s", (char*)item->data);
+						else {
+							printf("\n\n perms list contained unexpected data type\n");
+							break;
+						}
+						item = item->next;
+					}
+				}
+				else {
+					item = rule->perms_list->head;
+					while(item != NULL) {
+						if (item->flavor == CIL_PERM)
+							printf(" %s", ((struct cil_perm*)item->data)->datum.name);
+						else {
+							printf("\n\n perms list contained unexpected data type\n");
+							break;
+						}
+						item = item->next;
+					}
+				}
+				printf(" )\n");
+				return;
+			}
+			case CIL_TYPE_RULE : {
+				struct cil_type_rule *rule = node->data;
+				switch (rule->rule_kind) {
+					case CIL_TYPE_TRANSITION : {
+						printf("TYPETRANSITION:");
+						break;
+					}
+					case CIL_TYPE_MEMBER : {
+						printf("TYPEMEMBER:");
+						break;
+					}
+					case CIL_TYPE_CHANGE : {
+						printf("TYPECHANGE:");
+						break;
+					}
+				}
+				if (rule->src_str != NULL)
+					printf(" %s", rule->src_str);
+				else
+					printf(" %s", rule->src->datum.name);
+				if (rule->tgt_str != NULL)
+					printf(" %s", rule->tgt_str);
+				else
+					printf(" %s", rule->tgt->datum.name);
+				if (rule->obj_str != NULL)
+					printf(" %s", rule->obj_str);
+				else
+					printf(" %s", rule->obj->datum.name);
+				if (rule->result_str != NULL)
+					printf(" %s\n", rule->result_str);
+				else
+					printf(" %s\n", rule->result->datum.name);
+				return;
+			}
+			case CIL_SENS : {
+				struct cil_sens *sens = node->data;
+				printf("SENSITIVITY: %s\n", sens->datum.name);
+				return;
+			}
+			case CIL_SENSALIAS : {
+				struct cil_sensalias *alias = node->data;
+				if (alias->sens_str != NULL) 
+					printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens_str);
+				else
+					printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens->datum.name);
+				return;
+			}
+			case CIL_CAT : {
+				struct cil_cat *cat = node->data;
+				printf("CATEGORY: %s\n", cat->datum.name);
+				return;
+			}
+			case CIL_CATALIAS : {
+				struct cil_catalias *alias = node->data;
+				if (alias->cat_str != NULL) 
+					printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat_str);
+				else
+					printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat->datum.name);
+				return;
+			}
+			case CIL_CATSET : {
+				struct cil_catset *catset = node->data;
+				struct cil_list_item *cat;
+				struct cil_list_item *parent;
+				if (catset->cat_list_str != NULL)
+					cat = catset->cat_list_str->head;
+				else
+					cat = catset->cat_list->head;
+				printf("CATSET: %s (",catset->datum.name);
 				while (cat != NULL) {
 					if (cat->flavor == CIL_LIST) {
 						parent = cat;
 						cat = ((struct cil_list*)cat->data)->head;
 						printf(" (");
 						while (cat != NULL) {
-							printf(" %s", (char*)cat->data);
+							printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
 							cat = cat->next;
 						}
 						printf(" )");
 						cat = parent;
 					}
 					else
-						printf(" %s", (char*)cat->data);
+						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
 					cat = cat->next;
 				}
+				printf(" )\n");
+				return;
 			}
-			else
+			case CIL_CATORDER : {
+				struct cil_catorder *catorder = node->data;
+				struct cil_list_item *cat;
+				if (catorder->cat_list_str != NULL)
+					cat = catorder->cat_list_str->head;
+				else
+					return;
+				printf("CATORDER: (");
+				while (cat != NULL) {
+					printf(" %s", (char*)cat->data);
+					cat = cat->next;
+				}
+				printf(" )\n");
+				return;
+			}
+			case CIL_SENSCAT : {
+				struct cil_senscat *senscat = node->data;
+				struct cil_list_item *cat;
+				struct cil_list_item *parent;
+				printf("SENSCAT: (");
+				if (senscat->sens_str != NULL)
+					printf(" %s", senscat->sens_str);
+				else
+					printf(" [processed]");
+				if (senscat->cat_list_str != NULL) {
+					cat = senscat->cat_list_str->head;
+					while (cat != NULL) {
+						if (cat->flavor == CIL_LIST) {
+							parent = cat;
+							cat = ((struct cil_list*)cat->data)->head;
+							printf(" (");
+							while (cat != NULL) {
+								printf(" %s", (char*)cat->data);
+								cat = cat->next;
+							}
+							printf(" )");
+							cat = parent;
+						}
+						else
+							printf(" %s", (char*)cat->data);
+						cat = cat->next;
+					}
+				}
+				else {
+					printf("\n");
+					return;
+				}
+				printf(" )\n");
+				return;
+			}
+			case CIL_DOMINANCE : {
+				struct cil_sens_dominates *dom = node->data;
+				struct cil_list_item *sens;
+				struct cil_list_item *parent;
+
+				printf("DOMINANCE: (");
+				if (dom->sens_list_str != NULL) {
+					sens = dom->sens_list_str->head;
+					while(sens != NULL) {
+						if (sens->flavor == CIL_LIST) {
+							parent = sens;
+							sens = ((struct cil_list*)sens->data)->head;
+							printf(" (");
+							while (sens != NULL) {
+								printf(" %s", (char*)sens->data);
+								sens = sens->next;
+							}
+							printf(" )");
+							sens = parent;
+						}
+						else
+							printf(" %s", (char*)sens->data);
+						sens = sens->next;
+					}
+				}
+				else {
+					printf("\n");
+					return;
+				}
+				printf(" )\n");
+				return;
+			}
+			case CIL_LEVEL : {
+				struct cil_level *level = node->data;
+				printf("LEVEL %s:", level->datum.name); 
+				cil_tree_print_level(level);
 				printf("\n");
 				return;
-			printf(" )\n");
-			return;
-		}
-		case CIL_LEVEL : {
-			struct cil_level *level = node->data;
-			printf("LEVEL %s:", level->datum.name); 
-			cil_tree_print_level(level);
-			printf("\n");
-			return;
-		}
-		case CIL_MLSCONSTRAIN : {
-			struct cil_mlsconstrain *mlscon = node->data;
-			struct cil_list_item *class_curr;
-			struct cil_list_item *perm_curr;
-			printf("MLSCONSTRAIN: \n\t(");
-			if (mlscon->class_list_str != NULL)
-				class_curr = mlscon->class_list_str->head;
-			else
-				class_curr = mlscon->class_list->head;
-			if (mlscon->perm_list_str != NULL)
-				perm_curr = mlscon->perm_list_str->head;
-			else
-				perm_curr = mlscon->perm_list->head;
-			while (class_curr != NULL) {
+			}
+			case CIL_MLSCONSTRAIN : {
+				struct cil_mlsconstrain *mlscon = node->data;
+				struct cil_list_item *class_curr;
+				struct cil_list_item *perm_curr;
+				printf("MLSCONSTRAIN: \n\t(");
 				if (mlscon->class_list_str != NULL)
-					printf("%s ", (char*)class_curr->data);
+					class_curr = mlscon->class_list_str->head;
 				else
-					printf("%s ", ((struct cil_class*)class_curr->data)->datum.name);
-				class_curr = class_curr->next;
-			}
-			printf(") \n\t\t( ");
-			while (perm_curr != NULL) {
+					class_curr = mlscon->class_list->head;
 				if (mlscon->perm_list_str != NULL)
-					printf("%s ", (char*)perm_curr->data);
+					perm_curr = mlscon->perm_list_str->head;
 				else
-					printf("%s ", ((struct cil_class*)perm_curr->data)->datum.name);
-				perm_curr = perm_curr->next;
+					perm_curr = mlscon->perm_list->head;
+				while (class_curr != NULL) {
+					if (mlscon->class_list_str != NULL)
+						printf("%s ", (char*)class_curr->data);
+					else
+						printf("%s ", ((struct cil_class*)class_curr->data)->datum.name);
+					class_curr = class_curr->next;
+				}
+				printf(") \n\t\t( ");
+				while (perm_curr != NULL) {
+					if (mlscon->perm_list_str != NULL)
+						printf("%s ", (char*)perm_curr->data);
+					else
+						printf("%s ", ((struct cil_class*)perm_curr->data)->datum.name);
+					perm_curr = perm_curr->next;
+				}
+				printf(") \n\t\t");
+				cil_print_expr_tree(mlscon->expr->root);
+				return;
 			}
-			printf(") \n\t\t");
-			cil_print_expr_tree(mlscon->expr->root);
-			return;
-		}
-		case CIL_CONTEXT : {
-			struct cil_context *context = node->data;
-			printf("CONTEXT %s:", context->datum.name);
-			cil_tree_print_context(context);
-			printf("\n");
-			return;
-		}
-		case CIL_NETIFCON : {
-			struct cil_netifcon *netifcon = node->data;
-			printf("NETIFCON %s", netifcon->datum.name);
-			if (netifcon->if_context_str != NULL)
-				printf(" %s", netifcon->if_context_str);
-			else if (netifcon->if_context != NULL) {
-				printf(" (");
-				cil_tree_print_context(netifcon->if_context);
-				printf(" )");
+			case CIL_CONTEXT : {
+				struct cil_context *context = node->data;
+				printf("CONTEXT %s:", context->datum.name);
+				cil_tree_print_context(context);
+				printf("\n");
+				return;
 			}
-			if (netifcon->packet_context_str != NULL)
-				printf(" %s", netifcon->packet_context_str);
-			else if (netifcon->packet_context != NULL) {
-				printf(" (");
-				cil_tree_print_context(netifcon->packet_context);
-				printf(" )");
+			case CIL_NETIFCON : {
+				struct cil_netifcon *netifcon = node->data;
+				printf("NETIFCON %s", netifcon->datum.name);
+				if (netifcon->if_context_str != NULL)
+					printf(" %s", netifcon->if_context_str);
+				else if (netifcon->if_context != NULL) {
+					printf(" (");
+					cil_tree_print_context(netifcon->if_context);
+					printf(" )");
+				}
+				if (netifcon->packet_context_str != NULL)
+					printf(" %s", netifcon->packet_context_str);
+				else if (netifcon->packet_context != NULL) {
+					printf(" (");
+					cil_tree_print_context(netifcon->packet_context);
+					printf(" )");
+				}
+				printf("\n");
+				return;
 			}
-			printf("\n");
-			return;
-		}
-		case CIL_SID : {
-			struct cil_sid *sid = node->data;
-			printf("SID %s:", sid->datum.name);
-			if (sid->context_str != NULL)
-				printf(" %s", sid->context_str);
-			else
-				cil_tree_print_context(sid->context);
-			printf("\n");
-
-			return;
-		}
+			case CIL_SID : {
+				struct cil_sid *sid = node->data;
+				printf("SID %s:", sid->datum.name);
+				if (sid->context_str != NULL)
+					printf(" %s", sid->context_str);
+				else
+					cil_tree_print_context(sid->context);
+				printf("\n");
 	
-		default : {
-			printf("CIL FLAVOR: %d\n", node->flavor);
-			return;
+				return;
+			}
+	
+			default : {
+				printf("CIL FLAVOR: %d\n", node->flavor);
+				return;
+			}
 		}
 	}
 }

@@ -1212,7 +1212,7 @@ int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_t
 			new_node->parent = expr_curr;
 			new_node->line = expr_curr->line;
 			new_node->data = cil_strdup(curr->data);
-			new_node->flavor = CIL_AST_STR;
+			new_node->flavor = CIL_MLSCONSTRAIN_NODE;
 			if (expr_curr->cl_head == NULL)
 				expr_curr->cl_head = new_node;
 			else
