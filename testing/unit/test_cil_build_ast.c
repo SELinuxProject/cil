@@ -6024,7 +6024,7 @@ void test_cil_build_ast_node_helper_gen_senscat(CuTest *tc) {
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->next->cl_head, &finished, cil_l);
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->next->next->next->next->cl_head, &finished, cil_l);
 	CuAssertIntEquals(tc, finished, 1);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -6058,7 +6058,7 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc) {
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->next->cl_head, &finished, cil_l);
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->next->next->next->next->cl_head, &finished, cil_l);
 	CuAssertIntEquals(tc, finished, 0);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
