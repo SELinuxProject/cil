@@ -37,7 +37,8 @@ void test_cil_resolve_senscat_sublist(CuTest *);
 void test_cil_resolve_senscat_missingsens_neg(CuTest *);
 void test_cil_resolve_senscat_sublist_neg(CuTest *);
 void test_cil_resolve_senscat_category_neg(CuTest *);
-void test_cil_resolve_senscat_sublist_empty_neg(CuTest *);
+void test_cil_resolve_senscat_currrangecat(CuTest *);
+void test_cil_resolve_senscat_currrangecat_neg(CuTest *);
 
 void test_cil_resolve_roletrans(CuTest *);
 void test_cil_resolve_roletrans_srcdecl_neg(CuTest *);
