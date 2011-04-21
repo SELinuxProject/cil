@@ -436,7 +436,7 @@ void test_cil_resolve_senscat_currrangecat_neg(CuTest *tc) {
                         "(", "category", "c1", ")",
                         "(", "category", "c255", ")",
                         "(", "categoryorder", "(", "c0", "c1", "c255", ")", ")",
-                        "(", "sensitivitycategory", "s1", "(", "c32", ")", ")", NULL};
+                        "(", "sensitivitycategory", "s1", "(", "c1", "(", "c1", "c255", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -461,7 +461,7 @@ void test_cil_resolve_senscat_currrangecat_neg(CuTest *tc) {
 	__cil_verify_order(test_db->dominance, test_db->ast->root, CIL_SENS);
 
 	int rc = cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
 }
 
 void test_cil_resolve_roletrans(CuTest *tc) {

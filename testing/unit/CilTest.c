@@ -499,6 +499,22 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_nosublist_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_senscat);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_senscat_neg);
+	
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested_emptysecondlist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_extra_nested_secondlist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested_missingobjects_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested_secondnested_missingobjects_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_ethmissing_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_interfacemissing_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_packetmissing_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_netifcon);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_netifcon_neg);
 	/* test_cil_resolve_ast.c */
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_inval_perm_neg);

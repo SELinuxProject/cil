@@ -274,6 +274,20 @@ void test_cil_gen_senscat_astnull_neg(CuTest *tc);
 void test_cil_gen_senscat_nosensitivities_neg(CuTest *tc);
 void test_cil_gen_senscat_nosublist_neg(CuTest *tc);
 
+void test_cil_gen_netifcon(CuTest *tc);
+void test_cil_gen_netifcon_nested(CuTest *tc);
+void test_cil_gen_netifcon_nested_neg(CuTest *tc);
+void test_cil_gen_netifcon_nested_emptysecondlist_neg(CuTest *tc);
+void test_cil_gen_netifcon_extra_nested_secondlist_neg(CuTest *tc);
+void test_cil_gen_netifcon_nested_missingobjects_neg(CuTest *tc);
+void test_cil_gen_netifcon_nested_secondnested_missingobjects_neg(CuTest *tc);
+void test_cil_gen_netifcon_dbnull_neg(CuTest *tc);
+void test_cil_gen_netifcon_currnull_neg(CuTest *tc);
+void test_cil_gen_netifcon_astnull_neg(CuTest *tc);
+void test_cil_gen_netifcon_ethmissing_neg(CuTest *tc);
+void test_cil_gen_netifcon_interfacemissing_neg(CuTest *tc);
+void test_cil_gen_netifcon_packetmissing_neg(CuTest *tc);
+
 /*
 cil_build_ast test cases
 */
@@ -372,4 +386,7 @@ void test_cil_build_ast_node_helper_gen_dominance_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_senscat(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_netifcon(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc);
 #endif
