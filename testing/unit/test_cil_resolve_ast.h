@@ -81,6 +81,15 @@ void test_cil_resolve_type_rule_member_tgtdecl_neg(CuTest *);
 void test_cil_resolve_type_rule_member_objdecl_neg(CuTest *);
 void test_cil_resolve_type_rule_member_resultdecl_neg(CuTest *);
 
+void test_cil_resolve_netifcon(CuTest *);
+void test_cil_resolve_netifcon_otf_neg(CuTest *);
+void test_cil_resolve_netifcon_interface_neg(CuTest *);
+void test_cil_resolve_netifcon_unnamed(CuTest *);
+void test_cil_resolve_netifcon_unnamed_packet_neg(CuTest *);
+void test_cil_resolve_netifcon_unnamed_otf_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_netifcon(CuTest *tc);
+void test_cil_resolve_ast_node_helper_netifcon_neg(CuTest *tc);
+
 void test_cil_resolve_sid(CuTest *);
 void test_cil_resolve_sid_named_levels(CuTest *);
 void test_cil_resolve_sid_named_context(CuTest *);

@@ -625,6 +625,15 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_type_rule_member);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_type_rule_member_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_otf_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_interface_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_unnamed);
+	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_unnamed_packet_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_unnamed_otf_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_netifcon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_netifcon_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
