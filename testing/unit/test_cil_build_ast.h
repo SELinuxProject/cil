@@ -282,6 +282,23 @@ void test_cil_gen_level_dbnull_neg(CuTest *tc);
 void test_cil_gen_level_currnull_neg(CuTest *tc);
 void test_cil_gen_level_astnull_neg(CuTest *tc);
 
+void test_cil_gen_context(CuTest *tc);
+void test_cil_gen_context_neg(CuTest *tc);
+void test_cil_gen_context_unnamed(CuTest *tc);
+void test_cil_gen_context_unnamed_extra_neg(CuTest *tc);
+void test_cil_gen_context_unnamed_doubleparan_neg(CuTest *tc);
+void test_cil_gen_context_unnamed_norole_neg(CuTest *tc);
+void test_cil_gen_context_unnamed_roleinparans_neg(CuTest *tc);
+void test_cil_gen_context_unnamed_notype_neg(CuTest *tc);
+void test_cil_gen_context_unnamed_nestedtype_neg(CuTest *tc);
+void test_cil_gen_context_unnamed_nolevel_neg(CuTest *tc);
+void test_cil_gen_context_unnamed_nosecondlevel_neg(CuTest *tc);
+void test_cil_gen_context_noname_neg(CuTest *tc);
+void test_cil_gen_context_nouser_neg(CuTest *tc);
+void test_cil_gen_context_dbnull_neg(CuTest *tc);
+void test_cil_gen_context_currnull_neg(CuTest *tc);
+void test_cil_gen_context_astnull_neg(CuTest *tc);
+
 void test_cil_gen_netifcon(CuTest *tc);
 void test_cil_gen_netifcon_nested(CuTest *tc);
 void test_cil_gen_netifcon_nested_neg(CuTest *tc);
@@ -397,6 +414,9 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_level(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_context(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_netifcon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc);
