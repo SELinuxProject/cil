@@ -4578,44 +4578,6 @@ void test_cil_gen_level_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_context(CuTest *tc) {
-	char *line[] = {"(", "context", "localhost_node_label", "system_u", "object_r", "node_lo_t", "(", "s0", ")", "(", "s0", ")", ")", NULL};
-	
-        struct cil_tree *test_tree;
-        gen_test_tree(&test_tree, line);
-
-        struct cil_tree_node *test_ast_node;
-        cil_tree_node_init(&test_ast_node);
-
-        struct cil_db *test_db;
-        cil_db_init(&test_db);
-
-        test_ast_node->parent = test_db->ast->root;
-        test_ast_node->line = 1;
-
-        int rc = cil_gen_context(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-        CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_gen_context_neg(CuTest *tc) {
-	char *line[] = {"(", "context", "localhost_node_label", "system_u", "object_r", ")", NULL};
-	
-        struct cil_tree *test_tree;
-        gen_test_tree(&test_tree, line);
-
-        struct cil_tree_node *test_ast_node;
-        cil_tree_node_init(&test_ast_node);
-
-        struct cil_db *test_db;
-        cil_db_init(&test_db);
-
-        test_ast_node->parent = test_db->ast->root;
-        test_ast_node->line = 1;
-
-        int rc = cil_gen_context(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-        CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
-
-void test_cil_gen_context_unnamed(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -4634,7 +4596,7 @@ void test_cil_gen_context_unnamed(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_gen_context_unnamed_extra_neg(CuTest *tc) {
+void test_cil_gen_context_extra_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", "(", "extra", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -4653,7 +4615,7 @@ void test_cil_gen_context_unnamed_extra_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_context_unnamed_doubleparan_neg(CuTest *tc) {
+void test_cil_gen_context_doubleparen_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "(", "system_u", ")", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -4672,7 +4634,7 @@ void test_cil_gen_context_unnamed_doubleparan_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_context_unnamed_norole_neg(CuTest *tc) {
+void test_cil_gen_context_norole_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -4691,8 +4653,8 @@ void test_cil_gen_context_unnamed_norole_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_context_unnamed_roleinparans_neg(CuTest *tc) {
-	char *line[] = {"(", "context", "packet_default", "(", "system_u", "(", "nested", ")", ")", ")", NULL};
+void test_cil_gen_context_roleinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "context", "packet_default", "(", "system_u", "(", "role_r", ")", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -4710,7 +4672,7 @@ void test_cil_gen_context_unnamed_roleinparans_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_context_unnamed_notype_neg(CuTest *tc) {
+void test_cil_gen_context_notype_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", "role_r", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -4729,7 +4691,7 @@ void test_cil_gen_context_unnamed_notype_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_context_unnamed_nestedtype_neg(CuTest *tc) {
+void test_cil_gen_context_typeinparens_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", "role_r", "(", "type_t", ")", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -4748,7 +4710,7 @@ void test_cil_gen_context_unnamed_nestedtype_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_context_unnamed_nolevel_neg(CuTest *tc) {
+void test_cil_gen_context_nolevels_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", "role_r", "type_t", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -4767,7 +4729,7 @@ void test_cil_gen_context_unnamed_nolevel_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_context_unnamed_nosecondlevel_neg(CuTest *tc) {
+void test_cil_gen_context_nosecondlevel_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", "role_r", "type_t", "low", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -4825,7 +4787,7 @@ void test_cil_gen_context_nouser_neg(CuTest *tc) {
 }
 
 void test_cil_gen_context_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "context", "localhost_node_label", "system_u", "object_r", "node_lo_t", "(", "s0", ")", "(", "s0", ")", ")", NULL};
+	char *line[] = {"(", "context", "localhost_node_label", "(", "system_u", "object_r", "node_lo_t", "(", "s0", ")", "(", "s0", ")", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -4859,7 +4821,7 @@ void test_cil_gen_context_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_context_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "context", "localhost_node_label", "system_u", "object_r", "node_lo_t", "(", "s0", ")", "(", "s0", ")", ")", NULL};
+	char *line[] = {"(", "context", "localhost_node_label", "system_u", "object_r", "node_lo_t", "(", "s0", ")", "(", "s0", ")", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -6784,7 +6746,7 @@ void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_context(CuTest *tc) {
-	char *line[] = {"(", "context", "localhost_node_label", "system_u", "object_r", "node_lo_t", "(", "s0", ")", "(", "s0", ")", ")", NULL};
+	char *line[] = {"(", "context", "localhost_node_label", "(", "system_u", "object_r", "node_lo_t", "low", "high", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6799,7 +6761,7 @@ void test_cil_build_ast_node_helper_gen_context(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6810,7 +6772,7 @@ void test_cil_build_ast_node_helper_gen_context(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc) {
-	char *line[] = {"(", "context", "localhost_node_label", "system_u", "object_r", NULL};
+	char *line[] = {"(", "context", "localhost_node_label", "(", "system_u", "object_r", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6825,7 +6787,7 @@ void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;

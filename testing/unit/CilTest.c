@@ -511,16 +511,14 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_level_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_context);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed_doubleparan_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed_norole_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed_roleinparans_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed_notype_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed_nestedtype_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed_nolevel_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_unnamed_nosecondlevel_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_doubleparen_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_norole_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_roleinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_notype_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_typeinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_nolevels_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_nosecondlevel_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_nouser_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_dbnull_neg);
