@@ -282,6 +282,15 @@ void test_cil_gen_level_dbnull_neg(CuTest *tc);
 void test_cil_gen_level_currnull_neg(CuTest *tc);
 void test_cil_gen_level_astnull_neg(CuTest *tc);
 
+void test_cil_fill_context(CuTest *tc);
+void test_cil_fill_context_unnamedlvl(CuTest *tc);
+void test_cil_fill_context_nocontext_neg(CuTest *tc);
+void test_cil_fill_context_nouser_neg(CuTest *tc);
+void test_cil_fill_context_norole_neg(CuTest *tc);
+void test_cil_fill_context_notype_neg(CuTest *tc);
+void test_cil_fill_context_nolowlvl_neg(CuTest *tc);
+void test_cil_fill_context_nohighlvl_neg(CuTest *tc);
+
 void test_cil_gen_context(CuTest *tc);
 void test_cil_gen_context_extra_neg(CuTest *tc);
 void test_cil_gen_context_doubleparen_neg(CuTest *tc);
