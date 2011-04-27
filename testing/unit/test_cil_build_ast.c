@@ -4438,6 +4438,125 @@ void test_cil_gen_senscat_nosublist_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_fill_level(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_level *test_level = cil_malloc(sizeof(struct cil_level));
+	cil_symtab_datum_init(&test_level->datum);
+
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_fill_level_sensnull_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "low", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_level *test_level = cil_malloc(sizeof(struct cil_level));
+	cil_symtab_datum_init(&test_level->datum);
+
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_level_levelnull_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_level *test_level = NULL;
+
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_level_nocat(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "low", "s0", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_level *test_level = cil_malloc(sizeof(struct cil_level));
+	cil_symtab_datum_init(&test_level->datum);
+
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_fill_level_emptycat_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "low", "s0", "(", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_level *test_level = cil_malloc(sizeof(struct cil_level));
+	cil_symtab_datum_init(&test_level->datum);
+
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_level(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",

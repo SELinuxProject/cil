@@ -500,6 +500,12 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_senscat);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_senscat_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_fill_level);
+	SUITE_ADD_TEST(suite, test_cil_fill_level_sensnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_level_levelnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_level_nocat);
+	SUITE_ADD_TEST(suite, test_cil_fill_level_emptycat_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_level);
 	SUITE_ADD_TEST(suite, test_cil_gen_level_emptycat_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_level_noname_neg);
