@@ -6427,7 +6427,7 @@ void test_cil_build_ast_node_helper_roletype(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6453,7 +6453,7 @@ void test_cil_build_ast_node_helper_roletype_neg(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6479,7 +6479,7 @@ void test_cil_build_ast_node_helper_userrole(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6505,7 +6505,7 @@ void test_cil_build_ast_node_helper_userrole_neg(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6531,7 +6531,7 @@ void test_cil_build_ast_node_helper_gen_classcommon(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6557,7 +6557,7 @@ void test_cil_build_ast_node_helper_gen_classcommon_neg(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6586,7 +6586,7 @@ void test_cil_build_ast_node_helper_gen_dominance(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6615,7 +6615,7 @@ void test_cil_build_ast_node_helper_gen_dominance_neg(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6647,7 +6647,7 @@ void test_cil_build_ast_node_helper_gen_senscat(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6679,7 +6679,7 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6707,7 +6707,7 @@ void test_cil_build_ast_node_helper_gen_level(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6735,7 +6735,7 @@ void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6815,7 +6815,7 @@ void test_cil_build_ast_node_helper_gen_netifcon(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
@@ -6841,7 +6841,7 @@ void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc) {
 
 	cil_list_item_init(&cil_l->head);
 	cil_list_item_init(&cil_l->head->next);
-	cil_l->head->data = cil_l->head->next;
+	cil_l->head->data = test_db->ast->root;
 	cil_l->head->flavor = CIL_AST_NODE;
 	cil_l->head->next->flavor = CIL_DB;
 	cil_l->head->next->data = test_db;
