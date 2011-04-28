@@ -442,6 +442,9 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc);
 void test_cil_build_ast_node_helper_gen_level(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc);
 
+void test_cil_build_ast_node_helper_gen_mlsconstrain(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_mlsconstrain_neg(CuTest *tc);
+
 void test_cil_build_ast_node_helper_gen_context(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc);
 
