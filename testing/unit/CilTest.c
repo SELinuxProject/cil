@@ -516,6 +516,18 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_level);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_level_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_classset_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_classset_noperm_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_classset_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_permset_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_permset_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_permset_noperm_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_expression_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_astnull_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_fill_context);
 	SUITE_ADD_TEST(suite, test_cil_fill_context_unnamedlvl);
 	SUITE_ADD_TEST(suite, test_cil_fill_context_nocontext_neg);

@@ -288,6 +288,18 @@ void test_cil_gen_level_dbnull_neg(CuTest *tc);
 void test_cil_gen_level_currnull_neg(CuTest *tc);
 void test_cil_gen_level_astnull_neg(CuTest *tc);
 
+void test_cil_gen_mlsconstrain(CuTest *tc);
+void test_cil_gen_mlsconstrain_classset_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_classset_noclass_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_classset_noperm_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_permset_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_permset_noclass_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_permset_noperm_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_expression_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_dbnull_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_currnull_neg(CuTest *tc);
+void test_cil_gen_mlsconstrain_astnull_neg(CuTest *tc);
+
 void test_cil_fill_context(CuTest *tc);
 void test_cil_fill_context_unnamedlvl(CuTest *tc);
 void test_cil_fill_context_nocontext_neg(CuTest *tc);
