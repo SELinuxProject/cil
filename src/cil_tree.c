@@ -108,13 +108,13 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 			}
 		}
 
-		if (node->cl_head != NULL && !reverse)
+		if (node->cl_head != NULL && !reverse && !(finished & CIL_TREE_SKIP_HEAD))
 			node = node->cl_head;
-		else if (node->next != NULL && reverse) {
+		else if (node->next != NULL && reverse && !(finished & CIL_TREE_SKIP_NEXT)) {
 			node = node->next;
 			reverse = 0;
 		}
-		else if (node->next != NULL && !finished) 
+		else if (node->next != NULL && !(finished & CIL_TREE_SKIP_NEXT)) 
 			node = node->next;
 		else {
 			if (finished_branch != NULL) {
@@ -126,7 +126,7 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 			}
 			node = node->parent;
 			reverse = 1;
-			finished = 0;
+			finished = CIL_TREE_SKIP_NOTHING;
 		}
 	} while (node != start_node);
 	

@@ -1579,7 +1579,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 				// To avoid parsing list of perms again
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
 				rc = cil_gen_common(db, parse_current, ast_node);
@@ -1587,7 +1587,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_common failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CLASSCOMMON)) {
 				rc = cil_gen_classcommon(db, parse_current, ast_node);
@@ -1602,7 +1602,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_sid failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_USER)) {
 				rc = cil_gen_user(db, parse_current, ast_node);
@@ -1688,21 +1688,21 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 				// So that the object and perms lists do not get parsed again
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_AUDITALLOW)) {
 				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_AUDITALLOW);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_avrule (auditallow) failed, rc: %d\n", rc);
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_DONTAUDIT)) {
 				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_DONTAUDIT);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_avrule (dontaudit) failed, rc: %d\n", rc);
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_NEVERALLOW)) {
 				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_NEVERALLOW);
@@ -1710,7 +1710,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_avrule (neverallow) failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANS)) {
 				rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_TRANSITION);
@@ -1771,7 +1771,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_catset (categoryset) failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
 				rc = cil_gen_catorder(db, parse_current, ast_node);
@@ -1779,7 +1779,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_catorder failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_DOMINANCE)) {
 				rc = cil_gen_dominance(db, parse_current, ast_node);
@@ -1787,7 +1787,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_dominance failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_SENSCAT)) {
 				rc = cil_gen_senscat(db, parse_current, ast_node);
@@ -1795,7 +1795,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_senscat failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_LEVEL)) {
 				rc = cil_gen_level(db, parse_current, ast_node);
@@ -1803,7 +1803,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_level failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_MLSCONSTRAIN)) {
 				rc = cil_gen_mlsconstrain(db, parse_current, ast_node);
@@ -1811,7 +1811,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_mlsconstrain failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 
 			else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
@@ -1820,7 +1820,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_context failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_NETIFCON)) {
 				rc = cil_gen_netifcon(db, parse_current, ast_node);
@@ -1828,7 +1828,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					printf("cil_gen_netifcon failed, rc: %d\n", rc);
 					return rc;
 				}
-				*finished = 1;
+				*finished = CIL_TREE_SKIP_NEXT;
 			}
 
 		}
