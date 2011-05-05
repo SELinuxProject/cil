@@ -417,7 +417,7 @@ struct cil_fscon {
 	char *fs_str;
 	struct cil_fs *fs;
 	char *path;
-	struct cil_context context;
+	struct cil_context *context;
 };
 
 #define CIL_FS_USE_XATTR 1
@@ -427,7 +427,7 @@ struct cil_fs_use {
 	uint32_t flavor;
 	char *fs_str;
 	struct cil_fs *fs;
-	struct cil_context context;
+	struct cil_context *context;
 };
 
 /*struct constrain {
