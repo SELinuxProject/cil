@@ -288,3 +288,691 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 
 	return SEPOL_OK;
 }
+
+int cil_netifcon_init(struct cil_netifcon **netifcon)
+{
+	if (netifcon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_netifcon *new_netifcon = cil_malloc(sizeof(struct cil_netifcon));	
+
+	cil_symtab_datum_init(&new_netifcon->datum);
+	new_netifcon->if_context_str = NULL;
+	new_netifcon->if_context = NULL;
+	new_netifcon->packet_context_str = NULL;
+	new_netifcon->packet_context = NULL;
+
+	*netifcon = new_netifcon;
+
+	return SEPOL_OK;	
+}
+
+int cil_context_init(struct cil_context **context)
+{
+	if(context == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_context *new_context = cil_malloc(sizeof(struct cil_context));
+
+	cil_symtab_datum_init(&new_context->datum);
+	new_context->user_str = NULL;
+	new_context->user = NULL;
+	new_context->role_str = NULL;
+	new_context->role = NULL;
+	new_context->type_str = NULL;
+	new_context->type = NULL;
+	new_context->low_str = NULL;
+	new_context->low = NULL;
+	new_context->high_str = NULL;
+	new_context->high = NULL;
+
+	*context = new_context;	
+
+	return SEPOL_OK;	
+}
+
+int cil_level_init(struct cil_level **level)
+{
+	if (level == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_level *new_level = cil_malloc(sizeof(struct cil_level));
+
+	cil_symtab_datum_init(&new_level->datum);
+	new_level->sens_str = NULL;
+	new_level->sens = NULL;
+	new_level->cat_list_str = NULL;
+	new_level->cat_list = NULL;
+	
+	*level = new_level;
+
+	return SEPOL_OK;
+}
+
+int cil_sens_init(struct cil_sens **sens)
+{
+	if (sens == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_sens *new_sens = cil_malloc(sizeof(struct cil_sens));
+
+	cil_symtab_datum_init(&new_sens->datum);
+	int rc = symtab_init(&new_sens->cats, CIL_SYM_SIZE);
+	if (rc != SEPOL_OK) {
+		free(new_sens);
+		return rc;
+	}
+
+	*sens = new_sens;
+
+	return SEPOL_OK;
+}
+
+int cil_block_init(struct cil_block **block)
+{
+	if (block == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_block *new_block = cil_malloc(sizeof(struct cil_block));
+
+	cil_symtab_datum_init(&new_block->datum);
+	int rc = cil_symtab_array_init(new_block->symtab, CIL_SYM_NUM);
+
+	if (rc == SEPOL_ERR) {
+		cil_destroy_block(new_block);
+		return SEPOL_ERR;
+	}
+
+	new_block->is_abstract = 0;
+	new_block->is_optional = 0;
+	new_block->condition = NULL;
+
+	*block = new_block;
+
+	return SEPOL_OK;
+}
+
+int cil_class_init(struct cil_class **class)
+{
+	if (class == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_class *new_class = cil_malloc(sizeof(struct cil_class));
+
+	cil_symtab_datum_init(&new_class->datum);
+	int rc = symtab_init(&new_class->perms, CIL_SYM_SIZE);
+	if (rc != SEPOL_OK) {
+		free(new_class);
+		return rc;
+	}
+
+	new_class->common = NULL;
+
+	*class = new_class;
+
+	return SEPOL_OK;
+}
+
+int cil_common_init(struct cil_common **common)
+{
+	if (common == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_common *new_common = cil_malloc(sizeof(struct cil_common));
+
+	cil_symtab_datum_init(&new_common->datum);
+	int rc = symtab_init(&new_common->perms, CIL_SYM_SIZE);
+	if (rc != SEPOL_OK) {
+		free(new_common);
+		return rc;
+	}
+
+
+	*common = new_common;
+
+	return SEPOL_OK;
+}
+
+int cil_classcommon_init(struct cil_classcommon **classcommon)
+{
+	if (classcommon == NULL) {
+		return SEPOL_ERR;
+	}
+
+
+	struct cil_classcommon *new_classcommon = cil_malloc(sizeof(struct cil_classcommon));
+
+	new_classcommon->class_str = NULL;
+	new_classcommon->class = NULL;
+	new_classcommon->common_str = NULL;
+	new_classcommon->common = NULL;
+
+	*classcommon = new_classcommon;
+
+	return SEPOL_OK;
+}
+
+int cil_sid_init(struct cil_sid **sid)
+{
+	if (sid == NULL) {
+		return SEPOL_ERR;
+	}
+
+
+	struct cil_sid *new_sid = cil_malloc(sizeof(struct cil_sid));
+
+	cil_symtab_datum_init(&new_sid->datum);
+	new_sid->context_str = NULL;
+	new_sid->context = NULL;
+
+	*sid = new_sid;
+
+	return SEPOL_OK;
+}
+
+int cil_userrole_init(struct cil_userrole **userrole)
+{
+	if (userrole == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_userrole *new_userrole = cil_malloc(sizeof(struct cil_userrole));
+
+	new_userrole->user_str = NULL;
+	new_userrole->user = NULL;
+	new_userrole->role_str = NULL;
+	new_userrole->role = NULL;
+
+	*userrole = new_userrole;
+
+	return SEPOL_OK;
+}
+
+int cil_role_dominates_init(struct cil_role_dominates **role_dominates)
+{
+	if (role_dominates == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_role_dominates *new_role_dominates = cil_malloc(sizeof(struct cil_role_dominates));
+
+	new_role_dominates->role_str = NULL;
+	new_role_dominates->role = NULL;
+	new_role_dominates->dominates_str = NULL;
+	new_role_dominates->dominates = NULL;
+
+	*role_dominates = new_role_dominates;
+
+	return SEPOL_OK;
+}
+
+int cil_roletype_init(struct cil_roletype **roletype)
+{
+	if (roletype == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_roletype *new_roletype = cil_malloc(sizeof(struct cil_roletype));
+
+	new_roletype->role_str = NULL;
+	new_roletype->role = NULL;
+	new_roletype->type_str = NULL;
+	new_roletype->type = NULL;
+	
+	*roletype = new_roletype;
+
+	return SEPOL_OK;
+}
+
+int cil_typeattribute_init(struct cil_typeattribute **typeattribute)
+{
+	if (typeattribute == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_typeattribute *new_typeattribute = cil_malloc(sizeof(struct cil_typeattribute));
+
+	new_typeattribute->type_str = NULL;
+	new_typeattribute->type = NULL;
+	new_typeattribute->attr_str = NULL;
+	new_typeattribute->attr = NULL;
+
+	*typeattribute = new_typeattribute;
+
+	return SEPOL_OK;
+}
+
+int cil_typealias_init(struct cil_typealias **typealias)
+{
+	if (typealias == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_typealias *new_typealias = cil_malloc(sizeof(struct cil_typealias));
+
+	cil_symtab_datum_init(&new_typealias->datum);
+	new_typealias->type_str = NULL;
+	new_typealias->type = NULL;
+
+	*typealias = new_typealias;
+
+	return SEPOL_OK;
+}
+
+int cil_bool_init(struct cil_bool **cilbool)
+{
+	if (cilbool == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_bool *new_cilbool = cil_malloc(sizeof(struct cil_bool));
+
+	cil_symtab_datum_init(&new_cilbool->datum);
+	new_cilbool->value = 0;
+
+	*cilbool = new_cilbool;
+	
+	return SEPOL_OK;
+}
+
+int cil_avrule_init(struct cil_avrule **avrule)
+{
+	if (avrule == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_avrule *new_avrule = cil_malloc(sizeof(struct cil_avrule));
+
+	new_avrule->rule_kind = 0;
+	new_avrule->src_str = NULL;
+	new_avrule->src = NULL;
+	new_avrule->tgt_str = NULL;
+	new_avrule->tgt = NULL;
+	new_avrule->obj_str = NULL;
+	new_avrule->obj = NULL;
+	new_avrule->perms_str = NULL;
+	new_avrule->perms_list = NULL;
+
+	*avrule = new_avrule;
+
+	return SEPOL_OK;
+}
+
+int cil_type_rule_init(struct cil_type_rule **type_rule)
+{
+	if (type_rule == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_type_rule *new_type_rule = cil_malloc(sizeof(struct cil_type_rule));
+
+	new_type_rule->rule_kind = 0;
+	new_type_rule->src_str = NULL;
+	new_type_rule->src = NULL;
+	new_type_rule->tgt_str = NULL;
+	new_type_rule->tgt = NULL;
+	new_type_rule->obj_str = NULL;
+	new_type_rule->obj = NULL;
+	new_type_rule->result_str = NULL;
+	new_type_rule->result = NULL;
+
+	*type_rule = new_type_rule;
+
+	return SEPOL_OK;
+}
+
+int cil_role_trans_init(struct cil_role_trans **role_trans)
+{
+	if (role_trans == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_role_trans *new_role_trans = cil_malloc(sizeof(struct cil_role_trans));
+
+	new_role_trans->src_str = NULL;
+	new_role_trans->src = NULL;
+	new_role_trans->tgt_str = NULL;
+	new_role_trans->tgt = NULL;
+	new_role_trans->result_str = NULL;
+	new_role_trans->result = NULL;
+
+	*role_trans = new_role_trans;
+
+	return SEPOL_OK;
+}
+
+int cil_role_allow_init(struct cil_role_allow **role_allow)
+{
+	if (role_allow == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_role_allow *new_role_allow = cil_malloc(sizeof(struct cil_role_allow));
+
+	new_role_allow->src_str = NULL;
+	new_role_allow->src = NULL;
+	new_role_allow->tgt_str = NULL;
+	new_role_allow->tgt = NULL;
+
+	*role_allow = new_role_allow;
+
+	return SEPOL_OK;
+}
+
+int cil_sensalias_init(struct cil_sensalias **sensalias)
+{
+	if (sensalias == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_sensalias *new_sensalias = cil_malloc(sizeof(struct cil_sensalias));
+
+	cil_symtab_datum_init(&new_sensalias->datum);
+	new_sensalias->sens_str = NULL;
+	new_sensalias->sens = NULL;
+
+	*sensalias = new_sensalias;
+
+	return SEPOL_OK;
+}
+
+int cil_catalias_init(struct cil_catalias **catalias)
+{
+	if (catalias == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_catalias *new_catalias = cil_malloc(sizeof(struct cil_catalias));
+
+	cil_symtab_datum_init(&new_catalias->datum);
+	new_catalias->cat_str = NULL;
+	new_catalias->cat = NULL;
+
+	*catalias = new_catalias;
+
+	return SEPOL_OK;
+}
+
+int cil_catset_init(struct cil_catset **catset)
+{
+	if (catset == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_catset *new_catset = cil_malloc(sizeof(struct cil_catset));
+
+	cil_symtab_datum_init(&new_catset->datum);
+	new_catset->cat_list_str = NULL;
+	new_catset->cat_list = NULL;
+
+	*catset = new_catset;
+
+	return SEPOL_OK;
+}
+
+int cil_senscat_init(struct cil_senscat **senscat)
+{
+	if (senscat == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_senscat *new_senscat = cil_malloc(sizeof(struct cil_senscat));
+
+	new_senscat->sens_str = NULL;
+	new_senscat->cat_list_str = NULL;
+
+	*senscat = new_senscat;
+
+	return SEPOL_OK;
+}
+
+int cil_transform_interface_init(struct cil_transform_interface **transform_interface)
+{
+	if (transform_interface == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_transform_interface *new_transform_interface = cil_malloc(sizeof(struct cil_transform_interface));
+
+	cil_symtab_datum_init(&new_transform_interface->datum);
+	new_transform_interface->params = NULL;
+
+	*transform_interface = new_transform_interface;
+
+	return SEPOL_OK;
+}
+
+int cil_transform_call_init(struct cil_transform_call **transform_call)
+{
+	if (transform_call == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_transform_call *new_transform_call = cil_malloc(sizeof(struct cil_transform_call));
+
+	new_transform_call->params = NULL;
+	new_transform_call->interface_str = NULL;
+
+	*transform_call = new_transform_call;
+
+	return SEPOL_OK;
+}
+
+int cil_transform_inherit_init(struct cil_transform_inherit **transform_inherit)
+{
+	if (transform_inherit == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_transform_inherit *new_transform_inherit = cil_malloc(sizeof(struct cil_transform_inherit));
+
+	cil_symtab_datum_init(&new_transform_inherit->datum);
+	new_transform_inherit->inherit_from_str = NULL;
+	new_transform_inherit->inherit_from = NULL;
+	new_transform_inherit->except = NULL;
+	new_transform_inherit->flavor = 0;
+
+	*transform_inherit = new_transform_inherit;
+
+	return SEPOL_OK;
+}
+
+int cil_filecon_init(struct cil_filecon **filecon)
+{
+	if (filecon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_filecon *new_filecon = cil_malloc(sizeof(struct cil_filecon));
+
+	cil_symtab_datum_init(&new_filecon->datum);
+	new_filecon->context = NULL;
+
+	*filecon = new_filecon;
+
+	return SEPOL_OK;
+}
+
+int cil_portcon_init(struct cil_portcon **portcon)
+{
+	if (portcon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_portcon *new_portcon = cil_malloc(sizeof(struct cil_portcon));
+
+	cil_symtab_datum_init(&new_portcon->datum);
+	new_portcon->context = NULL;
+	new_portcon->proto_str = NULL;
+
+	*portcon = new_portcon;
+
+	return SEPOL_OK;
+}
+
+int cil_fscon_init(struct cil_fscon **fscon)
+{
+	if (fscon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_fscon *new_fscon = cil_malloc(sizeof(struct cil_fscon));
+
+	new_fscon->fs_str = NULL;
+	new_fscon->fs = NULL;
+	new_fscon->path = NULL;
+	new_fscon->context = NULL;
+
+	*fscon = new_fscon;
+
+	return SEPOL_OK;
+}
+
+int cil_fs_use_init(struct cil_fs_use **fs_use)
+{
+	if (fs_use == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_fs_use *new_fs_use = cil_malloc(sizeof(struct cil_fs_use));
+
+	new_fs_use->flavor = 0;
+	new_fs_use->fs_str = NULL;
+	new_fs_use->fs = NULL;
+	new_fs_use->context = NULL;
+
+	*fs_use = new_fs_use;
+
+	return SEPOL_OK;
+}
+
+int cil_mlsconstrain_init(struct cil_mlsconstrain **mlsconstrain)
+{
+	if (mlsconstrain == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_mlsconstrain *new_mlsconstrain = cil_malloc(sizeof(struct cil_mlsconstrain));
+
+	new_mlsconstrain->class_list_str = NULL;
+	new_mlsconstrain->class_list = NULL;
+	new_mlsconstrain->perm_list_str = NULL;
+	new_mlsconstrain->perm_list = NULL;
+	new_mlsconstrain->expr = NULL;
+
+	*mlsconstrain = new_mlsconstrain;
+
+	return SEPOL_OK;
+}
+
+int cil_perm_init(struct cil_perm **perm)
+{
+	if (perm == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_perm *new_perm = cil_malloc(sizeof(struct cil_perm));
+
+	cil_symtab_datum_init(&new_perm->datum);
+
+	*perm = new_perm;
+
+	return SEPOL_OK;
+}
+
+int cil_user_init(struct cil_user **user)
+{
+	if (user == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_user *new_user = cil_malloc(sizeof(struct cil_user));
+
+	cil_symtab_datum_init(&new_user->datum);
+
+	*user = new_user;
+
+	return SEPOL_OK;
+}
+
+int cil_role_init(struct cil_role **role)
+{
+	if (role == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_role *new_role = cil_malloc(sizeof(struct cil_role));
+
+	cil_symtab_datum_init(&new_role->datum);
+
+	*role = new_role;
+
+	return SEPOL_OK;
+}
+
+int cil_type_init(struct cil_type **type)
+{
+	if (type == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_type *new_type = cil_malloc(sizeof(struct cil_type));
+
+	cil_symtab_datum_init(&new_type->datum);
+
+	*type = new_type;
+
+	return SEPOL_OK;
+}
+
+int cil_cat_init(struct cil_cat **cat)
+{
+	if (cat == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_cat *new_cat = cil_malloc(sizeof(struct cil_cat));
+
+	cil_symtab_datum_init(&new_cat->datum);
+
+	*cat = new_cat;
+
+	return SEPOL_OK;
+}
+
+int cil_catorder_init(struct cil_catorder **catorder)
+{
+	if (catorder == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_catorder *new_catorder = cil_malloc(sizeof(struct cil_catorder));
+
+	new_catorder->cat_list_str = NULL;
+
+	*catorder = new_catorder;
+
+	return SEPOL_OK;
+}
+
+int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates)
+{
+	if (sens_dominates == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_sens_dominates *new_sens_dominates = cil_malloc(sizeof(struct cil_sens_dominates));
+
+	new_sens_dominates->sens_list_str = NULL;
+
+	*sens_dominates = new_sens_dominates;
+
+	return SEPOL_OK;
+}
