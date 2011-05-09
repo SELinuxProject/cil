@@ -288,6 +288,11 @@ void test_cil_gen_level_dbnull_neg(CuTest *tc);
 void test_cil_gen_level_currnull_neg(CuTest *tc);
 void test_cil_gen_level_astnull_neg(CuTest *tc);
 
+void test__cil_build_constrain_tree(CuTest *tc);
+void test__cil_build_constrain_tree_multi_constrain(CuTest *tc);
+void test__cil_build_constrain_tree_currnull_neg(CuTest *tc);
+void test__cil_build_constrain_tree_exprnull_neg(CuTest *tc);
+
 void test_cil_gen_mlsconstrain(CuTest *tc);
 void test_cil_gen_mlsconstrain_classset_neg(CuTest *tc);
 void test_cil_gen_mlsconstrain_classset_noclass_neg(CuTest *tc);

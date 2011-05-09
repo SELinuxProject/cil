@@ -9,6 +9,7 @@
 #include "../../src/cil_tree.h"
 
 int __cil_build_ast_node_helper(struct cil_tree_node *, uint32_t *, struct cil_list *);
+int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_tree_node *expr_root);
 
 // First seen in cil_gen_common
 void test_cil_parse_to_list(CuTest *tc) {
@@ -4693,6 +4694,110 @@ void test_cil_gen_level_astnull_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
         int rc = cil_gen_level(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test__cil_build_constrain_tree(CuTest *tc) {
+	char *line[] = {"(", "eq", "12", "h2", ")", NULL};
+	
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_mlsconstrain *test_mlscon;
+	cil_mlsconstrain_init(&test_mlscon);
+	cil_list_init(&test_mlscon->class_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_mlscon->class_list_str, CIL_AST_STR); 
+	cil_list_init(&test_mlscon->perm_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_mlscon->perm_list_str, CIL_AST_STR);
+	cil_tree_init(&test_mlscon->expr);
+
+	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test__cil_build_constrain_tree_multi_constrain(CuTest *tc) {
+	char *line[] = {"(", "or", "(", "domby", "l1", "l2", ")", "(", "==", "t1", "mlsfilewritedown", ")", ")", NULL};
+	
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_mlsconstrain *test_mlscon;
+	cil_mlsconstrain_init(&test_mlscon);
+	cil_list_init(&test_mlscon->class_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_mlscon->class_list_str, CIL_AST_STR); 
+	cil_list_init(&test_mlscon->perm_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_mlscon->perm_list_str, CIL_AST_STR);
+	cil_tree_init(&test_mlscon->expr);
+
+	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test__cil_build_constrain_tree_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", ")", NULL};
+	
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_mlsconstrain *test_mlscon;
+	cil_mlsconstrain_init(&test_mlscon);
+	cil_list_init(&test_mlscon->class_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_mlscon->class_list_str, CIL_AST_STR); 
+	cil_list_init(&test_mlscon->perm_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_mlscon->perm_list_str, CIL_AST_STR);
+	cil_tree_init(&test_mlscon->expr);
+
+	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test__cil_build_constrain_tree_exprnull_neg(CuTest *tc) {
+	char *line[] = {"(", "eq", "12", "h2", ")", NULL};
+	
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node = NULL;
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+	struct cil_mlsconstrain *test_mlscon;
+	cil_mlsconstrain_init(&test_mlscon);
+	cil_list_init(&test_mlscon->class_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_mlscon->class_list_str, CIL_AST_STR); 
+	cil_list_init(&test_mlscon->perm_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_mlscon->perm_list_str, CIL_AST_STR);
+	cil_tree_init(&test_mlscon->expr);
+
+	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
