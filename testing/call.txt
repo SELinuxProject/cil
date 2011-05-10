@@ -1,0 +1,10 @@
+(type foo)
+(type bar)
+(class file (read))
+(macro m ()
+	(type baz)
+	(allow baz foo file (read))
+	(allow baz bar file (read)))
+(block b
+	(type boz)
+	(call m))

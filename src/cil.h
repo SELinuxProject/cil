@@ -52,6 +52,7 @@
 #define CIL_SENSCAT		37
 #define CIL_CLASSCOMMON		38
 #define CIL_MLSCONSTRAIN_NODE	39
+#define CIL_CALL		40
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -69,6 +70,7 @@
 #define CIL_SENSALIAS		CIL_MIN_DECLARATIVE + 14
 #define CIL_CATALIAS		CIL_MIN_DECLARATIVE + 15
 #define CIL_CATSET		CIL_MIN_DECLARATIVE + 16
+#define CIL_MACRO		CIL_MIN_DECLARATIVE + 17
 
 /*
 	Keywords
@@ -97,7 +99,8 @@
 #define CIL_KEY_TYPEMEMBER	"typemember"
 #define CIL_KEY_TYPEATTR	"typeattribute"
 #define CIL_KEY_TYPEALIAS	"typealias"
-#define CIL_KEY_INTERFACE	"interface"
+#define CIL_KEY_MACRO		"macro"
+#define CIL_KEY_CALL		"call"
 #define CIL_KEY_CONTEXT		"context"
 #define CIL_KEY_NETIFCON	"netifcon"
 #define CIL_KEY_SENSITIVITY	"sensitivity"
@@ -136,6 +139,7 @@
 #define CIL_SYM_UNKNOWN		18
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
+
 
 struct cil_db {
 	struct cil_tree *ast;
@@ -338,17 +342,6 @@ struct cil_level {
 	struct cil_list *cat_list;	
 };
 
-struct cil_transform_interface {
-	struct cil_symtab_datum datum;
-	struct cil_list_item *params;
-};
-
-struct cil_transform_call {
-	struct cil_list_item *params;
-	char *interface_str;
-	//interface; 
-};
-
 #define CIL_INHERIT_BLOCK 1
 #define CIL_INHERIT_ROLE  2
 #define CIL_INHERIT_TYPE  3
@@ -442,6 +435,25 @@ struct cil_mlsconstrain {
 	struct cil_list *perm_list_str;
 	struct cil_list *perm_list;
 	struct cil_tree *expr;
+};
+
+struct cil_macro {
+	struct cil_symtab_datum datum;
+	symtab_t symtab[CIL_SYM_NUM];
+	struct cil_list *params;
+};
+
+struct cil_args {
+	char *arg_str;
+	void *arg;
+	char *param_str;
+};
+
+struct cil_call {
+	char *macro_str;
+	struct cil_macro *macro;
+	struct cil_tree *args_tree;
+	struct cil_list *args;
 };
 
 int cil_db_init(struct cil_db **);

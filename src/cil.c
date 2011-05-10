@@ -186,6 +186,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_netifcon(*data);
 			break;
 		}
+		case (CIL_MACRO) : {
+			cil_destroy_macro(*data);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;
@@ -266,6 +270,8 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 	if (ast_node->parent != NULL) {
 		if (ast_node->parent->flavor == CIL_BLOCK && cil_sym_index < CIL_SYM_NUM) 
 			*symtab = &((struct cil_block*)ast_node->parent->data)->symtab[cil_sym_index];
+		else if (ast_node->parent->flavor == CIL_MACRO && cil_sym_index < CIL_SYM_NUM) 
+			*symtab = &((struct cil_macro*)ast_node->parent->data)->symtab[cil_sym_index];
 		else if (ast_node->parent->flavor == CIL_CLASS) 
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
 		else if (ast_node->parent->flavor == CIL_COMMON)
