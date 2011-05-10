@@ -1298,108 +1298,115 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 		new_call->macro_str = NULL;
 	}
 
-	struct cil_list_item *item = new_call->macro->params->head;
-	struct cil_tree_node *pc = new_call->args_tree->root->cl_head;		
+	if (new_call->macro->params != NULL ){
+	
+		struct cil_list_item *item = new_call->macro->params->head;
+		struct cil_tree_node *pc = new_call->args_tree->root->cl_head;		
 
-	if (item != NULL && pc == NULL) {
-		printf("cil_resolve_call1 failed: missing arguments (line: %d)\n", current->line);
-		return SEPOL_ERR;
-	}
-	else if (item == NULL && pc != NULL) {
-		printf("cil_resolve_call1 failed: unexpected arguments (line: %d)\n", current->line);
-		return SEPOL_ERR;
-	}
+		if (item != NULL && pc == NULL) {
+			printf("cil_resolve_call1 failed: missing arguments (line: %d)\n", current->line);
+			return SEPOL_ERR;
+		}
+		else if (item == NULL && pc != NULL) {
+			printf("cil_resolve_call1 failed: unexpected arguments (line: %d)\n", current->line);
+			return SEPOL_ERR;
+		}
 
-	new_call->args = cil_malloc(sizeof(struct cil_list));
-	struct cil_list_item *args_tail = NULL;
-	struct cil_args *new_arg = NULL;
+		new_call->args = cil_malloc(sizeof(struct cil_list));
+		struct cil_list_item *args_tail = NULL;
+		struct cil_args *new_arg = NULL;
 
-	while (item != NULL) {
-		new_arg = cil_malloc(sizeof(struct cil_args));
-		new_arg->arg_str = NULL;
-		new_arg->arg = NULL;
-		new_arg->param_str = NULL;
+		while (item != NULL) {
+			new_arg = cil_malloc(sizeof(struct cil_args));
+			new_arg->arg_str = NULL;
+			new_arg->arg = NULL;
+			new_arg->param_str = NULL;
 
-		switch (item->flavor) {
-			case CIL_TYPE : {
-				new_arg->arg_str = cil_strdup(pc->data);
-				break;
-			}
-			case CIL_ROLE : {
-				new_arg->arg_str = cil_strdup(pc->data);
-				break;
-			}
-			case CIL_USER : {
-				new_arg->arg_str = cil_strdup(pc->data);
-				break;
-			}
-			case CIL_SENS : {
-				new_arg->arg_str = cil_strdup(pc->data);
-				break;
-			}
-			case CIL_CAT : {
-				new_arg->arg_str = cil_strdup(pc->data);
-				break;
-			}
-			case CIL_CATSET : {
-				if (pc->cl_head != NULL) {
-					struct cil_catset *catset = cil_malloc(sizeof(struct cil_catset));
-					rc = cil_fill_catset(pc, catset);
-					if (rc != SEPOL_OK) {
-						printf("cil_resolve_call1: cil_fill_catset failed, rc: %d\n", rc);
-						cil_destroy_catset(catset);
-						return rc;
-					}
-					new_arg->arg = catset;
-				}
-				else
+			switch (item->flavor) {
+				case CIL_TYPE : {
 					new_arg->arg_str = cil_strdup(pc->data);
-				break;
-			}
-			case CIL_LEVEL : {
-				if (pc->cl_head != NULL) {
-					struct cil_level *level = cil_malloc(sizeof(struct cil_level));
-					rc = cil_fill_level(pc, level);
-					if (rc != SEPOL_OK) {
-						printf("cil_resolve_call1: cil_fill_level failed, rc: %d\n", rc);
-						cil_destroy_level(level);
-						return rc;
-					}
-					new_arg->arg = level;
+					break;
 				}
-				else
+				case CIL_ROLE : {
 					new_arg->arg_str = cil_strdup(pc->data);
-				break;
+					break;
+				}
+				case CIL_USER : {
+					new_arg->arg_str = cil_strdup(pc->data);
+					break;
+				}
+				case CIL_SENS : {
+					new_arg->arg_str = cil_strdup(pc->data);
+					break;
+				}
+				case CIL_CAT : {
+					new_arg->arg_str = cil_strdup(pc->data);
+					break;
+				}
+				case CIL_CATSET : {
+					if (pc->cl_head != NULL) {
+						struct cil_catset *catset = cil_malloc(sizeof(struct cil_catset));
+						rc = cil_fill_catset(pc, catset);
+						if (rc != SEPOL_OK) {
+							printf("cil_resolve_call1: cil_fill_catset failed, rc: %d\n", rc);
+							cil_destroy_catset(catset);
+							return rc;
+						}
+						new_arg->arg = catset;
+					}
+					else
+						new_arg->arg_str = cil_strdup(pc->data);
+					break;
+				}
+				case CIL_LEVEL : {
+					if (pc->cl_head != NULL) {
+						struct cil_level *level = cil_malloc(sizeof(struct cil_level));
+						rc = cil_fill_level(pc, level);
+						if (rc != SEPOL_OK) {
+							printf("cil_resolve_call1: cil_fill_level failed, rc: %d\n", rc);
+							cil_destroy_level(level);
+							return rc;
+						}
+						new_arg->arg = level;
+					}
+					else
+						new_arg->arg_str = cil_strdup(pc->data);
+					break;
+				}
+				case CIL_CLASS : {
+					new_arg->arg_str = cil_strdup(pc->data);
+					break;
+				}
+				//permset and IP
+				default : {
+					printf("cil_resolve_call1: unexpected flavor: %d\n", item->flavor);
+					return SEPOL_ERR;
+				}
 			}
-			case CIL_CLASS : {
-				new_arg->arg_str = cil_strdup(pc->data);
-				break;
-			}
-			//permset and IP
-			default : {
-				printf("cil_resolve_call1: unexpected flavor: %d\n", item->flavor);
-				return SEPOL_ERR;
-			}
-		}
 
-		if (args_tail == NULL) {
-			new_call->args->head = cil_malloc(sizeof(struct cil_list_item));
-			new_call->args->head->flavor = item->flavor;
-			new_call->args->head->data = new_arg;
-			args_tail = new_call->args->head;
+			if (args_tail == NULL) {
+				new_call->args->head = cil_malloc(sizeof(struct cil_list_item));
+				new_call->args->head->flavor = item->flavor;
+				new_call->args->head->data = new_arg;
+				args_tail = new_call->args->head;
+			}
+			else {
+				args_tail->next = cil_malloc(sizeof(struct cil_list_item));
+				args_tail->next->flavor = item->flavor;
+				args_tail->next->data = new_arg;
+				args_tail = args_tail->next;
+			}
+	
+			pc = pc->next;
+			item = item->next;
 		}
-		else {
-			args_tail->next = cil_malloc(sizeof(struct cil_list_item));
-			args_tail->next->flavor = item->flavor;
-			args_tail->next->data = new_arg;
-			args_tail = args_tail->next;
-		}
-
-		pc = pc->next;
-		item = item->next;
 	}
 
-	cil_copy_ast(db, macro_node, current);
+	rc = cil_copy_ast(db, macro_node, current);
+	if (rc != SEPOL_OK) {
+		printf("cil_resolve_call1: cil_copy_ast failed, rc: %d\n", rc);
+		return rc;
+	}
 
 	return SEPOL_OK;
 }
@@ -1736,7 +1743,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 int __cil_resolve_ast_branch_helper(struct cil_tree_node *current, struct cil_list *other)
 {
 	if (other->head != NULL && other->head->next != NULL && other->head->next->next != NULL){
-		if (current->parent->parent != NULL && current->parent->parent->flavor == CIL_CALL) {
+		if (current->parent != NULL && current->parent->parent != NULL && current->parent->parent->flavor == CIL_CALL) {
 			other->head->next->next->data = current->parent->parent->data;
 			other->head->next->next->flavor = CIL_CALL;
 		}
