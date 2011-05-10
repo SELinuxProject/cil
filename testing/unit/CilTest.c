@@ -656,6 +656,17 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_context);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_user_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_role_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_type_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_low_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_high_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_low_unnamed_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_high_unnamed_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_lownull_unnamed_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_highnull_unnamed_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_srcdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_tgtdecl_neg);

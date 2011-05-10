@@ -46,6 +46,17 @@ void test_cil_resolve_mlsconstrain_perm_neg(CuTest *);
 void test_cil_resolve_mlsconstrain_perm_resolve_neg(CuTest *);
 void test_cil_resolve_mlsconstrain_expr_neg(CuTest *);
 
+void test_cil_resolve_context(CuTest *);
+void test_cil_resolve_context_user_neg(CuTest *);
+void test_cil_resolve_context_role_neg(CuTest *);
+void test_cil_resolve_context_type_neg(CuTest *);
+void test_cil_resolve_context_low_neg(CuTest *);
+void test_cil_resolve_context_high_neg(CuTest *);
+void test_cil_resolve_context_low_unnamed_neg(CuTest *);
+void test_cil_resolve_context_high_unnamed_neg(CuTest *);
+void test_cil_resolve_context_lownull_unnamed_neg(CuTest *);
+void test_cil_resolve_context_highnull_unnamed_neg(CuTest *);
+
 void test_cil_resolve_roletrans(CuTest *);
 void test_cil_resolve_roletrans_srcdecl_neg(CuTest *);
 void test_cil_resolve_roletrans_tgtdecl_neg(CuTest *);
