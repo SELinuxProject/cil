@@ -1,8 +1,9 @@
 (class file (read))
-(common file (write))
+(common file (write ioctl create getattr setattr lock))
 (classcommon file file)
 
 (type foo)
+(type foo_t)
 (type bar_t)
 (type foobar_t)
 (type result_t)
@@ -17,9 +18,11 @@
 (sensitivityalias s0 alias)
 (category c0)
 (category c1)
-(categoryorder (c0 c1))
+(category c2)
+(categoryorder (c0 c1 c2))
 (categoryalias c0 red)
 (sensitivitycategory s0 (c0 c1 c2))
+(sensitivitycategory s1 (c0 c1))
 (level high s0 (c0))
 (context sid_con (adm_u adm_r bar_t high high)) 
 (context blah_con (adm_u adm_r bar_t (s0 (c0)) (s1 (c0))))
@@ -28,7 +31,7 @@
 (sid asid sid_con)
 (sid init_sid (adm_u adm_r bar_t (s0 (c0)) high))
 
-(typetransition foo_t bar_t foobar_t result_t) 
+(typetransition foo_t bar_t file result_t) 
 
 (block a
 	(class file (read write execute_no_trans))
@@ -40,7 +43,21 @@
 	(typealias blah fooblah)
 	(type blah2))
 
+(attribute mlsfilereadtoclr)
+(attribute mlsfileread)
+(attribute mlstrustedobject)
 
 (mlsconstrain (file)
 	(ioctl read write create getattr setattr lock)
 	(or (or (dom l1 l2)(and (== t1 mlsfilereadtoclr)(dom h1 l2)))(or (== t1 mlsfileread)(== t2 mlstrustedobject))))
+
+(macro my_macro ((type baz)(type boz))
+	(allow foo bar file (read)))
+
+;(macro my_macro ((type baz)(type baz))
+;	(allow foo bar file (read)))
+
+(block b
+	(type b1)
+	(type b2)
+	(call my_macro (b1 b2)))

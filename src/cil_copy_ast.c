@@ -697,7 +697,11 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 		case CIL_MLSCONSTRAIN_NODE : {
 			new->data = cil_strdup(((char*)orig->data));
 			break;	
-		}	
+		}
+		case CIL_PARSE_NODE : {
+			new->data = cil_strdup(((char*)orig->data));
+			break;
+		}
 		default : return SEPOL_OK;
 	}
 

@@ -56,6 +56,7 @@ int cil_gen_catalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_no
 void cil_destroy_catalias(struct cil_catalias *);
 int cil_set_to_list(struct cil_tree_node *, struct cil_list *);
 int cil_gen_catset(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_fill_catset(struct cil_tree_node *, struct cil_catset *);
 void cil_destroy_catset(struct cil_catset *);
 int cil_gen_catorder(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_catorder(struct cil_catorder *);
@@ -73,6 +74,8 @@ int cil_fill_context(struct cil_tree_node *, struct cil_context *);
 void cil_destroy_context(struct cil_context *);
 int cil_gen_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_netifcon(struct cil_netifcon *);
+int cil_gen_macro(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_macro(struct cil_macro *);
 
 int cil_build_ast(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 

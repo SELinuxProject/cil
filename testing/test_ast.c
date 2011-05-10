@@ -74,37 +74,6 @@ int main(int argc, char *argv[])
 		cil_tree_destroy(&parse_tree);
 		printf("Parse tree destroyed\n\n");
 
-
-		printf("----------------------------------------------\n\n");
-		printf("Copying AST \n");
-		if (cil_copy_ast(copy_db, db->ast->root, copy_ast->root)) {
-			printf("Failed to copy ast, exiting\n");
-			return SEPOL_ERR;
-		}
-		printf("copy complete\n");
-		cil_tree_print(copy_ast->root, 0);
-
-/*		printf("----------------------------------------------\n\n");
-		printf("Resolving ast ... 1\n\n");
-		if (cil_resolve_ast(db, db->ast->root, 1)) {
-			printf("Failed to resolve ast, exiting\n");
-			return SEPOL_ERR;
-		}
-
-		printf("----------------------------------------------\n\n");
-		printf("Resolving ast ... 2\n\n");
-		if (cil_resolve_ast(db, db->ast->root, 2)) {
-			printf("Failed to resolve ast, exiting\n");
-			return SEPOL_ERR;
-		}
-
-		printf("----------------------------------------------\n\n");
-		printf("Resolving ast ... 3\n\n");
-		if (cil_resolve_ast(db, db->ast->root, 3)) {
-			printf("Failed to resolve ast, exiting\n");
-			return SEPOL_ERR;
-		}*/
-		
 		printf("----------------------------------------------\n\n");
 		printf("Resolve ast ...\n\n");
 		if (cil_resolve_ast(db, db->ast->root)) {

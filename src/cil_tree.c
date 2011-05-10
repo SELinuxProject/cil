@@ -17,11 +17,22 @@ int cil_tree_init(struct cil_tree **tree)
 
 void cil_tree_destroy(struct cil_tree **tree)
 {
-	struct cil_tree_node *node = (*tree)->root;
+	cil_tree_subtree_destroy((*tree)->root);
+	*tree = NULL;
+}
+
+void cil_tree_subtree_destroy(struct cil_tree_node *node)
+{
+	struct cil_tree_node *start_node = node;
 	struct cil_tree_node *next = NULL;
 
-	while(node != NULL)
-	{
+	if (node == NULL)
+		return;
+
+	if (node->cl_head != NULL)
+		node = node->cl_head;
+
+	while (node != start_node) {
 		//printf("##### node: %d#####\n", (char*)node->flavor);
 		if (node->cl_head != NULL){
 			next = node->cl_head;
@@ -45,7 +56,8 @@ void cil_tree_destroy(struct cil_tree **tree)
 		node = next;
 	}
 
-	*tree = NULL;
+	//Destroy start node
+	cil_tree_node_destroy(&node);
 }
 
 int cil_tree_node_init(struct cil_tree_node **node)
@@ -671,6 +683,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 				printf(") \n\t\t");
 				cil_print_expr_tree(mlscon->expr->root);
+				printf("\n");
 				return;
 			}
 			case CIL_CONTEXT : {
@@ -711,7 +724,56 @@ void cil_tree_print_node(struct cil_tree_node *node)
 	
 				return;
 			}
-	
+			case CIL_MACRO : {
+				struct cil_macro *macro = node->data;
+				printf("MACRO %s:", macro->datum.name);
+				if (macro->params != NULL && macro->params->head != NULL) {
+					struct cil_list_item *curr_param = macro->params->head;
+					printf(" parameters: (");
+					while (curr_param != NULL) {
+						printf(" flavor: %d, string: %s;", curr_param->flavor, (char*)curr_param->data);
+
+						curr_param = curr_param->next;
+					}
+					printf(" )\n");
+				}
+				return;
+			}
+
+			case CIL_CALL : {
+				struct cil_call *call = node->data;
+				printf("CALL: macro name:");
+				if (call->macro_str != NULL)
+					printf(" %s", call->macro_str);
+				else
+					printf(" %s", call->macro->datum.name);
+
+				if (call->args != NULL) {
+					printf(", args:( ");
+					struct cil_list_item *item = call->args->head;
+					while(item != NULL) {
+						if (((struct cil_args*)item->data)->arg_str != NULL) {
+							switch (item->flavor) {
+							case CIL_TYPE : printf("type:"); break;
+							case CIL_USER : printf("user:"); break;
+							case CIL_ROLE : printf("role:"); break;
+							case CIL_SENS : printf("sensitivity:"); break;
+							case CIL_CAT : printf("category:"); break;
+							case CIL_CATSET : printf("categoryset:"); break;
+							case CIL_LEVEL : printf("level:"); break;
+							case CIL_CLASS : printf("class:"); break;
+							}
+							printf("%s ", ((struct cil_args*)item->data)->arg_str);
+						}
+						else if (((struct cil_args*)item->data)->arg != NULL)
+							cil_tree_print_node(((struct cil_args*)item->data)->arg);
+						item = item->next;
+					}
+					printf(")");
+				}
+				printf("\n");
+				return;
+			}	
 			default : {
 				printf("CIL FLAVOR: %d\n", node->flavor);
 				return;
