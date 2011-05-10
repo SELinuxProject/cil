@@ -52,7 +52,7 @@
 	(or (or (dom l1 l2)(and (== t1 mlsfilereadtoclr)(dom h1 l2)))(or (== t1 mlsfileread)(== t2 mlstrustedobject))))
 
 (macro my_macro ((type baz)(type boz))
-	(allow foo bar file (read)))
+	(allow baz boz file (read)))
 
 ;(macro my_macro ((type baz)(type baz))
 ;	(allow foo bar file (read)))

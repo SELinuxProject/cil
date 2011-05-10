@@ -267,11 +267,20 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 	if (db == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
+	int rc = SEPOL_ERR;
+
 	if (ast_node->parent != NULL) {
 		if (ast_node->parent->flavor == CIL_BLOCK && cil_sym_index < CIL_SYM_NUM) 
 			*symtab = &((struct cil_block*)ast_node->parent->data)->symtab[cil_sym_index];
-		else if (ast_node->parent->flavor == CIL_MACRO && cil_sym_index < CIL_SYM_NUM) 
+		else if (ast_node->parent->flavor == CIL_MACRO  && cil_sym_index < CIL_SYM_NUM) 
 			*symtab = &((struct cil_macro*)ast_node->parent->data)->symtab[cil_sym_index];
+		else if (ast_node->parent->flavor == CIL_CALL  && cil_sym_index < CIL_SYM_NUM) {
+			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
+			if (rc != SEPOL_OK) {
+				printf("cil_get_parent_symtab: cil_call failed, rc: %d\n", rc);
+				return rc;
+			}
+		}
 		else if (ast_node->parent->flavor == CIL_CLASS) 
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
 		else if (ast_node->parent->flavor == CIL_COMMON)
