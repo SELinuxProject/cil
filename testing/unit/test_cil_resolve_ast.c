@@ -464,6 +464,108 @@ void test_cil_resolve_senscat_currrangecat_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
 }
 
+void test_cil_resolve_mlsconstrain(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
+			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "l2", "s0", "(", "c1", ")", ")",
+			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_mlsconstrain_class_neg(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "l2", "s0", "(", "c1", ")", ")",
+			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_mlsconstrain_perm_neg(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", ")", ")",
+			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "l2", "s0", "(", "c1", ")", ")",
+			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_mlsconstrain_perm_resolve_neg(CuTest *tc) {
+        char *line[] = {"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "l2", "s0", "(", "c1", ")", ")",
+			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "foo", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_mlsconstrain_expr_neg(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
+			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "l2", "s0", "(", "c1", ")", ")",
+			"(", "level", "foo", "s0", "(", "c1", ")", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "32", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_roletrans(CuTest *tc) {
 	char *line[] = {"(", "role", "foo_r", ")",
 			"(", "type", "bar_t", ")",
@@ -1778,6 +1880,75 @@ void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertPtrEquals(tc, NULL, finished);
 }
+
+void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
+			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "l2", "s0", "(", "c1", ")", ")",
+			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 3;
+	other->head->next->data = &pass;
+
+	uint32_t *finished = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, finished, other);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
+}
+
+void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "read", ")", ")",
+			"(", "class", "dir", "(", "read", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "level", "l2", "s0", "(", "c1", ")", ")",
+			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 3;
+	other->head->next->data = &pass;
+
+	uint32_t *finished = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, finished, other);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
+}
+
 
 void test_cil_resolve_ast_node_helper_senscat(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
