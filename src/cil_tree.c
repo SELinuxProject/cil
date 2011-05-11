@@ -832,6 +832,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}	
+
+			case CIL_OPTIONAL : {
+				struct cil_optional *optional = node->data;
+				printf("OPTIONAL: %s\n", optional->datum.name);
+				return;
+			}
+
 			default : {
 				printf("CIL FLAVOR: %d\n", node->flavor);
 				return;

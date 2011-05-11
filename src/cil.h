@@ -135,6 +135,7 @@
 #define CIL_KEY_EQ		"=="
 #define CIL_KEY_NEQ		"!="
 #define CIL_KEY_ELSE		"else"
+#define CIL_KEY_OPTIONAL	"optional"
 
 /*
 	Symbol Table Array Indices
@@ -157,10 +158,10 @@
 #define CIL_SYM_CONTEXTS	15
 #define CIL_SYM_LEVELS		16
 #define CIL_SYM_POLICYCAPS	17
+#define CIL_SYM_OPTIONALS	18
 
-#define CIL_SYM_NUM		18
-#define CIL_SYM_UNKNOWN		19
-
+#define CIL_SYM_NUM		19
+#define CIL_SYM_UNKNOWN		20
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
@@ -185,6 +186,14 @@ struct cil_block {
 	uint16_t is_abstract;
 	/* TODO CDS we need to figure out how to handle conditionals */
 	char *condition;
+};
+
+#define CIL_OPT_ENABLED 0
+#define CIL_OPT_DISABLING 1
+#define CIL_OPT_DISABLED 2
+struct cil_optional {
+	struct cil_symtab_datum datum;
+	int state;
 };
 
 struct cil_class {
@@ -546,5 +555,6 @@ int cil_cat_init(struct cil_cat **cat);
 int cil_catorder_init(struct cil_catorder **catorder);
 int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates);
 int cil_call_init(struct cil_call **call);
+int cil_optional_init(struct cil_optional **optional);
 
 #endif

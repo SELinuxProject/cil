@@ -84,6 +84,8 @@ void cil_destroy_call(struct cil_call *);
 void cil_destroy_args(struct cil_args *);
 int cil_gen_policycap(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_policycap(struct cil_policycap *);
+int cil_gen_optional(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_optional(struct cil_optional *);
 
 int cil_build_ast(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 

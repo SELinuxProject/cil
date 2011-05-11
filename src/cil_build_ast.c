@@ -1974,6 +1974,44 @@ void cil_destroy_call(struct cil_call *call)
 		cil_list_destroy(&call->args, 1);
 }
 
+int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL) {
+		printf("Invalid optional declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	char *name;
+	struct cil_optional *optional;
+	int rc = cil_optional_init(&optional);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+	
+	optional->state = CIL_OPT_ENABLED;
+	name = (char *)parse_current->next->data;
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)optional, (hashtab_key_t)name, CIL_SYM_OPTIONALS, CIL_OPTIONAL);
+	if (rc != SEPOL_OK) 
+		goto gen_optional_cleanup;
+
+	return SEPOL_OK;
+
+	gen_optional_cleanup:	
+		cil_destroy_optional(optional);
+		return rc;
+
+}
+
+void cil_destroy_optional(struct cil_optional *optional)
+{
+	cil_symtab_datum_destroy(optional->datum);
+	free(optional);
+}
+
 void cil_destroy_args(struct cil_args *args)
 {
 	if (args->arg_str != NULL)
@@ -2371,6 +2409,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 				*finished = 1;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_OPTIONAL)) {
+				rc = cil_gen_optional(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_optional failed, rc: %d\n", rc);
+					return rc;
+				}
 			}
 			else {
 				printf("Error: Unknown keyword %s\n", (char*)parse_current->data);

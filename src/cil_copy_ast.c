@@ -617,6 +617,27 @@ void cil_copy_call(struct cil_db *db, struct cil_call *orig, struct cil_call **c
 
 }
 
+int cil_copy_optional(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_optional *new;
+	int rc = cil_optional_init(&new);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	char *key = ((struct cil_symtab_datum *)orig->data)->name;
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_optional: cil_symtab_insert failed, rc: %d\n", rc);
+		cil_destroy_optional(new);
+		return rc;
+	}
+
+	copy->data = new;
+
+	return SEPOL_OK;
+}
+
 int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, uint32_t index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym))
 {
 	int rc = SEPOL_ERR;
@@ -865,6 +886,14 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 		}
 		case CIL_PARSE_NODE : {
 			new->data = cil_strdup(((char*)orig->data));
+			break;
+		}
+		case CIL_OPTIONAL : {
+			rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_OPTIONALS, &cil_copy_optional);
+			if (rc != SEPOL_OK) {
+				free(new);
+				return rc;
+			}
 			break;
 		}
 		default : return SEPOL_OK;

@@ -211,6 +211,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_args(*data);
 			break;
 		}
+		case (CIL_OPTIONAL) : {
+			cil_destroy_optional(*data);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;
@@ -310,6 +314,13 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_booleanif failed, rc: %d\n", rc);
+				return rc;
+			}
+		}
+		else if (ast_node->parent->flavor == CIL_OPTIONAL && cil_sym_index < CIL_SYM_NUM) {
+			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
+			if (rc != SEPOL_OK) {
+				printf("cil_get_parent_symtab: cil_optional failed, rc: %d\n", rc);
 				return rc;
 			}
 		}
@@ -983,6 +994,21 @@ int cil_call_init(struct cil_call **call)
 	new_call->args = NULL;
 
 	*call = new_call;
+
+	return SEPOL_OK;
+}
+
+int cil_optional_init(struct cil_optional **optional)
+{
+	if (optional == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_optional *new_optional = cil_malloc(sizeof(struct cil_optional));
+	cil_symtab_datum_init(&new_optional->datum);
+	new_optional->state = CIL_OPT_ENABLED;
+
+	*optional = new_optional;
 
 	return SEPOL_OK;
 }
