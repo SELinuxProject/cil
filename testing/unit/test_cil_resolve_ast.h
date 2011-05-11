@@ -40,6 +40,11 @@ void test_cil_resolve_senscat_category_neg(CuTest *);
 void test_cil_resolve_senscat_currrangecat(CuTest *);
 void test_cil_resolve_senscat_currrangecat_neg(CuTest *);
 
+void test_cil_resolve_level(CuTest *);
+void test_cil_resolve_level_sens_neg(CuTest *);
+void test_cil_resolve_level_cat_neg(CuTest *);
+void test_cil_resolve_level_senscat_neg(CuTest *);
+
 void test_cil_resolve_mlsconstrain(CuTest *);
 void test_cil_resolve_mlsconstrain_class_neg(CuTest *);
 void test_cil_resolve_mlsconstrain_perm_neg(CuTest *);
@@ -147,8 +152,14 @@ void test_cil_resolve_ast_node_helper_catalias_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_catset(CuTest *);
 void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *);
 
+void test_cil_resolve_ast_node_helper_level(CuTest *);
+void test_cil_resolve_ast_node_helper_level_neg(CuTest *);
+
 void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *);
 void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *);
+
+void test_cil_resolve_ast_node_helper_context(CuTest *);
+void test_cil_resolve_ast_node_helper_context_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_senscat(CuTest *tc);
 void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc);

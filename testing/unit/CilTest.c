@@ -648,6 +648,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_senscat);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_senscat_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_level);
+	SUITE_ADD_TEST(suite, test_cil_resolve_level_sens_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_level_cat_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_level_senscat_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_level);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_level_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_mlsconstrain);
 	SUITE_ADD_TEST(suite, test_cil_resolve_mlsconstrain_class_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_mlsconstrain_perm_neg);
@@ -666,6 +673,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_high_unnamed_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_lownull_unnamed_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_highnull_unnamed_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_context);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_context_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_srcdecl_neg);
