@@ -251,6 +251,77 @@ void test_cil_resolve_dominance_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_resolve_cat_list(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "somecats", "(", "c0", "c1", "c2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_list *test_cat_list;
+	cil_list_init(&test_cat_list);
+
+	struct cil_catset *test_catset = (struct cil_catset*)test_db->ast->root->cl_head->next->next->next->data;
+
+	int rc = cil_resolve_cat_list(test_db, test_db->ast->root->cl_head->next->next->next, test_catset->cat_list_str, test_cat_list);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_cat_list_catrange(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryorder", "(", "c0", "c1", "c2", ")", ")",
+			"(", "categoryset", "somecats", "(", "c0", "(", "c1", "c2", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_list *test_cat_list;
+	cil_list_init(&test_cat_list);
+
+	struct cil_catset *test_catset = (struct cil_catset*)test_db->ast->root->cl_head->next->next->next->next->data;
+
+	int rc = cil_resolve_cat_list(test_db, test_db->ast->root->cl_head->next->next->next->next, test_catset->cat_list_str, test_cat_list);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_cat_list_catname_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c5", ")",
+			"(", "category", "c6", ")",
+			"(", "category", "c7", ")",
+			"(", "categoryorder", "(", "c0", "c1", "c2", ")", ")",
+			"(", "categoryset", "somecats", "(", "c0", "(", "c1", "c2", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_list *test_cat_list;
+	cil_list_init(&test_cat_list);
+
+	struct cil_catset *test_catset = (struct cil_catset*)test_db->ast->root->cl_head->next->next->next->next->data;
+	
+	int rc = cil_resolve_cat_list(test_db, test_db->ast->root->cl_head->next->next->next->next, test_catset->cat_list_str, test_cat_list);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_catset(CuTest *tc) {
 	char *line[] = {"(", "category", "c0", ")",
 			"(", "category", "c1", ")",

@@ -633,6 +633,10 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dominance_neg);
 	//TODO: test for __cil_set_order
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list);
+	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catrange);
+	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catname_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_catset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_catset_catlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catset);
