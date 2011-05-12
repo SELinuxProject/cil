@@ -827,6 +827,9 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct
 
 int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *cat_list, struct cil_list *res_cat_list)
 {
+	if (cat_list == NULL || res_cat_list == NULL) 
+		return SEPOL_ERR;
+
 	struct cil_tree_node *cat_node = NULL;
 	struct cil_list *sub_list;
 	struct cil_list_item *new_item;
