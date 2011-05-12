@@ -774,7 +774,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_list_sublist);
 	SUITE_ADD_TEST(suite, test_cil_copy_list_sublist_extra);
 	SUITE_ADD_TEST(suite, test_cil_copy_list_orignull_neg);*/
-
 	
+	SUITE_ADD_TEST(suite, test_cil_copy_class);
+
 	return suite;
 }
