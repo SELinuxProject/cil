@@ -19,6 +19,7 @@
 #include "test_cil_build_ast.h"
 #include "test_cil_resolve_ast.h"
 #include "test_cil_fqn.h"
+#include "test_cil_copy_ast.h"
 
 void set_cil_file_data(struct cil_file_data **data) {
 	struct cil_file_data *new_data = malloc(sizeof(struct cil_file_data));
@@ -767,6 +768,13 @@ CuSuite* CilTreeGetSuite() {
 	/* test_cil_fqn.c */
 	SUITE_ADD_TEST(suite, test_cil_qualify_name);
 	SUITE_ADD_TEST(suite, test_cil_qualify_name_cil_flavor);
+
+	/* test cil_copy_ast.c */
+	/*SUITE_ADD_TEST(suite, test_cil_copy_list);
+	SUITE_ADD_TEST(suite, test_cil_copy_list_sublist);
+	SUITE_ADD_TEST(suite, test_cil_copy_list_sublist_extra);
+	SUITE_ADD_TEST(suite, test_cil_copy_list_orignull_neg);*/
+
 	
 	return suite;
 }
