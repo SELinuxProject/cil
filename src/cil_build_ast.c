@@ -634,6 +634,10 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 			printf("Invalid attribute declaration (line %d)\n", parse_current->line);
 			return SEPOL_ERR;
 		}
+		else {
+			printf("Error while handling unknown declaration (line %d)\n", parse_current->line);
+			return SEPOL_ERR;
+		}
 	}
 
 	int rc = SEPOL_ERR;
