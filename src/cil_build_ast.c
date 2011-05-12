@@ -928,6 +928,7 @@ int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl
 	struct cil_list_item *new_item;
 	struct cil_list_item *list_tail;
 	struct cil_tree_node *curr = parse_current;
+	int rc = SEPOL_ERR;
 	
 	if (parse_current->cl_head == NULL) {
 		printf("Error: Invalid list\n");
@@ -945,7 +946,11 @@ int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl
 			cil_list_init(&sub_list);
 			new_item->flavor = CIL_LIST;
 			new_item->data = sub_list;
-			cil_set_to_list(curr, sub_list);
+			rc = cil_set_to_list(curr, sub_list);
+			if (rc != SEPOL_OK) {
+				printf("Error while building sublist\n");
+				return rc;
+			}
 		}
 		if (ast_cl->head == NULL)
 			ast_cl->head = new_item;
