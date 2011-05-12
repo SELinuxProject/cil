@@ -10,4 +10,6 @@ void test_cil_copy_list_orignull_neg(CuTest *);
 
 void test_cil_copy_class(CuTest *);
 
+void test_cil_copy_type(CuTest *);
+
 #endif
