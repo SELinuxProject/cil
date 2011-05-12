@@ -152,3 +152,29 @@ void test_cil_copy_type(CuTest *tc) {
 		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_avrule(CuTest *tc) {
+	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_tree_node *test_current;
+	test_current = test_tree->root->cl_head->cl_head;
+
+	cil_gen_avrule(test_current, test_ast_node, CIL_AVRULE_ALLOWED);
+
+	struct cil_avrule *test_copy;
+	cil_avrule_init(&test_copy);
+
+	cil_copy_avrule((struct cil_avrule *)test_ast_node->data, &test_copy);
+}
+
