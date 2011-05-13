@@ -144,8 +144,6 @@ CuSuite* CilTreeGetSuite() {
 
 
 	/* test_cil_list.c */
-	SUITE_ADD_TEST(suite, test_cil_list_init);
-	SUITE_ADD_TEST(suite, test_cil_list_item_init);
 	SUITE_ADD_TEST(suite, test_cil_list_append_item);
 	SUITE_ADD_TEST(suite, test_cil_list_append_item_append);
 	SUITE_ADD_TEST(suite, test_cil_list_append_item_append_extra);

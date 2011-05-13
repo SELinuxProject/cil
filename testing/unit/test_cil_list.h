@@ -3,7 +3,6 @@
 
 #include "CuTest.h"
 
-void test_cil_list_init(CuTest *);
 void test_cil_list_item_init(CuTest *);
 void test_cil_list_append_item(CuTest *);
 void test_cil_list_append_item_append(CuTest *);

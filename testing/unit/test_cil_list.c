@@ -12,14 +12,6 @@ void test_cil_list_init(CuTest *tc) {
 	free(test_avrule);   
 }
 
-void test_cil_list_item_init(CuTest *tc) {
-	struct cil_transform_interface *test_transform_interface;
-	cil_transform_interface_init(&test_transform_interface);
-
-	cil_list_item_init(&test_transform_interface->params);
-	CuAssertPtrNotNull(tc, test_transform_interface->params);
-}
-
 void test_cil_list_append_item(CuTest *tc) {
         char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
 
