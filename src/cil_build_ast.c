@@ -994,7 +994,9 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		printf("Failed to fill categoryset\n");
 		goto gen_catset_cleanup;
 	}
-	
+
+	return SEPOL_OK;
+
 	gen_catset_cleanup:
 		cil_destroy_catset(catset);
 		return rc;	
