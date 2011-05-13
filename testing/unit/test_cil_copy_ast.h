@@ -18,4 +18,6 @@ void test_cil_copy_cat(CuTest *);
 
 void test_cil_copy_catalias(CuTest *);
 
+void test_cil_copy_level(CuTest *);
+
 #endif
