@@ -1383,7 +1383,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 					return SEPOL_ERR;
 				}
 			}
-			new_arg->param_str = cil_strdup(item->data);
+			new_arg->param_str = item->data;
 
 			if (args_tail == NULL) {
 				new_call->args->head = cil_malloc(sizeof(struct cil_list_item));
@@ -1404,6 +1404,8 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 			item = item->next;
 		}
 	}
+
+	cil_tree_destroy(&new_call->args_tree);
 
 	rc = cil_copy_ast(db, macro_node, current);
 	if (rc != SEPOL_OK) {

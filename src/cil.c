@@ -190,6 +190,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_macro(*data);
 			break;
 		}
+		case (CIL_CALL) : {
+			cil_destroy_call(*data);
+			break;
+		}
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;

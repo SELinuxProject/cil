@@ -76,6 +76,9 @@ int cil_gen_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_no
 void cil_destroy_netifcon(struct cil_netifcon *);
 int cil_gen_macro(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_macro(struct cil_macro *);
+int cil_gen_call(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_call(struct cil_call *);
+void cil_destroy_args(struct cil_args *);
 
 int cil_build_ast(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 
