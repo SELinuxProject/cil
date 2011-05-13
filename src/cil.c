@@ -748,56 +748,6 @@ int cil_senscat_init(struct cil_senscat **senscat)
 	return SEPOL_OK;
 }
 
-int cil_transform_interface_init(struct cil_transform_interface **transform_interface)
-{
-	if (transform_interface == NULL) {
-		return SEPOL_ERR;
-	}
-
-	struct cil_transform_interface *new_transform_interface = cil_malloc(sizeof(struct cil_transform_interface));
-
-	cil_symtab_datum_init(&new_transform_interface->datum);
-	new_transform_interface->params = NULL;
-
-	*transform_interface = new_transform_interface;
-
-	return SEPOL_OK;
-}
-
-int cil_transform_call_init(struct cil_transform_call **transform_call)
-{
-	if (transform_call == NULL) {
-		return SEPOL_ERR;
-	}
-
-	struct cil_transform_call *new_transform_call = cil_malloc(sizeof(struct cil_transform_call));
-
-	new_transform_call->params = NULL;
-	new_transform_call->interface_str = NULL;
-
-	*transform_call = new_transform_call;
-
-	return SEPOL_OK;
-}
-
-int cil_transform_inherit_init(struct cil_transform_inherit **transform_inherit)
-{
-	if (transform_inherit == NULL) {
-		return SEPOL_ERR;
-	}
-
-	struct cil_transform_inherit *new_transform_inherit = cil_malloc(sizeof(struct cil_transform_inherit));
-
-	cil_symtab_datum_init(&new_transform_inherit->datum);
-	new_transform_inherit->inherit_from_str = NULL;
-	new_transform_inherit->inherit_from = NULL;
-	new_transform_inherit->except = NULL;
-	new_transform_inherit->flavor = 0;
-
-	*transform_inherit = new_transform_inherit;
-
-	return SEPOL_OK;
-}
 
 int cil_filecon_init(struct cil_filecon **filecon)
 {
