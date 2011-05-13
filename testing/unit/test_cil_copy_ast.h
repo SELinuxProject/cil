@@ -14,4 +14,6 @@ void test_cil_copy_type(CuTest *);
 
 void test_cil_copy_avrule(CuTest *);
 
+void test_cil_copy_cat(CuTest *);
+
 #endif
