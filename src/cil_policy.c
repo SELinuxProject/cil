@@ -692,7 +692,7 @@ int cil_gen_policy(struct cil_db *db)
 	other->head->next->next->next->flavor = CIL_FILES;
 	other->head->next->next->next->data = file_arr;
 
-	rc = cil_tree_walk(curr, __cil_gen_policy_node_helper, NULL, other);
+	rc = cil_tree_walk(curr, __cil_gen_policy_node_helper, NULL, NULL, other);
 	if (rc != SEPOL_OK) {
 		printf("Error walking tree\n");
 		return rc;
