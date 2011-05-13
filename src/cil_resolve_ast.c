@@ -533,7 +533,7 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 			}
 			if (success) 
 				break;
-			else if (order_sublist->next == NULL) { 
+			else if (order_sublist->next == NULL) {
 				order_sublist->next = edge_node;
 				break;
 			}
@@ -677,55 +677,57 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, ui
 
 int __cil_create_edge_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *order, uint32_t sym_flavor, struct cil_list *edge_list)
 {
+	if (order == NULL || order->head == NULL || edge_list == NULL)
+		return SEPOL_ERR;
+
 	struct cil_tree_node *node = NULL;
-	struct cil_list_item *curr = order->head;
-	struct cil_list_item *list_item;
-	struct cil_list_item *copy_item;
-	struct cil_list_item *list_tail = NULL;
-	struct cil_list_item *edge_node;
+	struct cil_list *edge_nodes = NULL;
+	struct cil_list_item *edge = NULL;
+	struct cil_list_item *edge_node = NULL;
+	struct cil_list_item *copy_node = NULL;
+	struct cil_list_item *edge_tail = NULL;
 	struct cil_list_item *edge_list_tail = NULL;
-	struct cil_list *node_list;
+	struct cil_list_item *curr = order->head;
 	int rc = SEPOL_ERR;
 
-	cil_list_init(&node_list);
-
 	while (curr != NULL) {
-		cil_list_item_init(&list_item);
 		rc = cil_resolve_name(db, current, (char*)curr->data, sym_flavor, &node);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve name: %s\n", (char*)curr->data);
 			return rc;
 		}
-		list_item->flavor = node->flavor;
-		list_item->data = node->data;
-
-		if (node_list->head == NULL && list_tail == NULL)
-			node_list->head = list_item;
-		else if (node_list->head == NULL && list_tail != NULL) {
-			cil_list_item_init(&copy_item);
-			copy_item->flavor = list_tail->flavor;
-			copy_item->data = list_tail->data;
-			node_list->head = copy_item;
-			node_list->head->next = list_item;
-		}
-		else
-			list_tail->next = list_item;
-			
-		if (list_tail != NULL) {
-			cil_list_item_init(&edge_node);
-			edge_node->flavor = CIL_LIST;
-			edge_node->data = node_list;
+		cil_list_item_init(&edge_node);
+		edge_node->flavor = node->flavor;
+		edge_node->data = node->data;
+		if (edge_nodes == NULL) {
+			cil_list_init(&edge_nodes);
+			cil_list_item_init(&edge);
 			if (edge_list->head == NULL)
-				edge_list->head = edge_node;
+				edge_list->head = edge;
 			else
-				edge_list_tail->next = edge_node;
-			edge_list_tail = edge_node;
-			cil_list_init(&node_list);
+				edge_list_tail->next = edge;
+			edge_list_tail = edge;
+			edge_list_tail->flavor = CIL_LIST;
+			edge_list_tail->data = edge_nodes;
+			if (edge_tail != NULL) {
+				cil_list_item_init(&copy_node);
+				copy_node->flavor = edge_tail->flavor;
+				copy_node->data = edge_tail->data;
+				edge_nodes->head = copy_node;
+				edge_nodes->head->next = edge_node;
+				edge_tail = edge_node;
+				edge_nodes = NULL;
+			}
+			else
+				edge_nodes->head = edge_node;
 		}
-		list_tail = list_item;
+		else {
+			edge_nodes->head->next = edge_node;
+			edge_tail = edge_node;
+			edge_nodes = NULL;
+		}
 		curr = curr->next;
 	}
-
 	return SEPOL_OK;
 }
 
@@ -753,7 +755,7 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current)
 		printf("Failed to order categoryorder\n");
 		return rc;
 	}
-	
+
 	return SEPOL_OK;
 }
 
