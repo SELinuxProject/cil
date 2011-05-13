@@ -457,6 +457,19 @@ void cil_copy_mlsconstrain(struct cil_db *db, struct cil_mlsconstrain *orig, str
 	*copy = new;
 }
 
+void cil_copy_call(struct cil_db *db, struct cil_call *orig, struct cil_call **copy)
+{
+	struct cil_call *new = cil_malloc(sizeof(struct cil_call));
+	new->macro_str = cil_strdup(orig->macro_str);
+
+	cil_tree_init(&new->args_tree);
+	cil_tree_node_init(&new->args_tree->root);
+	cil_copy_ast(db, orig->args_tree->root, new->args_tree->root);
+
+	*copy = new;
+
+}
+
 int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, uint32_t index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym))
 {
 	int rc = SEPOL_ERR;
@@ -698,6 +711,10 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 		case CIL_MLSCONSTRAIN_NODE : {
 			new->data = cil_strdup(((char*)orig->data));
 			break;	
+		}
+		case CIL_CALL : {
+			cil_copy_call(db, (struct cil_call*)orig->data, (struct cil_call**)&new->data);
+			break;
 		}
 		case CIL_PARSE_NODE : {
 			new->data = cil_strdup(((char*)orig->data));
