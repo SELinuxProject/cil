@@ -509,7 +509,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 }
 
 /* other is a list containing users list, sensitivities list, categories list, and the file array */
-int __cil_gen_policy_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
+int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other)
 {
 	if (other == NULL || other->head == NULL || other->head->next == NULL || other->head->next->next == NULL)
 		return SEPOL_ERR;
@@ -517,6 +517,7 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, __attribute__((unus
 	uint32_t rc = SEPOL_ERR;
 	struct cil_list *users = NULL, *sens = NULL, *cats = NULL;
 	FILE **file_arr = NULL;
+	*finished = CIL_TREE_SKIP_NOTHING;
 
 	if (other->head->flavor == CIL_LIST)
 		users = other->head->data;
@@ -539,6 +540,10 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, __attribute__((unus
 		return SEPOL_ERR;
 
 	if (node->cl_head != NULL) {
+		if (node->flavor == CIL_MACRO) {
+			*finished = CIL_TREE_SKIP_HEAD;
+			return SEPOL_OK;
+		}
 		if (node->flavor != CIL_ROOT) {
 			rc = cil_name_to_policy(file_arr, node);
 			if (rc != SEPOL_OK && rc != SEPOL_DONE) {
