@@ -1,6 +1,9 @@
-(type bar)
 (type qaz)
 (class file (read))
+(macro mm ((type a))
+	(type b)
+	(call m (a b)))
+
 (macro m ((type foo)(type bar))
 	(type baz)
 	(block c
@@ -16,4 +19,14 @@
 	(type boz)
 	(call m (boz .c.moo)))
 (block c
-	(type moo))
+	(type moo)
+	(call mm (moo)))
+
+(type foo)
+(type bar)
+(call m1 (foo))
+(macro m1 ((type a))
+	(type blah)
+	(call m2 (a blah)))
+(macro m2 ((type a) (type b))
+	(allow a b file (read)))
