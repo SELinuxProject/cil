@@ -29,7 +29,7 @@ int cil_resolve_sid(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_classcommon(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_call1(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_call2(struct cil_db *, struct cil_tree_node *, struct cil_call *);
-int cil_resolve_name_call_args(struct cil_call *, char *, uint32_t, struct cil_tree_node *);
+int cil_resolve_name_call_args(struct cil_call *, char *, uint32_t, struct cil_tree_node **);
 
 int cil_resolve_ast(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_name(struct cil_db *, struct cil_tree_node *, char *, uint32_t, uint32_t, struct cil_call *, struct cil_tree_node **);

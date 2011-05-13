@@ -1637,6 +1637,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 				params_tail->next->flavor = flavor;
 				
 				params_tail = params_tail->next;
+				params_tail->next = NULL;
 			}
 
 			current_item = current_item->next;
@@ -2046,7 +2047,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	other->head->next->data = db;
 	other->head->next->flavor = CIL_DB;	
 
-	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_branch_helper, other); 
+	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, NULL, __cil_build_ast_branch_helper, other); 
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		return rc;

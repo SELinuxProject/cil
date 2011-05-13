@@ -95,7 +95,7 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
    finished_branch:     function to call when finished with a branch of the tree before walking back up
    other:               any additional data to be passed to process_node() and finished_branch()
 */
-int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other), int (*finished_branch)(struct cil_tree_node *node, struct cil_list *other), struct cil_list *other)
+int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other), int (*reverse_node)(struct cil_tree_node *node, struct cil_list *other), int (*finished_branch)(struct cil_tree_node *node, struct cil_list *other), struct cil_list *other)
 {
 	if (start_node == NULL)
 		return SEPOL_ERR;
@@ -115,6 +115,15 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 				rc = (*process_node)(node, &finished, other);
 				if (rc != SEPOL_OK) {
 					printf("Failed to process node\n");
+					return rc;
+				}
+			}
+		}
+		else {
+			if (reverse_node != NULL) {
+				rc = (*reverse_node)(node, other);
+				if (rc != SEPOL_OK) {
+					printf("Failed to reverse process node\n");
 					return rc;
 				}
 			}

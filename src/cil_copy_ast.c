@@ -20,18 +20,19 @@ void cil_copy_list(struct cil_list *orig, struct cil_list **copy)
 	while(orig_item != NULL) {
 		if (orig_item->flavor == CIL_AST_STR) {
 			new_item->data = cil_strdup(orig_item->data);
-			new_item->flavor = orig_item->flavor;
-			if (orig_item->next != NULL) {
-				cil_list_item_init(&new_item->next);
-				new_item = new_item->next;
-			}	
 		}
 		else if (orig_item->flavor == CIL_LIST) {
 			struct cil_list *new_sub;
 			cil_list_init(&new_sub);
 			cil_copy_list((struct cil_list*)orig_item->data, &new_sub);
+			new_item->data = new_sub;
 		}
 	
+		new_item->flavor = orig_item->flavor;
+		if (orig_item->next != NULL) {
+			cil_list_item_init(&new_item->next);
+			new_item = new_item->next;
+		}	
 		orig_item = orig_item->next;
 	}
 
@@ -748,7 +749,7 @@ int cil_copy_ast(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_
 	other->head->next->data = db;
 	other->head->next->flavor = CIL_DB;
 
-	rc = cil_tree_walk(orig, __cil_copy_node_helper, __cil_copy_branch_helper, other);
+	rc = cil_tree_walk(orig, __cil_copy_node_helper, NULL,  __cil_copy_branch_helper, other);
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		return rc;
