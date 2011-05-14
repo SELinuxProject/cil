@@ -345,6 +345,25 @@ void test_cil_gen_netifcon_ethmissing_neg(CuTest *tc);
 void test_cil_gen_netifcon_interfacemissing_neg(CuTest *tc);
 void test_cil_gen_netifcon_packetmissing_neg(CuTest *tc);
 
+void test_cil_gen_macro_type(CuTest *tc);
+void test_cil_gen_macro_role(CuTest *tc);
+void test_cil_gen_macro_user(CuTest *tc);
+void test_cil_gen_macro_sensitivity(CuTest *tc);
+void test_cil_gen_macro_category(CuTest *tc);
+void test_cil_gen_macro_catset(CuTest *tc);
+void test_cil_gen_macro_level(CuTest *tc);
+void test_cil_gen_macro_class(CuTest *tc);
+void test_cil_gen_macro_duplicate(CuTest *tc);
+void test_cil_gen_macro_duplicate_neg(CuTest *tc);
+void test_cil_gen_macro_unknown_neg(CuTest *tc);
+void test_cil_gen_macro_dbnull_neg(CuTest *tc);
+void test_cil_gen_macro_currnull_neg(CuTest *tc);
+void test_cil_gen_macro_astnull_neg(CuTest *tc);
+void test_cil_gen_macro_unnamed_neg(CuTest *tc);
+void test_cil_gen_macro_noparam_neg(CuTest *tc);
+void test_cil_gen_macro_nosecondparam_neg(CuTest *tc);
+void test_cil_gen_macro_emptyparam_neg(CuTest *tc);
+
 /*
 cil_build_ast test cases
 */
@@ -455,4 +474,7 @@ void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_netifcon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_macro(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_macro_neg(CuTest *tc);
 #endif
