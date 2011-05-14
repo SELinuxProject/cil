@@ -789,5 +789,9 @@ CuSuite* CilTreeGetSuite() {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_context);
 	
+	SUITE_ADD_TEST(suite, test_cil_copy_fill_context);
+	SUITE_ADD_TEST(suite, test_cil_copy_fill_context_anonlow);
+	SUITE_ADD_TEST(suite, test_cil_copy_fill_context_anonhigh);
+	
 	return suite;
 }

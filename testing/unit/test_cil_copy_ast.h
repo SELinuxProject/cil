@@ -24,4 +24,8 @@ void test_cil_copy_fill_level(CuTest *);
 
 void test_cil_copy_context(CuTest *);
 
+void test_cil_copy_fill_context(CuTest *);
+void test_cil_copy_fill_context_anonlow(CuTest *);
+void test_cil_copy_fill_context_anonhigh(CuTest *);
+
 #endif
