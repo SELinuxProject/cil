@@ -265,3 +265,32 @@ void test_cil_copy_level(CuTest *tc) {
 		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_fill_level(CuTest *tc) {
+	char *line[] = {"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_level(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+	cil_level_init((struct cil_level**)&test_copy->data);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	cil_copy_fill_level((struct cil_level*)test_ast_node->data, (struct cil_level*)test_copy->data);
+	CuAssertStrEquals(tc, ((struct cil_level *)test_copy->data)->sens_str,
+		((struct cil_level *)test_ast_node->data)->sens_str);
+}
+
