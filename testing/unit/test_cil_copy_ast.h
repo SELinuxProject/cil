@@ -22,4 +22,6 @@ void test_cil_copy_level(CuTest *);
 
 void test_cil_copy_fill_level(CuTest *);
 
+void test_cil_copy_context(CuTest *);
+
 #endif
