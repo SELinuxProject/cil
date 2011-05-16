@@ -356,7 +356,7 @@ struct cil_level {
 	char *sens_str;
 	struct cil_sens *sens;
 	struct cil_list *cat_list_str;
-	struct cil_list *cat_list;	
+	struct cil_list *cat_list;
 };
 
 #define CIL_INHERIT_BLOCK 1
@@ -401,12 +401,14 @@ struct cil_context {
 struct cil_filecon {
 	struct cil_symtab_datum datum;
 	struct cil_context *context;
+	char *context_str;
 };
 
 struct cil_portcon {
 	struct cil_symtab_datum datum; 
 	struct cil_context *context;
 	char *proto_str;
+	char *context_str;
 	//proto;
 };
 
@@ -416,6 +418,7 @@ struct cil_netifcon {
 	struct cil_context *if_context;
 	char *packet_context_str;
 	struct cil_context *packet_context;
+	char *context_str;
 };
 
 /* There is no fs declaration, but we will create a cil_fs on demand when the cil_fscon or cil_fs_use statements need one */
@@ -428,6 +431,7 @@ struct cil_fscon {
 	struct cil_fs *fs;
 	char *path;
 	struct cil_context *context;
+	char *context_str;
 };
 
 #define CIL_FS_USE_XATTR 1
@@ -438,6 +442,7 @@ struct cil_fs_use {
 	char *fs_str;
 	struct cil_fs *fs;
 	struct cil_context *context;
+	char *context_str;
 };
 
 /*struct constrain {
