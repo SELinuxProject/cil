@@ -554,7 +554,7 @@ void test_cil_resolve_level(CuTest *tc) {
 			"(", "user", "blah_u", ")",
 			"(", "level", "low", "s0", "(", "c0", ")", ")",
 			"(", "level", "high", "s0", "(", "c0", ")", ")",
-			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", NULL};
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -583,7 +583,7 @@ void test_cil_resolve_level_sens_neg(CuTest *tc) {
 			"(", "user", "blah_u", ")",
 			"(", "level", "low", "s1", "(", "c0", ")", ")",
 			"(", "level", "high", "s1", "(", "c0", ")", ")",
-			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", NULL};
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -611,7 +611,7 @@ void test_cil_resolve_level_cat_neg(CuTest *tc) {
 			"(", "user", "blah_u", ")",
 			"(", "level", "low", "s0", "(", "c1", ")", ")",
 			"(", "level", "high", "s0", "(", "c1", ")", ")",
-			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", NULL};
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -639,7 +639,7 @@ void test_cil_resolve_level_senscat_neg(CuTest *tc) {
 			"(", "user", "blah_u", ")",
 			"(", "level", "low", "s0", "(", "c0", ")", ")",
 			"(", "level", "high", "s0", "(", "c0", ")", ")",
-			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", NULL};
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1754,7 +1754,7 @@ void test_cil_resolve_sid_named_levels(CuTest *tc) {
 			"(", "user", "blah_u", ")",
 			"(", "level", "low", "s0", "(", "c0", ")", ")",
 			"(", "level", "high", "s0", "(", "c0", ")", ")",
-			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", NULL};
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1781,7 +1781,7 @@ void test_cil_resolve_sid_named_context(CuTest *tc) {
 			"(", "role", "blah_r", ")",
 			"(", "user", "blah_u", ")",
 			"(", "context", "con", "(", "blah_u", "blah_r", "blah_t", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
-			"(", "sid", "test", "con", NULL};
+			"(", "sid", "test", "con", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1858,7 +1858,7 @@ void test_cil_resolve_sid_named_context_sidcontextnull_neg(CuTest *tc) {
                         "(", "type", "blah_t", ")",
                         "(", "role", "blah_r", ")",
                         "(", "user", "blah_u", ")",
-                        "(", "sid", "test", "(", ")", NULL};
+                        "(", "sid", "test", "(", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -3492,7 +3492,7 @@ void test_cil_resolve_ast_node_helper_sid(CuTest *tc) {
 			"(", "user", "blah_u", ")",
 			"(", "level", "low", "s0", "(", "c0", ")", ")",
 			"(", "level", "high", "s0", "(", "c0", ")", ")",
-			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", NULL};
+			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
         
 	struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
