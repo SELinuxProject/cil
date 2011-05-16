@@ -240,11 +240,16 @@ int cil_print_constrain_expr(FILE **file_arr, struct cil_tree_node *root)
 
 void cil_level_to_policy(FILE **file_arr, uint32_t file_index, struct cil_level *level)
 {
-	struct cil_list_item *cat = level->cat_list->head;
+	struct cil_list_item *cat;
 	struct cil_list_item *curr;
 	struct cil_list_item *start_range;
 	struct cil_list_item *end_range;
 	char *sens_str = level->sens->datum.name;
+
+	if (level->catset != NULL)
+		cat = ((struct cil_catset*)level->catset)->cat_list->head;
+	else
+		cat = level->cat_list->head;
 
 	fprintf(file_arr[file_index], "%s:", sens_str);
 	while (cat != NULL) {

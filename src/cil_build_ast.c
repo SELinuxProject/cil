@@ -1285,6 +1285,11 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 	if (sens->next == NULL)
 		return SEPOL_OK;
 
+	if (sens->next->cl_head == NULL) {
+		level->catset_str = cil_strdup(sens->next->data);
+		return SEPOL_OK;
+	}
+
 	cil_list_init(&level->cat_list_str);
 
 	rc = cil_set_to_list(sens->next, level->cat_list_str, 1);

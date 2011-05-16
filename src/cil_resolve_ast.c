@@ -1002,6 +1002,7 @@ int __cil_verify_sens_cats(struct cil_sens *sens, struct cil_list *cat_list)
 int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct cil_level *level, struct cil_call *call)
 {
 	struct cil_tree_node *sens_node = NULL;
+	struct cil_tree_node *catset_node = NULL;
 	struct cil_list *res_cat_list;
 	int rc = SEPOL_ERR;
 	
@@ -1013,24 +1014,36 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 
 	level->sens = (struct cil_sens*)sens_node->data;
 
-	cil_list_init(&res_cat_list);
-	rc = cil_resolve_cat_list(db, current, level->cat_list_str, res_cat_list, call);
-	if (rc != SEPOL_OK) {
-		printf("Failed to resolve category list\n");
-		return rc;
+	if (level->catset_str != NULL) {
+		rc = cil_resolve_name(db, current, level->catset_str, CIL_SYM_CATS, CIL_CATSET, call, &catset_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_level: Failed to resolve categoryset, rc: %d\n", rc);
+			return rc;
+		}
+		level->catset = (struct cil_catset*)catset_node->data;
+		free(level->catset_str);
+		level->catset_str = NULL;
 	}
-
-	rc = __cil_verify_sens_cats(sens_node->data, res_cat_list);
-	if (rc != SEPOL_OK) {
-		printf("Failed to verify sensitivitycategory relationship\n");
-		return rc;
+	else {
+		cil_list_init(&res_cat_list);
+		rc = cil_resolve_cat_list(db, current, level->cat_list_str, res_cat_list, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve category list\n");
+			return rc;
+		}
+	
+		rc = __cil_verify_sens_cats(sens_node->data, res_cat_list);
+		if (rc != SEPOL_OK) {
+			printf("Failed to verify sensitivitycategory relationship\n");
+			return rc;
+		}
+	
+		level->cat_list = res_cat_list;
+		cil_list_destroy(&level->cat_list_str, 1);
+		free(level->cat_list_str);
+		level->cat_list_str = NULL;
 	}
-
-	level->cat_list = res_cat_list;
-	cil_list_destroy(&level->cat_list_str, 1);
-	free(level->cat_list_str);
 	free(level->sens_str);
-	level->cat_list_str = NULL;
 	level->sens_str = NULL;
 
 	return SEPOL_OK;

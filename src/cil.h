@@ -357,6 +357,8 @@ struct cil_level {
 	struct cil_sens *sens;
 	struct cil_list *cat_list_str;
 	struct cil_list *cat_list;
+	struct cil_catset *catset;
+	char *catset_str;
 };
 
 #define CIL_INHERIT_BLOCK 1
