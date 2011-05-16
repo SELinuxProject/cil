@@ -1522,6 +1522,41 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, uint32_t flavo
 		return SEPOL_ERR;
 }
 
+int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *bif, struct cil_call *call)
+{
+	int rc = SEPOL_ERR;
+	struct cil_tree_node *curr_expr = current;
+	struct cil_tree_node *bool_node = NULL;
+
+	while (curr_expr != NULL) {
+		if (curr_expr->flavor == CIL_BOOL) {
+			printf("resolving: %s\n", ((struct cil_conditional*)curr_expr->data)->str);
+			rc = cil_resolve_name(db, bif, ((struct cil_conditional*)curr_expr->data)->str, CIL_SYM_BOOLS, CIL_BOOL, call, &bool_node);
+			if (rc != SEPOL_OK) {
+				printf("Name resolution failed for bool %s\n", ((struct cil_conditional*)curr_expr->data)->str);
+				return rc;
+			}
+			free(((struct cil_conditional*)curr_expr->data)->str);
+			((struct cil_conditional*)curr_expr->data)->str = NULL;
+			((struct cil_conditional*)curr_expr->data)->boolean = (struct cil_bool*)bool_node->data;
+		}
+
+		curr_expr = curr_expr->cl_head;
+	}
+	return SEPOL_OK;	
+}
+
+int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	int rc = SEPOL_ERR;
+	struct cil_booleanif *bif = (struct cil_booleanif*)current->data;
+	
+	rc = cil_resolve_expr_stack(db, bif->expr_stack, current, call);
+	if (rc != SEPOL_OK)
+		return rc;
+	return SEPOL_OK;
+}
+
 int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
 {
 	int rc = SEPOL_ERR;
@@ -1743,6 +1778,15 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					if (rc != SEPOL_OK)
 						return rc;
 				}
+				break;
+			}
+			case 3 : {
+				if (node->flavor == CIL_BOOLEANIF) {
+					rc = cil_resolve_boolif(db, node, call);
+					if (rc != SEPOL_OK)
+						return rc;
+				}
+				break;
 			}
 			default :
 				break;

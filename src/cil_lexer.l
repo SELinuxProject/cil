@@ -12,7 +12,7 @@
 
 digit		[0-9]
 alpha		[a-zA-Z]
-spec_char	[\[\]\.\@\=\/\*\-\_\$\%\@\+\-\!]
+spec_char	[\[\]\.\@\=\/\*\-\_\$\%\@\+\-\!\|\&\^]
 symbol		({digit}|{alpha}|{spec_char})+
 white		[ \t]
 newline		[\n\r]

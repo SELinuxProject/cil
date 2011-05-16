@@ -408,6 +408,28 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("BOOL: %s, value: %d\n", boolean->datum.name, boolean->value);
 				return;
 			}
+			case CIL_BOOLEANIF : {
+				printf("BOOLEANIF: expression stack: ( ");
+				struct cil_booleanif *bif = node->data;
+				struct cil_tree_node *current = bif->expr_stack;
+				while (current != NULL) {
+					if (((struct cil_conditional*)current->data)->str != NULL)
+						printf("%s ", ((struct cil_conditional*)current->data)->str);
+					else if (((struct cil_conditional*)current->data)->boolean != NULL)
+						printf("(bool %s, value: %d) ", ((struct cil_conditional*)current->data)->boolean->datum.name, ((struct cil_conditional*)current->data)->boolean->value);
+					current = current->cl_head;
+				}
+				printf(")\n");
+				return;
+			}
+			case CIL_AND : {
+				printf("&&");
+				return;
+			}
+			case CIL_OR : {
+				printf("|| ");
+				return;
+			}
 			case CIL_TYPE_ATTR : {
 				struct cil_typeattribute *typeattr = node->data;
 				if (typeattr->type_str != NULL && typeattr->attr_str != NULL)

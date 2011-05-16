@@ -53,6 +53,14 @@
 #define CIL_CLASSCOMMON		38
 #define CIL_MLSCONSTRAIN_NODE	39
 #define CIL_CALL		40
+#define CIL_BOOLEANIF		41
+#define CIL_AND			42
+#define CIL_OR			43
+#define CIL_XOR			44
+#define CIL_NOT			45
+#define CIL_EQ			46
+#define CIL_NEQ			47
+#define CIL_ELSE		48
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -114,6 +122,14 @@
 #define CIL_KEY_SENSCAT		"sensitivitycategory"
 #define CIL_KEY_LEVEL		"level"
 #define CIL_KEY_MLSCONSTRAIN	"mlsconstrain"
+#define CIL_KEY_BOOLEANIF	"booleanif"
+#define CIL_KEY_AND		"&&"
+#define CIL_KEY_OR		"||"
+#define CIL_KEY_XOR		"^"
+#define CIL_KEY_NOT		"!"
+#define CIL_KEY_EQ		"=="
+#define CIL_KEY_NEQ		"!="
+#define CIL_KEY_ELSE		"else"
 
 /*
 	Symbol Table Array Indices
@@ -455,6 +471,15 @@ struct cil_call {
 	struct cil_macro *macro;
 	struct cil_tree *args_tree;
 	struct cil_list *args;
+};
+
+struct cil_booleanif {
+	struct cil_tree_node *expr_stack;
+};
+
+struct cil_conditional {
+	char *str;
+	struct cil_bool *boolean;
 };
 
 int cil_db_init(struct cil_db **);
