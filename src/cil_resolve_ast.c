@@ -1182,6 +1182,10 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 			return rc;
 		}
 	}
+	else {
+		printf("cil_resolve_context: Invalid context, low level not found\n");
+		return SEPOL_ERR;
+	}
 
 	if (context->high_str != NULL) {
 		rc = cil_resolve_name(db, current, context->high_str, CIL_SYM_LEVELS, CIL_LEVEL, call, &high_node);
@@ -1199,6 +1203,10 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 			printf("cil_resolve_context: Failed to resolve high level, rc: %d\n", rc);
 			return rc;
 		}
+	}
+	else {
+		printf("cil_resolve_context: Invalid context, high level not found\n");
+		return SEPOL_ERR;
 	}
 
 	return SEPOL_OK;
