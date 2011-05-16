@@ -2043,6 +2043,10 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				}
 				*finished = 1;
 			}
+			else {
+				printf("Error: Unknown keyword %s\n", (char*)parse_current->data);
+				return SEPOL_ERR;
+			}
 		}
 	}
 
