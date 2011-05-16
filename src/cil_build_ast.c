@@ -932,7 +932,7 @@ void cil_destroy_catalias(struct cil_catalias *alias)
 	free(alias);
 }
 
-int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl)
+int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl, uint8_t sublists)
 {
 	if (parse_current == NULL || ast_cl == NULL)
 		return SEPOL_ERR;
@@ -955,15 +955,19 @@ int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl
 			new_item->flavor = CIL_AST_STR;
 			new_item->data = cil_strdup(curr->data);
 		}
-		else {
+		else if (sublists) {
 			cil_list_init(&sub_list);
 			new_item->flavor = CIL_LIST;
 			new_item->data = sub_list;
-			rc = cil_set_to_list(curr, sub_list);
+			rc = cil_set_to_list(curr, sub_list, sublists);
 			if (rc != SEPOL_OK) {
 				printf("Error while building sublist\n");
 				return rc;
 			}
+		}
+		else {
+			printf("cil_set_to_list: invalid sublist\n");
+			return SEPOL_ERR;
 		}
 		if (ast_cl->head == NULL)
 			ast_cl->head = new_item;
@@ -1019,7 +1023,7 @@ int cil_fill_catset(struct cil_tree_node *start, struct cil_catset *catset)
 	
 	cil_list_init(&catset->cat_list_str);
 
-	rc = cil_set_to_list(start, catset->cat_list_str);
+	rc = cil_set_to_list(start, catset->cat_list_str, 0);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create categoryset list\n");
 		goto fill_catset_cleanup;
@@ -1059,7 +1063,7 @@ int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, str
 	struct cil_catorder *catorder = cil_malloc(sizeof(struct cil_catorder));
 	cil_list_init(&catorder->cat_list_str);
 	
-	rc = cil_set_to_list(parse_current->next, catorder->cat_list_str);
+	rc = cil_set_to_list(parse_current->next, catorder->cat_list_str, 0);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create category list\n");
 		goto gen_catorder_cleanup;
@@ -1095,7 +1099,7 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 	struct cil_sens_dominates *dom = cil_malloc(sizeof(struct cil_sens_dominates));
 	cil_list_init(&dom->sens_list_str);
 	
-	rc = cil_set_to_list(parse_current->next, dom->sens_list_str);
+	rc = cil_set_to_list(parse_current->next, dom->sens_list_str, 0);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create sensitivity list\n");
 		goto gen_dominance_cleanup;
@@ -1134,7 +1138,7 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	cil_list_init(&senscat->cat_list_str);
 	
-	rc = cil_set_to_list(parse_current->next->next, senscat->cat_list_str);
+	rc = cil_set_to_list(parse_current->next->next, senscat->cat_list_str, 1);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create category list\n");
 		goto gen_senscat_cleanup;
@@ -1172,7 +1176,7 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 
 	cil_list_init(&level->cat_list_str);
 
-	rc = cil_set_to_list(sens->next, level->cat_list_str);
+	rc = cil_set_to_list(sens->next, level->cat_list_str, 1);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create level category list\n");
 		goto cil_fill_level_cleanup;

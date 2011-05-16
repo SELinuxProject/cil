@@ -54,7 +54,7 @@ int cil_gen_sensalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_n
 void cil_destroy_sensalias(struct cil_sensalias *);
 int cil_gen_catalias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_catalias(struct cil_catalias *);
-int cil_set_to_list(struct cil_tree_node *, struct cil_list *);
+int cil_set_to_list(struct cil_tree_node *, struct cil_list *, uint8_t);
 int cil_gen_catset(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_fill_catset(struct cil_tree_node *, struct cil_catset *);
 void cil_destroy_catset(struct cil_catset *);
