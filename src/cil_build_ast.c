@@ -1265,8 +1265,10 @@ int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_t
 			else
 				expr_curr->cl_tail->next = new_node;
 			expr_curr->cl_tail = new_node;
-			if (strstr(CIL_CONSTRAIN_OPER, curr->data) != NULL) 
+			if (curr->data != NULL && strstr(CIL_CONSTRAIN_OPER, curr->data) != NULL)
 				expr_curr = new_node;
+			else
+				return SEPOL_ERR;
 		}
 		else {
 			rc = __cil_build_constrain_tree(curr->cl_head, expr_curr);
