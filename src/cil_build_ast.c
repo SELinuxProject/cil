@@ -1458,11 +1458,8 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		}
 	}
 	else {
-		rc = cil_fill_context(parse_current, context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to fill context, rc: %d\n", rc);
-			goto gen_context_cleanup;
-		}
+		printf("Invalid context declaration (line: %d)\n", parse_current->line);
+		goto gen_context_cleanup;
 	}
 	
 	return SEPOL_OK;
