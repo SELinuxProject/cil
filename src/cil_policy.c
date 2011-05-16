@@ -505,6 +505,11 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[SIDS], "\n");
 			break;
 		}
+		case CIL_POLICYCAP: {
+			fprintf(file_arr[ATTRTYPES], "policycap %s;\n", name);
+			break;
+		}
+
 		default : {
 			break;
 		}

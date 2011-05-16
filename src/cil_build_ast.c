@@ -1855,6 +1855,38 @@ void cil_destroy_args(struct cil_args *args)
 		} 
 }
 
+int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next != NULL || parse_current->next->cl_head != NULL) {
+		printf("Invalid policycap declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_policycap *polcap = cil_malloc(sizeof(struct cil_policycap));
+	cil_symtab_datum_init(&polcap->datum);
+	char *key = parse_current->next->data;
+	
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)polcap, (hashtab_key_t)key, CIL_SYM_POLICYCAPS, CIL_POLICYCAP);
+	if (rc != SEPOL_OK)
+		goto gen_polcap_cleanup;
+	
+	return SEPOL_OK;
+
+	gen_polcap_cleanup:
+		cil_destroy_policycap(polcap);
+		return rc;
+}
+
+void cil_destroy_policycap(struct cil_policycap *polcap)
+{
+	cil_symtab_datum_destroy(polcap->datum);
+	free(polcap);
+}
+
 /* other is a list of 2 items. head should be ast_current, head->next should be db */
 int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, struct cil_list *other)
 {
@@ -2176,6 +2208,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_call(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_call failed, rc: %d\n", rc);
+					return rc;
+				}
+				*finished = 1;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_POLICYCAP)) {
+				rc = cil_gen_policycap(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_policycap failed, rc: %d\n", rc);
 					return rc;
 				}
 				*finished = 1;

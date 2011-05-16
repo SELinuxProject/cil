@@ -80,6 +80,7 @@
 #define CIL_CATSET		CIL_MIN_DECLARATIVE + 16
 #define CIL_MACRO		CIL_MIN_DECLARATIVE + 17
 #define CIL_OPTIONAL		CIL_MIN_DECLARATIVE + 18
+#define CIL_POLICYCAP		CIL_MIN_DECLARATIVE + 19
 
 /*
 	Keywords
@@ -110,6 +111,7 @@
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_MACRO		"macro"
 #define CIL_KEY_CALL		"call"
+#define CIL_KEY_POLICYCAP	"policycap"
 #define CIL_KEY_CONTEXT		"context"
 #define CIL_KEY_NETIFCON	"netifcon"
 #define CIL_KEY_SENSITIVITY	"sensitivity"
@@ -151,9 +153,11 @@
 #define CIL_SYM_MACROS		14
 #define CIL_SYM_CONTEXTS	15
 #define CIL_SYM_LEVELS		16
+#define CIL_SYM_POLICYCAPS	17
 
-#define CIL_SYM_NUM		17
-#define CIL_SYM_UNKNOWN		18
+#define CIL_SYM_NUM		18
+#define CIL_SYM_UNKNOWN		19
+
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
@@ -487,6 +491,10 @@ struct cil_booleanif {
 struct cil_conditional {
 	char *str;
 	struct cil_bool *boolean;
+};
+
+struct cil_policycap {
+	struct cil_symtab_datum datum;
 };
 
 int cil_db_init(struct cil_db **);
