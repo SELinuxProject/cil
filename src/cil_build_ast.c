@@ -1198,7 +1198,9 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+	if (parse_current->next == NULL || 
+	parse_current->next->cl_head != NULL ||
+	parse_current->next->next == NULL) {
 		printf("Invalid level declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
