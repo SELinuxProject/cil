@@ -545,7 +545,15 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	if (parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 	
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next == NULL || parse_current->next->next->next->next == NULL || parse_current->next->next->next->next->cl_head == NULL || parse_current->next->next->next->next->next != NULL) {
+	if (parse_current->next == NULL || 
+	parse_current->next->cl_head != NULL ||
+	parse_current->next->next == NULL || 
+	parse_current->next->next->cl_head == NULL || 
+	parse_current->next->next->next == NULL || 
+	parse_current->next->next->next->cl_head == NULL || 
+	parse_current->next->next->next->next == NULL || 
+	parse_current->next->next->next->next->cl_head == NULL || 
+	parse_current->next->next->next->next->next != NULL) {
 		printf("Invalid allow rule (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
