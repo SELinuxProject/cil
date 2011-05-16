@@ -1434,7 +1434,6 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	// Syntax for 'context' statements (named)
 	if (parse_current->next->next->cl_head != NULL) {
 		if (parse_current->next->next->next != NULL
-		|| parse_current->next->next->cl_head == NULL
 		|| parse_current->next->next->cl_head->cl_head != NULL
 		|| parse_current->next->next->cl_head->next == NULL
  		|| parse_current->next->next->cl_head->next->cl_head != NULL
