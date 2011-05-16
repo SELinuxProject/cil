@@ -1622,13 +1622,12 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	
 	struct cil_netifcon *netifcon = cil_malloc(sizeof(struct cil_netifcon));
 	cil_symtab_datum_init(&netifcon->datum);
-	char *netif = (char*)parse_current->next->data;
+	char *name = (char*)parse_current->next->data;
 	
-	rc = cil_symtab_insert(&db->netif, (hashtab_key_t)netif, (struct cil_symtab_datum*)netifcon, ast_node);
-	if (rc != SEPOL_OK) {
-		printf("failed to insert network interface %s into symtab, rc: %d\n", netif, rc);
-		return SEPOL_ERR;
-	}
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)netifcon, (hashtab_key_t)name, CIL_SYM_NETIFCONS, CIL_NETIFCON);
+	if (rc != SEPOL_OK)
+		goto gen_netifcon_cleanup;
+
 
 	if (parse_current->next->next->cl_head == NULL) {
 		netifcon->if_context_str = cil_strdup(parse_current->next->next->data);
