@@ -53,14 +53,15 @@
 #define CIL_CLASSCOMMON		38
 #define CIL_MLSCONSTRAIN_NODE	39
 #define CIL_CALL		40
-#define CIL_BOOLEANIF		41
-#define CIL_AND			42
-#define CIL_OR			43
-#define CIL_XOR			44
-#define CIL_NOT			45
-#define CIL_EQ			46
-#define CIL_NEQ			47
-#define CIL_ELSE		48
+#define CIL_ARGS		41
+#define CIL_BOOLEANIF		42
+#define CIL_AND			43
+#define CIL_OR			44
+#define CIL_XOR			45
+#define CIL_NOT			46
+#define CIL_EQ			47
+#define CIL_NEQ			48
+#define CIL_ELSE		49
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -475,6 +476,7 @@ struct cil_args {
 	char *arg_str;
 	void *arg;
 	char *param_str;
+	uint32_t flavor;
 };
 
 struct cil_call {

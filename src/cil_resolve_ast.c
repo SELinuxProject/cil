@@ -1403,17 +1403,18 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				}
 			}
 			new_arg->param_str = item->data;
+			new_arg->flavor = item->flavor;
 
 			if (args_tail == NULL) {
 				new_call->args->head = cil_malloc(sizeof(struct cil_list_item));
-				new_call->args->head->flavor = item->flavor;
+				new_call->args->head->flavor = CIL_ARGS;;
 				new_call->args->head->data = new_arg;
 				args_tail = new_call->args->head;
 				args_tail->next = NULL;
 			}
 			else {
 				args_tail->next = cil_malloc(sizeof(struct cil_list_item));
-				args_tail->next->flavor = item->flavor;
+				args_tail->next->flavor = CIL_ARGS;
 				args_tail->next->data = new_arg;
 				args_tail = args_tail->next;
 				args_tail->next = NULL;
@@ -1453,7 +1454,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 			return SEPOL_ERR;
 		}
 		
-		switch (item->flavor) {
+		switch (((struct cil_args*)item->data)->flavor) {
 		case CIL_LEVEL : 
 			if (((struct cil_args*)item->data)->arg_str == NULL) {	
 				rc = cil_resolve_level(db, current, (struct cil_level*)((struct cil_args*)item->data)->arg, call);
@@ -1499,7 +1500,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 			break;
 		}
 		if (sym_index != CIL_SYM_UNKNOWN) {
-			rc = cil_resolve_name(db, current, ((struct cil_args*)item->data)->arg_str, sym_index, item->flavor, call, (struct cil_tree_node**)&(((struct cil_args*)item->data)->arg));
+			rc = cil_resolve_name(db, current, ((struct cil_args*)item->data)->arg_str, sym_index, ((struct cil_args*)item->data)->flavor, call, (struct cil_tree_node**)&(((struct cil_args*)item->data)->arg));
 			if (rc != SEPOL_OK) {
 				printf("cil_resolve_call2: cil_resolve_name failed, rc: %d\n", rc);
 				return rc;
@@ -1522,7 +1523,7 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, uint32_t flavo
 	struct cil_list_item *item = call->args->head;
 
 	while(item != NULL) {
-		if (item->flavor == flavor) {
+		if (((struct cil_args*)item->data)->flavor == flavor) {
 			if (!strcmp(name, ((struct cil_args*)item->data)->param_str)) {
 				*node = ((struct cil_args*)item->data)->arg;
 			}
