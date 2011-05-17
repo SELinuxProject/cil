@@ -99,7 +99,7 @@ void test_cil_set_to_list(CuTest *tc) {
 	gen_test_tree(&test_tree, line);
 	cil_list_init(&cil_l);
 
-	int rc = cil_set_to_list(test_tree->root->cl_head, cil_l);
+	int rc = cil_set_to_list(test_tree->root->cl_head, cil_l, 1);
 	sub_list = (struct cil_list *)cil_l->head->next->next->data;
 
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -110,7 +110,7 @@ void test_cil_set_to_list(CuTest *tc) {
 
 void test_cil_set_to_list_tree_node_null_neg(CuTest *tc) {
 	struct cil_list *cil_l = NULL;
-	int rc = cil_set_to_list(NULL, cil_l);
+	int rc = cil_set_to_list(NULL, cil_l, 1);
 
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
@@ -125,7 +125,7 @@ void test_cil_set_to_list_cl_head_null_neg(CuTest *tc) {
 	gen_test_tree(&test_tree, line);
 	test_tree->root->cl_head = NULL;
 
-	int rc = cil_set_to_list(test_tree->root, cil_l);
+	int rc = cil_set_to_list(test_tree->root, cil_l, 1);
 
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
@@ -136,7 +136,7 @@ void test_cil_set_to_list_listnull_neg(CuTest *tc) {
 	struct cil_tree *test_tree = NULL;
 	gen_test_tree(&test_tree, line);
 
-	int rc = cil_set_to_list(test_tree->root, NULL);
+	int rc = cil_set_to_list(test_tree->root, NULL, 1);
 
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }

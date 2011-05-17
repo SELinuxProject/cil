@@ -15,7 +15,7 @@ void test_cil_copy_list(CuTest *tc) {
 	gen_test_tree(&test_tree, line);
 	cil_list_init(&cil_l);
 
-	cil_set_to_list(test_tree->root->cl_head, cil_l);
+	cil_set_to_list(test_tree->root->cl_head, cil_l, 1);
 
 	struct cil_list *copy_list;
 	cil_list_init(&copy_list);
@@ -37,7 +37,7 @@ void test_cil_copy_list_sublist(CuTest *tc) {
 	gen_test_tree(&test_tree, line);
 	cil_list_init(&cil_l);
 
-	cil_set_to_list(test_tree->root->cl_head, cil_l);
+	cil_set_to_list(test_tree->root->cl_head, cil_l, 1);
 	sub_list = (struct cil_list *)cil_l->head->next->next->data;
 
 	struct cil_list *copy_list;
@@ -62,7 +62,7 @@ void test_cil_copy_list_sublist_extra(CuTest *tc) {
 	gen_test_tree(&test_tree, line);
 	cil_list_init(&cil_l);
 
-	cil_set_to_list(test_tree->root->cl_head, cil_l);
+	cil_set_to_list(test_tree->root->cl_head, cil_l, 1);
 	sub_list = (struct cil_list *)cil_l->head->next->next->data;
 
 	struct cil_list *copy_list;
