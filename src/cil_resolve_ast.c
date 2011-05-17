@@ -1335,10 +1335,6 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				printf("cil_resolve_call1 failed: missing arguments (line: %d)\n", current->line);
 				return SEPOL_ERR;
 			}
-			else if (item == NULL && pc != NULL) {
-				printf("cil_resolve_call1 failed: unexpected arguments (line: %d)\n", current->line);
-				return SEPOL_ERR;
-			}
 
 			new_arg = cil_malloc(sizeof(struct cil_args));
 			new_arg->arg_str = NULL;
@@ -1425,6 +1421,11 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 	
 			pc = pc->next;
 			item = item->next;
+		}
+
+		if (pc != NULL) {
+			printf("cil_resolve_call1 failed: unexpected arguments (line: %d)\n", current->line);
+			return SEPOL_ERR;
 		}
 	}
 
