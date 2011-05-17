@@ -37,9 +37,12 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 
 int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node)
 {
+	if (symtab == NULL || symtab->table == NULL || key == NULL || node == NULL)
+		return SEPOL_ERR;
+
 	struct cil_symtab_datum *datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
 	if (datum == NULL) 
-		return SEPOL_ERR;
+		return SEPOL_ENOENT;
 
 	*node = datum->node;
 
