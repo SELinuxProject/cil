@@ -19,7 +19,7 @@ int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *perm_list_
 	int rc = SEPOL_ERR;
 	while (perm != NULL) {
 		rc = cil_symtab_get_node(&class->perms, (char*)perm->data, &perm_node);
-		if (rc != SEPOL_OK) {
+		if (rc == SEPOL_ENOENT) {
 			if (class->common != NULL) {
 				rc = cil_symtab_get_node(&class->common->perms, (char*)perm->data, &perm_node);
 				if (rc != SEPOL_OK) {
@@ -31,6 +31,8 @@ int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *perm_list_
 				printf("Failed to find perm in class symtab\n");
 				return rc;
 			}
+		} else if (rc != SEPOL_OK) {
+			return rc;
 		}
 		if (res_list_perms != NULL) {
 			cil_list_item_init(&list_item);
@@ -990,6 +992,7 @@ int __cil_verify_sens_cats(struct cil_sens *sens, struct cil_list *cat_list)
 			rc = cil_symtab_get_node(symtab, key, &cat_node);
 			if (rc != SEPOL_OK) {
 				printf("Category has not been associated with this sensitivity: %s\n", key);
+				/*TOOD: should this return SEPOL_ERR, even if SEPOL_ENONENT is retunred? */
 				return rc;
 			}
 		}
@@ -1980,29 +1983,33 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		if (call != NULL) {
 			// check macro symtab
 			symtab = &call->macro->symtab[CIL_SYM_BLOCKS];
-			if (!cil_symtab_get_node(symtab, tok_current, node)) {
+			rc = cil_symtab_get_node(symtab, tok_current, node);
+			if (rc == SEPOL_OK) {
 				// if in macro, check call parent to verify successful copy to call
-				if (!cil_get_parent_symtab(db, ast_node->parent, &symtab, CIL_SYM_BLOCKS)) {
-					if (cil_symtab_get_node(symtab, tok_current, node)) {
+				rc = cil_get_parent_symtab(db, ast_node->parent, &symtab, CIL_SYM_BLOCKS);
+				if (rc == SEPOL_OK) {
+					rc = cil_symtab_get_node(symtab, tok_current, node);
+					if (rc != SEPOL_OK) {
 						printf("__cil_resolve_name_helper: failed to get node from parent symtab of call\n");
-						return SEPOL_ERR;
+						return rc;
 					}
-				}
-				else {
+				} else {
 					printf("__cil_resolve_name_helper: failed to get symtab from call parent\n");
-					return SEPOL_ERR;
+					return rc;
 				}
-			}
-			else if (cil_get_parent_symtab(db, call->macro->datum.node, &symtab, CIL_SYM_BLOCKS)) {
-				printf("__cil_resolve_name_helper: failed to get node from parent symtab of macro\n");
-				return SEPOL_ERR;
-			}
-			else {
-				symtab = &(db->symtab[CIL_SYM_BLOCKS]);	
+			} else if (rc == SEPOL_ENOENT) {
+				rc = cil_get_parent_symtab(db, call->macro->datum.node, &symtab, CIL_SYM_BLOCKS);
+				if (rc != SEPOL_OK) {
+					printf("__cil_resolve_name_helper: failed to get node from parent symtab of macro\n");
+					return rc;
+				} else {
+					symtab = &(db->symtab[CIL_SYM_BLOCKS]);	
+				}
+			} else {
+				return rc;
 			}
 				
-		}
-		else {
+		} else {
 			rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_BLOCKS);
 			if (rc != SEPOL_OK) {
 				printf("__cil_resolve_name_helper: cil_get_parent_symtab failed, rc: %d\n", rc);
@@ -2012,6 +2019,8 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 	}
 
 	if (tok_next == NULL) {
+		/*TODO: Should this set rc to SEPOL_ERR? */
+		/* Cant this be done earlier */
 		goto resolve_name_helper_cleanup;
 	}
 
@@ -2043,6 +2052,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 
 	resolve_name_helper_cleanup:
 		free(name_dup);
+		/*TODO: I think this is wrong */
 		if (rc)
 			return rc;
 		else
@@ -2065,36 +2075,39 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 			symtab_t *symtab = NULL;
 			if (call != NULL) {
 				symtab = &call->macro->symtab[sym_index];
-				if (!cil_symtab_get_node(symtab, name, node)) {
-					if(!cil_get_parent_symtab(db, ast_node->parent, &symtab, sym_index)) {
-						if(!cil_symtab_get_node(symtab, name, node))
-							return SEPOL_OK;
-						else {
+				rc = cil_symtab_get_node(symtab, name, node);
+				if (rc == SEPOL_OK) {
+					rc = cil_get_parent_symtab(db, ast_node->parent, &symtab, sym_index);
+					if (rc == SEPOL_OK) {
+						rc = cil_symtab_get_node(symtab, name, node);
+						if (rc != SEPOL_OK) {
 							printf("cil_resolve_name: failed to get node from parent symtab of call\n");
-							return SEPOL_ERR;
 						}
+						return rc;
 					}
 					else {
 						printf("failed to get parent symtab from call\n");
-						return SEPOL_ERR;
+						return rc;
 					}
 						
 				}
-				else if (!cil_resolve_name_call_args(call, name, flavor, node))
-					return SEPOL_OK;
 				else {
+					rc = cil_resolve_name_call_args(call, name, flavor, node);
+					if (rc == SEPOL_OK)
+						return rc;
+
 					rc = cil_get_parent_symtab(db, call->macro->datum.node, &symtab, sym_index);
 					if (rc != SEPOL_OK)
 						return rc;
-					if (!cil_symtab_get_node(symtab, name, node))
-						return SEPOL_OK;	
-					else {
-						global_symtab_name = cil_malloc(strlen(name)+2);
-						strcpy(global_symtab_name, ".");
-						strncat(global_symtab_name, name, strlen(name));
-					}
-				}	
-				
+
+					rc = cil_symtab_get_node(symtab, name, node);
+					if (rc == SEPOL_OK)
+						return rc;	
+
+					global_symtab_name = cil_malloc(strlen(name)+2);
+					strcpy(global_symtab_name, ".");
+					strncat(global_symtab_name, name, strlen(name));
+				}
 			}
 			else {
 				rc = cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
@@ -2111,7 +2124,8 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 			}
 		}
 		else {
-			if (__cil_resolve_name_helper(db, ast_node, name, sym_index, call, node) != SEPOL_OK) {
+			rc = __cil_resolve_name_helper(db, ast_node, name, sym_index, call, node);
+			if (rc != SEPOL_OK) {
 				global_symtab_name = cil_malloc(strlen(name)+2);
 				strcpy(global_symtab_name, ".");
 				strncat(global_symtab_name, name, strlen(name));
@@ -2123,15 +2137,17 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 
 	if (first == '.') {
 		if (strrchr(global_symtab_name, '.') == global_symtab_name) { //Only one dot in name, check global symtabs
-			if (cil_symtab_get_node(&db->symtab[sym_index], global_symtab_name+1, node)) {
+			rc = cil_symtab_get_node(&db->symtab[sym_index], global_symtab_name+1, node);
+			if (rc != SEPOL_OK) {
 				free(global_symtab_name);
-				return SEPOL_ERR;
+				return rc;
 			}
 		}
 		else {
-			if (__cil_resolve_name_helper(db, db->ast->root, global_symtab_name, sym_index, call, node)) {
+			rc = __cil_resolve_name_helper(db, db->ast->root, global_symtab_name, sym_index, call, node);
+			if (rc != SEPOL_OK) {
 				free(global_symtab_name);
-				return SEPOL_ERR;
+				return rc;
 			}
 		}
 	}
@@ -2141,4 +2157,3 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 
 	return SEPOL_OK;
 }
-
