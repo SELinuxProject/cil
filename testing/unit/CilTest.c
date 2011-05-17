@@ -608,6 +608,15 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_emptyparam_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro_neg);
+	
+	SUITE_ADD_TEST(suite, test_cil_gen_call);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_anon);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_empty);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_noparams_neg);
 	/* test_cil_resolve_ast.c */
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_inval_perm_neg);
