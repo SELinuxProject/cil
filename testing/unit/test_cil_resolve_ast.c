@@ -2191,6 +2191,272 @@ void test_cil_resolve_call1_copy_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
 }
 
+void test_cil_resolve_call2_type(CuTest *tc) {
+	char *line[] = {"(", "type", "qaz", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_role(CuTest *tc) {
+	char *line[] = {"(", "role", "role_r", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "role", "a", ")", ")",
+				"(", "role", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "role_r", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_user(CuTest *tc) {
+	char *line[] = {"(", "user", "user_u", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "user", "a", ")", ")",
+				"(", "user", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "user_u", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_sens(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "sens", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "sensitivity", "a", ")", ")",
+				"(", "sensitivity", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "sens", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_cat(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "category", "a", ")", ")",
+				"(", "category", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "c0", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_catset(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "somecats", "(", "c0", "c1", "c2", ")", ")",
+			"(", "macro", "mm", "(", "(", "categoryset",  "foo", ")", ")",
+				"(", "level", "bar", "(", "s0", "foo", ")", ")", ")",
+			"(", "call", "mm", "(", "somecats", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_catset_anon(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "macro", "mm", "(", "(", "categoryset",  "foo", ")", ")",
+				"(", "level", "bar", "(", "s0", "foo", ")", ")", ")",
+			"(", "call", "mm", "(", "(", "c0", "c1", "c2", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_class(CuTest *tc) {
+	char *line[] = {"(", "class", "foo", "(", "read", ")", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
+				"(", "class", "b", "(", "read", ")", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "foo", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_level(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "l", "s0", "(", "c0", ")", ")",
+			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", "(", "level", "lvl_h", ")", ")",
+				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")", ")",
+			"(", "call", "mm", "(", "l", "h", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_level_anon(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "l", "s0", "(", "c0", ")", ")",
+			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", ")",
+				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "h", ")", ")", ")",
+			"(", "call", "mm", "(", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_unknown_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "l", "s0", "(", "c0", ")", ")",
+			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", "(", "level", "lvl_h", ")", ")",
+				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")", ")",
+			"(", "call", "mm", "(", "l", "h", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	((struct cil_args*)((struct cil_list_item *)((struct cil_call *)test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->data)->args->head)->data)->flavor = CIL_SYM_UNKNOWN;
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_name_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "foo", "(", "read", ")", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
+				"(", "class", "b", "(", "read", ")", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_roletype(CuTest *tc) {
 	char *line[] = {"(", "role",  "admin_r", ")",
 			"(", "type", "admin_t", ")",

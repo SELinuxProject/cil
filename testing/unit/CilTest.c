@@ -793,6 +793,19 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_extraargs_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_copy_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_type);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_role);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_user);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_sens);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_cat);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_catset);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_catset_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_class);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level);
+	//SUITE_ADD_TEST(suite, test_cil_resolve_call2_level_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_unknown_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_name_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_role_neg);
