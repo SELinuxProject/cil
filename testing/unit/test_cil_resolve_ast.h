@@ -156,6 +156,14 @@ void test_cil_resolve_call2_level_anon(CuTest *);
 void test_cil_resolve_call2_unknown_neg(CuTest *);
 void test_cil_resolve_call2_name_neg(CuTest *);
 
+void test_cil_resolve_name_call_args(CuTest *);
+void test_cil_resolve_name_call_args_extraparams(CuTest *);
+void test_cil_resolve_name_call_args_diffflavor(CuTest *);
+void test_cil_resolve_name_call_args_callnull_neg(CuTest *);
+void test_cil_resolve_name_call_args_namenull_neg(CuTest *);
+void test_cil_resolve_name_call_args_callargsnull_neg(CuTest *);
+void test_cil_resolve_name_call_args_name_neg(CuTest *);
+
 void test_cil_resolve_roletype(CuTest *tc);
 void test_cil_resolve_roletype_type_neg(CuTest *tc);
 void test_cil_resolve_roletype_role_neg(CuTest *tc);

@@ -2457,6 +2457,185 @@ void test_cil_resolve_call2_name_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_name_call_args(CuTest *tc) {
+	char *line[] = {"(", "type", "qaz", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *test_node;
+	cil_tree_node_init(&test_node);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "qaz", CIL_TYPE, &test_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_name_call_args_extraparams(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "l", "s0", "(", "c0", ")", ")",
+			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", "(", "level", "lvl_h", ")", ")",
+				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")", ")",
+			"(", "call", "mm", "(", "l", "h", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_tree_node *test_node;
+	cil_tree_node_init(&test_node);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->data, "lvl_h", CIL_LEVEL, &test_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_name_call_args_diffflavor(CuTest *tc) {
+	char *line[] = {"(", "type", "qaz", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *test_node;
+	cil_tree_node_init(&test_node);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "qaz", CIL_LEVEL, &test_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_name_call_args_callnull_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "qaz", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *test_node;
+	cil_tree_node_init(&test_node);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_name_call_args(NULL, "qaz", CIL_LEVEL, &test_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_name_call_args_namenull_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "qaz", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *test_node;
+	cil_tree_node_init(&test_node);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, NULL, CIL_LEVEL, &test_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_name_call_args_callargsnull_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "qaz", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *test_node;
+	cil_tree_node_init(&test_node);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "qas", CIL_LEVEL, &test_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_name_call_args_name_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "qaz", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "baz", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *test_node = NULL;
+	//cil_tree_node_init(&test_node);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "qas", CIL_TYPE, &test_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_roletype(CuTest *tc) {
 	char *line[] = {"(", "role",  "admin_r", ")",
 			"(", "type", "admin_t", ")",
