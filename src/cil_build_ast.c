@@ -1220,7 +1220,7 @@ int cil_fill_catset(struct cil_tree_node *start, struct cil_catset *catset)
 	
 	cil_list_init(&catset->cat_list_str);
 
-	rc = cil_set_to_list(start, catset->cat_list_str, 0);
+	rc = cil_set_to_list(start, catset->cat_list_str, 1);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create categoryset list\n");
 		goto fill_catset_cleanup;
