@@ -183,7 +183,6 @@ struct cil_block {
 	symtab_t symtab[CIL_SYM_NUM];
 	/* TODO CDS eventually, these should probably become a flags bit vector */
 	uint16_t is_abstract;
-	uint16_t is_optional;
 	/* TODO CDS we need to figure out how to handle conditionals */
 	char *condition;
 };

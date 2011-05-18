@@ -432,7 +432,6 @@ int cil_block_init(struct cil_block **block)
 	}
 
 	new_block->is_abstract = 0;
-	new_block->is_optional = 0;
 	new_block->condition = NULL;
 
 	*block = new_block;

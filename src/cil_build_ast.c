@@ -86,7 +86,7 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 	return SEPOL_OK;
 }
 
-int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, uint16_t is_optional, char *condition)
+int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, char *condition)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
@@ -104,7 +104,6 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	}
 
 	block->is_abstract = is_abstract;
-	block->is_optional = is_optional;
 	block->condition = condition;
 
 	name = (char *)parse_current->next->data;
@@ -2066,7 +2065,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			other->head->data = ast_current;
 
 			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
-				rc = cil_gen_block(db, parse_current, ast_node, 0, 0, NULL);
+				rc = cil_gen_block(db, parse_current, ast_node, 0, NULL);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_block failed, rc: %d\n", rc);
 					return rc;

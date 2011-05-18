@@ -10,7 +10,7 @@
 int cil_parse_to_list(struct cil_tree_node *, struct cil_list *, uint32_t);
 int cil_gen_perm_nodes(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 
-int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, uint16_t, char *);
+int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint16_t, char *);
 void cil_destroy_block(struct cil_block *);
 int cil_gen_perm(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_perm(struct cil_perm *);
