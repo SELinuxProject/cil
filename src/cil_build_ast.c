@@ -103,12 +103,6 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return rc;
 	}
 
-	rc = cil_symtab_array_init(block->symtab, CIL_SYM_NUM);
-	if (rc != SEPOL_OK) {
-		printf("Failed to initialize symtab array\n");
-		goto gen_block_cleanup;
-	}
-
 	block->is_abstract = is_abstract;
 	block->is_optional = is_optional;
 	block->condition = condition;
@@ -152,12 +146,6 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	}
 
 	struct cil_tree_node *perms;
-
-	rc = symtab_init(&cls->perms, CIL_SYM_SIZE);
-	if (rc != SEPOL_OK) {
-		printf("Perms symtab init failed\n");
-		goto gen_class_cleanup;
-	}
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cls, (hashtab_key_t)key, CIL_SYM_CLASSES, CIL_CLASS);
 	if (rc != SEPOL_OK) 
@@ -244,12 +232,6 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		return rc;
 	}
 
-	rc = symtab_init(&common->perms, CIL_SYM_SIZE);
-	if (rc != SEPOL_OK) {
-		printf("Common perms symtab init failed\n");
-		return SEPOL_ERR;
-	}
-	
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)common, (hashtab_key_t)key, CIL_SYM_COMMONS, CIL_COMMON);
 	if (rc != SEPOL_OK) 
 		goto gen_common_cleanup;
@@ -418,7 +400,6 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return rc;
 	}
 
-	cil_symtab_datum_init(&role->datum);
 	char *key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)role, (hashtab_key_t)key, CIL_SYM_ROLES, CIL_ROLE);
@@ -988,12 +969,6 @@ int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, 
 
 	char *key = parse_current->next->data;
 	
-	rc = symtab_init(&sens->cats, CIL_SYM_SIZE);
-	if (rc != SEPOL_OK) {
-		printf("Categories symtab init failed\n");
-		goto gen_sens_cleanup;
-	}
-
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)sens, (hashtab_key_t)key, CIL_SYM_SENS, CIL_SENS);
 	if (rc != SEPOL_OK)
 		goto gen_sens_cleanup;
@@ -1191,8 +1166,6 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
-
-	cil_symtab_datum_init(&catset->datum);
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)catset, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CATSET);
 	if (rc != SEPOL_OK) 
