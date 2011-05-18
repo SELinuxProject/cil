@@ -1526,15 +1526,13 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, uint32_t flavo
 		if (((struct cil_args*)item->data)->flavor == flavor) {
 			if (!strcmp(name, ((struct cil_args*)item->data)->param_str)) {
 				*node = ((struct cil_args*)item->data)->arg;
+				return SEPOL_OK;
 			}
 		}
 		item = item->next;
 	}
-	
-	if (*node != NULL)
-		return SEPOL_OK;
-	else
-		return SEPOL_ERR;
+
+	return SEPOL_ERR;
 }
 
 int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *bif, struct cil_call *call)
