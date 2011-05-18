@@ -546,5 +546,6 @@ int cil_type_init(struct cil_type **type);
 int cil_cat_init(struct cil_cat **cat);
 int cil_catorder_init(struct cil_catorder **catorder);
 int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates);
+int cil_call_init(struct cil_call **call);
 
 #endif

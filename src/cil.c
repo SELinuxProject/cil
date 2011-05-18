@@ -969,3 +969,21 @@ int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates)
 
 	return SEPOL_OK;
 }
+
+int cil_call_init(struct cil_call **call)
+{
+	if (call == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_call *new_call = cil_malloc(sizeof(struct cil_call));
+
+	new_call->macro_str = NULL;
+	new_call->macro = NULL;
+	new_call->args_tree = NULL;
+	new_call->args = NULL;
+
+	*call = new_call;
+
+	return SEPOL_OK;
+}

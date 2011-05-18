@@ -1945,7 +1945,11 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return SEPOL_ERR;
 	}
 
-	struct cil_call *call = cil_malloc(sizeof(struct cil_call));
+	struct cil_call *call;
+	int rc = cil_call_init(&call);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
 
 	call->macro_str = cil_strdup(parse_current->next->data);
 
