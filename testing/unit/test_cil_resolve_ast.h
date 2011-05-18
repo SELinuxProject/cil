@@ -177,6 +177,12 @@ void test_cil_resolve_userrole_role_neg(CuTest *tc);
 	__cil_resolve_ast_node_helper test cases
 */
 
+void test_cil_resolve_ast_node_helper_call1(CuTest *);
+void test_cil_resolve_ast_node_helper_call1_neg(CuTest *);
+
+void test_cil_resolve_ast_node_helper_call2(CuTest *);
+void test_cil_resolve_ast_node_helper_call2_neg(CuTest *);
+
 void test_cil_resolve_ast_node_helper_catorder(CuTest *);
 void test_cil_resolve_ast_node_helper_catorder_neg(CuTest *);
 

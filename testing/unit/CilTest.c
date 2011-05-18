@@ -792,6 +792,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknowncall_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_extraargs_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_copy_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call1);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call1_neg); 
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_type);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_role);
@@ -805,6 +807,8 @@ CuSuite* CilTreeGetSuite() {
 	//SUITE_ADD_TEST(suite, test_cil_resolve_call2_level_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_unknown_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_name_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call2);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call2_neg); 
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args_extraparams);
