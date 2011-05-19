@@ -1575,7 +1575,7 @@ int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct 
 
 int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
 {
-	int rc = SEPOL_ERR;
+	int rc = SEPOL_OK;
 
 	if (node == NULL || other == NULL || other->head == NULL)
 		return SEPOL_ERR;
@@ -1616,8 +1616,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			case 1 : {
 				if (node->flavor == CIL_CALL) {
 					rc = cil_resolve_call1(db, node, call);
-					if (rc != SEPOL_OK)
-						return rc;
 				}
 				break;
 			}
@@ -1629,15 +1627,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					case CIL_CATORDER : {
 						printf("case categoryorder\n");
 						rc = cil_resolve_catorder(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_DOMINANCE : {
 						printf("case dominance\n");
 						rc = cil_resolve_dominance(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 				}
@@ -1648,15 +1642,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					case CIL_SENSCAT : {
 						printf("case sensitivitycategory\n");
 						rc = cil_resolve_senscat(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_CLASSCOMMON : {
 						printf("case classcommon\n");
 						rc = cil_resolve_classcommon(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 				}
@@ -1667,120 +1657,86 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					case CIL_TYPE_ATTR : {
 						printf("case typeattribute\n");
 						rc = cil_resolve_typeattr(db, node, call);
-						if (rc !=  SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_TYPEALIAS : {
 						printf("case typealias\n");
 						rc = cil_resolve_typealias(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_AVRULE : {
 						printf("case avrule\n");
 						rc = cil_resolve_avrule(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_TYPE_RULE : {
 						printf("case type_rule\n");
 						rc = cil_resolve_type_rule(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_USERROLE : {
 						printf("case userrole\n");
 						rc = cil_resolve_userrole(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_ROLETYPE : {
 						printf("case roletype\n");
 						rc = cil_resolve_roletype(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_ROLETRANS : {
 						printf("case roletransition\n");
 						rc = cil_resolve_roletrans(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_ROLEALLOW : {
 						printf("case roleallow\n");
 						rc = cil_resolve_roleallow(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_SENSALIAS : {
 						printf("case sensitivityalias\n");
 						rc = cil_resolve_sensalias(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_CATALIAS : {
 						printf("case categoryalias\n");
 						rc = cil_resolve_catalias(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_CATSET : {
 						printf("case categoryset\n");
 						rc = cil_resolve_catset(db, node, (struct cil_catset*)node->data, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_LEVEL : {
 						printf("case level\n");
 						rc = cil_resolve_level(db, node, (struct cil_level*)node->data, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_CONSTRAIN : {
 						printf("case constrain\n");
 						rc = cil_resolve_constrain(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_MLSCONSTRAIN : {
 						printf("case constrain\n");
 						rc = cil_resolve_constrain(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_CONTEXT : {
 						printf("case context\n");
 						rc = cil_resolve_context(db, node, (struct cil_context*)node->data, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					case CIL_NETIFCON : {
 						printf("case netifcon\n");
 						rc = cil_resolve_netifcon(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;	
 						break;
 					}
 					case CIL_SID : {
 						printf("case sid\n");
 						rc = cil_resolve_sid(db, node, call);
-						if (rc != SEPOL_OK)
-							return rc;
 						break;
 					}
 					default : 
@@ -1810,16 +1766,12 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			case 2 : {
 				if (node->flavor == CIL_CALL) {
 					rc = cil_resolve_call2(db, node, call);
-					if (rc != SEPOL_OK)
-						return rc;
 				}
 				break;
 			}
 			case 3 : {
 				if (node->flavor == CIL_BOOLEANIF) {
 					rc = cil_resolve_boolif(db, node, call);
-					if (rc != SEPOL_OK)
-						return rc;
 				}
 				break;
 			}
@@ -1828,11 +1780,28 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		}
 	}	
 
+	if (rc == SEPOL_ENOENT && optstack != NULL) {
+		/* disable an optional if something failed to resolve */
+		struct cil_optional *opt = (struct cil_optional *)optstack->data;
+		opt->state = CIL_OPT_DISABLING;
+		rc = SEPOL_OK;
+	}
+
+	if (node->flavor == CIL_OPTIONAL) {
+		/* disable this optional if the parent optional was disabled */
+		if (optstack != NULL) {
+			struct cil_optional *opt = (struct cil_optional *)optstack->data;
+			if (opt->state == CIL_OPT_DISABLING) {
+				((struct cil_optional *)node->data)->state = CIL_OPT_DISABLING;
+			}
+		}
+	}
+
 	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL) {
-		/* push this node onto the a stack */
+		/* push this node onto a stack */
 		struct cil_tree_node *new;
-		rc = cil_tree_node_init(&new);
-		if (rc != SEPOL_OK)
+		int rc2 = cil_tree_node_init(&new);
+		if (rc2 != SEPOL_OK)
 			return rc;
 
 		new->data = node->data;
@@ -1853,7 +1822,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		}
 	}
 	
-	return SEPOL_OK;
+	return rc;
 }
 
 int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, struct cil_list *other)
