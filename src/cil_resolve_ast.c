@@ -1825,8 +1825,8 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		}
 	}	
 
-	if (node->flavor == CIL_CALL) {
-		/* push this node onto the call stack */
+	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL) {
+		/* push this node onto the a stack */
 		struct cil_tree_node *new;
 		rc = cil_tree_node_init(&new);
 		if (rc != SEPOL_OK)
@@ -1835,34 +1835,21 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		new->data = node->data;
 		new->flavor = node->flavor;
 
-		if (other->head->next->next->data == NULL) {
+		if (node->flavor == CIL_CALL) {
+			if (callstack != NULL) {
+				callstack->parent = new;
+				new->cl_head = callstack;
+			}
 			other->head->next->next->data = new;
-		} else {
-			callstack->parent = new;
-			new->cl_head = callstack;
-			other->head->next->next->data = new;
+		} else if (node->flavor == CIL_OPTIONAL) {
+			if (optstack != NULL) {
+				optstack->parent = new;
+				new->cl_head = optstack;
+			}
+			other->head->next->next->next->data = new;
 		}
 	}
 	
-	if (node->flavor == CIL_OPTIONAL) {
-		/* push this node onto the optional stack */
-		struct cil_tree_node *new;
-		rc = cil_tree_node_init(&new);
-		if (rc != SEPOL_OK)
-			return rc;
-		
-		new->data = node->data;
-		new->flavor = node->flavor;
-		
-		if (optstack == NULL) {
-			other->head->next->next->next->data = new;
-		} else {
-			optstack->parent = new;
-			new->cl_head = optstack;
-			other->head->next->next->next->data = new;
-		}
-	}
-
 	return SEPOL_OK;
 }
 
