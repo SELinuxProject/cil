@@ -692,12 +692,8 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return rc;
 	}
 
-	symtab_t *symtab = NULL;
-
-	if (flavor == CIL_TYPE || flavor == CIL_ATTR) {
-		rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_TYPES);
-		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, (struct cil_symtab_datum*)type, ast_node);
-	}
+	if (flavor == CIL_TYPE || flavor == CIL_ATTR) 
+		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)type, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPE);
 	else {
 		printf("Error: cil_gen_type called on invalid node\n");
 		rc = SEPOL_ERR;
