@@ -6213,7 +6213,7 @@ void test_cil_gen_call_noparams_neg(CuTest *tc) {
 */
 
 void test_cil_build_ast(CuTest *tc) {
-	char *line[] = {"(", "test", "\"qstring\"", ")", ";comment", NULL};
+	char *line[] = {"(", "type", "foo", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

@@ -997,7 +997,7 @@ void test_cil_resolve_context_lownull_unnamed_neg(CuTest *tc) {
 	test_context->low = NULL;
 
 	int rc = cil_resolve_context(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, test_context, NULL);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_context_highnull_unnamed_neg(CuTest *tc) {
@@ -1025,7 +1025,7 @@ void test_cil_resolve_context_highnull_unnamed_neg(CuTest *tc) {
 	test_context->high = NULL;
 	
 	int rc = cil_resolve_context(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, test_context, NULL);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_roletrans(CuTest *tc) {
@@ -2486,7 +2486,7 @@ void test_cil_resolve_name_call_args(CuTest *tc) {
 
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "qaz", CIL_TYPE, &test_node);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "a", CIL_TYPE, &test_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -2541,7 +2541,7 @@ void test_cil_resolve_name_call_args_diffflavor(CuTest *tc) {
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "qaz", CIL_LEVEL, &test_node);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_name_call_args_callnull_neg(CuTest *tc) {
