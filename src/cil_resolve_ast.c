@@ -1981,7 +1981,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	if (rc == SEPOL_ENOENT && optstack != NULL) {
 		/* disable an optional if something failed to resolve */
 		struct cil_optional *opt = (struct cil_optional *)optstack->data;
-		opt->datum.state = CIL_STATE_DISABLED;
+		opt->datum.state = CIL_STATE_DISABLING;
 		rc = SEPOL_OK;
 	}
 
@@ -2013,6 +2013,82 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	return rc;
 }
 
+int __cil_disable_children_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
+{
+	switch (node->flavor) {
+	case CIL_OPTIONAL:
+		if (((struct cil_optional *)node->data)->datum.state == CIL_STATE_DISABLED) {
+			/* don't bother going into an optional that isn't enabled */
+			*finished = CIL_TREE_SKIP_HEAD;
+		} else {
+			((struct cil_optional *)node->data)->datum.state = CIL_STATE_DISABLED;
+		}
+		break;
+	case CIL_BLOCK:
+		((struct cil_block *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_USER:
+		((struct cil_user *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_ROLE:
+		((struct cil_role *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_TYPE:
+		((struct cil_type *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_TYPEALIAS:
+		((struct cil_typealias *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_COMMON:
+		((struct cil_common *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_CLASS:
+		((struct cil_class *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_BOOL:
+		((struct cil_bool *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_SENS:
+		((struct cil_sens *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_CAT:
+		((struct cil_cat *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_CATSET:
+		((struct cil_catset *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_SID:
+		((struct cil_sid *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_MACRO:
+		/* TODO: how to handle macros that have already been copied??? */
+		((struct cil_macro *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_CONTEXT:
+		((struct cil_context *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_LEVEL:
+		((struct cil_level *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_POLICYCAP:
+		((struct cil_policycap *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_PERM:
+		((struct cil_perm *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_CATALIAS:
+		((struct cil_catalias *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_SENSALIAS:
+		((struct cil_sensalias *)node->data)->datum.state = CIL_STATE_DISABLED;
+		break;
+	case CIL_TUNABLE: /*TODO not sure how to handle tunables??? */
+		break;
+	}
+
+	return SEPOL_OK;
+}
+
 int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, struct cil_list *other)
 {
 	if (other == NULL || other->head == NULL || other->head->next == NULL || other->head->next->next == NULL || other->head->next->next->next == NULL)
@@ -2027,6 +2103,26 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, struct cil_l
 		}
 		free(callstack);
 	} else if (current->flavor == CIL_OPTIONAL) {
+
+		if (((struct cil_optional *)current->data)->datum.state == CIL_STATE_DISABLING) {
+			/* go into the optional, removing everything that it added */
+			struct cil_list *optlist;
+			cil_list_init(&optlist);
+			cil_list_item_init(&optlist->head);
+			optlist->head->data = current->data;
+			optlist->head->flavor = CIL_OPTIONAL;
+	
+			printf("OPTIONAL %s was disabled %i, disabling children....\n", ((struct cil_optional *)current->data)->datum.name, ((struct cil_optional *)current->data)->datum.state);	
+			int rc = cil_tree_walk(current, __cil_disable_children_helper, NULL, NULL, optlist);
+			if (rc != SEPOL_OK) {
+				printf("cil_resolve_ast_reverse_helper: failed\n");
+				return rc;
+			}
+
+			cil_list_destroy(&optlist, 0);
+			((struct cil_optional *)current->data)->datum.state = CIL_STATE_DISABLED;
+		}
+		
 		/* pop off the stack */
 		struct cil_tree_node *optstack = other->head->next->next->next->data;
 		other->head->next->next->next->data = optstack->cl_head;
