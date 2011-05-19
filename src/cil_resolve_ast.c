@@ -1874,63 +1874,31 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	other->head->next->next->next->data = NULL;
 	other->head->next->next->next->flavor = CIL_AST_NODE;
 
-	printf("---------- Pass 1 ----------\n");
-	rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	
-	if (rc != SEPOL_OK) {
-		printf("cil_resolve_ast: Pass 1 failed\n");
-		return rc;
-	}
+	for (pass = 1; pass <= 5; pass++) {
 
-	cil_tree_print(db->ast->root, 0);
+		printf("---------- Pass %i ----------\n", pass);
+		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_ast: Pass %i failed\n", pass);
+			return rc;
+		}
 
-	pass = 2;
-	printf("---------- Pass 2 ----------\n");
-	rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	
-	if (rc != SEPOL_OK) {
-		printf("cil_resolve_ast: Pass 2 failed\n");
-		return rc;
-	}
+		//cil_tree_print(db->ast->root, 0);
 
-	cil_tree_print(db->ast->root, 0);
-	
-	pass = 3;
-	printf("---------- Pass 3 ----------\n");
-	rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	
-	if (rc != SEPOL_OK) {
-		printf("cil_resolve_ast: Pass 3 failed\n");
-		return rc;
-	}
-
-	cil_tree_print(db->ast->root, 0);
-
-	printf("----- Verify Catorder ------\n");
-	rc = __cil_verify_order(db->catorder, current, CIL_CAT);
-	if (rc != SEPOL_OK) {
-		printf("Failed to verify categoryorder\n");
-		return rc;
-	}
-	printf("----- Verify Dominance -----\n");
-	rc = __cil_verify_order(db->dominance, current, CIL_SENS);
-	if (rc != SEPOL_OK) {
-		printf("Failed to verify dominance\n");
-		return rc;
-	}
-	printf("---------- Pass 4 ----------\n");
-	pass = 4;
-	rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper,  NULL, other);	
-	if (rc != SEPOL_OK) {
-		printf("cil_resolve_ast: Pass 4 failed\n");
-		return rc;
-	}
-	
-	cil_tree_print(db->ast->root, 0);
-
-	printf("---------- Pass 5 ----------\n");
-	pass = 5;
-	rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	
-	if (rc != SEPOL_OK) {
-		printf("cil_resolve_ast: Pass 5 failed\n");
-		return rc;
+		if (pass == 3) {
+			printf("----- Verify Catorder ------\n");
+			rc = __cil_verify_order(db->catorder, current, CIL_CAT);
+			if (rc != SEPOL_OK) {
+				printf("Failed to verify categoryorder\n");
+				return rc;
+			}
+			printf("----- Verify Dominance -----\n");
+			rc = __cil_verify_order(db->dominance, current, CIL_SENS);
+			if (rc != SEPOL_OK) {
+				printf("Failed to verify dominance\n");
+				return rc;
+			}
+		}
 	}
 
 	return SEPOL_OK;
