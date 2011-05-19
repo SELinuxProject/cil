@@ -1166,7 +1166,7 @@ void test_cil_resolve_typealias(CuTest *tc) {
 
 void test_cil_resolve_typealias_neg(CuTest *tc) {
 	char *line[] = {"(", "block", "foo", 
-				"(", "type", "test", ")", ")", NULL};
+				"(", "typealias", ".foo", "apache_alias", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
