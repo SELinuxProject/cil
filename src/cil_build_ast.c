@@ -796,9 +796,11 @@ int cil_gen_expr_stack(struct cil_tree_node *current, struct cil_tree_node **sta
 			else
 				return SEPOL_ERR;
 
-			if (current->flavor == CIL_NOT && current->next->next != NULL)
-				return SEPOL_ERR;
-			else if (current->next == NULL || current->next->next == NULL)
+			if (cond->flavor == CIL_NOT) {
+				if (current->next->next != NULL)
+					return SEPOL_ERR;
+			}
+			else if (current->next == NULL || current->next->next == NULL || current->next->next->next != NULL)
 				return SEPOL_ERR;
 		}
 		else {
@@ -817,10 +819,16 @@ int cil_gen_expr_stack(struct cil_tree_node *current, struct cil_tree_node **sta
 		*stack = new;
 	}
 
-	if (current->cl_head != NULL)
+	if (current->cl_head != NULL) {
 		rc = cil_gen_expr_stack(current->cl_head, stack);
-	if (current->next != NULL)
+		if (rc != SEPOL_OK) 
+			return SEPOL_ERR;
+	}
+	if (current->next != NULL) {
 		rc = cil_gen_expr_stack(current->next, stack);
+		if (rc != SEPOL_OK)
+			return SEPOL_ERR;
+	}
 
 	return SEPOL_OK;
 }

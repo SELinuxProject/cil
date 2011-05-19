@@ -466,6 +466,18 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("|| ");
 				return;
 			}
+			case CIL_NOT : {
+				printf("!");
+				return;
+			}
+			case CIL_EQ : {
+				printf("==");
+				return;
+			}
+			case CIL_NEQ : {
+				printf("!=");
+				return;
+			}
 			case CIL_TYPE_ATTR : {
 				struct cil_typeattribute *typeattr = node->data;
 				if (typeattr->type_str != NULL && typeattr->attr_str != NULL)

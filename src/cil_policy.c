@@ -390,7 +390,8 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 			int len2 = 0;
 	
 			oper1 = stack->parent;
-			oper2 = stack->parent->parent;
+			if (cond->flavor != CIL_NOT)
+				oper2 = stack->parent->parent;
 
 			if (oper1->flavor == CIL_COND && ((struct cil_conditional*)oper1->data)->flavor == CIL_BOOL) 
 				oper1_str = ((struct cil_conditional*)stack->parent->data)->boolean->datum.name;
@@ -398,32 +399,54 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 				oper1_str = (char*)oper1->data;
 			len1 = strlen(oper1_str);
 
-			if (oper2->flavor == CIL_COND && ((struct cil_conditional*)oper2->data)->flavor == CIL_BOOL) 
-				oper2_str = ((struct cil_conditional*)stack->parent->parent->data)->boolean->datum.name;
-			else
-				oper2_str = (char*)oper2->data;
-			len2 = strlen(oper2_str);			
+			if (cond->flavor != CIL_NOT) {
+				if (oper2->flavor == CIL_COND && ((struct cil_conditional*)oper2->data)->flavor == CIL_BOOL) 
+					oper2_str = ((struct cil_conditional*)stack->parent->parent->data)->boolean->datum.name;
+				else
+					oper2_str = (char*)oper2->data;
+				len2 = strlen(oper2_str);
+			}
 			
 			oper = ((struct cil_conditional*)stack->data)->str;
 			int oplen = strlen(oper);
 
-			new->data = cil_malloc(len1 + len2 + oplen + 5);
-			strcpy(new->data, "(");
-			strncat(new->data, oper1_str, len1);
-			strncat(new->data, " ", 1);
-			strncat(new->data, oper, oplen);
-			strncat(new->data, " ", 1);
-			strncat(new->data, oper2_str, len2);
-			strncat(new->data, ")", 1);
+			if (cond->flavor != CIL_NOT) {
+				new->data = cil_malloc(len1 + len2 + oplen + 5);
+				strcpy(new->data, "(");
+				strncat(new->data, oper1_str, len1);
+				strncat(new->data, " ", 1);
+				strncat(new->data, oper, oplen);
+				strncat(new->data, " ", 1);
+				strncat(new->data, oper2_str, len2);
+				strncat(new->data, ")", 1);
+			}
+			else {
+				new->data = cil_malloc(len1 + len2 + oplen + 3);
+				strcpy(new->data, "(");
+				strncat(new->data, oper, oplen);
+				strncat(new->data, oper1_str, len1);
+				strncat(new->data, ")", 1);
+				
+			}
 		
 			new->flavor = CIL_AST_STR;
 			new->cl_head = stack->cl_head;
-			new->parent = stack->parent->parent->parent;
-			if (stack->parent->parent->parent != NULL)
-				stack->parent->parent->parent->cl_head = new;
+			if (cond->flavor != CIL_NOT)
+				new->parent = stack->parent->parent->parent;
+			else
+				new->parent = stack->parent->parent;
+			if (cond->flavor != CIL_NOT) {
+				if (stack->parent->parent->parent != NULL)
+					stack->parent->parent->parent->cl_head = new;
+			}
+			else {
+				if (stack->parent->parent != NULL)
+					stack->parent->parent->cl_head = new;
+			}
 			if (stack->cl_head != NULL)
 				stack->cl_head->parent = new;
-			cil_tree_node_destroy(&stack->parent->parent);
+			if (stack->parent->parent != NULL)
+				cil_tree_node_destroy(&stack->parent->parent);
 			cil_tree_node_destroy(&stack->parent);
 			cil_tree_node_destroy(&stack);
 
