@@ -720,7 +720,7 @@ void cil_destroy_type(struct cil_type *type)
 	free(type);
 }
 
-int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
@@ -743,12 +743,15 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	else if (!strcmp(parse_current->next->next->data, "false"))
 		boolean->value = 0;
 	else {
-		printf("Error: boolean value must be \'true\' or \'false\'");
+		printf("Error: value must be \'true\' or \'false\'");
 		rc = SEPOL_ERR;	
 		goto gen_bool_cleanup;
 	}
-	
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)boolean, (hashtab_key_t)key, CIL_SYM_BOOLS, CIL_BOOL);
+
+	if (flavor == CIL_BOOL)	
+		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)boolean, (hashtab_key_t)key, CIL_SYM_BOOLS, CIL_BOOL);
+	else
+		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)boolean, (hashtab_key_t)key, CIL_SYM_TUNABLES, CIL_TUNABLE);
 	if (rc != SEPOL_OK) 
 		goto gen_bool_cleanup;
 	
@@ -2217,7 +2220,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				}
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
-				rc = cil_gen_bool(db, parse_current, ast_node);
+				rc = cil_gen_bool(db, parse_current, ast_node, CIL_BOOL);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_bool failed, rc: %d\n", rc);
 					return rc;
@@ -2230,7 +2233,21 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 			}
-			else if (!strcmp(parse_current->data, CIL_KEY_ELSE)) {
+			else if(!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
+				rc = cil_gen_bool(db, parse_current, ast_node, CIL_TUNABLE);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_bool failed, rc: %d\n", rc);
+					return rc;
+				}
+			}
+/*			else if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
+				rc = cil_gen_tunif(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_tunif failed, rc: %d\n", rc);
+					return rc;
+				}
+			}
+*/			else if (!strcmp(parse_current->data, CIL_KEY_ELSE)) {
 				rc = cil_gen_else(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_else failed, rc: %d\n", rc);

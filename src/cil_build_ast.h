@@ -40,7 +40,7 @@ int cil_gen_roletrans(struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_roletrans(struct cil_role_trans *);
 int cil_gen_roleallow(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_roleallow(struct cil_role_allow *);
-int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t flavor);
 void cil_destroy_bool(struct cil_bool *);
 int cil_gen_boolif(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_boolif(struct cil_booleanif *);

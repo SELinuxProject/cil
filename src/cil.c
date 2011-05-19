@@ -122,6 +122,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_bool(*data);
 			break;
 		}
+		case (CIL_TUNABLE) : {
+			cil_destroy_bool(*data);
+			break;
+		}
 		case (CIL_BOOLEANIF) : {
 			cil_destroy_boolif(*data);
 			break;

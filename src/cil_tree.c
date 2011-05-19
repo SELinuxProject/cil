@@ -440,6 +440,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("BOOL: %s, value: %d\n", boolean->datum.name, boolean->value);
 				return;
 			}
+			case CIL_TUNABLE : {
+				struct cil_bool *boolean = node->data;
+				printf("TUNABLE: %s, value: %d\n", boolean->datum.name, boolean->value);
+				return;
+			}
 			case CIL_BOOLEANIF : {
 				printf("BOOLEANIF: expression stack: ( ");
 				struct cil_booleanif *bif = node->data;
