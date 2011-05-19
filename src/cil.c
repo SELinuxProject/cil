@@ -268,6 +268,18 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 					cil_symtab_destroy(&((struct cil_common*)current->data)->perms);
 					break;
 				}
+				case (CIL_MACRO) : {
+					cil_symtab_array_destroy(((struct cil_macro*)current->data)->symtab);
+					break;
+				}
+				case (CIL_CALL) : {
+					/* do nothing */
+					break;
+				}
+				case (CIL_OPTIONAL) : {
+					/* do nothing */
+					break;
+				}
 				default : 
 					printf("destroy symtab error, wrong flavor node\n");
 			}
