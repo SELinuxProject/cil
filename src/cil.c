@@ -170,8 +170,12 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_level(*data);
 			break;
 		}
+		case (CIL_CONSTRAIN) : {
+			cil_destroy_constrain(*data);
+			break;
+		}
 		case (CIL_MLSCONSTRAIN) : {
-			cil_destroy_mlsconstrain(*data);
+			cil_destroy_constrain(*data);
 			break;
 		}
 		case (CIL_ROLETYPE) : {
@@ -837,21 +841,21 @@ int cil_fs_use_init(struct cil_fs_use **fs_use)
 	return SEPOL_OK;
 }
 
-int cil_mlsconstrain_init(struct cil_mlsconstrain **mlsconstrain)
+int cil_constrain_init(struct cil_constrain **constrain)
 {
-	if (mlsconstrain == NULL) {
+	if (constrain == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_mlsconstrain *new_mlsconstrain = cil_malloc(sizeof(struct cil_mlsconstrain));
+	struct cil_constrain *new_constrain = cil_malloc(sizeof(struct cil_constrain));
 
-	new_mlsconstrain->class_list_str = NULL;
-	new_mlsconstrain->class_list = NULL;
-	new_mlsconstrain->perm_list_str = NULL;
-	new_mlsconstrain->perm_list = NULL;
-	new_mlsconstrain->expr = NULL;
+	new_constrain->class_list_str = NULL;
+	new_constrain->class_list = NULL;
+	new_constrain->perm_list_str = NULL;
+	new_constrain->perm_list = NULL;
+	new_constrain->expr = NULL;
 
-	*mlsconstrain = new_mlsconstrain;
+	*constrain = new_constrain;
 
 	return SEPOL_OK;
 }

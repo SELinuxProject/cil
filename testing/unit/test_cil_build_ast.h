@@ -293,17 +293,17 @@ void test__cil_build_constrain_tree_multi_constrain(CuTest *tc);
 void test__cil_build_constrain_tree_currnull_neg(CuTest *tc);
 void test__cil_build_constrain_tree_exprnull_neg(CuTest *tc);
 
-void test_cil_gen_mlsconstrain(CuTest *tc);
-void test_cil_gen_mlsconstrain_classset_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_classset_noclass_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_classset_noperm_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_permset_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_permset_noclass_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_permset_noperm_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_expression_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_dbnull_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_currnull_neg(CuTest *tc);
-void test_cil_gen_mlsconstrain_astnull_neg(CuTest *tc);
+void test_cil_gen_constrain(CuTest *tc);
+void test_cil_gen_constrain_classset_neg(CuTest *tc);
+void test_cil_gen_constrain_classset_noclass_neg(CuTest *tc);
+void test_cil_gen_constrain_classset_noperm_neg(CuTest *tc);
+void test_cil_gen_constrain_permset_neg(CuTest *tc);
+void test_cil_gen_constrain_permset_noclass_neg(CuTest *tc);
+void test_cil_gen_constrain_permset_noperm_neg(CuTest *tc);
+void test_cil_gen_constrain_expression_neg(CuTest *tc);
+void test_cil_gen_constrain_dbnull_neg(CuTest *tc);
+void test_cil_gen_constrain_currnull_neg(CuTest *tc);
+void test_cil_gen_constrain_astnull_neg(CuTest *tc);
 
 void test_cil_fill_context(CuTest *tc);
 void test_cil_fill_context_unnamedlvl(CuTest *tc);
@@ -475,8 +475,8 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc);
 void test_cil_build_ast_node_helper_gen_level(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc);
 
-void test_cil_build_ast_node_helper_gen_mlsconstrain(CuTest *tc); 
-void test_cil_build_ast_node_helper_gen_mlsconstrain_neg(CuTest *tc);
+void test_cil_build_ast_node_helper_gen_constrain(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_constrain_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_context(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc);

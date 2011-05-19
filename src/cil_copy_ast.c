@@ -586,10 +586,10 @@ int cil_copy_netifcon(struct cil_tree_node *orig, struct cil_tree_node *copy, sy
 	return SEPOL_OK;	
 }
 
-void cil_copy_mlsconstrain(struct cil_db *db, struct cil_mlsconstrain *orig, struct cil_mlsconstrain **copy)
+void cil_copy_constrain(struct cil_db *db, struct cil_constrain *orig, struct cil_constrain **copy)
 {
-	struct cil_mlsconstrain *new;
-	int rc = cil_mlsconstrain_init(&new);
+	struct cil_constrain *new;
+	int rc = cil_constrain_init(&new);
 	if (rc != SEPOL_OK) {
 		return;
 	}
@@ -852,10 +852,10 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 			break;
 		}
 		case CIL_MLSCONSTRAIN : {
-			cil_copy_mlsconstrain(db, (struct cil_mlsconstrain*)orig->data, (struct cil_mlsconstrain**)&new->data);
+			cil_copy_constrain(db, (struct cil_constrain*)orig->data, (struct cil_constrain**)&new->data);
 			break;
 		}
-		case CIL_MLSCONSTRAIN_NODE : {
+		case CIL_CONSTRAIN_NODE : {
 			new->data = cil_strdup(((char*)orig->data));
 			break;	
 		}

@@ -20,14 +20,13 @@
 #define SENS				5
 #define CATS				6
 #define LEVELS				7
-#define MLSCONSTRAIN			8
+#define CONSTRAINS			8
 //TODO policycaps
 #define ATTRTYPES			9
 #define ALIASES				10
 #define ALLOWS				11
 #define USERROLES			12
-//TODO constrain
-//fs_use, genfscon, portcon
+//TODO fs_use, genfscon, portcon
 #define SIDS				13
 #define NETIFCONS			14 
 
@@ -214,7 +213,7 @@ int cil_print_constrain_expr(FILE **file_arr, struct cil_tree_node *root)
 
 	while (curr != NULL) {
 		if (curr->cl_head != NULL) {
-			fprintf(file_arr[MLSCONSTRAIN], "( ");
+			fprintf(file_arr[CONSTRAINS], "( ");
 			rc = cil_print_constrain_expr(file_arr, curr->cl_head);
 			if (rc != SEPOL_OK) {
 				printf("Failed to print constrain expression\n");
@@ -222,15 +221,15 @@ int cil_print_constrain_expr(FILE **file_arr, struct cil_tree_node *root)
 			}
 		}
 		else {
-			if (curr->flavor == CIL_AST_STR)
-				fprintf(file_arr[MLSCONSTRAIN], "%s", (char*)curr->data);
+			if (curr->flavor == CIL_CONSTRAIN_NODE)
+				fprintf(file_arr[CONSTRAINS], "%s", (char*)curr->data);
 			else
-				fprintf(file_arr[MLSCONSTRAIN], "%s", ((struct cil_type*)curr->data)->datum.name);
+				fprintf(file_arr[CONSTRAINS], "%s", ((struct cil_type*)curr->data)->datum.name);
 		}
 		if (curr->next != NULL) 
-			fprintf(file_arr[MLSCONSTRAIN], " %s ", (char*)curr->parent->data);
+			fprintf(file_arr[CONSTRAINS], " %s ", (char*)curr->parent->data);
 		else if (curr->parent->flavor != CIL_ROOT) 
-			fprintf(file_arr[MLSCONSTRAIN], " )");
+			fprintf(file_arr[CONSTRAINS], " )");
 
 		curr = curr->next;
 	}
@@ -285,6 +284,30 @@ void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_cont
 	cil_level_to_policy(file_arr, file_index, low);
 	fprintf(file_arr[file_index], " - ");
 	cil_level_to_policy(file_arr, file_index, high);
+}
+
+void cil_constrain_to_policy(FILE **file_arr, uint32_t file_index, struct cil_constrain *cons)
+{
+	struct cil_list_item *class_curr = cons->class_list->head;
+	struct cil_list_item *perm_curr = cons->perm_list->head;
+	if (class_curr->next == NULL)
+		fprintf(file_arr[CONSTRAINS], "%s ", ((struct cil_class*)class_curr->data)->datum.name);
+	else {
+		fprintf(file_arr[CONSTRAINS], "{ ");
+		while (class_curr != NULL) {
+			fprintf(file_arr[CONSTRAINS], "%s ", ((struct cil_class*)class_curr->data)->datum.name);
+			class_curr = class_curr->next;
+		}
+		fprintf(file_arr[CONSTRAINS], "}\n\t\t");
+	}
+	fprintf(file_arr[CONSTRAINS], "{ ");
+	while (perm_curr != NULL) {
+		fprintf(file_arr[CONSTRAINS], "%s ", ((struct cil_perm*)perm_curr->data)->datum.name);
+		perm_curr = perm_curr->next;
+	}
+	fprintf(file_arr[CONSTRAINS], "}\n\t");
+	cil_print_constrain_expr(file_arr, cons->expr->root);
+	fprintf(file_arr[CONSTRAINS], ";\n");
 }
 
 int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current) 
@@ -461,29 +484,14 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[LEVELS], ";\n");
 			break;
 		}
+		case CIL_CONSTRAIN : {
+			fprintf(file_arr[CONSTRAINS], "constrain ");
+			cil_constrain_to_policy(file_arr, CONSTRAINS, (struct cil_constrain*)current->data);
+			break;
+		}
 		case CIL_MLSCONSTRAIN : {
-			struct cil_mlsconstrain *mlscon = (struct cil_mlsconstrain*)current->data;
-			struct cil_list_item *class_curr = mlscon->class_list->head;
-			struct cil_list_item *perm_curr = mlscon->perm_list->head;
-			fprintf(file_arr[MLSCONSTRAIN], "mlsconstrain ");
-			if (class_curr->next == NULL)
-				fprintf(file_arr[MLSCONSTRAIN], "%s ", ((struct cil_class*)class_curr->data)->datum.name);
-			else {
-				fprintf(file_arr[MLSCONSTRAIN], "{ ");
-				while (class_curr != NULL) {
-					fprintf(file_arr[MLSCONSTRAIN], "%s ", ((struct cil_class*)class_curr->data)->datum.name);
-					class_curr = class_curr->next;
-				}
-				fprintf(file_arr[MLSCONSTRAIN], "}\n\t\t");
-			}
-			fprintf(file_arr[MLSCONSTRAIN], "{ ");
-			while (perm_curr != NULL) {
-				fprintf(file_arr[MLSCONSTRAIN], "%s ", ((struct cil_perm*)perm_curr->data)->datum.name);
-				perm_curr = perm_curr->next;
-			}
-			fprintf(file_arr[MLSCONSTRAIN], "}\n\t");
-			cil_print_constrain_expr(file_arr, mlscon->expr->root);
-			fprintf(file_arr[MLSCONSTRAIN], ";\n");
+			fprintf(file_arr[CONSTRAINS], "mlsconstrain ");
+			cil_constrain_to_policy(file_arr, CONSTRAINS, (struct cil_constrain*)current->data);
 			break;
 		}
 		case CIL_NETIFCON : {
@@ -645,8 +653,8 @@ int cil_gen_policy(struct cil_db *db)
 	file_path_arr[LEVELS] = cil_strdup(temp);
 
 	strcpy(temp, "/tmp/cil_mlscon-XXXXXX");
-	file_arr[MLSCONSTRAIN] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[MLSCONSTRAIN] = cil_strdup(temp);
+	file_arr[CONSTRAINS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[CONSTRAINS] = cil_strdup(temp);
 
 	strcpy(temp, "/tmp/cil_attrtypes-XXXXXX");
 	file_arr[ATTRTYPES] = fdopen(mkstemp(temp), "w+");

@@ -268,7 +268,7 @@ void cil_print_expr_tree(struct cil_tree_node *expr_root)
 	struct cil_tree_node *curr = expr_root;
 
 	while (curr != NULL) {
-		if (curr->flavor == CIL_MLSCONSTRAIN_NODE)
+		if (curr->flavor == CIL_CONSTRAIN_NODE)
 			printf("%s ", (char*)curr->data);
 		else if (curr->flavor != CIL_ROOT)
 			printf("%s ", ((struct cil_type*)curr->data)->datum.name);
@@ -279,6 +279,38 @@ void cil_print_expr_tree(struct cil_tree_node *expr_root)
 		}
 		curr = curr->next;
 	}
+}
+
+void cil_tree_print_constrain(struct cil_constrain *cons)
+{
+	struct cil_list_item *class_curr;
+	struct cil_list_item *perm_curr;
+	if (cons->class_list_str != NULL)
+		class_curr = cons->class_list_str->head;
+	else
+		class_curr = cons->class_list->head;
+	if (cons->perm_list_str != NULL)
+		perm_curr = cons->perm_list_str->head;
+	else
+		perm_curr = cons->perm_list->head;
+	while (class_curr != NULL) {
+		if (cons->class_list_str != NULL)
+			printf("%s ", (char*)class_curr->data);
+		else
+			printf("%s ", ((struct cil_class*)class_curr->data)->datum.name);
+		class_curr = class_curr->next;
+	}
+	printf(") \n\t\t( ");
+	while (perm_curr != NULL) {
+	if (cons->perm_list_str != NULL)
+		printf("%s ", (char*)perm_curr->data);
+	else
+		printf("%s ", ((struct cil_class*)perm_curr->data)->datum.name);
+		perm_curr = perm_curr->next;
+	}
+	printf(") \n\t\t");
+	cil_print_expr_tree(cons->expr->root);
+	printf("\n");
 }
 
 void cil_tree_print_node(struct cil_tree_node *node)
@@ -684,37 +716,16 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
+			case CIL_CONSTRAIN : {
+				struct cil_constrain *cons = node->data;
+				printf("CONSTRAIN: \n\t(");
+				cil_tree_print_constrain(cons);
+				return;
+			}
 			case CIL_MLSCONSTRAIN : {
-				struct cil_mlsconstrain *mlscon = node->data;
-				struct cil_list_item *class_curr;
-				struct cil_list_item *perm_curr;
+				struct cil_constrain *cons = node->data;
 				printf("MLSCONSTRAIN: \n\t(");
-				if (mlscon->class_list_str != NULL)
-					class_curr = mlscon->class_list_str->head;
-				else
-					class_curr = mlscon->class_list->head;
-				if (mlscon->perm_list_str != NULL)
-					perm_curr = mlscon->perm_list_str->head;
-				else
-					perm_curr = mlscon->perm_list->head;
-				while (class_curr != NULL) {
-					if (mlscon->class_list_str != NULL)
-						printf("%s ", (char*)class_curr->data);
-					else
-						printf("%s ", ((struct cil_class*)class_curr->data)->datum.name);
-					class_curr = class_curr->next;
-				}
-				printf(") \n\t\t( ");
-				while (perm_curr != NULL) {
-					if (mlscon->perm_list_str != NULL)
-						printf("%s ", (char*)perm_curr->data);
-					else
-						printf("%s ", ((struct cil_class*)perm_curr->data)->datum.name);
-					perm_curr = perm_curr->next;
-				}
-				printf(") \n\t\t");
-				cil_print_expr_tree(mlscon->expr->root);
-				printf("\n");
+				cil_tree_print_constrain(cons);
 				return;
 			}
 			case CIL_CONTEXT : {

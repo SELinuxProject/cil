@@ -530,19 +530,19 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test__cil_build_constrain_tree_currnull_neg);
 	SUITE_ADD_TEST(suite, test__cil_build_constrain_tree_exprnull_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_classset_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_classset_noperm_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_classset_noclass_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_permset_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_permset_noclass_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_permset_noperm_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_expression_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_mlsconstrain_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_mlsconstrain);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_mlsconstrain_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_classset_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_classset_noperm_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_classset_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_permset_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_permset_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_permset_noperm_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_expression_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_constrain_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_constrain);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_constrain_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_fill_context);
 	SUITE_ADD_TEST(suite, test_cil_fill_context_unnamedlvl);
@@ -688,13 +688,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_level_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_resolve_mlsconstrain);
-	SUITE_ADD_TEST(suite, test_cil_resolve_mlsconstrain_class_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_mlsconstrain_perm_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_mlsconstrain_perm_resolve_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_mlsconstrain_expr_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_constrain);
+	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_class_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_perm_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_perm_resolve_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_expr_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_constrain);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_constrain_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_context);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_user_neg);
@@ -864,7 +864,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_context_anonlow);
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_context_anonhigh);
 	
-	SUITE_ADD_TEST(suite, test_cil_copy_mlsconstrain);
+	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
 	
 	return suite;
 }

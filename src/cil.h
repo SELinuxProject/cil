@@ -51,7 +51,7 @@
 #define CIL_DOMINANCE		36
 #define CIL_SENSCAT		37
 #define CIL_CLASSCOMMON		38
-#define CIL_MLSCONSTRAIN_NODE	39
+#define CIL_CONSTRAIN_NODE	39
 #define CIL_CALL		40
 #define CIL_ARGS		41
 #define CIL_BOOLEANIF		42
@@ -125,6 +125,7 @@
 #define CIL_KEY_SENSCAT		"sensitivitycategory"
 #define CIL_KEY_LEVEL		"level"
 #define CIL_KEY_MLSCONSTRAIN	"mlsconstrain"
+#define CIL_KEY_CONSTRAIN	"constrain"
 #define CIL_KEY_BOOLEANIF	"booleanif"
 #define CIL_KEY_AND		"&&"
 #define CIL_KEY_OR		"||"
@@ -456,9 +457,11 @@ struct cil_fs_use {
 	//Design
 };*/
 
-#define CIL_CONSTRAIN_KEYS "t1 t2 r1 r2 u1 u2 l1 l2 h1 h2"
-#define CIL_CONSTRAIN_OPER "== != eq dom domby incomp and or"
-struct cil_mlsconstrain {
+#define CIL_MLS_LEVELS "l1 l2 h1 h2" 
+#define CIL_CONSTRAIN_KEYS "t1 t2 r1 r2 u1 u2"
+#define CIL_MLSCONSTRAIN_KEYS CIL_MLS_LEVELS CIL_CONSTRAIN_KEYS
+#define CIL_CONSTRAIN_OPER "== != eq dom domby incomp not and or"
+struct cil_constrain {
 	struct cil_list *class_list_str;
 	struct cil_list *class_list;
 	struct cil_list *perm_list_str;
@@ -533,7 +536,7 @@ int cil_filecon_init(struct cil_filecon **filecon);
 int cil_portcon_init(struct cil_portcon **portcon);
 int cil_fscon_init(struct cil_fscon **fscon);
 int cil_fs_use_init(struct cil_fs_use **fs_use);
-int cil_mlsconstrain_init(struct cil_mlsconstrain **mlsconstrain);
+int cil_constrain_init(struct cil_constrain **constrain);
 int cil_perm_init(struct cil_perm **perm);
 int cil_user_init(struct cil_user **user);
 int cil_role_init(struct cil_role **role);

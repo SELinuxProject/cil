@@ -657,7 +657,7 @@ void test_cil_resolve_level_senscat_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc2);
 }
 
-void test_cil_resolve_mlsconstrain(CuTest *tc) {
+void test_cil_resolve_constrain(CuTest *tc) {
         char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
@@ -674,11 +674,11 @@ void test_cil_resolve_mlsconstrain(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_constrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_resolve_mlsconstrain_class_neg(CuTest *tc) {
+void test_cil_resolve_constrain_class_neg(CuTest *tc) {
         char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
@@ -694,11 +694,11 @@ void test_cil_resolve_mlsconstrain_class_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	int rc = cil_resolve_constrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_mlsconstrain_perm_neg(CuTest *tc) {
+void test_cil_resolve_constrain_perm_neg(CuTest *tc) {
         char *line[] = {"(", "class", "file", "(", "create", ")", ")",
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
@@ -715,11 +715,11 @@ void test_cil_resolve_mlsconstrain_perm_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_constrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_mlsconstrain_perm_resolve_neg(CuTest *tc) {
+void test_cil_resolve_constrain_perm_resolve_neg(CuTest *tc) {
         char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "s0", "(", "c1", ")", ")",
@@ -734,11 +734,11 @@ void test_cil_resolve_mlsconstrain_perm_resolve_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	int rc = cil_resolve_constrain(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_mlsconstrain_expr_neg(CuTest *tc) {
+void test_cil_resolve_constrain_expr_neg(CuTest *tc) {
         char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
@@ -755,7 +755,7 @@ void test_cil_resolve_mlsconstrain_expr_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_mlsconstrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_constrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -3337,7 +3337,7 @@ void test_cil_resolve_ast_node_helper_level_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, finished, 0);
 }
 
-void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
         char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
@@ -3371,7 +3371,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
 	CuAssertPtrEquals(tc, NULL, finished);
 }
 
-void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
         char *line[] = {"(", "class", "file", "(", "read", ")", ")",
 			"(", "class", "dir", "(", "read", ")", ")",
 			"(", "sensitivity", "s0", ")",
