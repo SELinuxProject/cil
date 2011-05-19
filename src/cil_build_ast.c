@@ -1875,6 +1875,11 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 			char *param =  cil_strdup(current_item->cl_head->next->data);
 
+			if (strchr(param, '.')) {
+				printf("Invalid macro declaration: parameter names cannot contain a '.' (line: %d)\n", parse_current->line);
+				goto gen_macro_cleanup;
+			}
+
 			if (params_tail == NULL) {
 				cil_list_item_init(&macro->params->head);
 				macro->params->head->data = param;
