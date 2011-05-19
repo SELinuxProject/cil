@@ -1581,6 +1581,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	struct cil_db *db = NULL;
 	struct cil_call *call = NULL;
 	struct cil_tree_node *callstack = NULL;
+	struct cil_tree_node *optstack = NULL;
 
 	if (other->head->flavor == CIL_DB)
 		db = (struct cil_db*)other->head->data;
@@ -1597,6 +1598,12 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		if (callstack != NULL) {
 			call = (struct cil_call *)callstack->data;
 		}
+	} else {
+		return SEPOL_ERR;
+	}
+
+	if (other->head->next->next->next != NULL) {
+		optstack = (struct cil_tree_node *)other->head->next->next->next->data;
 	} else {
 		return SEPOL_ERR;
 	}
@@ -1836,7 +1843,26 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			other->head->next->next->data = new;
 		}
 	}
+	
+	if (node->flavor == CIL_OPTIONAL) {
+		/* push this node onto the optional stack */
+		struct cil_tree_node *new;
+		rc = cil_tree_node_init(&new);
+		if (rc != SEPOL_OK)
+			return rc;
 		
+		new->data = node->data;
+		new->flavor = node->flavor;
+		
+		if (optstack == NULL) {
+			other->head->next->next->next->data = new;
+		} else {
+			optstack->parent = new;
+			new->cl_head = optstack;
+			other->head->next->next->next->data = new;
+		}
+	}
+
 	return SEPOL_OK;
 }
 
@@ -1853,6 +1879,14 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, struct cil_l
 			callstack->cl_head->parent = NULL;
 		}
 		free(callstack);
+	} else if (current->flavor == CIL_OPTIONAL) {
+		/* pop off the stack */
+		struct cil_tree_node *optstack = other->head->next->next->next->data;
+		other->head->next->next->next->data = optstack->cl_head;
+		if (optstack->cl_head) {
+			optstack->cl_head->parent = NULL;
+		}
+		free(optstack);
 	}
 
 	return SEPOL_OK;
