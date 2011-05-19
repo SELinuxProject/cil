@@ -1883,7 +1883,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			return rc;
 		}
 
-		//cil_tree_print(db->ast->root, 0);
+		cil_tree_print(db->ast->root, 0);
 
 		if (pass == 3) {
 			printf("----- Verify Catorder ------\n");
