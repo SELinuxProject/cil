@@ -25,7 +25,7 @@ void test_cil_gen_perm(CuTest *);
 void test_cil_gen_perm_noname_neg(CuTest *);
 void test_cil_gen_perm_dbnull_neg(CuTest *);
 void test_cil_gen_perm_currnull_neg(CuTest *);
-void test_cil_gen_perm_permexists_neg(CuTest *);
+void test_cil_gen_perm_astnull_neg(CuTest *);
 void test_cil_gen_perm_nodenull_neg(CuTest *);
 
 void test_cil_gen_perm_nodes(CuTest *);
@@ -44,7 +44,6 @@ void test_cil_gen_class_noperms_neg(CuTest *);
 void test_cil_gen_class_permsnotinlist_neg(CuTest *);
 void test_cil_gen_class_extrapermlist_neg(CuTest *);
 void test_cil_gen_class_listinlist_neg(CuTest *);
-void test_cil_gen_class_failgen_neg(CuTest *);
 
 void test_cil_gen_common(CuTest *);
 void test_cil_gen_common_dbnull_neg(CuTest *tc);

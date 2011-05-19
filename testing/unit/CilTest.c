@@ -199,14 +199,11 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_block);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_block_neg);
 
-	//SUITE_ADD_TEST(suite, test_cil_gen_perm);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_perm_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodenull_neg);
-	//This needs to be fixed. Looks for perms in CIL_ROOT should be CLASS or COMMON
-	//SUITE_ADD_TEST(suite, test_cil_gen_perm_permexists_neg);
-	// Causes a segfault
-	//SUITE_ADD_TEST(suite, test_cil_gen_perm_noname_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_failgen_neg);
@@ -222,7 +219,6 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_class_permsnotinlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_extrapermlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_listinlist_neg);
-	//test_cil_gen_class_failgen_neg
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class_neg);
 
@@ -345,11 +341,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_allow);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_allow_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_auditallow);
-// TODO: uncomment
-//	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_auditallow_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_auditallow_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_dontaudit);
-// TODO: uncomment
-//	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_dontaudit_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_dontaudit_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_neverallow);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_neverallow_neg);
 
@@ -804,7 +798,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_catset_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_class);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level);
-	//SUITE_ADD_TEST(suite, test_cil_resolve_call2_level_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_unknown_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_name_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call2);
@@ -839,10 +833,10 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_qualify_name_cil_flavor);
 
 	/* test cil_copy_ast.c */
-	/*SUITE_ADD_TEST(suite, test_cil_copy_list);
+	SUITE_ADD_TEST(suite, test_cil_copy_list);
 	SUITE_ADD_TEST(suite, test_cil_copy_list_sublist);
 	SUITE_ADD_TEST(suite, test_cil_copy_list_sublist_extra);
-	SUITE_ADD_TEST(suite, test_cil_copy_list_orignull_neg);*/
+	SUITE_ADD_TEST(suite, test_cil_copy_list_orignull_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_class);
 

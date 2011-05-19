@@ -2125,7 +2125,7 @@ void test_cil_resolve_call1_noname_neg(CuTest *tc) {
 			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
 				"(", "class", "b", "(", "read", ")", ")",
 				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
-			"(", "call", "(", "foo", ")", ")", NULL};
+			"(", "call", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

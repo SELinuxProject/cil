@@ -294,84 +294,34 @@ void test_cil_destroy_block(CuTest *tc) {
 }
 
 void test_cil_gen_perm(CuTest *tc) {
-	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
-
-	int rc = 0;
+	char *line[] = {"(", "class", "foo", "(", "read", "write", "open", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 
-	struct cil_tree_node *test_current_perm = NULL;
-	struct cil_tree_node *test_new_ast = NULL;
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	test_ast_node->parent = test_db->ast->root;
+	struct cil_class *new_node;
+	cil_class_init(&new_node);
+
+	struct cil_tree_node *new_tree_node;
+	cil_tree_node_init(&new_tree_node);
+	new_tree_node->data = new_node;
+	new_tree_node->flavor = CIL_CLASS;
+
+	test_ast_node->parent = new_tree_node;
 	test_ast_node->line = 1;
 
-	test_current_perm = test_tree->root->cl_head->cl_head->next->next->cl_head;
-
-	while(test_current_perm != NULL) {
-	    cil_tree_node_init(&test_new_ast);
-	    test_new_ast->parent = test_ast_node;
-	    test_new_ast->line = test_current_perm->line;
-
-	    rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
-	    CuAssertIntEquals(tc, SEPOL_OK, rc);
-	    CuAssertPtrNotNull(tc, test_new_ast->data);
-	    CuAssertIntEquals(tc, test_new_ast->flavor, CIL_PERM);
-	    
-	    test_current_perm = test_current_perm->next;
-
-	    if (test_ast_node->cl_head == NULL)
-	        test_ast_node->cl_head = test_new_ast;
-	    else
-	        test_ast_node->cl_tail->next = test_new_ast;
-
-	    test_ast_node->cl_tail = test_new_ast;
-	}
-}
-
-void test_cil_gen_perm_noname_neg(CuTest *tc) {
-	char *line[] = {"(", "class", "(", "read", "write", "open", ")", ")", NULL};
-
-	int rc = 0;
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_tree_node *test_current_perm = NULL;
-	struct cil_tree_node *test_new_ast = NULL;
-	struct cil_tree_node *test_ast_node;
-	cil_tree_node_init(&test_ast_node);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	test_ast_node->parent = test_db->ast->root;
-	test_ast_node->line = 1;
-
-	test_current_perm = test_tree->root->cl_head->cl_head->next->next->cl_head;
-
-	while(test_current_perm != NULL) {
-	    cil_tree_node_init(&test_new_ast);
-	    test_new_ast->parent = test_ast_node;
-	    test_new_ast->line = test_current_perm->line;
-
-	    rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
-	    CuAssertIntEquals(tc, SEPOL_ERR, rc);
-	    
-	    test_current_perm = test_current_perm->next;
-
-	    if (test_ast_node->cl_head == NULL)
-	        test_ast_node->cl_head = test_new_ast;
-	    else
-	        test_ast_node->cl_tail->next = test_new_ast;
-
-	    test_ast_node->cl_tail = test_new_ast;
-	}
+	int rc = cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
+	int rc1 = cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head->next, test_ast_node);
+	int rc2 = cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head->next->next, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc1);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 }
 
 void test_cil_gen_perm_dbnull_neg(CuTest *tc) {
@@ -425,37 +375,27 @@ void test_cil_gen_perm_currnull_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_perm_permexists_neg(CuTest *tc) {
-	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
+void test_cil_gen_perm_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "foo", "(", "read", "write", "open", ")", ")", NULL};
 
-	int rc = 0;
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 
-	struct cil_tree_node *test_current_perm = NULL;
-	struct cil_tree_node *test_new_ast = NULL;
-	struct cil_tree_node *test_ast_node;
-	cil_tree_node_init(&test_ast_node);
+	struct cil_tree_node *test_ast_node = NULL;
 
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	test_ast_node->parent = test_db->ast->root;
-	test_ast_node->line = 1;
+	struct cil_class *new_node;
+	cil_class_init(&new_node);
 
-	test_current_perm = test_tree->root->cl_head->cl_head->next->next->cl_head;
+	struct cil_tree_node *new_tree_node;
+	cil_tree_node_init(&new_tree_node);
+	new_tree_node->data = new_node;
+	new_tree_node->flavor = CIL_CLASS;
 
-	cil_tree_node_init(&test_new_ast);
-	test_new_ast->parent = test_ast_node;
-	test_new_ast->line = test_current_perm->line;
-
-	struct cil_perm *test_perm = malloc(sizeof(struct cil_perm));
-	symtab_t *test_symtab = NULL;
-	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_UNKNOWN);
-	cil_symtab_insert(test_symtab, (hashtab_key_t)"read", (struct cil_symtab_datum*)test_perm, test_new_ast);
-
-	rc = cil_gen_perm(test_db, test_current_perm, test_new_ast);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	int rc = cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_perm_nodenull_neg(CuTest *tc) {
@@ -786,29 +726,6 @@ void test_cil_gen_class_listinlist_neg(CuTest *tc) {
 
 	int rc = cil_gen_class(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
-
-void test_cil_gen_class_failgen_neg(CuTest *tc) {
-	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_tree_node *test_ast_node;
-	cil_tree_node_init(&test_ast_node);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	test_ast_node->parent = test_db->ast->root;
-	test_ast_node->line = 1;
-
-	int rc = cil_gen_class(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrNotNull(tc, test_ast_node->cl_tail);
-	CuAssertPtrNotNull(tc, test_ast_node->data);
-	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_CLASS);
-
 }
 
 void test_cil_gen_common(CuTest *tc) {
