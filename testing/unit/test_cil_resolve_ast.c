@@ -499,6 +499,10 @@ void test_cil_resolve_senscat_currrangecat(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
     	other->head->next->data = &pass;
+    	cil_list_item_init(&other->head->next->next);
+    	other->head->next->next->data = NULL;
+    	cil_list_item_init(&other->head->next->next->next);
+    	other->head->next->next->next->data = NULL;
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, other);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -535,6 +539,10 @@ void test_cil_resolve_senscat_currrangecat_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
     	other->head->next->data = &pass;
+    	cil_list_item_init(&other->head->next->next);
+    	other->head->next->next->data = NULL;
+    	cil_list_item_init(&other->head->next->next->next);
+    	other->head->next->next->next->data = NULL;
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, other);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -2918,6 +2926,10 @@ void test_cil_resolve_ast_node_helper_catorder(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -2949,6 +2961,10 @@ void test_cil_resolve_ast_node_helper_catorder_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -2980,6 +2996,10 @@ void test_cil_resolve_ast_node_helper_dominance(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -3011,6 +3031,10 @@ void test_cil_resolve_ast_node_helper_dominance_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -3041,6 +3065,10 @@ void test_cil_resolve_ast_node_helper_roleallow(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 
@@ -3070,6 +3098,10 @@ void test_cil_resolve_ast_node_helper_roleallow_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3099,6 +3131,10 @@ void test_cil_resolve_ast_node_helper_sensalias(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3127,6 +3163,10 @@ void test_cil_resolve_ast_node_helper_sensalias_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3156,6 +3196,10 @@ void test_cil_resolve_ast_node_helper_catalias(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 
@@ -3184,6 +3228,10 @@ void test_cil_resolve_ast_node_helper_catalias_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 
@@ -3215,6 +3263,10 @@ void test_cil_resolve_ast_node_helper_catset(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 
@@ -3245,6 +3297,10 @@ void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 
@@ -3276,6 +3332,10 @@ void test_cil_resolve_ast_node_helper_level(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -3317,6 +3377,10 @@ void test_cil_resolve_ast_node_helper_level_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -3361,6 +3425,10 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 
@@ -3395,6 +3463,10 @@ void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 
@@ -3432,6 +3504,10 @@ void test_cil_resolve_ast_node_helper_context(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -3479,6 +3555,10 @@ void test_cil_resolve_ast_node_helper_context_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 3;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -3523,6 +3603,10 @@ void test_cil_resolve_ast_node_helper_senscat(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 4;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -3557,6 +3641,10 @@ void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 4;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t finished = 0;
 
@@ -3588,6 +3676,10 @@ void test_cil_resolve_ast_node_helper_roletrans(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3618,6 +3710,10 @@ void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3648,6 +3744,10 @@ void test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3678,6 +3778,10 @@ void test_cil_resolve_ast_node_helper_roletrans_resultdecl_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3708,6 +3812,10 @@ void test_cil_resolve_ast_node_helper_typeattr(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3737,6 +3845,10 @@ void test_cil_resolve_ast_node_helper_typeattr_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3767,6 +3879,10 @@ void test_cil_resolve_ast_node_helper_typealias(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3796,6 +3912,10 @@ void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3827,6 +3947,10 @@ void test_cil_resolve_ast_node_helper_avrule(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3855,6 +3979,10 @@ void test_cil_resolve_ast_node_helper_avrule_src_nores_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3884,6 +4012,10 @@ void test_cil_resolve_ast_node_helper_avrule_tgt_nores_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3914,6 +4046,10 @@ void test_cil_resolve_ast_node_helper_avrule_class_nores_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3944,6 +4080,10 @@ void test_cil_resolve_ast_node_helper_avrule_datum_null_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -3976,6 +4116,10 @@ void test_cil_resolve_ast_node_helper_type_rule_transition(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -4007,6 +4151,10 @@ void test_cil_resolve_ast_node_helper_type_rule_transition_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -4039,6 +4187,10 @@ void test_cil_resolve_ast_node_helper_type_rule_change(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -4070,6 +4222,10 @@ void test_cil_resolve_ast_node_helper_type_rule_change_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -4102,6 +4258,10 @@ void test_cil_resolve_ast_node_helper_type_rule_member(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -4133,6 +4293,10 @@ void test_cil_resolve_ast_node_helper_type_rule_member_neg(CuTest *tc) {
 	other->head->next->flavor = CIL_INT;
 	int pass = 5;
 	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
 
 	uint32_t *finished = NULL;
 	
@@ -4169,6 +4333,10 @@ void test_cil_resolve_ast_node_helper_roletype(CuTest *tc) {
 	cil_l->head->next->flavor = CIL_INT;
 	int pass = 5;
 	cil_l->head->next->data = &pass;
+	cil_list_item_init(&cil_l->head->next->next);
+	cil_l->head->next->next->data = NULL;
+	cil_list_item_init(&cil_l->head->next->next->next);
+	cil_l->head->next->next->next->data = NULL;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -4202,6 +4370,10 @@ void test_cil_resolve_ast_node_helper_roletype_role_neg(CuTest *tc) {
 	cil_l->head->next->flavor = CIL_INT;
 	int pass = 5;
 	cil_l->head->next->data = &pass;
+	cil_list_item_init(&cil_l->head->next->next);
+	cil_l->head->next->next->data = NULL;
+	cil_list_item_init(&cil_l->head->next->next->next);
+	cil_l->head->next->next->next->data = NULL;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4235,6 +4407,10 @@ void test_cil_resolve_ast_node_helper_roletype_type_neg(CuTest *tc) {
 	cil_l->head->next->flavor = CIL_INT;
 	int pass = 5;
 	cil_l->head->next->data = &pass;
+	cil_list_item_init(&cil_l->head->next->next);
+	cil_l->head->next->next->data = NULL;
+	cil_list_item_init(&cil_l->head->next->next->next);
+	cil_l->head->next->next->next->data = NULL;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4269,6 +4445,10 @@ void test_cil_resolve_ast_node_helper_userrole(CuTest *tc) {
 	cil_l->head->next->flavor = CIL_INT;
 	int pass = 5;
 	cil_l->head->next->data = &pass;
+	cil_list_item_init(&cil_l->head->next->next);
+	cil_l->head->next->next->data = NULL;
+	cil_list_item_init(&cil_l->head->next->next->next);
+	cil_l->head->next->next->next->data = NULL;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -4302,6 +4482,10 @@ void test_cil_resolve_ast_node_helper_userrole_user_neg(CuTest *tc) {
 	cil_l->head->next->flavor = CIL_INT;
 	int pass = 5;
 	cil_l->head->next->data = &pass;
+	cil_list_item_init(&cil_l->head->next->next);
+	cil_l->head->next->next->data = NULL;
+	cil_list_item_init(&cil_l->head->next->next->next);
+	cil_l->head->next->next->next->data = NULL;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4335,6 +4519,10 @@ void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc) {
 	cil_l->head->next->flavor = CIL_INT;
 	int pass = 5;
 	cil_l->head->next->data = &pass;
+	cil_list_item_init(&cil_l->head->next->next);
+	cil_l->head->next->next->data = NULL;
+	cil_list_item_init(&cil_l->head->next->next->next);
+	cil_l->head->next->next->next->data = NULL;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4363,6 +4551,10 @@ void test_cil_resolve_ast_node_helper_netifcon(CuTest *tc) {
         other->head->next->flavor = CIL_INT;
         int pass = 5;
         other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = NULL;
 
         uint32_t finished = 0;
 
@@ -4392,6 +4584,10 @@ void test_cil_resolve_ast_node_helper_netifcon_neg(CuTest *tc) {
         other->head->next->flavor = CIL_INT;
         int pass = 5;
         other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = NULL;
 
         uint32_t finished = 0;
 
@@ -4429,6 +4625,10 @@ void test_cil_resolve_ast_node_helper_sid(CuTest *tc) {
         other->head->next->flavor = CIL_INT;
         int pass = 5;
         other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = NULL;
 
         uint32_t finished = 0;
 
@@ -4464,6 +4664,10 @@ void test_cil_resolve_ast_node_helper_sid_neg(CuTest *tc) {
         other->head->next->flavor = CIL_INT;
         int pass = 5;
         other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = NULL;
 
         uint32_t finished = 0;
 
@@ -4494,6 +4698,10 @@ void test_cil_resolve_ast_node_helper_classcommon(CuTest *tc) {
         other->head->next->flavor = CIL_INT;
         int pass = 4;
         other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = NULL;
 
         uint32_t finished = 0;
 
@@ -4523,6 +4731,10 @@ void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc) {
         other->head->next->flavor = CIL_INT;
         int pass = 4;
         other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = NULL;
 
         uint32_t finished = 0;
 
