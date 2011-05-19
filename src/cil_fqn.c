@@ -17,7 +17,12 @@ int cil_qualify_name(struct cil_tree_node *root)
 	char *fqn, *uqn;
 
 	do {
-		if (curr->cl_head != NULL && (curr->flavor != CIL_MACRO && curr->flavor != CIL_CALL && curr->flavor != CIL_BOOLEANIF && curr->flavor != CIL_ELSE)) {
+		if (curr->cl_head != NULL &&
+			(curr->flavor != CIL_MACRO &&
+			 curr->flavor != CIL_CALL &&
+			 curr->flavor != CIL_BOOLEANIF &&
+			 curr->flavor != CIL_ELSE &&
+			 curr->flavor != CIL_OPTIONAL)) {
 			if (!reverse) {
 				if (curr->flavor >= CIL_MIN_DECLARATIVE) { // append name
 					strcat(fqp, ((struct cil_symtab_datum*)curr->data)->name);
