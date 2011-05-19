@@ -1580,6 +1580,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	int *pass = NULL;
 	struct cil_db *db = NULL;
 	struct cil_call *call = NULL;
+	struct cil_tree_node *callstack = NULL;
 
 	if (other->head->flavor == CIL_DB)
 		db = (struct cil_db*)other->head->data;
@@ -1592,8 +1593,12 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		return SEPOL_ERR;
 
 	if (other->head->next->next != NULL) {
-		if (other->head->next->next->flavor == CIL_CALL)
-			call = (struct cil_call*)other->head->next->next->data;
+		callstack = (struct cil_tree_node*)other->head->next->next->data;
+		if (callstack != NULL) {
+			call = (struct cil_call *)callstack->data;
+		}
+	} else {
+		return SEPOL_ERR;
 	}
 
 	if (node->cl_head == NULL) {
@@ -1814,9 +1819,22 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	}	
 
 	if (node->flavor == CIL_CALL) {
-		other->head->next->next->flavor = CIL_CALL;
-		other->head->next->next->data = node->data;
-		call = other->head->next->data;
+		/* push this node onto the call stack */
+		struct cil_tree_node *new;
+		rc = cil_tree_node_init(&new);
+		if (rc != SEPOL_OK)
+			return rc;
+
+		new->data = node->data;
+		new->flavor = node->flavor;
+
+		if (other->head->next->next->data == NULL) {
+			other->head->next->next->data = new;
+		} else {
+			callstack->parent = new;
+			new->cl_head = callstack;
+			other->head->next->next->data = new;
+		}
 	}
 		
 	return SEPOL_OK;
@@ -1827,38 +1845,16 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, struct cil_l
 	if (other == NULL || other->head == NULL || other->head->next == NULL || other->head->next->next == NULL || other->head->next->next->next == NULL)
 		return SEPOL_ERR;
 
-	uint32_t flavor = current->flavor;
-
-	if (other->head->next->next->data == NULL && other->head->next->next->flavor == flavor)
-		return SEPOL_ERR;	
-
-	else if (other->head->next->next->next == NULL && other->head->next->next->next->flavor == flavor)
-		return SEPOL_ERR;
-
-	current = current->parent;
-
-	while (current->flavor != CIL_ROOT && current->flavor != flavor) {
-		current = current->parent;
-	}
-
-	if (flavor == CIL_CALL) {
-		if (current->flavor == CIL_ROOT) {
-			other->head->next->next->flavor = CIL_AST_NODE;
-			other->head->next->next->data = NULL;
+	if (current->flavor == CIL_CALL) {
+		/* pop off the stack */
+		struct cil_tree_node *callstack = other->head->next->next->data;
+		other->head->next->next->data = callstack->cl_head;
+		if (callstack->cl_head) {
+			callstack->cl_head->parent = NULL;
 		}
-		else if (current->flavor == CIL_CALL)
-			other->head->next->next->data = current;
+		free(callstack);
 	}
 
-	if (current->flavor == CIL_OPTIONAL) {
-		if (current->flavor == CIL_ROOT) {
-			other->head->next->next->next->flavor = CIL_AST_NODE;
-			other->head->next->next->next->data = NULL;
-		}
-		else if (current->flavor == CIL_OPTIONAL)
-			other->head->next->next->next->data = current;
-	}
-	
 	return SEPOL_OK;
 }
 
