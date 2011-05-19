@@ -25,13 +25,14 @@
 #define ATTRTYPES			9
 #define ALIASES				10
 #define ALLOWS				11
-#define USERROLES			12
-//TODO fs_use, genfscon, portcon
-#define SIDS				13
-#define NETIFCONS			14 
+#define CONDS				12
+#define USERROLES			13
+//fs_use, genfscon, portcon
+#define SIDS				14
+#define NETIFCONS			15 
 
 #define BUFFER				1024
-#define NUM_POLICY_FILES		15
+#define NUM_POLICY_FILES		16
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 {
@@ -310,10 +311,223 @@ void cil_constrain_to_policy(FILE **file_arr, uint32_t file_index, struct cil_co
 	fprintf(file_arr[CONSTRAINS], ";\n");
 }
 
+int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule *rule)
+{
+	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
+	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
+	char *obj_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->obj)->name;
+	struct cil_list_item *perm_item = rule->perms_list->head;
+	switch (rule->rule_kind) {
+		case CIL_AVRULE_ALLOWED:
+			fprintf(file_arr[file_index], "allow %s %s:%s { ", src_str, tgt_str, obj_str);
+			break;
+		case CIL_AVRULE_AUDITALLOW:
+			fprintf(file_arr[file_index], "auditallow %s %s:%s { ", src_str, tgt_str, obj_str);
+			break;
+		case CIL_AVRULE_DONTAUDIT:
+			fprintf(file_arr[file_index], "dontaudit %s %s:%s { ", src_str, tgt_str, obj_str);
+			break;
+		case CIL_AVRULE_NEVERALLOW:
+			fprintf(file_arr[file_index], "neverallow %s %s:%s { ", src_str, tgt_str, obj_str);
+			break;
+		default : {
+			printf("Unknown avrule kind: %d\n", rule->rule_kind);
+			return SEPOL_ERR;
+		}
+	}
+	while (perm_item != NULL) {
+		fprintf(file_arr[file_index], "%s ", ((struct cil_perm*)(perm_item->data))->datum.name);
+		perm_item = perm_item->next;
+	}
+	fprintf(file_arr[file_index], "};\n");
+
+	return SEPOL_OK;
+}
+
+int cil_typerule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_type_rule *rule)
+{
+	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
+	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
+	char *obj_str = ((struct cil_symtab_datum*)(struct cil_class*)rule->obj)->name;
+	char *result_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->result)->name;
+		
+	switch (rule->rule_kind) {
+		case CIL_TYPE_TRANSITION:
+			fprintf(file_arr[ALLOWS], "type_transition %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
+			break;
+		case CIL_TYPE_CHANGE:
+			fprintf(file_arr[ALLOWS], "type_change %s %s : %s %s\n;", src_str, tgt_str, obj_str, result_str);
+			break;
+		case CIL_TYPE_MEMBER:
+			fprintf(file_arr[ALLOWS], "type_member %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
+			break;
+		default : {
+			printf("Unknown type_rule kind: %d\n", rule->rule_kind);
+			return SEPOL_ERR;
+		}
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tree_node *stack)
+{
+	struct cil_conditional *cond = NULL;
+	struct cil_tree_node *new = NULL;
+	struct cil_tree_node *oper1 = NULL;
+	struct cil_tree_node *oper2 = NULL;
+	char *oper1_str = NULL;
+	char *oper2_str = NULL;
+	char *oper = NULL;
+	char *policy = NULL;
+
+	while (stack != NULL) {
+		cond = (struct cil_conditional*)stack->data;
+		if ((cond->flavor == CIL_AND) || (cond->flavor == CIL_OR) || (cond->flavor == CIL_XOR) || (cond->flavor == CIL_NOT) || (cond->flavor == CIL_EQ) || (cond->flavor == CIL_NEQ)) {
+			
+			cil_tree_node_init(&new);
+			int len1 = 0;
+			int len2 = 0;
+	
+			oper1 = stack->parent;
+			oper2 = stack->parent->parent;
+
+			if (oper1->flavor == CIL_COND && ((struct cil_conditional*)oper1->data)->flavor == CIL_BOOL) 
+				oper1_str = ((struct cil_conditional*)stack->parent->data)->boolean->datum.name;
+			else 
+				oper1_str = (char*)oper1->data;
+			len1 = strlen(oper1_str);
+
+			if (oper2->flavor == CIL_COND && ((struct cil_conditional*)oper2->data)->flavor == CIL_BOOL) 
+				oper2_str = ((struct cil_conditional*)stack->parent->parent->data)->boolean->datum.name;
+			else
+				oper2_str = (char*)oper2->data;
+			len2 = strlen(oper2_str);			
+			
+			oper = ((struct cil_conditional*)stack->data)->str;
+			int oplen = strlen(oper);
+
+			new->data = cil_malloc(len1 + len2 + oplen + 5);
+			strcpy(new->data, "(");
+			strncat(new->data, oper1_str, len1);
+			strncat(new->data, " ", 1);
+			strncat(new->data, oper, oplen);
+			strncat(new->data, " ", 1);
+			strncat(new->data, oper2_str, len2);
+			strncat(new->data, ")", 1);
+		
+			new->flavor = CIL_AST_STR;
+			new->cl_head = stack->cl_head;
+			new->parent = stack->parent->parent->parent;
+			if (stack->parent->parent->parent != NULL)
+				stack->parent->parent->parent->cl_head = new;
+			if (stack->cl_head != NULL)
+				stack->cl_head->parent = new;
+			cil_tree_node_destroy(&stack->parent->parent);
+			cil_tree_node_destroy(&stack->parent);
+			cil_tree_node_destroy(&stack);
+
+			if (new->cl_head == NULL) {
+				if (new->parent == NULL)
+					policy = (char*)new->data;
+				else 
+					return SEPOL_ERR;
+			}
+
+			stack = new;
+		}
+		stack = stack->cl_head;
+	}
+
+	if (policy != NULL)
+		fprintf(file_arr[file_index], "%s", policy);
+	else
+		return SEPOL_ERR;
+
+	return SEPOL_OK;
+}
+
+
+int __cil_booleanif_node_helper(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other)
+{
+	int rc = SEPOL_ERR;
+	FILE **file_arr = (FILE**)other->head->data;
+	uint32_t *file_index = (uint32_t*)other->head->next->data;
+
+	switch (node->flavor) {
+		case CIL_AVRULE : {
+			rc = cil_avrule_to_policy(file_arr, *file_index, (struct cil_avrule*)node->data);
+			if (rc != SEPOL_OK) {
+				printf("cil_avrule_to_policy failed, rc: %d\n", rc);
+				return rc;
+			}
+			break;
+		}
+		case CIL_TYPE_RULE : {
+			rc = cil_typerule_to_policy(file_arr, *file_index, (struct cil_type_rule*)node->data);
+			if (rc != SEPOL_OK) {
+				printf("cil_typerule_to_policy failed, rc: %d\n", rc);
+				return rc;
+			}
+			break;
+		}
+		case CIL_ELSE : {
+			fprintf(file_arr[*file_index], "else {\n");
+			break;
+		}
+		default: return SEPOL_ERR;
+	}
+
+	return SEPOL_OK;
+}
+
+int __cil_booleanif_reverse_helper(struct cil_tree_node *node, struct cil_list *other)
+{
+	FILE **file_arr = (FILE**)other->head->data;
+	uint32_t *file_index = (uint32_t*)other->head->next->data;
+
+	if (node->flavor == CIL_ELSE)
+		fprintf(file_arr[*file_index], "}\n");
+	
+	return SEPOL_OK;
+}
+int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_booleanif *bif = node->data;
+	struct cil_tree_node *stack = bif->expr_stack;
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	cil_list_item_init(&other->head->next);
+
+	other->head->data = file_arr;
+	other->head->next->data = &file_index;
+
+	fprintf(file_arr[file_index], "if ");
+
+	rc = cil_expr_stack_to_policy(file_arr, file_index, stack);
+	if (rc != SEPOL_OK) {
+		printf("cil_expr_stack_to_policy failed, rc: %d\n", rc);
+		return rc;
+	}
+	bif->expr_stack = NULL;
+	fprintf(file_arr[file_index], "{\n");
+	rc = cil_tree_walk(node, __cil_booleanif_node_helper, __cil_booleanif_reverse_helper, NULL, other);
+	if (rc != SEPOL_OK) {
+		printf("Failed to write booleanif content to file, rc: %d\n", rc);
+		return rc;
+	}
+	fprintf(file_arr[file_index], "}");
+
+	return SEPOL_OK;
+}
+
 int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current) 
 {
 	char *name = ((struct cil_symtab_datum*)current->data)->name;
 	uint32_t flavor = current->flavor;
+	int rc = SEPOL_ERR;
 
 	switch(flavor) {
 		case CIL_ATTR: {
@@ -399,57 +613,20 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			return SEPOL_DONE;
 		}
 		case CIL_AVRULE: {
-			struct cil_avrule *rule = (struct cil_avrule*)current->data;
-			char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
-			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
-			char *obj_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->obj)->name;
-			struct cil_list_item *perm_item = rule->perms_list->head;
-			switch (rule->rule_kind) {
-				case CIL_AVRULE_ALLOWED:
-					fprintf(file_arr[ALLOWS], "allow %s %s:%s { ", src_str, tgt_str, obj_str);
-					break;
-				case CIL_AVRULE_AUDITALLOW:
-					fprintf(file_arr[ALLOWS], "auditallow %s %s:%s { ", src_str, tgt_str, obj_str);
-					break;
-				case CIL_AVRULE_DONTAUDIT:
-					fprintf(file_arr[ALLOWS], "dontaudit %s %s:%s { ", src_str, tgt_str, obj_str);
-					break;
-				case CIL_AVRULE_NEVERALLOW:
-					fprintf(file_arr[ALLOWS], "neverallow %s %s:%s { ", src_str, tgt_str, obj_str);
-					break;
-				default : {
-					printf("Unknown avrule kind: %d\n", rule->rule_kind);
-					return SEPOL_ERR;
-				}
+			struct cil_avrule *avrule = (struct cil_avrule*)current->data;
+			rc = cil_avrule_to_policy(file_arr, ALLOWS, avrule);
+			if (rc != SEPOL_OK) {
+				printf("Failed to write avrule to policy\n");
+				return rc;
 			}
-			while (perm_item != NULL) {
-				fprintf(file_arr[ALLOWS], "%s ", ((struct cil_perm*)(perm_item->data))->datum.name);
-				perm_item = perm_item->next;
-			}
-			fprintf(file_arr[ALLOWS], "};\n");
 			break;
 		}
 		case CIL_TYPE_RULE: {
 			struct cil_type_rule *rule = (struct cil_type_rule*)current->data;
-			char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
-			char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
-			char *obj_str = ((struct cil_symtab_datum*)(struct cil_class*)rule->obj)->name;
-			char *result_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->result)->name;
-			
-			switch (rule->rule_kind) {
-				case CIL_TYPE_TRANSITION:
-					fprintf(file_arr[ALLOWS], "type_transition %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
-					break;
-				case CIL_TYPE_CHANGE:
-					fprintf(file_arr[ALLOWS], "type_change %s %s : %s %s\n;", src_str, tgt_str, obj_str, result_str);
-					break;
-				case CIL_TYPE_MEMBER:
-					fprintf(file_arr[ALLOWS], "type_member %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
-					break;
-				default : {
-					printf("Unknown type_rule kind: %d\n", rule->rule_kind);
-					return SEPOL_ERR;
-				}
+			rc = cil_typerule_to_policy(file_arr, ALLOWS, rule);
+			if (rc != SEPOL_OK) {
+				printf("Failed to write type rule to policy\n");
+				return rc;
 			}
 			break;
 		}
@@ -562,6 +739,15 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 			*finished = CIL_TREE_SKIP_HEAD;
 			return SEPOL_OK;
 		}
+		if (node->flavor == CIL_BOOLEANIF) {
+			rc = cil_booleanif_to_policy(file_arr, CONDS, node);
+			if (rc != SEPOL_OK) {
+				printf("Failed to write booleanif contents to file\n");
+				return rc;
+			}
+			*finished = CIL_TREE_SKIP_HEAD;
+			return SEPOL_OK;
+		}
 		if (node->flavor != CIL_ROOT) {
 			rc = cil_name_to_policy(file_arr, node);
 			if (rc != SEPOL_OK && rc != SEPOL_DONE) {
@@ -667,6 +853,10 @@ int cil_gen_policy(struct cil_db *db)
 	strcpy(temp, "/tmp/cil_allows-XXXXXX");
 	file_arr[ALLOWS] = fdopen(mkstemp(temp), "w+");
 	file_path_arr[ALLOWS] = cil_strdup(temp);
+	
+	strcpy(temp, "/tmp/cil_conds-XXXXXX");
+	file_arr[CONDS] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[CONDS] = cil_strdup(temp);
 	
 	strcpy(temp, "/tmp/cil_userroles-XXXXXX");
 	file_arr[USERROLES] = fdopen(mkstemp(temp), "w+");

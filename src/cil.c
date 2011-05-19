@@ -126,6 +126,11 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_boolif(*data);
 			break;
 		}
+		case (CIL_ELSE) : break;
+		case (CIL_COND) : {
+			cil_destroy_conditional(*data);
+			break;
+		}
 		case (CIL_TYPEALIAS) : {
 			cil_destroy_typealias(*data);
 			break;
@@ -301,7 +306,7 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
 		else if (ast_node->parent->flavor == CIL_COMMON)
 			*symtab = &((struct cil_common*)ast_node->parent->data)->perms;
-		else if (ast_node->parent->flavor == CIL_BOOLEANIF && cil_sym_index < CIL_SYM_NUM) {
+		else if ((ast_node->parent->flavor == CIL_BOOLEANIF || ast_node->parent->flavor == CIL_ELSE) && cil_sym_index < CIL_SYM_NUM) {
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_booleanif failed, rc: %d\n", rc);

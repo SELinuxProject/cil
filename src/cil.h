@@ -62,6 +62,7 @@
 #define CIL_EQ			47
 #define CIL_NEQ			48
 #define CIL_ELSE		49
+#define CIL_COND		50 
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -496,6 +497,7 @@ struct cil_booleanif {
 struct cil_conditional {
 	char *str;
 	struct cil_bool *boolean;
+	uint32_t flavor;
 };
 
 struct cil_policycap {

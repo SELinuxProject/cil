@@ -1542,7 +1542,7 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, str
 	struct cil_tree_node *bool_node = NULL;
 
 	while (curr_expr != NULL) {
-		if (curr_expr->flavor == CIL_BOOL) {
+		if (((struct cil_conditional*)curr_expr->data)->flavor == CIL_BOOL) {
 			printf("resolving: %s\n", ((struct cil_conditional*)curr_expr->data)->str);
 			rc = cil_resolve_name(db, bif, ((struct cil_conditional*)curr_expr->data)->str, CIL_SYM_BOOLS, CIL_BOOL, call, &bool_node);
 			if (rc != SEPOL_OK) {

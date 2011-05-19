@@ -454,6 +454,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(")\n");
 				return;
 			}
+			case CIL_ELSE : {
+				printf("else\n"); 
+				return;
+			}
 			case CIL_AND : {
 				printf("&&");
 				return;
