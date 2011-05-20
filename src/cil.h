@@ -565,5 +565,9 @@ int cil_catorder_init(struct cil_catorder **catorder);
 int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates);
 int cil_call_init(struct cil_call **call);
 int cil_optional_init(struct cil_optional **optional);
+int cil_conditional_init(struct cil_conditional **conditional);
+int cil_booleanif_init(struct cil_booleanif **booleanif);
+int cil_macro_init(struct cil_macro **macro);
+int cil_policycap_init(struct cil_policycap **policycap);
 
 #endif

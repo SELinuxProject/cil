@@ -773,9 +773,11 @@ int cil_gen_expr_stack(struct cil_tree_node *current, struct cil_tree_node **sta
 	if (current->cl_head == NULL) {
 		struct cil_tree_node *new = NULL;
 		cil_tree_node_init(&new);
-		struct cil_conditional *cond = cil_malloc(sizeof(struct cil_conditional));
-		cond->str = NULL;
-		cond->boolean = NULL;
+		struct cil_conditional *cond;
+		rc = cil_conditional_init(&cond);
+		if (rc != SEPOL_OK) {
+			return rc;
+		}
 
 		if (current == current->parent->cl_head) {	
 			if (!strcmp((char*)current->data, CIL_KEY_AND))
@@ -840,9 +842,12 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		return SEPOL_ERR;
 	}
 
-	int rc = SEPOL_ERR;
-	struct cil_booleanif *bif = cil_malloc(sizeof(struct cil_booleanif));
-	
+	struct cil_booleanif *bif;
+	int rc = cil_booleanif_init(&bif);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
 	if (parse_current->next->cl_head == NULL) {
 		bif->expr_stack->flavor = CIL_BOOL;
 		bif->expr_stack->data = cil_strdup(parse_current->next->data);
@@ -1819,16 +1824,12 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return SEPOL_ERR;
 	}
 
-	int rc = SEPOL_ERR;
 	uint32_t flavor = 0;
 	char *name = (char*)parse_current->next->data;
-	struct cil_macro *macro = cil_malloc(sizeof(struct cil_macro));
-	cil_symtab_datum_init(&macro->datum);
-
-	rc = cil_symtab_array_init(macro->symtab, CIL_SYM_NUM);
+	struct cil_macro *macro;
+	int rc = cil_macro_init(&macro);	
 	if (rc != SEPOL_OK) {
-		printf("Failed to initialize symtab array\n");
-		goto gen_macro_cleanup;
+		return rc;
 	}
 
 	if (parse_current->next->next->cl_head != NULL) {
@@ -2043,9 +2044,11 @@ int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, st
 		return SEPOL_ERR;
 	}
 
-	int rc = SEPOL_ERR;
-	struct cil_policycap *polcap = cil_malloc(sizeof(struct cil_policycap));
-	cil_symtab_datum_init(&polcap->datum);
+	struct cil_policycap *polcap;
+	int rc = cil_policycap_init(&polcap);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
 	char *key = parse_current->next->data;
 	
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)polcap, (hashtab_key_t)key, CIL_SYM_POLICYCAPS, CIL_POLICYCAP);

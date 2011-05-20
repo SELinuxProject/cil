@@ -1028,3 +1028,72 @@ int cil_optional_init(struct cil_optional **optional)
 
 	return SEPOL_OK;
 }
+
+int cil_conditional_init(struct cil_conditional **conditional)
+{
+	if (conditional == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_conditional *new_conditional = cil_malloc(sizeof(struct cil_conditional));
+	
+	new_conditional->str = NULL;
+	new_conditional->boolean = NULL;
+	new_conditional->flavor = 0;
+
+	*conditional = new_conditional;
+
+	return SEPOL_OK;
+}
+
+int cil_booleanif_init(struct cil_booleanif **booleanif)
+{
+	if (booleanif == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_booleanif *new_booleanif = cil_malloc(sizeof(struct cil_booleanif));
+
+	new_booleanif->expr_stack = NULL;
+
+	*booleanif = new_booleanif;
+
+	return SEPOL_OK;
+}
+
+int cil_macro_init(struct cil_macro **macro)
+{
+	if (macro == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_macro *new_macro = cil_malloc(sizeof(struct cil_macro));
+
+	cil_symtab_datum_init(&new_macro->datum);
+	int rc = cil_symtab_array_init(new_macro->symtab, CIL_SYM_NUM);
+	if (rc != SEPOL_OK) {
+		printf("Failed to initialize symtab array\n");
+		free(new_macro);
+		return rc;
+	}
+	new_macro->params = NULL;
+
+	*macro = new_macro;
+
+	return SEPOL_OK;
+}
+
+int cil_policycap_init(struct cil_policycap **policycap)
+{
+	if (policycap == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_policycap *new_policycap = cil_malloc(sizeof(struct cil_policycap));
+
+	cil_symtab_datum_init(&new_policycap->datum);
+
+	*policycap = new_policycap;
+
+	return SEPOL_OK;
+}
