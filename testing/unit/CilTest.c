@@ -277,6 +277,21 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattr_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_and);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_or);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_xor);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_not);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_not_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_eq);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_neq);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_nested);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_nested_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_arg1null_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_arg2null_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_extraarg_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_stacknull_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif);
 	//SUITE_ADD_TEST(suite, test_cil_gen_boolif_nocond);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_neg);

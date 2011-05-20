@@ -1434,6 +1434,324 @@ void test_cil_gen_typeattr_extra_neg (CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_expr_stack_and(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_expr_stack_or(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "||", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_expr_stack_xor(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "^", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_expr_stack_not(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "!", "foo", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_expr_stack_not_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "!", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_eq(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "==", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_expr_stack_neq(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "!=", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_expr_stack_nested(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "||", "(","!=", "foo", "bar", ")", "(", "==", "baz", "boo", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_expr_stack_nested_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "(","!=", "foo", "bar", ")", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_arg1null_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "==", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_arg2null_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "==", "foo", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_extraarg_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "==", "foo", "bar", "extra", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_booleanif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_stacknull_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "^", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_boolif(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};

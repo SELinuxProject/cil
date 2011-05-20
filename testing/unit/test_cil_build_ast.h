@@ -90,6 +90,21 @@ void test_cil_gen_typeattr_attrnull_neg(CuTest *);
 void test_cil_gen_typeattr_attrlist_neg(CuTest *);
 void test_cil_gen_typeattr_extra_neg(CuTest *);
 
+void test_cil_gen_expr_stack_and(CuTest *);
+void test_cil_gen_expr_stack_or(CuTest *);
+void test_cil_gen_expr_stack_xor(CuTest *);
+void test_cil_gen_expr_stack_not(CuTest *);
+void test_cil_gen_expr_stack_not_neg(CuTest *);
+void test_cil_gen_expr_stack_eq(CuTest *);
+void test_cil_gen_expr_stack_neq(CuTest *);
+void test_cil_gen_expr_stack_nested(CuTest *);
+void test_cil_gen_expr_stack_nested_neg(CuTest *);
+void test_cil_gen_expr_stack_arg1null_neg(CuTest *);
+void test_cil_gen_expr_stack_arg2null_neg(CuTest *);
+void test_cil_gen_expr_stack_extraarg_neg(CuTest *);
+void test_cil_gen_expr_stack_currnull_neg(CuTest *);
+void test_cil_gen_expr_stack_stacknull_neg(CuTest *);
+
 void test_cil_gen_boolif(CuTest *);
 void test_cil_gen_boolif_nocond(CuTest *);
 void test_cil_gen_boolif_neg(CuTest *);
