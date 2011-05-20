@@ -99,6 +99,12 @@ void test_cil_gen_boolif_astnull_neg(CuTest *);
 void test_cil_gen_boolif_nocond_neg(CuTest *);
 void test_cil_gen_boolif_notruelist_neg(CuTest *);
 
+void test_cil_gen_else(CuTest *);
+void test_cil_gen_else_neg(CuTest *);
+void test_cil_gen_else_dbnull_neg(CuTest *);
+void test_cil_gen_else_currnull_neg(CuTest *);
+void test_cil_gen_else_astnull_neg(CuTest *);
+
 void test_cil_gen_typealias(CuTest *);
 void test_cil_gen_typealias(CuTest *);
 void test_cil_gen_typealias(CuTest *);
