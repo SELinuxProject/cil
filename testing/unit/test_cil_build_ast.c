@@ -1436,7 +1436,7 @@ void test_cil_gen_typeattr_extra_neg (CuTest *tc) {
 
 void test_cil_gen_boolif(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "read", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1456,7 +1456,7 @@ void test_cil_gen_boolif(CuTest *tc) {
 
 void test_cil_gen_boolif_nocond(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "baz",
-			"(", "allow", "foo", "bar", "read", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1476,7 +1476,7 @@ void test_cil_gen_boolif_nocond(CuTest *tc) {
 
 void test_cil_gen_boolif_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "**", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "read", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1496,7 +1496,7 @@ void test_cil_gen_boolif_neg(CuTest *tc) {
 
 void test_cil_gen_boolif_dbnull_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "read", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1531,7 +1531,7 @@ void test_cil_gen_boolif_currnull_neg(CuTest *tc) {
 
 void test_cil_gen_boolif_astnull_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "read", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
