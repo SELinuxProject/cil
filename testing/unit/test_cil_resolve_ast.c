@@ -2650,6 +2650,51 @@ void test_cil_resolve_name_call_args_name_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_resolve_expr_stack(CuTest *tc) {
+	char *line[] = {"(", "bool", "foo", "true", ")",
+			"(", "bool", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data; 
+
+	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_expr_stack_neg(CuTest *tc) {
+	char *line[] = {"(", "bool", "foo", "true", ")",
+			"(", "bool", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "booleanif", "(", "&&", "beef", "baf", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data; 
+
+	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+}
+
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_roletype(CuTest *tc) {
 	char *line[] = {"(", "role",  "admin_r", ")",
 			"(", "type", "admin_t", ")",
