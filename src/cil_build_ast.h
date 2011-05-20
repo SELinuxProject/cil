@@ -44,6 +44,7 @@ int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *
 void cil_destroy_bool(struct cil_bool *);
 int cil_gen_boolif(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_boolif(struct cil_booleanif *);
+int cil_gen_else(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_conditional(struct cil_conditional *);
 int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_typealias(struct cil_typealias *);
