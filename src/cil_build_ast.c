@@ -192,13 +192,8 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	char *key = (char*)parse_current->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)perm, (hashtab_key_t)key, CIL_SYM_UNKNOWN, CIL_PERM);
-	if (rc != SEPOL_OK) {
-		if (rc == SEPOL_EEXIST) {
-			printf("Error: perm already exists in symtab\n");
-			goto gen_perm_cleanup;
-		}
+	if (rc != SEPOL_OK) 
 		goto gen_perm_cleanup;
-	}
 
 	return SEPOL_OK;
 
