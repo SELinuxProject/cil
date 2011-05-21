@@ -44,28 +44,29 @@
 #define CIL_USERROLE		29
 #define CIL_TYPE_ATTR		30
 #define CIL_TYPE_RULE 		31
-#define CIL_ROLETRANS		32
-#define CIL_ROLEALLOW		33
-#define CIL_ROLETYPE		34 
-#define CIL_CATORDER		35
-#define CIL_DOMINANCE		36
-#define CIL_SENSCAT		37
-#define CIL_CLASSCOMMON		38
-#define CIL_CONSTRAIN_NODE	39
-#define CIL_CALL		40
-#define CIL_ARGS		41
-#define CIL_BOOLEANIF		42
-#define CIL_TUNABLEIF		43
-#define CIL_TUNABLEIFDEF	44
-#define CIL_TUNABLEIFNDEF	45
-#define CIL_AND			46
-#define CIL_OR			47
-#define CIL_XOR			48
-#define CIL_NOT			49
-#define CIL_EQ			50
-#define CIL_NEQ			51
-#define CIL_ELSE		52
-#define CIL_COND		53
+#define CIL_TYPEBOUNDS		32
+#define CIL_ROLETRANS		33
+#define CIL_ROLEALLOW		34
+#define CIL_ROLETYPE		35 
+#define CIL_CATORDER		36
+#define CIL_DOMINANCE		37
+#define CIL_SENSCAT		38
+#define CIL_CLASSCOMMON		39
+#define CIL_CONSTRAIN_NODE	40
+#define CIL_CALL		41
+#define CIL_ARGS		42
+#define CIL_BOOLEANIF		43
+#define CIL_TUNABLEIF		44
+#define CIL_TUNABLEIFDEF	45
+#define CIL_TUNABLEIFNDEF	46
+#define CIL_AND			47
+#define CIL_OR			48
+#define CIL_XOR			49
+#define CIL_NOT			50
+#define CIL_EQ			51
+#define CIL_NEQ			52
+#define CIL_ELSE		53
+#define CIL_COND		54
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -115,6 +116,7 @@
 #define CIL_KEY_TYPEMEMBER	"typemember"
 #define CIL_KEY_TYPEATTR	"typeattribute"
 #define CIL_KEY_TYPEALIAS	"typealias"
+#define CIL_KEY_TYPEBOUNDS	"typebounds"
 #define CIL_KEY_MACRO		"macro"
 #define CIL_KEY_CALL		"call"
 #define CIL_KEY_POLICYCAP	"policycap"
@@ -279,6 +281,14 @@ struct cil_typealias {
 	struct cil_symtab_datum datum;
 	char *type_str;
 	struct cil_type *type;
+};
+
+struct cil_typebounds {
+	struct cil_symtab_datum datum;
+	char *parent_str;
+	struct cil_type *parent;
+	char *child_str;
+	struct cil_type *child;
 };
 
 struct cil_bool {
@@ -542,6 +552,7 @@ int cil_role_dominates_init(struct cil_role_dominates **role_dominates);
 int cil_roletype_init(struct cil_roletype **roletype);
 int cil_typeattribute_init(struct cil_typeattribute **typeattribute);
 int cil_typealias_init(struct cil_typealias **typealias);
+int cil_typebounds_init(struct cil_typebounds **typebnds);
 int cil_bool_init(struct cil_bool **cilbool);
 int cil_avrule_init(struct cil_avrule **avrule);
 int cil_type_rule_init(struct cil_type_rule **type_rule);

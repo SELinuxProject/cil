@@ -499,6 +499,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type->datum.name);
 				return;
 			}
+			case CIL_TYPEBOUNDS : {
+				struct cil_typebounds *typebnds = node->data;
+				if (typebnds->parent_str != NULL && typebnds->child_str != NULL)
+					printf("TYPEBOUNDS: parent: %s, child: %s\n", typebnds->parent_str, typebnds->child_str);
+				else
+					printf("TYPEBOUNDS: parent: %s, child: %s\n", typebnds->parent->datum.name, typebnds->child->datum.name);
+				return;
+			}
 			case CIL_AVRULE : {
 				struct cil_avrule *rule = node->data;
 				struct cil_list_item *item = NULL;

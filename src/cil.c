@@ -143,6 +143,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_typeattr(*data);
 			break;
 		}
+		case (CIL_TYPEBOUNDS) : {
+			cil_destroy_typebounds(*data);
+			break;
+		}
 		case (CIL_SENS) : {
 			cil_destroy_sensitivity(*data);
 			break;
@@ -631,6 +635,23 @@ int cil_typealias_init(struct cil_typealias **typealias)
 	new_typealias->type = NULL;
 
 	*typealias = new_typealias;
+
+	return SEPOL_OK;
+}
+
+int cil_typebounds_init(struct cil_typebounds **typebnds)
+{
+	if (typebnds == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_typebounds *new_typebnds = cil_malloc(sizeof(struct cil_typebounds));
+
+	cil_symtab_datum_init(&new_typebnds->datum);
+	new_typebnds->parent_str = NULL;
+	new_typebnds->child_str = NULL;
+
+	*typebnds = new_typebnds;
 
 	return SEPOL_OK;
 }

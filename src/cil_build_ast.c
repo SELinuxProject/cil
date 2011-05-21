@@ -984,6 +984,41 @@ void cil_destroy_typeattr(struct cil_typeattribute *typeattr)
 	free(typeattr);
 }
 
+int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+		printf("Invalid typebounds declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_typebounds *typebnds;
+	int rc = cil_typebounds_init(&typebnds);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	typebnds->parent_str = cil_strdup(parse_current->next->data);
+	typebnds->child_str = cil_strdup(parse_current->next->next->data);
+
+	ast_node->data = typebnds;
+	ast_node->flavor = CIL_TYPEBOUNDS;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_typebounds(struct cil_typebounds *typebnds)
+{
+	if (typebnds->parent_str != NULL)
+		free(typebnds->parent_str);
+	if (typebnds->child_str != NULL)
+		free(typebnds->child_str);
+	free(typebnds);
+}
+
 int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -2179,6 +2214,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_typealias(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_typealias failed, rc: %d\n", rc);
+					return rc;
+				}
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_TYPEBOUNDS)) {
+				rc = cil_gen_typebounds(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_typebounds failed, rc: %d\n", rc);
 					return rc;
 				}
 			}

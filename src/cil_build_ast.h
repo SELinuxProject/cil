@@ -51,6 +51,8 @@ int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_n
 void cil_destroy_typealias(struct cil_typealias *);
 int cil_gen_typeattr(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_typeattr(struct cil_typeattribute *);
+int cil_gen_typebounds(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_typebounds(struct cil_typebounds *);
 int cil_gen_sensitivity(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_sensitivity(struct cil_sens *);
 int cil_gen_category(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

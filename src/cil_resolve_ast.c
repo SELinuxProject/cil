@@ -203,6 +203,33 @@ int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current, stru
 	return SEPOL_OK;
 }
 
+int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_typebounds *typebnds = (struct cil_typebounds*)current->data;
+	struct cil_tree_node *parent_node = NULL;
+	struct cil_tree_node *child_node = NULL;
+	int rc = SEPOL_ERR;
+	rc = cil_resolve_name(db, current, typebnds->parent_str, CIL_SYM_TYPES, CIL_TYPE, call, &parent_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", typebnds->parent_str);
+		return rc;
+	}
+	typebnds->parent = (struct cil_type*)(parent_node->data);
+	free(typebnds->parent_str);
+	typebnds->parent_str = NULL;
+
+	rc = cil_resolve_name(db, current, typebnds->child_str, CIL_SYM_TYPES, CIL_TYPE, call, &child_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", typebnds->child_str);
+		return rc;
+	}
+	typebnds->child = (struct cil_type*)(child_node->data);
+	free(typebnds->child_str);
+	typebnds->child_str = NULL;
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_classcommon *clscom = (struct cil_classcommon*)current->data;
