@@ -559,6 +559,40 @@ void cil_destroy_roleallow(struct cil_role_allow *roleallow)
 	free(roleallow);
 }
 
+int cil_gen_roledominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+		printf("Invalid roledominance declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_roledominance *roledom;
+	int rc = cil_roledominance_init(&roledom);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	roledom->role_str = cil_strdup(parse_current->next->data);
+	roledom->domed_str = cil_strdup(parse_current->next->next->data);
+
+	ast_node->data = roledom;
+	ast_node->flavor = CIL_ROLEDOMINANCE;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_roledominance(struct cil_roledominance *roledom)
+{
+	if (roledom->role_str != NULL)
+		free(roledom->role_str);
+	if (roledom->domed_str != NULL)
+		free(roledom->domed_str);
+	free(roledom);
+}
 
 int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
@@ -2256,6 +2290,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_roleallow(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_roleallow failed, rc: %d\n", rc);
+					return rc;
+				}
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_ROLEDOMINANCE)) {
+				rc = cil_gen_roledominance(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_roledominance failed, rc: %d\n", rc);
 					return rc;
 				}
 			}

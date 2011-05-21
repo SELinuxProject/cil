@@ -678,6 +678,13 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALIASES], "role %s types %s\n", role_str, type_str);
 			break;
 		}
+		case CIL_ROLEDOMINANCE : {
+			struct cil_roledominance *roledom = (struct cil_roledominance*)current->data;
+			char *role_str = ((struct cil_symtab_datum*)(struct cil_role*)roledom->role)->name;
+			char *domed_str = ((struct cil_symtab_datum*)(struct cil_role*)roledom->domed)->name;
+			fprintf(file_arr[ATTRTYPES], "dominance { role %s { role %s; } }\n", role_str, domed_str);
+			break;
+		}
 		case CIL_LEVEL : {
 			fprintf(file_arr[LEVELS], "level ");
 			cil_level_to_policy(file_arr, LEVELS, (struct cil_level*)current->data);

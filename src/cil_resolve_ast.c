@@ -389,6 +389,38 @@ int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current, stru
 	return SEPOL_OK;	
 }
 
+int cil_resolve_roledominance(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_roledominance *roledom = (struct cil_roledominance*)current->data;
+	struct cil_tree_node *role_node = NULL;
+	struct cil_tree_node *domed_node = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, roledom->role_str, CIL_SYM_ROLES, CIL_ROLE, call, &role_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roledom->role_str);
+		return rc;
+	}
+	else {
+		roledom->role = (struct cil_role*)(role_node->data);
+		free(roledom->role_str);
+		roledom->role_str = NULL;
+	}
+
+	rc = cil_resolve_name(db, current, roledom->domed_str, CIL_SYM_ROLES, CIL_ROLE, call, &domed_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roledom->domed_str);
+		return rc;
+	}
+	else {
+		roledom->domed = (struct cil_role*)(domed_node->data);
+		free(roledom->domed_str);
+		roledom->domed_str = NULL;
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_sensalias(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_sensalias *alias = (struct cil_sensalias*)current->data;
@@ -1718,6 +1750,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					}
 					case CIL_ROLEALLOW : {
 						printf("case roleallow\n");
+						rc = cil_resolve_roleallow(db, node, call);
+						break;
+					}
+					case CIL_ROLEDOMINANCE : {
+						printf("case roledominance\n");
 						rc = cil_resolve_roleallow(db, node, call);
 						break;
 					}

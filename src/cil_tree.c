@@ -405,6 +405,20 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
+			case CIL_ROLEDOMINANCE : {
+				struct cil_roledominance *roledom = node->data;
+				printf("ROLEDOMINANCE:");
+				if (roledom->role_str != NULL)
+					printf(" %s", roledom->role_str);
+				else
+					printf(" %s", roledom->role->datum.name);
+				if (roledom->domed_str != NULL)
+					printf(" %s", roledom->domed_str);
+				else
+					printf(" %s", roledom->domed->datum.name);
+				printf("\n");
+				return;
+			}
 			case CIL_CLASS : {
 				struct cil_class *cls = node->data;
 				printf("CLASS: %s ", cls->datum.name);

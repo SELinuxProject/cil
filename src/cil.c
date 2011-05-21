@@ -118,6 +118,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_roleallow(*data);
 			break;
 		}
+		case (CIL_ROLEDOMINANCE) : {
+			cil_destroy_roledominance(*data);
+			break;
+		}
 		case (CIL_BOOL) : {
 			cil_destroy_bool(*data);
 			break;
@@ -568,20 +572,20 @@ int cil_userrole_init(struct cil_userrole **userrole)
 	return SEPOL_OK;
 }
 
-int cil_role_dominates_init(struct cil_role_dominates **role_dominates)
+int cil_roledominance_init(struct cil_roledominance **roledominance)
 {
-	if (role_dominates == NULL) {
+	if (roledominance == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_role_dominates *new_role_dominates = cil_malloc(sizeof(struct cil_role_dominates));
+	struct cil_roledominance *new_roledominance = cil_malloc(sizeof(struct cil_roledominance));
 
-	new_role_dominates->role_str = NULL;
-	new_role_dominates->role = NULL;
-	new_role_dominates->dominates_str = NULL;
-	new_role_dominates->dominates = NULL;
+	new_roledominance->role_str = NULL;
+	new_roledominance->role = NULL;
+	new_roledominance->domed_str = NULL;
+	new_roledominance->domed = NULL;
 
-	*role_dominates = new_role_dominates;
+	*roledominance = new_roledominance;
 
 	return SEPOL_OK;
 }

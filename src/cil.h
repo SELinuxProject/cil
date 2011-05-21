@@ -48,25 +48,26 @@
 #define CIL_ROLETRANS		33
 #define CIL_ROLEALLOW		34
 #define CIL_ROLETYPE		35 
-#define CIL_CATORDER		36
-#define CIL_DOMINANCE		37
-#define CIL_SENSCAT		38
-#define CIL_CLASSCOMMON		39
-#define CIL_CONSTRAIN_NODE	40
-#define CIL_CALL		41
-#define CIL_ARGS		42
-#define CIL_BOOLEANIF		43
-#define CIL_TUNABLEIF		44
-#define CIL_TUNABLEIFDEF	45
-#define CIL_TUNABLEIFNDEF	46
-#define CIL_AND			47
-#define CIL_OR			48
-#define CIL_XOR			49
-#define CIL_NOT			50
-#define CIL_EQ			51
-#define CIL_NEQ			52
-#define CIL_ELSE		53
-#define CIL_COND		54
+#define CIL_ROLEDOMINANCE	36
+#define CIL_CATORDER		37
+#define CIL_DOMINANCE		38
+#define CIL_SENSCAT		39
+#define CIL_CLASSCOMMON		40
+#define CIL_CONSTRAIN_NODE	41
+#define CIL_CALL		42
+#define CIL_ARGS		43
+#define CIL_BOOLEANIF		44
+#define CIL_TUNABLEIF		45
+#define CIL_TUNABLEIFDEF	46
+#define CIL_TUNABLEIFNDEF	47
+#define CIL_AND			48
+#define CIL_OR			49
+#define CIL_XOR			50
+#define CIL_NOT			51
+#define CIL_EQ			52
+#define CIL_NEQ			53
+#define CIL_ELSE		54
+#define CIL_COND		55
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -104,6 +105,7 @@
 #define CIL_KEY_ROLETYPE	"roletype"
 #define CIL_KEY_ROLETRANS	"roletransition"
 #define CIL_KEY_ROLEALLOW	"roleallow"
+#define CIL_KEY_ROLEDOMINANCE	"roledominance"
 #define CIL_KEY_TYPE 		"type"
 #define CIL_KEY_ATTR		"attribute"
 #define CIL_KEY_BOOL		"bool"
@@ -252,11 +254,11 @@ struct cil_role {
 };
 
 /* TODO Waiting on design */
-struct cil_role_dominates {
+struct cil_roledominance {
 	char *role_str;
 	struct cil_role *role;
-	char *dominates_str;
-	struct cil_role *dominates;
+	char *domed_str;
+	struct cil_role *domed;
 };
 
 struct cil_roletype {
@@ -548,7 +550,7 @@ int cil_common_init(struct cil_common **common);
 int cil_classcommon_init(struct cil_classcommon **classcommon);
 int cil_sid_init(struct cil_sid **sid);
 int cil_userrole_init(struct cil_userrole **userrole);
-int cil_role_dominates_init(struct cil_role_dominates **role_dominates);
+int cil_roledominance_init(struct cil_roledominance **roledominance);
 int cil_roletype_init(struct cil_roletype **roletype);
 int cil_typeattribute_init(struct cil_typeattribute **typeattribute);
 int cil_typealias_init(struct cil_typealias **typealias);
