@@ -847,6 +847,10 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack);
 	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_boolif);
+	SUITE_ADD_TEST(suite, test_cil_resolve_boolif_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_boolif);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_boolif_neg); 
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_type_neg);
