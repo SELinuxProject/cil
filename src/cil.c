@@ -86,6 +86,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_sid(*data);
 			break;
 		}
+		case (CIL_SIDCONTEXT) : {
+			cil_destroy_sidcontext(*data);
+			break;
+		}
 		case (CIL_POLICYCAP) : {
 			cil_destroy_policycap(*data);
 			break;
