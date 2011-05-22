@@ -159,25 +159,44 @@ int cil_copy_sid(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
+	char *key = ((struct cil_symtab_datum*)orig->data)->name;
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_sid: cil_symtab_insert failed, rc: %d\n", rc);
+		free(new);
+		return rc;
+	}
+	copy->data = new;
+
+	return SEPOL_OK;
+}
+
+int cil_copy_sidcontext(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_sidcontext *new;
+	int rc = cil_sidcontext_init(&new);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
 
 	char *key = ((struct cil_symtab_datum *)orig->data)->name;
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
 	if (rc != SEPOL_OK) {
-		printf("cil_copy_sid: cil_symtab_insert failed, rc: %d\n", rc);
-		cil_destroy_sid(new);
+		printf("cil_copy_sidcontext: cil_symtab_insert failed, rc: %d\n", rc);
+		cil_destroy_sidcontext(new);
 		return rc;
 	}
-	new->context_str = cil_strdup(((struct cil_sid *)orig->data)->context_str);
+	new->context_str = cil_strdup(((struct cil_sidcontext*)orig->data)->context_str);
 	
-	if (((struct cil_sid*)orig->data)->context != NULL) {
+	if (((struct cil_sidcontext*)orig->data)->context != NULL) {
 		rc = cil_context_init(&new->context);
 
 		if (rc != SEPOL_OK) {
-			cil_destroy_sid(new);
+			cil_destroy_sidcontext(new);
 			return rc;
 		}
 
-		cil_copy_fill_context(((struct cil_sid*)orig->data)->context, new->context);
+		cil_copy_fill_context(((struct cil_sidcontext*)orig->data)->context, new->context);
 	}
 
 	copy->data = new;
@@ -734,6 +753,14 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 		}
 		case CIL_SID : {
 			rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_SIDS, &cil_copy_sid);
+			if (rc != SEPOL_OK) {
+				free(new);
+				return rc;
+			}
+			break;
+		}
+		case CIL_SIDCONTEXT : {
+			rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_SIDS, &cil_copy_sidcontext);
 			if (rc != SEPOL_OK) {
 				free(new);
 				return rc;

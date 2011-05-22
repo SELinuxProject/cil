@@ -26,7 +26,7 @@ int cil_resolve_level(struct cil_db *, struct cil_tree_node *, struct cil_level 
 int cil_resolve_constrain(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_context(struct cil_db *, struct cil_tree_node *, struct cil_context *, struct cil_call *);
 int cil_resolve_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_call *);
-int cil_resolve_sid(struct cil_db *, struct cil_tree_node *, struct cil_call *);
+int cil_resolve_sidcontext(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_classcommon(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_call1(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_call2(struct cil_db *, struct cil_tree_node *, struct cil_call *);

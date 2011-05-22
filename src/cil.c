@@ -546,10 +546,26 @@ int cil_sid_init(struct cil_sid **sid)
 	struct cil_sid *new_sid = cil_malloc(sizeof(struct cil_sid));
 
 	cil_symtab_datum_init(&new_sid->datum);
-	new_sid->context_str = NULL;
-	new_sid->context = NULL;
 
 	*sid = new_sid;
+
+	return SEPOL_OK;
+}
+
+int cil_sidcontext_init(struct cil_sidcontext **sidcontext)
+{
+	if (sidcontext == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_sidcontext *new_sidcontext = cil_malloc(sizeof(struct cil_sidcontext));
+
+	new_sidcontext->sid_str = NULL;
+	new_sidcontext->sid = NULL;
+	new_sidcontext->context_str = NULL;
+	new_sidcontext->context = NULL;
+
+	*sidcontext = new_sidcontext;
 
 	return SEPOL_OK;
 }

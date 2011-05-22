@@ -116,14 +116,14 @@ void test_cil_resolve_netifcon_unnamed_otf_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_netifcon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_netifcon_neg(CuTest *tc);
 
-void test_cil_resolve_sid(CuTest *);
-void test_cil_resolve_sid_named_levels(CuTest *);
-void test_cil_resolve_sid_named_context(CuTest *);
-void test_cil_resolve_sid_named_context_wrongname_neg(CuTest *tc);
-void test_cil_resolve_sid_named_context_invaliduser_neg(CuTest *tc);
-void test_cil_resolve_sid_named_context_sidcontextnull_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_sid(CuTest *tc);
-void test_cil_resolve_ast_node_helper_sid_neg(CuTest *tc);
+void test_cil_resolve_sidcontext(CuTest *);
+void test_cil_resolve_sidcontext_named_levels(CuTest *);
+void test_cil_resolve_sidcontext_named_context(CuTest *);
+void test_cil_resolve_sidcontext_named_context_wrongname_neg(CuTest *tc);
+void test_cil_resolve_sidcontext_named_context_invaliduser_neg(CuTest *tc);
+void test_cil_resolve_sidcontext_named_context_sidcontextnull_neg(CuTest *tc);
+void test_cil_resolve_ast_node_helper_sidcontext(CuTest *tc);
+void test_cil_resolve_ast_node_helper_sidcontext_neg(CuTest *tc);
 
 void test_cil_resolve_call1_type(CuTest *);
 void test_cil_resolve_call1_role(CuTest *);

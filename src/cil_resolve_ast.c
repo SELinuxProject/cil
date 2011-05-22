@@ -1338,25 +1338,35 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 	return SEPOL_OK;
 }
 
-int cil_resolve_sid(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
-	struct cil_sid *sid = (struct cil_sid*)current->data;
+	struct cil_sidcontext *sidcon = (struct cil_sidcontext*)current->data;
+	struct cil_tree_node *sid_node = NULL;
 	struct cil_tree_node *context_node = NULL;
 
 	int rc = SEPOL_ERR;
 
-	if (sid->context_str != NULL) {
-		rc = cil_resolve_name(db, current, sid->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
+	rc = cil_resolve_name(db, current, sidcon->sid_str, CIL_SYM_SIDS, CIL_SID, call, &sid_node);
+	if (rc != SEPOL_OK) {
+		printf("cil_resolve_sidcontext: Failed to resolve sid, rc: %d : %s\n", rc, sidcon->sid_str);
+		return rc;
+	}
+	sidcon->sid = (struct cil_sid*)sid_node->data;
+	free(sidcon->sid_str);
+	sidcon->sid_str = NULL;
+
+	if (sidcon->context_str != NULL) {
+		rc = cil_resolve_name(db, current, sidcon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_sid: Failed to resolve context, rc: %d\n", rc);
+			printf("cil_resolve_sidcontext: Failed to resolve context, rc: %d\n", rc);
 			return rc;
 		}
-		sid->context = (struct cil_context*)context_node->data;
-		free(sid->context_str);
-		sid->context_str = NULL;
+		sidcon->context = (struct cil_context*)context_node->data;
+		free(sidcon->context_str);
+		sidcon->context_str = NULL;
 	}
-	else if (sid->context != NULL) {
-		rc = cil_resolve_context(db, current, sid->context, call);
+	else if (sidcon->context != NULL) {
+		rc = cil_resolve_context(db, current, sidcon->context, call);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_sid: Failed to resolve context, rc: %d\n", rc);
 			return rc;
@@ -1798,9 +1808,9 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						rc = cil_resolve_netifcon(db, node, call);
 						break;
 					}
-					case CIL_SID : {
-						printf("case sid\n");
-						rc = cil_resolve_sid(db, node, call);
+					case CIL_SIDCONTEXT : {
+						printf("case sidcontext\n");
+						rc = cil_resolve_sidcontext(db, node, call);
 						break;
 					}
 					default : 

@@ -234,19 +234,19 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_common);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_common_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_gen_sid);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_namedcontext);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_halfcontext_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_noname_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_empty_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_nocontext_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_dblname_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_pcurrnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_astnodenull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sid_insertnode_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_sid);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_sid_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_namedcontext);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_halfcontext_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_empty_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_nocontext_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_dblname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_pcurrnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_astnodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_insertnode_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_sidcontext);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_sidcontext_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_type);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_dbnull_neg);
@@ -794,14 +794,14 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_netifcon_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_resolve_sid);
-	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_levels);
-	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context);
-	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context_wrongname_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context_invaliduser_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_sid_named_context_sidcontextnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sid); 
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sid_neg); 
+	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_levels);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context_wrongname_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context_invaliduser_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context_sidcontextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sidcontext); 
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sidcontext_neg); 
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_type);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_role);

@@ -11,7 +11,7 @@ int cil_copy_perm(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 int cil_copy_class(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 int cil_copy_common(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 void cil_copy_classcommon(struct cil_classcommon *, struct cil_classcommon **);
-int cil_copy_sid(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
+int cil_copy_sidcontext(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 int cil_copy_user(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 int cil_copy_role(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 void cil_copy_userrole(struct cil_userrole *, struct cil_userrole **);

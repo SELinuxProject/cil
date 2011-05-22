@@ -800,11 +800,20 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_SID : {
 				struct cil_sid *sid = node->data;
-				printf("SID %s:", sid->datum.name);
-				if (sid->context_str != NULL)
-					printf(" %s", sid->context_str);
+				printf("SID: %s\n", sid->datum.name);
+				return;
+			}
+			case CIL_SIDCONTEXT : {
+				struct cil_sidcontext *sidcon = node->data;
+				printf("SIDCONTEXT:");
+				if (sidcon->sid_str != NULL)
+					printf(" %s", sidcon->sid_str);
 				else
-					cil_tree_print_context(sid->context);
+					printf(" %s", (((struct cil_sid*)sidcon->sid)->datum.name));
+				if (sidcon->context_str != NULL)
+					printf(" %s", sidcon->context_str);
+				else
+					cil_tree_print_context(sidcon->context);
 				printf("\n");
 	
 				return;

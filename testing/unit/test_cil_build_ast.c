@@ -878,8 +878,8 @@ void test_cil_gen_common_noperms_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+void test_cil_gen_sidcontext(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -894,14 +894,14 @@ void test_cil_gen_sid(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
-	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_SID);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_SIDCONTEXT);
 }
 
-void test_cil_gen_sid_namedcontext(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "something", NULL};
+void test_cil_gen_sidcontext_namedcontext(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", "something", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -915,14 +915,14 @@ void test_cil_gen_sid_namedcontext(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
-	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_SID);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_SIDCONTEXT);
 }
 
-void test_cil_gen_sid_halfcontext_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", NULL};
+void test_cil_gen_sidcontext_halfcontext_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -936,12 +936,12 @@ void test_cil_gen_sid_halfcontext_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid_noname_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+void test_cil_gen_sidcontext_noname_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -955,12 +955,12 @@ void test_cil_gen_sid_noname_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid_empty_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", ")", NULL};
+void test_cil_gen_sidcontext_empty_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -974,12 +974,12 @@ void test_cil_gen_sid_empty_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid_nocontext_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", NULL};
+void test_cil_gen_sidcontext_nocontext_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -993,12 +993,12 @@ void test_cil_gen_sid_nocontext_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid_dblname_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "test2", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+void test_cil_gen_sidcontext_dblname_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", "test2", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1012,12 +1012,12 @@ void test_cil_gen_sid_dblname_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+void test_cil_gen_sidcontext_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1027,11 +1027,11 @@ void test_cil_gen_sid_dbnull_neg(CuTest *tc) {
 
 	struct cil_db *test_db = NULL;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid_pcurrnull_neg(CuTest *tc) {
+void test_cil_gen_sidcontext_pcurrnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
@@ -1041,12 +1041,12 @@ void test_cil_gen_sid_pcurrnull_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, NULL, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, NULL, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid_astnodenull_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+void test_cil_gen_sidcontext_astnodenull_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1060,12 +1060,13 @@ void test_cil_gen_sid_astnodenull_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, NULL);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_sid_insertnode_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+/* Should this fail ? */
+void test_cil_gen_sidcontext_insertnode_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1079,8 +1080,8 @@ void test_cil_gen_sid_insertnode_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-	int rc = cil_gen_sid(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
 }
 
@@ -6942,8 +6943,8 @@ void test_cil_build_ast_node_helper_common_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_build_ast_node_helper_sid(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+void test_cil_build_ast_node_helper_sidcontext(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6967,8 +6968,8 @@ void test_cil_build_ast_node_helper_sid(CuTest *tc) {
 	CuAssertIntEquals(tc, 1, finished);
 }
 
-void test_cil_build_ast_node_helper_sid_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "(", "blah", "blah", ")", ")", NULL};
+void test_cil_build_ast_node_helper_sidcontext_neg(CuTest *tc) {
+	char *line[] = {"(", "sidcontext", "(", "blah", "blah", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

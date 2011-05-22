@@ -289,11 +289,12 @@ void cil_destroy_classcommon(struct cil_classcommon *clscom)
 
 int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	if (db == NULL || parse_current == NULL || ast_node == NULL)
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
 		return SEPOL_ERR;
+	}
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL
-	|| parse_current->next->next->next != NULL) {
+	if (parse_current->next == NULL  || parse_current->next->cl_head != NULL
+	|| parse_current->next->next != NULL) {
 		printf("Invalid sid declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -309,25 +310,9 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)sid, (hashtab_key_t)key, CIL_SYM_SIDS, CIL_SID);
 	if (rc != SEPOL_OK) 
 		goto gen_sid_cleanup;
-	
-	if (parse_current->next->next->cl_head == NULL) 
-		sid->context_str = cil_strdup(parse_current->next->next->data);
-	else {
-		rc = cil_context_init(&sid->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init context\n");	
-			goto gen_sid_cleanup;
-		}
-
-		rc = cil_fill_context(parse_current->next->next->cl_head, sid->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to fill sid context\n");
-			goto gen_sid_cleanup;
-		}
-	}
 
 	return SEPOL_OK;
-	
+
 	gen_sid_cleanup:
 		cil_destroy_sid(sid);
 		return rc;
@@ -336,11 +321,65 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 void cil_destroy_sid(struct cil_sid *sid)
 {
 	cil_symtab_datum_destroy(sid->datum);
-	if (sid->context_str != NULL)
-		free(sid->context_str);
-	else if (sid->context != NULL && sid->context->datum.name == NULL)
-		cil_destroy_context(sid->context);
 	free(sid);
+}
+
+int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_sidcontext *sidcon;
+	int rc = cil_sidcontext_init(&sidcon);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL
+	|| parse_current->next->next->next != NULL) {
+		printf("Invalid sidcontext declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	sidcon->sid_str = cil_strdup(parse_current->next->data);
+
+	if (parse_current->next->next->cl_head == NULL) 
+		sidcon->context_str = cil_strdup(parse_current->next->next->data);
+	else {
+		rc = cil_context_init(&sidcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init context\n");	
+			goto gen_sidcontext_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->cl_head, sidcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill sid context\n");
+			goto gen_sidcontext_cleanup;
+		}
+	}
+
+	ast_node->data = sidcon;
+	ast_node->flavor = CIL_SIDCONTEXT;
+
+	return SEPOL_OK;
+
+	gen_sidcontext_cleanup:
+		cil_destroy_sidcontext(sidcon);
+		return rc;
+	
+}
+
+void cil_destroy_sidcontext(struct cil_sidcontext *sidcon)
+{
+	if (sidcon->sid_str != NULL)
+		free(sidcon->sid_str);
+	if (sidcon->context_str != NULL)
+		free(sidcon->context_str);
+	else if (sidcon->context != NULL && sidcon->context->datum.name == NULL)
+		cil_destroy_context(sidcon->context);
+	free(sidcon);
 }
 
 int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -2212,6 +2251,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_sid(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_sid failed, rc: %d\n", rc);
+					return rc;
+				}
+				*finished = CIL_TREE_SKIP_NEXT;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_SIDCONTEXT)) {
+				rc = cil_gen_sidcontext(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_sidcontext failed, rc: %d\n", rc);
 					return rc;
 				}
 				*finished = CIL_TREE_SKIP_NEXT;

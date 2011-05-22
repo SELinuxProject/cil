@@ -54,20 +54,21 @@
 #define CIL_SENSCAT		39
 #define CIL_CLASSCOMMON		40
 #define CIL_CONSTRAIN_NODE	41
-#define CIL_CALL		42
-#define CIL_ARGS		43
-#define CIL_BOOLEANIF		44
-#define CIL_TUNABLEIF		45
-#define CIL_TUNABLEIFDEF	46
-#define CIL_TUNABLEIFNDEF	47
-#define CIL_AND			48
-#define CIL_OR			49
-#define CIL_XOR			50
-#define CIL_NOT			51
-#define CIL_EQ			52
-#define CIL_NEQ			53
-#define CIL_ELSE		54
-#define CIL_COND		55
+#define CIL_SIDCONTEXT		42
+#define CIL_CALL		43
+#define CIL_ARGS		44
+#define CIL_BOOLEANIF		45
+#define CIL_TUNABLEIF		46
+#define CIL_TUNABLEIFDEF	47
+#define CIL_TUNABLEIFNDEF	48
+#define CIL_AND			49
+#define CIL_OR			50
+#define CIL_XOR			51
+#define CIL_NOT			52
+#define CIL_EQ			53
+#define CIL_NEQ			54
+#define CIL_ELSE		55
+#define CIL_COND		56
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -99,6 +100,7 @@
 #define CIL_KEY_COMMON		"common"
 #define CIL_KEY_CLASSCOMMON	"classcommon"
 #define CIL_KEY_SID		"sid"
+#define CIL_KEY_SIDCONTEXT	"sidcontext"
 #define CIL_KEY_USER		"user"
 #define CIL_KEY_ROLE 		"role"
 #define CIL_KEY_USERROLE	"userrole"
@@ -234,6 +236,12 @@ struct cil_classcommon {
 
 struct cil_sid {
 	struct cil_symtab_datum datum;
+};
+
+struct cil_sidcontext {
+	struct cil_symtab_datum datum;
+	char *sid_str;
+	struct cil_sid *sid;
 	char *context_str;
 	struct cil_context *context;
 };
@@ -549,6 +557,7 @@ int cil_class_init(struct cil_class **class);
 int cil_common_init(struct cil_common **common);
 int cil_classcommon_init(struct cil_classcommon **classcommon);
 int cil_sid_init(struct cil_sid **sid);
+int cil_sidcontext_init(struct cil_sidcontext **sidcontext);
 int cil_userrole_init(struct cil_userrole **userrole);
 int cil_roledominance_init(struct cil_roledominance **roledominance);
 int cil_roletype_init(struct cil_roletype **roletype);
