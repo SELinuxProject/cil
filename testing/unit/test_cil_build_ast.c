@@ -1452,9 +1452,9 @@ void test_cil_gen_expr_stack_and(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1475,9 +1475,9 @@ void test_cil_gen_expr_stack_or(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1498,9 +1498,9 @@ void test_cil_gen_expr_stack_xor(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1521,9 +1521,9 @@ void test_cil_gen_expr_stack_not(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1544,9 +1544,9 @@ void test_cil_gen_expr_stack_not_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1567,9 +1567,9 @@ void test_cil_gen_expr_stack_eq(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1590,14 +1590,14 @@ void test_cil_gen_expr_stack_neq(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_expr_stack_nested(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "||", "(","!=", "foo", "bar", ")", "(", "==", "baz", "boo", ")",
+	char *line[] = {"(", "booleanif", "(", "||", "(","!=", "foo", "bar", ")", "(", "==", "baz", "boo", ")", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1613,14 +1613,14 @@ void test_cil_gen_expr_stack_nested(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_expr_stack_nested_neg(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "(","!=", "foo", "bar", ")", ")",
+	char *line[] = {"(", "booleanif", "(", "(","!=", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1636,9 +1636,9 @@ void test_cil_gen_expr_stack_nested_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1659,9 +1659,9 @@ void test_cil_gen_expr_stack_arg1null_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1682,9 +1682,9 @@ void test_cil_gen_expr_stack_arg2null_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1705,9 +1705,9 @@ void test_cil_gen_expr_stack_extraarg_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1727,9 +1727,9 @@ void test_cil_gen_expr_stack_currnull_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	struct cil_booleanif *bif;
-	cil_booleanif_init(&bif);
+	cil_boolif_init(&bif);
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, &bif->expr_stack);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -1749,7 +1749,7 @@ void test_cil_gen_expr_stack_stacknull_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, NULL);
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
