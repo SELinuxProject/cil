@@ -818,6 +818,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 	
 				return;
 			}
+			case CIL_POLICYCAP : {
+				struct cil_policycap *polcap = node->data;
+				printf("POLICYCAP: %s\n", polcap->datum.name);
+				return;
+			}
 			case CIL_MACRO : {
 				struct cil_macro *macro = node->data;
 				printf("MACRO %s:", macro->datum.name);
