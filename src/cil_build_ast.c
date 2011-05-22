@@ -1619,6 +1619,15 @@ int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_t
 	return SEPOL_OK;
 }
 
+void cil_destroy_constrain_node(struct cil_tree_node *cons_node)
+{
+	if (cons_node->data != NULL)
+		free(cons_node->data);
+	cons_node->data = NULL;
+	cons_node->parent = NULL;
+	free(cons_node);
+}
+
 int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)

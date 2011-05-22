@@ -203,6 +203,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_constrain(*data);
 			break;
 		}
+		case (CIL_CONSTRAIN_NODE) : {
+			cil_destroy_constrain_node(*data);
+			break;
+		}
 		case (CIL_ROLETYPE) : {
 			cil_destroy_roletype(*data);
 			break;

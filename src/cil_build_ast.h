@@ -80,6 +80,7 @@ int cil_gen_level(struct cil_db *, struct cil_tree_node *, struct cil_tree_node 
 void cil_destroy_level(struct cil_level *);
 int cil_gen_constrain(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t);
 void cil_destroy_constrain(struct cil_constrain *);
+void cil_destroy_constrain_node(struct cil_tree_node *);
 int cil_gen_context(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_fill_context(struct cil_tree_node *, struct cil_context *);
 void cil_destroy_context(struct cil_context *);
