@@ -147,6 +147,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_conditional(*data);
 			break;
 		}
+		case (CIL_TUNABLEIF) : {
+			cil_destroy_tunif(*data);
+			break;
+		}
 		case (CIL_TYPEALIAS) : {
 			cil_destroy_typealias(*data);
 			break;
@@ -346,6 +350,8 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
 		else if (ast_node->parent->flavor == CIL_COMMON)
 			*symtab = &((struct cil_common*)ast_node->parent->data)->perms;
+		else if (ast_node->parent->flavor == CIL_TUNABLEIF)
+			*symtab = &((struct cil_tunableif*)ast_node->parent->data)->symtab[cil_sym_index];
 		else if ((ast_node->parent->flavor == CIL_BOOLEANIF || ast_node->parent->flavor == CIL_ELSE) && cil_sym_index < CIL_SYM_NUM) {
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
@@ -701,6 +707,54 @@ int cil_bool_init(struct cil_bool **cilbool)
 
 	*cilbool = new_cilbool;
 	
+	return SEPOL_OK;
+}
+
+int cil_boolif_init(struct cil_booleanif **bif)
+{
+	if (bif == NULL)
+		return SEPOL_ERR;
+
+	struct cil_booleanif *new_bif = cil_malloc(sizeof(struct cil_booleanif));
+
+	new_bif->expr_stack = NULL;
+
+	*bif = new_bif;
+
+	return SEPOL_OK;
+}
+
+int cil_conditional_init(struct cil_conditional **cond)
+{
+	if (cond == NULL)
+		return SEPOL_ERR;
+
+	struct cil_conditional *new_cond = cil_malloc(sizeof(struct cil_conditional));
+
+	new_cond->str = NULL;
+	new_cond->boolean = NULL;
+	new_cond->flavor = CIL_AST_NODE;
+
+	*cond = new_cond;
+
+	return SEPOL_OK;
+}
+
+int cil_tunif_init(struct cil_tunableif **tif)
+{
+	if (tif == NULL)
+		return SEPOL_ERR;
+
+	int rc = SEPOL_ERR;
+	struct cil_tunableif *new_tif = cil_malloc(sizeof(struct cil_tunableif));
+
+	new_tif->expr_stack = NULL;
+	rc = cil_symtab_array_init(new_tif->symtab, CIL_SYM_NUM);
+	if (rc != SEPOL_OK)
+		return SEPOL_ERR;
+
+	*tif = new_tif;
+
 	return SEPOL_OK;
 }
 
@@ -1078,38 +1132,6 @@ int cil_optional_init(struct cil_optional **optional)
 	new_optional->state = CIL_OPT_ENABLED;
 
 	*optional = new_optional;
-
-	return SEPOL_OK;
-}
-
-int cil_conditional_init(struct cil_conditional **conditional)
-{
-	if (conditional == NULL) {
-		return SEPOL_ERR;
-	}
-
-	struct cil_conditional *new_conditional = cil_malloc(sizeof(struct cil_conditional));
-	
-	new_conditional->str = NULL;
-	new_conditional->boolean = NULL;
-	new_conditional->flavor = 0;
-
-	*conditional = new_conditional;
-
-	return SEPOL_OK;
-}
-
-int cil_booleanif_init(struct cil_booleanif **booleanif)
-{
-	if (booleanif == NULL) {
-		return SEPOL_ERR;
-	}
-
-	struct cil_booleanif *new_booleanif = cil_malloc(sizeof(struct cil_booleanif));
-
-	new_booleanif->expr_stack = NULL;
-
-	*booleanif = new_booleanif;
 
 	return SEPOL_OK;
 }

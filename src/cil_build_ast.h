@@ -46,10 +46,12 @@ int cil_gen_roledominance(struct cil_db *, struct cil_tree_node *, struct cil_tr
 void cil_destroy_roledominance(struct cil_roledominance *);
 int cil_gen_bool(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *, uint32_t flavor);
 void cil_destroy_bool(struct cil_bool *);
-int cil_gen_expr_stack(struct cil_tree_node *current, struct cil_tree_node **stack);
+int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct cil_tree_node **stack);
 int cil_gen_boolif(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_boolif(struct cil_booleanif *);
 int cil_gen_else(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+int cil_gen_tunif(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_tunif(struct cil_tunableif *);
 void cil_destroy_conditional(struct cil_conditional *);
 int cil_gen_typealias(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_typealias(struct cil_typealias *);

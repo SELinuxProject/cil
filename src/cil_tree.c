@@ -473,6 +473,24 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(")\n");
 				return;
 			}
+			case CIL_TUNABLEIF : {
+				printf("TUNABLEIF: expression stack: ( ");
+				struct cil_tunableif *tif = node->data;
+				struct cil_tree_node *current = tif->expr_stack;
+				if (current->flavor != CIL_INT) {
+					while (current != NULL && current->data != NULL) {
+						if (((struct cil_conditional*)current->data)->str != NULL)
+							printf("%s ", ((struct cil_conditional*)current->data)->str);
+						else if (((struct cil_conditional*)current->data)->boolean != NULL)
+							printf("(tunable %s, value: %d) ", ((struct cil_conditional*)current->data)->boolean->datum.name, ((struct cil_conditional*)current->data)->boolean->value);
+						current = current->cl_head;
+					}
+				}
+				else
+					printf("%d", *(uint16_t*)current->data);
+				printf(")\n");
+				return;
+			}
 			case CIL_ELSE : {
 				printf("else\n"); 
 				return;

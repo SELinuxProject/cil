@@ -1607,18 +1607,23 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, uint32_t flavo
 	return SEPOL_ERR;
 }
 
-int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *bif, struct cil_call *call)
+int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *bif, struct cil_call *call, uint32_t flavor)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *curr_expr = current;
 	struct cil_tree_node *bool_node = NULL;
+	int sym_index = 0;
+	if (flavor == CIL_BOOL)
+		sym_index = CIL_SYM_BOOLS;
+	if (flavor == CIL_TUNABLE)
+		sym_index = CIL_SYM_TUNABLES;
 
 	while (curr_expr != NULL) {
-		if (((struct cil_conditional*)curr_expr->data)->flavor == CIL_BOOL) {
+		if (((struct cil_conditional*)curr_expr->data)->flavor == flavor) {
 			printf("resolving: %s\n", ((struct cil_conditional*)curr_expr->data)->str);
-			rc = cil_resolve_name(db, bif, ((struct cil_conditional*)curr_expr->data)->str, CIL_SYM_BOOLS, CIL_BOOL, call, &bool_node);
+			rc = cil_resolve_name(db, bif, ((struct cil_conditional*)curr_expr->data)->str, sym_index, flavor, call, &bool_node);
 			if (rc != SEPOL_OK) {
-				printf("Name resolution failed for bool %s\n", ((struct cil_conditional*)curr_expr->data)->str);
+				printf("Name resolution failed for %s\n", ((struct cil_conditional*)curr_expr->data)->str);
 				return rc;
 			}
 			free(((struct cil_conditional*)curr_expr->data)->str);
@@ -1636,9 +1641,120 @@ int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct 
 	int rc = SEPOL_ERR;
 	struct cil_booleanif *bif = (struct cil_booleanif*)current->data;
 	
-	rc = cil_resolve_expr_stack(db, bif->expr_stack, current, call);
+	rc = cil_resolve_expr_stack(db, bif->expr_stack, current, call, CIL_BOOL);
 	if (rc != SEPOL_OK)
 		return rc;
+	return SEPOL_OK;
+}
+
+int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result)
+{
+	struct cil_conditional *cond = NULL;
+	struct cil_tree_node *new = NULL;
+	struct cil_tree_node *oper1 = NULL;
+	struct cil_tree_node *oper2 = NULL;
+	uint16_t value1 = CIL_FALSE;
+	uint16_t value2 = CIL_FALSE;
+	uint16_t new_value = CIL_FALSE;
+
+	while (stack != NULL) {
+		cond = (struct cil_conditional*)stack->data;
+		if ((cond->flavor == CIL_AND) || (cond->flavor == CIL_OR) || (cond->flavor == CIL_XOR) || (cond->flavor == CIL_NOT) || (cond->flavor == CIL_EQ) || (cond->flavor == CIL_NEQ)) {
+
+			cil_tree_node_init(&new);
+
+			oper1 = stack->parent;
+			if (cond->flavor != CIL_NOT)
+				oper2 = stack->parent->parent;
+
+			if (oper1->flavor == CIL_COND && ((struct cil_conditional*)oper1->data)->flavor == CIL_TUNABLE)
+				value1 = ((struct cil_conditional*)oper1->data)->boolean->value;
+			else
+				value1 = *(uint16_t*)oper1->data;
+
+			if (cond->flavor != CIL_NOT) {
+				if (oper2->flavor == CIL_COND && ((struct cil_conditional*)oper2->data)->flavor == CIL_TUNABLE)
+					value2 = ((struct cil_conditional*)oper2->data)->boolean->value;
+				else
+					value2 = *(uint16_t*)oper2->data;
+			}
+
+			if (cond->flavor == CIL_NOT)
+					new_value = !value1;
+			else if (cond->flavor == CIL_AND)
+				new_value = (value1 && value2);
+			else if (cond->flavor == CIL_OR)
+				new_value = (value1 || value2);
+			else if (cond->flavor == CIL_XOR)
+				new_value = (value1 ^ value2);
+			else if (cond->flavor == CIL_EQ) 
+				new_value = (value1 == value2);
+			else if (cond->flavor == CIL_NEQ) 
+				new_value = (value1 != value2);
+
+			new->data = &new_value;
+
+			new->flavor = CIL_INT;
+			new->cl_head = stack->cl_head;
+			if (cond->flavor != CIL_NOT)
+				new->parent = stack->parent->parent->parent;
+			else
+				new->parent = stack->parent->parent;
+			if (cond->flavor != CIL_NOT) {
+				if (stack->parent->parent->parent != NULL)
+					stack->parent->parent->parent->cl_head = new;
+			}
+			else {
+				if (stack->parent->parent != NULL)
+					stack->parent->parent->cl_head = new;
+			}
+			if (stack->cl_head != NULL)
+				stack->cl_head->parent = new;
+			if (stack->parent->parent != NULL)
+				cil_tree_node_destroy(&stack->parent->parent);
+			cil_tree_node_destroy(&stack->parent);
+			cil_tree_node_destroy(&stack);
+
+			if (new->cl_head == NULL) {
+				if (new->parent == NULL)
+					*result = *(uint16_t*)new->data;
+				else
+					return SEPOL_ERR;
+			}
+
+			stack = new;
+		}
+		stack = stack->cl_head;
+	}
+
+	printf("result: %d\n", *result);
+
+	return SEPOL_OK;
+}
+
+int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	int rc = SEPOL_ERR;
+	struct cil_tunableif *tif = (struct cil_tunableif*)current->data;
+	uint16_t result = CIL_FALSE;
+
+	rc = cil_resolve_expr_stack(db, tif->expr_stack, current, call, CIL_TUNABLE);
+	if (rc != SEPOL_OK)
+		return rc;
+	rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	if (rc != SEPOL_OK) {
+		printf("Failed to evaluate expr stack\n");
+		return rc;
+	}
+
+	if (result) {
+		rc = cil_copy_ast(db, current, current->parent);
+		if (rc != SEPOL_OK)
+			return rc;
+	}
+	cil_tree_subtree_destroy(current->cl_head);
+	current->cl_head = NULL;
+
 	return SEPOL_OK;
 }
 
@@ -1844,9 +1960,10 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 				break;
 			}
 			case 3 : {
-				if (node->flavor == CIL_BOOLEANIF) {
+				if (node->flavor == CIL_BOOLEANIF)
 					rc = cil_resolve_boolif(db, node, call);
-				}
+				if (node->flavor == CIL_TUNABLEIF) 
+					rc = cil_resolve_tunif(db, node, call);
 				break;
 			}
 			default :

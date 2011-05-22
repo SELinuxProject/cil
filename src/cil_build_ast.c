@@ -807,9 +807,9 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	char *key = parse_current->next->data;
 
 	if (!strcmp(parse_current->next->next->data, "true"))
-		boolean->value = 1;
+		boolean->value = CIL_TRUE;
 	else if (!strcmp(parse_current->next->next->data, "false"))
-		boolean->value = 0;
+		boolean->value = CIL_FALSE;
 	else {
 		printf("Error: value must be \'true\' or \'false\'");
 		rc = SEPOL_ERR;	
@@ -836,7 +836,7 @@ void cil_destroy_bool(struct cil_bool *boolean)
 	free(boolean);
 }
 
-int cil_gen_expr_stack(struct cil_tree_node *current, struct cil_tree_node **stack)
+int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct cil_tree_node **stack)
 {
 	if (current == NULL || stack == NULL) 
 		return SEPOL_ERR;
@@ -848,9 +848,8 @@ int cil_gen_expr_stack(struct cil_tree_node *current, struct cil_tree_node **sta
 		cil_tree_node_init(&new);
 		struct cil_conditional *cond;
 		rc = cil_conditional_init(&cond);
-		if (rc != SEPOL_OK) {
+		if (rc != SEPOL_OK)
 			return rc;
-		}
 
 		if (current == current->parent->cl_head) {	
 			if (!strcmp((char*)current->data, CIL_KEY_AND))
@@ -876,7 +875,7 @@ int cil_gen_expr_stack(struct cil_tree_node *current, struct cil_tree_node **sta
 				return SEPOL_ERR;
 		}
 		else {
-			cond->flavor = CIL_BOOL;
+			cond->flavor = flavor;
 		}
 		
 		cond->str = cil_strdup(current->data);
@@ -892,12 +891,12 @@ int cil_gen_expr_stack(struct cil_tree_node *current, struct cil_tree_node **sta
 	}
 
 	if (current->cl_head != NULL) {
-		rc = cil_gen_expr_stack(current->cl_head, stack);
+		rc = cil_gen_expr_stack(current->cl_head, flavor, stack);
 		if (rc != SEPOL_OK) 
 			return SEPOL_ERR;
 	}
 	if (current->next != NULL) {
-		rc = cil_gen_expr_stack(current->next, stack);
+		rc = cil_gen_expr_stack(current->next, flavor, stack);
 		if (rc != SEPOL_OK)
 			return SEPOL_ERR;
 	}
@@ -915,18 +914,22 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		return SEPOL_ERR;
 	}
 
+	int rc = SEPOL_ERR;
 	struct cil_booleanif *bif;
-	int rc = cil_booleanif_init(&bif);
-	if (rc != SEPOL_OK) {
+	rc = cil_boolif_init(&bif);
+	if (rc != SEPOL_OK)
 		return rc;
-	}
-
+	
 	if (parse_current->next->cl_head == NULL) {
-		bif->expr_stack->flavor = CIL_BOOL;
-		bif->expr_stack->data = cil_strdup(parse_current->next->data);
+		struct cil_conditional *cond;
+		cil_conditional_init(&cond);
+		bif->expr_stack->flavor = CIL_COND;
+		cond->str = cil_strdup(parse_current->next->data);
+		cond->flavor = CIL_BOOL;
+		bif->expr_stack->data = cond;
 	}
 	else {
-		rc = cil_gen_expr_stack(parse_current->next->cl_head, &bif->expr_stack);
+		rc = cil_gen_expr_stack(parse_current->next->cl_head, CIL_BOOL, &bif->expr_stack);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_boolif: failed to create expr tree, rc: %d\n", rc);
 			return rc;
@@ -950,7 +953,7 @@ void cil_destroy_boolif(struct cil_booleanif *bif)
 	if (bif->expr_stack != NULL) {
 		curr = bif->expr_stack;
 		while (curr != NULL) {
-			if (curr->flavor == CIL_COND) {
+			if (curr->flavor == CIL_COND && curr->data != NULL) {
 				if (((struct cil_conditional*)curr->data)->str != NULL) {
 					free(((struct cil_conditional*)curr->data)->str);
 					((struct cil_conditional*)curr->data)->str = NULL;
@@ -985,6 +988,73 @@ int cil_gen_else(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	ast_node->flavor = CIL_ELSE;
 	ast_node->data = "else";
 	return SEPOL_OK;
+}
+
+int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+		printf("Invalid tunableif declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	int rc = SEPOL_ERR;
+	struct cil_tunableif *tif;
+	rc = cil_tunif_init(&tif);
+	if (rc != SEPOL_OK)
+		return rc;
+
+	if (parse_current->next->cl_head == NULL) {
+		struct cil_conditional *cond;
+		cil_conditional_init(&cond);
+		tif->expr_stack->flavor = CIL_COND;
+		cond->str = cil_strdup(parse_current->next->data);
+		cond->flavor = CIL_TUNABLE;
+		tif->expr_stack->data = cond;
+	}
+	else {
+		rc = cil_gen_expr_stack(parse_current->next->cl_head, CIL_TUNABLE, &tif->expr_stack);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_tunif: failed to create expr tree, rc: %d\n", rc);
+			return rc;
+		}
+	}
+
+	struct cil_tree_node *next = parse_current->next->next;
+	cil_tree_subtree_destroy(parse_current->next);
+	parse_current->next = next;
+
+	ast_node->flavor = CIL_TUNABLEIF;
+	ast_node->data = tif;
+	
+	return SEPOL_OK;
+}
+
+void cil_destroy_tunif(struct cil_tunableif *tif) 
+{
+	struct cil_tree_node *curr = NULL;
+	struct cil_tree_node *next = NULL;
+	if (tif->expr_stack != NULL) {
+		curr = tif->expr_stack;
+		while (curr != NULL) {
+			if (curr->flavor == CIL_COND && curr->data != NULL) {
+				if (((struct cil_conditional*)curr->data)->str != NULL) {
+					free(((struct cil_conditional*)curr->data)->str);
+					((struct cil_conditional*)curr->data)->str = NULL;
+				}
+			}
+			next = curr->next;
+			free(curr->data);
+			free(curr);
+			curr = next;
+		}
+	}
+
+	cil_symtab_array_destroy(tif->symtab);
+
+	free(tif);
 }
 
 int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -2377,14 +2447,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 			}
-/*			else if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
+			else if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
 				rc = cil_gen_tunif(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_tunif failed, rc: %d\n", rc);
 					return rc;
 				}
 			}
-*/			else if (!strcmp(parse_current->data, CIL_KEY_ELSE)) {
+			else if (!strcmp(parse_current->data, CIL_KEY_ELSE)) {
 				rc = cil_gen_else(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_else failed, rc: %d\n", rc);

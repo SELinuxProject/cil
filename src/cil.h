@@ -527,7 +527,15 @@ struct cil_call {
 	struct cil_list *args;
 };
 
+#define CIL_TRUE	1
+#define CIL_FALSE	0
+
 struct cil_booleanif {
+	struct cil_tree_node *expr_stack;
+};
+
+struct cil_tunableif {
+	symtab_t symtab[CIL_SYM_NUM];
 	struct cil_tree_node *expr_stack;
 };
 
@@ -565,6 +573,9 @@ int cil_typeattribute_init(struct cil_typeattribute **typeattribute);
 int cil_typealias_init(struct cil_typealias **typealias);
 int cil_typebounds_init(struct cil_typebounds **typebnds);
 int cil_bool_init(struct cil_bool **cilbool);
+int cil_boolif_init(struct cil_booleanif **bif);
+int cil_conditional_init(struct cil_conditional **cond);
+int cil_tunif_init(struct cil_tunableif **tif);
 int cil_avrule_init(struct cil_avrule **avrule);
 int cil_type_rule_init(struct cil_type_rule **type_rule);
 int cil_role_trans_init(struct cil_role_trans **role_trans);
