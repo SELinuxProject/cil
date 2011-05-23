@@ -14,6 +14,8 @@ void test_cil_copy_perm(CuTest *);
 
 void test_cil_copy_class(CuTest *);
 
+void test_cil_copy_common(CuTest *);
+
 void test_cil_copy_type(CuTest *);
 
 void test_cil_copy_avrule(CuTest *);

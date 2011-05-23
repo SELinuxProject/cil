@@ -883,6 +883,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_perm);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_class);
+	
+	SUITE_ADD_TEST(suite, test_cil_copy_common);
 
 	SUITE_ADD_TEST(suite, test_cil_copy_type);
 	
