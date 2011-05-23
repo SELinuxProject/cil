@@ -863,12 +863,21 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_boolif);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_boolif_neg); 
 	
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_and);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_not);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_or);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_xor);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_eq);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neq);
+	//SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper1);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_false);
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_true);
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_resolveexpr_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_evaluateexpr_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif_neg); 
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_type_neg);

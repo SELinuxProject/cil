@@ -2730,6 +2730,211 @@ void test_cil_resolve_boolif_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
 }
 
+void test_cil_evaluate_expr_stack_and(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint16_t result = CIL_FALSE;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
+
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_evaluate_expr_stack_not(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "!", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint16_t result = CIL_FALSE;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
+
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_evaluate_expr_stack_or(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "||", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint16_t result = CIL_FALSE;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
+
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_evaluate_expr_stack_xor(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "^", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint16_t result = CIL_FALSE;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
+
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_evaluate_expr_stack_eq(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "==", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint16_t result = CIL_FALSE;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
+
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_evaluate_expr_stack_neq(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "!=", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint16_t result = CIL_FALSE;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
+
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_evaluate_expr_stack_oper1(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "tunable", "baz", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "&&", "(", "foo", "bar", ")", "baz", ")",
+			"(", "allow", "foo", "bar", "jaz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint16_t result = CIL_FALSE;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->next->data;
+
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next->next, NULL, CIL_TUNABLE);
+	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_evaluate_expr_stack_neg(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "!=", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint16_t result = CIL_FALSE;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *test_node;
+	cil_tree_node_init(&test_node);
+
+	struct cil_conditional *new_cond;
+	cil_conditional_init(&new_cond);
+	new_cond->flavor = CIL_COND;
+	char *baz = "baz";
+	new_cond->str = baz;
+	new_cond->flavor = CIL_TUNABLE;
+
+	test_node->data = new_cond;	
+	test_node->cl_head = ((struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data)->expr_stack;
+	((struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data)->expr_stack->parent = test_node;
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_tunif_false(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",

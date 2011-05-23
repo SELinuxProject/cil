@@ -170,6 +170,15 @@ void test_cil_resolve_expr_stack_neg(CuTest *);
 void test_cil_resolve_boolif(CuTest *);
 void test_cil_resolve_boolif_neg(CuTest *);
 
+void test_cil_evaluate_expr_stack_and(CuTest *);
+void test_cil_evaluate_expr_stack_not(CuTest *);
+void test_cil_evaluate_expr_stack_or(CuTest *);
+void test_cil_evaluate_expr_stack_xor(CuTest *);
+void test_cil_evaluate_expr_stack_eq(CuTest *);
+void test_cil_evaluate_expr_stack_neq(CuTest *);
+void test_cil_evaluate_expr_stack_oper1(CuTest *);
+void test_cil_evaluate_expr_stack_neg(CuTest *);
+
 void test_cil_resolve_tunif_false(CuTest *);
 void test_cil_resolve_tunif_true(CuTest *);
 void test_cil_resolve_tunif_resolveexpr_neg(CuTest *);
