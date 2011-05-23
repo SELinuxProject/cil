@@ -64,22 +64,14 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		printf("Name resolution failed for %s\n", rule->src_str);
 		return rc;
 	}
-	else {
-		rule->src = (struct cil_type*)(src_node->data);
-		free(rule->src_str);
-		rule->src_str = NULL;
-	}
+	rule->src = (struct cil_type*)(src_node->data);
 					
 	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, CIL_TYPE, call, &tgt_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->tgt_str);
 		return rc;
 	}
-	else {
-		rule->tgt = (struct cil_type*)(tgt_node->data);
-		free(rule->tgt_str);
-		rule->tgt_str = NULL;	
-	}
+	rule->tgt = (struct cil_type*)(tgt_node->data);
 
 	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, CIL_CLASS, call, &obj_node);
 	if (rc != SEPOL_OK) {
@@ -88,8 +80,6 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	}
 	else {
 		rule->obj = (struct cil_class*)(obj_node->data);
-		free(rule->obj_str);
-		rule->obj_str = NULL;
 	}
 	struct cil_list *perms_list;
 	cil_list_init(&perms_list);
@@ -99,7 +89,6 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		return rc;
 	}
 	rule->perms_list = perms_list;
-	cil_list_destroy(&rule->perms_str, 1);
 
 	return SEPOL_OK;
 }
@@ -119,44 +108,29 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current, stru
 		printf("Name resolution failed for %s\n", rule->src_str);
 		return rc;
 	}
-	else {
-		rule->src = (struct cil_type*)(src_node->data);
-		free(rule->src_str);
-		rule->src_str = NULL;
-	}
+	rule->src = (struct cil_type*)(src_node->data);
 					
 	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, CIL_TYPE, call, &tgt_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->tgt_str);
 		return rc;
 	}
-	else {
-		rule->tgt = (struct cil_type*)(tgt_node->data);
-		free(rule->tgt_str);
-		rule->tgt_str = NULL;	
-	}
+	rule->tgt = (struct cil_type*)(tgt_node->data);
 
 	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, CIL_CLASS, call, &obj_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->obj_str);
 		return rc;
 	}
-	else {
-		rule->obj = (struct cil_class*)(obj_node->data);
-		free(rule->obj_str);
-		rule->obj_str = NULL;
-	}
+	rule->obj = (struct cil_class*)(obj_node->data);
 
 	rc = cil_resolve_name(db, current, rule->result_str, CIL_SYM_TYPES, CIL_TYPE, call, &result_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->result_str);
 		return rc;
 	}
-	else {
-		rule->result = (struct cil_type*)(result_node->data);
-		free(rule->result_str);
-		rule->result_str = NULL;
-	}
+	rule->result = (struct cil_type*)(result_node->data);
+
 	return SEPOL_OK;
 }
 
@@ -172,8 +146,6 @@ int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current, struc
 		return rc;
 	}
 	typeattr->type = (struct cil_type*)(type_node->data);
-	free(typeattr->type_str);
-	typeattr->type_str = NULL;
 
 	rc = cil_resolve_name(db, current, typeattr->attr_str, CIL_SYM_TYPES, CIL_TYPE, call, &attr_node);
 	if (rc != SEPOL_OK) {
@@ -181,8 +153,6 @@ int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current, struc
 		return rc;
 	}
 	typeattr->attr = (struct cil_type*)(attr_node->data);
-	free(typeattr->attr_str);
-	typeattr->attr_str = NULL;
 
 	return SEPOL_OK;
 }
@@ -197,8 +167,6 @@ int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current, stru
 		return rc;
 	}
 	alias->type = (struct cil_type*)(type_node->data);
-	free(alias->type_str);
-	alias->type_str = NULL;
 
 	return SEPOL_OK;
 }
@@ -215,8 +183,6 @@ int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, str
 		return rc;
 	}
 	typebnds->parent = (struct cil_type*)(parent_node->data);
-	free(typebnds->parent_str);
-	typebnds->parent_str = NULL;
 
 	rc = cil_resolve_name(db, current, typebnds->child_str, CIL_SYM_TYPES, CIL_TYPE, call, &child_node);
 	if (rc != SEPOL_OK) {
@@ -224,8 +190,6 @@ int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, str
 		return rc;
 	}
 	typebnds->child = (struct cil_type*)(child_node->data);
-	free(typebnds->child_str);
-	typebnds->child_str = NULL;
 
 	return SEPOL_OK;
 }
@@ -242,8 +206,6 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 		return rc;
 	}
 	clscom->class = (struct cil_class*)(class_node->data);
-	free(clscom->class_str);
-	clscom->class_str = NULL;
 
 	rc = cil_resolve_name(db, current, clscom->common_str, CIL_SYM_COMMONS, CIL_COMMON, call, &common_node);
 	if (rc != SEPOL_OK) {
@@ -251,8 +213,6 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 		return rc;
 	}
 	clscom->common = (struct cil_common*)(common_node->data);
-	free(clscom->common_str);
-	clscom->common_str = NULL;
 
 	clscom->class->common = clscom->common;
 
@@ -271,8 +231,6 @@ int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struc
 		return rc;
 	} 
 	userrole->user = (struct cil_user*)(user_node->data);
-	free(userrole->user_str);
-	userrole->user_str = NULL;
 
 	rc = cil_resolve_name(db, current, userrole->role_str, CIL_SYM_ROLES, CIL_ROLE, call, &role_node);
 	if (rc != SEPOL_OK) {
@@ -280,8 +238,6 @@ int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struc
 		return rc;
 	} 
 	userrole->role = (struct cil_role*)(role_node->data);
-	free(userrole->role_str);
-	userrole->role_str = NULL;
 
 	return SEPOL_OK;	
 }
@@ -298,8 +254,6 @@ int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struc
 		return rc;
 	}
 	roletype->role = (struct cil_role*)(role_node->data);
-	free(roletype->role_str);
-	roletype->role_str = NULL;
 	
 	rc = cil_resolve_name(db, current, roletype->type_str, CIL_SYM_TYPES, CIL_TYPE, call, &type_node);
 	if (rc != SEPOL_OK) {
@@ -307,8 +261,6 @@ int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struc
 		return rc;
 	}
 	roletype->type = (struct cil_type*)(type_node->data);
-	free(roletype->type_str);
-	roletype->type_str = NULL;
 
 	return SEPOL_OK;
 }
@@ -326,33 +278,21 @@ int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, stru
 		printf("Name resolution failed for %s\n", roletrans->src_str);
 		return rc;
 	}
-	else {
-		roletrans->src = (struct cil_role*)(src_node->data);
-		free(roletrans->src_str);
-		roletrans->src_str = NULL;
-	}
+	roletrans->src = (struct cil_role*)(src_node->data);
 					
 	rc = cil_resolve_name(db, current, roletrans->tgt_str, CIL_SYM_TYPES, CIL_TYPE, call, &tgt_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roletrans->tgt_str);
 		return rc;
 	}
-	else {
-		roletrans->tgt = (struct cil_type*)(tgt_node->data);
-		free(roletrans->tgt_str);
-		roletrans->tgt_str = NULL;	
-	}
+	roletrans->tgt = (struct cil_type*)(tgt_node->data);
 
 	rc = cil_resolve_name(db, current, roletrans->result_str, CIL_SYM_ROLES, CIL_ROLE, call, &result_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roletrans->result_str);
 		return rc;
 	}
-	else {
-		roletrans->result = (struct cil_role*)(result_node->data);
-		free(roletrans->result_str);
-		roletrans->result_str = NULL;
-	}
+	roletrans->result = (struct cil_role*)(result_node->data);
 
 	return SEPOL_OK;	
 }
@@ -369,22 +309,14 @@ int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current, stru
 		printf("Name resolution failed for %s\n", roleallow->src_str);
 		return rc;
 	}
-	else {
-		roleallow->src = (struct cil_role*)(src_node->data);
-		free(roleallow->src_str);
-		roleallow->src_str = NULL;
-	}
+	roleallow->src = (struct cil_role*)(src_node->data);
 
 	rc = cil_resolve_name(db, current, roleallow->tgt_str, CIL_SYM_ROLES, CIL_ROLE, call, &tgt_node);	
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roleallow->tgt_str);
 		return rc;
 	}
-	else {
-		roleallow->tgt = (struct cil_role*)(tgt_node->data);
-		free(roleallow->tgt_str);
-		roleallow->tgt_str = NULL;
-	}
+	roleallow->tgt = (struct cil_role*)(tgt_node->data);
 
 	return SEPOL_OK;	
 }
@@ -401,22 +333,14 @@ int cil_resolve_roledominance(struct cil_db *db, struct cil_tree_node *current, 
 		printf("Name resolution failed for %s\n", roledom->role_str);
 		return rc;
 	}
-	else {
-		roledom->role = (struct cil_role*)(role_node->data);
-		free(roledom->role_str);
-		roledom->role_str = NULL;
-	}
+	roledom->role = (struct cil_role*)(role_node->data);
 
 	rc = cil_resolve_name(db, current, roledom->domed_str, CIL_SYM_ROLES, CIL_ROLE, call, &domed_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", roledom->domed_str);
 		return rc;
 	}
-	else {
-		roledom->domed = (struct cil_role*)(domed_node->data);
-		free(roledom->domed_str);
-		roledom->domed_str = NULL;
-	}
+	roledom->domed = (struct cil_role*)(domed_node->data);
 
 	return SEPOL_OK;
 }
@@ -431,8 +355,6 @@ int cil_resolve_sensalias(struct cil_db *db, struct cil_tree_node *current, stru
 		return rc;
 	}
 	alias->sens = (struct cil_sens*)(sens_node->data);
-	free(alias->sens_str);
-	alias->sens_str = NULL;
 
 	return SEPOL_OK;
 }
@@ -447,8 +369,6 @@ int cil_resolve_catalias(struct cil_db *db, struct cil_tree_node *current, struc
 		return rc;
 	}
 	alias->cat = (struct cil_cat*)(cat_node->data);
-	free(alias->cat_str);
-	alias->cat_str = NULL;
 
 	return SEPOL_OK;
 }
@@ -948,9 +868,6 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current, struct 
 	}
 	
 	catset->cat_list = res_cat_list;
-	cil_list_destroy(&catset->cat_list_str, 1);
-	free(catset->cat_list_str);
-	catset->cat_list_str = NULL;
 	
 	return SEPOL_OK;
 }
@@ -1021,12 +938,6 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct
 		curr = curr->next;
 	}
 
-	cil_list_destroy(&senscat->cat_list_str, 1);
-	free(senscat->cat_list_str);
-	free(senscat->sens_str);
-	senscat->cat_list_str = NULL;
-	senscat->sens_str = NULL;
-
 	return SEPOL_OK;
 }
 
@@ -1073,7 +984,6 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 		printf("Failed to get sensitivity node\n");
 		return rc;
 	}
-
 	level->sens = (struct cil_sens*)sens_node->data;
 
 	if (level->catset_str != NULL) {
@@ -1083,8 +993,6 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 			return rc;
 		}
 		level->catset = (struct cil_catset*)catset_node->data;
-		free(level->catset_str);
-		level->catset_str = NULL;
 	}
 	else {
 		cil_list_init(&res_cat_list);
@@ -1101,12 +1009,7 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 		}
 	
 		level->cat_list = res_cat_list;
-		cil_list_destroy(&level->cat_list_str, 1);
-		free(level->cat_list_str);
-		level->cat_list_str = NULL;
 	}
-	free(level->sens_str);
-	level->sens_str = NULL;
 
 	return SEPOL_OK;
 }
@@ -1192,12 +1095,6 @@ int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, stru
 
 	cons->class_list = class_list;
 	cons->perm_list = perm_list;
-	cil_list_destroy(&cons->class_list_str, 1);
-	cil_list_destroy(&cons->perm_list_str, 1);
-	free(cons->class_list_str);
-	free(cons->perm_list_str);
-	cons->class_list_str = NULL;
-	cons->perm_list_str = NULL;
 
 	return SEPOL_OK;
 }
@@ -1219,8 +1116,6 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		goto resolve_context_cleanup;
 	}
 	context->user = (struct cil_user*)user_node->data;
-	free(context->user_str);
-	context->user_str = NULL;
 
 	rc = cil_resolve_name(db, current, context->role_str, CIL_SYM_ROLES, CIL_ROLE, call, &role_node);
 	if (rc != SEPOL_OK) {
@@ -1228,8 +1123,6 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		goto resolve_context_cleanup;
 	}
 	context->role = (struct cil_role*)role_node->data;
-	free(context->role_str);
-	context->role_str = NULL;	
 
 	rc = cil_resolve_name(db, current, context->type_str, CIL_SYM_TYPES, CIL_TYPE, call, &type_node);
 	if (rc != SEPOL_OK) {
@@ -1237,8 +1130,6 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		goto resolve_context_cleanup;
 	}
 	context->type = (struct cil_type*)type_node->data;
-	free(context->type_str);
-	context->type_str = NULL;
 
 	if (context->low_str != NULL) {
 		rc = cil_resolve_name(db, current, context->low_str, CIL_SYM_LEVELS, CIL_LEVEL, call, &low_node);
@@ -1247,8 +1138,6 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 			goto resolve_context_cleanup;
 		}
 		context->low = (struct cil_level*)low_node->data;
-		free(context->low_str);
-		context->low_str = NULL;
 	}
 	else if (context->low != NULL) {
 		rc = cil_resolve_level(db, current, context->low, call);
@@ -1269,8 +1158,6 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 			goto resolve_context_cleanup;
 		}
 		context->high = (struct cil_level*)high_node->data;
-		free(context->high_str);
-		context->high_str = NULL;
 	}
 	else if (context->high != NULL) {
 		rc = cil_resolve_level(db, current, context->high, call);
@@ -1306,8 +1193,6 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 			return rc;
 		}
 		netifcon->if_context = (struct cil_context*)ifcon_node->data;
-		free(netifcon->if_context_str);
-		netifcon->if_context_str = NULL;
 	}
 	else {
 		rc = cil_resolve_context(db, current, netifcon->if_context, call);
@@ -1324,8 +1209,6 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 			return rc;
 		}
 		netifcon->packet_context = (struct cil_context*)packcon_node->data;
-		free(netifcon->packet_context_str);
-		netifcon->packet_context_str = NULL;
 	}
 	else {
 		rc = cil_resolve_context(db, current, netifcon->packet_context, call);
@@ -1352,8 +1235,6 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 		return rc;
 	}
 	sidcon->sid = (struct cil_sid*)sid_node->data;
-	free(sidcon->sid_str);
-	sidcon->sid_str = NULL;
 
 	if (sidcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, sidcon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
@@ -1362,8 +1243,6 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 			return rc;
 		}
 		sidcon->context = (struct cil_context*)context_node->data;
-		free(sidcon->context_str);
-		sidcon->context_str = NULL;
 	}
 	else if (sidcon->context != NULL) {
 		rc = cil_resolve_context(db, current, sidcon->context, call);
@@ -1389,8 +1268,6 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 			return rc;
 		}
 		new_call->macro = (struct cil_macro*)macro_node->data;
-		free(new_call->macro_str);
-		new_call->macro_str = NULL;
 	}
 
 	if (new_call->macro->params != NULL ){
@@ -1501,8 +1378,6 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 			return SEPOL_ERR;
 		}
 	}
-
-	cil_tree_destroy(&new_call->args_tree);
 
 	rc = cil_copy_ast(db, macro_node, current);
 	if (rc != SEPOL_OK) {
@@ -1626,8 +1501,6 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, str
 				printf("Name resolution failed for %s\n", ((struct cil_conditional*)curr_expr->data)->str);
 				return rc;
 			}
-			free(((struct cil_conditional*)curr_expr->data)->str);
-			((struct cil_conditional*)curr_expr->data)->str = NULL;
 			((struct cil_conditional*)curr_expr->data)->boolean = (struct cil_bool*)bool_node->data;
 		}
 
@@ -1644,6 +1517,7 @@ int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct 
 	rc = cil_resolve_expr_stack(db, bif->expr_stack, current, call, CIL_BOOL);
 	if (rc != SEPOL_OK)
 		return rc;
+
 	return SEPOL_OK;
 }
 
