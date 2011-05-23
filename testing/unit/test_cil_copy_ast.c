@@ -374,6 +374,31 @@ void test_cil_copy_type(CuTest *tc) {
 		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_typeattr(CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "bar", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_typeattr(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_typeattribute *test_copy;
+	cil_typeattribute_init(&test_copy);
+
+	cil_copy_typeattr((struct cil_typeattribute *)test_ast_node->data, &test_copy);
+	CuAssertStrEquals(tc, ((struct cil_typeattribute *)test_ast_node->data)->type_str, test_copy->type_str);
+	CuAssertStrEquals(tc, ((struct cil_typeattribute *)test_ast_node->data)->attr_str, test_copy->attr_str);
+}
+
 void test_cil_copy_avrule(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 

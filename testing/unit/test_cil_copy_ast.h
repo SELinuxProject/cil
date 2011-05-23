@@ -26,6 +26,8 @@ void test_cil_copy_userrole(CuTest *);
 
 void test_cil_copy_type(CuTest *);
 
+void test_cil_copy_typeattr(CuTest *);
+
 void test_cil_copy_avrule(CuTest *);
 
 void test_cil_copy_cat(CuTest *);
