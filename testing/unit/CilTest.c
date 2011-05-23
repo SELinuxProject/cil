@@ -863,6 +863,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_boolif);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_boolif_neg); 
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_false);
+	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_true);
+	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_resolveexpr_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_evaluateexpr_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif_neg); 
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_role_neg);

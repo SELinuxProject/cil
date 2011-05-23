@@ -170,6 +170,11 @@ void test_cil_resolve_expr_stack_neg(CuTest *);
 void test_cil_resolve_boolif(CuTest *);
 void test_cil_resolve_boolif_neg(CuTest *);
 
+void test_cil_resolve_tunif_false(CuTest *);
+void test_cil_resolve_tunif_true(CuTest *);
+void test_cil_resolve_tunif_resolveexpr_neg(CuTest *);
+void test_cil_resolve_tunif_evaluateexpr_neg(CuTest *);
+
 void test_cil_resolve_roletype(CuTest *tc);
 void test_cil_resolve_roletype_type_neg(CuTest *tc);
 void test_cil_resolve_roletype_role_neg(CuTest *tc);
@@ -191,6 +196,9 @@ void test_cil_resolve_ast_node_helper_call2_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_boolif(CuTest *);
 void test_cil_resolve_ast_node_helper_boolif_neg(CuTest *);
+
+void test_cil_resolve_ast_node_helper_tunif(CuTest *);
+void test_cil_resolve_ast_node_helper_tunif_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_catorder(CuTest *);
 void test_cil_resolve_ast_node_helper_catorder_neg(CuTest *);
