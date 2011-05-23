@@ -350,7 +350,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roletrans_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_true);
+	SUITE_ADD_TEST(suite, test_cil_gen_bool_tunable_true);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_false);
+	SUITE_ADD_TEST(suite, test_cil_gen_bool_tunable_false);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_none_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_currnull_neg);
@@ -361,6 +363,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_extraname_true_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_bool);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_bool_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_bool_tunable);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_bool_tunable_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_roleallow);
 	SUITE_ADD_TEST(suite, test_cil_gen_roleallow_dbnull_neg);

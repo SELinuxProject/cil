@@ -156,7 +156,9 @@ void test_cil_gen_roletrans_resultnull_neg(CuTest *);
 void test_cil_gen_roletrans_extra_neg(CuTest *);
 
 void test_cil_gen_bool_true(CuTest *);
+void test_cil_gen_bool_tunable_true(CuTest *);
 void test_cil_gen_bool_false(CuTest *);
+void test_cil_gen_bool_tunable_false(CuTest *);
 void test_cil_gen_bool_none_neg(CuTest *);
 void test_cil_gen_bool_dbnull_neg(CuTest *);
 void test_cil_gen_bool_currnull_neg(CuTest *);
@@ -486,6 +488,9 @@ void test_cil_build_ast_node_helper_type_rule_member_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_bool(CuTest *);
 void test_cil_build_ast_node_helper_bool_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_bool_tunable(CuTest *);
+void test_cil_build_ast_node_helper_bool_tunable_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_sensitivity(CuTest *);
 void test_cil_build_ast_node_helper_sensitivity_neg(CuTest *);

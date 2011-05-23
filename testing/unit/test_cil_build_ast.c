@@ -2532,6 +2532,28 @@ void test_cil_gen_bool_true(CuTest *tc) {
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BOOL);
 }
 
+void test_cil_gen_bool_tunable_true(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_bool(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_TUNABLE);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, ((struct cil_bool*)test_ast_node->data)->value, 1);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TUNABLE);
+}
+
 void test_cil_gen_bool_false(CuTest *tc) {
 	char *line[] = {"(", "bool", "bar", "false", ")", NULL};
 
@@ -2552,6 +2574,28 @@ void test_cil_gen_bool_false(CuTest *tc) {
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 	CuAssertIntEquals(tc, ((struct cil_bool*)test_ast_node->data)->value, 0);
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BOOL);
+}
+
+void test_cil_gen_bool_tunable_false(CuTest *tc) {
+	char *line[] = {"(", "tunable", "bar", "false", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_bool(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_TUNABLE);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrNotNull(tc, test_ast_node->data);
+	CuAssertIntEquals(tc, ((struct cil_bool*)test_ast_node->data)->value, 0);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TUNABLE);
 }
 
 void test_cil_gen_bool_none_neg(CuTest *tc) {
@@ -8022,6 +8066,56 @@ void test_cil_build_ast_node_helper_bool(CuTest *tc) {
 
 void test_cil_build_ast_node_helper_bool_neg(CuTest *tc) {
 	char *line[] = {"(", "bool", "foo", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	cil_list_item_init(&other->head->next);
+	other->head->next->data = test_db;
+	other->head->next->flavor = CIL_DB; 
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, other);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_bool_tunable(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	cil_list_item_init(&other->head->next);
+	other->head->next->data = test_db;
+	other->head->next->flavor = CIL_DB; 
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, other);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_bool_tunable_neg(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
