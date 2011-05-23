@@ -42,7 +42,7 @@ int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node
 		return SEPOL_ERR;
 
 	struct cil_symtab_datum *datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
-	if (datum == NULL) 
+	if (datum == NULL || datum->state != CIL_STATE_ENABLED)
 		return SEPOL_ENOENT;
 
 	*node = datum->node;
