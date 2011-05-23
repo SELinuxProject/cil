@@ -8,6 +8,8 @@ void test_cil_copy_list_sublist(CuTest *);
 void test_cil_copy_list_sublist_extra(CuTest *);
 void test_cil_copy_list_orignull_neg(CuTest *);
 
+void test_cil_copy_block(CuTest *);
+
 void test_cil_copy_class(CuTest *);
 
 void test_cil_copy_type(CuTest *);
