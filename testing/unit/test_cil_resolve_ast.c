@@ -2667,7 +2667,7 @@ void test_cil_resolve_expr_stack(CuTest *tc) {
 	
 	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data; 
 
-	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL, CIL_BOOL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -2688,7 +2688,7 @@ void test_cil_resolve_expr_stack_neg(CuTest *tc) {
 	
 	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data; 
 
-	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL, CIL_BOOL);
 	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
 }
 
