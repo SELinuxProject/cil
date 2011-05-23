@@ -20,6 +20,10 @@ void test_cil_copy_classcommon(CuTest *);
 
 void test_cil_copy_user(CuTest *);
 
+void test_cil_copy_role(CuTest *);
+
+void test_cil_copy_userrole(CuTest *);
+
 void test_cil_copy_type(CuTest *);
 
 void test_cil_copy_avrule(CuTest *);

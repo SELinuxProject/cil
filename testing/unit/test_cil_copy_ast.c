@@ -291,6 +291,60 @@ void test_cil_copy_user(CuTest *tc) {
 		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_role(CuTest *tc) {
+	char *line[] = {"(", "role", "role_r", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_role(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_role(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
+		((struct cil_class *)test_ast_node->data)->datum.name);
+}
+
+void test_cil_copy_userrole(CuTest *tc) {
+	char *line[] = {"(", "userrole", "staff_u", "staff_r", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_userrole(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_userrole *test_copy;
+	cil_userrole_init(&test_copy);
+
+	cil_copy_userrole((struct cil_userrole *)test_ast_node->data, &test_copy);
+	CuAssertStrEquals(tc, ((struct cil_userrole *)test_ast_node->data)->user_str, test_copy->user_str);
+	CuAssertStrEquals(tc, ((struct cil_userrole *)test_ast_node->data)->role_str, test_copy->role_str);
+}
+
 void test_cil_copy_type(CuTest *tc) {
 	char *line[] = {"(", "type", "test", ")", NULL};
 
