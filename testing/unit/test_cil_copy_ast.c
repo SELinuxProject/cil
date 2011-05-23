@@ -123,6 +123,53 @@ void test_cil_copy_block(CuTest *tc) {
 		((struct cil_block *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_perm(CuTest *tc) {
+	char *line[] = {"(", "class", "foo", "(", "read", "write", "open", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_class *new_node;
+	cil_class_init(&new_node);
+
+	struct cil_tree_node *new_tree_node;
+	cil_tree_node_init(&new_tree_node);
+	new_tree_node->data = new_node;
+	new_tree_node->flavor = CIL_CLASS;
+
+	test_ast_node->parent = new_tree_node;
+	test_ast_node->line = 1;
+
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
+	int rc = cil_copy_perm(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_perm *)test_copy->data)->datum.name, 
+		((struct cil_perm *)test_ast_node->data)->datum.name);
+	cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head->next, test_ast_node);
+	cil_copy_perm(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_perm *)test_copy->data)->datum.name, 
+		((struct cil_perm *)test_ast_node->data)->datum.name);
+	cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head->next->next, test_ast_node);
+	cil_copy_perm(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_perm *)test_copy->data)->datum.name, 
+		((struct cil_perm *)test_ast_node->data)->datum.name);
+	
+}
+
 void test_cil_copy_class(CuTest *tc) {
 	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
 
