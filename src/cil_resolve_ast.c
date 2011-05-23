@@ -1982,6 +1982,9 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		/* disable an optional if something failed to resolve */
 		struct cil_optional *opt = (struct cil_optional *)optstack->data;
 		opt->datum.state = CIL_STATE_DISABLING;
+		/* let the resolve loop know something was changed */
+		int *changed = other->head->next->next->next->next->data;
+		*changed = 1;
 		rc = SEPOL_OK;
 	}
 
@@ -2157,6 +2160,9 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	cil_list_item_init(&other->head->next->next->next);
 	other->head->next->next->next->data = NULL;
 	other->head->next->next->next->flavor = CIL_AST_NODE;
+	int changed = 0;
+	cil_list_item_init(&other->head->next->next->next->next);
+	other->head->next->next->next->next->data = &changed;
 
 	for (pass = 1; pass <= 5; pass++) {
 
@@ -2182,6 +2188,12 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				printf("Failed to verify dominance\n");
 				return rc;
 			}
+		}
+
+		if (changed) {
+			/* something changed (likely, an optional was disabled). need to redo everything :( */
+			pass = 0;
+			changed = 0;
 		}
 	}
 
