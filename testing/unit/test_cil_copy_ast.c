@@ -399,6 +399,35 @@ void test_cil_copy_typeattr(CuTest *tc) {
 	CuAssertStrEquals(tc, ((struct cil_typeattribute *)test_ast_node->data)->attr_str, test_copy->attr_str);
 }
 
+void test_cil_copy_typealias(CuTest *tc) {
+	char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_typealias(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_typealias(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_typealias *)test_copy->data)->type_str,
+		((struct cil_typealias *)test_ast_node->data)->type_str);
+}
+
 void test_cil_copy_avrule(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 
