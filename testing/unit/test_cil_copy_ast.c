@@ -228,6 +228,40 @@ void test_cil_copy_common(CuTest *tc) {
 		((struct cil_common *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_classcommon(CuTest *tc) {
+	char *line[] = {"(", "classcommon", "file", "(", "read", "write", "open", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        char *test_key = test_tree->root->cl_head->cl_head->next->data;
+        struct cil_class *test_cls;
+	cil_class_init(&test_cls);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_symtab_insert(&test_db->symtab[CIL_SYM_CLASSES], (hashtab_key_t)test_key, (struct cil_symtab_datum*)test_cls, test_ast_node);
+
+        test_ast_node->data = test_cls;
+        test_ast_node->flavor = CIL_CLASS;
+
+        cil_gen_classcommon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_classcommon *test_copy;
+	cil_classcommon_init(&test_copy);
+
+	cil_copy_classcommon((struct cil_classcommon *)test_ast_node->data, &test_copy);
+	CuAssertStrEquals(tc, ((struct cil_classcommon *)test_ast_node->data)->class_str, test_copy->class_str);
+	CuAssertStrEquals(tc, ((struct cil_classcommon *)test_ast_node->data)->common_str, test_copy->common_str);
+}
+
 void test_cil_copy_type(CuTest *tc) {
 	char *line[] = {"(", "type", "test", ")", NULL};
 
