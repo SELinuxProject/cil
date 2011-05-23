@@ -931,6 +931,8 @@ CuSuite* CilTreeGetSuite() {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_typealias);
 	
+	SUITE_ADD_TEST(suite, test_cil_copy_bool);
+	
 	SUITE_ADD_TEST(suite, test_cil_copy_avrule);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_cat);

@@ -30,6 +30,8 @@ void test_cil_copy_typeattr(CuTest *);
 
 void test_cil_copy_typealias(CuTest *);
 
+void test_cil_copy_bool(CuTest *);
+
 void test_cil_copy_avrule(CuTest *);
 
 void test_cil_copy_cat(CuTest *);
