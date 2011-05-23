@@ -33,6 +33,7 @@ int cil_resolve_call2(struct cil_db *, struct cil_tree_node *, struct cil_call *
 int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *bif, struct cil_call *call, uint32_t flavor);
 int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result);
 int cil_resolve_name_call_args(struct cil_call *, char *, uint32_t, struct cil_tree_node **);
 
 int cil_resolve_ast(struct cil_db *, struct cil_tree_node *);
