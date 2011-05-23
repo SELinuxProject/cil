@@ -287,8 +287,8 @@ void test_cil_copy_user(CuTest *tc) {
 
 	int rc = cil_copy_user(test_ast_node, test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
-		((struct cil_class *)test_ast_node->data)->datum.name);
+	CuAssertStrEquals(tc, ((struct cil_user *)test_copy->data)->datum.name, 
+		((struct cil_user *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_role(CuTest *tc) {
@@ -316,8 +316,8 @@ void test_cil_copy_role(CuTest *tc) {
 
 	int rc = cil_copy_role(test_ast_node, test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
-		((struct cil_class *)test_ast_node->data)->datum.name);
+	CuAssertStrEquals(tc, ((struct cil_role *)test_copy->data)->datum.name, 
+		((struct cil_role *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_userrole(CuTest *tc) {
