@@ -1978,16 +1978,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		rc = SEPOL_OK;
 	}
 
-	if (node->flavor == CIL_OPTIONAL) {
-		/* disable this optional if the parent optional was disabled */
-		if (optstack != NULL) {
-			struct cil_optional *opt = (struct cil_optional *)optstack->data;
-			if (opt->state == CIL_OPT_DISABLING) {
-				((struct cil_optional *)node->data)->state = CIL_OPT_DISABLING;
-			}
-		}
-	}
-
 	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL) {
 		/* push this node onto a stack */
 		struct cil_tree_node *new;
