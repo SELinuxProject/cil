@@ -203,9 +203,6 @@ struct cil_block {
 	char *condition;
 };
 
-#define CIL_OPT_ENABLED 0
-#define CIL_OPT_DISABLING 1
-#define CIL_OPT_DISABLED 2
 struct cil_optional {
 	struct cil_symtab_datum datum;
 };
