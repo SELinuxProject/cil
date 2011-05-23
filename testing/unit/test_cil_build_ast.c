@@ -1437,7 +1437,7 @@ void test_cil_gen_typeattr_extra_neg (CuTest *tc) {
 
 void test_cil_gen_expr_stack_and(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1460,7 +1460,7 @@ void test_cil_gen_expr_stack_and(CuTest *tc) {
 
 void test_cil_gen_expr_stack_or(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "||", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1483,7 +1483,7 @@ void test_cil_gen_expr_stack_or(CuTest *tc) {
 
 void test_cil_gen_expr_stack_xor(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "^", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1506,7 +1506,7 @@ void test_cil_gen_expr_stack_xor(CuTest *tc) {
 
 void test_cil_gen_expr_stack_not(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "!", "foo", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1529,7 +1529,7 @@ void test_cil_gen_expr_stack_not(CuTest *tc) {
 
 void test_cil_gen_expr_stack_not_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "!", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1552,7 +1552,7 @@ void test_cil_gen_expr_stack_not_neg(CuTest *tc) {
 
 void test_cil_gen_expr_stack_eq(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "==", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1575,7 +1575,7 @@ void test_cil_gen_expr_stack_eq(CuTest *tc) {
 
 void test_cil_gen_expr_stack_neq(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "!=", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1598,7 +1598,7 @@ void test_cil_gen_expr_stack_neq(CuTest *tc) {
 
 void test_cil_gen_expr_stack_nested(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "||", "(","!=", "foo", "bar", ")", "(", "==", "baz", "boo", ")", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1621,7 +1621,7 @@ void test_cil_gen_expr_stack_nested(CuTest *tc) {
 
 void test_cil_gen_expr_stack_nested_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "(","!=", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1644,7 +1644,7 @@ void test_cil_gen_expr_stack_nested_neg(CuTest *tc) {
 
 void test_cil_gen_expr_stack_arg1null_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "==", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1667,7 +1667,7 @@ void test_cil_gen_expr_stack_arg1null_neg(CuTest *tc) {
 
 void test_cil_gen_expr_stack_arg2null_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "==", "foo", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1690,7 +1690,7 @@ void test_cil_gen_expr_stack_arg2null_neg(CuTest *tc) {
 
 void test_cil_gen_expr_stack_extraarg_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "==", "foo", "bar", "extra", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
