@@ -208,7 +208,6 @@ struct cil_block {
 #define CIL_OPT_DISABLED 2
 struct cil_optional {
 	struct cil_symtab_datum datum;
-	int state;
 };
 
 struct cil_class {

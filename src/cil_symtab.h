@@ -4,9 +4,12 @@
 #include <sepol/policydb/symtab.h>
 #include <sepol/policydb/hashtab.h>
 
+#define CIL_STATE_ENABLED 1
+#define CIL_STATE_DISABLED 2
 struct cil_symtab_datum {
 	struct cil_tree_node *node;
 	char *name;
+	int state;
 };
 
 void cil_symtab_datum_init(struct cil_symtab_datum *);

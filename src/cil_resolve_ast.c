@@ -1974,7 +1974,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	if (rc == SEPOL_ENOENT && optstack != NULL) {
 		/* disable an optional if something failed to resolve */
 		struct cil_optional *opt = (struct cil_optional *)optstack->data;
-		opt->state = CIL_OPT_DISABLING;
+		opt->datum.state = CIL_STATE_DISABLED;
 		rc = SEPOL_OK;
 	}
 

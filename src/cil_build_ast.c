@@ -2182,7 +2182,6 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 		return rc;
 	}
 	
-	optional->state = CIL_OPT_ENABLED;
 	name = (char *)parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)optional, (hashtab_key_t)name, CIL_SYM_OPTIONALS, CIL_OPTIONAL);

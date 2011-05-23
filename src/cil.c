@@ -1129,7 +1129,6 @@ int cil_optional_init(struct cil_optional **optional)
 
 	struct cil_optional *new_optional = cil_malloc(sizeof(struct cil_optional));
 	cil_symtab_datum_init(&new_optional->datum);
-	new_optional->state = CIL_OPT_ENABLED;
 
 	*optional = new_optional;
 

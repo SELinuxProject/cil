@@ -780,7 +780,7 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 			return SEPOL_OK;
 		}
 		if (node->flavor == CIL_OPTIONAL) {
-			if (((struct cil_optional *)node->data)->state != CIL_OPT_ENABLED) {
+			if (((struct cil_symtab_datum *)node->data)->state != CIL_STATE_ENABLED) {
 				*finished = CIL_TREE_SKIP_HEAD;
 			}
 			return SEPOL_OK;

@@ -10,6 +10,7 @@ void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 {
 	datum->name = NULL;
 	datum->node = NULL;
+	datum->state = CIL_STATE_ENABLED;
 }
 
 void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
