@@ -262,6 +262,35 @@ void test_cil_copy_classcommon(CuTest *tc) {
 	CuAssertStrEquals(tc, ((struct cil_classcommon *)test_ast_node->data)->common_str, test_copy->common_str);
 }
 
+void test_cil_copy_user(CuTest *tc) {
+	char *line[] = {"(", "user", "sysadm", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_user(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_user(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
+		((struct cil_class *)test_ast_node->data)->datum.name);
+}
+
 void test_cil_copy_type(CuTest *tc) {
 	char *line[] = {"(", "type", "test", ")", NULL};
 
