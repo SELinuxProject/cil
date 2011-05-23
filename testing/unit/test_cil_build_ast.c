@@ -2045,7 +2045,7 @@ void test_cil_gen_tunif(CuTest *tc) {
 }
 
 void test_cil_gen_tunif_nocond(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "baz",
+	char *line[] = {"(", "tunableif", "baz",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2065,7 +2065,7 @@ void test_cil_gen_tunif_nocond(CuTest *tc) {
 }
 
 void test_cil_gen_tunif_neg(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "**", "foo", "bar", ")",
+	char *line[] = {"(", "tunableif", "(", "**", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2085,7 +2085,7 @@ void test_cil_gen_tunif_neg(CuTest *tc) {
 }
 
 void test_cil_gen_tunif_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+	char *line[] = {"(", "tunableif", "(", "&&", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2120,7 +2120,7 @@ void test_cil_gen_tunif_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_tunif_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+	char *line[] = {"(", "tunableif", "(", "&&", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2136,7 +2136,7 @@ void test_cil_gen_tunif_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_tunif_nocond_neg(CuTest *tc) {
-	char *line[] = {"(", "booleanif", ")", NULL};
+	char *line[] = {"(", "tunableif", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2155,7 +2155,7 @@ void test_cil_gen_tunif_nocond_neg(CuTest *tc) {
 }
 
 void test_cil_gen_tunif_notruelist_neg(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")", ")", NULL};
+	char *line[] = {"(", "tunableif", "(", "&&", "foo", "bar", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
