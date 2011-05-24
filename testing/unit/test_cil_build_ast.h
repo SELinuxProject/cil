@@ -381,6 +381,20 @@ void test_cil_gen_context_dbnull_neg(CuTest *tc);
 void test_cil_gen_context_currnull_neg(CuTest *tc);
 void test_cil_gen_context_astnull_neg(CuTest *tc);
 
+void test_cil_gen_filecon(CuTest *tc);
+void test_cil_gen_filecon_anon_context(CuTest *tc);
+void test_cil_gen_filecon_dbnull_neg(CuTest *tc);
+void test_cil_gen_filecon_currnull_neg(CuTest *tc);
+void test_cil_gen_filecon_astnull_neg(CuTest *tc);
+void test_cil_gen_filecon_str1null_neg(CuTest *tc);
+void test_cil_gen_filecon_str1_inparens_neg(CuTest *tc);
+void test_cil_gen_filecon_str2null_neg(CuTest *tc);
+void test_cil_gen_filecon_str2_inparens_neg(CuTest *tc);
+void test_cil_gen_filecon_classnull_neg(CuTest *tc);
+void test_cil_gen_filecon_class_inparens_neg(CuTest *tc);
+void test_cil_gen_filecon_contextnull_neg(CuTest *tc);
+void test_cil_gen_filecon_extra_neg(CuTest *tc);
+
 void test_cil_gen_netifcon(CuTest *tc);
 void test_cil_gen_netifcon_nested(CuTest *tc);
 void test_cil_gen_netifcon_nested_neg(CuTest *tc);
@@ -539,6 +553,9 @@ void test_cil_build_ast_node_helper_gen_constrain_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_context(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_filecon(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_filecon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_netifcon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc);

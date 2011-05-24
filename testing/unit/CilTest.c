@@ -622,6 +622,22 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_context);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_context_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_anon_context);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_str1null_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_str1_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_str2null_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_str2_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_classnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_class_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_contextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filecon_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_filecon);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_filecon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested);
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested_neg);
