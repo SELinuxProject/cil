@@ -304,6 +304,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_nocond_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_notruelist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_empty_cond_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_boolif);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_boolif_neg);
 	
