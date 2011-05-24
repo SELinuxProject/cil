@@ -241,7 +241,6 @@ struct cil_sid {
 };
 
 struct cil_sidcontext {
-	struct cil_symtab_datum datum;
 	char *sid_str;
 	struct cil_sid *sid;
 	char *context_str;
@@ -296,7 +295,6 @@ struct cil_typealias {
 };
 
 struct cil_typebounds {
-	struct cil_symtab_datum datum;
 	char *parent_str;
 	struct cil_type *parent;
 	char *child_str;
@@ -458,7 +456,6 @@ enum cil_filecon_types {
 };
 
 struct cil_filecon {
-	struct cil_symtab_datum datum;
 	char *root_str;
 	char *path_str;
 	enum cil_filecon_types type;
@@ -475,7 +472,6 @@ struct cil_portcon {
 };
 
 struct cil_nodecon {
-	struct cil_symtab_datum datum;
 	char *node_str;
 	char *netmask_str;
 	char *context_str;

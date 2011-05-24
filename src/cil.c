@@ -702,7 +702,6 @@ int cil_typebounds_init(struct cil_typebounds **typebnds)
 
 	struct cil_typebounds *new_typebnds = cil_malloc(sizeof(struct cil_typebounds));
 
-	cil_symtab_datum_init(&new_typebnds->datum);
 	new_typebnds->parent_str = NULL;
 	new_typebnds->child_str = NULL;
 
@@ -935,7 +934,6 @@ int cil_filecon_init(struct cil_filecon **filecon)
 
 	struct cil_filecon *new_filecon = cil_malloc(sizeof(struct cil_filecon));
 
-	cil_symtab_datum_init(&new_filecon->datum);
 	new_filecon->root_str = NULL;
 	new_filecon->path_str = NULL;
 	new_filecon->context_str =NULL;
@@ -971,7 +969,6 @@ int cil_nodecon_init(struct cil_nodecon **nodecon)
 
 	struct cil_nodecon *new_nodecon = cil_malloc(sizeof(struct cil_nodecon));
 
-	cil_symtab_datum_init(&new_nodecon->datum);
 	new_nodecon->node_str = NULL;
 	new_nodecon->netmask_str = NULL;
 	new_nodecon->context_str = NULL;

@@ -179,13 +179,6 @@ int cil_copy_sidcontext(struct cil_tree_node *orig, struct cil_tree_node *copy, 
 		return rc;
 	}
 
-	char *key = ((struct cil_symtab_datum *)orig->data)->name;
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_sidcontext: cil_symtab_insert failed, rc: %d\n", rc);
-		cil_destroy_sidcontext(new);
-		return rc;
-	}
 	new->context_str = cil_strdup(((struct cil_sidcontext*)orig->data)->context_str);
 	
 	if (((struct cil_sidcontext*)orig->data)->context != NULL) {
