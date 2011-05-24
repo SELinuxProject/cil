@@ -78,9 +78,8 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		printf("Name resolution failed for %s\n", rule->obj_str);
 		return rc;
 	}
-	else {
-		rule->obj = (struct cil_class*)(obj_node->data);
-	}
+	rule->obj = (struct cil_class*)(obj_node->data);
+
 	struct cil_list *perms_list;
 	cil_list_init(&perms_list);
 	rc = __cil_resolve_perm_list(rule->obj, rule->perms_str, perms_list);
