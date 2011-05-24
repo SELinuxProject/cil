@@ -2046,7 +2046,8 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	portcon->type_str = cil_strdup(parse_current->next->data);
 
 	if (parse_current->next->next->cl_head != NULL) {
-		if (parse_current->next->next->cl_head->next != NULL) {
+		if (parse_current->next->next->cl_head->next != NULL
+		&& parse_current->next->next->cl_head->next->next == NULL) {
 			portcon->port_low = (uint32_t)atoi(parse_current->next->next->cl_head->data);
 			portcon->port_high = (uint32_t)atoi(parse_current->next->next->cl_head->next->data);
 		}
