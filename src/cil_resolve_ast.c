@@ -1558,8 +1558,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 			sym_index = CIL_SYM_CLASSES;
 			break;
 		default : 
-			sym_index = CIL_SYM_UNKNOWN;
-			break;
+			return SEPOL_ERR;
 		}
 		if (sym_index != CIL_SYM_UNKNOWN) {
 			rc = cil_resolve_name(db, current, ((struct cil_args*)item->data)->arg_str, sym_index, ((struct cil_args*)item->data)->flavor, call, (struct cil_tree_node**)&(((struct cil_args*)item->data)->arg));

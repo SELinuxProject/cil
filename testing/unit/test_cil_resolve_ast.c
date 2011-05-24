@@ -2447,7 +2447,7 @@ void test_cil_resolve_call2_unknown_neg(CuTest *tc) {
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
 	((struct cil_args*)((struct cil_list_item *)((struct cil_call *)test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->data)->args->head)->data)->flavor = CIL_SYM_UNKNOWN;
 	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_call2_name_neg(CuTest *tc) {
