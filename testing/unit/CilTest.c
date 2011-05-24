@@ -902,6 +902,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_genfscon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_genfscon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_anon_context);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_anon_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodecon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodecon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_otf_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_interface_neg);
