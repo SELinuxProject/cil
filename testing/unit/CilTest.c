@@ -785,7 +785,10 @@ CuSuite* CilTreeGetSuite() {
 	//TODO: test for __cil_set_order
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list);
+	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catlistnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_rescatlistnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catrange);
+	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catrange_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catname_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_catset);

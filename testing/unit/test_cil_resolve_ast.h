@@ -30,7 +30,10 @@ void test_cil_resolve_dominance(CuTest *);
 void test_cil_resolve_dominance_neg(CuTest *);
 
 void test_cil_resolve_cat_list(CuTest *);
+void test_cil_resolve_cat_list_catlistnull_neg(CuTest *);
+void test_cil_resolve_cat_list_rescatlistnull_neg(CuTest *);
 void test_cil_resolve_cat_list_catrange(CuTest *);
+void test_cil_resolve_cat_list_catrange_neg(CuTest *);
 void test_cil_resolve_cat_list_catname_neg(CuTest *);
 
 void test_cil_resolve_catset(CuTest *);
