@@ -2203,7 +2203,8 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	|| parse_current->next->cl_head != NULL
 	|| parse_current->next->next == NULL
 	|| parse_current->next->next->cl_head != NULL
-	|| parse_current->next->next->next == NULL) {
+	|| parse_current->next->next->next == NULL
+	|| parse_current->next->next->next->next != NULL) {
 		printf("Invalid genfscon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
