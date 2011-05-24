@@ -1022,7 +1022,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	else {
 		rc = cil_gen_expr_stack(parse_current->next->cl_head, CIL_TUNABLE, &tif->expr_stack);
 		if (rc != SEPOL_OK) {
-			printf("cil_gen_tunif: failed to create expr tree, rc: %d\n", rc);
+			printf("cil_gen_tunif (line %d): failed to create expr tree, rc: %d\n", parse_current->line, rc);
 			return rc;
 		}
 	}
