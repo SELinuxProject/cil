@@ -1242,6 +1242,7 @@ int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struc
 		rc = cil_resolve_context(db, current, genfscon->context, call);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_genfscon: Failed to resolve genfs context\n");
+			return rc;
 		}
 	}
 
