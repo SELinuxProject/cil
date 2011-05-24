@@ -6358,8 +6358,8 @@ void test_cil_gen_context_astnull_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filecon(CuTest *tc) {
-	char *line[] = {"(", "filecon", "root", "path", "type", "context", NULL};
+void test_cil_gen_filecon_dir(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "dir", "context", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -6377,8 +6377,160 @@ void test_cil_gen_filecon(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_gen_filecon_file(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "file", "context", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_filecon_char(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "char", "context", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_filecon_block(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "block", "context", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_filecon_socket(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "socket", "context", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_filecon_pipe(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "pipe", "context", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_filecon_symlink(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "symlink", "context", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_filecon_any(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "any", "context", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_filecon_neg(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "dne", "context", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_filecon_anon_context(CuTest *tc) {
-	char *line[] = {"(", "filecon", "root", "path", "type", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "filecon", "root", "path", "file", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -6397,7 +6549,7 @@ void test_cil_gen_filecon_anon_context(CuTest *tc) {
 }
 
 void test_cil_gen_filecon_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "filecon", "root", "path", "type", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "filecon", "root", "path", "file", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -6431,7 +6583,7 @@ void test_cil_gen_filecon_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_filecon_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "filecon", "root", "path", "type", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "filecon", "root", "path", "file", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -6561,6 +6713,25 @@ void test_cil_gen_filecon_class_inparens_neg(CuTest *tc) {
 
 void test_cil_gen_filecon_contextnull_neg(CuTest *tc) {
 	char *line[] = {"(", "filecon", "root", "path", "file", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_filecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_filecon_context_neg(CuTest *tc) {
+	char *line[] = {"(", "filecon", "root", "path", "file", "(", "system_u", "object_r", "low", "high", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
