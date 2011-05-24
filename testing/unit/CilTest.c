@@ -385,6 +385,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roleallow_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_sourceparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_targetparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_sourcedomainnull_neg);

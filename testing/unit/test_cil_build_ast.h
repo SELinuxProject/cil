@@ -66,6 +66,7 @@ void test_cil_gen_sidcontext_pcurrnull_neg(CuTest *);
 void test_cil_gen_sidcontext_astnodenull_neg(CuTest *);
 
 void test_cil_gen_type(CuTest *);
+void test_cil_gen_type_neg(CuTest *);
 void test_cil_gen_type_dbnull_neg(CuTest *tc);
 void test_cil_gen_type_currnull_neg(CuTest *tc);
 void test_cil_gen_type_astnull_neg(CuTest *tc);
@@ -185,6 +186,8 @@ void test_cil_gen_roleallow_tgtnull_neg(CuTest *);
 void test_cil_gen_roleallow_extra_neg(CuTest *);
 
 void test_cil_gen_avrule(CuTest *);
+void test_cil_gen_avrule_sourceparens_neg(CuTest *);
+void test_cil_gen_avrule_targetparens_neg(CuTest *);
 void test_cil_gen_avrule_currnull_neg(CuTest *tc);
 void test_cil_gen_avrule_astnull_neg(CuTest *tc);
 void test_cil_gen_avrule_sourcedomainnull_neg(CuTest *tc);
