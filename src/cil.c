@@ -934,8 +934,6 @@ int cil_filecon_init(struct cil_filecon **filecon)
 	cil_symtab_datum_init(&new_filecon->datum);
 	new_filecon->root_str = NULL;
 	new_filecon->path_str = NULL;
-	new_filecon->type_str = NULL;
-	new_filecon->type = NULL;
 	new_filecon->context_str =NULL;
 	new_filecon->context = NULL;
 

@@ -446,12 +446,22 @@ struct cil_context {
 	struct cil_level *high;
 };
 
+enum cil_filecon_types {
+	CIL_FILECON_FILE,
+	CIL_FILECON_DIR,
+	CIL_FILECON_CHAR,
+	CIL_FILECON_BLOCK,
+	CIL_FILECON_SOCKET,
+	CIL_FILECON_PIPE,
+	CIL_FILECON_SYMLINK,
+	CIL_FILECON_ANY
+};
+
 struct cil_filecon {
 	struct cil_symtab_datum datum;
 	char *root_str;
 	char *path_str;
-	char *type_str;
-	struct cil_type *type;
+	enum cil_filecon_types type;
 	char *context_str;
 	struct cil_context *context;
 };

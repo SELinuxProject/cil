@@ -1938,12 +1938,14 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	|| parse_current->next->next->cl_head != NULL
 	|| parse_current->next->next->next == NULL
 	|| parse_current->next->next->next->cl_head != NULL
-	|| parse_current->next->next->next->next == NULL) {
+	|| parse_current->next->next->next->next == NULL
+	|| parse_current->next->next->next->next->next != NULL) {
 		printf("Invalid filecon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
 	struct cil_filecon *filecon;
+	char *type = (char*)parse_current->next->next->next->data;
 	int rc = cil_filecon_init(&filecon);
 	if (rc != SEPOL_OK) {
 		return rc;
@@ -1951,8 +1953,36 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	filecon->root_str = cil_strdup(parse_current->next->data);
 	filecon->path_str = cil_strdup(parse_current->next->next->data);
-	filecon->type_str = cil_strdup(parse_current->next->next->next->data);
 
+	if (!strcmp(type, "file")) {
+		filecon->type = CIL_FILECON_FILE;
+	}
+	else if (!strcmp(type, "dir")) {
+		filecon->type = CIL_FILECON_DIR;
+	}
+	else if (!strcmp(type, "char")) {
+		filecon->type = CIL_FILECON_CHAR;
+	}
+	else if (!strcmp(type, "block")) {
+		filecon->type = CIL_FILECON_BLOCK;
+	}
+	else if (!strcmp(type, "socket")) {
+		filecon->type = CIL_FILECON_SOCKET;
+	}
+	else if (!strcmp(type, "pipe")) {
+		filecon->type = CIL_FILECON_PIPE;
+	}
+	else if (!strcmp(type, "symlink")) {
+		filecon->type = CIL_FILECON_SYMLINK;
+	}
+	else if (!strcmp(type, "any")) {
+		filecon->type = CIL_FILECON_ANY;
+	}
+	else {
+		printf("cil_gen_filecon: Invalid file type\n");
+		return SEPOL_ERR;
+	}
+		
 	if (parse_current->next->next->next->next->cl_head == NULL) {
 		filecon->context_str = cil_strdup(parse_current->next->next->next->next->data);
 	}
@@ -1986,8 +2016,6 @@ void cil_destroy_filecon(struct cil_filecon *filecon)
 		free(filecon->root_str);
 	if (filecon->path_str != NULL)
 		free(filecon->path_str);
-	if (filecon->type_str != NULL)
-		free(filecon->type_str);
 	if (filecon->context_str != NULL)
 		free(filecon->context_str);
 	else
