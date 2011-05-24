@@ -114,6 +114,13 @@ void test_cil_resolve_filecon_anon_context_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_filecon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_filecon_neg(CuTest *tc);
 
+void test_cil_resolve_portcon(CuTest *);
+void test_cil_resolve_portcon_neg(CuTest *);
+void test_cil_resolve_portcon_anon_context(CuTest *);
+void test_cil_resolve_portcon_anon_context_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_portcon(CuTest *tc);
+void test_cil_resolve_ast_node_helper_portcon_neg(CuTest *tc);
+
 void test_cil_resolve_netifcon(CuTest *);
 void test_cil_resolve_netifcon_otf_neg(CuTest *);
 void test_cil_resolve_netifcon_interface_neg(CuTest *);

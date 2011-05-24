@@ -1681,6 +1681,95 @@ void test_cil_resolve_filecon_anon_context_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
 }
 
+void test_cil_resolve_portcon(CuTest *tc) {
+	char *line[] = {"(", "user", "user_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
+			"(", "portcon", "type", "25", "con", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_portcon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_portcon_neg(CuTest *tc) {
+	char *line[] = {"(", "user", "user_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
+			"(", "portcon", "type", "25", "conn", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_portcon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+}
+
+void test_cil_resolve_portcon_anon_context(CuTest *tc) {
+	char *line[] = {"(", "user", "user_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "portcon", "type", "25", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_portcon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_portcon_anon_context_neg(CuTest *tc) {
+	char *line[] = {"(", "user", "system_u", ")",
+			"(", "type", "type_t", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "portcon", "type", "25", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_portcon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+}
+
 void test_cil_resolve_netifcon(CuTest *tc) {
 	char *line[] = {"(", "context", "if_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")",
 			"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", 
@@ -5224,6 +5313,86 @@ void test_cil_resolve_ast_node_helper_filecon_neg(CuTest *tc) {
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
 			"(", "filecon", "root", "path", "file", "foo", ")", NULL};
+ 
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        struct cil_list *other;
+        cil_list_init(&other);
+        cil_list_item_init(&other->head);
+        other->head->data = test_db;
+        other->head->flavor = CIL_DB;
+        cil_list_item_init(&other->head->next);
+        other->head->next->flavor = CIL_INT;
+        int pass = 5;
+        other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = NULL;
+
+        uint32_t finished = 0;
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, &finished, other);
+        CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+        CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_resolve_ast_node_helper_portcon(CuTest *tc) {
+	char *line[] = {"(", "user", "user_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
+			"(", "portcon", "type", "25", "con", ")", NULL};
+        
+	struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        struct cil_list *other;
+        cil_list_init(&other);
+        cil_list_item_init(&other->head);
+        other->head->data = test_db;
+        other->head->flavor = CIL_DB;
+        cil_list_item_init(&other->head->next);
+        other->head->next->flavor = CIL_INT;
+        int pass = 5;
+        other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = NULL;
+
+        uint32_t finished = 0;
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, &finished, other);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+        CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_resolve_ast_node_helper_portcon_neg(CuTest *tc) {
+	char *line[] = {"(", "user", "user_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
+			"(", "portcon", "type", "25", "foo", ")", NULL};
  
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
