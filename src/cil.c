@@ -223,6 +223,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_context(*data);
 			break;
 		}
+		case (CIL_FILECON) : {
+			cil_destroy_filecon(*data);
+			break;
+		}
 		case (CIL_PORTCON) : {
 			cil_destroy_portcon(*data);
 			break;
@@ -924,6 +928,11 @@ int cil_filecon_init(struct cil_filecon **filecon)
 	struct cil_filecon *new_filecon = cil_malloc(sizeof(struct cil_filecon));
 
 	cil_symtab_datum_init(&new_filecon->datum);
+	new_filecon->root_str = NULL;
+	new_filecon->path_str = NULL;
+	new_filecon->type_str = NULL;
+	new_filecon->type = NULL;
+	new_filecon->context_str =NULL;
 	new_filecon->context = NULL;
 
 	*filecon = new_filecon;

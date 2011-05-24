@@ -1921,6 +1921,75 @@ void cil_destroy_context(struct cil_context *context)
 //		cil_destroy_level(high);	
 }
 
+int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL
+	|| parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL
+	|| parse_current->next->next->cl_head != NULL
+	|| parse_current->next->next->next == NULL
+	|| parse_current->next->next->next->cl_head != NULL
+	|| parse_current->next->next->next->next == NULL) {
+		printf("Invalid filecon declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_filecon *filecon;
+	int rc = cil_filecon_init(&filecon);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	filecon->root_str = cil_strdup(parse_current->next->data);
+	filecon->path_str = cil_strdup(parse_current->next->next->data);
+	filecon->type_str = cil_strdup(parse_current->next->next->next->data);
+
+	if (parse_current->next->next->next->next->cl_head == NULL) {
+		filecon->context_str = cil_strdup(parse_current->next->next->next->next->data);
+	}
+	else {
+		rc = cil_context_init(&filecon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init file context\n");
+			goto gen_filecon_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->next->next->cl_head, filecon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill file context\n");
+			goto gen_filecon_cleanup;
+		}
+	}
+
+	ast_node->data = filecon;
+	ast_node->flavor = CIL_FILECON; 
+
+	return SEPOL_OK;
+
+	gen_filecon_cleanup:
+		cil_destroy_filecon(filecon);
+		return SEPOL_ERR;
+}
+
+void cil_destroy_filecon(struct cil_filecon *filecon)
+{
+	if (filecon->root_str != NULL)
+		free(filecon->root_str);
+	if (filecon->path_str != NULL)
+		free(filecon->path_str);
+	if (filecon->type_str != NULL)
+		free(filecon->type_str);
+	if (filecon->context_str != NULL)
+		free(filecon->context_str);
+	else
+		cil_destroy_context(filecon->context);
+	free(filecon);
+}
+
 int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -2687,10 +2756,18 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				}
 				*finished = CIL_TREE_SKIP_NEXT;
 			}
+			else if (!strcmp(parse_current->data, CIL_KEY_FILECON)) {
+				rc = cil_gen_filecon(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_filecon failed, rc: %d\n", rc);
+					return rc;
+				}
+				*finished = CIL_TREE_SKIP_NEXT;
+			}
 			else if (!strcmp(parse_current->data, CIL_KEY_PORTCON)) {
 				rc = cil_gen_portcon(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
-					printf("cil_gen_netifcon failed, rc: %d\n", rc);
+					printf("cil_gen_portcon failed, rc: %d\n", rc);
 					return rc;
 				}
 				*finished = CIL_TREE_SKIP_NEXT;

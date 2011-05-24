@@ -86,6 +86,8 @@ void cil_destroy_constrain_node(struct cil_tree_node *);
 int cil_gen_context(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 int cil_fill_context(struct cil_tree_node *, struct cil_context *);
 void cil_destroy_context(struct cil_context *);
+int cil_gen_filecon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_filecon(struct cil_filecon *);
 int cil_gen_portcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_portcon(struct cil_portcon *);
 int cil_gen_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
