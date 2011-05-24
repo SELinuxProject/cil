@@ -244,7 +244,6 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_pcurrnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_astnodenull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_insertnode_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_sidcontext);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_sidcontext_neg);
 

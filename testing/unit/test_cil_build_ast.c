@@ -1064,27 +1064,6 @@ void test_cil_gen_sidcontext_astnodenull_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-/* Should this fail ? */
-void test_cil_gen_sidcontext_insertnode_neg(CuTest *tc) {
-	char *line[] = {"(", "sidcontext", "test", "(", "blah", "blah", "blah", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_tree_node *test_ast_node;
-	cil_tree_node_init(&test_ast_node);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	test_ast_node->parent = test_db->ast->root;
-	test_ast_node->line = 1;
-
-	cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-	int rc = cil_gen_sidcontext(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
-}
-
 void test_cil_gen_type(CuTest *tc) {
 	char *line[] = {"(", "type", "test", ")", NULL};
 

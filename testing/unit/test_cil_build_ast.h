@@ -64,7 +64,6 @@ void test_cil_gen_sidcontext_dblname_neg(CuTest *);
 void test_cil_gen_sidcontext_dbnull_neg(CuTest *);
 void test_cil_gen_sidcontext_pcurrnull_neg(CuTest *);
 void test_cil_gen_sidcontext_astnodenull_neg(CuTest *);
-void test_cil_gen_sidcontext_insertnode_neg(CuTest *);
 
 void test_cil_gen_type(CuTest *);
 void test_cil_gen_type_dbnull_neg(CuTest *tc);
