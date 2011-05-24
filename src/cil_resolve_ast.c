@@ -1194,6 +1194,7 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 		rc = cil_resolve_context(db, current, filecon->context, call);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_filecon: Failed to resolve file context\n");
+			return rc;
 		}
 	}
 
