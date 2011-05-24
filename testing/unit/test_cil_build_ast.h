@@ -395,6 +395,20 @@ void test_cil_gen_filecon_class_inparens_neg(CuTest *tc);
 void test_cil_gen_filecon_contextnull_neg(CuTest *tc);
 void test_cil_gen_filecon_extra_neg(CuTest *tc);
 
+void test_cil_gen_portcon(CuTest *tc);
+void test_cil_gen_portcon_anon_context(CuTest *tc);
+void test_cil_gen_portcon_portrange(CuTest *tc);
+void test_cil_gen_portcon_portrange_one_neg(CuTest *tc);
+void test_cil_gen_portcon_portrange_morethanone_neg(CuTest *tc);
+void test_cil_gen_portcon_dbnull_neg(CuTest *tc);
+void test_cil_gen_portcon_currnull_neg(CuTest *tc);
+void test_cil_gen_portcon_astnull_neg(CuTest *tc);
+void test_cil_gen_portcon_str1null_neg(CuTest *tc);
+void test_cil_gen_portcon_str1parens_neg(CuTest *tc);
+void test_cil_gen_portcon_portnull_neg(CuTest *tc);
+void test_cil_gen_portcon_contextnull_neg(CuTest *tc);
+void test_cil_gen_portcon_context_neg(CuTest *tc);
+
 void test_cil_gen_netifcon(CuTest *tc);
 void test_cil_gen_netifcon_nested(CuTest *tc);
 void test_cil_gen_netifcon_nested_neg(CuTest *tc);
