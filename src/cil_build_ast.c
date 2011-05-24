@@ -891,7 +891,7 @@ int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct ci
 	}
 
 	if (current->cl_head != NULL) {
-		if ((current->cl_head != NULL) && (current == current->parent->cl_head)) {
+		if (current == current->parent->cl_head) {
 			printf("Invalid booleanif expression\n");
 			return SEPOL_ERR;
 		}
