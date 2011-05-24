@@ -421,6 +421,7 @@ void test_cil_gen_nodecon_ip2null_neg(CuTest *tc);
 void test_cil_gen_nodecon_ip2parens_neg(CuTest *tc);
 void test_cil_gen_nodecon_contextnull_neg(CuTest *tc);
 void test_cil_gen_nodecon_context_neg(CuTest *tc);
+void test_cil_gen_nodecon_extra_neg(CuTest *tc);
 
 void test_cil_gen_netifcon(CuTest *tc);
 void test_cil_gen_netifcon_nested(CuTest *tc);
