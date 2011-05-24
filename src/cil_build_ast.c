@@ -1321,6 +1321,28 @@ void cil_destroy_catalias(struct cil_catalias *alias)
 	free(alias);
 }
 
+int __cil_verify_ranges(struct cil_list *list)
+{
+	if (list == NULL || list->head == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_list_item *curr = list->head;
+	struct cil_list_item *range = NULL;
+
+	while (curr != NULL) {
+		/* range */
+		if (curr->flavor == CIL_LIST) {
+			range = ((struct cil_list*)curr->data)->head;
+			if (range == NULL || range->next == NULL || range->next->next != NULL) {
+				return SEPOL_ERR;
+			}
+		}
+		curr = curr->next;
+	}
+	return SEPOL_OK;
+}
+
 int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl, uint8_t sublists)
 {
 	if (parse_current == NULL || ast_cl == NULL)
@@ -1541,6 +1563,11 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	rc = cil_set_to_list(parse_current->next->next, senscat->cat_list_str, 1);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create category list\n");
+		goto gen_senscat_cleanup;
+	}
+	rc = __cil_verify_ranges(senscat->cat_list_str);
+	if (rc != SEPOL_OK) {
+		printf("Error verifying range syntax\n");
 		goto gen_senscat_cleanup;
 	}
 	ast_node->data = senscat;
