@@ -243,6 +243,7 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_optional(*data);
 			break;
 		}
+		case (CIL_INT) : break;
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
 			break;

@@ -1495,6 +1495,10 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, str
 
 	while (curr_expr != NULL) {
 		if (((struct cil_conditional*)curr_expr->data)->flavor == flavor) {
+			if (((struct cil_conditional*)curr_expr->data)->str == NULL) {
+				printf("Invalid expression\n");
+				return SEPOL_ERR;
+			}
 			printf("resolving: %s\n", ((struct cil_conditional*)curr_expr->data)->str);
 			rc = cil_resolve_name(db, bif, ((struct cil_conditional*)curr_expr->data)->str, sym_index, flavor, call, &bool_node);
 			if (rc != SEPOL_OK) {
@@ -1515,8 +1519,10 @@ int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct 
 	struct cil_booleanif *bif = (struct cil_booleanif*)current->data;
 	
 	rc = cil_resolve_expr_stack(db, bif->expr_stack, current, call, CIL_BOOL);
-	if (rc != SEPOL_OK)
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve booleanif (line %d)\n", current->line);
 		return rc;
+	}
 
 	return SEPOL_OK;
 }
