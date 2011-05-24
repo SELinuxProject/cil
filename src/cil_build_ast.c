@@ -1014,6 +1014,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (parse_current->next->cl_head == NULL) {
 		struct cil_conditional *cond;
 		cil_conditional_init(&cond);
+		cil_tree_node_init(&tif->expr_stack);
 		tif->expr_stack->flavor = CIL_COND;
 		cond->str = cil_strdup(parse_current->next->data);
 		cond->flavor = CIL_TUNABLE;
