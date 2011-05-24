@@ -1265,6 +1265,7 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 		rc = cil_resolve_context(db, current, nodecon->context, call);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_nodecon: Failed to resolve node context\n");
+			return rc;
 		}
 	}
 
