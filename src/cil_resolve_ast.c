@@ -1189,6 +1189,7 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 			printf("cil_resolve_filecon: Failed to resolve file context: %s, rc: %d\n", filecon->context_str, rc);
 			return rc;
 		}
+		filecon->context = (struct cil_context*)context_node->data;
 	}
 	else {
 		rc = cil_resolve_context(db, current, filecon->context, call);
@@ -1213,6 +1214,7 @@ int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct
 			printf("cil_resolve_portcon: Failed to resolve port context: %s, rc: %d\n", portcon->context_str, rc);
 			return rc;
 		}
+		portcon->context = (struct cil_context*)context_node->data;
 	}
 	else {
 		rc = cil_resolve_context(db, current, portcon->context, call);
@@ -1237,6 +1239,7 @@ int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struc
 			printf("cil_resolve_genfscon: Failed to resolve genfs context: %s, rc: %d\n", genfscon->context_str, rc);
 			return rc;
 		}
+		genfscon->context = (struct cil_context*)context_node->data;
 	}
 	else {
 		rc = cil_resolve_context(db, current, genfscon->context, call);
@@ -1261,6 +1264,7 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 			printf("cil_resolve_nodecon: Failed to resolve node context: %s, rc: %d\n", nodecon->context_str, rc);
 			return rc;
 		}
+		nodecon->context = (struct cil_context*)context_node->data;
 	}
 	else {
 		rc = cil_resolve_context(db, current, nodecon->context, call);
