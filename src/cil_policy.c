@@ -458,6 +458,12 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 
 			stack = new;
 		}
+		else {
+			policy = cil_malloc(strlen(((struct cil_conditional*)stack->data)->str) + 3);
+			strcpy(policy, "(");
+			strncat(policy, ((struct cil_conditional*)stack->data)->str, strlen(((struct cil_conditional*)stack->data)->str));
+			strncat(policy, ")", 1);
+		}
 		stack = stack->cl_head;
 	}
 

@@ -923,6 +923,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (parse_current->next->cl_head == NULL) {
 		struct cil_conditional *cond;
 		cil_conditional_init(&cond);
+		cil_tree_node_init(&bif->expr_stack);
 		bif->expr_stack->flavor = CIL_COND;
 		cond->str = cil_strdup(parse_current->next->data);
 		cond->flavor = CIL_BOOL;
