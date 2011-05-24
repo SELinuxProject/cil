@@ -293,13 +293,18 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_stacknull_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif);
-	//SUITE_ADD_TEST(suite, test_cil_gen_boolif_nocond);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_nested);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_nested_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_extra_parens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_nocond);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_nocond_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_notruelist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_empty_cond_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_boolif);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_boolif_neg);
 	
@@ -311,6 +316,10 @@ CuSuite* CilTreeGetSuite() {
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif);
 	//SUITE_ADD_TEST(suite, test_cil_gen_tunif_nocond);
+	SUITE_ADD_TEST(suite, test_cil_gen_tunif_nested);
+	SUITE_ADD_TEST(suite, test_cil_gen_tunif_nested_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_tunif_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_tunif_extra_parens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif_currnull_neg);
@@ -873,7 +882,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_xor);
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_eq);
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neq);
-	//SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper1);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper1);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper2);
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_false);

@@ -106,6 +106,10 @@ void test_cil_gen_expr_stack_currnull_neg(CuTest *);
 void test_cil_gen_expr_stack_stacknull_neg(CuTest *);
 
 void test_cil_gen_boolif(CuTest *);
+void test_cil_gen_boolif_nested(CuTest *);
+void test_cil_gen_boolif_nested_neg(CuTest *);
+void test_cil_gen_boolif_extra_neg(CuTest *);
+void test_cil_gen_boolif_extra_parens_neg(CuTest *);
 void test_cil_gen_boolif_nocond(CuTest *);
 void test_cil_gen_boolif_neg(CuTest *);
 void test_cil_gen_boolif_dbnull_neg(CuTest *);
@@ -113,6 +117,7 @@ void test_cil_gen_boolif_currnull_neg(CuTest *);
 void test_cil_gen_boolif_astnull_neg(CuTest *);
 void test_cil_gen_boolif_nocond_neg(CuTest *);
 void test_cil_gen_boolif_notruelist_neg(CuTest *);
+void test_cil_gen_boolif_empty_cond_neg(CuTest *);
 
 void test_cil_gen_else(CuTest *);
 void test_cil_gen_else_neg(CuTest *);
@@ -122,6 +127,10 @@ void test_cil_gen_else_astnull_neg(CuTest *);
 
 void test_cil_gen_tunif(CuTest *);
 void test_cil_gen_tunif_nocond(CuTest *);
+void test_cil_gen_tunif_nested(CuTest *);
+void test_cil_gen_tunif_nested_neg(CuTest *);
+void test_cil_gen_tunif_extra_neg(CuTest *);
+void test_cil_gen_tunif_extra_parens_neg(CuTest *);
 void test_cil_gen_tunif_neg(CuTest *);
 void test_cil_gen_tunif_dbnull_neg(CuTest *);
 void test_cil_gen_tunif_currnull_neg(CuTest *);

@@ -177,6 +177,7 @@ void test_cil_evaluate_expr_stack_xor(CuTest *);
 void test_cil_evaluate_expr_stack_eq(CuTest *);
 void test_cil_evaluate_expr_stack_neq(CuTest *);
 void test_cil_evaluate_expr_stack_oper1(CuTest *);
+void test_cil_evaluate_expr_stack_oper2(CuTest *);
 void test_cil_evaluate_expr_stack_neg(CuTest *);
 
 void test_cil_resolve_tunif_false(CuTest *);
