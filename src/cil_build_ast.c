@@ -2070,6 +2070,71 @@ void cil_destroy_portcon(struct cil_portcon *portcon)
 	free(portcon);
 }
 
+int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL
+	|| parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL
+	|| parse_current->next->next->cl_head != NULL
+	|| parse_current->next->next->next == NULL) {
+		printf("Invalid nodecon declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_nodecon *nodecon;
+	int rc = cil_nodecon_init(&nodecon);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	nodecon->node_str = cil_strdup(parse_current->next->data);
+	nodecon->netmask_str = cil_strdup(parse_current->next->next->data);
+
+
+	if (parse_current->next->next->next->cl_head == NULL ) {
+		nodecon->context_str = cil_strdup(parse_current->next->next->next->data);
+	}
+	else {
+		rc = cil_context_init(&nodecon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init node context\n");
+			goto gen_nodecon_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->next->cl_head, nodecon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill node context\n");
+			goto gen_nodecon_cleanup;
+		}
+	}
+
+	ast_node->data = nodecon;
+	ast_node->flavor = CIL_NODECON; 
+
+	return SEPOL_OK;
+
+	gen_nodecon_cleanup:
+		cil_destroy_nodecon(nodecon);
+		return SEPOL_ERR;
+}
+
+void cil_destroy_nodecon(struct cil_nodecon *nodecon)
+{
+	if (nodecon->node_str != NULL)
+		free(nodecon->node_str);
+	if (nodecon->netmask_str != NULL)
+		free(nodecon->netmask_str);
+	if (nodecon->context_str != NULL)
+		free(nodecon->context_str);
+	else if (nodecon->context != NULL)
+		cil_destroy_context(nodecon->context);
+	free(nodecon);
+}
+
 int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -2773,6 +2838,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_portcon(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_portcon failed, rc: %d\n", rc);
+					return rc;
+				}
+				*finished = CIL_TREE_SKIP_NEXT;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_NODECON)) {
+				rc = cil_gen_nodecon(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_nodecon failed, rc: %d\n", rc);
 					return rc;
 				}
 				*finished = CIL_TREE_SKIP_NEXT;

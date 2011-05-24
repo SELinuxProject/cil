@@ -35,40 +35,41 @@
 #define CIL_IN			20
 #define CIL_FILECON		21
 #define CIL_PORTCON		22
-#define CIL_NETIFCON		23
-#define CIL_FSCON		24
-#define CIL_FS_USE		25
-#define CIL_CONSTRAIN		26
-#define CIL_MLSCONSTRAIN	27
-#define CIL_PERM		28
-#define CIL_USERROLE		29
-#define CIL_TYPE_ATTR		30
-#define CIL_TYPE_RULE 		31
-#define CIL_TYPEBOUNDS		32
-#define CIL_ROLETRANS		33
-#define CIL_ROLEALLOW		34
-#define CIL_ROLETYPE		35 
-#define CIL_ROLEDOMINANCE	36
-#define CIL_CATORDER		37
-#define CIL_DOMINANCE		38
-#define CIL_SENSCAT		39
-#define CIL_CLASSCOMMON		40
-#define CIL_CONSTRAIN_NODE	41
-#define CIL_SIDCONTEXT		42
-#define CIL_CALL		43
-#define CIL_ARGS		44
-#define CIL_BOOLEANIF		45
-#define CIL_TUNABLEIF		46
-#define CIL_TUNABLEIFDEF	47
-#define CIL_TUNABLEIFNDEF	48
-#define CIL_AND			49
-#define CIL_OR			50
-#define CIL_XOR			51
-#define CIL_NOT			52
-#define CIL_EQ			53
-#define CIL_NEQ			54
-#define CIL_ELSE		55
-#define CIL_COND		56
+#define CIL_NODECON		23	
+#define CIL_NETIFCON		24
+#define CIL_FSCON		25
+#define CIL_FS_USE		26
+#define CIL_CONSTRAIN		27
+#define CIL_MLSCONSTRAIN	28
+#define CIL_PERM		29
+#define CIL_USERROLE		30
+#define CIL_TYPE_ATTR		31
+#define CIL_TYPE_RULE 		32
+#define CIL_TYPEBOUNDS		33
+#define CIL_ROLETRANS		34
+#define CIL_ROLEALLOW		35
+#define CIL_ROLETYPE		36 
+#define CIL_ROLEDOMINANCE	37
+#define CIL_CATORDER		38
+#define CIL_DOMINANCE		39
+#define CIL_SENSCAT		40
+#define CIL_CLASSCOMMON		41
+#define CIL_CONSTRAIN_NODE	42
+#define CIL_SIDCONTEXT		43
+#define CIL_CALL		44
+#define CIL_ARGS		45
+#define CIL_BOOLEANIF		46
+#define CIL_TUNABLEIF		47
+#define CIL_TUNABLEIFDEF	48
+#define CIL_TUNABLEIFNDEF	49
+#define CIL_AND			50
+#define CIL_OR			51
+#define CIL_XOR			52
+#define CIL_NOT			53
+#define CIL_EQ			54
+#define CIL_NEQ			55
+#define CIL_ELSE		56
+#define CIL_COND		57
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -127,6 +128,7 @@
 #define CIL_KEY_CONTEXT		"context"
 #define CIL_KEY_FILECON		"filecon"
 #define CIL_KEY_PORTCON		"portcon"
+#define CIL_KEY_NODECON		"nodecon"
 #define CIL_KEY_NETIFCON	"netifcon"
 #define CIL_KEY_SENSITIVITY	"sensitivity"
 #define CIL_KEY_SENSALIAS	"sensitivityalias"
@@ -462,6 +464,14 @@ struct cil_portcon {
 	struct cil_context *context;
 };
 
+struct cil_nodecon {
+	struct cil_symtab_datum datum;
+	char *node_str;
+	char *netmask_str;
+	char *context_str;
+	struct cil_context *context;
+};
+
 struct cil_netifcon {
 	struct cil_symtab_datum datum;
 	char *if_context_str;
@@ -590,6 +600,7 @@ int cil_catset_init(struct cil_catset **catset);
 int cil_senscat_init(struct cil_senscat **senscat);
 int cil_filecon_init(struct cil_filecon **filecon);
 int cil_portcon_init(struct cil_portcon **portcon);
+int cil_nodecon_init(struct cil_nodecon **nodecon);
 int cil_fscon_init(struct cil_fscon **fscon);
 int cil_fs_use_init(struct cil_fs_use **fs_use);
 int cil_constrain_init(struct cil_constrain **constrain);

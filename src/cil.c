@@ -959,6 +959,25 @@ int cil_portcon_init(struct cil_portcon **portcon)
 	return SEPOL_OK;
 }
 
+int cil_nodecon_init(struct cil_nodecon **nodecon)
+{
+	if (nodecon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_nodecon *new_nodecon = cil_malloc(sizeof(struct cil_nodecon));
+
+	cil_symtab_datum_init(&new_nodecon->datum);
+	new_nodecon->node_str = NULL;
+	new_nodecon->netmask_str = NULL;
+	new_nodecon->context_str = NULL;
+	new_nodecon->context = NULL;
+
+	*nodecon = new_nodecon;
+
+	return SEPOL_OK;
+}
+
 int cil_fscon_init(struct cil_fscon **fscon)
 {
 	if (fscon == NULL) {

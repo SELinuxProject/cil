@@ -827,6 +827,17 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
+			case CIL_NODECON : {
+				struct cil_nodecon *nodecon = node->data;
+				printf("NODECON:");
+				printf(" %s %s", nodecon->node_str, nodecon->netmask_str);
+				if (nodecon->context_str != NULL)
+					printf(" %s", nodecon->context_str);
+				else if (nodecon->context != NULL)
+					cil_tree_print_context(nodecon->context);
+				printf("\n");
+				return;
+			}
 			case CIL_NETIFCON : {
 				struct cil_netifcon *netifcon = node->data;
 				printf("NETIFCON %s", netifcon->datum.name);
