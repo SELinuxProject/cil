@@ -2032,7 +2032,8 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (parse_current->next == NULL
 	|| parse_current->next->cl_head != NULL
 	|| parse_current->next->next == NULL
-	|| parse_current->next->next->next == NULL) {
+	|| parse_current->next->next->next == NULL
+	|| parse_current->next->next->next->next != NULL) {
 		printf("Invalid portcon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -2109,7 +2110,8 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	|| parse_current->next->cl_head != NULL
 	|| parse_current->next->next == NULL
 	|| parse_current->next->next->cl_head != NULL
-	|| parse_current->next->next->next == NULL) {
+	|| parse_current->next->next->next == NULL
+	|| parse_current->next->next->next->next != NULL) {
 		printf("Invalid nodecon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
