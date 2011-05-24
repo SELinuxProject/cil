@@ -556,6 +556,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_nosensitivities_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_nosublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_senscat_sublist_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_senscat);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_senscat_neg);
 	
@@ -796,7 +797,6 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_sublist);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_missingsens_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_sublist_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_category_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_currrangecat);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_currrangecat_neg);

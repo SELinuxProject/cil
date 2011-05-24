@@ -323,6 +323,7 @@ void test_cil_gen_senscat_currnull_neg(CuTest *tc);
 void test_cil_gen_senscat_astnull_neg(CuTest *tc);
 void test_cil_gen_senscat_nosensitivities_neg(CuTest *tc);
 void test_cil_gen_senscat_nosublist_neg(CuTest *tc);
+void test_cil_gen_senscat_sublist_neg(CuTest *);
 
 void test_cil_fill_level(CuTest *tc);
 void test_cil_fill_level_sensnull_neg(CuTest *tc);

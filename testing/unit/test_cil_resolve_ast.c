@@ -430,27 +430,6 @@ void test_cil_resolve_senscat_missingsens_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
-void test_cil_resolve_senscat_sublist_neg(CuTest *tc) {
-      char *line[] = {"(", "sensitivity", "s0", ")",
-                        "(", "sensitivity", "s1", ")",
-                        "(", "dominance", "(", "s0", "s1", ")", ")",
-                        "(", "category", "c0", ")",
-                        "(", "category", "c255", ")",
-                        "(", "categoryorder", "(", "c0", "c255", ")", ")",
-                        "(", "sensitivitycategory", "s1", "(", "c0", "(", "c255", ")", ")", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
-
 void test_cil_resolve_senscat_category_neg(CuTest *tc) {
       char *line[] = {"(", "sensitivity", "s0", ")",
                         "(", "sensitivity", "s1", ")",
