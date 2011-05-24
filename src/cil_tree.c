@@ -177,12 +177,30 @@ void cil_tree_print_level(struct cil_level *level)
 {
 	struct cil_list_item *cat;
 	struct cil_list_item *parent;
-	if (level->sens_str != NULL)
-		printf(" %s", level->sens_str);
-	else if (level->sens != NULL)
+	if (level->sens != NULL)
 		printf(" %s", level->sens->datum.name);
+	else if (level->sens_str != NULL)
+		printf(" %s", level->sens_str);
 	printf(" (");
-	if (level->cat_list_str != NULL) {
+	if (level->cat_list != NULL) {
+		cat = level->cat_list->head;
+		while (cat != NULL) {
+			if (cat->flavor == CIL_LIST) {
+				parent = cat;
+				cat = ((struct cil_list *)cat->data)->head;
+				printf(" (");
+				while (cat != NULL) {
+					printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+					cat = cat->next;
+				}
+				printf(" )");
+				cat = parent;
+			}
+			else
+				printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+			cat = cat->next;
+		}
+	} else if (level->cat_list_str != NULL) {
 		cat = level->cat_list_str->head;
 		while (cat != NULL) {
 			if (cat->flavor == CIL_LIST) {
@@ -201,64 +219,41 @@ void cil_tree_print_level(struct cil_level *level)
 				cat = cat->next;
 			}
 	}
-	else if (level->cat_list != NULL) {
-		cat = level->cat_list->head;
-		while (cat != NULL) {
-			if (cat->flavor == CIL_LIST) {
-				parent = cat;
-				cat = ((struct cil_list *)cat->data)->head;
-				printf(" (");
-				while (cat != NULL) {
-					printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-					cat = cat->next;
-				}
-				printf(" )");
-				cat = parent;
-			}
-			else
-				printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-			cat = cat->next;
-		}
-	}
 	printf(" )");
 	return;
 }
 
 void cil_tree_print_context(struct cil_context *context)
 {
-	if (context->user_str != NULL)
-		printf(" %s", context->user_str);
-	else if (context->user != NULL)
+	if (context->user != NULL)
 		printf(" %s", context->user->datum.name);
-	if (context->role_str != NULL)
-		printf(" %s", context->role_str);
-	else if (context->role != NULL)
+	else if (context->user_str != NULL)
+		printf(" %s", context->user_str);
+
+	if (context->role != NULL)
 		printf(" %s", context->role->datum.name);
-	if (context->type_str != NULL)
-		printf(" %s", context->type_str);
-	else if (context->type != NULL)
+	else if (context->role_str != NULL)
+		printf(" %s", context->role_str);
+
+	if (context->type != NULL)
 		printf(" %s", context->type->datum.name);
-	if (context->low_str != NULL)
+	else if (context->type_str != NULL)
+		printf(" %s", context->type_str);
+
+	if (context->low != NULL) {
+		printf(" (");
+		cil_tree_print_level(context->low);
+		printf(" )");
+	} else if (context->low_str != NULL) {
 		printf(" %s", context->low_str);
-	else if (context->low != NULL) {
-//		if (context->low->datum.name != NULL)
-//			printf(" %s", context->low->datum.name);
-//		else {
-			printf(" (");
-			cil_tree_print_level(context->low);
-			printf(" )");
-//		}
 	}
-	if (context->high_str != NULL)
+
+	if (context->high != NULL) {
+		printf(" (");
+		cil_tree_print_level(context->high);
+		printf(" )");
+	} else if (context->high_str != NULL) {
 		printf(" %s", context->high_str);
-	else if (context->high != NULL) {
-//		if (context->high->datum.name != NULL)
-//			printf(" %s", context->high->datum.name);
-//		else {
-			printf(" (");
-			cil_tree_print_level(context->high);
-			printf(" )");
-//		}
 	}
 	return;
 }
@@ -285,27 +280,30 @@ void cil_tree_print_constrain(struct cil_constrain *cons)
 {
 	struct cil_list_item *class_curr;
 	struct cil_list_item *perm_curr;
-	if (cons->class_list_str != NULL)
-		class_curr = cons->class_list_str->head;
-	else
+	if (cons->class_list != NULL)
 		class_curr = cons->class_list->head;
-	if (cons->perm_list_str != NULL)
-		perm_curr = cons->perm_list_str->head;
 	else
+		class_curr = cons->class_list_str->head;
+
+	if (cons->perm_list != NULL)
 		perm_curr = cons->perm_list->head;
+	else
+		perm_curr = cons->perm_list_str->head;
+
 	while (class_curr != NULL) {
-		if (cons->class_list_str != NULL)
-			printf("%s ", (char*)class_curr->data);
-		else
+		if (cons->class_list != NULL)
 			printf("%s ", ((struct cil_class*)class_curr->data)->datum.name);
+		else
+			printf("%s ", (char*)class_curr->data);
 		class_curr = class_curr->next;
 	}
 	printf(") \n\t\t( ");
+
 	while (perm_curr != NULL) {
-	if (cons->perm_list_str != NULL)
-		printf("%s ", (char*)perm_curr->data);
-	else
-		printf("%s ", ((struct cil_class*)perm_curr->data)->datum.name);
+		if (cons->perm_list != NULL)
+			printf("%s ", ((struct cil_class*)perm_curr->data)->datum.name);
+		else
+			printf("%s ", (char*)perm_curr->data);
 		perm_curr = perm_curr->next;
 	}
 	printf(") \n\t\t");
@@ -349,73 +347,81 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_USERROLE : {
 				struct cil_userrole *userrole = node->data;
 				printf("USERROLE:");
-				if (userrole->user_str != NULL)
-					printf(" %s", userrole->user_str);
-				else if (userrole->user != NULL)
+				if (userrole->user != NULL)
 					printf(" %s", userrole->user->datum.name);
-				if (userrole->role_str != NULL)
-					printf(" %s", userrole->role_str);
-				else if (userrole->role != NULL)
+				else if (userrole->user_str != NULL)
+					printf(" %s", userrole->user_str);
+
+				if (userrole->role != NULL)
 					printf(" %s", userrole->role->datum.name);
+				else if (userrole->role_str != NULL)
+					printf(" %s", userrole->role_str);
+
 				printf("\n");
 				return;
 			}
 			case CIL_ROLETYPE : {
 				struct cil_roletype *roletype = node->data;
 				printf("ROLETYPE:");
-				if (roletype->role_str != NULL)
-					printf(" %s", roletype->role_str);
-				else if (roletype->role != NULL)
+				if (roletype->role != NULL)
 					printf(" %s", roletype->role->datum.name);
-				if (roletype->type_str != NULL)
-					printf(" %s", roletype->type_str);
-				else if (roletype->type != NULL)
+				else if (roletype->role_str != NULL)
+					printf(" %s", roletype->role_str);
+
+				if (roletype->type != NULL)
 					printf(" %s", roletype->type->datum.name);
+				else if (roletype->type_str != NULL)
+					printf(" %s", roletype->type_str);
+
 				printf("\n");
 				return;
 			}
 			case CIL_ROLETRANS : {
 				struct cil_role_trans *roletrans = node->data;
 				printf("ROLETRANSITION:");
-				if (roletrans->src_str != NULL)
-					printf(" %s", roletrans->src_str);
-				else
+				if (roletrans->src != NULL)
 					printf(" %s", roletrans->src->datum.name);
-				if (roletrans->tgt_str != NULL)
-					printf(" %s", roletrans->tgt_str);
 				else
+					printf(" %s", roletrans->src_str);
+
+				if (roletrans->tgt != NULL)
 					printf(" %s", roletrans->tgt->datum.name);
-				if (roletrans->result_str != NULL)
-					printf(" %s\n", roletrans->result_str);
 				else
+					printf(" %s", roletrans->tgt_str);
+
+				if (roletrans->result != NULL)
 					printf(" %s\n", roletrans->result->datum.name);
+				else
+					printf(" %s\n", roletrans->result_str);
+
 				return;
 			}
 			case CIL_ROLEALLOW : {
 				struct cil_role_allow *roleallow = node->data;
 				printf("ROLEALLOW:");
-				if (roleallow->src_str != NULL)
-					printf(" %s", roleallow->src_str);
-				else
+				if (roleallow->src != NULL)
 					printf(" %s", roleallow->src->datum.name);
-				if (roleallow->tgt_str != NULL)
-					printf(" %s", roleallow->tgt_str);
 				else
+					printf(" %s", roleallow->src_str);
+
+				if (roleallow->tgt != NULL)
 					printf(" %s", roleallow->tgt->datum.name);
+				else
+					printf(" %s", roleallow->tgt_str);
 				printf("\n");
 				return;
 			}
 			case CIL_ROLEDOMINANCE : {
 				struct cil_roledominance *roledom = node->data;
 				printf("ROLEDOMINANCE:");
-				if (roledom->role_str != NULL)
-					printf(" %s", roledom->role_str);
-				else
+				if (roledom->role != NULL)
 					printf(" %s", roledom->role->datum.name);
-				if (roledom->domed_str != NULL)
-					printf(" %s", roledom->domed_str);
 				else
+					printf(" %s", roledom->role_str);
+				if (roledom->domed != NULL)
 					printf(" %s", roledom->domed->datum.name);
+				else
+					printf(" %s", roledom->domed_str);
 				printf("\n");
 				return;
 			}
@@ -443,10 +449,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_CLASSCOMMON : {
 				struct cil_classcommon *clscom = node->data;
-				if (clscom->class_str != NULL && clscom->common_str != NULL)
-					printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
-				else
+				if (clscom->class != NULL && clscom->common != NULL)
 					printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class->datum.name, clscom->common->datum.name);
+				else
+					printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
 				return;
 			}
 			case CIL_BOOL : {
@@ -464,10 +470,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_booleanif *bif = node->data;
 				struct cil_tree_node *current = bif->expr_stack;
 				while (current != NULL) {
-					if (((struct cil_conditional*)current->data)->str != NULL)
-						printf("%s ", ((struct cil_conditional*)current->data)->str);
-					else if (((struct cil_conditional*)current->data)->boolean != NULL)
+					if (((struct cil_conditional*)current->data)->boolean != NULL)
 						printf("(bool %s, value: %d) ", ((struct cil_conditional*)current->data)->boolean->datum.name, ((struct cil_conditional*)current->data)->boolean->value);
+					else if (((struct cil_conditional*)current->data)->str != NULL)
+						printf("%s ", ((struct cil_conditional*)current->data)->str);
 					current = current->cl_head;
 				}
 				printf(")\n");
@@ -479,10 +485,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_tree_node *current = tif->expr_stack;
 				if (current->flavor != CIL_INT) {
 					while (current != NULL && current->data != NULL) {
-						if (((struct cil_conditional*)current->data)->str != NULL)
-							printf("%s ", ((struct cil_conditional*)current->data)->str);
-						else if (((struct cil_conditional*)current->data)->boolean != NULL)
+						if (((struct cil_conditional*)current->data)->boolean != NULL)
 							printf("(tunable %s, value: %d) ", ((struct cil_conditional*)current->data)->boolean->datum.name, ((struct cil_conditional*)current->data)->boolean->value);
+						else if (((struct cil_conditional*)current->data)->str != NULL)
+							printf("%s ", ((struct cil_conditional*)current->data)->str);
 						current = current->cl_head;
 					}
 				}
@@ -517,26 +523,26 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_TYPE_ATTR : {
 				struct cil_typeattribute *typeattr = node->data;
-				if (typeattr->type_str != NULL && typeattr->attr_str != NULL)
-					printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type_str, typeattr->attr_str);
-				else
+				if (typeattr->type != NULL && typeattr->attr != NULL)
 					printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type->datum.name, typeattr->attr->datum.name);
+				else
+					printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type_str, typeattr->attr_str);
 				return;
 			}
 			case CIL_TYPEALIAS : {
 				struct cil_typealias *alias = node->data;
-				if (alias->type_str != NULL) 
-					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type_str);
-				else
+				if (alias->type != NULL) 
 					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type->datum.name);
+				else
+					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type_str);
 				return;
 			}
 			case CIL_TYPEBOUNDS : {
 				struct cil_typebounds *typebnds = node->data;
-				if (typebnds->parent_str != NULL && typebnds->child_str != NULL)
-					printf("TYPEBOUNDS: parent: %s, child: %s\n", typebnds->parent_str, typebnds->child_str);
-				else
+				if (typebnds->parent != NULL && typebnds->child != NULL)
 					printf("TYPEBOUNDS: parent: %s, child: %s\n", typebnds->parent->datum.name, typebnds->child->datum.name);
+				else
+					printf("TYPEBOUNDS: parent: %s, child: %s\n", typebnds->parent_str, typebnds->child_str);
 				return;
 			}
 			case CIL_AVRULE : {
@@ -560,36 +566,38 @@ void cil_tree_print_node(struct cil_tree_node *node)
 						break;
 					}
 				}	
-				if (rule->src_str != NULL)
-					printf(" %s", rule->src_str);
-				else
+				if (rule->src != NULL)
 					printf(" %s", rule->src->datum.name);
-				if (rule->tgt_str != NULL)
-					printf(" %s", rule->tgt_str);
 				else
+					printf(" %s", rule->src_str);
+
+				if (rule->tgt != NULL)
 					printf(" %s", rule->tgt->datum.name);
-				if (rule->obj_str != NULL)
-					printf(" %s", rule->obj_str);
 				else
+					printf(" %s", rule->tgt_str);
+
+				if (rule->obj != NULL)
 					printf(" %s", rule->obj->datum.name);
+				else
+					printf(" %s", rule->obj_str);
+
 				printf(" (");
-				if (rule->perms_str != NULL) {
-					item = rule->perms_str->head;
+				if (rule->perms_list != NULL) {
+					item = rule->perms_list->head;
 					while(item != NULL) {
-						if (item->flavor == CIL_AST_STR)
-							printf(" %s", (char*)item->data);
+						if (item->flavor == CIL_PERM)
+							printf(" %s", ((struct cil_perm*)item->data)->datum.name);
 						else {
 							printf("\n\n perms list contained unexpected data type\n");
 							break;
 						}
 						item = item->next;
 					}
-				}
-				else {
-					item = rule->perms_list->head;
+				} else if (rule->perms_str != NULL) {
+					item = rule->perms_str->head;
 					while(item != NULL) {
-						if (item->flavor == CIL_PERM)
-							printf(" %s", ((struct cil_perm*)item->data)->datum.name);
+						if (item->flavor == CIL_AST_STR)
+							printf(" %s", (char*)item->data);
 						else {
 							printf("\n\n perms list contained unexpected data type\n");
 							break;
@@ -616,22 +624,26 @@ void cil_tree_print_node(struct cil_tree_node *node)
 						break;
 					}
 				}
-				if (rule->src_str != NULL)
-					printf(" %s", rule->src_str);
-				else
+				if (rule->src != NULL)
 					printf(" %s", rule->src->datum.name);
-				if (rule->tgt_str != NULL)
-					printf(" %s", rule->tgt_str);
 				else
+					printf(" %s", rule->src_str);
+
+				if (rule->tgt != NULL)
 					printf(" %s", rule->tgt->datum.name);
-				if (rule->obj_str != NULL)
-					printf(" %s", rule->obj_str);
 				else
+					printf(" %s", rule->tgt_str);
+
+				if (rule->obj != NULL)
 					printf(" %s", rule->obj->datum.name);
-				if (rule->result_str != NULL)
-					printf(" %s\n", rule->result_str);
 				else
+					printf(" %s", rule->obj_str);
+
+				if (rule->result != NULL)
 					printf(" %s\n", rule->result->datum.name);
+				else
+					printf(" %s\n", rule->result_str);
+
 				return;
 			}
 			case CIL_SENS : {
@@ -641,10 +653,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_SENSALIAS : {
 				struct cil_sensalias *alias = node->data;
-				if (alias->sens_str != NULL) 
-					printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens_str);
-				else
+				if (alias->sens != NULL) 
 					printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens->datum.name);
+				else
+					printf("SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens_str);
 				return;
 			}
 			case CIL_CAT : {
@@ -654,20 +666,20 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_CATALIAS : {
 				struct cil_catalias *alias = node->data;
-				if (alias->cat_str != NULL) 
-					printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat_str);
-				else
+				if (alias->cat != NULL) 
 					printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat->datum.name);
+				else
+					printf("CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat_str);
 				return;
 			}
 			case CIL_CATSET : {
 				struct cil_catset *catset = node->data;
 				struct cil_list_item *cat;
 				struct cil_list_item *parent;
-				if (catset->cat_list_str != NULL)
-					cat = catset->cat_list_str->head;
-				else
+				if (catset->cat_list != NULL)
 					cat = catset->cat_list->head;
+				else
+					cat = catset->cat_list_str->head;
 				printf("CATSET: %s (",catset->datum.name);
 				while (cat != NULL) {
 					if (cat->flavor == CIL_LIST) {
@@ -695,6 +707,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					cat = catorder->cat_list_str->head;
 				else
 					return;
+
 				printf("CATORDER: (");
 				while (cat != NULL) {
 					printf(" %s", (char*)cat->data);
@@ -730,8 +743,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 							printf(" %s", (char*)cat->data);
 						cat = cat->next;
 					}
-				}
-				else {
+				} else {
 					printf("\n");
 					return;
 				}
@@ -743,7 +755,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_list_item *sens;
 				struct cil_list_item *parent;
 
-				printf("DOMINANCE: (");
 				if (dom->sens_list_str != NULL) {
 					sens = dom->sens_list_str->head;
 					while(sens != NULL) {
@@ -762,8 +773,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 							printf(" %s", (char*)sens->data);
 						sens = sens->next;
 					}
-				}
-				else {
+				} else {
 					printf("\n");
 					return;
 				}
@@ -800,14 +810,16 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_filecon *filecon = node->data;
 				printf("FILECON:");
 				printf(" %s %s", filecon->root_str, filecon->path_str);
-				if (filecon->type_str != NULL)
-					printf(" %s", filecon->type_str);
-				else if (filecon->type != NULL)
+				if (filecon->type != NULL)
 					printf(" %s", filecon->type->datum.name);
-				if (filecon->context_str != NULL)
-					printf(" %s", filecon->context_str);
-				else if (filecon->context != NULL)
+				else if (filecon->type_str != NULL)
+					printf(" %s", filecon->type_str);
+
+				if (filecon->context != NULL)
 					cil_tree_print_context(filecon->context);
+				else if (filecon->context_str != NULL)
+					printf(" %s", filecon->context_str);
+
 				printf("\n");
 				return;
 
@@ -815,15 +827,17 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_PORTCON : {
 				struct cil_portcon *portcon = node->data;
 				printf("PORTCON:");
-				if (portcon->type_str != NULL)
-					printf(" %s", portcon->type_str);
-				else if (portcon->type != NULL)
+				if (portcon->type != NULL)
 					printf(" %s", portcon->type->datum.name);
+				else if (portcon->type != NULL)
+					printf(" %s", portcon->type_str);
+
 				printf(" (%d %d)", portcon->port_low, portcon->port_high);
-				if (portcon->context_str != NULL)
-					printf(" %s", portcon->context_str);
-				else if (portcon->context != NULL)
+
+				if (portcon->context != NULL)
 					cil_tree_print_context(portcon->context);
+				else if (portcon->context_str != NULL)
+					printf(" %s", portcon->context_str);
 				printf("\n");
 				return;
 			}
@@ -831,44 +845,44 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_nodecon *nodecon = node->data;
 				printf("NODECON:");
 				printf(" %s %s", nodecon->node_str, nodecon->netmask_str);
-				if (nodecon->context_str != NULL)
-					printf(" %s", nodecon->context_str);
-				else if (nodecon->context != NULL)
+				if (nodecon->context != NULL)
 					cil_tree_print_context(nodecon->context);
+				else if (nodecon->context_str != NULL)
+					printf(" %s", nodecon->context_str);
 				printf("\n");
 				return;
 			}
 			case CIL_GENFSCON : {
 				struct cil_genfscon *genfscon = node->data;
 				printf("GENFSCON:");
-				if (genfscon->type_str != NULL)
-					printf(" %s", genfscon->type_str);
-				else if (genfscon->type != NULL)
+				if (genfscon->type != NULL)
 					printf(" %s", genfscon->type->datum.name);
+				else if (genfscon->type_str != NULL)
+					printf(" %s", genfscon->type_str);
 				printf(" %s", genfscon->path_str);
-				if (genfscon->context_str != NULL)
-					printf(" %s", genfscon->context_str);
-				else if (genfscon->context != NULL)
+				if (genfscon->context != NULL)
 					cil_tree_print_context(genfscon->context);
+				else if (genfscon->context_str != NULL)
+					printf(" %s", genfscon->context_str);
 				printf("\n");
 				return;
 			}
 			case CIL_NETIFCON : {
 				struct cil_netifcon *netifcon = node->data;
 				printf("NETIFCON %s", netifcon->datum.name);
-				if (netifcon->if_context_str != NULL)
-					printf(" %s", netifcon->if_context_str);
-				else if (netifcon->if_context != NULL) {
+				if (netifcon->if_context != NULL) {
 					printf(" (");
 					cil_tree_print_context(netifcon->if_context);
 					printf(" )");
+				} else if (netifcon->if_context_str != NULL) {
+					printf(" %s", netifcon->if_context_str);
 				}
-				if (netifcon->packet_context_str != NULL)
-					printf(" %s", netifcon->packet_context_str);
-				else if (netifcon->packet_context != NULL) {
+				if (netifcon->packet_context != NULL) {
 					printf(" (");
 					cil_tree_print_context(netifcon->packet_context);
 					printf(" )");
+				} else if (netifcon->packet_context_str != NULL) {
+					printf(" %s", netifcon->packet_context_str);
 				}
 				printf("\n");
 				return;
@@ -881,14 +895,15 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_SIDCONTEXT : {
 				struct cil_sidcontext *sidcon = node->data;
 				printf("SIDCONTEXT:");
-				if (sidcon->sid_str != NULL)
-					printf(" %s", sidcon->sid_str);
-				else
+				if (sidcon->sid != NULL)
 					printf(" %s", (((struct cil_sid*)sidcon->sid)->datum.name));
-				if (sidcon->context_str != NULL)
-					printf(" %s", sidcon->context_str);
 				else
+					printf(" %s", sidcon->sid_str);
+
+				if (sidcon->context != NULL)
 					cil_tree_print_context(sidcon->context);
+				else
+					printf(" %s", sidcon->context_str);
 				printf("\n");
 	
 				return;
@@ -917,16 +932,19 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_CALL : {
 				struct cil_call *call = node->data;
 				printf("CALL: macro name:");
-				if (call->macro_str != NULL)
-					printf(" %s", call->macro_str);
-				else
+				if (call->macro != NULL)
 					printf(" %s", call->macro->datum.name);
+				else
+					printf(" %s", call->macro_str);
 
 				if (call->args != NULL) {
 					printf(", args:( ");
 					struct cil_list_item *item = call->args->head;
 					while(item != NULL) {
-						if (((struct cil_args*)item->data)->arg_str != NULL) {
+						if (((struct cil_args*)item->data)->arg != NULL) {
+							cil_tree_print_node(((struct cil_args*)item->data)->arg);
+						}
+						else if (((struct cil_args*)item->data)->arg_str != NULL) {
 							switch (item->flavor) {
 							case CIL_TYPE : printf("type:"); break;
 							case CIL_USER : printf("user:"); break;
@@ -939,8 +957,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 							}
 							printf("%s ", ((struct cil_args*)item->data)->arg_str);
 						}
-						else if (((struct cil_args*)item->data)->arg != NULL)
-							cil_tree_print_node(((struct cil_args*)item->data)->arg);
 						item = item->next;
 					}
 					printf(")");
