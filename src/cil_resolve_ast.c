@@ -1187,7 +1187,7 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 
 	rc = cil_resolve_name(db, current, filecon->type_str, CIL_SYM_TYPES, CIL_TYPE, call, &type_node);
 	if (rc != SEPOL_OK) {
-		printf("cil_resolve_portcon: Failed to resolve type: %s, rc: %d\n", filecon->type_str, rc);
+		printf("cil_resolve_filecon: Failed to resolve type: %s, rc: %d\n", filecon->type_str, rc);
 		return rc;
 	}
 	filecon->type = (struct cil_type*)type_node->data;
@@ -1195,14 +1195,14 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (filecon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, filecon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_portcon: Failed to resolve file context: %s, rc: %d\n", filecon->context_str, rc);
+			printf("cil_resolve_filecon: Failed to resolve file context: %s, rc: %d\n", filecon->context_str, rc);
 			return rc;
 		}
 	}
 	else {
 		rc = cil_resolve_context(db, current, filecon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_portcon: Failed to resolve file context\n");
+			printf("cil_resolve_filecon: Failed to resolve file context\n");
 		}
 	}
 
