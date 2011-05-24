@@ -39,6 +39,7 @@ void test_cil_resolve_catset_catlist_neg(CuTest *);
 void test_cil_resolve_senscat(CuTest *);
 void test_cil_resolve_senscat_sublist(CuTest *);
 void test_cil_resolve_senscat_missingsens_neg(CuTest *);
+void test_cil_resolve_senscat_sublist_neg(CuTest *);
 void test_cil_resolve_senscat_category_neg(CuTest *);
 void test_cil_resolve_senscat_currrangecat(CuTest *);
 void test_cil_resolve_senscat_currrangecat_neg(CuTest *);
@@ -119,6 +120,13 @@ void test_cil_resolve_portcon_anon_context(CuTest *);
 void test_cil_resolve_portcon_anon_context_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_portcon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_portcon_neg(CuTest *tc);
+
+void test_cil_resolve_genfscon(CuTest *);
+void test_cil_resolve_genfscon_neg(CuTest *);
+void test_cil_resolve_genfscon_anon_context(CuTest *);
+void test_cil_resolve_genfscon_anon_context_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_genfscon(CuTest *tc);
+void test_cil_resolve_ast_node_helper_genfscon_neg(CuTest *tc);
 
 void test_cil_resolve_netifcon(CuTest *);
 void test_cil_resolve_netifcon_otf_neg(CuTest *);
