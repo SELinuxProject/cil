@@ -1234,16 +1234,8 @@ int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct
 int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_genfscon *genfscon = (struct cil_genfscon*)current->data;
-	struct cil_tree_node *type_node = NULL;
 	struct cil_tree_node *context_node = NULL;
 	int rc=  SEPOL_ERR;
-
-	rc = cil_resolve_name(db, current, genfscon->type_str, CIL_SYM_TYPES, CIL_TYPE, call, &type_node);
-	if (rc != SEPOL_OK) {
-		printf("cil_resolve_genfscon: Failed to resolve type: %s, rc: %d\n", genfscon->type_str, rc);
-		return rc;
-	}
-	genfscon->type = (struct cil_type*)type_node->data;
 
 	if (genfscon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, genfscon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);

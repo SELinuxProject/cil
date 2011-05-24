@@ -988,9 +988,7 @@ int cil_genfscon_init(struct cil_genfscon **genfscon)
 
 	struct cil_genfscon *new_genfscon = cil_malloc(sizeof(struct cil_genfscon));
 
-	cil_symtab_datum_init(&new_genfscon->datum);
 	new_genfscon->type_str = NULL;
-	new_genfscon->type = NULL;
 	new_genfscon->context_str = NULL;
 	new_genfscon->context = NULL;
 

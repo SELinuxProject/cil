@@ -485,9 +485,7 @@ struct cil_nodecon {
 };
 
 struct cil_genfscon {
-	struct cil_symtab_datum datum;
 	char *type_str;
-	struct cil_type *type;
 	char *path_str;
 	char *context_str;
 	struct cil_context *context;
