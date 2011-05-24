@@ -882,7 +882,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_xor);
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_eq);
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neq);
-	//SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper1);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper1);
+	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper2);
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_false);
