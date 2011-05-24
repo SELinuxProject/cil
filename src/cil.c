@@ -231,6 +231,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_portcon(*data);
 			break;
 		}
+		case (CIL_NODECON) : {
+			cil_destroy_nodecon(*data);
+			break;
+		}
 		case (CIL_GENFSCON) : {
 			cil_destroy_genfscon(*data);
 			break;
