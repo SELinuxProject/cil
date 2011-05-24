@@ -967,13 +967,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 			case CIL_OPTIONAL : {
 				struct cil_optional *optional = node->data;
-				printf("OPTIONAL: %s, state: ", optional->datum.name);
-				if (optional->datum.state == CIL_STATE_ENABLED) {
-					printf("enabled");
-				} else {
-					printf("disabled");
-				}
-				printf("\n");
+				printf("OPTIONAL: %s", optional->datum.name);
 				return;
 			}
 
