@@ -925,6 +925,10 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		return rc;
 	
 	if (parse_current->next->cl_head == NULL) {
+		if (parse_current->next->data == NULL) {
+			printf("Invalid booleanif expression (line: %d)\n", parse_current->line);
+			return SEPOL_ERR;
+		}
 		struct cil_conditional *cond;
 		cil_conditional_init(&cond);
 		cil_tree_node_init(&bif->expr_stack);
