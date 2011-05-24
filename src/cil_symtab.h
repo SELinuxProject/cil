@@ -6,6 +6,7 @@
 
 #define CIL_STATE_ENABLED 1
 #define CIL_STATE_DISABLED 2
+#define CIL_STATE_DISABLING 3
 struct cil_symtab_datum {
 	struct cil_tree_node *node;
 	char *name;
