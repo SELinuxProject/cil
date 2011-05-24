@@ -891,6 +891,10 @@ int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct ci
 	}
 
 	if (current->cl_head != NULL) {
+		if ((current->cl_head != NULL) && (current == current->parent->cl_head)) {
+			printf("Invalid booleanif expression\n");
+			return SEPOL_ERR;
+		}
 		rc = cil_gen_expr_stack(current->cl_head, flavor, stack);
 		if (rc != SEPOL_OK) 
 			return SEPOL_ERR;
@@ -932,7 +936,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	else {
 		rc = cil_gen_expr_stack(parse_current->next->cl_head, CIL_BOOL, &bif->expr_stack);
 		if (rc != SEPOL_OK) {
-			printf("cil_gen_boolif: failed to create expr tree, rc: %d\n", rc);
+			printf("cil_gen_boolif (line %d): failed to create expr tree, rc: %d\n", parse_current->line, rc);
 			return rc;
 		}
 	}
