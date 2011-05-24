@@ -796,6 +796,21 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
+			case CIL_PORTCON : {
+				struct cil_portcon *portcon = node->data;
+				printf("PORTCON:");
+				if (portcon->type_str != NULL)
+					printf(" %s", portcon->type_str);
+				else if (portcon->type != NULL)
+					printf(" %s", portcon->type->datum.name);
+				printf(" (%d %d)", portcon->port_low, portcon->port_high);
+				if (portcon->context_str != NULL)
+					printf(" %s", portcon->context_str);
+				else if (portcon->context != NULL)
+					cil_tree_print_context(portcon->context);
+				printf("\n");
+				return;
+			}
 			case CIL_NETIFCON : {
 				struct cil_netifcon *netifcon = node->data;
 				printf("NETIFCON %s", netifcon->datum.name);

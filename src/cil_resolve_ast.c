@@ -1178,6 +1178,37 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		return rc;
 }
 
+int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_portcon *portcon = (struct cil_portcon*)current->data;
+	struct cil_tree_node *type_node = NULL;
+	struct cil_tree_node *context_node = NULL;
+	int rc=  SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, portcon->type_str, CIL_SYM_TYPES, CIL_TYPE, call, &type_node);
+	if (rc != SEPOL_OK) {
+		printf("cil_resolve_portcon: Failed to resolve type: %s, rc: %d\n", portcon->type_str, rc);
+		return rc;
+	}
+	portcon->type = (struct cil_type*)type_node->data;
+
+	if (portcon->context_str != NULL) {
+		rc = cil_resolve_name(db, current, portcon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_portcon: Failed to resolve port context: %s, rc: %d\n", portcon->context_str, rc);
+			return rc;
+		}
+	}
+	else {
+		rc = cil_resolve_context(db, current, portcon->context, call);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_portcon: Failed to resolve port context\n");
+		}
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_netifcon *netifcon = (struct cil_netifcon*)current->data;
@@ -1797,6 +1828,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					case CIL_CONTEXT : {
 						printf("case context\n");
 						rc = cil_resolve_context(db, node, (struct cil_context*)node->data, call);
+						break;
+					}
+					case CIL_PORTCON : {
+						printf("case portcon\n");
+						rc = cil_resolve_portcon(db, node, call);
 						break;
 					}
 					case CIL_NETIFCON : {

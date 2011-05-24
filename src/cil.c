@@ -223,6 +223,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_context(*data);
 			break;
 		}
+		case (CIL_PORTCON) : {
+			cil_destroy_portcon(*data);
+			break;
+		}
 		case (CIL_NETIFCON) : {
 			cil_destroy_netifcon(*data);
 			break;
@@ -936,8 +940,10 @@ int cil_portcon_init(struct cil_portcon **portcon)
 	struct cil_portcon *new_portcon = cil_malloc(sizeof(struct cil_portcon));
 
 	cil_symtab_datum_init(&new_portcon->datum);
+	new_portcon->type_str = NULL;
+	new_portcon->type = NULL;
+	new_portcon->context_str = NULL;
 	new_portcon->context = NULL;
-	new_portcon->proto_str = NULL;
 
 	*portcon = new_portcon;
 

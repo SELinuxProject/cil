@@ -125,6 +125,7 @@
 #define CIL_KEY_CALL		"call"
 #define CIL_KEY_POLICYCAP	"policycap"
 #define CIL_KEY_CONTEXT		"context"
+#define CIL_KEY_PORTCON		"portcon"
 #define CIL_KEY_NETIFCON	"netifcon"
 #define CIL_KEY_SENSITIVITY	"sensitivity"
 #define CIL_KEY_SENSALIAS	"sensitivityalias"
@@ -447,11 +448,13 @@ struct cil_filecon {
 };
 
 struct cil_portcon {
-	struct cil_symtab_datum datum; 
-	struct cil_context *context;
-	char *proto_str;
+	struct cil_symtab_datum datum;
+	char *type_str;
+	struct cil_type *type;
+	uint32_t port_low;
+	uint32_t port_high;
 	char *context_str;
-	//proto;
+	struct cil_context *context;
 };
 
 struct cil_netifcon {

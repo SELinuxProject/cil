@@ -1921,6 +1921,81 @@ void cil_destroy_context(struct cil_context *context)
 //		cil_destroy_level(high);	
 }
 
+int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL
+	|| parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL
+	|| parse_current->next->next->next == NULL) {
+		printf("Invalid portcon declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_portcon *portcon;
+	int rc = cil_portcon_init(&portcon);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	portcon->type_str = cil_strdup(parse_current->next->data);
+
+	if (parse_current->next->next->cl_head != NULL) {
+		if (parse_current->next->next->cl_head->next != NULL) {
+			portcon->port_low = (uint32_t)atoi(parse_current->next->next->cl_head->data);
+			portcon->port_high = (uint32_t)atoi(parse_current->next->next->cl_head->next->data);
+		}
+		else {
+			printf("Error: Improper port range specified\n");
+			return SEPOL_ERR;
+		}
+	}
+	else {
+		portcon->port_low = (uint32_t)atoi(parse_current->next->next->data);
+		portcon->port_high = (uint32_t)atoi(parse_current->next->next->data);
+	}
+
+	if (parse_current->next->next->next->cl_head == NULL ) {
+		portcon->context_str = cil_strdup(parse_current->next->next->next->data);
+	}
+	else {
+		rc = cil_context_init(&portcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init port context\n");
+			goto gen_portcon_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->next->cl_head, portcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill port context\n");
+			goto gen_portcon_cleanup;
+		}
+	}
+
+	ast_node->data = portcon;
+	ast_node->flavor = CIL_PORTCON; 
+
+	return SEPOL_OK;
+
+	gen_portcon_cleanup:
+		cil_destroy_portcon(portcon);
+		return SEPOL_ERR;
+}
+
+void cil_destroy_portcon(struct cil_portcon *portcon)
+{
+	if (portcon->type_str != NULL)
+		free(portcon->type_str);
+	if (portcon->context_str != NULL)
+		free(portcon->context_str);
+	else if (portcon->context != NULL)
+		cil_destroy_context(portcon->context);
+	free(portcon);
+}
+
 int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -2608,6 +2683,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_context(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_context failed, rc: %d\n", rc);
+					return rc;
+				}
+				*finished = CIL_TREE_SKIP_NEXT;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_PORTCON)) {
+				rc = cil_gen_portcon(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_netifcon failed, rc: %d\n", rc);
 					return rc;
 				}
 				*finished = CIL_TREE_SKIP_NEXT;
