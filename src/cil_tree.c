@@ -838,6 +838,21 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
+			case CIL_GENFSCON : {
+				struct cil_genfscon *genfscon = node->data;
+				printf("GENFSCON:");
+				if (genfscon->type_str != NULL)
+					printf(" %s", genfscon->type_str);
+				else if (genfscon->type != NULL)
+					printf(" %s", genfscon->type->datum.name);
+				printf(" %s", genfscon->path_str);
+				if (genfscon->context_str != NULL)
+					printf(" %s", genfscon->context_str);
+				else if (genfscon->context != NULL)
+					cil_tree_print_context(genfscon->context);
+				printf("\n");
+				return;
+			}
 			case CIL_NETIFCON : {
 				struct cil_netifcon *netifcon = node->data;
 				printf("NETIFCON %s", netifcon->datum.name);

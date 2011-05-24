@@ -1240,6 +1240,37 @@ int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct
 	return SEPOL_OK;
 }
 
+int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_genfscon *genfscon = (struct cil_genfscon*)current->data;
+	struct cil_tree_node *type_node = NULL;
+	struct cil_tree_node *context_node = NULL;
+	int rc=  SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, genfscon->type_str, CIL_SYM_TYPES, CIL_TYPE, call, &type_node);
+	if (rc != SEPOL_OK) {
+		printf("cil_resolve_genfscon: Failed to resolve type: %s, rc: %d\n", genfscon->type_str, rc);
+		return rc;
+	}
+	genfscon->type = (struct cil_type*)type_node->data;
+
+	if (genfscon->context_str != NULL) {
+		rc = cil_resolve_name(db, current, genfscon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_genfscon: Failed to resolve genfs context: %s, rc: %d\n", genfscon->context_str, rc);
+			return rc;
+		}
+	}
+	else {
+		rc = cil_resolve_context(db, current, genfscon->context, call);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_genfscon: Failed to resolve genfs context\n");
+		}
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_nodecon *nodecon = (struct cil_nodecon*)current->data;
@@ -1897,6 +1928,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					case CIL_NODECON : {
 						printf("case nodecon\n");
 						rc = cil_resolve_nodecon(db, node, call);
+						break;
+					}
+					case CIL_GENFSCON : {
+						printf("case genfscon\n");
+						rc = cil_resolve_genfscon(db, node, call);
 						break;
 					}
 					case CIL_NETIFCON : {

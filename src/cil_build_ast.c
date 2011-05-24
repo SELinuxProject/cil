@@ -2135,6 +2135,71 @@ void cil_destroy_nodecon(struct cil_nodecon *nodecon)
 	free(nodecon);
 }
 
+int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL
+	|| parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL
+	|| parse_current->next->next->cl_head != NULL
+	|| parse_current->next->next->next == NULL) {
+		printf("Invalid genfscon declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_genfscon *genfscon;
+	int rc = cil_genfscon_init(&genfscon);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	genfscon->type_str = cil_strdup(parse_current->next->data);
+	genfscon->path_str = cil_strdup(parse_current->next->next->data);
+
+	if (parse_current->next->next->next->cl_head == NULL ) {
+		genfscon->context_str = cil_strdup(parse_current->next->next->next->data);
+	}
+	else {
+		rc = cil_context_init(&genfscon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init genfs context\n");
+			goto gen_genfscon_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->next->cl_head, genfscon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill genfs context\n");
+			goto gen_genfscon_cleanup;
+		}
+	}
+
+	ast_node->data = genfscon;
+	ast_node->flavor = CIL_GENFSCON; 
+
+	return SEPOL_OK;
+
+	gen_genfscon_cleanup:
+		cil_destroy_genfscon(genfscon);
+		return SEPOL_ERR;
+}
+
+void cil_destroy_genfscon(struct cil_genfscon *genfscon)
+{
+	if (genfscon->type_str != NULL)
+		free(genfscon->type_str);
+	if (genfscon->path_str != NULL)
+		free(genfscon->path_str);
+	if (genfscon->context_str != NULL)
+		free(genfscon->context_str);
+	else if (genfscon->context != NULL)
+		cil_destroy_context(genfscon->context);
+	free(genfscon);
+}
+
+
 int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -2846,6 +2911,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_nodecon(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_nodecon failed, rc: %d\n", rc);
+					return rc;
+				}
+				*finished = CIL_TREE_SKIP_NEXT;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_GENFSCON)) {
+				rc = cil_gen_genfscon(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_genfscon failed, rc: %d\n", rc);
 					return rc;
 				}
 				*finished = CIL_TREE_SKIP_NEXT;

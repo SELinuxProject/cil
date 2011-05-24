@@ -92,6 +92,8 @@ int cil_gen_portcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_nod
 void cil_destroy_portcon(struct cil_portcon *);
 int cil_gen_nodecon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_nodecon(struct cil_nodecon *);
+int cil_gen_genfscon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_genfscon(struct cil_genfscon *);
 int cil_gen_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_netifcon(struct cil_netifcon *);
 int cil_gen_macro(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

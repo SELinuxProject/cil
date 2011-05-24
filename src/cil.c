@@ -231,6 +231,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_portcon(*data);
 			break;
 		}
+		case (CIL_GENFSCON) : {
+			cil_destroy_genfscon(*data);
+			break;
+		}
 		case (CIL_NETIFCON) : {
 			cil_destroy_netifcon(*data);
 			break;
@@ -974,6 +978,25 @@ int cil_nodecon_init(struct cil_nodecon **nodecon)
 	new_nodecon->context = NULL;
 
 	*nodecon = new_nodecon;
+
+	return SEPOL_OK;
+}
+
+int cil_genfscon_init(struct cil_genfscon **genfscon)
+{
+	if (genfscon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_genfscon *new_genfscon = cil_malloc(sizeof(struct cil_genfscon));
+
+	cil_symtab_datum_init(&new_genfscon->datum);
+	new_genfscon->type_str = NULL;
+	new_genfscon->type = NULL;
+	new_genfscon->context_str = NULL;
+	new_genfscon->context = NULL;
+
+	*genfscon = new_genfscon;
 
 	return SEPOL_OK;
 }
