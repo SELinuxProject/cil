@@ -881,6 +881,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_type_rule_member);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_type_rule_member_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_filecon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_filecon_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_filecon_anon_context);
+	SUITE_ADD_TEST(suite, test_cil_resolve_filecon_anon_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filecon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filecon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_otf_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_interface_neg);
