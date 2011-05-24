@@ -1218,6 +1218,7 @@ int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct
 		rc = cil_resolve_context(db, current, portcon->context, call);
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_portcon: Failed to resolve port context\n");
+			return rc;
 		}
 	}
 
