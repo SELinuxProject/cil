@@ -651,6 +651,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_portnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_contextnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_portcon_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_portcon);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_portcon_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon);
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_anon_context);

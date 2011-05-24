@@ -408,6 +408,7 @@ void test_cil_gen_portcon_str1parens_neg(CuTest *tc);
 void test_cil_gen_portcon_portnull_neg(CuTest *tc);
 void test_cil_gen_portcon_contextnull_neg(CuTest *tc);
 void test_cil_gen_portcon_context_neg(CuTest *tc);
+void test_cil_gen_portcon_extra_neg(CuTest *tc);
 
 void test_cil_gen_nodecon(CuTest *tc);
 void test_cil_gen_nodecon_anon_context(CuTest *tc);
@@ -582,6 +583,9 @@ void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_filecon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_filecon_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_portcon(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_portcon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_nodecon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_nodecon_neg(CuTest *tc);
