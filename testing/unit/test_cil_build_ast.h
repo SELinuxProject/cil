@@ -432,6 +432,19 @@ void test_cil_gen_nodecon_contextnull_neg(CuTest *tc);
 void test_cil_gen_nodecon_context_neg(CuTest *tc);
 void test_cil_gen_nodecon_extra_neg(CuTest *tc);
 
+void test_cil_gen_genfscon(CuTest *tc);
+void test_cil_gen_genfscon_anon_context(CuTest *tc);
+void test_cil_gen_genfscon_dbnull_neg(CuTest *tc);
+void test_cil_gen_genfscon_currnull_neg(CuTest *tc);
+void test_cil_gen_genfscon_astnull_neg(CuTest *tc);
+void test_cil_gen_genfscon_typenull_neg(CuTest *tc);
+void test_cil_gen_genfscon_typeparens_neg(CuTest *tc);
+void test_cil_gen_genfscon_pathnull_neg(CuTest *tc);
+void test_cil_gen_genfscon_pathparens_neg(CuTest *tc);
+void test_cil_gen_genfscon_contextnull_neg(CuTest *tc);
+void test_cil_gen_genfscon_context_neg(CuTest *tc);
+void test_cil_gen_genfscon_extra_neg(CuTest *tc);
+
 void test_cil_gen_netifcon(CuTest *tc);
 void test_cil_gen_netifcon_nested(CuTest *tc);
 void test_cil_gen_netifcon_nested_neg(CuTest *tc);
@@ -599,6 +612,9 @@ void test_cil_build_ast_node_helper_gen_portcon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_nodecon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_nodecon_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_genfscon(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_genfscon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_netifcon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc);

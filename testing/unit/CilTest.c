@@ -679,6 +679,21 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_nodecon);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_nodecon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_anon_context);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_typenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_typeparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_pathnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_pathparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_contextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_genfscon_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_genfscon);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_genfscon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested);
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested_neg);
