@@ -652,6 +652,20 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_contextnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_context_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_anon_context);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ip1null_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ip1parens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ip2null_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ip2parens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_contextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_nodecon);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_nodecon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested);
 	SUITE_ADD_TEST(suite, test_cil_gen_netifcon_nested_neg);
