@@ -106,6 +106,10 @@ void test_cil_gen_expr_stack_currnull_neg(CuTest *);
 void test_cil_gen_expr_stack_stacknull_neg(CuTest *);
 
 void test_cil_gen_boolif(CuTest *);
+void test_cil_gen_boolif_nested(CuTest *);
+void test_cil_gen_boolif_nested_neg(CuTest *);
+void test_cil_gen_boolif_extra_neg(CuTest *);
+void test_cil_gen_boolif_extra_parens_neg(CuTest *);
 void test_cil_gen_boolif_nocond(CuTest *);
 void test_cil_gen_boolif_neg(CuTest *);
 void test_cil_gen_boolif_dbnull_neg(CuTest *);
