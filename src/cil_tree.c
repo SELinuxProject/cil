@@ -823,13 +823,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_PORTCON : {
 				struct cil_portcon *portcon = node->data;
 				printf("PORTCON:");
-				if (portcon->type != NULL)
-					printf(" %s", portcon->type->datum.name);
-				else if (portcon->type != NULL)
-					printf(" %s", portcon->type_str);
-
-				printf(" (%d %d)", portcon->port_low, portcon->port_high);
-
+				printf(" %s (%d %d)", portcon->type_str, portcon->port_low, portcon->port_high);
 				if (portcon->context != NULL)
 					cil_tree_print_context(portcon->context);
 				else if (portcon->context_str != NULL)

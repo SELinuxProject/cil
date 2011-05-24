@@ -467,9 +467,7 @@ struct cil_filecon {
 };
 
 struct cil_portcon {
-	struct cil_symtab_datum datum;
 	char *type_str;
-	struct cil_type *type;
 	uint32_t port_low;
 	uint32_t port_high;
 	char *context_str;

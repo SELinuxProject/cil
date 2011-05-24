@@ -1203,16 +1203,8 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_portcon *portcon = (struct cil_portcon*)current->data;
-	struct cil_tree_node *type_node = NULL;
 	struct cil_tree_node *context_node = NULL;
 	int rc=  SEPOL_ERR;
-
-	rc = cil_resolve_name(db, current, portcon->type_str, CIL_SYM_TYPES, CIL_TYPE, call, &type_node);
-	if (rc != SEPOL_OK) {
-		printf("cil_resolve_portcon: Failed to resolve type: %s, rc: %d\n", portcon->type_str, rc);
-		return rc;
-	}
-	portcon->type = (struct cil_type*)type_node->data;
 
 	if (portcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, portcon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);

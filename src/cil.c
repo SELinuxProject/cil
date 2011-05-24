@@ -950,9 +950,7 @@ int cil_portcon_init(struct cil_portcon **portcon)
 
 	struct cil_portcon *new_portcon = cil_malloc(sizeof(struct cil_portcon));
 
-	cil_symtab_datum_init(&new_portcon->datum);
 	new_portcon->type_str = NULL;
-	new_portcon->type = NULL;
 	new_portcon->context_str = NULL;
 	new_portcon->context = NULL;
 
