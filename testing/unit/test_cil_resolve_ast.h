@@ -183,12 +183,12 @@ void test_cil_resolve_call2_sens(CuTest *);
 void test_cil_resolve_call2_cat(CuTest *);
 void test_cil_resolve_call2_catset(CuTest *);
 void test_cil_resolve_call2_catset_anon(CuTest *);
+void test_cil_resolve_call2_catset_anon_neg(CuTest *);
 void test_cil_resolve_call2_level(CuTest *);
 void test_cil_resolve_call2_class(CuTest *);
 void test_cil_resolve_call2_level(CuTest *);
 void test_cil_resolve_call2_level_anon(CuTest *);
 void test_cil_resolve_call2_unknown_neg(CuTest *);
-void test_cil_resolve_call2_name_neg(CuTest *);
 
 void test_cil_resolve_name_call_args(CuTest *);
 void test_cil_resolve_name_call_args_extraparams(CuTest *);
