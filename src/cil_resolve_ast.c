@@ -1804,6 +1804,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	struct cil_call *call = NULL;
 	struct cil_tree_node *callstack = NULL;
 	struct cil_tree_node *optstack = NULL;
+	int *changed = NULL;
 
 	if (other->head->flavor == CIL_DB)
 		db = (struct cil_db*)other->head->data;
@@ -1826,6 +1827,12 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 
 	if (other->head->next->next->next != NULL) {
 		optstack = (struct cil_tree_node *)other->head->next->next->next->data;
+	} else {
+		return SEPOL_ERR;
+	}
+
+	if (other->head->next->next->next->next != NULL) {
+		changed = (int *)other->head->next->next->next->next->data;
 	} else {
 		return SEPOL_ERR;
 	}
@@ -2040,7 +2047,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		struct cil_optional *opt = (struct cil_optional *)optstack->data;
 		opt->datum.state = CIL_STATE_DISABLING;
 		/* let the resolve loop know something was changed */
-		int *changed = other->head->next->next->next->next->data;
 		*changed = 1;
 		rc = SEPOL_OK;
 	}
