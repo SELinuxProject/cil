@@ -9,7 +9,7 @@
 #include "../../src/cil_tree.h"
 
 int __cil_build_ast_node_helper(struct cil_tree_node *, uint32_t *, struct cil_list *);
-int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_tree_node *expr_root);
+//int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_tree_node *expr_root);
 
 // First seen in cil_gen_common
 void test_cil_parse_to_list(CuTest *tc) {
@@ -5642,7 +5642,7 @@ void test_cil_gen_level_astnull_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test__cil_build_constrain_tree(CuTest *tc) {
+/*void test__cil_build_constrain_tree(CuTest *tc) {
 	char *line[] = {"(", "eq", "12", "h2", ")", NULL};
 	
         struct cil_tree *test_tree;
@@ -5665,8 +5665,35 @@ void test__cil_build_constrain_tree(CuTest *tc) {
 	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_con->perm_list_str, CIL_AST_STR);
 	cil_tree_init(&test_con->expr);
 
-	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
+//	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
         CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test__cil_build_constrain_tree_unknown_neg(CuTest *tc) {
+	char *line[] = {"(", "dne", "l1", "l2", ")", NULL};
+	
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_constrain *test_con;
+	cil_constrain_init(&test_con);
+	cil_list_init(&test_con->class_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_con->class_list_str, CIL_AST_STR); 
+	cil_list_init(&test_con->perm_list_str);
+	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_con->perm_list_str, CIL_AST_STR);
+	cil_tree_init(&test_con->expr);
+
+//	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test__cil_build_constrain_tree_multi_constrain(CuTest *tc) {
@@ -5692,7 +5719,7 @@ void test__cil_build_constrain_tree_multi_constrain(CuTest *tc) {
 	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_con->perm_list_str, CIL_AST_STR);
 	cil_tree_init(&test_con->expr);
 
-	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
+//	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node, CIL_CONSTRAIN);
         CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5719,7 +5746,7 @@ void test__cil_build_constrain_tree_currnull_neg(CuTest *tc) {
 	cil_parse_to_list(test_tree->root->cl_head->cl_head, test_con->perm_list_str, CIL_AST_STR);
 	cil_tree_init(&test_con->expr);
 
-	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
+//	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5744,7 +5771,7 @@ void test__cil_build_constrain_tree_exprnull_neg(CuTest *tc) {
 
 	int rc = __cil_build_constrain_tree(test_tree->root->cl_head->cl_head, test_ast_node);
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
+}*/
 
 void test_cil_gen_constrain(CuTest *tc) {
 	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
@@ -5763,6 +5790,25 @@ void test_cil_gen_constrain(CuTest *tc) {
 
         int rc = cil_gen_constrain(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_MLSCONSTRAIN);
         CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_constrain_neg(CuTest *tc) {
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "dne", "l1", "l2", ")", ")", NULL};
+	
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_constrain(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_MLSCONSTRAIN);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_classset_neg(CuTest *tc) {
