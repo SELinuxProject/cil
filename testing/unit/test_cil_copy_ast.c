@@ -974,6 +974,30 @@ void test_cil_copy_fill_context_anonhigh(CuTest *tc) {
 		((struct cil_context *)test_ast_node->data)->high_str);
 }
 
+void test_cil_copy_call(CuTest *tc) {
+	char *line[] = {"(", "call", "mm", "(", "foo", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_call(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_call *test_copy;
+	cil_call_init(&test_copy);
+
+	cil_copy_call(test_db, (struct cil_call *)test_ast_node->data, &test_copy);
+	CuAssertStrEquals(tc, test_copy->macro_str, ((struct cil_call *)test_ast_node->data)->macro_str);
+}
+
 void test_cil_copy_constrain(CuTest *tc) {
 	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
 	
