@@ -213,6 +213,11 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 	}
 	clscom->common = (struct cil_common*)(common_node->data);
 
+	if (clscom->class->common != NULL) {
+		printf("class cannot be associeated with more than one common\n");
+		return SEPOL_ERR;
+	}
+
 	clscom->class->common = clscom->common;
 
 	return SEPOL_OK;
