@@ -42,6 +42,8 @@ void test_cil_copy_cat(CuTest *);
 
 void test_cil_copy_catalias(CuTest *);
 
+void test_cil_copy_senscat(CuTest *);
+
 void test_cil_copy_level(CuTest *);
 
 void test_cil_copy_fill_level(CuTest *);
