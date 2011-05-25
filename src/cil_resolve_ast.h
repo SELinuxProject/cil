@@ -44,4 +44,7 @@ int cil_resolve_ast(struct cil_db *, struct cil_tree_node *);
 int cil_resolve_name(struct cil_db *, struct cil_tree_node *, char *, uint32_t, uint32_t, struct cil_call *, struct cil_tree_node **);
 int cil_resolve_name_global(symtab_t, char *, void **);
 
+int cil_reset_class(struct cil_db *, struct cil_tree_node *, struct cil_call *);
+int cil_reset_sens(struct cil_db *, struct cil_tree_node *, struct cil_call *);
+
 #endif /* CIL_RESOLVE_AST_H_ */

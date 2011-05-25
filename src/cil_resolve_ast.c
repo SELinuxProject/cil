@@ -87,6 +87,11 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		printf("Failed to resolve perm list\n");
 		return rc;
 	}
+
+	if (rule->perms_list != NULL) {
+		/* clean up because of re-resolve */
+		cil_list_destroy(&rule->perms_list, 0);
+	}
 	rule->perms_list = perms_list;
 
 	return SEPOL_OK;
@@ -219,6 +224,31 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 	}
 
 	clscom->class->common = clscom->common;
+
+	return SEPOL_OK;
+}
+
+int cil_reset_class(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_class *class = (struct cil_class *)current->data;
+	
+	/* during a re-resolve, we need to reset the common, so a classcommon
+	 * statement isn't seen as a duplicate */
+	class->common = NULL;
+
+	return SEPOL_OK;
+}
+
+int cil_reset_sens(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_sens *sens = (struct cil_sens *)current->data;
+	/* during a re-resolve, we need to reset the categories associated with
+	 * this sensitivity from a (sensitivitycategory) statement */
+	cil_symtab_destroy(&sens->cats);
+	int rc = symtab_init(&sens->cats, CIL_SYM_SIZE);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
 
 	return SEPOL_OK;
 }
@@ -870,7 +900,11 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current, struct 
 		printf("Failed to resolve category list\n");
 		return rc;
 	}
-	
+
+	if (catset->cat_list != NULL) {
+		/* clean up because of re-resolve */
+		cil_list_destroy(&catset->cat_list, 0);
+	}
 	catset->cat_list = res_cat_list;
 	
 	return SEPOL_OK;
@@ -1011,7 +1045,11 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 			printf("Failed to verify sensitivitycategory relationship\n");
 			return rc;
 		}
-	
+
+		if (level->cat_list) {
+			/* clean up because of re-resolve */
+			cil_list_destroy(&level->cat_list, 0);
+		}
 		level->cat_list = res_cat_list;
 	}
 
@@ -1097,7 +1135,16 @@ int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, stru
 		return rc;
 	}
 
+	if (cons->class_list != NULL) {
+		/* clean up because of re-resolve */
+		cil_list_destroy(&cons->class_list, 0);
+	}
 	cons->class_list = class_list;
+
+	if (cons->perm_list != NULL) {
+		/* clean up because of re-resolve */
+		cil_list_destroy(&cons->perm_list, 0);
+	}
 	cons->perm_list = perm_list;
 
 	return SEPOL_OK;
@@ -1806,6 +1853,16 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						rc = cil_resolve_dominance(db, node, call);
 						break;
 					}
+					case CIL_CLASS : {
+						printf("case class\n");
+						rc = cil_reset_class(db, node, call);
+						break;
+					}
+					case CIL_SENS: {
+						printf("case sensitivity\n");
+						rc = cil_reset_sens(db, node, call);
+						break;
+					}
 				}
 				break;
 			}
@@ -2192,8 +2249,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 		if (changed) {
 			/* something changed (likely, an optional was disabled). need to redo everything :( */
+			printf("----- Redoing resolve passes -----\n");
 			pass = 0;
 			changed = 0;
+
+			/* reset the global data */
+			cil_list_destroy(&db->catorder, 0);
+			cil_list_destroy(&db->dominance, 0);
 		}
 	}
 
