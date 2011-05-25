@@ -996,6 +996,35 @@ void test_cil_copy_call(CuTest *tc) {
 	CuAssertStrEquals(tc, test_copy->macro_str, ((struct cil_call *)test_ast_node->data)->macro_str);
 }
 
+void test_cil_copy_optional(CuTest *tc) {
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_optional(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_optional(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_optional *)test_copy->data)->datum.name, 
+		((struct cil_optional *)test_ast_node->data)->datum.name);
+}
+
 void test_cil_copy_constrain(CuTest *tc) {
 	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
 	

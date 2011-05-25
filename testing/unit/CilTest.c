@@ -1097,6 +1097,8 @@ CuSuite* CilTreeGetSuite() {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_call);
 	
+	SUITE_ADD_TEST(suite, test_cil_copy_optional);
+	
 	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
 	
 	return suite;

@@ -63,6 +63,8 @@ void test_cil_copy_fill_context_anonhigh(CuTest *);
 
 void test_cil_copy_call(CuTest *);
 
+void test_cil_copy_optional(CuTest *);
+
 void test_cil_copy_constrain(CuTest *);
 
 #endif
