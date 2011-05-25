@@ -5036,7 +5036,7 @@ void test_cil_gen_catorder_astnull_neg(CuTest *tc) {
 void test_cil_gen_catorder_missingcats_neg(CuTest *tc) {
 	char *line[] = {"(", "category", "c0", ")",
 			"(", "category", "c255", ")",
-			"(", "categoryorder", NULL};
+			"(", "categoryorder", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5057,7 +5057,28 @@ void test_cil_gen_catorder_missingcats_neg(CuTest *tc) {
 void test_cil_gen_catorder_nosublist_neg(CuTest *tc) {
 	char *line[] = {"(", "category", "c0", ")",
 			"(", "category", "c255", ")",
-			"(", "categoryorder", "c0", "c255", NULL};
+			"(", "categoryorder", "c0", "c255", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_catorder(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catorder_nestedcat_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c255", ")",
+			"(", "categoryorder", "(", "c0", "(", "c255", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

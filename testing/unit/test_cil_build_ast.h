@@ -311,6 +311,7 @@ void test_cil_gen_catorder_currnull_neg(CuTest *tc);
 void test_cil_gen_catorder_astnull_neg(CuTest *tc);
 void test_cil_gen_catorder_missingcats_neg(CuTest *tc);
 void test_cil_gen_catorder_nosublist_neg(CuTest *tc);
+void test_cil_gen_catorder_nestedcat_neg(CuTest *tc);
 
 void test_cil_gen_dominance(CuTest *tc);
 void test_cil_gen_dominance_dbnull_neg(CuTest *tc);
