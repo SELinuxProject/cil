@@ -783,6 +783,84 @@ void test_cil_copy_context(CuTest *tc) {
 		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_netifcon(CuTest *tc) {
+	char *line[] = {"(", "netifcon", "eth0", "if_default", "packet_default", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_netifcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_netifcon(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->datum.name, 
+		((struct cil_netifcon *)test_ast_node->data)->datum.name);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->if_context_str,
+		((struct cil_netifcon *)test_ast_node->data)->if_context_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context_str);
+}
+
+void test_cil_copy_netifcon_nested(CuTest *tc) {
+	char *line[] = {"(", "netifcon", "eth1", 
+			"(", "system_u", "object_r", "netif_t", "low", "high", ")",
+			"(", "system_u", "object_r", "netif_t", "low", "high", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_netifcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_netifcon(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_netifcon*)test_copy->data)->datum.name, 
+		((struct cil_netifcon *)test_ast_node->data)->datum.name);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->if_context_str,
+		((struct cil_netifcon *)test_ast_node->data)->if_context_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->user_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context->user_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->role_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context->role_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->type_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context->type_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->low_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context->low_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->high_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context->high_str);
+}
+
 void test_cil_copy_fill_context(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
 	
