@@ -2344,6 +2344,13 @@ void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 	free(netifcon);
 }
 
+void cil_destroy_param(struct cil_param *param)
+{
+	if (param->str != NULL)
+		free(param->str);
+	free(param);
+}
+
 int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -2354,7 +2361,6 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return SEPOL_ERR;
 	}
 
-	uint32_t flavor = 0;
 	char *name = (char*)parse_current->next->data;
 	struct cil_macro *macro;
 	int rc = cil_macro_init(&macro);	
@@ -2372,29 +2378,31 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 				goto gen_macro_cleanup;
 			}
 			char *kind = current_item->cl_head->data;
+			struct cil_param *param;
+			cil_param_init(&param);
 			if (!strcmp(kind, CIL_KEY_TYPE)) {
-				flavor = CIL_TYPE;
+				param->flavor = CIL_TYPE;
 			}
 			else if (!strcmp(kind, CIL_KEY_ROLE)) {
-				flavor = CIL_ROLE;
+				param->flavor = CIL_ROLE;
 			}
 			else if (!strcmp(kind, CIL_KEY_USER)) {
-				flavor = CIL_USER;
+				param->flavor = CIL_USER;
 			}
 			else if (!strcmp(kind, CIL_KEY_SENSITIVITY)) {
-				flavor = CIL_SENS;
+				param->flavor = CIL_SENS;
 			}
 			else if (!strcmp(kind, CIL_KEY_CATEGORY)) {
-				flavor = CIL_CAT;
+				param->flavor = CIL_CAT;
 			}
 			else if (!strcmp(kind, CIL_KEY_CATSET)) {
-				flavor = CIL_CATSET;
+				param->flavor = CIL_CATSET;
 			}
 			else if (!strcmp(kind, CIL_KEY_LEVEL)) {
-				flavor = CIL_LEVEL;
+				param->flavor = CIL_LEVEL;
 			}
 			else if (!strcmp(kind, CIL_KEY_CLASS)) {
-				flavor = CIL_CLASS;
+				param->flavor = CIL_CLASS;
 			}
 			//TODO permissionset and IP addresses
 			else {
@@ -2402,17 +2410,18 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 				goto gen_macro_cleanup;
 			}
 
-			char *param =  cil_strdup(current_item->cl_head->next->data);
+			param->str =  cil_strdup(current_item->cl_head->next->data);
 
-			if (strchr(param, '.')) {
+			if (strchr(param->str, '.')) {
 				printf("Invalid macro declaration: parameter names cannot contain a '.' (line: %d)\n", parse_current->line);
+				cil_destroy_param(param);
 				goto gen_macro_cleanup;
 			}
 
 			if (params_tail == NULL) {
 				cil_list_item_init(&macro->params->head);
 				macro->params->head->data = param;
-				macro->params->head->flavor = flavor;
+				macro->params->head->flavor = CIL_PARAM;
 
 				params_tail = macro->params->head;
 			}			
@@ -2420,8 +2429,8 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 				//walk current list and check for duplicate parameters
 				struct cil_list_item *curr_param = macro->params->head;
 				while (curr_param != NULL) {
-					if (!strcmp(param, (char*)curr_param->data)) {
-						if (flavor == curr_param->flavor) {
+					if (!strcmp(param->str, ((struct cil_param*)curr_param->data)->str)) {
+						if (param->flavor == ((struct cil_param*)curr_param->data)->flavor) {
 							printf("Invalid macro declaration (line: %d): Duplicate parameter\n", parse_current->line);
 							goto gen_macro_cleanup;
 						}
@@ -2431,7 +2440,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 				cil_list_item_init(&params_tail->next);
 				params_tail->next->data = param;
-				params_tail->next->flavor = flavor;
+				params_tail->next->flavor = CIL_PARAM;
 				
 				params_tail = params_tail->next;
 				params_tail->next = NULL;

@@ -96,6 +96,7 @@ int cil_gen_genfscon(struct cil_db *, struct cil_tree_node *, struct cil_tree_no
 void cil_destroy_genfscon(struct cil_genfscon *);
 int cil_gen_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_netifcon(struct cil_netifcon *);
+void cil_destroy_param(struct cil_param*);
 int cil_gen_macro(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_macro(struct cil_macro *);
 int cil_gen_call(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

@@ -906,7 +906,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					struct cil_list_item *curr_param = macro->params->head;
 					printf(" parameters: (");
 					while (curr_param != NULL) {
-						printf(" flavor: %d, string: %s;", curr_param->flavor, (char*)curr_param->data);
+						printf(" flavor: %d, string: %s;", ((struct cil_param*)curr_param->data)->flavor, ((struct cil_param*)curr_param->data)->str);
 
 						curr_param = curr_param->next;
 					}

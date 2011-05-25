@@ -243,6 +243,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_netifcon(*data);
 			break;
 		}
+		case (CIL_PARAM) : {
+			cil_destroy_param(*data);
+			break;
+		}
 		case (CIL_MACRO) : {
 			cil_destroy_macro(*data);
 			break;
@@ -1184,6 +1188,22 @@ int cil_optional_init(struct cil_optional **optional)
 	cil_symtab_datum_init(&new_optional->datum);
 
 	*optional = new_optional;
+
+	return SEPOL_OK;
+}
+
+int cil_param_init(struct cil_param **param)
+{
+	if (param == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_param *new_param = cil_malloc(sizeof(struct cil_param));
+
+	new_param->str = NULL;
+	new_param->flavor = CIL_AST_STR;
+
+	*param = new_param;
 
 	return SEPOL_OK;
 }

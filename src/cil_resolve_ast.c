@@ -1439,13 +1439,15 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				printf("cil_resolve_call1 failed: missing arguments (line: %d)\n", current->line);
 				return SEPOL_ERR;
 			}
+			if (item->flavor != CIL_PARAM)
+				return SEPOL_ERR;
 
 			new_arg = cil_malloc(sizeof(struct cil_args));
 			new_arg->arg_str = NULL;
 			new_arg->arg = NULL;
 			new_arg->param_str = NULL;
 
-			switch (item->flavor) {
+			switch (((struct cil_param*)item->data)->flavor) {
 				case CIL_TYPE : {
 					new_arg->arg_str = cil_strdup(pc->data);
 					break;
@@ -1506,8 +1508,8 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 					return SEPOL_ERR;
 				}
 			}
-			new_arg->param_str = item->data;
-			new_arg->flavor = item->flavor;
+			new_arg->param_str = ((struct cil_param*)item->data)->str;
+			new_arg->flavor = ((struct cil_param*)item->data)->flavor;
 
 			if (args_tail == NULL) {
 				new_call->args->head = cil_malloc(sizeof(struct cil_list_item));

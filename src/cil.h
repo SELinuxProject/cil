@@ -71,6 +71,7 @@
 #define CIL_NEQ			56
 #define CIL_ELSE		57
 #define CIL_COND		58
+#define CIL_PARAM		59
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -534,6 +535,11 @@ struct cil_constrain {
 	struct cil_tree *expr;
 };
 
+struct cil_param {
+	char *str;
+	uint32_t flavor;
+};
+
 struct cil_macro {
 	struct cil_symtab_datum datum;
 	symtab_t symtab[CIL_SYM_NUM];
@@ -630,6 +636,7 @@ int cil_optional_init(struct cil_optional **optional);
 int cil_conditional_init(struct cil_conditional **conditional);
 int cil_booleanif_init(struct cil_booleanif **booleanif);
 int cil_macro_init(struct cil_macro **macro);
+int cil_param_init(struct cil_param **param);
 int cil_policycap_init(struct cil_policycap **policycap);
 
 #endif
