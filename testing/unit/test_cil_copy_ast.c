@@ -459,6 +459,33 @@ void test_cil_copy_bool(CuTest *tc) {
 		((struct cil_bool *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_type_rule(CuTest *tc) {
+	char *line[] = {"(", "typetransition", "foo", "bar", "file", "foobar", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_type_rule(test_tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE_TRANSITION);
+
+	struct cil_type_rule *test_copy;
+	cil_type_rule_init(&test_copy);
+
+	cil_copy_type_rule((struct cil_type_rule *)test_ast_node->data, &test_copy);
+	CuAssertIntEquals(tc, ((struct cil_type_rule *)test_ast_node->data)->rule_kind, test_copy->rule_kind);
+	CuAssertStrEquals(tc, ((struct cil_type_rule *)test_ast_node->data)->src_str, test_copy->src_str);
+	CuAssertStrEquals(tc, ((struct cil_type_rule *)test_ast_node->data)->tgt_str, test_copy->tgt_str);
+	CuAssertStrEquals(tc, ((struct cil_type_rule *)test_ast_node->data)->obj_str, test_copy->obj_str);
+}
+
 void test_cil_copy_avrule(CuTest *tc) {
 	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
 

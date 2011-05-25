@@ -34,6 +34,8 @@ void test_cil_copy_bool(CuTest *);
 
 void test_cil_copy_avrule(CuTest *);
 
+void test_cil_copy_type_rule(CuTest *);
+
 void test_cil_copy_cat(CuTest *);
 
 void test_cil_copy_catalias(CuTest *);
