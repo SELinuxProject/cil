@@ -729,6 +729,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_unnamed_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_noparam_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_nosecondparam_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_macro_noparam_name_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_emptyparam_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro_neg);
@@ -932,6 +933,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sidcontext); 
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sidcontext_neg); 
 
+	//SUITE_ADD_TEST(suite, test_cil_resolve_call1_noparam);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_type);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_role);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_user);
@@ -939,14 +941,16 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_cat);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_catset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_catset_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_catset_anon_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_class);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknown_neg);
-	//SUITE_ADD_TEST(suite, test_cil_resolve_call1_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknowncall_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_extraargs_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_copy_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_missing_arg_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknownflavor_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call1);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call1_neg); 
 	

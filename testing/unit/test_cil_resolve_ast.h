@@ -156,6 +156,7 @@ void test_cil_resolve_sidcontext_named_context_sidcontextnull_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_sidcontext(CuTest *tc);
 void test_cil_resolve_ast_node_helper_sidcontext_neg(CuTest *tc);
 
+void test_cil_resolve_call1_noparam(CuTest *);
 void test_cil_resolve_call1_type(CuTest *);
 void test_cil_resolve_call1_role(CuTest *);
 void test_cil_resolve_call1_user(CuTest *);
@@ -163,15 +164,17 @@ void test_cil_resolve_call1_sens(CuTest *);
 void test_cil_resolve_call1_cat(CuTest *);
 void test_cil_resolve_call1_catset(CuTest *);
 void test_cil_resolve_call1_catset_anon(CuTest *);
+void test_cil_resolve_call1_catset_anon_neg(CuTest *);
 void test_cil_resolve_call1_level(CuTest *);
 void test_cil_resolve_call1_class(CuTest *);
 void test_cil_resolve_call1_level(CuTest *);
 void test_cil_resolve_call1_level_anon(CuTest *);
 void test_cil_resolve_call1_unknown_neg(CuTest *);
-void test_cil_resolve_call1_noname_neg(CuTest *);
 void test_cil_resolve_call1_unknowncall_neg(CuTest *);
 void test_cil_resolve_call1_extraargs_neg(CuTest *);
 void test_cil_resolve_call1_copy_neg(CuTest *);
+void test_cil_resolve_call1_missing_arg_neg(CuTest *);
+void test_cil_resolve_call1_unknownflavor_neg(CuTest *);
 
 void test_cil_resolve_call2_type(CuTest *);
 void test_cil_resolve_call2_role(CuTest *);

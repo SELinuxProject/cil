@@ -477,6 +477,7 @@ void test_cil_gen_macro_dbnull_neg(CuTest *tc);
 void test_cil_gen_macro_currnull_neg(CuTest *tc);
 void test_cil_gen_macro_astnull_neg(CuTest *tc);
 void test_cil_gen_macro_unnamed_neg(CuTest *tc);
+void test_cil_gen_macro_noparam_name_neg(CuTest *tc);
 void test_cil_gen_macro_noparam_neg(CuTest *tc);
 void test_cil_gen_macro_nosecondparam_neg(CuTest *tc);
 void test_cil_gen_macro_emptyparam_neg(CuTest *tc);

@@ -8078,6 +8078,25 @@ void test_cil_gen_macro_nosecondparam_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_macro_noparam_name_neg(CuTest *tc) {
+	char *line[] = {"(", "macro", "mm", "(", "(", "foo", ")", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_macro(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_macro_emptyparam_neg(CuTest *tc) {
 	char *line[] = {"(", "macro", "mm", "(", "(", ")", ")", "(", "foo", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
 
