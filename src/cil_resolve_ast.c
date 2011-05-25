@@ -2266,12 +2266,24 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			/* something changed (likely, an optional was disabled). need to redo everything :( */
 			printf("----- Redoing resolve passes -----\n");
 			pass = 0;
-			changed = 0;
-
 			/* reset the global data */
 			cil_list_destroy(&db->catorder, 0);
 			cil_list_destroy(&db->dominance, 0);
 		}
+
+		/* reset the arguments */
+		changed = 0;
+		while (other->head->next->next->data != NULL) {
+			struct cil_list_item *tmp = ((struct cil_list_item *)other->head->next->next->data)->next;
+			free(other->head->next->next->data);
+			other->head->next->next->data = tmp;
+		}
+		while (other->head->next->next->next->data != NULL) {
+			struct cil_list_item *tmp = ((struct cil_list_item *)other->head->next->next->next->data)->next;
+			free(other->head->next->next->next->data);
+			other->head->next->next->next->data = tmp;
+		}
+
 	}
 
 	return SEPOL_OK;
