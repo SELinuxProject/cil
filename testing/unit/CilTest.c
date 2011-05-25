@@ -960,7 +960,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_unknown_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_call2_name_neg);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_call2_name_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call2);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call2_neg); 
 	
