@@ -1839,16 +1839,16 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 
 	if (node->cl_head == NULL) {
 		switch (*pass) {
-			case 1 : {
+			case 2 : {
 				if (node->flavor == CIL_CALL) {
 					rc = cil_resolve_call1(db, node, call);
 				}
 				break;
 			}
-			case 2 : {
+			case 3 : {
 				break;
 			}
-			case 3 : {
+			case 4 : {
 				switch (node->flavor) {
 					case CIL_CATORDER : {
 						printf("case categoryorder\n");
@@ -1873,7 +1873,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 				}
 				break;
 			}
-			case 4 : {
+			case 5 : {
 				switch (node->flavor) {
 					case CIL_SENSCAT : {
 						printf("case sensitivitycategory\n");
@@ -1888,7 +1888,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 				}
 				break;
 			}
-			case 5 : {
+			case 6 : {
 				switch (node->flavor) {
 					case CIL_TYPE_ATTR : {
 						printf("case typeattribute\n");
@@ -2018,24 +2018,33 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		switch (*pass) {
 			case 1 : {
 				switch (node->flavor) {
-					default : 
+					case CIL_TUNABLEIF : {
+						printf("case tunableif\n");
+						rc = cil_resolve_tunif(db, node, call);
+						break;
+					}
+					default:
 						break;
 				}
 			
 				break;	
 			}
-			case 2 : {
+			case 3 : {
 				if (node->flavor == CIL_CALL) {
 					rc = cil_resolve_call2(db, node, call);
 				}
 				break;
 			}
-			case 3 : {
-				if (node->flavor == CIL_BOOLEANIF)
-					rc = cil_resolve_boolif(db, node, call);
-				if (node->flavor == CIL_TUNABLEIF) 
-					rc = cil_resolve_tunif(db, node, call);
-				break;
+			case 4 : {
+				switch (node->flavor) {
+					case CIL_BOOLEANIF : {
+						printf("case booleanif\n");
+						rc = cil_resolve_boolif(db, node, call);
+						break;
+					}
+					default:
+						break;
+				}
 			}
 			default :
 				break;
@@ -2227,7 +2236,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	cil_list_item_init(&other->head->next->next->next->next);
 	other->head->next->next->next->next->data = &changed;
 
-	for (pass = 1; pass <= 5; pass++) {
+	for (pass = 1; pass <= 6; pass++) {
 
 		printf("---------- Pass %i ----------\n", pass);
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	
@@ -2238,7 +2247,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 		cil_tree_print(db->ast->root, 0);
 
-		if (pass == 3) {
+		if (pass == 4) {
 			printf("----- Verify Catorder ------\n");
 			rc = __cil_verify_order(db->catorder, current, CIL_CAT);
 			if (rc != SEPOL_OK) {
