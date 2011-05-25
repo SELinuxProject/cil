@@ -520,6 +520,37 @@ void test_cil_copy_avrule(CuTest *tc) {
 	CuAssertStrEquals(tc, (char*)((struct cil_avrule *)test_ast_node->data)->perms_str->head->next->data, (char*)test_copy->perms_str->head->next->data);
 }
 
+void test_cil_copy_sensalias(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_sensalias(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_sensalias(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_sensalias *)test_copy->data)->sens_str,
+		((struct cil_sensalias *)test_ast_node->data)->sens_str);
+	CuAssertStrEquals(tc, ((struct cil_sensalias *)test_copy->data)->datum.name, 
+		((struct cil_sensalias *)test_ast_node->data)->datum.name);
+}
+
 void test_cil_copy_cat(CuTest *tc) {
 	char *line[] = {"(", "category", "c0", ")", NULL};
 
