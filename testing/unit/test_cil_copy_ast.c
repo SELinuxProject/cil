@@ -913,8 +913,7 @@ void test_cil_copy_fill_context_anonlow(CuTest *tc) {
         test_ast_node->parent = test_db->ast->root;
         test_ast_node->line = 1;
 
-	int rc = cil_gen_context(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-	rc = rc;
+	cil_gen_context(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	
 	struct cil_tree_node *test_copy;
 	cil_tree_node_init(&test_copy);
@@ -951,8 +950,7 @@ void test_cil_copy_fill_context_anonhigh(CuTest *tc) {
         test_ast_node->parent = test_db->ast->root;
         test_ast_node->line = 1;
 
-	int rc = cil_gen_context(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-	rc = rc;
+	cil_gen_context(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	
 	struct cil_tree_node *test_copy;
 	cil_tree_node_init(&test_copy);
@@ -1022,5 +1020,6 @@ void test_cil_copy_constrain(CuTest *tc) {
 	cil_constrain_init(&test_copy);
 
 	cil_copy_constrain(test_db, (struct cil_constrain *)test_ast_node->data, &test_copy);
+	CuAssertStrEquals(tc, (char*)test_copy->expr->root->data, (char*)((struct cil_constrain *)test_ast_node->data)->expr->root->data);
 }
 
