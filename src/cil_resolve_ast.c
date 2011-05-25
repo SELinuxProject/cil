@@ -1373,6 +1373,10 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 		}
 		new_call->macro = (struct cil_macro*)macro_node->data;
 	}
+	else {
+		printf("cil_resolve_call1: macro string is null\n");
+		return SEPOL_ERR;
+	}
 
 	if (new_call->macro->params != NULL ){
 	
