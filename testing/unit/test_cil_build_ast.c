@@ -8079,7 +8079,7 @@ void test_cil_gen_macro_nosecondparam_neg(CuTest *tc) {
 }
 
 void test_cil_gen_macro_noparam_name_neg(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "foo", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "type", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
