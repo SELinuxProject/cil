@@ -735,10 +735,11 @@ CuSuite* CilTreeGetSuite() {
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_call);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_anon);
-	SUITE_ADD_TEST(suite, test_cil_gen_call_empty);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_empty_call_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_call_name_inparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_noparams_neg);
 	/* test_cil_resolve_ast.c */

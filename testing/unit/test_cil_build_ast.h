@@ -483,10 +483,11 @@ void test_cil_gen_macro_emptyparam_neg(CuTest *tc);
 
 void test_cil_gen_call(CuTest *tc);
 void test_cil_gen_call_anon(CuTest *tc);
-void test_cil_gen_call_empty(CuTest *tc);
+void test_cil_gen_call_empty_call_neg(CuTest *tc);
 void test_cil_gen_call_dbnull_neg(CuTest *tc);
 void test_cil_gen_call_currnull_neg(CuTest *tc);
 void test_cil_gen_call_astnull_neg(CuTest *tc);
+void test_cil_gen_call_name_inparens_neg(CuTest *tc);
 void test_cil_gen_call_noname_neg(CuTest *tc);
 void test_cil_gen_call_noparams_neg(CuTest *tc);
 
