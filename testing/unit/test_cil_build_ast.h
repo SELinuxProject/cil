@@ -497,6 +497,13 @@ void test_cil_gen_call_name_inparens_neg(CuTest *tc);
 void test_cil_gen_call_noname_neg(CuTest *tc);
 void test_cil_gen_call_noparams_neg(CuTest *tc);
 
+void test_cil_gen_optional(CuTest *tc);
+void test_cil_gen_optional_dbnull_neg(CuTest *tc);
+void test_cil_gen_optional_currnull_neg(CuTest *tc);
+void test_cil_gen_optional_astnull_neg(CuTest *tc);
+void test_cil_gen_optional_unnamed_neg(CuTest *tc);
+void test_cil_gen_optional_nameinparens_neg(CuTest *tc);
+
 /*
 cil_build_ast test cases
 */
@@ -631,4 +638,7 @@ void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_macro(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_macro_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_optional(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_optional_neg(CuTest *tc);
 #endif
