@@ -1061,6 +1061,8 @@ CuSuite* CilTreeGetSuite() {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_catorder);
 	
+	SUITE_ADD_TEST(suite, test_cil_copy_dominance);
+	
 	SUITE_ADD_TEST(suite, test_cil_copy_level);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_level);
