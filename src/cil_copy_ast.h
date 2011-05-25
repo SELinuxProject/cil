@@ -36,6 +36,7 @@ int cil_copy_context(struct cil_tree_node *, struct cil_tree_node *, symtab_t *)
 int cil_copy_netifcon(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 void cil_copy_constrain(struct cil_db *, struct cil_constrain *, struct cil_constrain **);
 void cil_copy_call(struct cil_db *, struct cil_call *, struct cil_call **);
+int cil_copy_optional(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 
 int cil_copy_ast(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 
