@@ -2464,7 +2464,8 @@ void cil_destroy_macro(struct cil_macro *macro)
 {
 	cil_symtab_datum_destroy(macro->datum);
 	cil_symtab_array_destroy(macro->symtab);
-	cil_list_destroy(&macro->params, 1);
+	if (macro->params != NULL)
+		cil_list_destroy(&macro->params, 1);
 	free(macro);
 }
 
@@ -2473,7 +2474,9 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if ((parse_current->next == NULL || parse_current->next->cl_head != NULL) || (parse_current->next->next != NULL && parse_current->next->next->cl_head == NULL)) {
+	if ((parse_current->next == NULL || parse_current->next->cl_head != NULL)
+	|| (parse_current->next->next == NULL)
+	|| (parse_current->next->next != NULL && parse_current->next->next->cl_head == NULL)) {
 		printf("Invalid call declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
