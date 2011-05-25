@@ -314,7 +314,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_else_astnull_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif);
-	//SUITE_ADD_TEST(suite, test_cil_gen_tunif_nocond);
+	SUITE_ADD_TEST(suite, test_cil_gen_tunif_nocond);
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif_nested);
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif_nested_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif_extra_neg);
