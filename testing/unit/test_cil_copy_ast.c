@@ -641,6 +641,33 @@ void test_cil_copy_senscat(CuTest *tc) {
 	CuAssertStrEquals(tc, (char*)((struct cil_senscat *)test_ast_node->data)->cat_list_str->head->next->data, (char*)test_copy->cat_list_str->head->next->data);
 }
 
+void test_cil_copy_catorder(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c255", ")",
+			"(", "categoryorder", "(", "c0", "c255", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_catorder(test_db, test_tree->root->cl_head->next->next->cl_head, test_ast_node);
+
+	struct cil_catorder *test_copy;
+	cil_catorder_init(&test_copy);
+
+	cil_copy_catorder((struct cil_catorder *)test_ast_node->data, &test_copy);
+	CuAssertStrEquals(tc, (char*)((struct cil_catorder *)test_ast_node->data)->cat_list_str->head->data, (char*)test_copy->cat_list_str->head->data);
+	CuAssertStrEquals(tc, (char*)((struct cil_catorder *)test_ast_node->data)->cat_list_str->head->next->data, (char*)test_copy->cat_list_str->head->next->data);
+}
+
 void test_cil_copy_level(CuTest *tc) {
 	char *line[] = {"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
 
