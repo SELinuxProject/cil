@@ -611,6 +611,8 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_fill_context_unnamedlvl_nocontexthigh_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_context);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_extralevel_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_context_emptycontext_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_doubleparen_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_norole_neg);

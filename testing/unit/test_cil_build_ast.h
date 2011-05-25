@@ -373,6 +373,8 @@ void test_cil_fill_context_unnamedlvl_nocontextlow_neg(CuTest *tc);
 void test_cil_fill_context_unnamedlvl_nocontexthigh_neg(CuTest *tc);
 
 void test_cil_gen_context(CuTest *tc);
+void test_cil_gen_context_extralevel_neg(CuTest *tc);
+void test_cil_gen_context_emptycontext_neg(CuTest *tc);
 void test_cil_gen_context_extra_neg(CuTest *tc);
 void test_cil_gen_context_doubleparen_neg(CuTest *tc);
 void test_cil_gen_context_norole_neg(CuTest *tc);
