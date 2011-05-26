@@ -503,6 +503,8 @@ void test_cil_gen_optional_currnull_neg(CuTest *tc);
 void test_cil_gen_optional_astnull_neg(CuTest *tc);
 void test_cil_gen_optional_unnamed_neg(CuTest *tc);
 void test_cil_gen_optional_nameinparens_neg(CuTest *tc);
+void test_cil_gen_optional_emptyoptional_neg(CuTest *tc);
+void test_cil_gen_optional_norule_neg(CuTest *tc);
 
 /*
 cil_build_ast test cases
