@@ -726,7 +726,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_level);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_class);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_duplicate);
-	//SUITE_ADD_TEST(suite, test_cil_gen_macro_duplicate_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_macro_duplicate_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_unknown_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_currnull_neg);
