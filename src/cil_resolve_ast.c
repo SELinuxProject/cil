@@ -1486,7 +1486,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				case CIL_LEVEL : {
 					if (pc->cl_head != NULL) {
 						struct cil_level *level = cil_malloc(sizeof(struct cil_level));
-						rc = cil_fill_level(pc, level);
+						rc = cil_fill_level(pc->cl_head, level);
 						if (rc != SEPOL_OK) {
 							printf("cil_resolve_call1: cil_fill_level failed, rc: %d\n", rc);
 							cil_destroy_level(level);

@@ -1,32 +1,58 @@
 (type qaz)
 (class file (read))
-(macro mm ((type a))
-	(type b)
-	(call m (a b)))
+;(macro mm ((type a))
+;	(type b)
+;	(call m (a b)))
 
-(macro m ((type foo)(type bar))
-	(type baz)
-	(block c
-		(type hi))
-	(allow foo c.hi file (read))
-	(allow foo .bar file (read))
-	(allow baz .b.boz file (read))
-	(block d
-		(type hd))
-	(allow baz d.hd file (read))
-	(allow foo qaz file (read)))
-(block b
-	(type boz)
-	(call m (boz .c.moo)))
-(block c
-	(type moo)
-	(call mm (moo)))
+;(macro m ((type foo)(type bar))
+;	(type baz)
+;	(block c
+;		(type hi))
+;	(allow foo c.hi file (read))
+;	(allow foo .bar file (read))
+;	(allow baz .b.boz file (read))
+;	(block d
+;		(type hd))
+;	(allow baz d.hd file (read))
+;	(allow foo qaz file (read)))
+;(block b
+;	(type boz)
+;	(call m (boz .c.moo)))
+;(block c
+;	(type moo)
+;	(call mm (moo)))
 
-(type foo)
-(type bar)
-(call m1 (foo))
-(macro m1 ((type a))
-	(type blah)
-	(call m2 (a blah)))
-(macro m2 ((type a) (type b))
-	(allow a b file (read)))
+;(type foo)
+;(type bar)
+;(call m1 (foo))
+;(macro m1 ((type a))
+;	(type blah)
+;	(call m2 (a blah)))
+;(macro m2 ((type a) (type b))
+;	(allow a b file (read)))
+
+(user adm_u)
+(role adm_r)
+(type adm_t)
+(userrole adm_u adm_r)
+
+(macro lvl_test ((level low)(level high))
+	(context new_lvl (adm_u adm_r adm_t low high)))
+
+(sensitivity s0)
+(sensitivity s1)
+(category c0)
+(category c1)
+
+(dominance (s0 s1))
+
+(sensitivitycategory s0 (c0))
+(sensitivitycategory s1 (c1))
+
+(categoryorder (c0 c1))
+
+(level low s0 (c0))
+(level high s1 (c1))
+
+;(call lvl_test (low high))
+(call lvl_test ((s0 (c0)) (s1 (c1))))
