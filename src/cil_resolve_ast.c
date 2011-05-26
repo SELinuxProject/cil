@@ -1471,9 +1471,10 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				case CIL_CATSET : {
 					if (pc->cl_head != NULL) {
 						struct cil_catset *catset = cil_malloc(sizeof(struct cil_catset));
-						rc = cil_fill_catset(pc, catset);
+						cil_list_init(&catset->cat_list_str);
+						rc = cil_fill_cat_list(pc, catset->cat_list_str);
 						if (rc != SEPOL_OK) {
-							printf("cil_resolve_call1: cil_fill_catset failed, rc: %d\n", rc);
+							printf("cil_resolve_call1: cil_fill_cat_list failed, rc: %d\n", rc);
 							cil_destroy_catset(catset);
 							return rc;
 						}

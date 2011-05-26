@@ -1391,6 +1391,27 @@ int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl
 	return SEPOL_OK;
 }
 
+int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list)
+{
+	int rc = SEPOL_ERR;
+
+	if (start == NULL || list == NULL)
+		return SEPOL_ERR;
+	
+	rc = cil_set_to_list(start, list, 1);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create category list\n");
+		return rc;
+	}
+	rc = __cil_verify_ranges(list);
+	if (rc != SEPOL_OK) {
+		printf("Error verifying range syntax\n");
+		return rc;
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -1414,7 +1435,8 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (rc != SEPOL_OK) 
 		goto gen_catset_cleanup;
 
-	rc = cil_fill_catset(parse_current->next->next, catset);
+	cil_list_init(&catset->cat_list_str);
+	rc = cil_fill_cat_list(parse_current->next->next, catset->cat_list_str);
 	if (rc != SEPOL_OK) {
 		printf("Failed to fill categoryset\n");
 		goto gen_catset_cleanup;
@@ -1425,31 +1447,6 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	gen_catset_cleanup:
 		cil_destroy_catset(catset);
 		return rc;	
-}
-
-int cil_fill_catset(struct cil_tree_node *start, struct cil_catset *catset)
-{
-	int rc = SEPOL_ERR;
-
-	if (start == NULL || catset == NULL)
-		return SEPOL_ERR;
-	
-	cil_list_init(&catset->cat_list_str);
-
-	rc = cil_set_to_list(start, catset->cat_list_str, 1);
-	if (rc != SEPOL_OK) {
-		printf("Failed to create categoryset list\n");
-		goto fill_catset_cleanup;
-	}
-	
-	return SEPOL_OK;
-
-	fill_catset_cleanup:
-		if (catset->cat_list_str != NULL) {
-			cil_list_destroy(&catset->cat_list_str, 1);
-			catset->cat_list_str = NULL;
-		}
-		return rc;		
 }
 
 void cil_destroy_catset(struct cil_catset *catset)
@@ -1559,15 +1556,9 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	senscat->sens_str = cil_strdup(parse_current->next->data);
 
 	cil_list_init(&senscat->cat_list_str);
-	
-	rc = cil_set_to_list(parse_current->next->next, senscat->cat_list_str, 1);
+	rc = cil_fill_cat_list(parse_current->next->next, senscat->cat_list_str);
 	if (rc != SEPOL_OK) {
-		printf("Failed to create category list\n");
-		goto gen_senscat_cleanup;
-	}
-	rc = __cil_verify_ranges(senscat->cat_list_str);
-	if (rc != SEPOL_OK) {
-		printf("Error verifying range syntax\n");
+		printf("Failed to fill category list\n");
 		goto gen_senscat_cleanup;
 	}
 	ast_node->data = senscat;
@@ -1611,13 +1602,18 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 	}
 
 	cil_list_init(&level->cat_list_str);
-
+	rc = cil_fill_cat_list(sens->next, level->cat_list_str);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create level category list\n");
+		goto cil_fill_level_cleanup;
+	}
+/*
 	rc = cil_set_to_list(sens->next, level->cat_list_str, 1);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create level category list\n");
 		goto cil_fill_level_cleanup;
 	}
-
+*/
 	return SEPOL_OK;
 
 	cil_fill_level_cleanup:
