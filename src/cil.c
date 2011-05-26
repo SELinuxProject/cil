@@ -406,6 +406,24 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 	return SEPOL_OK;
 }
 
+int cil_sort_init(struct cil_sort **sort)
+{
+	if (sort == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_sort *new_sort = cil_malloc(sizeof(struct cil_sort));
+
+	new_sort->flavor = 0;
+	new_sort->count = 0;
+	new_sort->index = 0;
+	new_sort->array = NULL;
+
+	*sort = new_sort;
+
+	return SEPOL_OK;
+}
+
 int cil_netifcon_init(struct cil_netifcon **netifcon)
 {
 	if (netifcon == NULL) {
