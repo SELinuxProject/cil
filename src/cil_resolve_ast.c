@@ -1676,31 +1676,33 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, uint32_t flavo
 	return SEPOL_ERR;
 }
 
-int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *bif, struct cil_call *call, uint32_t flavor)
+int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *bif, struct cil_call *call)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *curr_expr = current;
-	struct cil_tree_node *bool_node = NULL;
-	int sym_index = 0;
-	if (flavor == CIL_BOOL)
-		sym_index = CIL_SYM_BOOLS;
-	if (flavor == CIL_TUNABLE)
-		sym_index = CIL_SYM_TUNABLES;
+	struct cil_tree_node *res_node = NULL;
+	
 
 	while (curr_expr != NULL) {
-		if (((struct cil_conditional*)curr_expr->data)->flavor == flavor) {
-			if (((struct cil_conditional*)curr_expr->data)->str == NULL) {
-				printf("Invalid expression\n");
-				return SEPOL_ERR;
-			}
-			printf("resolving: %s\n", ((struct cil_conditional*)curr_expr->data)->str);
-			rc = cil_resolve_name(db, bif, ((struct cil_conditional*)curr_expr->data)->str, sym_index, flavor, call, &bool_node);
-			if (rc != SEPOL_OK) {
-				printf("Name resolution failed for %s\n", ((struct cil_conditional*)curr_expr->data)->str);
-				return rc;
-			}
-			((struct cil_conditional*)curr_expr->data)->data = (struct cil_bool*)bool_node->data;
+
+		uint32_t flavor = ((struct cil_conditional*)curr_expr->data)->flavor;
+		int sym_index = 0;
+		if (flavor == CIL_BOOL)
+			sym_index = CIL_SYM_BOOLS;
+		else if (flavor == CIL_TUNABLE)
+			sym_index = CIL_SYM_TUNABLES;
+	
+		if (((struct cil_conditional*)curr_expr->data)->str == NULL) {
+			printf("Invalid expression\n");
+			return SEPOL_ERR;
 		}
+		printf("resolving: %s\n", ((struct cil_conditional*)curr_expr->data)->str);
+		rc = cil_resolve_name(db, bif, ((struct cil_conditional*)curr_expr->data)->str, sym_index, flavor, call, &res_node);
+		if (rc != SEPOL_OK) {
+			printf("Name resolution failed for %s\n", ((struct cil_conditional*)curr_expr->data)->str);
+			return rc;
+		}
+		((struct cil_conditional*)curr_expr->data)->data = res_node->data;
 
 		curr_expr = curr_expr->cl_head;
 	}
@@ -1712,7 +1714,7 @@ int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct 
 	int rc = SEPOL_ERR;
 	struct cil_booleanif *bif = (struct cil_booleanif*)current->data;
 	
-	rc = cil_resolve_expr_stack(db, bif->expr_stack, current, call, CIL_BOOL);
+	rc = cil_resolve_expr_stack(db, bif->expr_stack, current, call);
 	if (rc != SEPOL_OK) {
 		printf("Failed to resolve booleanif (line %d)\n", current->line);
 		return rc;
@@ -1812,7 +1814,7 @@ int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct c
 	struct cil_tunableif *tif = (struct cil_tunableif*)current->data;
 	uint16_t result = CIL_FALSE;
 
-	rc = cil_resolve_expr_stack(db, tif->expr_stack, current, call, CIL_TUNABLE);
+	rc = cil_resolve_expr_stack(db, tif->expr_stack, current, call);
 	if (rc != SEPOL_OK)
 		return rc;
 	rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
