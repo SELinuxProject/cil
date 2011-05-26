@@ -1047,69 +1047,115 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_list_orignull_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_block);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_block);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_block_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_perm);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_perm);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_perm_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_class);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_class);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_class_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_common);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_common);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_common_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_copy_classcommon);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_classcommon);
 	
 	//SUITE_ADD_TEST(suite, test_cil_copy_sid);
+	//SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sid);
+	//SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sid_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_sidcontext);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sidcontext);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_user);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_user);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_user_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_role);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_role);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_role_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_userrole);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_userrole);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_type);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_typeattr);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typeattr);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_typealias);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typealias);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typealias_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_bool);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_bool);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_bool_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_avrule);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_avrule);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_type_rule);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type_rule);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_sens);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sens);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sens_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_sensalias);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sensalias);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sensalias_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_cat);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_cat);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_cat_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_catalias);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_catalias);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_catalias_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_senscat);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_senscat);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_catorder);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_catorder);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_dominance);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_dominance);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_level);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_level);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_level_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_level);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_context);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_context);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_context_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_copy_netifcon_nested);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_netifcon);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_netifcon_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_context);
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_context_anonlow);
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_context_anonhigh);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_call);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_call);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_optional);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_optional);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_optional_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
-	
+
 	return suite;
 }
