@@ -72,6 +72,24 @@
 #define CIL_ELSE		57
 #define CIL_COND		58
 #define CIL_PARAM		59
+#define CIL_CONS_AND		60
+#define CIL_CONS_OR		61
+#define CIL_CONS_NOT		62
+#define CIL_CONS_EQ		63
+#define CIL_CONS_DOM		64
+#define CIL_CONS_DOMBY		65
+#define CIL_CONS_INCOMP		66
+#define CIL_CONS_U1		67
+#define CIL_CONS_U2		68
+#define CIL_CONS_T1		69
+#define CIL_CONS_T2		70
+#define CIL_CONS_R1		71
+#define CIL_CONS_R2		72
+#define CIL_CONS_L1		73
+#define CIL_CONS_L2		74
+#define CIL_CONS_H1		75
+#define CIL_CONS_H2		76
+
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -157,6 +175,24 @@
 #define CIL_KEY_NEQ		"!="
 #define CIL_KEY_ELSE		"else"
 #define CIL_KEY_OPTIONAL	"optional"
+
+#define CIL_KEY_CONS_AND	"and"
+#define CIL_KEY_CONS_OR		"or"
+#define CIL_KEY_CONS_NOT	"not"
+#define CIL_KEY_CONS_EQ		"eq"	
+#define CIL_KEY_CONS_DOM	"dom"
+#define CIL_KEY_CONS_DOMBY	"domby"
+#define CIL_KEY_CONS_INCOMP	"incomp"
+#define CIL_KEY_CONS_U1		"u1"
+#define CIL_KEY_CONS_U2		"u2"
+#define CIL_KEY_CONS_T1		"t1"
+#define CIL_KEY_CONS_T2		"t2"
+#define CIL_KEY_CONS_R1		"r1"
+#define CIL_KEY_CONS_R2		"r2"
+#define CIL_KEY_CONS_L1		"l1"
+#define CIL_KEY_CONS_L2		"l2"
+#define CIL_KEY_CONS_H1		"h1"
+#define CIL_KEY_CONS_H2		"h2"
 
 /*
 	Symbol Table Array Indices
@@ -544,7 +580,7 @@ struct cil_constrain {
 	struct cil_list *class_list;
 	struct cil_list *perm_list_str;
 	struct cil_list *perm_list;
-	struct cil_tree *expr;
+	struct cil_tree_node *expr;
 };
 
 struct cil_param {

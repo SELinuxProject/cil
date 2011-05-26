@@ -609,9 +609,8 @@ void cil_copy_constrain(struct cil_db *db, struct cil_constrain *orig, struct ci
 	cil_copy_list(orig->class_list_str, &new->class_list_str);
 	cil_copy_list(orig->perm_list_str, &new->perm_list_str);
 
-	cil_tree_init(&new->expr);
-	cil_tree_node_init(&new->expr->root);
-	cil_copy_ast(db, orig->expr->root, new->expr->root);
+	cil_tree_node_init(&new->expr);
+	cil_copy_ast(db, orig->expr, new->expr);
 
 	*copy = new;
 }

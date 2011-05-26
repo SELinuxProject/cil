@@ -1129,7 +1129,7 @@ int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, stru
 		return rc;
 	}
 
-	rc = __cil_resolve_constrain_expr(db, current, cons->expr->root, call);
+	rc = cil_resolve_expr_stack(db, cons->expr, current, call);
 	if (rc != SEPOL_OK) {
 		printf("Failed to resolve constrain expression\n");
 		return rc;
@@ -1676,10 +1676,10 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, uint32_t flavo
 	return SEPOL_ERR;
 }
 
-int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *bif, struct cil_call *call)
+int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *expr_stack, struct cil_tree_node *parent, struct cil_call *call)
 {
 	int rc = SEPOL_ERR;
-	struct cil_tree_node *curr_expr = current;
+	struct cil_tree_node *curr_expr = expr_stack;
 	struct cil_tree_node *res_node = NULL;
 	
 
@@ -1687,17 +1687,27 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, str
 
 		uint32_t flavor = ((struct cil_conditional*)curr_expr->data)->flavor;
 		int sym_index = 0;
-		if (flavor == CIL_BOOL)
+		if (flavor == CIL_BOOL) {
 			sym_index = CIL_SYM_BOOLS;
-		else if (flavor == CIL_TUNABLE)
+		} else if (flavor == CIL_TUNABLE) {
 			sym_index = CIL_SYM_TUNABLES;
+		} else if (flavor == CIL_TYPE) {
+			sym_index = CIL_SYM_TYPES;
+		} else if (flavor == CIL_ROLE) {
+			sym_index = CIL_SYM_ROLES;
+		} else if (flavor == CIL_USER) {
+			sym_index = CIL_SYM_USERS;
+		} else {
+			curr_expr = curr_expr->cl_head;
+			continue;
+		}
 	
 		if (((struct cil_conditional*)curr_expr->data)->str == NULL) {
 			printf("Invalid expression\n");
 			return SEPOL_ERR;
 		}
 		printf("resolving: %s\n", ((struct cil_conditional*)curr_expr->data)->str);
-		rc = cil_resolve_name(db, bif, ((struct cil_conditional*)curr_expr->data)->str, sym_index, flavor, call, &res_node);
+		rc = cil_resolve_name(db, parent, ((struct cil_conditional*)curr_expr->data)->str, sym_index, flavor, call, &res_node);
 		if (rc != SEPOL_OK) {
 			printf("Name resolution failed for %s\n", ((struct cil_conditional*)curr_expr->data)->str);
 			return rc;
@@ -1877,6 +1887,14 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		changed = (int *)other->head->next->next->next->next->data;
 	} else {
 		return SEPOL_ERR;
+	}
+
+	if (optstack != NULL) {
+		if (node->flavor == CIL_TUNABLE || node->flavor == CIL_MACRO) {
+			/* tuanbles and macros are not allowed in optionals */
+			printf("Node of flavor %i is not allowed in optionals\n", node->flavor);
+			return SEPOL_ERR;
+		}
 	}
 
 	if (node->cl_head == NULL) {

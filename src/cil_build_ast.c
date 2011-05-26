@@ -836,6 +836,275 @@ void cil_destroy_bool(struct cil_bool *boolean)
 	free(boolean);
 }
 
+int cil_gen_constrain_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct cil_tree_node **stack)
+{
+	if (current == NULL || stack == NULL) 
+		return SEPOL_ERR;
+
+	uint32_t rc = SEPOL_ERR;
+	struct cil_tree_node *opnode = NULL;
+	struct cil_conditional *opcond = NULL;
+	struct cil_tree_node *lnode = NULL;
+	struct cil_conditional *lcond = NULL;
+	char * lstr = NULL;
+	struct cil_tree_node *rnode = NULL;
+	struct cil_conditional *rcond = NULL;
+	char * rstr = NULL;
+	
+	if (current->cl_head != NULL) {
+		return SEPOL_ERR;
+	}
+	
+	if (current->parent->cl_head != current) {
+		return SEPOL_ERR;
+	}
+
+	cil_tree_node_init(&opnode);
+
+	rc = cil_conditional_init(&opcond);
+	if (rc != SEPOL_OK)
+		return rc;
+
+	if (!strcmp((char*)current->data, CIL_KEY_EQ))
+		opcond->flavor = CIL_EQ;
+	else if (!strcmp((char*)current->data, CIL_KEY_NEQ))
+		opcond->flavor = CIL_NEQ;
+	else if (!strcmp((char*)current->data, CIL_KEY_CONS_NOT))
+		opcond->flavor = CIL_CONS_NOT;
+	else if (!strcmp((char*)current->data, CIL_KEY_CONS_OR))
+		opcond->flavor = CIL_CONS_OR;
+	else if (!strcmp((char*)current->data, CIL_KEY_CONS_AND))
+		opcond->flavor = CIL_CONS_AND;
+	else if (!strcmp((char*)current->data, CIL_KEY_CONS_EQ))
+		opcond->flavor = CIL_CONS_EQ;
+	else if (!strcmp((char*)current->data, CIL_KEY_CONS_DOM))
+		opcond->flavor = CIL_CONS_DOM;
+	else if (!strcmp((char*)current->data, CIL_KEY_CONS_DOMBY))
+		opcond->flavor = CIL_CONS_DOMBY;
+	else if (!strcmp((char*)current->data, CIL_KEY_CONS_INCOMP))
+		opcond->flavor = CIL_CONS_INCOMP;
+	else
+		return SEPOL_ERR;
+
+	if (opcond->flavor == CIL_CONS_NOT) {
+		if (current->next == NULL || current->next->cl_head == NULL || current->next->next != NULL)
+			return SEPOL_ERR;
+	} else if (opcond->flavor == CIL_CONS_AND || opcond->flavor == CIL_CONS_OR) {
+		if (current->next == NULL || current->next->cl_head == NULL ||
+	        current->next->next == NULL || current->next->next->cl_head == NULL ||
+			current->next->next->next != NULL) 
+		return SEPOL_ERR;
+	} else {
+		if (current->next == NULL || current->next->cl_head != NULL ||
+	        current->next->next == NULL || current->next->next->cl_head != NULL ||
+			current->next->next->next != NULL)
+		return SEPOL_ERR;
+	}
+
+	opcond->str = cil_strdup(current->data);
+
+	opnode->data = opcond;
+	opnode->flavor = CIL_COND;
+
+	if (*stack != NULL) {
+		(*stack)->parent = opnode;
+		opnode->cl_head = *stack;
+	}
+	*stack = opnode;
+
+	if (opcond->flavor == CIL_CONS_NOT)
+		return cil_gen_constrain_expr_stack(current->next->cl_head, flavor, stack);
+	else if (opcond->flavor == CIL_CONS_OR || opcond->flavor == CIL_CONS_AND) {
+		rc = cil_gen_constrain_expr_stack(current->next->cl_head, flavor, stack);
+		if (rc != SEPOL_OK) {
+			return rc;
+		}
+		return cil_gen_constrain_expr_stack(current->next->next->cl_head, flavor, stack);
+	}
+
+	/* this wasn't an expression, figure out left and right of the constrain op */
+	rc = cil_tree_node_init(&lnode);
+	if (rc != SEPOL_OK)
+		return rc;
+	
+	rc = cil_conditional_init(&lcond);
+	if (rc != SEPOL_OK)
+		return rc;
+
+	rc = cil_tree_node_init(&rnode);
+	if (rc != SEPOL_OK)
+		return rc;
+
+	rc = cil_conditional_init(&rcond);
+	if (rc != SEPOL_OK)
+		return rc;
+	
+	lstr = current->next->data;
+	rstr = current->next->next->data;
+
+	lnode->data = lcond;
+	rnode->data = rcond;
+	lnode->flavor = CIL_COND;
+	rnode->flavor = CIL_COND;
+
+	lnode->parent = rnode;
+	lnode->cl_head = *stack;
+
+	(*stack)->parent = lnode;
+
+	rnode->cl_head = lnode;
+	*stack = rnode;
+	
+		
+	int liskeyword = 0;
+	int riskeyword = 0;
+	if (!strcmp(lstr, CIL_KEY_CONS_T1) || !strcmp(lstr, CIL_KEY_CONS_T2) ||
+        !strcmp(lstr, CIL_KEY_CONS_R1) || !strcmp(lstr, CIL_KEY_CONS_R2) ||
+		!strcmp(lstr, CIL_KEY_CONS_U1) || !strcmp(lstr, CIL_KEY_CONS_U2) ||
+		!strcmp(lstr, CIL_KEY_CONS_L1) || !strcmp(lstr, CIL_KEY_CONS_L2) ||
+		!strcmp(lstr, CIL_KEY_CONS_H1) || !strcmp(lstr, CIL_KEY_CONS_H2)) {
+		liskeyword = 1;
+	}
+	if (!strcmp(rstr, CIL_KEY_CONS_T1) || !strcmp(rstr, CIL_KEY_CONS_T2) ||
+        !strcmp(rstr, CIL_KEY_CONS_R1) || !strcmp(rstr, CIL_KEY_CONS_R2) ||
+		!strcmp(rstr, CIL_KEY_CONS_U1) || !strcmp(rstr, CIL_KEY_CONS_U2) ||
+		!strcmp(rstr, CIL_KEY_CONS_L1) || !strcmp(rstr, CIL_KEY_CONS_L2) ||
+		!strcmp(rstr, CIL_KEY_CONS_H1) || !strcmp(rstr, CIL_KEY_CONS_H2)) {
+		riskeyword = 1;
+	}
+	if (!liskeyword) {
+		return SEPOL_ERR;
+	}
+
+	if (opcond->flavor == CIL_EQ || opcond->flavor == CIL_NEQ) {
+		/* type constraints */
+		if (!strcmp(lstr, CIL_KEY_CONS_T1)) {
+			lcond->flavor = CIL_CONS_T1;
+			if (!strcmp(rstr, CIL_KEY_CONS_T2)) {
+				rcond->flavor = CIL_CONS_T2;
+			} else {
+				if (riskeyword) {
+					printf("Keyword %s not allowed on right side of expression\n", rstr);
+					return SEPOL_ERR;
+				}
+				rcond->flavor = CIL_TYPE;
+			}
+			goto valid;
+		} else if (!strcmp(lstr, CIL_KEY_CONS_T2)) {
+			lcond->flavor = CIL_CONS_T2;
+			if (riskeyword) {
+				printf("Keyword %s not allowed on right side of expression\n", rstr);
+				return SEPOL_ERR;
+			}
+			rcond->flavor = CIL_TYPE;
+			goto valid;
+	
+		/* role constrains */	
+		} else if (!strcmp(lstr, CIL_KEY_CONS_R1)) {
+			lcond->flavor = CIL_CONS_R1;
+			if (!strcmp(rstr, CIL_KEY_CONS_R2)) {
+				rcond->flavor = CIL_CONS_R2;
+			} else {
+				if (riskeyword) {
+					printf("Keyword %s not allowed on right side of expression\n", rstr);
+					return SEPOL_ERR;
+				}
+				rcond->flavor = CIL_ROLE;
+			}
+			goto valid;
+		} else if (!strcmp(lstr, CIL_KEY_CONS_R2)) {
+			if (riskeyword) {
+				printf("Keyword %s not allowed on right side of expression\n", rstr);
+				return SEPOL_ERR;
+			}
+			rcond->flavor = CIL_ROLE;		
+			goto valid;
+
+		/* user constrains */
+		} else if (!strcmp(lstr, CIL_KEY_CONS_U1)) {
+			lcond->flavor = CIL_CONS_U1;
+			if (!strcmp(rstr, CIL_KEY_CONS_U2)) {
+				rcond->flavor = CIL_CONS_U2;
+			} else {
+				if (riskeyword) {
+					printf("Keyword %s not allowed on right side of expression\n", rstr);
+					return SEPOL_ERR;
+				}
+				rcond->flavor = CIL_USER;
+			}
+			goto valid;
+		} else if (!strcmp(lstr, CIL_KEY_CONS_U2)) {
+			lcond->flavor = CIL_CONS_U2;
+			if (riskeyword) {
+				printf("Keyword %s not allowed on right side of expression\n", rstr);
+				return SEPOL_ERR;
+			}
+			rcond->flavor = CIL_USER;
+			goto valid;
+
+		/* error if not mlsconstrain*/
+		} else if (flavor == CIL_CONSTRAIN) {
+			printf("Left hand side must be a keyword\n");
+			return SEPOL_ERR;
+		}
+
+	} else {
+		/* only roles allow in eq, dom, domby, or incomp in non-mlsconstrain */
+		if (!strcmp(lstr, CIL_KEY_CONS_R1) && !strcmp(rstr, CIL_KEY_CONS_R2)) {
+			lcond->flavor = CIL_CONS_R1;
+			rcond->flavor = CIL_CONS_R2;
+			goto valid;
+		}
+	}
+	
+	if (flavor == CIL_MLSCONSTRAIN) {
+		/* check mls specific levels */
+		if (!strcmp(lstr, CIL_KEY_CONS_L1)) {
+			lcond->flavor = CIL_CONS_L1;
+			if (!strcmp(rstr, CIL_KEY_CONS_L2)) {
+				rcond->flavor = CIL_CONS_L2;
+			} else if (!strcmp(rstr, CIL_KEY_CONS_H1)) {
+				rcond->flavor = CIL_CONS_H1;
+			} else if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
+				rcond->flavor = CIL_CONS_H2;
+			} else {
+				printf("Right side of expression must be correct keyword\n");
+				return SEPOL_ERR;
+			}
+			goto valid;
+		} else if (!strcmp(lstr, CIL_KEY_CONS_L2)) {
+			lcond->flavor = CIL_CONS_L2;
+			if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
+				rcond->flavor = CIL_CONS_H2;
+			} else {
+				printf("Right side of expression must be correct keyword\n");
+				return SEPOL_ERR;
+			}
+			goto valid;
+		} else if (!strcmp(lstr, CIL_KEY_CONS_H1)) {
+			lcond->flavor = CIL_CONS_H1;
+			if (!strcmp(rstr, CIL_KEY_CONS_L2)) {
+				rcond->flavor = CIL_CONS_L2;
+			} else if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
+				rcond->flavor = CIL_CONS_H2;
+			} else {
+				printf("Right side of expression must be correct keyword\n");
+				return SEPOL_ERR;
+			}
+			goto valid;
+		} else {
+			printf("Left hand side must be a keyword\n");
+			return SEPOL_ERR;
+		}
+	}
+
+valid:
+	lcond->str = cil_strdup(lstr);
+	rcond->str = cil_strdup(rstr);
+
+	return SEPOL_OK;
+}
+
 int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct cil_tree_node **stack)
 {
 	if (current == NULL || stack == NULL) 
@@ -868,7 +1137,7 @@ int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct ci
 				return SEPOL_ERR;
 
 			if (cond->flavor == CIL_NOT) {
-				if (current->next->next != NULL)
+				if (current->next == NULL || current->next->next != NULL)
 					return SEPOL_ERR;
 			}
 			else if (current->next == NULL || current->next->next == NULL || current->next->next->next != NULL)
@@ -1757,8 +2026,7 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 
-	cil_tree_init(&cons->expr);
-	rc = __cil_build_constrain_tree(parse_current->next->next->next->cl_head, cons->expr->root, flavor);
+	rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, flavor, &cons->expr);
 	if (rc != SEPOL_OK) {
 		printf("Failed to build constrain expression tree\n");
 		goto gen_constrain_cleanup;
@@ -1785,8 +2053,23 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 		cil_list_destroy(&cons->perm_list_str, 1);
 	if (cons->perm_list != NULL)
 		cil_list_destroy(&cons->perm_list, 0);
-	if (cons->expr != NULL)
-		cil_tree_destroy(&cons->expr);
+	if (cons->expr != NULL) {
+		struct cil_tree_node *curr = cons->expr;
+		struct cil_tree_node *next = NULL;
+		while (curr != NULL) {
+			if (curr->flavor == CIL_COND && curr->data != NULL) {
+				if (((struct cil_conditional*)curr->data)->str != NULL) {
+					free(((struct cil_conditional*)curr->data)->str);
+					((struct cil_conditional*)curr->data)->str = NULL;
+				}
+			}
+			next = curr->next;
+			free(curr->data);
+			free(curr);
+			curr = next;
+		}
+	}
+	
 	free(cons);
 }
 

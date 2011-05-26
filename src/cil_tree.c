@@ -280,6 +280,7 @@ void cil_tree_print_constrain(struct cil_constrain *cons)
 {
 	struct cil_list_item *class_curr;
 	struct cil_list_item *perm_curr;
+	struct cil_tree_node *expr_curr;
 	if (cons->class_list != NULL)
 		class_curr = cons->class_list->head;
 	else
@@ -307,7 +308,16 @@ void cil_tree_print_constrain(struct cil_constrain *cons)
 		perm_curr = perm_curr->next;
 	}
 	printf(") \n\t\t");
-	cil_print_expr_tree(cons->expr->root);
+	expr_curr = cons->expr;
+	while (expr_curr != NULL) {
+		struct cil_conditional *cond = expr_curr->data;
+		if (cond->data != NULL)
+			printf("%s:%i ", ((struct cil_symtab_datum *)cond->data)->name, cond->flavor);
+		else
+			printf("-%s:%i ", cond->str, cond->flavor);
+		expr_curr = expr_curr->cl_head;
+	}
+	printf(")\n");
 	printf("\n");
 }
 
