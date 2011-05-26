@@ -18,6 +18,8 @@ void test_cil_copy_common(CuTest *);
 
 void test_cil_copy_classcommon(CuTest *);
 
+void test_cil_copy_sid(CuTest *);
+
 void test_cil_copy_user(CuTest *);
 
 void test_cil_copy_role(CuTest *);
