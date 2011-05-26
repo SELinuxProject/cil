@@ -586,7 +586,7 @@ struct cil_tunableif {
 
 struct cil_conditional {
 	char *str;
-	struct cil_bool *boolean;
+	void *data;
 	uint32_t flavor;
 };
 

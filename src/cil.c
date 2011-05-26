@@ -770,7 +770,7 @@ int cil_conditional_init(struct cil_conditional **cond)
 	struct cil_conditional *new_cond = cil_malloc(sizeof(struct cil_conditional));
 
 	new_cond->str = NULL;
-	new_cond->boolean = NULL;
+	new_cond->data = NULL;
 	new_cond->flavor = CIL_AST_NODE;
 
 	*cond = new_cond;

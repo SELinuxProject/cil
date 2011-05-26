@@ -1699,7 +1699,7 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *current, str
 				printf("Name resolution failed for %s\n", ((struct cil_conditional*)curr_expr->data)->str);
 				return rc;
 			}
-			((struct cil_conditional*)curr_expr->data)->boolean = (struct cil_bool*)bool_node->data;
+			((struct cil_conditional*)curr_expr->data)->data = (struct cil_bool*)bool_node->data;
 		}
 
 		curr_expr = curr_expr->cl_head;
@@ -1742,13 +1742,13 @@ int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result)
 				oper2 = stack->parent->parent;
 
 			if (oper1->flavor == CIL_COND && ((struct cil_conditional*)oper1->data)->flavor == CIL_TUNABLE)
-				value1 = ((struct cil_conditional*)oper1->data)->boolean->value;
+				value1 = ((struct cil_bool *)((struct cil_conditional*)oper1->data)->data)->value;
 			else
 				value1 = *(uint16_t*)oper1->data;
 
 			if (cond->flavor != CIL_NOT) {
 				if (oper2->flavor == CIL_COND && ((struct cil_conditional*)oper2->data)->flavor == CIL_TUNABLE)
-					value2 = ((struct cil_conditional*)oper2->data)->boolean->value;
+					value2 = ((struct cil_bool *)((struct cil_conditional*)oper2->data)->data)->value;
 				else
 					value2 = *(uint16_t*)oper2->data;
 			}

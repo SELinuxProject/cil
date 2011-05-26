@@ -393,14 +393,14 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 				oper2 = stack->parent->parent;
 
 			if (oper1->flavor == CIL_COND && ((struct cil_conditional*)oper1->data)->flavor == CIL_BOOL) 
-				oper1_str = ((struct cil_conditional*)stack->parent->data)->boolean->datum.name;
+				oper1_str = ((struct cil_bool *)((struct cil_conditional*)stack->parent->data)->data)->datum.name;
 			else 
 				oper1_str = (char*)oper1->data;
 			len1 = strlen(oper1_str);
 
 			if (cond->flavor != CIL_NOT) {
 				if (oper2->flavor == CIL_COND && ((struct cil_conditional*)oper2->data)->flavor == CIL_BOOL) 
-					oper2_str = ((struct cil_conditional*)stack->parent->parent->data)->boolean->datum.name;
+					oper2_str = ((struct cil_bool *)((struct cil_conditional*)stack->parent->parent->data)->data)->datum.name;
 				else
 					oper2_str = (char*)oper2->data;
 				len2 = strlen(oper2_str);

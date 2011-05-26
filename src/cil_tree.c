@@ -470,8 +470,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_booleanif *bif = node->data;
 				struct cil_tree_node *current = bif->expr_stack;
 				while (current != NULL) {
-					if (((struct cil_conditional*)current->data)->boolean != NULL)
-						printf("(bool %s, value: %d) ", ((struct cil_conditional*)current->data)->boolean->datum.name, ((struct cil_conditional*)current->data)->boolean->value);
+					if (((struct cil_bool *)((struct cil_conditional*)current->data)->data) != NULL)
+						printf("(bool %s, value: %d) ", ((struct cil_bool*)((struct cil_conditional*)current->data)->data)->datum.name, ((struct cil_bool*)((struct cil_conditional*)current->data)->data)->value);
 					else if (((struct cil_conditional*)current->data)->str != NULL)
 						printf("%s ", ((struct cil_conditional*)current->data)->str);
 					current = current->cl_head;
@@ -485,8 +485,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_tree_node *current = tif->expr_stack;
 				if (current->flavor != CIL_INT) {
 					while (current != NULL && current->data != NULL) {
-						if (((struct cil_conditional*)current->data)->boolean != NULL)
-							printf("(tunable %s, value: %d) ", ((struct cil_conditional*)current->data)->boolean->datum.name, ((struct cil_conditional*)current->data)->boolean->value);
+						if (((struct cil_bool*)((struct cil_conditional*)current->data)->data) != NULL)
+							printf("(tunable %s, value: %d) ", ((struct cil_bool*)((struct cil_conditional*)current->data)->data)->datum.name, ((struct cil_bool*)((struct cil_conditional*)current->data)->data)->value);
 						else if (((struct cil_conditional*)current->data)->str != NULL)
 							printf("%s ", ((struct cil_conditional*)current->data)->str);
 						current = current->cl_head;
