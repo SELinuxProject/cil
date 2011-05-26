@@ -1517,7 +1517,11 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 							cil_destroy_catset(catset);
 							return rc;
 						}
-						new_arg->arg = catset;
+						struct cil_tree_node *cat_node;
+						cil_tree_node_init(&cat_node);
+						cat_node->flavor = CIL_CATSET;
+						cat_node->data = catset;
+						new_arg->arg = cat_node;
 					}
 					else
 						new_arg->arg_str = cil_strdup(pc->data);
@@ -1532,7 +1536,11 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 							cil_destroy_level(level);
 							return rc;
 						}
-						new_arg->arg = level;
+						struct cil_tree_node *lvl;
+						cil_tree_node_init(&lvl);
+						lvl->flavor = CIL_LEVEL;
+						lvl->data = level;
+						new_arg->arg = lvl;
 					}
 					else
 						new_arg->arg_str = cil_strdup(pc->data);
@@ -1600,24 +1608,14 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 		
 		switch (((struct cil_args*)item->data)->flavor) {
 		case CIL_LEVEL : 
-			if (((struct cil_args*)item->data)->arg_str == NULL) {	
-				rc = cil_resolve_level(db, current, (struct cil_level*)((struct cil_args*)item->data)->arg, call);
-				if (rc != SEPOL_OK) {
-					printf("cil_resolve_call2: cil_resolve_level failed: %d\n", rc);
-					return rc;
-				} 
-			}
+			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) 
+				break;
 			else
 				sym_index = CIL_SYM_LEVELS;
 			break;
 		case CIL_CATSET : 
-			if (((struct cil_args*)item->data)->arg_str == NULL) {
-				rc = cil_resolve_catset(db, current, (struct cil_catset*)((struct cil_args*)item->data)->arg, call);
-				if (rc != SEPOL_OK) {
-					printf("cil_resolve_call2: cil_resolve_catset failed, rc: %d\n", rc);
-					return rc;
-				}
-			}
+			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL)
+				break;
 			else
 				sym_index = CIL_SYM_CATS;
 			break;
@@ -1643,7 +1641,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 			return SEPOL_ERR;
 		}
 		if (sym_index != CIL_SYM_UNKNOWN) {
-			rc = cil_resolve_name(db, current, ((struct cil_args*)item->data)->arg_str, sym_index, ((struct cil_args*)item->data)->flavor, call, (struct cil_tree_node**)&(((struct cil_args*)item->data)->arg));
+			rc = cil_resolve_name(db, current, ((struct cil_args*)item->data)->arg_str, sym_index, ((struct cil_args*)item->data)->flavor, call, &(((struct cil_args*)item->data)->arg));
 			if (rc != SEPOL_OK) {
 				printf("cil_resolve_call2: cil_resolve_name failed, rc: %d\n", rc);
 				return rc;

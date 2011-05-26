@@ -560,7 +560,7 @@ struct cil_macro {
 
 struct cil_args {
 	char *arg_str;
-	void *arg;
+	struct cil_tree_node *arg;
 	char *param_str;
 	uint32_t flavor;
 };

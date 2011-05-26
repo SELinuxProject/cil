@@ -2558,14 +2558,14 @@ void cil_destroy_args(struct cil_args *args)
 	if (args->arg_str != NULL)
 		free(args->arg_str);
 	args->param_str = NULL;
-	if (((struct cil_symtab_datum*)args->arg)->name == NULL)
-		switch (((struct cil_symtab_datum*)args->arg)->node->flavor) {
+	if (args->arg_str == NULL)
+		switch (args->arg->flavor) {
 		case CIL_LEVEL : 
-			cil_destroy_level((struct cil_level*)args->arg);
+			cil_tree_node_destroy(&args->arg);
 			args->arg = NULL;
 			break;
 		case CIL_CATSET : 
-			cil_destroy_catset((struct cil_catset*)args->arg);
+			cil_tree_node_destroy(&args->arg);
 			args->arg = NULL;
 			break;
 		} 
