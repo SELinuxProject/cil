@@ -169,11 +169,13 @@ void test_cil_resolve_call1_level(CuTest *);
 void test_cil_resolve_call1_class(CuTest *);
 void test_cil_resolve_call1_level(CuTest *);
 void test_cil_resolve_call1_level_anon(CuTest *);
+void test_cil_resolve_call1_level_anon_neg(CuTest *);
 void test_cil_resolve_call1_unknown_neg(CuTest *);
 void test_cil_resolve_call1_unknowncall_neg(CuTest *);
 void test_cil_resolve_call1_extraargs_neg(CuTest *);
 void test_cil_resolve_call1_copy_neg(CuTest *);
 void test_cil_resolve_call1_missing_arg_neg(CuTest *);
+void test_cil_resolve_call1_paramsflavor_neg(CuTest *);
 void test_cil_resolve_call1_unknownflavor_neg(CuTest *);
 
 void test_cil_resolve_call2_type(CuTest *);

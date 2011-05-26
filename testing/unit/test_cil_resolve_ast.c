@@ -2477,7 +2477,7 @@ void test_cil_resolve_call1_catset_anon_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_call1_level(CuTest *tc) {
@@ -2526,6 +2526,30 @@ void test_cil_resolve_call1_level_anon(CuTest *tc) {
 
 	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call1_level_anon_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "l", "s0", "(", "c0", ")", ")",
+			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", ")",
+				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "h", ")", ")", ")",
+			"(", "call", "mm", "(", "(", "s0", "(", "c0", "(", "c5", ")", ")", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_call1_class(CuTest *tc) {
@@ -2660,7 +2684,7 @@ void test_cil_resolve_call1_missing_arg_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_call1_unknownflavor_neg(CuTest *tc) {
+void test_cil_resolve_call1_paramsflavor_neg(CuTest *tc) {
 	char *line[] = {"(", "type", "qaz", ")",
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
@@ -2683,6 +2707,34 @@ void test_cil_resolve_call1_unknownflavor_neg(CuTest *tc) {
 	new_call->macro = (struct cil_macro*)macro_node->data;
 	struct cil_list_item *item = new_call->macro->params->head;
 	item->flavor = CIL_CONTEXT;
+
+	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_call1_unknownflavor_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "qaz", ")",
+			"(", "class", "file", "(", "read", ")", ")",
+			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *macro_node = NULL;
+
+	struct cil_call *new_call = ((struct cil_call*)test_db->ast->root->cl_head->next->next->next->data);
+	cil_resolve_name(test_db, test_db->ast->root->cl_head->next->next->next, new_call->macro_str, CIL_SYM_MACROS, CIL_MACRO, NULL, &macro_node);
+	new_call->macro = (struct cil_macro*)macro_node->data;
+	struct cil_list_item *item = new_call->macro->params->head;
+	((struct cil_param*)item->data)->flavor = CIL_CONTEXT;
 
 	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -2854,7 +2906,7 @@ void test_cil_resolve_call2_catset_anon_neg(CuTest *tc) {
 
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
 	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_call2_class(CuTest *tc) {

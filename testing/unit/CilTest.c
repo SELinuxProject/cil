@@ -961,11 +961,13 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_class);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknown_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknowncall_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_extraargs_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_copy_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_missing_arg_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_paramsflavor_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknownflavor_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call1);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call1_neg); 
