@@ -379,6 +379,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 	char *oper2_str = NULL;
 	char *oper = NULL;
 	char *policy = NULL;
+	struct cil_tree_node *prev_stack = NULL;
 
 	while (stack != NULL) {
 		cond = (struct cil_conditional*)stack->data;
@@ -413,7 +414,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 			len1 = strlen(oper1_str);
 
 			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
-				if (stack->parent->flavor != CIL_COND)
+				if (stack->parent->parent->flavor != CIL_COND)
 					oper2_str = (char *)stack->parent->parent->data;
 				else {
 					struct cil_conditional *cond2 = stack->parent->parent->data;
@@ -451,15 +452,16 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 				strncat(new->data, " ", 1);
 				strncat(new->data, oper1_str, len1);
 				strncat(new->data, ")", 1);
-				
 			}
 		
 			new->flavor = CIL_AST_STR;
 			new->cl_head = stack->cl_head;
+
 			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT)
 				new->parent = stack->parent->parent->parent;
 			else
 				new->parent = stack->parent->parent;
+
 			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
 				if (stack->parent->parent->parent != NULL)
 					stack->parent->parent->parent->cl_head = new;
@@ -468,29 +470,47 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 				if (stack->parent->parent != NULL)
 					stack->parent->parent->cl_head = new;
 			}
+
 			if (stack->cl_head != NULL)
 				stack->cl_head->parent = new;
-			if (stack->parent->parent != NULL)
-				cil_tree_node_destroy(&stack->parent->parent);
-			cil_tree_node_destroy(&stack->parent);
-			cil_tree_node_destroy(&stack);
-
-			if (new->cl_head == NULL) {
-				if (new->parent == NULL)
-					policy = (char*)new->data;
-				else 
-					return SEPOL_ERR;
-			}
-
+/*
+			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT)
+				if (stack->parent->parent != NULL)
+					free(stack->parent->parent);
+					//cil_tree_node_destroy(&stack->parent->parent);
+			free(stack->parent);
+			free(stack);
+			//cil_tree_node_destroy(&stack->parent);
+			//cil_tree_node_destroy(&stack);
+*/
+			
 			stack = new;
 		}
+		prev_stack = stack;
 		stack = stack->cl_head;
 	}
 
-	if (policy != NULL)
-		fprintf(file_arr[file_index], "%s", policy);
-	else
+	if (prev_stack == NULL || prev_stack->parent != NULL || prev_stack->cl_head != NULL) {
+		/* there should only be one item on the stack at this point */
 		return SEPOL_ERR;
+	}
+
+	if (prev_stack->flavor == CIL_COND) {
+		cond = prev_stack->data;
+		if (cond->flavor == CIL_BOOL) {
+			char * bname = ((struct cil_bool *)cond->data)->datum.name;
+			policy = cil_malloc(strlen(bname) + 3);
+			strcpy(policy, "(");
+			strncat(policy, bname, strlen(bname));
+			strncat(policy, ")", 1);
+		} else {
+			return SEPOL_ERR;
+		}
+	} else {
+		policy = (char *)prev_stack->data;
+	}
+
+	fprintf(file_arr[file_index], "%s", policy);
 
 	return SEPOL_OK;
 }
