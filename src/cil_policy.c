@@ -473,16 +473,13 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 
 			if (stack->cl_head != NULL)
 				stack->cl_head->parent = new;
-/*
+
 			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT)
 				if (stack->parent->parent != NULL)
-					free(stack->parent->parent);
-					//cil_tree_node_destroy(&stack->parent->parent);
-			free(stack->parent);
-			free(stack);
-			//cil_tree_node_destroy(&stack->parent);
-			//cil_tree_node_destroy(&stack);
-*/
+					cil_tree_node_destroy(&stack->parent->parent);
+			cil_tree_node_destroy(&stack->parent);
+			cil_tree_node_destroy(&stack);
+
 			
 			stack = new;
 		}
@@ -498,19 +495,27 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 	if (prev_stack->flavor == CIL_COND) {
 		cond = prev_stack->data;
 		if (cond->flavor == CIL_BOOL) {
+			/* a single boolean is left on the stack, e.g (booleanif foo */
 			char * bname = ((struct cil_bool *)cond->data)->datum.name;
 			policy = cil_malloc(strlen(bname) + 3);
 			strcpy(policy, "(");
 			strncat(policy, bname, strlen(bname));
 			strncat(policy, ")", 1);
+
+			struct cil_tree_node *bnode;
+			cil_tree_node_init(&bnode);
+			bnode->data = policy;
+			bnode->flavor = CIL_AST_STR;
+			cil_tree_node_destroy(&prev_stack);
+			prev_stack = bnode;
 		} else {
 			return SEPOL_ERR;
 		}
-	} else {
-		policy = (char *)prev_stack->data;
 	}
+	
+	fprintf(file_arr[file_index], "%s", (char *)prev_stack->data);
 
-	fprintf(file_arr[file_index], "%s", policy);
+	cil_tree_node_destroy(&prev_stack);
 
 	return SEPOL_OK;
 }
