@@ -56,7 +56,6 @@ void test_cil_resolve_constrain(CuTest *);
 void test_cil_resolve_constrain_class_neg(CuTest *);
 void test_cil_resolve_constrain_perm_neg(CuTest *);
 void test_cil_resolve_constrain_perm_resolve_neg(CuTest *);
-void test_cil_resolve_constrain_expr_neg(CuTest *);
 
 void test_cil_resolve_context(CuTest *);
 void test_cil_resolve_context_user_neg(CuTest *);

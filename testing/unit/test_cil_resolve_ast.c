@@ -801,27 +801,6 @@ void test_cil_resolve_constrain_perm_resolve_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
-void test_cil_resolve_constrain_expr_neg(CuTest *tc) {
-        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
-			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
-			"(", "sensitivity", "s0", ")",
-			"(", "category", "c1", ")",
-			"(", "level", "l2", "s0", "(", "c1", ")", ")",
-			"(", "level", "foo", "s0", "(", "c1", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "32", ")", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = cil_resolve_constrain(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-}
-
 void test_cil_resolve_context(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
@@ -3223,7 +3202,7 @@ void test_cil_resolve_expr_stack(CuTest *tc) {
 	
 	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data; 
 
-	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL, CIL_BOOL);
+	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -3244,7 +3223,7 @@ void test_cil_resolve_expr_stack_neg(CuTest *tc) {
 	
 	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data; 
 
-	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL, CIL_BOOL);
+	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
 }
 
@@ -3305,7 +3284,7 @@ void test_cil_evaluate_expr_stack_and(CuTest *tc) {
 
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -3329,7 +3308,7 @@ void test_cil_evaluate_expr_stack_not(CuTest *tc) {
 
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -3353,7 +3332,7 @@ void test_cil_evaluate_expr_stack_or(CuTest *tc) {
 
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -3377,7 +3356,7 @@ void test_cil_evaluate_expr_stack_xor(CuTest *tc) {
 
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -3401,7 +3380,7 @@ void test_cil_evaluate_expr_stack_eq(CuTest *tc) {
 
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -3425,7 +3404,7 @@ void test_cil_evaluate_expr_stack_neq(CuTest *tc) {
 
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -3450,7 +3429,7 @@ void test_cil_evaluate_expr_stack_oper1(CuTest *tc) {
 
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->next->data;
 
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -3475,7 +3454,7 @@ void test_cil_evaluate_expr_stack_oper2(CuTest *tc) {
 
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->next->data;
 
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -3511,7 +3490,7 @@ void test_cil_evaluate_expr_stack_neg(CuTest *tc) {
 	test_node->cl_head = ((struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data)->expr_stack;
 	((struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data)->expr_stack->parent = test_node;
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
-	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL, CIL_TUNABLE);
+	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
 	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }

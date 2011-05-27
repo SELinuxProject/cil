@@ -1115,7 +1115,7 @@ void test_cil_copy_optional(CuTest *tc) {
 }
 
 void test_cil_copy_constrain(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -1138,7 +1138,7 @@ void test_cil_copy_constrain(CuTest *tc) {
 	cil_constrain_init(&test_copy);
 
 	cil_copy_constrain(test_db, (struct cil_constrain *)test_ast_node->data, &test_copy);
-	CuAssertStrEquals(tc, (char*)test_copy->expr->root->data, (char*)((struct cil_constrain *)test_ast_node->data)->expr->root->data);
+	CuAssertStrEquals(tc, (char*)test_copy->class_list_str->head->data, (char*)((struct cil_constrain *)test_ast_node->data)->class_list_str->head->data);
 }
 
 /* node_helper functions */
