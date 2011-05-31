@@ -959,25 +959,22 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, uint32_t flavor,
 	rnode->cl_head = lnode;
 	*stack = rnode;
 	
-		
-	int liskeyword = 0;
-	int riskeyword = 0;
-	if (!strcmp(lstr, CIL_KEY_CONS_T1) || !strcmp(lstr, CIL_KEY_CONS_T2) ||
-        !strcmp(lstr, CIL_KEY_CONS_R1) || !strcmp(lstr, CIL_KEY_CONS_R2) ||
-		!strcmp(lstr, CIL_KEY_CONS_U1) || !strcmp(lstr, CIL_KEY_CONS_U2) ||
-		!strcmp(lstr, CIL_KEY_CONS_L1) || !strcmp(lstr, CIL_KEY_CONS_L2) ||
-		!strcmp(lstr, CIL_KEY_CONS_H1) || !strcmp(lstr, CIL_KEY_CONS_H2)) {
-		liskeyword = 1;
+	if (strcmp(lstr, CIL_KEY_CONS_T1) && strcmp(lstr, CIL_KEY_CONS_T2) &&
+	    strcmp(lstr, CIL_KEY_CONS_R1) && strcmp(lstr, CIL_KEY_CONS_R2) &&
+	    strcmp(lstr, CIL_KEY_CONS_U1) && strcmp(lstr, CIL_KEY_CONS_U2) &&
+	    strcmp(lstr, CIL_KEY_CONS_L1) && strcmp(lstr, CIL_KEY_CONS_L2) &&
+	    strcmp(lstr, CIL_KEY_CONS_H1)) {
+		printf("Left hand side must be valid keyword\n");
+		return SEPOL_ERR;
 	}
+	
+	int riskeyword = 0;
 	if (!strcmp(rstr, CIL_KEY_CONS_T1) || !strcmp(rstr, CIL_KEY_CONS_T2) ||
         !strcmp(rstr, CIL_KEY_CONS_R1) || !strcmp(rstr, CIL_KEY_CONS_R2) ||
 		!strcmp(rstr, CIL_KEY_CONS_U1) || !strcmp(rstr, CIL_KEY_CONS_U2) ||
 		!strcmp(rstr, CIL_KEY_CONS_L1) || !strcmp(rstr, CIL_KEY_CONS_L2) ||
 		!strcmp(rstr, CIL_KEY_CONS_H1) || !strcmp(rstr, CIL_KEY_CONS_H2)) {
 		riskeyword = 1;
-	}
-	if (!liskeyword) {
-		return SEPOL_ERR;
 	}
 
 	if (opcond->flavor == CIL_EQ || opcond->flavor == CIL_NEQ) {
@@ -1048,7 +1045,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, uint32_t flavor,
 
 		/* error if not mlsconstrain*/
 		} else if (flavor == CIL_CONSTRAIN) {
-			printf("Left hand side must be a keyword\n");
+			printf("Left hand side must be a valid keyword\n");
 			return SEPOL_ERR;
 		}
 
