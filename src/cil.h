@@ -638,6 +638,7 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *);
 int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
 void cil_destroy_data(void **, uint32_t);
 int cil_sort_init(struct cil_sort **sort);
+void cil_sort_destroy(struct cil_sort **sort);
 int cil_netifcon_init(struct cil_netifcon **netifcon);
 int cil_context_init(struct cil_context **context);
 int cil_level_init(struct cil_level **level);

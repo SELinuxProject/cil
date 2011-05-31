@@ -28,6 +28,11 @@ int cil_db_init(struct cil_db **db)
 	cil_list_init(&new_db->catorder);
 	cil_list_init(&new_db->dominance);
 	symtab_init(&new_db->netif, CIL_SYM_SIZE);
+	cil_sort_init(&new_db->netifcon);
+	cil_sort_init(&new_db->genfscon);
+	cil_sort_init(&new_db->filecon);
+	cil_sort_init(&new_db->nodecon);
+	cil_sort_init(&new_db->portcon);
 
 	*db = new_db;
 
@@ -38,7 +43,12 @@ void cil_db_destroy(struct cil_db **db)
 {
 	cil_tree_destroy(&(*db)->ast);
 	cil_symtab_array_destroy((*db)->symtab);
-	
+	cil_sort_destroy(&(*db)->netifcon);
+	cil_sort_destroy(&(*db)->genfscon);
+	cil_sort_destroy(&(*db)->filecon);
+	cil_sort_destroy(&(*db)->nodecon);
+	cil_sort_destroy(&(*db)->portcon);
+
 	*db = NULL;	
 
 }
@@ -422,6 +432,19 @@ int cil_sort_init(struct cil_sort **sort)
 	*sort = new_sort;
 
 	return SEPOL_OK;
+}
+
+void cil_sort_destroy(struct cil_sort **sort)
+{
+	(*sort)->flavor = 0;
+	(*sort)->count = 0;
+	(*sort)->index = 0;
+	if ((*sort)->array != NULL) {
+		free((*sort)->array);
+	}
+	(*sort)->array = NULL;
+
+	*sort = NULL;
 }
 
 int cil_netifcon_init(struct cil_netifcon **netifcon)
