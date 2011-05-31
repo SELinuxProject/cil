@@ -63,6 +63,90 @@ int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 	return SEPOL_OK;
 }
 
+void fc_fill_data(struct fc_data *fc, char *path)
+{
+	int c = 0;
+	fc->meta = 0;
+	fc->stem_len = 0;
+	fc->str_len = 0;
+	
+	while (path[c] != '\0') {
+		switch (path[c]) {
+		case '.':
+		case '^':
+		case '$':
+		case '?':
+		case '*':
+		case '+':
+		case '|':
+		case '[':
+		case '(':
+		case '{':
+			fc->meta = 1;
+			break;
+		case '\\':
+			c++;
+		default:
+			if (!fc->meta) {
+				fc->stem_len++;
+			}
+			break;
+		}
+		fc->str_len++;
+		c++;
+	}
+}
+
+int cil_filecon_compare(const void *a, const void *b)
+{
+	int rc = 0;
+	struct cil_filecon *a_filecon = *(struct cil_filecon**)a;
+	struct cil_filecon *b_filecon = *(struct cil_filecon**)b;
+	struct fc_data *a_data = cil_malloc(sizeof(*a_data));
+	struct fc_data *b_data = cil_malloc(sizeof(*b_data));
+	char *a_path = cil_malloc(strlen(a_filecon->root_str)+strlen(a_filecon->path_str));
+	a_path[0] = '\0';
+	char *b_path = cil_malloc(strlen(b_filecon->root_str)+strlen(b_filecon->path_str));
+	b_path[0] = '\0';
+	strcat(a_path, a_filecon->root_str);
+	strcat(a_path, a_filecon->path_str);
+	strcat(b_path, b_filecon->root_str);
+	strcat(b_path, b_filecon->path_str);
+	fc_fill_data(a_data, a_path);
+	fc_fill_data(b_data, b_path);
+	if (a_data->meta && !b_data->meta) {
+		rc = -1;
+	}
+	else if (b_data->meta && !a_data->meta) {
+		rc = 1;
+	}
+	else if (a_data->stem_len < b_data->stem_len) {
+		rc = -1;
+	}
+	else if (b_data->stem_len < a_data->stem_len) {
+		rc = 1;
+	}
+	else if (a_data->str_len < b_data->str_len) {
+		rc = -1;
+	}
+	else if (b_data->str_len < a_data->str_len) {
+		rc = 1;
+	}
+	else if (!((struct cil_filecon*)a)->type && ((struct cil_filecon*)b)->type) {
+		rc = -1;
+	}
+	else if (!((struct cil_filecon*)b)->type && ((struct cil_filecon*)a)->type) {
+		rc = 1;
+	}
+
+	free(a_path);
+	free(b_path);
+	free(a_data);
+	free(b_data);
+
+	return rc;
+}	
+
 static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
 	struct cil_list_item *new_key = NULL;
@@ -999,6 +1083,8 @@ int cil_gen_policy(struct cil_db *db)
 		printf("Error walking tree\n");
 		return rc;
 	}
+
+	qsort(db->filecon->array, db->filecon->count, sizeof(struct cil_filecon*), cil_filecon_compare);
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {

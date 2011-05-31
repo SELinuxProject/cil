@@ -10,6 +10,12 @@ struct cil_multimap_item {
 	struct cil_list *values;
 };
 
+struct fc_data {
+	int meta;
+	int stem_len;
+	int str_len;
+};
+
 int cil_combine_policy(FILE **, FILE *);
 int cil_name_to_policy(FILE **, struct cil_tree_node *); 
 int cil_gen_policy(struct cil_db *);
