@@ -2186,7 +2186,8 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		|| parse_current->next->next->cl_head->next->next == NULL
 		|| parse_current->next->next->cl_head->next->next->cl_head != NULL
 		|| parse_current->next->next->cl_head->next->next->next == NULL
-		|| parse_current->next->next->cl_head->next->next->next->next == NULL) {
+		|| parse_current->next->next->cl_head->next->next->next->next == NULL
+		|| parse_current->next->next->cl_head->next->next->next->next->next != NULL) {
 			printf("Invalid context declaration (line: %d)\n", parse_current->line);
 			goto gen_context_cleanup;
 		}
