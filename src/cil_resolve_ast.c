@@ -304,6 +304,7 @@ int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, stru
 	struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;
 	struct cil_tree_node *src_node = NULL;
 	struct cil_tree_node *tgt_node = NULL;
+	struct cil_tree_node *obj_node = NULL;
 	struct cil_tree_node *result_node = NULL;
 	int rc = SEPOL_ERR;
 
@@ -320,6 +321,13 @@ int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, stru
 		return rc;
 	}
 	roletrans->tgt = (struct cil_type*)(tgt_node->data);
+
+	rc = cil_resolve_name(db, current, roletrans->obj_str, CIL_SYM_CLASSES, CIL_CLASS, call, &obj_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", roletrans->obj_str);
+		return rc;
+	}
+	roletrans->obj = (struct cil_class*)(obj_node->data);
 
 	rc = cil_resolve_name(db, current, roletrans->result_str, CIL_SYM_ROLES, CIL_ROLE, call, &result_node);
 	if (rc != SEPOL_OK) {

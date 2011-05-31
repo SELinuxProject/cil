@@ -525,10 +525,11 @@ int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node 
 	if (parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 	
-	if (parse_current->next == NULL || \
-		parse_current->next->next == NULL || \
-		parse_current->next->next->next == NULL || \
-		parse_current->next->next->next->next != NULL) 
+	if (parse_current->next == NULL ||
+		parse_current->next->next == NULL ||
+		parse_current->next->next->next == NULL ||
+		parse_current->next->next->next->next == NULL ||
+		parse_current->next->next->next->next->next != NULL) 
 	{
 		printf("Invalid roletransition declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
@@ -542,7 +543,8 @@ int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node 
 
 	roletrans->src_str = cil_strdup(parse_current->next->data);
 	roletrans->tgt_str = cil_strdup(parse_current->next->next->data);
-	roletrans->result_str = cil_strdup(parse_current->next->next->next->data);
+	roletrans->obj_str = cil_strdup(parse_current->next->next->next->data);
+	roletrans->result_str = cil_strdup(parse_current->next->next->next->next->data);
 
 	ast_node->data = roletrans;
 	ast_node->flavor = CIL_ROLETRANS;
@@ -556,6 +558,8 @@ void cil_destroy_roletrans(struct cil_role_trans *roletrans)
 		free(roletrans->src_str);
 	if (roletrans->tgt_str != NULL)
 		free(roletrans->tgt_str);
+	if (roletrans->obj_str != NULL)
+		free(roletrans->obj_str);
 	if (roletrans->result_str != NULL)
 		free(roletrans->result_str);
 	free(roletrans);

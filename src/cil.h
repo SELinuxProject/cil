@@ -393,6 +393,8 @@ struct cil_role_trans {
 	struct cil_role *src;
 	char *tgt_str;	
 	struct cil_type *tgt;
+	char *obj_str;
+	struct cil_class *obj;
 	char *result_str;
 	struct cil_role *result;
 };

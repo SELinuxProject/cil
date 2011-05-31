@@ -398,6 +398,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf(" %s", roletrans->tgt->datum.name);
 				else
 					printf(" %s", roletrans->tgt_str);
+				
+				if (roletrans->obj != NULL)
+					printf(" %s", roletrans->obj->datum.name);
+				else
+					printf(" %s", roletrans->obj_str);
 
 				if (roletrans->result != NULL)
 					printf(" %s\n", roletrans->result->datum.name);

@@ -877,6 +877,8 @@ int cil_role_trans_init(struct cil_role_trans **role_trans)
 	new_role_trans->src = NULL;
 	new_role_trans->tgt_str = NULL;
 	new_role_trans->tgt = NULL;
+	new_role_trans->obj_str = NULL;
+	new_role_trans->obj = NULL;
 	new_role_trans->result_str = NULL;
 	new_role_trans->result = NULL;
 
