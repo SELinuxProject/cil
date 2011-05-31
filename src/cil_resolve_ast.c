@@ -2045,7 +2045,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						uint32_t count = sort->count;
 						uint32_t i = sort->index;
 						if (sort->array == NULL) {
-							sort->array = malloc(sizeof(struct cil_netifcon*)*count);
+							sort->array = cil_malloc(sizeof(struct cil_netifcon*)*count);
 						}
 						sort->array[i] = node->data;
 						sort->index++;
@@ -2056,7 +2056,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						uint32_t count = sort->count;
 						uint32_t i = sort->index;
 						if (sort->array == NULL) {
-							sort->array = malloc(sizeof(struct cil_genfscon*)*count);
+							sort->array = cil_malloc(sizeof(struct cil_genfscon*)*count);
 						}
 						sort->array[i] = node->data;
 						sort->index++;
@@ -2067,7 +2067,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						uint32_t count = sort->count;
 						uint32_t i = sort->index;
 						if (sort->array == NULL) {
-							sort->array = malloc(sizeof(struct cil_filecon*)*count);
+							sort->array = cil_malloc(sizeof(struct cil_filecon*)*count);
 						}
 						sort->array[i] = node->data;
 						sort->index++;
@@ -2078,7 +2078,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						uint32_t count = sort->count;
 						uint32_t i = sort->index;
 						if (sort->array == NULL) {
-							sort->array = malloc(sizeof(struct cil_nodecon*)*count);
+							sort->array = cil_malloc(sizeof(struct cil_nodecon*)*count);
 						}
 						sort->array[i] = node->data;
 						sort->index++;
@@ -2089,7 +2089,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						uint32_t count = sort->count;
 						uint32_t i = sort->index;
 						if (sort->array == NULL) {
-							sort->array = malloc(sizeof(struct cil_portcon*)*count);
+							sort->array = cil_malloc(sizeof(struct cil_portcon*)*count);
 						}
 						sort->array[i] = node->data;
 						sort->index++;
