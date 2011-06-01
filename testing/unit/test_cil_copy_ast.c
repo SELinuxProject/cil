@@ -7,6 +7,7 @@
 #include "../../src/cil_resolve_ast.h"
 
 int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struct cil_list *other);
+int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, uint32_t index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym));
 
 void test_cil_copy_list(CuTest *tc) {
 	char *line[] = {"(", "foo1", "foo2", ")", NULL};
@@ -2868,5 +2869,120 @@ void test_cil_copy_node_helper_othernextflavor_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, other);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_copy_data_helper(CuTest *tc) {
+	char *line[] = {"(", "user", "sysadm", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_db *test_db2;
+	cil_db_init(&test_db2);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+
+	cil_list_item_init(&other->head);
+	cil_list_item_init(&other->head->next);
+	other->head->data = test_db2->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	other->head->next->flavor = CIL_DB;
+	other->head->next->data = test_db2;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *orig = test_db->ast->root->cl_head;
+	
+	struct cil_tree_node *new;
+	cil_tree_node_init(&new);
+	new->parent = (struct cil_tree_node*)other->head->data;
+	new->line = orig->line;
+	new->flavor = orig->flavor;
+
+	struct cil_db *db = (struct cil_db*)other->head->next->data;
+
+	symtab_t *symtab = NULL;
+
+	int rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_USERS, &cil_copy_user);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_copy_data_helper_getparentsymtab_neg(CuTest *tc) {
+	char *line[] = {"(", "user", "sysadm", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_db *test_db2;
+	cil_db_init(&test_db2);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+
+	cil_list_item_init(&other->head);
+	cil_list_item_init(&other->head->next);
+	other->head->data = test_db2->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	other->head->next->flavor = CIL_DB;
+	other->head->next->data = test_db2;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *orig = test_db->ast->root->cl_head;
+	
+	struct cil_tree_node *new;
+	cil_tree_node_init(&new);
+	new->parent = (struct cil_tree_node*)other->head->data;
+	new->line = orig->line;
+	new->flavor = orig->flavor;
+
+	struct cil_db *db = (struct cil_db*)other->head->next->data;
+
+	symtab_t *symtab = NULL;
+
+	int rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_USER, &cil_copy_user);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_copy_data_helper_duplicatedb_neg(CuTest *tc) {
+	char *line[] = {"(", "user", "sysadm", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+
+	cil_list_item_init(&other->head);
+	cil_list_item_init(&other->head->next);
+	other->head->data = test_db->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	other->head->next->flavor = CIL_DB;
+	other->head->next->data = test_db;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_tree_node *orig = test_db->ast->root->cl_head;
+	
+	struct cil_tree_node *new;
+	cil_tree_node_init(&new);
+	new->parent = (struct cil_tree_node*)other->head->data;
+	new->line = orig->line;
+	new->flavor = orig->flavor;
+
+	symtab_t *symtab = NULL;
+
+	int rc = __cil_copy_data_helper(test_db, orig, new, symtab, CIL_SYM_USERS, &cil_copy_user);
+	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
 }
 

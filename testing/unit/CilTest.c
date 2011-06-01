@@ -1267,5 +1267,9 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_otherheadflavor_neg);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernextflavor_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_copy_data_helper);
+	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_getparentsymtab_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_duplicatedb_neg);
+	
 	return suite;
 }
