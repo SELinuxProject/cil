@@ -119,4 +119,7 @@ void test_cil_copy_node_helper_optional_neg(CuTest *tc);
 
 void test_cil_copy_constrain(CuTest *);
 
+void test_cil_copy_ast(CuTest *);
+void test_cil_copy_ast_neg(CuTest *);
+
 #endif

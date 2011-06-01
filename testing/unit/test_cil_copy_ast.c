@@ -1141,6 +1141,62 @@ void test_cil_copy_constrain(CuTest *tc) {
 	CuAssertStrEquals(tc, (char*)test_copy->class_list_str->head->data, (char*)((struct cil_constrain *)test_ast_node->data)->class_list_str->head->data);
 }
 
+void test_cil_copy_ast(CuTest *tc) {
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_constrain(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_MLSCONSTRAIN);
+
+	struct cil_tree_node *test_current;
+	test_current = test_tree->root->cl_head->cl_head;
+
+	struct cil_constrain *test_copy;
+	cil_constrain_init(&test_copy);
+	cil_tree_node_init(&test_copy->expr);
+
+	int rc = cil_copy_ast(test_db, ((struct cil_constrain *)test_ast_node->data)->expr, test_copy->expr);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+}
+
+void test_cil_copy_ast_neg(CuTest *tc) {
+	char *line[] = {"(", "mlsconstrain", ")", NULL};
+	
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_constrain(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_MLSCONSTRAIN);
+
+	struct cil_tree_node *test_current;
+	test_current = test_tree->root->cl_head->cl_head;
+
+	struct cil_constrain *test_copy;
+	cil_constrain_init(&test_copy);
+	cil_tree_node_init(&test_copy->expr);
+
+	int rc = cil_copy_ast(test_db, ((struct cil_constrain *)test_ast_node->data)->expr, test_copy->expr);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
 /* node_helper functions */
 
 void test_cil_copy_node_helper_block(CuTest *tc) {

@@ -1254,5 +1254,8 @@ CuSuite* CilTreeGetSuite() {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
 
+	SUITE_ADD_TEST(suite, test_cil_copy_ast);
+	//SUITE_ADD_TEST(suite, test_cil_copy_ast_neg);
+	
 	return suite;
 }
