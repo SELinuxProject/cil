@@ -804,6 +804,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_netifcon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_macro_noparams);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_type);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_role);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_user);
@@ -823,6 +824,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_nosecondparam_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_noparam_name_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_emptyparam_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_macro_paramcontainsperiod_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro_neg);
 	

@@ -554,6 +554,7 @@ void test_cil_gen_netifcon_ethmissing_neg(CuTest *tc);
 void test_cil_gen_netifcon_interfacemissing_neg(CuTest *tc);
 void test_cil_gen_netifcon_packetmissing_neg(CuTest *tc);
 
+void test_cil_gen_macro_noparams(CuTest *tc);
 void test_cil_gen_macro_type(CuTest *tc);
 void test_cil_gen_macro_role(CuTest *tc);
 void test_cil_gen_macro_user(CuTest *tc);
@@ -573,6 +574,7 @@ void test_cil_gen_macro_noparam_name_neg(CuTest *tc);
 void test_cil_gen_macro_noparam_neg(CuTest *tc);
 void test_cil_gen_macro_nosecondparam_neg(CuTest *tc);
 void test_cil_gen_macro_emptyparam_neg(CuTest *tc);
+void test_cil_gen_macro_paramcontainsperiod_neg(CuTest *tc);
 
 void test_cil_gen_call(CuTest *tc);
 void test_cil_gen_call_anon(CuTest *tc);
