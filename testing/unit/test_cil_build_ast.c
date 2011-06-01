@@ -1506,7 +1506,30 @@ void test_cil_gen_expr_stack_not(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_gen_expr_stack_not_neg(CuTest *tc) {
+void test_cil_gen_expr_stack_not_noexpr_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "!", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_boolif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_not_extraexpr_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "!", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
@@ -1599,7 +1622,53 @@ void test_cil_gen_expr_stack_nested(CuTest *tc) {
 }
 
 void test_cil_gen_expr_stack_nested_neg(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "(","!=", "foo", "bar", ")",
+	char *line[] = {"(", "booleanif", "(", "(","!=", "foo", "bar", ")", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_boolif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_nested_emptyargs_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "==", "(", ")", "(", ")", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_booleanif *bif;
+	cil_boolif_init(&bif);
+
+	int rc = cil_gen_expr_stack(test_tree->root->cl_head->cl_head->next->cl_head, CIL_BOOL, &bif->expr_stack);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_expr_stack_nested_missingoperator_neg(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "||", "(","foo", "bar", ")", "(", "==", "baz", "boo", ")", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;

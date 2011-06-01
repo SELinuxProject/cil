@@ -280,11 +280,14 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_or);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_xor);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_not);
-	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_not_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_not_noexpr_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_not_extraexpr_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_eq);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_neq);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_nested);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_nested_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_nested_emptyargs_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_nested_missingoperator_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_arg1null_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_arg2null_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_extraarg_neg);
