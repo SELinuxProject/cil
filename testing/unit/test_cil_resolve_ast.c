@@ -3189,7 +3189,7 @@ void test_cil_resolve_name_call_args_name_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_expr_stack(CuTest *tc) {
+void test_cil_resolve_expr_stack_bools(CuTest *tc) {
 	char *line[] = {"(", "bool", "foo", "true", ")",
 			"(", "bool", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
@@ -3207,6 +3207,90 @@ void test_cil_resolve_expr_stack(CuTest *tc) {
 	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data; 
 
 	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_expr_stack_tunables(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "true", ")",
+			"(", "tunable", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data; 
+
+	int rc = cil_resolve_expr_stack(test_db, tif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_expr_stack_type(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
+			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
+			"(", "type", "t1", ")",
+			"(", "type", "type_t", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "t1", "type_t", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_constrain *cons = (struct cil_constrain*)test_db->ast->root->cl_head->next->next->next->next->data; 
+
+	int rc = cil_resolve_expr_stack(test_db, cons->expr, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_expr_stack_role(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
+			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
+			"(", "role", "r1", ")",
+			"(", "role", "role_r", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "r1", "role_r", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_constrain *cons = (struct cil_constrain*)test_db->ast->root->cl_head->next->next->next->next->data; 
+
+	int rc = cil_resolve_expr_stack(test_db, cons->expr, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_expr_stack_user(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
+			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
+			"(", "user", "u1", ")",
+			"(", "user", "user_u", ")",
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "u1", "user_u", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_constrain *cons = (struct cil_constrain*)test_db->ast->root->cl_head->next->next->next->next->data; 
+
+	int rc = cil_resolve_expr_stack(test_db, cons->expr, test_db->ast->root->cl_head->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -3229,6 +3313,28 @@ void test_cil_resolve_expr_stack_neg(CuTest *tc) {
 
 	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+}
+
+void test_cil_resolve_expr_stack_emptystr_neg(CuTest *tc) {
+	char *line[] = {"(", "bool", "foo", "true", ")",
+			"(", "bool", "bar", "false", ")",
+			"(", "class", "baz", "(", "read", ")", ")",
+			"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data;
+	((struct cil_conditional*)bif->expr_stack->data)->str = NULL;
+
+	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_boolif(CuTest *tc) {

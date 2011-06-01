@@ -199,8 +199,13 @@ void test_cil_resolve_name_call_args_namenull_neg(CuTest *);
 void test_cil_resolve_name_call_args_callargsnull_neg(CuTest *);
 void test_cil_resolve_name_call_args_name_neg(CuTest *);
 
-void test_cil_resolve_expr_stack(CuTest *);
+void test_cil_resolve_expr_stack_bools(CuTest *);
+void test_cil_resolve_expr_stack_tunables(CuTest *);
+void test_cil_resolve_expr_stack_type(CuTest *);
+void test_cil_resolve_expr_stack_role(CuTest *);
+void test_cil_resolve_expr_stack_user(CuTest *);
 void test_cil_resolve_expr_stack_neg(CuTest *);
+void test_cil_resolve_expr_stack_emptystr_neg(CuTest *);
 
 void test_cil_resolve_boolif(CuTest *);
 void test_cil_resolve_boolif_neg(CuTest *);
