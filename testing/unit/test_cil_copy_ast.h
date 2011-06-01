@@ -51,6 +51,8 @@ void test_cil_copy_node_helper_type_neg(CuTest *tc);
 
 void test_cil_copy_typeattr(CuTest *);
 void test_cil_copy_node_helper_typeattr(CuTest *tc); 
+void test_cil_copy_node_helper_attr(CuTest *tc); 
+void test_cil_copy_node_helper_attr_neg(CuTest *tc); 
 
 void test_cil_copy_typealias(CuTest *);
 void test_cil_copy_node_helper_typealias(CuTest *tc); 
@@ -118,8 +120,16 @@ void test_cil_copy_node_helper_optional(CuTest *tc);
 void test_cil_copy_node_helper_optional_neg(CuTest *tc); 
 
 void test_cil_copy_constrain(CuTest *);
+void test_cil_copy_node_helper_mlsconstrain(CuTest *tc); 
 
 void test_cil_copy_ast(CuTest *);
 void test_cil_copy_ast_neg(CuTest *);
+
+void test_cil_copy_node_helper_orignull_neg(CuTest *tc); 
+void test_cil_copy_node_helper_othernull_neg(CuTest *tc); 
+void test_cil_copy_node_helper_otherheadnull_neg(CuTest *tc); 
+void test_cil_copy_node_helper_othernextnull_neg(CuTest *tc); 
+void test_cil_copy_node_helper_otherheadflavor_neg(CuTest *tc); 
+void test_cil_copy_node_helper_othernextflavor_neg(CuTest *tc); 
 
 #endif

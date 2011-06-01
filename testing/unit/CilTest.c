@@ -1186,6 +1186,8 @@ CuSuite* CilTreeGetSuite() {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typeattr);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_attr);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_attr_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_typealias);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typealias);
@@ -1253,9 +1255,17 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_optional_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_mlsconstrain);
 
 	SUITE_ADD_TEST(suite, test_cil_copy_ast);
 	//SUITE_ADD_TEST(suite, test_cil_copy_ast_neg);
+	
+//	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_orignull_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernull_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_otherheadnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_otherheadflavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernextflavor_neg);
 	
 	return suite;
 }
