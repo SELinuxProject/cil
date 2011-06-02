@@ -2402,18 +2402,44 @@ void cil_destroy_portcon(struct cil_portcon *portcon)
 	free(portcon);
 }
 
+int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr)
+{
+	int rc = SEPOL_ERR;
+
+	if (addr_node == NULL || addr == NULL) {
+		return rc;
+	}
+
+	if (addr_node->cl_head != NULL ||  addr_node->next != NULL) {
+		printf("Invalid ip address (line: %d)\n", addr_node->line);
+		return rc;
+	}
+
+	if (strchr(addr_node->data, '.') != NULL) {
+		addr->family = AF_INET;
+	} else {
+		addr->family = AF_INET6;
+	}
+
+	rc = inet_pton(addr->family, addr_node->data, &addr->ip);
+	if (rc != 1) {
+		printf("Invalid ip address (line: %d)\n", addr_node->line);
+		return rc;
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL
-	|| parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL
-	|| parse_current->next->next->cl_head != NULL
-	|| parse_current->next->next->next == NULL
-	|| parse_current->next->next->next->next != NULL) {
+	if (parse_current->next == NULL ||
+	    parse_current->next->next == NULL ||
+	    parse_current->next->next->next == NULL ||
+	    parse_current->next->next->next->next != NULL) {
 		printf("Invalid nodecon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -2424,14 +2450,41 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		return rc;
 	}
 
-	nodecon->node_str = cil_strdup(parse_current->next->data);
-	nodecon->netmask_str = cil_strdup(parse_current->next->next->data);
+	if (parse_current->next->cl_head == NULL ) {
+		nodecon->addr_str = cil_strdup(parse_current->next->data);
+	} else {
+		rc = cil_ipaddr_init(&nodecon->addr);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init node address\n");
+			goto gen_nodecon_cleanup;
+		}
 
+		rc = cil_fill_ipaddr(parse_current->next->cl_head, nodecon->addr);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill node address\n");
+			goto gen_nodecon_cleanup;
+		}
+	}
+
+	if (parse_current->next->next->cl_head == NULL ) {
+		nodecon->mask_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		rc = cil_ipaddr_init(&nodecon->mask);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init node netmask\n");
+			goto gen_nodecon_cleanup;
+		}
+
+		rc = cil_fill_ipaddr(parse_current->next->next->cl_head, nodecon->mask);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill node netmask\n");
+			goto gen_nodecon_cleanup;
+		}
+	}
 
 	if (parse_current->next->next->next->cl_head == NULL ) {
 		nodecon->context_str = cil_strdup(parse_current->next->next->next->data);
-	}
-	else {
+	} else {
 		rc = cil_context_init(&nodecon->context);
 		if (rc != SEPOL_OK) {
 			printf("Failed to init node context\n");
@@ -2457,10 +2510,14 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 void cil_destroy_nodecon(struct cil_nodecon *nodecon)
 {
-	if (nodecon->node_str != NULL)
-		free(nodecon->node_str);
-	if (nodecon->netmask_str != NULL)
-		free(nodecon->netmask_str);
+	if (nodecon->addr_str != NULL)
+		free(nodecon->addr_str);
+	else if (nodecon->addr != NULL)
+		cil_destroy_ipaddr(nodecon->addr);
+	if (nodecon->mask_str != NULL)
+		free(nodecon->mask_str);
+	else if (nodecon->mask != NULL)
+		cil_destroy_ipaddr(nodecon->mask);
 	if (nodecon->context_str != NULL)
 		free(nodecon->context_str);
 	else if (nodecon->context != NULL)
@@ -2879,6 +2936,53 @@ void cil_destroy_policycap(struct cil_policycap *polcap)
 {
 	cil_symtab_datum_destroy(polcap->datum);
 	free(polcap);
+}
+
+int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	char * name;
+	struct cil_ipaddr *ipaddr;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return rc;
+
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL ||
+		parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL ||
+		parse_current->next->next->next != NULL)
+	{
+		printf("Invalid ipaddr rule (line: %d)\n", parse_current->line);
+		return rc;
+	}
+	
+	rc = cil_ipaddr_init(&ipaddr);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	name  = (char *)parse_current->next->data;
+
+	rc = cil_fill_ipaddr(parse_current->next->next, ipaddr);
+	if (rc != SEPOL_OK) {
+		goto gen_ipaddr_cleanup;
+	}
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)ipaddr, (hashtab_key_t)name, CIL_SYM_IPADDRS, CIL_IPADDR);
+	if (rc != SEPOL_OK) {
+		goto gen_ipaddr_cleanup;
+	}
+
+	return rc;
+
+gen_ipaddr_cleanup:
+	cil_destroy_ipaddr(ipaddr);
+	return rc;
+}
+
+void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr)
+{
+	cil_symtab_datum_destroy(ipaddr->datum);
+	free(ipaddr);
 }
 
 /* other is a list of 2 items. head should be ast_current, head->next should be db */
@@ -3301,6 +3405,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_optional(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_optional failed, rc: %d\n", rc);
+					return rc;
+				}
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_IPADDR)) {
+				rc = cil_gen_ipaddr(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_ipaddr failed, rc: %d\n", rc);
 					return rc;
 				}
 			}

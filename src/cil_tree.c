@@ -848,8 +848,23 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_NODECON : {
 				struct cil_nodecon *nodecon = node->data;
+				char buf[256];
+				
 				printf("NODECON:");
-				printf(" %s %s", nodecon->node_str, nodecon->netmask_str);
+				
+				if (nodecon->addr) {
+					inet_ntop(nodecon->addr->family, &nodecon->addr->ip, buf, 256);
+					printf(" %s", buf);
+				}  else {
+					printf(" %s", nodecon->addr_str);
+				}
+				if (nodecon->mask) {
+					inet_ntop(nodecon->mask->family, &nodecon->mask->ip, buf, 256);
+					printf(" %s", buf);
+				}  else {
+					printf(" %s", nodecon->mask_str);
+				}
+				
 				if (nodecon->context != NULL)
 					cil_tree_print_context(nodecon->context);
 				else if (nodecon->context_str != NULL)
@@ -970,6 +985,16 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_optional *optional = node->data;
 				printf("OPTIONAL: %s", optional->datum.name);
 				return;
+			}
+
+			case CIL_IPADDR : {
+				struct cil_ipaddr *ipaddr = node->data;
+				char buf[256];
+
+				inet_ntop(ipaddr->family, &ipaddr->ip, buf, 256);
+				printf("IPADDR %s: %s\n", ipaddr->datum.name, buf);
+
+				break;
 			}
 
 			default : {

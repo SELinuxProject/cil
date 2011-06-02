@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <arpa/inet.h>
 #include "cil_symtab.h"
 #include "cil_mem.h"
 
@@ -111,6 +112,7 @@
 #define CIL_MACRO		CIL_MIN_DECLARATIVE + 18
 #define CIL_OPTIONAL		CIL_MIN_DECLARATIVE + 19
 #define CIL_POLICYCAP		CIL_MIN_DECLARATIVE + 20
+#define CIL_IPADDR		CIL_MIN_DECLARATIVE + 21
 
 /*
 	Keywords
@@ -175,6 +177,7 @@
 #define CIL_KEY_NEQ		"!="
 #define CIL_KEY_ELSE		"else"
 #define CIL_KEY_OPTIONAL	"optional"
+#define CIL_KEY_IPADDR		"ipaddr"
 
 #define CIL_KEY_CONS_AND	"and"
 #define CIL_KEY_CONS_OR		"or"
@@ -217,9 +220,10 @@
 #define CIL_SYM_LEVELS		17
 #define CIL_SYM_POLICYCAPS	18
 #define CIL_SYM_OPTIONALS	19
+#define CIL_SYM_IPADDRS		20
 
-#define CIL_SYM_NUM		20
-#define CIL_SYM_UNKNOWN		21
+#define CIL_SYM_NUM		21
+#define CIL_SYM_UNKNOWN		22
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
@@ -523,10 +527,21 @@ struct cil_portcon {
 };
 
 struct cil_nodecon {
-	char *node_str;
-	char *netmask_str;
+	char *addr_str;
+	struct cil_ipaddr *addr;
+	char *mask_str;
+	struct cil_ipaddr *mask;
 	char *context_str;
 	struct cil_context *context;
+};
+
+struct cil_ipaddr {
+	struct cil_symtab_datum datum;
+	int family;
+	union {
+		struct in_addr v4;
+		struct in6_addr v6;
+	} ip;
 };
 
 struct cil_genfscon {
@@ -690,5 +705,6 @@ int cil_booleanif_init(struct cil_booleanif **booleanif);
 int cil_macro_init(struct cil_macro **macro);
 int cil_param_init(struct cil_param **param);
 int cil_policycap_init(struct cil_policycap **policycap);
+int cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 
 #endif

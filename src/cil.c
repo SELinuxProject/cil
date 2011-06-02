@@ -273,6 +273,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_optional(*data);
 			break;
 		}
+		case (CIL_IPADDR) : {
+			cil_destroy_ipaddr(*data);
+			break;
+		}
 		case (CIL_INT) : break;
 		default : {
 			printf("Unknown data flavor: %d\n", flavor);
@@ -1016,12 +1020,29 @@ int cil_nodecon_init(struct cil_nodecon **nodecon)
 
 	struct cil_nodecon *new_nodecon = cil_malloc(sizeof(struct cil_nodecon));
 
-	new_nodecon->node_str = NULL;
-	new_nodecon->netmask_str = NULL;
+	new_nodecon->addr_str = NULL;
+	new_nodecon->addr = NULL;
+	new_nodecon->mask_str = NULL;
+	new_nodecon->mask = NULL;
 	new_nodecon->context_str = NULL;
 	new_nodecon->context = NULL;
 
 	*nodecon = new_nodecon;
+
+	return SEPOL_OK;
+}
+
+int cil_ipaddr_init(struct cil_ipaddr **ipaddr)
+{
+	if (ipaddr == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_ipaddr *new_ipaddr = cil_malloc(sizeof(struct cil_ipaddr));
+
+	cil_symtab_datum_init(&new_ipaddr->datum);
+
+	*ipaddr = new_ipaddr;
 
 	return SEPOL_OK;
 }

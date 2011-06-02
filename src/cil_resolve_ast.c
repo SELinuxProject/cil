@@ -1318,8 +1318,28 @@ int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struc
 int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_nodecon *nodecon = (struct cil_nodecon*)current->data;
+	struct cil_tree_node *addr_node = NULL;
+	struct cil_tree_node *mask_node = NULL;
 	struct cil_tree_node *context_node = NULL;
-	int rc=  SEPOL_ERR;
+	int rc = SEPOL_ERR;
+
+	if (nodecon->addr_str != NULL) {
+		rc = cil_resolve_name(db, current, nodecon->addr_str, CIL_SYM_IPADDRS, CIL_IPADDR, call, &addr_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_nodecon: Failed to resolve node addr: %s, rc: %d\n", nodecon->addr_str, rc);
+			return rc;
+		}
+		nodecon->addr = (struct cil_ipaddr*)addr_node->data;
+	}
+	
+	if (nodecon->mask_str != NULL) {
+		rc = cil_resolve_name(db, current, nodecon->mask_str, CIL_SYM_IPADDRS, CIL_IPADDR, call, &mask_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_nodecon: Failed to resolve node mask: %s, rc: %d\n", nodecon->mask_str, rc);
+			return rc;
+		}
+		nodecon->mask = (struct cil_ipaddr*)mask_node->data;
+	}
 
 	if (nodecon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, nodecon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
@@ -1336,6 +1356,12 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 			return rc;
 		}
 	}
+
+	if (nodecon->addr->family != nodecon->mask->family) {
+		printf("Nodecon ip address not in the same family\n");
+		return SEPOL_ERR;
+	}
+
 	db->nodecon->count++;
 
 	return SEPOL_OK;

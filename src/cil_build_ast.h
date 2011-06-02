@@ -107,6 +107,9 @@ int cil_gen_policycap(struct cil_db *, struct cil_tree_node *, struct cil_tree_n
 void cil_destroy_policycap(struct cil_policycap *);
 int cil_gen_optional(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_optional(struct cil_optional *);
+int cil_fill_ipaddr(struct cil_tree_node *, struct cil_ipaddr *);
+int cil_gen_ipaddr(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_ipaddr(struct cil_ipaddr *);
 
 int cil_build_ast(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 
