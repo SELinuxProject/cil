@@ -898,8 +898,8 @@ void test_cil_copy_netifcon(CuTest *tc) {
 
 	int rc = cil_copy_netifcon(test_ast_node, test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->datum.name, 
-		((struct cil_netifcon *)test_ast_node->data)->datum.name);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->interface_str, 
+		((struct cil_netifcon *)test_ast_node->data)->interface_str);
 	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->if_context_str,
 		((struct cil_netifcon *)test_ast_node->data)->if_context_str);
 	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context_str,
@@ -933,8 +933,8 @@ void test_cil_copy_netifcon_nested(CuTest *tc) {
 
 	int rc = cil_copy_netifcon(test_ast_node, test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_netifcon*)test_copy->data)->datum.name, 
-		((struct cil_netifcon *)test_ast_node->data)->datum.name);
+	CuAssertStrEquals(tc, ((struct cil_netifcon*)test_copy->data)->interface_str, 
+		((struct cil_netifcon *)test_ast_node->data)->interface_str);
 	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->if_context_str,
 		((struct cil_netifcon *)test_ast_node->data)->if_context_str);
 	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context_str,
@@ -2554,34 +2554,6 @@ void test_cil_copy_node_helper_netifcon(CuTest *tc) {
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, other);
 	CuAssertIntEquals(tc, finished, 0);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_copy_node_helper_netifcon_neg(CuTest *tc) {
-	char *line[] = {"(", "netifcon", "eth0", "if_default", "packet_default", ")", NULL};
-	
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	struct cil_list *other;
-	cil_list_init(&other);
-
-	uint32_t finished = 0;
-
-	cil_list_item_init(&other->head);
-	cil_list_item_init(&other->head->next);
-	other->head->data = test_db->ast->root;
-	other->head->flavor = CIL_AST_NODE;
-	other->head->next->flavor = CIL_DB;
-	other->head->next->data = test_db;
-	
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-	
-	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, other);
-	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
 }
 
 void test_cil_copy_node_helper_call(CuTest *tc) {

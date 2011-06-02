@@ -1241,7 +1241,6 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_copy_netifcon_nested);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_netifcon);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_netifcon_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_context);
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_context_anonlow);
