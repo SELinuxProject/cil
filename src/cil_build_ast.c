@@ -1877,13 +1877,7 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 		printf("Failed to create level category list\n");
 		goto cil_fill_level_cleanup;
 	}
-/*
-	rc = cil_set_to_list(sens->next, level->cat_list_str, 1);
-	if (rc != SEPOL_OK) {
-		printf("Failed to create level category list\n");
-		goto cil_fill_level_cleanup;
-	}
-*/
+
 	return SEPOL_OK;
 
 	cil_fill_level_cleanup:
