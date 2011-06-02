@@ -2853,7 +2853,7 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL) {
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL) {
 		printf("Invalid optional declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
