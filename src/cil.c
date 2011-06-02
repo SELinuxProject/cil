@@ -455,7 +455,7 @@ int cil_netifcon_init(struct cil_netifcon **netifcon)
 
 	struct cil_netifcon *new_netifcon = cil_malloc(sizeof(struct cil_netifcon));	
 
-	cil_symtab_datum_init(&new_netifcon->datum);
+	new_netifcon->interface_str = NULL;
 	new_netifcon->if_context_str = NULL;
 	new_netifcon->if_context = NULL;
 	new_netifcon->packet_context_str = NULL;

@@ -537,7 +537,7 @@ struct cil_genfscon {
 };
 
 struct cil_netifcon {
-	struct cil_symtab_datum datum;
+	char *interface_str;
 	char *if_context_str;
 	struct cil_context *if_context;
 	char *packet_context_str;

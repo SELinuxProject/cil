@@ -562,14 +562,7 @@ int cil_copy_netifcon(struct cil_tree_node *orig, struct cil_tree_node *copy, sy
 		return rc;
 	}
 
-	char *key = ((struct cil_symtab_datum*)orig->data)->name;
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_netifcon: cil_symtab_insert failed, rc: %d\n", rc);
-		cil_destroy_netifcon(new);
-		return rc;
-	}
-
+	new->interface_str = cil_strdup(((struct cil_netifcon*)orig->data)->interface_str);
 	new->if_context_str = cil_strdup(((struct cil_netifcon*)orig->data)->if_context_str);
 	new->packet_context_str = cil_strdup(((struct cil_netifcon*)orig->data)->packet_context_str);
 

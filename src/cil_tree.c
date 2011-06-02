@@ -870,7 +870,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_NETIFCON : {
 				struct cil_netifcon *netifcon = node->data;
-				printf("NETIFCON %s", netifcon->datum.name);
+				printf("NETIFCON %s", netifcon->interface_str);
 				if (netifcon->if_context != NULL) {
 					printf(" (");
 					cil_tree_print_context(netifcon->if_context);

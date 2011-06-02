@@ -2561,12 +2561,8 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 		return rc;
 	}
 	
-	char *name = (char*)parse_current->next->data;
+	netifcon->interface_str = cil_strdup(parse_current->next->data);
 	
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)netifcon, (hashtab_key_t)name, CIL_SYM_NETIFCONS, CIL_NETIFCON);
-	if (rc != SEPOL_OK)
-		goto gen_netifcon_cleanup;
-
 	if (parse_current->next->next->cl_head == NULL) {
 		netifcon->if_context_str = cil_strdup(parse_current->next->next->data);
 	}
@@ -2613,7 +2609,8 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 {
-	cil_symtab_datum_destroy(netifcon->datum);
+	if (netifcon->interface_str != NULL)
+		free(netifcon->interface_str);
 	if (netifcon->if_context_str != NULL)
 		free(netifcon->if_context_str);
 	else if (netifcon->if_context != NULL)

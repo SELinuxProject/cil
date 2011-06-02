@@ -861,7 +861,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		}
 		case CIL_NETIFCON : {
 			struct cil_netifcon *netifcon = (struct cil_netifcon*)current->data;
-			fprintf(file_arr[NETIFCONS], "netifcon %s ", netifcon->datum.name);
+			fprintf(file_arr[NETIFCONS], "netifcon %s ", netifcon->interface_str);
 			cil_context_to_policy(file_arr, NETIFCONS, netifcon->if_context);
 			fprintf(file_arr[NETIFCONS], " ");
 			cil_context_to_policy(file_arr, NETIFCONS, netifcon->packet_context);
