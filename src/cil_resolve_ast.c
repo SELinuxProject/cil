@@ -2242,7 +2242,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	return rc;
 }
 
-int __cil_disable_children_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
+int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) struct cil_list *other)
 {
 	switch (node->flavor) {
 	case CIL_OPTIONAL:
