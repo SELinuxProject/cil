@@ -3120,7 +3120,7 @@ void test_cil_gen_constrain_expr_stack_eq2_r1role(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_gen_constrain_expr_stack_eq_constrain_r1role(CuTest *tc) {
+void test_cil_gen_constrain_expr_stack_eq_constrain_r1_neg(CuTest *tc) {
 	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "role_r", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3147,7 +3147,7 @@ void test_cil_gen_constrain_expr_stack_eq_constrain_r1role(CuTest *tc) {
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
 	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_CONSTRAIN, &cons->expr);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_r1r1_neg(CuTest *tc) {

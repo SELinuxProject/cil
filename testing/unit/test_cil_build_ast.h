@@ -185,7 +185,7 @@ void test_cil_gen_constrain_expr_stack_eq2_t1t1_neg(CuTest *);
 void test_cil_gen_constrain_expr_stack_eq2_t2type(CuTest *);
 void test_cil_gen_constrain_expr_stack_eq2_t2t2_neg(CuTest *);
 void test_cil_gen_constrain_expr_stack_eq2_r1role(CuTest *);
-void test_cil_gen_constrain_expr_stack_eq_constrain_r1role(CuTest *);
+void test_cil_gen_constrain_expr_stack_eq_constrain_r1_neg(CuTest *);
 void test_cil_gen_constrain_expr_stack_eq2_r1r1_neg(CuTest *);
 void test_cil_gen_constrain_expr_stack_eq2_r2role(CuTest *);
 void test_cil_gen_constrain_expr_stack_eq2_r2r2_neg(CuTest *);
