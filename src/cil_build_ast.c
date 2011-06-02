@@ -2887,10 +2887,8 @@ void cil_destroy_optional(struct cil_optional *optional)
 
 void cil_destroy_args(struct cil_args *args)
 {
-	if (args->arg_str != NULL)
-		free(args->arg_str);
 	args->param_str = NULL;
-	if (args->arg_str == NULL)
+	if (args->arg_str == NULL) {
 		switch (args->arg->flavor) {
 		case CIL_LEVEL : 
 			cil_tree_node_destroy(&args->arg);
@@ -2901,6 +2899,10 @@ void cil_destroy_args(struct cil_args *args)
 			args->arg = NULL;
 			break;
 		} 
+	}
+	if (args->arg_str != NULL) {
+		free(args->arg_str);
+	}
 }
 
 int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
