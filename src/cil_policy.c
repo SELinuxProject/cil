@@ -184,6 +184,16 @@ int cil_genfscon_compare(const void *a, const void *b)
 	return rc;
 }
 
+int cil_netifcon_compare(const void *a, const void *b)
+{
+	struct cil_netifcon *anetifcon;
+	struct cil_netifcon *bnetifcon;
+	anetifcon = *(struct cil_netifcon**)a;
+	bnetifcon = *(struct cil_netifcon**)b;
+	return  strcmp(anetifcon->interface_str, bnetifcon->interface_str);
+}
+
+
 static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
 	struct cil_list_item *new_key = NULL;
@@ -1124,6 +1134,7 @@ int cil_gen_policy(struct cil_db *db)
 	qsort(db->filecon->array, db->filecon->count, sizeof(struct cil_filecon*), cil_filecon_compare);
 	qsort(db->portcon->array, db->portcon->count, sizeof(struct cil_portcon*), cil_portcon_compare);
 	qsort(db->genfscon->array, db->genfscon->count, sizeof(struct cil_genfscon*), cil_genfscon_compare);
+	qsort(db->netifcon->array, db->netifcon->count, sizeof(struct cil_netifcon*), cil_netifcon_compare);
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {
