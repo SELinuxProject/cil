@@ -145,7 +145,30 @@ int cil_filecon_compare(const void *a, const void *b)
 	free(b_data);
 
 	return rc;
-}	
+}
+
+int cil_portcon_compare(const void *a, const void *b)
+{
+	int rc;
+	struct cil_portcon *aportcon;
+	struct cil_portcon *bportcon;
+	aportcon = *(struct cil_portcon**)a;
+	bportcon = *(struct cil_portcon**)b;
+	rc = (aportcon->port_high - aportcon->port_low) 
+		- (bportcon->port_high - bportcon->port_low);
+	if (rc == 0) {
+		if (aportcon->port_low < bportcon->port_low) {
+			rc = -1;
+		}
+		else if (aportcon->port_low > bportcon->port_low) {
+			rc = 1;
+		}
+		else {
+			rc = 0;
+		}
+	}
+	return rc;
+}
 
 static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
@@ -1085,6 +1108,7 @@ int cil_gen_policy(struct cil_db *db)
 	}
 
 	qsort(db->filecon->array, db->filecon->count, sizeof(struct cil_filecon*), cil_filecon_compare);
+	qsort(db->portcon->array, db->portcon->count, sizeof(struct cil_portcon*), cil_portcon_compare);
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {
