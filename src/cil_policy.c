@@ -170,6 +170,20 @@ int cil_portcon_compare(const void *a, const void *b)
 	return rc;
 }
 
+int cil_genfscon_compare(const void *a, const void *b)
+{
+	int rc;
+	struct cil_genfscon *agenfscon;
+	struct cil_genfscon *bgenfscon;
+	agenfscon = *(struct cil_genfscon**)a;
+	bgenfscon = *(struct cil_genfscon**)b;
+	rc = strcmp(agenfscon->type_str, bgenfscon->type_str);
+	if (rc == 0) {
+		rc = strcmp(agenfscon->path_str, bgenfscon->path_str);
+	}
+	return rc;
+}
+
 static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
 	struct cil_list_item *new_key = NULL;
@@ -1109,6 +1123,7 @@ int cil_gen_policy(struct cil_db *db)
 
 	qsort(db->filecon->array, db->filecon->count, sizeof(struct cil_filecon*), cil_filecon_compare);
 	qsort(db->portcon->array, db->portcon->count, sizeof(struct cil_portcon*), cil_portcon_compare);
+	qsort(db->genfscon->array, db->genfscon->count, sizeof(struct cil_genfscon*), cil_genfscon_compare);
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {
