@@ -1131,6 +1131,29 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userrole_user_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userrole_role_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_optional_enabled);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_optional_disabled);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_block);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_user);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_role);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_type);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_typealias);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_common);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_class);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_bool);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_sens);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_cat);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_catset);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_sid);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_macro);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_context);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_level);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_policycap);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_perm);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_catalias);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_sensalias);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_tunable);
+	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_unknown);
 
 	
 	/* test_cil_fqn.c */

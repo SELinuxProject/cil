@@ -8,6 +8,7 @@
 
 int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, uint32_t flavor);
 int __cil_resolve_ast_node_helper(struct cil_tree_node *, uint32_t *, struct cil_list *);
+int __cil_disable_children_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other);
 
 void test_cil_resolve_name(CuTest *tc) {
 	char *line[] = { "(", "block", "foo", 
@@ -3795,6 +3796,402 @@ void test_cil_resolve_userrole_role_neg(CuTest *tc) {
 
 	int rc = cil_resolve_userrole(test_db, test_db->ast->root->cl_head->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_disable_children_helper_optional_enabled(CuTest *tc) {
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_optional_disabled(CuTest *tc) {
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	uint32_t finished = 0;
+
+	((struct cil_optional *)test_db->ast->root->cl_head->data)->datum.state = CIL_STATE_DISABLED;
+	
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_block(CuTest *tc) {
+	char *line[] = {"(", "block", "a", "(", "type", "log", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_user(CuTest *tc) {
+	char *line[] = {"(", "user", "staff_u", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_role(CuTest *tc) {
+	char *line[] = {"(", "role", "role_r", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_type(CuTest *tc) {
+	char *line[] = {"(", "type", "type_t", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_typealias(CuTest *tc) {
+	char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_common(CuTest *tc) {
+	char *line[] = {"(", "common", "foo", "(", "read", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_class(CuTest *tc) {
+	char *line[] = {"(", "class", "foo", "(", "read", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_bool(CuTest *tc) {
+	char *line[] = {"(", "bool", "foo", "true", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_sens(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_cat(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_catset(CuTest *tc) {
+	char *line[] = {"(", "categoryset", "somecats", "(", "c0", "c1", "c2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_sid(CuTest *tc) {
+	char *line[] = {"(", "sid", "foo", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_macro(CuTest *tc) {
+	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
+				"(", "type", "b", ")",
+				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_context(CuTest *tc) {
+	char *line[] = {"(", "context", "con",
+                        "(", "system_u", "object_r", "netif_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_level(CuTest *tc) {
+	char *line[] = {"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_policycap(CuTest *tc) {
+	char *line[] = {"(", "policycap", "foo", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_perm(CuTest *tc) {
+	char *line[] = {"(", "class", "foo", "(", "read", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_catalias(CuTest *tc) {
+	char *line[] = {"(", "categoryalias", "c0", "red", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_sensalias(CuTest *tc) {
+	char *line[] = {"(", "sensitivityalias", "s0", "red", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_tunable(CuTest *tc) {
+	char *line[] = {"(", "tunable", "foo", "false", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_disable_children_helper_unknown(CuTest *tc) {
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	uint32_t finished = 0;
+
+	int rc = __cil_disable_children_helper(test_db->ast->root->cl_head, &finished, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 

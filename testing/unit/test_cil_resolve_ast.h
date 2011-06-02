@@ -233,6 +233,29 @@ void test_cil_resolve_userrole(CuTest *tc);
 void test_cil_resolve_userrole_user_neg(CuTest *tc);
 void test_cil_resolve_userrole_role_neg(CuTest *tc);
 
+void test_cil_disable_children_helper_optional_enabled(CuTest *tc);
+void test_cil_disable_children_helper_optional_disabled(CuTest *tc);
+void test_cil_disable_children_helper_block(CuTest *tc);
+void test_cil_disable_children_helper_user(CuTest *tc);
+void test_cil_disable_children_helper_role(CuTest *tc);
+void test_cil_disable_children_helper_type(CuTest *tc);
+void test_cil_disable_children_helper_typealias(CuTest *tc);
+void test_cil_disable_children_helper_common(CuTest *tc);
+void test_cil_disable_children_helper_class(CuTest *tc);
+void test_cil_disable_children_helper_bool(CuTest *tc);
+void test_cil_disable_children_helper_sens(CuTest *tc);
+void test_cil_disable_children_helper_cat(CuTest *tc);
+void test_cil_disable_children_helper_catset(CuTest *tc);
+void test_cil_disable_children_helper_sid(CuTest *tc);
+void test_cil_disable_children_helper_macro(CuTest *tc);
+void test_cil_disable_children_helper_context(CuTest *tc);
+void test_cil_disable_children_helper_level(CuTest *tc);
+void test_cil_disable_children_helper_policycap(CuTest *tc);
+void test_cil_disable_children_helper_perm(CuTest *tc);
+void test_cil_disable_children_helper_catalias(CuTest *tc);
+void test_cil_disable_children_helper_sensalias(CuTest *tc);
+void test_cil_disable_children_helper_tunable(CuTest *tc);
+void test_cil_disable_children_helper_unknown(CuTest *tc);
 
 /*
 	__cil_resolve_ast_node_helper test cases
