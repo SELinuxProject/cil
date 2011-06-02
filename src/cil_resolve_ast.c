@@ -1596,10 +1596,11 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 {
 	struct cil_call *new_call = (struct cil_call*)current->data;
 	int rc = SEPOL_ERR;
-	uint32_t sym_index = CIL_SYM_UNKNOWN;
-
-	struct cil_list_item *item = new_call->args->head;
-	while (item != NULL) {
+	uint32_t sym_index;
+	struct cil_list_item *item;
+	
+	for (item = new_call->args->head; item != NULL; item = item->next) {
+	
 		if (((struct cil_args*)item->data)->arg == NULL && ((struct cil_args*)item->data)->arg_str == NULL) {
 			printf("cil_resolve_call2: arg and arg_str are both NULL\n");
 			return SEPOL_ERR;
@@ -1608,13 +1609,13 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 		switch (((struct cil_args*)item->data)->flavor) {
 		case CIL_LEVEL : 
 			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) 
-				break;
+				continue; // anonymous, no need to resolve
 			else
 				sym_index = CIL_SYM_LEVELS;
 			break;
 		case CIL_CATSET : 
 			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL)
-				break;
+				continue; // anonymous, no need to resolve
 			else
 				sym_index = CIL_SYM_CATS;
 			break;
@@ -1639,6 +1640,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 		default : 
 			return SEPOL_ERR;
 		}
+
 		if (sym_index != CIL_SYM_UNKNOWN) {
 			rc = cil_resolve_name(db, current, ((struct cil_args*)item->data)->arg_str, sym_index, ((struct cil_args*)item->data)->flavor, call, &(((struct cil_args*)item->data)->arg));
 			if (rc != SEPOL_OK) {
@@ -1646,7 +1648,6 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 				return rc;
 			}
 		}
-		item = item->next;
 	}
 
 	return SEPOL_OK;
