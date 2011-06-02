@@ -1545,11 +1545,37 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 						new_arg->arg_str = cil_strdup(pc->data);
 					break;
 				}
+				case CIL_IPADDR : {
+					if (pc->cl_head != NULL) {
+						struct cil_ipaddr *ipaddr;
+						struct cil_tree_node *addr_node;
+
+						rc = cil_ipaddr_init(&ipaddr);
+						if (rc != SEPOL_OK) {
+							return rc;
+						}
+						
+						rc = cil_fill_ipaddr(pc->cl_head, ipaddr);
+						if (rc != SEPOL_OK) {
+							printf("cil_resolve_call1: cil_fill_ipaddr failed, rc; %d\n", rc);
+							cil_destroy_ipaddr(ipaddr);
+							return rc;
+						}
+
+						cil_tree_node_init(&addr_node);
+						addr_node->flavor = CIL_IPADDR;
+						addr_node->data = ipaddr;
+						new_arg->arg = addr_node;
+					} else {
+						new_arg->arg_str = cil_strdup(pc->data);
+					}
+					break;
+				}
 				case CIL_CLASS : {
 					new_arg->arg_str = cil_strdup(pc->data);
 					break;
 				}
-				//permset and IP
+				//permset
 				default : {
 					printf("cil_resolve_call1: unexpected flavor: %d\n", item->flavor);
 					return SEPOL_ERR;
@@ -1618,6 +1644,12 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 				continue; // anonymous, no need to resolve
 			else
 				sym_index = CIL_SYM_CATS;
+			break;
+		case CIL_IPADDR :
+			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL)
+				continue; // anonymous, no need to resolve
+			else
+				sym_index = CIL_SYM_IPADDRS;
 			break;
 		case CIL_TYPE : 
 			sym_index = CIL_SYM_TYPES;

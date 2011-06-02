@@ -2732,7 +2732,10 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			else if (!strcmp(kind, CIL_KEY_CLASS)) {
 				param->flavor = CIL_CLASS;
 			}
-			//TODO permissionset and IP addresses
+			else if (!strcmp(kind, CIL_KEY_IPADDR)) {
+				param->flavor = CIL_IPADDR;
+			}
+			//TODO permissionset
 			else {
 				printf("Invalid macro declaration (line: %d)\n", parse_current->line);
 				goto gen_macro_cleanup;
@@ -2895,6 +2898,10 @@ void cil_destroy_args(struct cil_args *args)
 			args->arg = NULL;
 			break;
 		case CIL_CATSET : 
+			cil_tree_node_destroy(&args->arg);
+			args->arg = NULL;
+			break;
+		case CIL_IPADDR :
 			cil_tree_node_destroy(&args->arg);
 			args->arg = NULL;
 			break;

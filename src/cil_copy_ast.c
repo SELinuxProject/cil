@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "cil.h"
 #include "cil_mem.h"
@@ -642,11 +643,96 @@ int cil_copy_optional(struct cil_tree_node *orig, struct cil_tree_node *copy, sy
 	return SEPOL_OK;
 }
 
-int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, uint32_t index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym))
+int cil_copy_nodecon(struct cil_nodecon *orig, struct cil_nodecon **copy)
+{
+	struct cil_nodecon *new;
+	int rc;
+
+	rc = cil_nodecon_init(&new);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	new->addr_str = cil_strdup(orig->addr_str);
+	new->mask_str = cil_strdup(orig->mask_str);
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->addr != NULL) {
+		rc = cil_ipaddr_init(&new->addr);
+		if (rc != SEPOL_OK) {
+			cil_destroy_nodecon(new);
+			return rc;
+		}
+
+		cil_copy_fill_ipaddr(orig->addr, new->addr);
+	}
+
+	if (orig->mask != NULL) {
+		rc = cil_ipaddr_init(&new->mask);
+		if (rc != SEPOL_OK) {
+			cil_destroy_nodecon(new);
+			return rc;
+		}
+
+		cil_copy_fill_ipaddr(orig->mask, new->mask);
+	}
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_nodecon(new);
+			return rc;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
+void cil_copy_fill_ipaddr(struct cil_ipaddr *orig, struct cil_ipaddr *new)
+{
+	new->family = orig->family;
+	memcpy(&new->ip, &orig->ip, sizeof(orig->ip));
+}
+
+int cil_copy_ipaddr(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_ipaddr *new;
+	struct cil_ipaddr *old;
+	char * key;
+	int rc;
+
+	rc = cil_ipaddr_init(&new);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	old = (struct cil_ipaddr*)orig->data;
+
+	key = old->datum.name;
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_ipaddr: cil_symtab_insert failed, rc: %d\n", rc);
+		free(new);
+		return rc;
+	}
+
+	cil_copy_fill_ipaddr(old, new);
+
+	copy->data = new;
+
+	return SEPOL_OK;
+}
+
+
+int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, uint32_t sym_index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym))
 {
 	int rc = SEPOL_ERR;
 
-	rc = cil_get_parent_symtab(db, new, &symtab, index);
+	rc = cil_get_parent_symtab(db, new, &symtab, sym_index);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -902,6 +988,18 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 		}
 		case CIL_OPTIONAL : {
 			rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_OPTIONALS, &cil_copy_optional);
+			if (rc != SEPOL_OK) {
+				free(new);
+				return rc;
+			}
+			break;
+		}
+		case CIL_NODECON : {
+			cil_copy_nodecon((struct cil_nodecon*)orig->data, (struct cil_nodecon**)&new->data);
+			break;
+		}
+		case CIL_IPADDR : {
+			rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_IPADDRS, &cil_copy_ipaddr);
 			if (rc != SEPOL_OK) {
 				free(new);
 				return rc;
