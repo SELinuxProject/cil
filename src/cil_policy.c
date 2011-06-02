@@ -193,6 +193,37 @@ int cil_netifcon_compare(const void *a, const void *b)
 	return  strcmp(anetifcon->interface_str, bnetifcon->interface_str);
 }
 
+int cil_nodecon_compare(const void *a, const void *b)
+{
+	struct cil_nodecon *anodecon;
+	struct cil_nodecon *bnodecon;
+	anodecon = *(struct cil_nodecon**)a;
+	bnodecon = *(struct cil_nodecon**)b;
+
+	/* sort ipv4 before ipv6 */
+	if (anodecon->addr->family != bnodecon->addr->family) {
+		if (anodecon->addr->family == AF_INET) {
+			return -1;
+		} else {
+			return 1;
+		}
+	}
+
+	/* most specific netmask goes first, then order by ip addr */
+	if (anodecon->addr->family == AF_INET) {
+		int rc = memcmp(&anodecon->mask->ip.v4, &bnodecon->mask->ip.v4, sizeof(anodecon->mask->ip.v4));
+		if (rc != 0) {
+			return -1 * rc;
+		}
+		return memcmp(&anodecon->addr->ip.v4, &bnodecon->addr->ip.v4, sizeof(anodecon->addr->ip.v4));
+	} else {
+		int rc = memcmp(&anodecon->mask->ip.v6, &bnodecon->mask->ip.v6, sizeof(anodecon->mask->ip.v6));
+		if (rc != 0) {
+			return -1 * rc;
+		}
+		return memcmp(&anodecon->addr->ip.v6, &bnodecon->addr->ip.v6, sizeof(anodecon->addr->ip.v6));
+	}
+}
 
 static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
@@ -1135,6 +1166,7 @@ int cil_gen_policy(struct cil_db *db)
 	qsort(db->portcon->array, db->portcon->count, sizeof(struct cil_portcon*), cil_portcon_compare);
 	qsort(db->genfscon->array, db->genfscon->count, sizeof(struct cil_genfscon*), cil_genfscon_compare);
 	qsort(db->netifcon->array, db->netifcon->count, sizeof(struct cil_netifcon*), cil_netifcon_compare);
+	qsort(db->nodecon->array, db->nodecon->count, sizeof(struct cil_nodecon*), cil_nodecon_compare);
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {
