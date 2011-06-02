@@ -9955,7 +9955,7 @@ void test_cil_gen_nodecon_ip1null_neg(CuTest *tc) {
 }
 
 void test_cil_gen_nodecon_ip1parens_neg(CuTest *tc) {
-	char *line[] = {"(", "nodecon", "(", "ipaddr", ")", "ipaddr", "con", ")", NULL};
+	char *line[] = {"(", "nodecon", "(", "192.168.1.1", ")", "ipaddr", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -9993,7 +9993,7 @@ void test_cil_gen_nodecon_ip2null_neg(CuTest *tc) {
 }
 
 void test_cil_gen_nodecon_ip2parens_neg(CuTest *tc) {
-	char *line[] = {"(", "nodecon", "ipaddr", "(", "ipaddr", ")", ")", NULL};
+	char *line[] = {"(", "nodecon", "ipaddr", "(", "255.255.255.0", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);

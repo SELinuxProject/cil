@@ -1906,7 +1906,8 @@ void test_cil_resolve_nodecon(CuTest *tc) {
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
-			"(", "nodecon", "ipaddr", "ipaddr", "con", ")", NULL};
+			"(", "ipaddr", "ip", "192.168.1.1", ")",
+			"(", "nodecon", "ip", "ip", "con", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1916,7 +1917,7 @@ void test_cil_resolve_nodecon(CuTest *tc) {
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1929,7 +1930,8 @@ void test_cil_resolve_nodecon_neg(CuTest *tc) {
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
-			"(", "nodecon", "ipaddr", "ipaddr", "conn", ")", NULL};
+			"(", "ipaddr", "ip", "192.168.1.1", ")",
+			"(", "nodecon", "ip", "ip", "conn", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1939,7 +1941,7 @@ void test_cil_resolve_nodecon_neg(CuTest *tc) {
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
 }
 
@@ -1951,7 +1953,8 @@ void test_cil_resolve_nodecon_anon_context(CuTest *tc) {
 			"(", "sensitivity", "s0", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "nodecon", "ipaddr", "ipaddr", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")", NULL};
+			"(", "ipaddr", "ip", "192.168.1.1", ")",
+			"(", "nodecon", "ip", "ip", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1961,7 +1964,7 @@ void test_cil_resolve_nodecon_anon_context(CuTest *tc) {
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -1972,7 +1975,8 @@ void test_cil_resolve_nodecon_anon_context_neg(CuTest *tc) {
 			"(", "sensitivity", "s0", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "nodecon", "ipaddr", "ipaddr", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")", NULL};
+			"(", "ipaddr", "ip", "192.168.1.1", ")",
+			"(", "nodecon", "ip", "ip", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1982,7 +1986,7 @@ void test_cil_resolve_nodecon_anon_context_neg(CuTest *tc) {
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
 }
 
@@ -6103,7 +6107,7 @@ void test_cil_resolve_ast_node_helper_genfscon(CuTest *tc) {
 
         cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, &finished, other);
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, &finished, other);
         CuAssertIntEquals(tc, SEPOL_OK, rc);
         CuAssertIntEquals(tc, 0, finished);
 }
@@ -6146,7 +6150,7 @@ void test_cil_resolve_ast_node_helper_genfscon_neg(CuTest *tc) {
 
         cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, &finished, other);
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, &finished, other);
         CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
         CuAssertIntEquals(tc, 0, finished);
 }
@@ -6160,7 +6164,8 @@ void test_cil_resolve_ast_node_helper_nodecon(CuTest *tc) {
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
-			"(", "nodecon", "ipaddr", "ipaddr", "con", ")", NULL};
+			"(", "ipaddr", "ip", "192.168.1.1", ")",
+			"(", "nodecon", "ip", "ip", "con", ")", NULL};
         
 	struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -6203,7 +6208,8 @@ void test_cil_resolve_ast_node_helper_nodecon_neg(CuTest *tc) {
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "low", "high", ")", ")",
-			"(", "nodecon", "ipaddr", "ipaddr", "foo", ")", NULL};
+			"(", "ipaddr", "ip", "192.168.1.1", ")",
+			"(", "nodecon", "ip", "ip", "foo", ")", NULL};
  
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
