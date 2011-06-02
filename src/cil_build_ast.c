@@ -1093,11 +1093,10 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, uint32_t flavor,
 				return SEPOL_ERR;
 			}
 			goto valid;
-		} else {
-			printf("Left hand side must be a keyword\n");
-			return SEPOL_ERR;
 		}
 	}
+
+	return SEPOL_ERR;
 
 valid:
 	lcond->str = cil_strdup(lstr);
