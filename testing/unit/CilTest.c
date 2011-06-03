@@ -854,6 +854,19 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_norule);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_optional);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_optional_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_ipv4);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_ipv4_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_ipv6);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_ipv6_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_nameinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_noip_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_ipinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_astnull_neg);
 	/* test_cil_resolve_ast.c */
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_curr_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_inval_perm_neg);

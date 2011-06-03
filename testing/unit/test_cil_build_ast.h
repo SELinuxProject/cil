@@ -601,6 +601,18 @@ void test_cil_gen_optional_nameinparens_neg(CuTest *tc);
 void test_cil_gen_optional_emptyoptional_neg(CuTest *tc);
 void test_cil_gen_optional_norule(CuTest *tc);
 
+void test_cil_gen_ipaddr_ipv4(CuTest *tc);
+void test_cil_gen_ipaddr_ipv4_neg(CuTest *tc);
+void test_cil_gen_ipaddr_ipv6(CuTest *tc);
+void test_cil_gen_ipaddr_ipv6_neg(CuTest *tc);
+void test_cil_gen_ipaddr_noname_neg(CuTest *tc);
+void test_cil_gen_ipaddr_nameinparens_neg(CuTest *tc);
+void test_cil_gen_ipaddr_noip_neg(CuTest *tc);
+void test_cil_gen_ipaddr_ipinparens_neg(CuTest *tc);
+void test_cil_gen_ipaddr_extra_neg(CuTest *tc);
+void test_cil_gen_ipaddr_dbnull_neg(CuTest *tc);
+void test_cil_gen_ipaddr_currnull_neg(CuTest *tc);
+void test_cil_gen_ipaddr_astnull_neg(CuTest *tc);
 /*
 cil_build_ast test cases
 */
