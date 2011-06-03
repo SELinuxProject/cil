@@ -9935,7 +9935,7 @@ void test_cil_gen_nodecon_astnull_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_nodecon_ip1null_neg(CuTest *tc) {
+void test_cil_gen_nodecon_ipnull_neg(CuTest *tc) {
 	char *line[] = {"(", "nodecon", ")", NULL};
 
         struct cil_tree *test_tree;
@@ -9954,8 +9954,27 @@ void test_cil_gen_nodecon_ip1null_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_nodecon_ip1parens_neg(CuTest *tc) {
+void test_cil_gen_nodecon_ipanon(CuTest *tc) {
 	char *line[] = {"(", "nodecon", "(", "192.168.1.1", ")", "ipaddr", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_nodecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_nodecon_ipanon_neg(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "(", "192.1.1", ")", "ipaddr", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -9973,7 +9992,7 @@ void test_cil_gen_nodecon_ip1parens_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_nodecon_ip2null_neg(CuTest *tc) {
+void test_cil_gen_nodecon_netmasknull_neg(CuTest *tc) {
 	char *line[] = {"(", "nodecon", "ipaddr", ")", NULL};
 
         struct cil_tree *test_tree;
@@ -9992,8 +10011,27 @@ void test_cil_gen_nodecon_ip2null_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_nodecon_ip2parens_neg(CuTest *tc) {
-	char *line[] = {"(", "nodecon", "ipaddr", "(", "255.255.255.0", ")", "con", ")", NULL};
+void test_cil_gen_nodecon_netmaskanon(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "ipaddr", "(", "255.255.255.4", ")", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_nodecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_nodecon_netmaskanon_neg(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "ipaddr", "(", "str0", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -11219,7 +11257,7 @@ void test_cil_gen_optional_emptyoptional_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_optional_norule_neg(CuTest *tc) {
+void test_cil_gen_optional_norule(CuTest *tc) {
 	char *line[] = {"(", "optional", "opt", "(", ")", ")", NULL};
 
         struct cil_tree *test_tree;
@@ -11235,7 +11273,7 @@ void test_cil_gen_optional_norule_neg(CuTest *tc) {
         test_ast_node->line = 1;
 
         int rc = cil_gen_optional(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 /*

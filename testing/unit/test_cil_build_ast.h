@@ -523,10 +523,12 @@ void test_cil_gen_nodecon_anon_context(CuTest *tc);
 void test_cil_gen_nodecon_dbnull_neg(CuTest *tc);
 void test_cil_gen_nodecon_currnull_neg(CuTest *tc);
 void test_cil_gen_nodecon_astnull_neg(CuTest *tc);
-void test_cil_gen_nodecon_ip1null_neg(CuTest *tc);
-void test_cil_gen_nodecon_ip1parens_neg(CuTest *tc);
-void test_cil_gen_nodecon_ip2null_neg(CuTest *tc);
-void test_cil_gen_nodecon_ip2parens_neg(CuTest *tc);
+void test_cil_gen_nodecon_ipnull_neg(CuTest *tc);
+void test_cil_gen_nodecon_ipanon(CuTest *tc);
+void test_cil_gen_nodecon_ipanon_neg(CuTest *tc);
+void test_cil_gen_nodecon_netmasknull_neg(CuTest *tc);
+void test_cil_gen_nodecon_netmaskanon(CuTest *tc);
+void test_cil_gen_nodecon_netmaskanon_neg(CuTest *tc);
 void test_cil_gen_nodecon_contextnull_neg(CuTest *tc);
 void test_cil_gen_nodecon_context_neg(CuTest *tc);
 void test_cil_gen_nodecon_extra_neg(CuTest *tc);
@@ -597,7 +599,7 @@ void test_cil_gen_optional_astnull_neg(CuTest *tc);
 void test_cil_gen_optional_unnamed_neg(CuTest *tc);
 void test_cil_gen_optional_nameinparens_neg(CuTest *tc);
 void test_cil_gen_optional_emptyoptional_neg(CuTest *tc);
-void test_cil_gen_optional_norule_neg(CuTest *tc);
+void test_cil_gen_optional_norule(CuTest *tc);
 
 /*
 cil_build_ast test cases

@@ -130,12 +130,21 @@ void test_cil_resolve_genfscon_anon_context_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_genfscon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_genfscon_neg(CuTest *tc);
 
-void test_cil_resolve_nodecon(CuTest *);
-void test_cil_resolve_nodecon_neg(CuTest *);
+void test_cil_resolve_nodecon_ipv4(CuTest *);
+void test_cil_resolve_nodecon_ipv6(CuTest *);
+void test_cil_resolve_nodecon_anonipaddr_ipv4(CuTest *);
+void test_cil_resolve_nodecon_anonnetmask_ipv4(CuTest *);
+void test_cil_resolve_nodecon_anonipaddr_ipv6(CuTest *);
+void test_cil_resolve_nodecon_anonnetmask_ipv6(CuTest *);
+void test_cil_resolve_nodecon_diffipfam_neg(CuTest *);
+void test_cil_resolve_nodecon_context_neg(CuTest *);
+void test_cil_resolve_nodecon_ipaddr_neg(CuTest *);
+void test_cil_resolve_nodecon_netmask_neg(CuTest *);
 void test_cil_resolve_nodecon_anon_context(CuTest *);
 void test_cil_resolve_nodecon_anon_context_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_nodecon(CuTest *tc);
-void test_cil_resolve_ast_node_helper_nodecon_neg(CuTest *tc);
+void test_cil_resolve_ast_node_helper_nodecon_ipaddr_neg(CuTest *tc);
+void test_cil_resolve_ast_node_helper_nodecon_netmask_neg(CuTest *tc);
 
 void test_cil_resolve_netifcon(CuTest *);
 void test_cil_resolve_netifcon_otf_neg(CuTest *);

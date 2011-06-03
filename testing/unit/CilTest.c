@@ -767,10 +767,12 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ip1null_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ip1parens_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ip2null_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ip2parens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ipnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ipanon);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_ipanon_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_netmasknull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_netmaskanon);
+	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_netmaskanon_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_contextnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_context_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_extra_neg);
@@ -849,7 +851,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_unnamed_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_nameinparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_emptyoptional_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_optional_norule_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_optional_norule);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_optional);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_optional_neg);
 	/* test_cil_resolve_ast.c */
@@ -1016,12 +1018,21 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_genfscon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_genfscon_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon);
-	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_ipv4);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_ipv6);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_anonipaddr_ipv4);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_anonnetmask_ipv4);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_anonipaddr_ipv6);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_anonnetmask_ipv6);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_diffipfam_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_ipaddr_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_netmask_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_anon_context);
 	SUITE_ADD_TEST(suite, test_cil_resolve_nodecon_anon_context_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodecon);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodecon_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodecon_ipaddr_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodecon_netmask_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_netifcon_otf_neg);
