@@ -750,4 +750,7 @@ void test_cil_build_ast_node_helper_gen_macro_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_optional(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_optional_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_ipaddr(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_ipaddr_neg(CuTest *tc);
 #endif

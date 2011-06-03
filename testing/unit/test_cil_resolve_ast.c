@@ -2736,6 +2736,85 @@ void test_cil_resolve_call1_level_anon_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_resolve_call1_ipaddr(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
+			"(", "ipaddr", "netmask", "192.168.0.1", ")",
+			"(", "ipaddr", "ip", "192.168.0.1", ")",
+			"(", "macro", "mm", "(", "(", "ipaddr", "addr", ")", ")",
+				"(", "nodecon", "addr", "netmask", "con", ")", ")",
+			"(", "call", "mm", "(", "ip", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call1_ipaddr_anon(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
+			"(", "ipaddr", "netmask", "192.168.0.1", ")",
+			"(", "macro", "mm", "(", "(", "ipaddr", "addr", ")", ")",
+				"(", "nodecon", "addr", "netmask", "con", ")", ")",
+			"(", "call", "mm", "(", "(", "192.168.1.1", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call1_ipaddr_anon_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
+			"(", "ipaddr", "netmask", "192.168.0.1", ")",
+			"(", "macro", "mm", "(", "(", "ipaddr", "addr", ")", ")",
+				"(", "nodecon", "addr", "netmask", "con", ")", ")",
+			"(", "call", "mm", "(", "(", "192.1.1", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_call1_class(CuTest *tc) {
 	char *line[] = {"(", "class", "foo", "(", "read", ")", ")",
 			"(", "class", "file", "(", "read", ")", ")",
@@ -3161,6 +3240,61 @@ void test_cil_resolve_call2_level_anon(CuTest *tc) {
 
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
 	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_ipaddr(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
+			"(", "ipaddr", "netmask", "192.168.0.1", ")",
+			"(", "ipaddr", "ip", "192.168.0.1", ")",
+			"(", "macro", "mm", "(", "(", "ipaddr", "addr", ")", ")",
+				"(", "nodecon", "addr", "netmask", "con", ")", ")",
+			"(", "call", "mm", "(", "ip", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_ipaddr_anon(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "user", "system_u", ")",
+			"(", "role", "role_r", ")",
+			"(", "type", "type_t", ")",
+			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
+			"(", "ipaddr", "netmask", "192.168.0.1", ")",
+			"(", "macro", "mm", "(", "(", "ipaddr", "addr", ")", ")",
+				"(", "nodecon", "addr", "netmask", "con", ")", ")",
+			"(", "call", "mm", "(", "(", "192.168.1.1", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 

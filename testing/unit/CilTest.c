@@ -335,6 +335,9 @@ CuSuite* CilTreeGetResolveSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_ipaddr);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_ipaddr_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_ipaddr_anon_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknown_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknowncall_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_extraargs_neg);
@@ -356,6 +359,8 @@ CuSuite* CilTreeGetResolveSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_class);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_ipaddr);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_ipaddr_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_unknown_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call2);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call2_neg); 
@@ -1136,6 +1141,8 @@ CuSuite* CilTreeGetBuildSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_ipaddr);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_ipaddr_neg);
 
 	return suite;
 }
