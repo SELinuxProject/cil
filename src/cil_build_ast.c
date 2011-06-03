@@ -2423,7 +2423,7 @@ int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr)
 	rc = inet_pton(addr->family, addr_node->data, &addr->ip);
 	if (rc != 1) {
 		printf("Invalid ip address (line: %d)\n", addr_node->line);
-		return rc;
+		return SEPOL_ERR;
 	}
 
 	return SEPOL_OK;
