@@ -2007,6 +2007,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						rc = cil_resolve_typealias(db, node, call);
 						break;
 					}
+					case CIL_TYPEBOUNDS : {
+						printf("case typebounds\n");
+						rc = cil_resolve_typebounds(db, node, call);
+						break;
+					}
 					case CIL_TYPEPERMISSIVE : {
 						printf("case typepermissive\n");
 						rc = cil_resolve_typepermissive(db, node, call);

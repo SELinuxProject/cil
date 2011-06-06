@@ -785,6 +785,12 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALIASES], "typealias %s alias %s;\n", ((struct cil_symtab_datum*)alias->type)->name, name);
 			break;
 		}
+		case CIL_TYPEBOUNDS: {
+			struct cil_typebounds *typebnds = (struct cil_typebounds*)current->data;
+			char *parent_str = ((struct cil_symtab_datum*)typebnds->parent)->name;
+			char *child_str = ((struct cil_symtab_datum*)typebnds->child)->name;
+			fprintf(file_arr[ALLOWS], "typebounds %s %s;\n", parent_str, child_str);
+		}
 		case CIL_TYPEPERMISSIVE: {
 			struct cil_typepermissive *typeperm = (struct cil_typepermissive*)current->data;
 			fprintf(file_arr[ATTRTYPES], "permissive %s;\n", ((struct cil_symtab_datum*)typeperm->type)->name);
