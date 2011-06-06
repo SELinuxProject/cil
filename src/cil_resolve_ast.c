@@ -1086,6 +1086,11 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 			printf("cil_resolve_level: Failed to resolve categoryset, rc: %d\n", rc);
 			return rc;
 		}
+		rc = cil_resolve_catset(db, current, (struct cil_catset*)catset_node->data, call);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_level: failed to resolve catset\n");
+			return rc;
+		}
 		rc = __cil_verify_sens_cats(sens_node->data, ((struct cil_catset*)catset_node->data)->cat_list);
 		if (rc != SEPOL_OK) {
 			printf("Failed to verify sensitivitycategory relationship\n");
@@ -1250,6 +1255,15 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 			goto resolve_context_cleanup;
 		}
 		context->low = (struct cil_level*)low_node->data;
+
+		if (context->low->datum.name == NULL) {
+			rc = cil_resolve_level(db, current, context->low, call);
+			if (rc != SEPOL_OK) {
+				printf("cil_resolve_context: Failed to resolve low level, rc: %d\n", rc);
+				return rc;
+			}
+		}
+
 	}
 	else if (context->low != NULL) {
 		rc = cil_resolve_level(db, current, context->low, call);
@@ -1270,6 +1284,14 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 			goto resolve_context_cleanup;
 		}
 		context->high = (struct cil_level*)high_node->data;
+
+		if (context->high->datum.name == NULL) {
+			rc = cil_resolve_level(db, current, context->high, call);
+			if (rc != SEPOL_OK) {
+				printf("cil_resolve_context: Failed to resolve high level, rc: %d\n", rc);
+				return rc;
+			}
+		}
 	}
 	else if (context->high != NULL) {
 		rc = cil_resolve_level(db, current, context->high, call);
@@ -1693,14 +1715,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 			break;
 		case CIL_CATSET : 
 			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
-				struct cil_catset *catset = ((struct cil_catset*)((struct cil_args*)item->data)->arg->data);
-				cil_list_init(&catset->cat_list);
-				rc = cil_resolve_cat_list(db, current, catset->cat_list_str, catset->cat_list, call);
-				if (rc != SEPOL_OK) {
-					printf("failed to resolve cat list\n");
-					return rc;
-				} 	
-				break;
+				continue; // anonymous, no need to resolve
 			} else {
 				sym_index = CIL_SYM_CATS;
 			}
