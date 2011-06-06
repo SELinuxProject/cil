@@ -259,6 +259,77 @@ void test_cil_portcon_compare_equal(CuTest *tc) {
 	CuAssertTrue(tc, rc == 0);
 }
 
+void test_cil_genfscon_compare_atypestr_greater_btypestr(CuTest *tc) {
+	struct cil_genfscon *agenfscon;
+	cil_genfscon_init(&agenfscon);
+	agenfscon->type_str = "aaaa";
+
+	struct cil_genfscon *bgenfscon;
+	cil_genfscon_init(&bgenfscon);
+	bgenfscon->type_str = "bbbb";
+
+	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
+	CuAssertIntEquals(tc, -1, rc);
+}
+
+void test_cil_genfscon_compare_btypestr_greater_atypestr(CuTest *tc) {
+	struct cil_genfscon *agenfscon;
+	cil_genfscon_init(&agenfscon);
+	agenfscon->type_str = "bbbb";
+
+	struct cil_genfscon *bgenfscon;
+	cil_genfscon_init(&bgenfscon);
+	bgenfscon->type_str = "aaaa";
+
+	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
+	CuAssertIntEquals(tc, 1, rc);
+}
+
+void test_cil_genfscon_compare_apathstr_greater_bpathstr(CuTest *tc) {
+	struct cil_genfscon *agenfscon;
+	cil_genfscon_init(&agenfscon);
+	agenfscon->type_str = "aaaa";
+	agenfscon->path_str = "ff";
+
+	struct cil_genfscon *bgenfscon;
+	cil_genfscon_init(&bgenfscon);
+	bgenfscon->type_str = "aaaa";
+	bgenfscon->type_str = "gg";
+
+	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
+	CuAssertIntEquals(tc, -1, rc);
+}
+
+void test_cil_genfscon_compare_bpathstr_greater_apathstr(CuTest *tc) {
+	struct cil_genfscon *agenfscon;
+	cil_genfscon_init(&agenfscon);
+	agenfscon->type_str = "bbbb";
+	agenfscon->path_str = "cccc";
+
+	struct cil_genfscon *bgenfscon;
+	cil_genfscon_init(&bgenfscon);
+	bgenfscon->type_str = "bbbb";
+	bgenfscon->path_str = "aaaa";
+
+	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
+	CuAssertIntEquals(tc, 1, rc);
+}
+
+void test_cil_genfscon_compare_equal(CuTest *tc) {
+	struct cil_genfscon *agenfscon;
+	cil_genfscon_init(&agenfscon);
+	agenfscon->type_str = "bbbb";
+	agenfscon->path_str = "cccc";
+
+	struct cil_genfscon *bgenfscon;
+	cil_genfscon_init(&bgenfscon);
+	bgenfscon->type_str = "bbbb";
+	bgenfscon->path_str = "cccc";
+
+	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
+	CuAssertIntEquals(tc, 0, rc);
+}
+
 void test_cil_nodecon_compare_aipv4_bipv6(CuTest *tc) {
 	struct cil_nodecon *anodecon;
 	cil_nodecon_init(&anodecon);

@@ -1348,11 +1348,11 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_filecon_compare_stemlen_b_greater_a);
 	SUITE_ADD_TEST(suite, test_cil_filecon_compare_equal);
 	
-	SUITE_ADD_TEST(suite, test_cil_portcon_compare_atotal_greater_btotal);
-	SUITE_ADD_TEST(suite, test_cil_portcon_compare_btotal_greater_atotal);
-	SUITE_ADD_TEST(suite, test_cil_portcon_compare_aportlow_greater_bportlow);
-	SUITE_ADD_TEST(suite, test_cil_portcon_compare_bportlow_greater_aportlow);
-	SUITE_ADD_TEST(suite, test_cil_portcon_compare_equal);
+	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_atypestr_greater_btypestr);
+	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_btypestr_greater_atypestr);
+	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_apathstr_greater_bpathstr);
+	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_bpathstr_greater_apathstr);
+	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_equal);
 	
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_bipv6);
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_bipv4);

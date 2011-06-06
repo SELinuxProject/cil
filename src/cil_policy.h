@@ -22,5 +22,6 @@ int cil_gen_policy(struct cil_db *);
 int cil_nodecon_compare(const void *a, const void *b);
 int cil_filecon_compare(const void *a, const void *b);
 int cil_portcon_compare(const void *a, const void *b);
+int cil_genfscon_compare(const void *a, const void *b);
 
 #endif
