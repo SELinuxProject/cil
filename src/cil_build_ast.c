@@ -1843,7 +1843,7 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next->cl_head == NULL) {
+	if (parse_current->next == NULL || parse_current->next->next == NULL) {
 		printf("Invalid sensitivitycategory declaration (line %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -1856,12 +1856,17 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	senscat->sens_str = cil_strdup(parse_current->next->data);
 
-	cil_list_init(&senscat->cat_list_str);
-	rc = cil_fill_cat_list(parse_current->next->next, senscat->cat_list_str);
-	if (rc != SEPOL_OK) {
-		printf("Failed to fill category list\n");
-		goto gen_senscat_cleanup;
+	if (parse_current->next->next->cl_head == NULL && parse_current->next->next->data != NULL) {
+		senscat->catset_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		cil_list_init(&senscat->cat_list_str);
+		rc = cil_fill_cat_list(parse_current->next->next, senscat->cat_list_str);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill category list\n");
+			goto gen_senscat_cleanup;
+		}
 	}
+
 	ast_node->data = senscat;
 	ast_node->flavor = CIL_SENSCAT;
 
@@ -1896,17 +1901,16 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 	if (sens->next->cl_head == NULL) {
 		if (sens->next->data != NULL) {
 			level->catset_str = cil_strdup(sens->next->data);
-			return SEPOL_OK;
-		}
-		else
+		} else {
 			return SEPOL_ERR;
-	}
-
-	cil_list_init(&level->cat_list_str);
-	rc = cil_fill_cat_list(sens->next, level->cat_list_str);
-	if (rc != SEPOL_OK) {
-		printf("Failed to create level category list\n");
-		goto cil_fill_level_cleanup;
+		}
+	} else {
+		cil_list_init(&level->cat_list_str);
+		rc = cil_fill_cat_list(sens->next, level->cat_list_str);
+		if (rc != SEPOL_OK) {
+			printf("Failed to create level category list\n");
+			goto cil_fill_level_cleanup;
+		}
 	}
 
 	return SEPOL_OK;

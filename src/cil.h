@@ -454,6 +454,8 @@ struct cil_catorder {
 struct cil_senscat {
 	char *sens_str;
 	struct cil_list *cat_list_str;
+	char *catset_str;
+	struct cil_catset *catset;
 };
 
 struct cil_level {

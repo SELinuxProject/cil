@@ -869,16 +869,19 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct
 
 int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *cat_list, struct cil_list *res_cat_list, struct cil_call *call)
 {
-	if (cat_list == NULL || res_cat_list == NULL) 
-		return SEPOL_ERR;
-
 	struct cil_tree_node *cat_node = NULL;
-	struct cil_list *sub_list;
-	struct cil_list_item *new_item;
-	struct cil_list_item *list_tail;
-	struct cil_list_item *curr = cat_list->head;
+	struct cil_list *sub_list = NULL;
+	struct cil_list_item *new_item = NULL;
+	struct cil_list_item *list_tail = NULL;
+	struct cil_list_item *curr = NULL;
 	int rc = SEPOL_ERR;
 	
+	if (cat_list == NULL || res_cat_list == NULL) {
+		return rc;
+	}
+
+	curr = cat_list->head;
+
 	while (curr != NULL) {
 		cil_list_item_init(&new_item);
 		if (curr->flavor == CIL_LIST) {
@@ -890,20 +893,29 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 				printf("Failed to resolve category range\n");
 				return rc;
 			}
-		}
-		else {
-			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, CIL_CAT, call, &cat_node);
+		} else {
+			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, CIL_CATSET, call, &cat_node);
 			if (rc != SEPOL_OK) {
 				printf("Failed to resolve category name: %s\n", (char*)curr->data);
 				return rc;
 			}
-			new_item->flavor = cat_node->flavor;
-			new_item->data = cat_node->data;
+			if (cat_node->flavor == CIL_CATSET) {
+				printf("categorysets are not allowed inside category lists\n");
+				return SEPOL_ERR;
+                        } else {
+				new_item->flavor = cat_node->flavor;
+				new_item->data = cat_node->data;
+			}
 		}
-		if (res_cat_list->head == NULL)
+		if (res_cat_list->head == NULL) {
 			res_cat_list->head = new_item;
-		else
+		} else {
 			list_tail->next = new_item;
+		}
+
+		while (new_item->next != NULL) {
+			new_item = new_item->next;
+		}
 		list_tail = new_item;
 		curr = curr->next;
 	}
@@ -957,9 +969,10 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct
 {
 	struct cil_tree_node *sens_node = NULL;
 	struct cil_senscat *senscat = (struct cil_senscat*)current->data;
-	struct cil_list *sub_list;
-	struct cil_list_item *curr = senscat->cat_list_str->head;
-	struct cil_list_item *curr_range_cat;
+	struct cil_tree_node *cat_node = NULL;
+	struct cil_list *sub_list = NULL;
+	struct cil_list_item *curr = NULL;
+	struct cil_list_item *curr_range_cat = NULL;
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 	
@@ -968,35 +981,55 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct
 		printf("Failed to get sensitivity node\n");
 		return rc;
 	}
-	
-	while (curr != NULL) {
-		if (curr->flavor == CIL_LIST) {
-			cil_list_init(&sub_list);
-			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+
+	if (senscat->catset_str != NULL) {
+		rc = cil_resolve_name(db, current, (char*)senscat->catset_str, CIL_SYM_CATS, CIL_CATSET, call, &cat_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve catset_str\n");
+			return rc;
+		}
+		senscat->catset = (struct cil_catset*)cat_node->data;
+		curr = senscat->catset->cat_list->head;
+
+		while (curr != NULL) {
+			key = cil_strdup(((struct cil_symtab_datum*)curr->data)->name);
+			rc = __cil_senscat_insert(db, current, ((struct cil_sens*)sens_node->data)->cats.table, key, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve category range\n");
+				printf("Failed to insert category from catset into sensitivity symtab\n");
 				return rc;
 			}
-			curr_range_cat = sub_list->head;
-			while (curr_range_cat != NULL) {
-				key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
+			curr = curr->next;
+		}
+	} else if (senscat->cat_list_str != NULL) {
+		curr = senscat->cat_list_str->head;
+		while (curr != NULL) {
+			if (curr->flavor == CIL_LIST) {
+				cil_list_init(&sub_list);
+				rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+				if (rc != SEPOL_OK) {
+					printf("Failed to resolve category range\n");
+					return rc;
+				}
+				curr_range_cat = sub_list->head;
+				while (curr_range_cat != NULL) {
+					key = cil_strdup(((struct cil_cat*)curr_range_cat->data)->datum.name);
+					rc = __cil_senscat_insert(db, current, ((struct cil_sens*)sens_node->data)->cats.table, key, call);
+					if (rc != SEPOL_OK) {
+						printf("Failed to insert category into sensitivity symtab\n");
+						return rc;
+					}
+					curr_range_cat = curr_range_cat->next;
+				}
+			} else {
+				key = cil_strdup(curr->data);
 				rc = __cil_senscat_insert(db, current, ((struct cil_sens*)sens_node->data)->cats.table, key, call);
 				if (rc != SEPOL_OK) {
 					printf("Failed to insert category into sensitivity symtab\n");
 					return rc;
 				}
-				curr_range_cat = curr_range_cat->next;
 			}
+			curr = curr->next;
 		}
-		else {
-			key = cil_strdup(curr->data);
-			rc = __cil_senscat_insert(db, current, ((struct cil_sens*)sens_node->data)->cats.table, key, call);
-			if (rc != SEPOL_OK) {
-				printf("Failed to insert category into sensitivity symtab\n");
-				return rc;
-			}
-		}
-		curr = curr->next;
 	}
 
 	return SEPOL_OK;
@@ -1037,7 +1070,7 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 {
 	struct cil_tree_node *sens_node = NULL;
 	struct cil_tree_node *catset_node = NULL;
-	struct cil_list *res_cat_list;
+	struct cil_list *res_cat_list = NULL;
 	int rc = SEPOL_ERR;
 	
 	rc = cil_resolve_name(db, current, (char*)level->sens_str, CIL_SYM_SENS, CIL_SENS, call, &sens_node);
@@ -1053,13 +1086,18 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 			printf("cil_resolve_level: Failed to resolve categoryset, rc: %d\n", rc);
 			return rc;
 		}
-		level->catset = (struct cil_catset*)catset_node->data;
-	}
-	else {
+		rc = __cil_verify_sens_cats(sens_node->data, ((struct cil_catset*)catset_node->data)->cat_list);
+		if (rc != SEPOL_OK) {
+			printf("Failed to verify sensitivitycategory relationship\n");
+			return rc;
+		}
+		level->catset = catset_node->data;
+	} else {
 		cil_list_init(&res_cat_list);
 		rc = cil_resolve_cat_list(db, current, level->cat_list_str, res_cat_list, call);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve category list\n");
+			/* TODO: Add cleanup for cil_list_init */
 			return rc;
 		}
 	
@@ -1641,7 +1679,6 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 	struct cil_list_item *item;
 	
 	for (item = new_call->args->head; item != NULL; item = item->next) {
-	
 		if (((struct cil_args*)item->data)->arg == NULL && ((struct cil_args*)item->data)->arg_str == NULL) {
 			printf("cil_resolve_call2: arg and arg_str are both NULL\n");
 			return SEPOL_ERR;
@@ -1655,10 +1692,18 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 				sym_index = CIL_SYM_LEVELS;
 			break;
 		case CIL_CATSET : 
-			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL)
-				continue; // anonymous, no need to resolve
-			else
+			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+				struct cil_catset *catset = ((struct cil_catset*)((struct cil_args*)item->data)->arg->data);
+				cil_list_init(&catset->cat_list);
+				rc = cil_resolve_cat_list(db, current, catset->cat_list_str, catset->cat_list, call);
+				if (rc != SEPOL_OK) {
+					printf("failed to resolve cat list\n");
+					return rc;
+				} 	
+				break;
+			} else {
 				sym_index = CIL_SYM_CATS;
+			}
 			break;
 		case CIL_IPADDR :
 			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL)
@@ -1989,6 +2034,16 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			}
 			case 5 : {
 				switch (node->flavor) {
+					case CIL_CATSET : {
+						printf("case categoryset\n");
+						rc = cil_resolve_catset(db, node, (struct cil_catset*)node->data, call);
+						break;
+					}
+				}
+				break;
+			}
+			case 6 : {
+				switch (node->flavor) {
 					case CIL_SENSCAT : {
 						printf("case sensitivitycategory\n");
 						rc = cil_resolve_senscat(db, node, call);
@@ -2002,7 +2057,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 				}
 				break;
 			}
-			case 6 : {
+			case 7 : {
 				switch (node->flavor) {
 					case CIL_TYPE_ATTR : {
 						printf("case typeattribute\n");
@@ -2069,11 +2124,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						rc = cil_resolve_catalias(db, node, call);
 						break;
 					}
-					case CIL_CATSET : {
-						printf("case categoryset\n");
-						rc = cil_resolve_catset(db, node, (struct cil_catset*)node->data, call);
-						break;
-					}
 					case CIL_LEVEL : {
 						printf("case level\n");
 						rc = cil_resolve_level(db, node, (struct cil_level*)node->data, call);
@@ -2129,7 +2179,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 				}
 				break;	
 			}
-			case 7 : {
+			case 8 : {
 				switch (node->flavor) {
 					case CIL_NETIFCON : {
 						struct cil_sort *sort = db->netifcon;
@@ -2439,7 +2489,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	other->head->next->next->next->next->next->data = NULL;
 	other->head->next->next->next->next->next->flavor = CIL_AST_NODE;
 
-	for (pass = 1; pass <= 7; pass++) {
+	for (pass = 1; pass <= 8; pass++) {
 
 		printf("---------- Pass %i ----------\n", pass);
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	

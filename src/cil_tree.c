@@ -175,51 +175,58 @@ void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 
 void cil_tree_print_level(struct cil_level *level)
 {
-	struct cil_list_item *cat;
-	struct cil_list_item *parent;
+	struct cil_list_item *cat = NULL;
+	struct cil_list_item *parent = NULL;
+	struct cil_list *tmp = NULL;
+	uint16_t str_list = CIL_FALSE;
+
 	if (level->sens != NULL)
 		printf(" %s", level->sens->datum.name);
 	else if (level->sens_str != NULL)
 		printf(" %s", level->sens_str);
-	printf(" (");
-	if (level->cat_list != NULL) {
-		cat = level->cat_list->head;
-		while (cat != NULL) {
-			if (cat->flavor == CIL_LIST) {
-				parent = cat;
-				cat = ((struct cil_list *)cat->data)->head;
-				printf(" (");
-				while (cat != NULL) {
-					printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-					cat = cat->next;
-				}
-				printf(" )");
-				cat = parent;
-			}
-			else
-				printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-			cat = cat->next;
+
+	if (level->catset != NULL) {
+		tmp = level->catset->cat_list;	
+	} else if (level->catset_str != NULL) {
+		printf(" %s", level->catset_str);
+	} else {
+		if (level->cat_list != NULL) {
+			tmp = level->cat_list;
+		} else if (level->cat_list_str != NULL) {
+			tmp = level->cat_list_str;
+			str_list = CIL_TRUE;
 		}
-	} else if (level->cat_list_str != NULL) {
-		cat = level->cat_list_str->head;
-		while (cat != NULL) {
-			if (cat->flavor == CIL_LIST) {
-				parent = cat;
-				cat = ((struct cil_list *)cat->data)->head;
-				printf(" (");
-				while (cat != NULL) {
-					printf(" %s", (char*)cat->data);
-					cat = cat->next;
+	}
+
+	if (tmp != NULL) {
+		printf(" (");
+			cat = tmp->head;
+			while (cat != NULL) {
+				if (cat->flavor == CIL_LIST) {
+					parent = cat;
+					cat = ((struct cil_list *)cat->data)->head;
+					printf(" (");
+					while (cat != NULL) {
+						if (str_list == CIL_TRUE) {
+							printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+						} else {
+							printf(" %s", (char*)cat->data);
+						}
+						cat = cat->next;
+					}
+					printf(" )");
+					cat = parent;
+				} else {
+					if (str_list != CIL_TRUE) {
+						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+					} else {
+						printf(" %s", (char*)cat->data);
+					}
 				}
-				printf(" )");
-				cat = parent;
-			}
-			else
-				printf(" %s", (char*)cat->data);
 				cat = cat->next;
 			}
+			printf(" )");
 	}
-	printf(" )");
 	return;
 }
 
@@ -766,6 +773,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 							printf(" %s", (char*)cat->data);
 						cat = cat->next;
 					}
+				} else if (senscat->catset != NULL) {
+					cat = senscat->catset->cat_list->head;
+					while (cat != NULL) {
+						printf(" %s", ((struct cil_catset*)cat->data)->datum.name);
+						cat = cat->next;
+					}
+				} else if (senscat->catset_str != NULL) {
+					printf (" %s", senscat->catset_str);
 				} else {
 					printf("\n");
 					return;
@@ -777,6 +792,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_sens_dominates *dom = node->data;
 				struct cil_list_item *sens;
 				struct cil_list_item *parent;
+
+				printf("DOMINANCE: (");
 
 				if (dom->sens_list_str != NULL) {
 					sens = dom->sens_list_str->head;

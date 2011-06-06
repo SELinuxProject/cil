@@ -477,6 +477,7 @@ void cil_copy_dominance(struct cil_sens_dominates *orig, struct cil_sens_dominat
 void cil_copy_fill_level(struct cil_level *orig, struct cil_level *new)
 {
 	new->sens_str = cil_strdup(orig->sens_str);
+	new->catset_str = cil_strdup(orig->catset_str);
 	cil_copy_list(orig->cat_list_str, &new->cat_list_str);
 }
 
