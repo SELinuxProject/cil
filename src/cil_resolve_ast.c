@@ -1903,6 +1903,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	struct cil_call *call = NULL;
 	struct cil_tree_node *callstack = NULL;
 	struct cil_tree_node *optstack = NULL;
+	struct cil_tree_node *macrostack = NULL;
 	int *changed = NULL;
 
 	if (other->head->flavor == CIL_DB)
@@ -1936,10 +1937,16 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		return SEPOL_ERR;
 	}
 
-	if (optstack != NULL) {
+	if (other->head->next->next->next->next->next != NULL) {
+		macrostack = (struct cil_tree_node *)other->head->next->next->next->next->next->data;
+	} else {
+		return SEPOL_ERR;
+	}
+
+	if (optstack != NULL || macrostack != NULL) {
 		if (node->flavor == CIL_TUNABLE || node->flavor == CIL_MACRO) {
-			/* tuanbles and macros are not allowed in optionals */
-			printf("Node of flavor %i is not allowed in optionals\n", node->flavor);
+			/* tuanbles and macros are not allowed in optionals or macros */
+			printf("Node of flavor %i is not allowed in optionals or macros\n", node->flavor);
 			return SEPOL_ERR;
 		}
 	}
@@ -2239,7 +2246,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		rc = SEPOL_OK;
 	}
 
-	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL) {
+	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL || node->flavor == CIL_MACRO) {
 		/* push this node onto a stack */
 		struct cil_tree_node *new;
 		int rc2 = cil_tree_node_init(&new);
@@ -2261,6 +2268,12 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 				new->cl_head = optstack;
 			}
 			other->head->next->next->next->data = new;
+		} else if (node->flavor == CIL_MACRO) {
+			if (macrostack != NULL) {
+				macrostack->parent = new;
+				new->cl_head = macrostack;
+			}
+			other->head->next->next->next->next->next->data = new;
 		}
 	}
 	
@@ -2356,6 +2369,14 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, struct cil_l
 			callstack->cl_head->parent = NULL;
 		}
 		free(callstack);
+	} else if (current->flavor == CIL_MACRO) {
+		/* pop off the stack */
+		struct cil_tree_node *macrostack = other->head->next->next->next->next->next->data;
+		other->head->next->next->next->next->next->data = macrostack->cl_head;
+		if (macrostack->cl_head) {
+			macrostack->cl_head->parent = NULL;
+		}
+		free(macrostack);
 	} else if (current->flavor == CIL_OPTIONAL) {
 
 		if (((struct cil_optional *)current->data)->datum.state == CIL_STATE_DISABLING) {
@@ -2414,6 +2435,9 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	int changed = 0;
 	cil_list_item_init(&other->head->next->next->next->next);
 	other->head->next->next->next->next->data = &changed;
+	cil_list_item_init(&other->head->next->next->next->next->next);
+	other->head->next->next->next->next->next->data = NULL;
+	other->head->next->next->next->next->next->flavor = CIL_AST_NODE;
 
 	for (pass = 1; pass <= 7; pass++) {
 
@@ -2461,6 +2485,11 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			struct cil_list_item *tmp = ((struct cil_list_item *)other->head->next->next->next->data)->next;
 			free(other->head->next->next->next->data);
 			other->head->next->next->next->data = tmp;
+		}
+		while (other->head->next->next->next->next->next->data != NULL) {
+			struct cil_list_item *tmp = ((struct cil_list_item *)other->head->next->next->next->next->next->data)->next;
+			free(other->head->next->next->next->next->next->data);
+			other->head->next->next->next->next->next->data = tmp;
 		}
 
 	}
