@@ -20,6 +20,7 @@
 #include "test_cil_resolve_ast.h"
 #include "test_cil_fqn.h"
 #include "test_cil_copy_ast.h"
+#include "test_cil_policy.h"
 
 void set_cil_file_data(struct cil_file_data **data) {
 	struct cil_file_data *new_data = malloc(sizeof(struct cil_file_data));
@@ -1335,6 +1336,18 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_data_helper);
 	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_getparentsymtab_neg);
 	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_duplicatedb_neg);
+	
+	/* test_policy.c */
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_bipv6);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_bipv4);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_greaterthan_bipv4);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_lessthan_bipv4);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv4_greaterthan_bmaskipv4);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv4_lessthan_bmaskipv4);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_greaterthan_bipv6);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_lessthan_bipv6);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv6_greaterthan_bmaskipv6);
+	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv6_lessthan_bmaskipv6);
 	
 	return suite;
 }
