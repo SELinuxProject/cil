@@ -729,6 +729,54 @@ int cil_copy_ipaddr(struct cil_tree_node *orig, struct cil_tree_node *copy, symt
 	return SEPOL_OK;
 }
 
+void cil_copy_conditional(struct cil_conditional *orig, struct cil_conditional *new)
+{
+	new->str = cil_strdup(orig->str);
+	new->flavor = orig->flavor;
+}
+
+int cil_copy_boolif(struct cil_booleanif *orig, struct cil_booleanif **copy)
+{
+	struct cil_booleanif *new;
+	struct cil_conditional *cond_new;
+	struct cil_tree_node *curr_new;
+	struct cil_tree_node *curr_old;
+	struct cil_tree_node *temp = NULL;
+	int rc;
+
+	rc = cil_boolif_init(&new);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	curr_old = orig->expr_stack;
+
+	while (curr_old != NULL) {
+		rc = cil_tree_node_init(&curr_new);
+		if (rc != SEPOL_OK) {
+			return rc;
+		}
+		rc = cil_conditional_init(&cond_new);
+		if (rc != SEPOL_OK) {
+			return rc;
+		}
+		cil_copy_conditional(curr_old->data, cond_new);
+		curr_new->data = cond_new;
+		curr_new->flavor = curr_old->flavor;
+		if (temp != NULL) {
+			temp->cl_head = curr_new;
+			curr_new->parent = temp;
+		} else {
+			new->expr_stack = curr_new;
+		}
+		temp = curr_new;
+		curr_old = curr_old->cl_head;
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
 
 int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, uint32_t sym_index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym))
 {
@@ -1006,6 +1054,10 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 				free(new);
 				return rc;
 			}
+			break;
+		}
+		case CIL_BOOLEANIF : {
+			cil_copy_boolif((struct cil_booleanif*)orig->data, (struct cil_booleanif**)&new->data);
 			break;
 		}
 		default : return SEPOL_OK;
