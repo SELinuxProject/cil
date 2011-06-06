@@ -15,26 +15,27 @@ void cil_copy_list(struct cil_list *orig, struct cil_list **copy)
 	if (orig == NULL)
 		return;
 	struct cil_list *new;
+	struct cil_list *new_sub;
+	struct cil_list_item *new_item = NULL;
 	struct cil_list_item *orig_item = orig->head;
 	cil_list_init(&new);
-	cil_list_item_init(&new->head);
-	struct cil_list_item *new_item = new->head;
 	while(orig_item != NULL) {
+		if (new_item == NULL) {
+			cil_list_item_init(&new_item);
+			new->head = new_item;
+		}
+		else {
+			cil_list_item_init(&new_item->next);
+			new_item = new_item->next;
+		}
 		if (orig_item->flavor == CIL_AST_STR) {
 			new_item->data = cil_strdup(orig_item->data);
 		}
 		else if (orig_item->flavor == CIL_LIST) {
-			struct cil_list *new_sub;
-			cil_list_init(&new_sub);
 			cil_copy_list((struct cil_list*)orig_item->data, &new_sub);
 			new_item->data = new_sub;
-		}
-	
-		new_item->flavor = orig_item->flavor;
-		if (orig_item->next != NULL) {
-			cil_list_item_init(&new_item->next);
-			new_item = new_item->next;
 		}	
+		new_item->flavor = orig_item->flavor;
 		orig_item = orig_item->next;
 	}
 
