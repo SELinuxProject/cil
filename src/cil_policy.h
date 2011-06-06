@@ -21,5 +21,6 @@ int cil_name_to_policy(FILE **, struct cil_tree_node *);
 int cil_gen_policy(struct cil_db *);
 int cil_nodecon_compare(const void *a, const void *b);
 int cil_filecon_compare(const void *a, const void *b);
+int cil_portcon_compare(const void *a, const void *b);
 
 #endif
