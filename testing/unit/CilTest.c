@@ -1338,6 +1338,16 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_duplicatedb_neg);
 	
 	/* test_policy.c */
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_meta_a_not_b);
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_meta_b_not_a);
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_meta_a_and_b_strlen_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_meta_a_and_b_strlen_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_type_atype_greater_btype);
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_type_btype_greater_atype);
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_stemlen_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_stemlen_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_filecon_compare_equal);
+	
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_bipv6);
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_bipv4);
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_greaterthan_bipv4);
