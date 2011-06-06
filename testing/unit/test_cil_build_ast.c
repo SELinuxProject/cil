@@ -8040,7 +8040,7 @@ void test_cil_gen_senscat_sublist_neg(CuTest *tc) {
 void test_cil_fill_level(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8088,7 +8088,7 @@ void test_cil_fill_level_sensnull_neg(CuTest *tc) {
 void test_cil_fill_level_levelnull_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8111,7 +8111,7 @@ void test_cil_fill_level_levelnull_neg(CuTest *tc) {
 void test_cil_fill_level_nocat(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", ")", NULL};
+			"(", "level", "low", "(", "s0", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8135,7 +8135,7 @@ void test_cil_fill_level_nocat(CuTest *tc) {
 void test_cil_fill_level_emptycat_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8159,7 +8159,7 @@ void test_cil_fill_level_emptycat_neg(CuTest *tc) {
 void test_cil_gen_level(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8180,7 +8180,7 @@ void test_cil_gen_level(CuTest *tc) {
 void test_cil_gen_level_emptycat_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8243,7 +8243,7 @@ void test_cil_gen_level_nosens_neg(CuTest *tc) {
 void test_cil_gen_level_dbnull_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8281,7 +8281,7 @@ void test_cil_gen_level_currnull_neg(CuTest *tc) {
 void test_cil_gen_level_astnull_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -13258,7 +13258,7 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc) {
 void test_cil_build_ast_node_helper_gen_level(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -13286,7 +13286,7 @@ void test_cil_build_ast_node_helper_gen_level(CuTest *tc) {
 void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "low", "s0", "(", ")", ")", NULL};
+			"(", "level", "low", "(", "s0", "(", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

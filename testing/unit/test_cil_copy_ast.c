@@ -787,7 +787,7 @@ void test_cil_copy_dominance(CuTest *tc) {
 }
 
 void test_cil_copy_level(CuTest *tc) {
-	char *line[] = {"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+	char *line[] = {"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -816,7 +816,7 @@ void test_cil_copy_level(CuTest *tc) {
 }
 
 void test_cil_copy_fill_level(CuTest *tc) {
-	char *line[] = {"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+	char *line[] = {"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -2408,7 +2408,7 @@ void test_cil_copy_node_helper_dominance(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_level(CuTest *tc) {
-	char *line[] = {"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+	char *line[] = {"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2439,7 +2439,7 @@ void test_cil_copy_node_helper_level(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_level_neg(CuTest *tc) {
-	char *line[] = {"(", "level", "low", "s0", "(", "c1", ")", ")", NULL};
+	char *line[] = {"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

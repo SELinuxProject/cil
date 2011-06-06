@@ -1931,7 +1931,9 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	if (parse_current->next == NULL || 
 	parse_current->next->cl_head != NULL ||
-	parse_current->next->next == NULL) {
+	parse_current->next->next == NULL ||
+	parse_current->next->next->cl_head == NULL ||
+	parse_current->next->next->next != NULL) {
 		printf("Invalid level declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -1947,7 +1949,7 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (rc != SEPOL_OK) 
 		goto gen_level_cleanup;
 	
-	rc = cil_fill_level(parse_current->next->next, level);
+	rc = cil_fill_level(parse_current->next->next->cl_head, level);
 	if (rc != SEPOL_OK) {
 		printf("Failed to populate level\n");
 		goto gen_level_cleanup;

@@ -616,8 +616,8 @@ void test_cil_resolve_level(CuTest *tc) {
 			"(", "type", "blah_t", ")",
 			"(", "role", "blah_r", ")",
 			"(", "user", "blah_u", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -645,8 +645,8 @@ void test_cil_resolve_level_sens_neg(CuTest *tc) {
 			"(", "type", "blah_t", ")",
 			"(", "role", "blah_r", ")",
 			"(", "user", "blah_u", ")",
-			"(", "level", "low", "s1", "(", "c0", ")", ")",
-			"(", "level", "high", "s1", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s1", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s1", "(", "c0", ")", ")", ")",
 			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -673,8 +673,8 @@ void test_cil_resolve_level_cat_neg(CuTest *tc) {
 			"(", "type", "blah_t", ")",
 			"(", "role", "blah_r", ")",
 			"(", "user", "blah_u", ")",
-			"(", "level", "low", "s0", "(", "c1", ")", ")",
-			"(", "level", "high", "s0", "(", "c1", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -701,8 +701,8 @@ void test_cil_resolve_level_senscat_neg(CuTest *tc) {
 			"(", "type", "blah_t", ")",
 			"(", "role", "blah_r", ")",
 			"(", "user", "blah_u", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -726,8 +726,8 @@ void test_cil_resolve_constrain(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "l2", "s0", "(", "c1", ")", ")",
-			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
+			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -746,8 +746,8 @@ void test_cil_resolve_constrain_class_neg(CuTest *tc) {
         char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "l2", "s0", "(", "c1", ")", ")",
-			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
+			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -767,8 +767,8 @@ void test_cil_resolve_constrain_perm_neg(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "l2", "s0", "(", "c1", ")", ")",
-			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
+			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -786,8 +786,8 @@ void test_cil_resolve_constrain_perm_neg(CuTest *tc) {
 void test_cil_resolve_constrain_perm_resolve_neg(CuTest *tc) {
         char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "l2", "s0", "(", "c1", ")", ")",
-			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
+			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "foo", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -806,8 +806,8 @@ void test_cil_resolve_context(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -832,8 +832,8 @@ void test_cil_resolve_context_user_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
 			"(", "context", "con",
@@ -857,8 +857,8 @@ void test_cil_resolve_context_role_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "type", "netif_t", ")",
 			"(", "context", "con",
@@ -882,8 +882,8 @@ void test_cil_resolve_context_type_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "context", "con",
@@ -907,8 +907,8 @@ void test_cil_resolve_context_low_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -933,8 +933,8 @@ void test_cil_resolve_context_high_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -959,8 +959,8 @@ void test_cil_resolve_context_low_unnamed_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -985,8 +985,8 @@ void test_cil_resolve_context_high_unnamed_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -1011,8 +1011,8 @@ void test_cil_resolve_context_lownull_unnamed_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -1039,8 +1039,8 @@ void test_cil_resolve_context_highnull_unnamed_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -2239,8 +2239,8 @@ void test_cil_resolve_netifcon_interface_neg(CuTest *tc) {
 void test_cil_resolve_netifcon_unnamed(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")", 
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -2263,8 +2263,8 @@ void test_cil_resolve_netifcon_unnamed(CuTest *tc) {
 void test_cil_resolve_netifcon_unnamed_packet_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")", 
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
 			"(", "netifcon", "eth1",
@@ -2286,8 +2286,8 @@ void test_cil_resolve_netifcon_unnamed_packet_neg(CuTest *tc) {
 void test_cil_resolve_netifcon_unnamed_otf_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")", 
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -2356,8 +2356,8 @@ void test_cil_resolve_sidcontext_named_levels(CuTest *tc) {
 			"(", "type", "blah_t", ")",
 			"(", "role", "blah_r", ")",
 			"(", "user", "blah_u", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "sid", "test", ")",
 			"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
@@ -2670,8 +2670,8 @@ void test_cil_resolve_call1_level(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "l", "s0", "(", "c0", ")", ")",
-			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "level", "l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", "(", "level", "lvl_h", ")", ")",
 				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")", ")",
 			"(", "call", "mm", "(", "l", "h", ")", ")", NULL};
@@ -2694,8 +2694,8 @@ void test_cil_resolve_call1_level_anon(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "l", "s0", "(", "c0", ")", ")",
-			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "level", "l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", ")",
 				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "h", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
@@ -2718,8 +2718,8 @@ void test_cil_resolve_call1_level_anon_neg(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "l", "s0", "(", "c0", ")", ")",
-			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "level", "l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", ")",
 				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "h", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "s0", "(", "c0", "(", "c5", ")", ")", ")", ")", ")", NULL};
@@ -2742,8 +2742,8 @@ void test_cil_resolve_call1_ipaddr(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
-			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "lvl_h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
 			"(", "ipaddr", "netmask", "192.168.0.1", ")",
 			"(", "ipaddr", "ip", "192.168.0.1", ")",
@@ -2769,8 +2769,8 @@ void test_cil_resolve_call1_ipaddr_anon(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
-			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "lvl_h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
 			"(", "ipaddr", "netmask", "192.168.0.1", ")",
 			"(", "macro", "mm", "(", "(", "ipaddr", "addr", ")", ")",
@@ -2795,8 +2795,8 @@ void test_cil_resolve_call1_ipaddr_anon_neg(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
-			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "lvl_h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
 			"(", "ipaddr", "netmask", "192.168.0.1", ")",
 			"(", "macro", "mm", "(", "(", "ipaddr", "addr", ")", ")",
@@ -2929,8 +2929,8 @@ void test_cil_resolve_call1_missing_arg_neg(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "l", "s0", "(", "c0", ")", ")",
-			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "level", "l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", "(", "level", "lvl_h", ")", ")",
 				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")", ")",
 			"(", "call", "mm", "(", "l", ")", ")", NULL};
@@ -3199,8 +3199,8 @@ void test_cil_resolve_call2_level(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "l", "s0", "(", "c0", ")", ")",
-			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "level", "l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", "(", "level", "lvl_h", ")", ")",
 				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")", ")",
 			"(", "call", "mm", "(", "l", "h", ")", ")", NULL};
@@ -3224,8 +3224,8 @@ void test_cil_resolve_call2_level_anon(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "l", "s0", "(", "c0", ")", ")",
-			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "level", "l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", ")",
 				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "h", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
@@ -3249,8 +3249,8 @@ void test_cil_resolve_call2_ipaddr(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
-			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "lvl_h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
 			"(", "ipaddr", "netmask", "192.168.0.1", ")",
 			"(", "ipaddr", "ip", "192.168.0.1", ")",
@@ -3277,8 +3277,8 @@ void test_cil_resolve_call2_ipaddr_anon(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "lvl_l", "s0", "(", "c0", ")", ")",
-			"(", "level", "lvl_h", "s0", "(", "c0", ")", ")",
+			"(", "level", "lvl_l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "lvl_h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")",
 			"(", "ipaddr", "netmask", "192.168.0.1", ")",
 			"(", "macro", "mm", "(", "(", "ipaddr", "addr", ")", ")",
@@ -3304,8 +3304,8 @@ void test_cil_resolve_call2_unknown_neg(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "l", "s0", "(", "c0", ")", ")",
-			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "level", "l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", "(", "level", "lvl_h", ")", ")",
 				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")", ")",
 			"(", "call", "mm", "(", "l", "h", ")", ")", NULL};
@@ -3376,8 +3376,8 @@ void test_cil_resolve_name_call_args_extraparams(CuTest *tc) {
 			"(", "user", "system_u", ")",
 			"(", "role", "role_r", ")",
 			"(", "type", "type_t", ")",
-			"(", "level", "l", "s0", "(", "c0", ")", ")",
-			"(", "level", "h", "s0", "(", "c0", ")", ")",
+			"(", "level", "l", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "h", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "lvl_l", ")", "(", "level", "lvl_h", ")", ")",
 				"(", "context", "foo", "(", "system_u", "role_r", "type_t", "lvl_l", "lvl_h", ")", ")", ")",
 			"(", "call", "mm", "(", "l", "h", ")", ")", NULL};
@@ -5305,7 +5305,7 @@ void test_cil_resolve_ast_node_helper_level(CuTest *tc) {
         char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
 			"(", "sensitivitycategory", "s0", "(", "c1", ")", ")",
-			"(", "level", "l2", "s0", "(", "c1", ")", ")", NULL};
+			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",  NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5353,7 +5353,7 @@ void test_cil_resolve_ast_node_helper_level_neg(CuTest *tc) {
         char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
 			"(", "sensitivitycategory", "s0", "(", "c1", ")", ")",
-			"(", "level", "l2", "s8", "(", "c1", ")", ")", NULL};
+			"(", "level", "l2", "(", "s8", "(", "c1", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5402,8 +5402,8 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "l2", "s0", "(", "c1", ")", ")",
-			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
+			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5443,8 +5443,8 @@ void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
 			"(", "class", "dir", "(", "read", ")", ")",
 			"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
-			"(", "level", "l2", "s0", "(", "c1", ")", ")",
-			"(", "level", "h2", "s0", "(", "c1", ")", ")",
+			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
+			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5483,8 +5483,8 @@ void test_cil_resolve_ast_node_helper_context(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -5537,8 +5537,8 @@ void test_cil_resolve_ast_node_helper_context_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "user", "system_u", ")",
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
@@ -7097,8 +7097,8 @@ void test_cil_resolve_ast_node_helper_sidcontext(CuTest *tc) {
 			"(", "type", "blah_t", ")",
 			"(", "role", "blah_r", ")",
 			"(", "user", "blah_u", ")",
-			"(", "level", "low", "s0", "(", "c0", ")", ")",
-			"(", "level", "high", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
         
 	struct cil_tree *test_tree;
