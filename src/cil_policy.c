@@ -132,10 +132,10 @@ int cil_filecon_compare(const void *a, const void *b)
 	else if (b_data->str_len < a_data->str_len) {
 		rc = 1;
 	}
-	else if (!((struct cil_filecon*)a)->type && ((struct cil_filecon*)b)->type) {
+	else if (a_filecon->type < b_filecon->type) {
 		rc = -1;
 	}
-	else if (!((struct cil_filecon*)b)->type && ((struct cil_filecon*)a)->type) {
+	else if (b_filecon->type < a_filecon->type) {
 		rc = 1;
 	}
 
