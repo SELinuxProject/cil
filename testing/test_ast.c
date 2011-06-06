@@ -37,27 +37,30 @@ int main(int argc, char *argv[])
 	cil_db_init(&db);
 
 	if (argc > 1) {
-		file = fopen(argv[1], "r");
-		if (!file) {
-			 fprintf(stderr, "Could not open file\n");
-			 return SEPOL_ERR;
-		}
-		if (stat(argv[1], &filedata) == -1) {
-			printf("Could not stat file\n");
-			return SEPOL_ERR;
-		}
-		file_size = filedata.st_size;	
+		int i;
+		for (i=1; i < argc; i++) {
+			file = fopen(argv[i], "r");
+			if (!file) {
+				 fprintf(stderr, "Could not open file\n");
+				 return SEPOL_ERR;
+			}
+			if (stat(argv[1], &filedata) == -1) {
+				printf("Could not stat file\n");
+				return SEPOL_ERR;
+			}
+			file_size = filedata.st_size;	
+	
+			buffer = malloc(file_size + 2);
+			fread(buffer, file_size, 1, file);
+			memset(buffer+file_size, 0, 2);
+			fclose(file);
 
-		buffer = malloc(file_size + 2);
-		fread(buffer, file_size, 1, file);
-		memset(buffer+file_size, 0, 2);
-		fclose(file);
-
-		printf("----------------------------------------------\n\n");
-		printf("Building parse tree\n");
-		if (cil_parser(buffer, file_size + 2, &parse_tree)) {
-			printf("Failed to parse CIL policy, exiting\n");
-			return SEPOL_ERR;
+			printf("----------------------------------------------\n\n");
+			printf("Building parse tree\n");
+			if (cil_parser(buffer, file_size + 2, &parse_tree)) {
+				printf("Failed to parse CIL policy, exiting\n");
+				return SEPOL_ERR;
+			}
 		}
 		cil_tree_print(parse_tree->root, 0);
 

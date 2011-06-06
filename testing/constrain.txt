@@ -1,4 +1,4 @@
-(class file (read))
+;(class file (read))
 (type foo)
 (user u)
 (role r)
