@@ -2466,9 +2466,12 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		}
 
 		if (changed) {
-			/* something changed (likely, an optional was disabled). need to redo everything :( */
 			printf("----- Redoing resolve passes -----\n");
-			pass = 0;
+			/* Need to re-resolve because an optional was disabled. We only
+			 * need to reset to the thrid pass because things done in pass 1
+			 * and 2 aren't allowed in optionals, and thus can't be disabled.
+			 * Note: set pass to 2 because the pass++ will increment it to 3 */
+			pass = 2;
 			/* reset the global data */
 			cil_list_destroy(&db->catorder, 0);
 			cil_list_destroy(&db->dominance, 0);
