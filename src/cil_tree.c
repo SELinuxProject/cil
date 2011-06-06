@@ -560,6 +560,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf("TYPEBOUNDS: parent: %s, child: %s\n", typebnds->parent_str, typebnds->child_str);
 				return;
 			}
+			case CIL_TYPEPERMISSIVE : {
+				struct cil_typepermissive *typeperm = node->data;
+				if (typeperm->type != NULL)
+					printf("TYPEPERMISSIVE: %s\n", typeperm->type->datum.name);
+				else
+					printf("TYPEPERMISSIVE: %s\n", typeperm->type_str);
+				return;
+			}
 			case CIL_AVRULE : {
 				struct cil_avrule *rule = node->data;
 				struct cil_list_item *item = NULL;

@@ -785,6 +785,11 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[ALIASES], "typealias %s alias %s;\n", ((struct cil_symtab_datum*)alias->type)->name, name);
 			break;
 		}
+		case CIL_TYPEPERMISSIVE: {
+			struct cil_typepermissive *typeperm = (struct cil_typepermissive*)current->data;
+			fprintf(file_arr[ATTRTYPES], "permissive %s;\n", ((struct cil_symtab_datum*)typeperm->type)->name);
+			break;
+		}
 		case CIL_ROLE: {
 			fprintf(file_arr[ATTRTYPES], "role %s;\n", name);
 			break;

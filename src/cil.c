@@ -173,6 +173,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_typebounds(*data);
 			break;
 		}
+		case (CIL_TYPEPERMISSIVE) : {
+			cil_destroy_typepermissive(*data);
+			break;
+		}
 		case (CIL_SENS) : {
 			cil_destroy_sensitivity(*data);
 			break;
@@ -755,6 +759,21 @@ int cil_typebounds_init(struct cil_typebounds **typebnds)
 	new_typebnds->child_str = NULL;
 
 	*typebnds = new_typebnds;
+
+	return SEPOL_OK;
+}
+
+int cil_typepermissive_init(struct cil_typepermissive **typeperm)
+{
+	if (typeperm == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_typepermissive *new_typeperm = cil_malloc(sizeof(struct cil_typepermissive));
+
+	new_typeperm->type_str = NULL;
+
+	*typeperm = new_typeperm;
 
 	return SEPOL_OK;
 }

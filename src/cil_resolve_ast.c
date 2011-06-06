@@ -198,6 +198,21 @@ int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, str
 	return SEPOL_OK;
 }
 
+int cil_resolve_typepermissive(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_typepermissive *typeperm = (struct cil_typepermissive*)current->data;
+	struct cil_tree_node *type_node = NULL;
+	int rc = SEPOL_ERR;
+	rc = cil_resolve_name(db, current, typeperm->type_str, CIL_SYM_TYPES, CIL_TYPE, call, &type_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", typeperm->type_str);
+		return rc;
+	}
+	typeperm->type = (struct cil_type*)(type_node->data);
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_classcommon *clscom = (struct cil_classcommon*)current->data;
@@ -1990,6 +2005,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					case CIL_TYPEALIAS : {
 						printf("case typealias\n");
 						rc = cil_resolve_typealias(db, node, call);
+						break;
+					}
+					case CIL_TYPEPERMISSIVE : {
+						printf("case typepermissive\n");
+						rc = cil_resolve_typepermissive(db, node, call);
 						break;
 					}
 					case CIL_AVRULE : {

@@ -1441,6 +1441,38 @@ void cil_destroy_typebounds(struct cil_typebounds *typebnds)
 	free(typebnds);
 }
 
+int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next != NULL) {
+		printf("Invalid typepermissive declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_typepermissive *typeperm;
+	int rc = cil_typepermissive_init(&typeperm);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	typeperm->type_str = cil_strdup(parse_current->next->data);
+
+	ast_node->data = typeperm;
+	ast_node->flavor = CIL_TYPEPERMISSIVE;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_typepermissive(struct cil_typepermissive *typeperm)
+{
+	if (typeperm->type_str != NULL)
+		free(typeperm->type_str);
+	free(typeperm);
+}
+
 int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -3122,6 +3154,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 			}
+			else if (!strcmp(parse_current->data, CIL_KEY_TYPEPERMISSIVE)) {
+				rc = cil_gen_typepermissive(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_typepermissive failed, rc: %d\n", rc);
+					return rc;
+				}
+			}
+
 			else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
 				rc = cil_gen_role(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
