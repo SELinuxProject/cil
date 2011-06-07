@@ -753,7 +753,7 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 		printf("Failed to write booleanif content to file, rc: %d\n", rc);
 		return rc;
 	}
-	fprintf(file_arr[file_index], "}");
+	fprintf(file_arr[file_index], "}\n");
 
 	return SEPOL_OK;
 }
