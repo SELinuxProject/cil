@@ -330,6 +330,45 @@ void test_cil_genfscon_compare_equal(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, rc);
 }
 
+void test_cil_netifcon_compare_a_greater_b(CuTest *tc) {
+	struct cil_netifcon *anetifcon;
+	cil_netifcon_init(&anetifcon);
+	anetifcon->interface_str = "aaa";
+
+	struct cil_netifcon *bnetifcon;
+	cil_netifcon_init(&bnetifcon);
+	bnetifcon->interface_str = "bbb";
+	
+	int rc = cil_netifcon_compare(&anetifcon, &bnetifcon);
+	CuAssertTrue(tc, rc < 0);
+}
+
+void test_cil_netifcon_compare_b_greater_a(CuTest *tc) {
+	struct cil_netifcon *anetifcon;
+	cil_netifcon_init(&anetifcon);
+	anetifcon->interface_str = "bbb";
+
+	struct cil_netifcon *bnetifcon;
+	cil_netifcon_init(&bnetifcon);
+	bnetifcon->interface_str = "aaa";
+	
+	int rc = cil_netifcon_compare(&anetifcon, &bnetifcon);
+	CuAssertTrue(tc, rc > 0);
+}
+
+void test_cil_netifcon_compare_equal(CuTest *tc) {
+	struct cil_netifcon *anetifcon;
+	cil_netifcon_init(&anetifcon);
+	anetifcon->interface_str = "aaa";
+
+	struct cil_netifcon *bnetifcon;
+	cil_netifcon_init(&bnetifcon);
+	bnetifcon->interface_str = "aaa";
+	
+	int rc = cil_netifcon_compare(&anetifcon, &bnetifcon);
+	CuAssertTrue(tc, rc == 0);
+}
+
 void test_cil_nodecon_compare_aipv4_bipv6(CuTest *tc) {
 	struct cil_nodecon *anodecon;
 	cil_nodecon_init(&anodecon);

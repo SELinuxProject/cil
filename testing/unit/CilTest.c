@@ -1357,6 +1357,10 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_bpathstr_greater_apathstr);
 	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_equal);
 	
+	SUITE_ADD_TEST(suite, test_cil_netifcon_compare_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_netifcon_compare_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_netifcon_compare_equal);
+	
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_bipv6);
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_bipv4);
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_greaterthan_bipv4);

@@ -25,6 +25,10 @@ void test_cil_genfscon_compare_apathstr_greater_bpathstr(CuTest *tc);
 void test_cil_genfscon_compare_bpathstr_greater_apathstr(CuTest *tc);
 void test_cil_genfscon_compare_equal(CuTest *tc);
 
+void test_cil_netifcon_compare_a_greater_b(CuTest *tc);
+void test_cil_netifcon_compare_b_greater_a(CuTest *tc);
+void test_cil_netifcon_compare_equal(CuTest *tc);
+
 void test_cil_nodecon_compare_aipv4_bipv6(CuTest *tc);
 void test_cil_nodecon_compare_aipv6_bipv4(CuTest *tc);
 void test_cil_nodecon_compare_aipv4_greaterthan_bipv4(CuTest *tc);
