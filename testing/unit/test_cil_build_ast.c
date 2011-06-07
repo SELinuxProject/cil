@@ -27,15 +27,15 @@ void test_cil_parse_to_list(CuTest *tc) {
 	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
 	test_avrule->obj_str = cil_strdup(test_current->next->next->next->data);
 
-	cil_list_init(&test_avrule->perms_str);
+	cil_list_init(&test_avrule->perms_list_str);
 
 	test_current = test_current->next->next->next->next->cl_head;
 
-	int rc = cil_parse_to_list(test_current, test_avrule->perms_str, CIL_AST_STR);
+	int rc = cil_parse_to_list(test_current, test_avrule->perms_list_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 
-	free(test_avrule->perms_str);
-	test_avrule->perms_str = NULL;
+	free(test_avrule->perms_list_str);
+	test_avrule->perms_list_str = NULL;
 	free(test_avrule);
 }
 
@@ -54,15 +54,15 @@ void test_cil_parse_to_list_currnull_neg(CuTest *tc) {
 	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
 	test_avrule->obj_str = cil_strdup(test_current->next->next->next->data);
 
-	cil_list_init(&test_avrule->perms_str);
+	cil_list_init(&test_avrule->perms_list_str);
 
 	test_current = NULL;
 
-	int rc = cil_parse_to_list(test_current, test_avrule->perms_str, CIL_AST_STR);
+	int rc = cil_parse_to_list(test_current, test_avrule->perms_list_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 
-	free(test_avrule->perms_str);
-	test_avrule->perms_str = NULL;
+	free(test_avrule->perms_list_str);
+	test_avrule->perms_list_str = NULL;
 	free(test_avrule);
 }
 
@@ -83,7 +83,7 @@ void test_cil_parse_to_list_listnull_neg(CuTest *tc) {
 
 	test_current = test_current->next->next->next->next->cl_head;
 
-	int rc = cil_parse_to_list(test_current, test_avrule->perms_str, CIL_AST_STR);
+	int rc = cil_parse_to_list(test_current, test_avrule->perms_list_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 
 	free(test_avrule);
@@ -5698,9 +5698,9 @@ void test_cil_gen_avrule(CuTest *tc) {
 	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->tgt_str, test_current->next->next->data);
 	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->obj_str, test_current->next->next->next->data);
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_AVRULE);
-	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_str);
+	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_list_str);
 
-	struct cil_list_item *test_list = ((struct cil_avrule*)test_ast_node->data)->perms_str->head;
+	struct cil_list_item *test_list = ((struct cil_avrule*)test_ast_node->data)->perms_list_str->head;
 	test_current = test_current->next->next->next->next->cl_head;
 
 	while(test_list != NULL) {

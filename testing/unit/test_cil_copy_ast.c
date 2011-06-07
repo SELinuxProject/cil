@@ -575,10 +575,10 @@ void test_cil_copy_avrule(CuTest *tc) {
 	CuAssertStrEquals(tc, ((struct cil_avrule *)test_ast_node->data)->src_str, test_copy->src_str);
 	CuAssertStrEquals(tc, ((struct cil_avrule *)test_ast_node->data)->tgt_str, test_copy->tgt_str);
 	CuAssertStrEquals(tc, ((struct cil_avrule *)test_ast_node->data)->obj_str, test_copy->obj_str);
-	CuAssertIntEquals(tc, ((struct cil_avrule *)test_ast_node->data)->perms_str->head->flavor, test_copy->perms_str->head->flavor);
-	CuAssertStrEquals(tc, (char*)((struct cil_avrule *)test_ast_node->data)->perms_str->head->data, (char*)test_copy->perms_str->head->data);
-	CuAssertIntEquals(tc, ((struct cil_avrule *)test_ast_node->data)->perms_str->head->next->flavor, test_copy->perms_str->head->next->flavor);
-	CuAssertStrEquals(tc, (char*)((struct cil_avrule *)test_ast_node->data)->perms_str->head->next->data, (char*)test_copy->perms_str->head->next->data);
+	CuAssertIntEquals(tc, ((struct cil_avrule *)test_ast_node->data)->perms_list_str->head->flavor, test_copy->perms_list_str->head->flavor);
+	CuAssertStrEquals(tc, (char*)((struct cil_avrule *)test_ast_node->data)->perms_list_str->head->data, (char*)test_copy->perms_list_str->head->data);
+	CuAssertIntEquals(tc, ((struct cil_avrule *)test_ast_node->data)->perms_list_str->head->next->flavor, test_copy->perms_list_str->head->next->flavor);
+	CuAssertStrEquals(tc, (char*)((struct cil_avrule *)test_ast_node->data)->perms_list_str->head->next->data, (char*)test_copy->perms_list_str->head->next->data);
 }
 
 void test_cil_copy_sens(CuTest *tc) {
