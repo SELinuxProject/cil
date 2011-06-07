@@ -303,6 +303,23 @@ int cil_copy_typealias(struct cil_tree_node *orig, struct cil_tree_node *copy, s
 	return SEPOL_OK;
 }
 
+void cil_copy_filetransition(struct cil_filetransition *orig, struct cil_filetransition **copy)
+{
+	struct cil_filetransition *new;
+	int rc = cil_filetransition_init(&new);
+	if (rc != SEPOL_OK) {
+		return;
+	}
+
+	new->src_str = cil_strdup(orig->src_str);
+	new->exec_str = cil_strdup(orig->exec_str);
+	new->proc_str = cil_strdup(orig->proc_str);
+	new->dest_str = cil_strdup(orig->dest_str);
+	new->path_str = cil_strdup(orig->path_str);
+
+	*copy = new;
+}
+
 int cil_copy_bool(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
 {
 	struct cil_bool *new;
@@ -934,6 +951,10 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 				free(new);
 				return rc;
 			}
+			break;
+		}
+		case CIL_FILETRANSITION : {
+			cil_copy_filetransition((struct cil_filetransition*)orig->data, (struct cil_filetransition**)&new->data);
 			break;
 		}
 		case CIL_BOOL : {

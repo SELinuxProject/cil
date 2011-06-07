@@ -19,6 +19,7 @@ void cil_copy_userrole(struct cil_userrole *, struct cil_userrole **);
 int cil_copy_type(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 void cil_copy_typeattr(struct cil_typeattribute *, struct cil_typeattribute **);
 int cil_copy_typealias(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
+void cil_copy_filetransition(struct cil_filetransition *, struct cil_filetransition **);
 int cil_copy_bool(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 void cil_copy_avrule(struct cil_avrule *, struct cil_avrule **);
 void cil_copy_type_rule(struct cil_type_rule *, struct cil_type_rule **);
