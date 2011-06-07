@@ -28,6 +28,16 @@ void test_cil_gen_perm_currnull_neg(CuTest *);
 void test_cil_gen_perm_astnull_neg(CuTest *);
 void test_cil_gen_perm_nodenull_neg(CuTest *);
 
+void test_cil_gen_permset(CuTest *);
+void test_cil_gen_permset_noname_neg(CuTest *);
+void test_cil_gen_permset_nameinparens_neg(CuTest *);
+void test_cil_gen_permset_noperms_neg(CuTest *);
+void test_cil_gen_permset_emptyperms_neg(CuTest *);
+void test_cil_gen_permset_extra_neg(CuTest *);
+void test_cil_gen_permset_dbnull_neg(CuTest *);
+void test_cil_gen_permset_currnull_neg(CuTest *);
+void test_cil_gen_permset_astnull_neg(CuTest *);
+
 void test_cil_gen_perm_nodes(CuTest *);
 void test_cil_gen_perm_nodes_failgen_neg(CuTest *);
 void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *);
@@ -276,6 +286,9 @@ void test_cil_gen_roleallow_tgtnull_neg(CuTest *);
 void test_cil_gen_roleallow_extra_neg(CuTest *);
 
 void test_cil_gen_avrule(CuTest *);
+void test_cil_gen_avrule_permset(CuTest *);
+void test_cil_gen_avrule_permset_anon(CuTest *);
+void test_cil_gen_avrule_extra_neg(CuTest *);
 void test_cil_gen_avrule_sourceparens_neg(CuTest *);
 void test_cil_gen_avrule_targetparens_neg(CuTest *);
 void test_cil_gen_avrule_currnull_neg(CuTest *tc);
@@ -284,7 +297,6 @@ void test_cil_gen_avrule_sourcedomainnull_neg(CuTest *tc);
 void test_cil_gen_avrule_targetdomainnull_neg(CuTest *tc);
 void test_cil_gen_avrule_objectclassnull_neg(CuTest *tc);
 void test_cil_gen_avrule_permsnull_neg(CuTest *tc);
-void test_cil_gen_avrule_notlist_neg(CuTest *);
 void test_cil_gen_avrule_twolists_neg(CuTest *);
 //TODO: add cases to cover  parse_current->next->cl_head != NULL || parse_current->next->next->cl_head != NULL 
 // || parse_current->next->next->next->cl_head != NULL
@@ -570,6 +582,7 @@ void test_cil_gen_macro_category(CuTest *tc);
 void test_cil_gen_macro_catset(CuTest *tc);
 void test_cil_gen_macro_level(CuTest *tc);
 void test_cil_gen_macro_class(CuTest *tc);
+void test_cil_gen_macro_permset(CuTest *tc);
 void test_cil_gen_macro_duplicate(CuTest *tc);
 void test_cil_gen_macro_duplicate_neg(CuTest *tc);
 void test_cil_gen_macro_unknown_neg(CuTest *tc);

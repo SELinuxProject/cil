@@ -237,6 +237,8 @@ CuSuite* CilTreeGetResolveSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roleallow_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule);
+	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_permset);
+	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_permset_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_firsttype_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_secondtype_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_class_neg);
@@ -336,6 +338,8 @@ CuSuite* CilTreeGetResolveSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_catset_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_catset_anon_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_class);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_permset);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_permset_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon_neg);
@@ -359,6 +363,8 @@ CuSuite* CilTreeGetResolveSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_cat);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_catset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_catset_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_permset);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_permset_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_class);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level_anon);
@@ -482,6 +488,16 @@ CuSuite* CilTreeGetBuildSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodenull_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_permset);
+	SUITE_ADD_TEST(suite, test_cil_gen_permset_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_permset_nameinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_permset_noperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_permset_emptyperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_permset_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_permset_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_permset_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_permset_astnull_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_failgen_neg);
 
@@ -752,6 +768,9 @@ CuSuite* CilTreeGetBuildSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roleallow_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permset);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permset_anon);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_sourceparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_targetparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_currnull_neg);
@@ -760,7 +779,6 @@ CuSuite* CilTreeGetBuildSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_targetdomainnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_objectclassnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permsnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_avrule_notlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_twolists_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_allow);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_avrule_allow_neg);
@@ -1097,6 +1115,7 @@ CuSuite* CilTreeGetBuildSuite() {
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_catset);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_level);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_class);
+	SUITE_ADD_TEST(suite, test_cil_gen_macro_permset);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_duplicate);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_duplicate_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_unknown_neg);

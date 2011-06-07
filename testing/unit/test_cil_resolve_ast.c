@@ -1356,6 +1356,44 @@ void test_cil_resolve_avrule(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_avrule_permset(CuTest *tc) {
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
+	                "(", "type", "test", ")", 
+			"(", "type", "foo", ")",
+			"(", "permissionset", "baz", "(", "open", "close", ")", ")",
+	                "(", "allow", "test", "foo", "bar", "baz", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_avrule(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_avrule_permset_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
+	                "(", "type", "test", ")", 
+			"(", "type", "foo", ")",
+			"(", "permissionset", "baz", "(", "open", "close", ")", ")",
+	                "(", "allow", "test", "foo", "bar", "dne", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_avrule(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_avrule_firsttype_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 
@@ -2905,6 +2943,49 @@ void test_cil_resolve_call1_class(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_call1_permset(CuTest *tc) {
+	char *line[] = {"(", "permissionset", "foo", "(", "read", "open", ")", ")",
+			"(", "class", "dead", "(", "close", ")", ")",
+			"(", "class", "bar", "(", "close", ")", ")",
+			"(", "class", "baz", "(", "close", ")", ")",
+			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
+				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
+			"(", "call", "mm", "(", "foo", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc1 = cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	rc1 = rc1;
+
+	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call1_permset_anon(CuTest *tc) {
+	char *line[] = {"(", "class", "dead", "(", "close", ")", ")",
+			"(", "class", "bar", "(", "close", ")", ")",
+			"(", "class", "baz", "(", "close", ")", ")",
+			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
+				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
+			"(", "call", "mm", "(", "(", "read", "open", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc1 = cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	rc1 = rc1;
+
+	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_call1_unknown_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "foo", "(", "read", ")", ")",
 			"(", "class", "file", "(", "read", ")", ")",
@@ -3207,6 +3288,49 @@ void test_cil_resolve_call2_catset_anon(CuTest *tc) {
 			"(", "macro", "mm", "(", "(", "categoryset",  "foo", ")", ")",
 				"(", "level", "bar", "(", "s0", "foo", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "c0", "c1", "c2", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_permset(CuTest *tc) {
+	char *line[] = {"(", "permissionset", "foo", "(", "read", "open", ")", ")",
+			"(", "class", "dead", "(", "close", ")", ")",
+			"(", "class", "bar", "(", "close", ")", ")",
+			"(", "class", "baz", "(", "close", ")", ")",
+			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
+				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
+			"(", "call", "mm", "(", "foo", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_permset_anon(CuTest *tc) {
+	char *line[] = {"(", "class", "dead", "(", "close", ")", ")",
+			"(", "class", "bar", "(", "close", ")", ")",
+			"(", "class", "baz", "(", "close", ")", ")",
+			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
+				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
+			"(", "call", "mm", "(", "(", "read", "open", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
