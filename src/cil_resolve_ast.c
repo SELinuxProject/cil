@@ -2117,22 +2117,18 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			case 4 : {
 				switch (node->flavor) {
 					case CIL_CATORDER : {
-						printf("case categoryorder\n");
 						rc = cil_resolve_catorder(db, node, call);
 						break;
 					}
 					case CIL_DOMINANCE : {
-						printf("case dominance\n");
 						rc = cil_resolve_dominance(db, node, call);
 						break;
 					}
 					case CIL_CLASS : {
-						printf("case class\n");
 						rc = cil_reset_class(db, node, call);
 						break;
 					}
 					case CIL_SENS: {
-						printf("case sensitivity\n");
 						rc = cil_reset_sens(db, node, call);
 						break;
 					}
@@ -2142,7 +2138,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			case 5 : {
 				switch (node->flavor) {
 					case CIL_CATSET : {
-						printf("case categoryset\n");
 						rc = cil_resolve_catset(db, node, (struct cil_catset*)node->data, call);
 						break;
 					}
@@ -2152,12 +2147,10 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			case 6 : {
 				switch (node->flavor) {
 					case CIL_SENSCAT : {
-						printf("case sensitivitycategory\n");
 						rc = cil_resolve_senscat(db, node, call);
 						break;
 					}
 					case CIL_CLASSCOMMON : {
-						printf("case classcommon\n");
 						rc = cil_resolve_classcommon(db, node, call);
 						break;
 					}
@@ -2167,122 +2160,98 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			case 7 : {
 				switch (node->flavor) {
 					case CIL_TYPE_ATTR : {
-						printf("case typeattribute\n");
 						rc = cil_resolve_typeattr(db, node, call);
 						break;
 					}
 					case CIL_TYPEALIAS : {
-						printf("case typealias\n");
 						rc = cil_resolve_typealias(db, node, call);
 						break;
 					}
 					case CIL_TYPEBOUNDS : {
-						printf("case typebounds\n");
 						rc = cil_resolve_typebounds(db, node, call);
 						break;
 					}
 					case CIL_TYPEPERMISSIVE : {
-						printf("case typepermissive\n");
 						rc = cil_resolve_typepermissive(db, node, call);
 						break;
 					}
 					case CIL_FILETRANSITION : {
-						printf("case filetransition\n");
 						rc = cil_resolve_filetransition(db, node, call);
 						break;
 					}
 					case CIL_AVRULE : {
-						printf("case avrule\n");
 						rc = cil_resolve_avrule(db, node, call);
 						break;
 					}
 					case CIL_TYPE_RULE : {
-						printf("case type_rule\n");
 						rc = cil_resolve_type_rule(db, node, call);
 						break;
 					}
 					case CIL_USERROLE : {
-						printf("case userrole\n");
 						rc = cil_resolve_userrole(db, node, call);
 						break;
 					}
 					case CIL_ROLETYPE : {
-						printf("case roletype\n");
 						rc = cil_resolve_roletype(db, node, call);
 						break;
 					}
 					case CIL_ROLETRANS : {
-						printf("case roletransition\n");
 						rc = cil_resolve_roletrans(db, node, call);
 						break;
 					}
 					case CIL_ROLEALLOW : {
-						printf("case roleallow\n");
 						rc = cil_resolve_roleallow(db, node, call);
 						break;
 					}
 					case CIL_ROLEDOMINANCE : {
-						printf("case roledominance\n");
 						rc = cil_resolve_roleallow(db, node, call);
 						break;
 					}
 					case CIL_SENSALIAS : {
-						printf("case sensitivityalias\n");
 						rc = cil_resolve_sensalias(db, node, call);
 						break;
 					}
 					case CIL_CATALIAS : {
-						printf("case categoryalias\n");
 						rc = cil_resolve_catalias(db, node, call);
 						break;
 					}
 					case CIL_LEVEL : {
-						printf("case level\n");
 						rc = cil_resolve_level(db, node, (struct cil_level*)node->data, call);
 						break;
 					}
 					case CIL_CONSTRAIN : {
-						printf("case constrain\n");
 						rc = cil_resolve_constrain(db, node, call);
 						break;
 					}
 					case CIL_MLSCONSTRAIN : {
-						printf("case constrain\n");
 						rc = cil_resolve_constrain(db, node, call);
 						break;
 					}
 					case CIL_CONTEXT : {
-						printf("case context\n");
 						rc = cil_resolve_context(db, node, (struct cil_context*)node->data, call);
 						break;
 					}
 					case CIL_FILECON : {
-						printf("case filecon\n");
 						rc = cil_resolve_filecon(db, node, call);
 						break;
 					}
 					case CIL_PORTCON : {
-						printf("case portcon\n");
 						rc = cil_resolve_portcon(db, node, call);
 						break;
 					}
 					case CIL_NODECON : {
-						printf("case nodecon\n");
 						rc = cil_resolve_nodecon(db, node, call);
 						break;
 					}
 					case CIL_GENFSCON : {
-						printf("case genfscon\n");
 						rc = cil_resolve_genfscon(db, node, call);
 						break;
 					}
 					case CIL_NETIFCON : {
-						printf("case netifcon\n");
 						rc = cil_resolve_netifcon(db, node, call);
 						break;
 					}
 					case CIL_SIDCONTEXT : {
-						printf("case sidcontext\n");
 						rc = cil_resolve_sidcontext(db, node, call);
 						break;
 					}
@@ -2359,7 +2328,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	}
 	else {
 		if (node->flavor == CIL_MACRO) {
-			printf("macros are not resolved\n");
+			/* Macros are not resolved */
 			*finished = CIL_TREE_SKIP_HEAD;
 			return SEPOL_OK;
 		}
@@ -2367,7 +2336,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			case 1 : {
 				switch (node->flavor) {
 					case CIL_TUNABLEIF : {
-						printf("case tunableif\n");
 						rc = cil_resolve_tunif(db, node, call);
 						break;
 					}
@@ -2386,7 +2354,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			case 4 : {
 				switch (node->flavor) {
 					case CIL_BOOLEANIF : {
-						printf("case booleanif\n");
 						rc = cil_resolve_boolif(db, node, call);
 						break;
 					}

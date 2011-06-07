@@ -813,7 +813,6 @@ int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct
 
 int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struct cil_list *other)
 {
-	printf("__cil_copy_node_helper, node: %d\n", orig->flavor);
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *parent = NULL;
 	struct cil_tree_node *new = NULL;
@@ -1090,7 +1089,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 		other->head->data = new;
 	}
 
-	printf("return __cil_copy_node_helper\n");
 	return SEPOL_OK;
 
 	
@@ -1099,7 +1097,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struc
 
 int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig, struct cil_list *other)
 {
-	printf("__cil_copy_branch_helper\n");
 	if (other == NULL || other->head == NULL) 
 		return SEPOL_ERR;
 
@@ -1110,7 +1107,6 @@ int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig,
 		other->head->data = ((struct cil_tree_node*)other->head->data)->parent;
 	}
 
-	printf("return __cil_copy_branch_helper\n");
 	return SEPOL_OK;
 }
 
