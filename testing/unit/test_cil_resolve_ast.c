@@ -3221,27 +3221,6 @@ void test_cil_resolve_call2_catset_anon(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_resolve_call2_catset_anon_neg(CuTest *tc) {
-	char *line[] = {"(", "category", "c0", ")",
-			"(", "category", "c1", ")",
-			"(", "category", "c2", ")",
-			"(", "macro", "mm", "(", "(", "categoryset",  "foo", ")", ")",
-				"(", "level", "bar", "(", "s0", "foo", ")", ")", ")",
-			"(", "call", "mm", "(", "(", "c0", "c3", "c2", ")", ")", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
-	int rc = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-}
-
 void test_cil_resolve_call2_class(CuTest *tc) {
 	char *line[] = {"(", "class", "foo", "(", "read", ")", ")",
 			"(", "class", "file", "(", "read", ")", ")",
@@ -5455,8 +5434,10 @@ void test_cil_resolve_ast_node_helper_level(CuTest *tc) {
 	pass = 5;
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, other);
 
-	pass = 7;
+	pass = 6;
+	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, other);
 
+	pass = 7;
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, other);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, finished, 0);

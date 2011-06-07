@@ -8067,7 +8067,7 @@ void test_cil_fill_level(CuTest *tc) {
 	struct cil_level *test_level;
 	cil_level_init(&test_level);
 
-        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next->cl_head, test_level);
         CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -8114,7 +8114,7 @@ void test_cil_fill_level_levelnull_neg(CuTest *tc) {
 
 	struct cil_level *test_level = NULL;
 
-        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next->cl_head, test_level);
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -8138,7 +8138,7 @@ void test_cil_fill_level_nocat(CuTest *tc) {
 	struct cil_level *test_level;
 	cil_level_init(&test_level);
 
-        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next->cl_head, test_level);
         CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -8162,7 +8162,7 @@ void test_cil_fill_level_emptycat_neg(CuTest *tc) {
 	struct cil_level *test_level;
 	cil_level_init(&test_level);
 
-        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next, test_level);
+        int rc = cil_fill_level(test_tree->root->cl_head->next->next->cl_head->next->next->cl_head, test_level);
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
