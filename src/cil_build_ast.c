@@ -2963,7 +2963,6 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		return SEPOL_ERR;
 
 	if ((parse_current->next == NULL || parse_current->next->cl_head != NULL)
-	|| (parse_current->next->next == NULL)
 	|| (parse_current->next->next != NULL && parse_current->next->next->cl_head == NULL)) {
 		printf("Invalid call declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
@@ -2977,10 +2976,11 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	call->macro_str = cil_strdup(parse_current->next->data);
 
-	cil_tree_init(&call->args_tree);
-	cil_tree_node_init(&call->args_tree->root);
-	
-	cil_copy_ast(db, parse_current->next->next, call->args_tree->root); 
+	if (parse_current->next->next != NULL) {
+		cil_tree_init(&call->args_tree);
+		cil_tree_node_init(&call->args_tree->root);
+		cil_copy_ast(db, parse_current->next->next, call->args_tree->root);
+	}
 
 	ast_node->data = call;
 	ast_node->flavor = CIL_CALL;

@@ -1587,14 +1587,21 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 		return SEPOL_ERR;
 	}
 
-	if (new_call->macro->params != NULL ){
+	if (new_call->macro->params != NULL ) {
 	
 		struct cil_list_item *item = new_call->macro->params->head;
-		struct cil_tree_node *pc = new_call->args_tree->root->cl_head;		
-
-		new_call->args = cil_malloc(sizeof(struct cil_list));
 		struct cil_list_item *args_tail = NULL;
 		struct cil_args *new_arg = NULL;
+		struct cil_tree_node *pc = NULL;
+
+		if (new_call->args_tree == NULL) {
+			printf("cil_resolve_call1 failed: missing arguments (line: %d)\n", current->line);
+			return SEPOL_ERR;
+		}
+
+		pc = new_call->args_tree->root->cl_head;
+
+		new_call->args = cil_malloc(sizeof(struct cil_list));
 
 		while (item != NULL) {
 			if (item != NULL && pc == NULL) {
@@ -1753,6 +1760,9 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 			printf("cil_resolve_call1 failed: unexpected arguments (line: %d)\n", current->line);
 			return SEPOL_ERR;
 		}
+	} else if (new_call->args_tree != NULL) {
+		printf("cil_resolve_call1 failed: unexpected arguments (line: %d)\n", current->line);
+		return SEPOL_ERR;
 	}
 
 	rc = cil_copy_ast(db, macro_node, current);
@@ -1770,6 +1780,10 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 	int rc = SEPOL_ERR;
 	uint32_t sym_index;
 	struct cil_list_item *item;
+
+	if (new_call->args == NULL) {
+		return SEPOL_OK;
+	}
 	
 	for (item = new_call->args->head; item != NULL; item = item->next) {
 		if (((struct cil_args*)item->data)->arg == NULL && ((struct cil_args*)item->data)->arg_str == NULL) {
