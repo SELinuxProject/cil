@@ -575,6 +575,24 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf("TYPEPERMISSIVE: %s\n", typeperm->type_str);
 				return;
 			}
+			case CIL_FILETRANSITION : {
+				struct cil_filetransition *filetrans = node->data;
+				printf("FILETRANSITION:");
+				if (filetrans->src != NULL)
+					printf(" %s", filetrans->src->datum.name);
+				else
+					printf(" %s", filetrans->src_str);
+				if (filetrans->exec != NULL)
+					printf(" %s", filetrans->exec->datum.name);
+				else
+					printf(" %s", filetrans->exec_str);
+				if (filetrans->proc != NULL)
+					printf(" %s", filetrans->proc->datum.name);
+				else
+					printf(" %s", filetrans->proc_str);
+				printf(" %s\n", filetrans->path_str);
+				return;
+			}
 			case CIL_AVRULE : {
 				struct cil_avrule *rule = node->data;
 				struct cil_list_item *item = NULL;

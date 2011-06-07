@@ -49,48 +49,49 @@
 #define CIL_TYPE_RULE 		33
 #define CIL_TYPEBOUNDS		34
 #define CIL_TYPEPERMISSIVE	35
-#define CIL_ROLETRANS		36
-#define CIL_ROLEALLOW		37
-#define CIL_ROLETYPE		38
-#define CIL_ROLEDOMINANCE	39
-#define CIL_CATORDER		40
-#define CIL_DOMINANCE		41
-#define CIL_SENSCAT		42
-#define CIL_CLASSCOMMON		43
-#define CIL_CONSTRAIN_NODE	44
-#define CIL_SIDCONTEXT		45
-#define CIL_CALL		46
-#define CIL_ARGS		47
-#define CIL_BOOLEANIF		48
-#define CIL_TUNABLEIF		49
-#define CIL_TUNABLEIFDEF	50
-#define CIL_TUNABLEIFNDEF	51
-#define CIL_AND			52
-#define CIL_OR			53
-#define CIL_XOR			54
-#define CIL_NOT			55
-#define CIL_EQ			56
-#define CIL_NEQ			57
-#define CIL_ELSE		58
-#define CIL_COND		59
-#define CIL_PARAM		60
-#define CIL_CONS_AND		61
-#define CIL_CONS_OR		62
-#define CIL_CONS_NOT		63
-#define CIL_CONS_EQ		64
-#define CIL_CONS_DOM		65
-#define CIL_CONS_DOMBY		66
-#define CIL_CONS_INCOMP		67
-#define CIL_CONS_U1		68
-#define CIL_CONS_U2		69
-#define CIL_CONS_T1		70
-#define CIL_CONS_T2		71
-#define CIL_CONS_R1		72
-#define CIL_CONS_R2		73
-#define CIL_CONS_L1		74
-#define CIL_CONS_L2		75
-#define CIL_CONS_H1		76
-#define CIL_CONS_H2		77
+#define CIL_FILETRANSITION	36
+#define CIL_ROLETRANS		37
+#define CIL_ROLEALLOW		38
+#define CIL_ROLETYPE		39
+#define CIL_ROLEDOMINANCE	40
+#define CIL_CATORDER		41
+#define CIL_DOMINANCE		42
+#define CIL_SENSCAT		43
+#define CIL_CLASSCOMMON		44
+#define CIL_CONSTRAIN_NODE	45
+#define CIL_SIDCONTEXT		46
+#define CIL_CALL		47
+#define CIL_ARGS		48
+#define CIL_BOOLEANIF		49
+#define CIL_TUNABLEIF		50
+#define CIL_TUNABLEIFDEF	51
+#define CIL_TUNABLEIFNDEF	52
+#define CIL_AND			53
+#define CIL_OR			54
+#define CIL_XOR			55
+#define CIL_NOT			56
+#define CIL_EQ			57
+#define CIL_NEQ			58
+#define CIL_ELSE		59
+#define CIL_COND		60
+#define CIL_PARAM		61
+#define CIL_CONS_AND		62
+#define CIL_CONS_OR		63
+#define CIL_CONS_NOT		64
+#define CIL_CONS_EQ		65
+#define CIL_CONS_DOM		66
+#define CIL_CONS_DOMBY		67
+#define CIL_CONS_INCOMP		68
+#define CIL_CONS_U1		69
+#define CIL_CONS_U2		70
+#define CIL_CONS_T1		71
+#define CIL_CONS_T2		72
+#define CIL_CONS_R1		73
+#define CIL_CONS_R2		74
+#define CIL_CONS_L1		75
+#define CIL_CONS_L2		76
+#define CIL_CONS_H1		77
+#define CIL_CONS_H2		78
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -139,6 +140,7 @@
 #define CIL_KEY_DONTAUDIT	"dontaudit"
 #define CIL_KEY_NEVERALLOW	"neverallow"
 #define CIL_KEY_TYPETRANS	"typetransition"
+#define CIL_KEY_FILETRANSITION	"filetransition"
 #define CIL_KEY_TYPECHANGE	"typechange"
 #define CIL_KEY_TYPEMEMBER	"typemember"
 #define CIL_KEY_TYPEATTR	"typeattribute"
@@ -358,6 +360,18 @@ struct cil_typebounds {
 struct cil_typepermissive {
 	char *type_str;
 	struct cil_type *type;
+};
+
+struct cil_filetransition {
+	char *src_str;
+	struct cil_type *src;
+	char *exec_str;
+	struct cil_type *exec;
+	char *proc_str;
+	struct cil_class *proc;
+	char *dest_str;
+	struct cil_type *dest;
+	char *path_str;
 };
 
 struct cil_bool {
@@ -681,6 +695,7 @@ int cil_typeattribute_init(struct cil_typeattribute **typeattribute);
 int cil_typealias_init(struct cil_typealias **typealias);
 int cil_typebounds_init(struct cil_typebounds **typebnds);
 int cil_typepermissive_init(struct cil_typepermissive **typeperm);
+int cil_filetransition_init(struct cil_filetransition **filetrans);
 int cil_bool_init(struct cil_bool **cilbool);
 int cil_boolif_init(struct cil_booleanif **bif);
 int cil_conditional_init(struct cil_conditional **cond);

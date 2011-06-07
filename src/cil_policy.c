@@ -533,6 +533,17 @@ int cil_typerule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_type
 	return SEPOL_OK;
 }
 
+int cil_filetransition_to_policy(FILE **file_arr, uint32_t file_index, struct cil_filetransition *filetrans)
+{
+	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)filetrans->src)->name;
+	char *exec_str = ((struct cil_symtab_datum*)(struct cil_type*)filetrans->exec)->name;
+	char *proc_str = ((struct cil_symtab_datum*)(struct cil_class*)filetrans->proc)->name;
+	char *dest_str = ((struct cil_symtab_datum*)(struct cil_type*)filetrans->dest)->name;
+
+	fprintf(file_arr[file_index], "type_transition %s %s : %s %s %s;\n", src_str, exec_str, proc_str, dest_str, filetrans->path_str);
+	return SEPOL_OK;
+}
+
 int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tree_node *stack)
 {
 	struct cil_conditional *cond = NULL;
@@ -875,6 +886,14 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 				return rc;
 			}
 			break;
+		}
+		case CIL_FILETRANSITION: {
+			struct cil_filetransition *filetrans = (struct cil_filetransition*)current->data;
+			rc = cil_filetransition_to_policy(file_arr, ALLOWS, filetrans);
+			if (rc != SEPOL_OK) {
+				printf("Failed to write filetransition to policy\n");
+				return rc;
+			}
 		}
 		case CIL_ROLETRANS: {
 			struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;

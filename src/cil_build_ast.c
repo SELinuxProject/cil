@@ -1473,6 +1473,59 @@ void cil_destroy_typepermissive(struct cil_typepermissive *typeperm)
 	free(typeperm);
 }
 
+int cil_gen_filetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL ) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL
+	|| parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL
+	|| parse_current->next->next->cl_head != NULL
+	|| parse_current->next->next->next == NULL
+	|| parse_current->next->next->next->cl_head != NULL
+	|| parse_current->next->next->next->next == NULL
+	|| parse_current->next->next->next->next->cl_head != NULL
+	|| parse_current->next->next->next->next->next == NULL
+	|| parse_current->next->next->next->next->next->cl_head != NULL
+	|| parse_current->next->next->next->next->next->next != NULL) {
+		printf("Invalid filetransition declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	struct cil_filetransition *filetrans;
+	int rc = cil_filetransition_init(&filetrans);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	filetrans->src_str = cil_strdup(parse_current->next->data);
+	filetrans->exec_str = cil_strdup(parse_current->next->next->data);
+	filetrans->proc_str = cil_strdup(parse_current->next->next->next->data);
+	filetrans->dest_str = cil_strdup(parse_current->next->next->next->next->data);
+	filetrans->path_str = cil_strdup(parse_current->next->next->next->next->next->data);
+
+	ast_node->data = filetrans;
+	ast_node->flavor = CIL_FILETRANSITION;
+
+	return SEPOL_OK;
+}
+
+void cil_destroy_filetransition(struct cil_filetransition *filetrans)
+{
+	if (filetrans->src_str != NULL)
+		free(filetrans->src_str);
+	if (filetrans->exec_str != NULL)
+		free(filetrans->exec_str);
+	if (filetrans->proc_str != NULL)
+		free(filetrans->proc_str);
+	if (filetrans->dest_str != NULL)
+		free(filetrans->dest_str);
+	if (filetrans->path_str != NULL)
+		free(filetrans->path_str);
+}
+
 int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
@@ -3167,7 +3220,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 			}
-
+			else if (!strcmp(parse_current->data, CIL_KEY_FILETRANSITION)) {
+				rc = cil_gen_filetransition(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_filetransition failed, rc: %d\n", rc);
+					return rc;
+				}
+			}
 			else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
 				rc = cil_gen_role(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {

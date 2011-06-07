@@ -177,6 +177,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_typepermissive(*data);
 			break;
 		}
+		case (CIL_FILETRANSITION) : {
+			cil_destroy_filetransition(*data);
+			break;
+		}
 		case (CIL_SENS) : {
 			cil_destroy_sensitivity(*data);
 			break;
@@ -774,6 +778,29 @@ int cil_typepermissive_init(struct cil_typepermissive **typeperm)
 	new_typeperm->type_str = NULL;
 
 	*typeperm = new_typeperm;
+
+	return SEPOL_OK;
+}
+
+int cil_filetransition_init(struct cil_filetransition **filetrans)
+{
+	if (filetrans == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_filetransition *new_filetrans = cil_malloc(sizeof(struct cil_filetransition));
+
+	new_filetrans->src_str = NULL;
+	new_filetrans->src = NULL;
+	new_filetrans->exec_str = NULL;
+	new_filetrans->exec = NULL;
+	new_filetrans->proc_str = NULL;
+	new_filetrans->proc = NULL;
+	new_filetrans->dest_str = NULL;
+	new_filetrans->dest = NULL;
+	new_filetrans->path_str = NULL;
+
+	*filetrans = new_filetrans;
 
 	return SEPOL_OK;
 }

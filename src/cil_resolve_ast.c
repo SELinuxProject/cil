@@ -213,6 +213,42 @@ int cil_resolve_typepermissive(struct cil_db *db, struct cil_tree_node *current,
 	return SEPOL_OK;
 }
 
+int cil_resolve_filetransition(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_filetransition *filetrans = (struct cil_filetransition*)current->data;
+	struct cil_tree_node *src_node = NULL;
+	struct cil_tree_node *exec_node = NULL;
+	struct cil_tree_node *proc_node = NULL;
+	struct cil_tree_node *dest_node = NULL;
+	int rc = SEPOL_ERR;
+	rc = cil_resolve_name(db, current, filetrans->src_str, CIL_SYM_TYPES, CIL_TYPE, call, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", filetrans->src_str);
+		return rc;
+	}
+	filetrans->src = (struct cil_type*)(src_node->data);
+	rc = cil_resolve_name(db, current, filetrans->exec_str, CIL_SYM_TYPES, CIL_TYPE, call, &exec_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", filetrans->exec_str);
+		return rc;
+	}
+	filetrans->exec = (struct cil_type*)(exec_node->data);
+	rc = cil_resolve_name(db, current, filetrans->proc_str, CIL_SYM_CLASSES, CIL_CLASS, call, &proc_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", filetrans->proc_str);
+		return rc;
+	}
+	filetrans->proc = (struct cil_class*)(proc_node->data);
+	rc = cil_resolve_name(db, current, filetrans->dest_str, CIL_SYM_TYPES, CIL_TYPE, call, &dest_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", filetrans->dest_str);
+		return rc;
+	}
+	filetrans->dest = (struct cil_type*)(dest_node->data);
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_classcommon *clscom = (struct cil_classcommon*)current->data;
@@ -2092,6 +2128,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 					case CIL_TYPEPERMISSIVE : {
 						printf("case typepermissive\n");
 						rc = cil_resolve_typepermissive(db, node, call);
+						break;
+					}
+					case CIL_FILETRANSITION : {
+						printf("case filetransition\n");
+						rc = cil_resolve_filetransition(db, node, call);
 						break;
 					}
 					case CIL_AVRULE : {

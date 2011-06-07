@@ -61,6 +61,8 @@ int cil_gen_typebounds(struct cil_db *, struct cil_tree_node *, struct cil_tree_
 void cil_destroy_typebounds(struct cil_typebounds *);
 int cil_gen_typepermissive(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_typepermissive(struct cil_typepermissive *);
+int cil_gen_filetransition(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_filetransition(struct cil_filetransition *);
 int cil_gen_sensitivity(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_sensitivity(struct cil_sens *);
 int cil_gen_category(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
