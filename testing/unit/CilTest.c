@@ -183,6 +183,9 @@ CuSuite* CilTreeGetResolveSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catset_catlist_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat);
+	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_catrange_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_catsetname);
+	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_catsetname_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_sublist);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_missingsens_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_category_neg);
@@ -918,12 +921,13 @@ CuSuite* CilTreeGetBuildSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_dominance_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat);
+	SUITE_ADD_TEST(suite, test_cil_gen_senscat_nosublist);
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_nosensitivities_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_senscat_nosublist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_senscat_sublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_senscat_nocat_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_senscat);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_senscat_neg);
 	

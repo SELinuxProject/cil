@@ -459,6 +459,72 @@ void test_cil_resolve_senscat(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_senscat_catrange_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+                        "(", "sensitivity", "s1", ")",
+                        "(", "dominance", "(", "s0", "s1", ")", ")",
+                        "(", "category", "c0", ")",
+                        "(", "category", "c255", ")",
+                        "(", "category", "c500", ")",
+                        "(", "categoryorder", "(", "c0", "c255", "c500", ")", ")",
+                        "(", "sensitivitycategory", "s1", "(", "c0", "(", "c255", "c5", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_senscat_catsetname(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+                        "(", "sensitivity", "s1", ")",
+                        "(", "category", "c0", ")",
+                        "(", "category", "c255", ")",
+                        "(", "category", "c500", ")",
+			"(", "categoryset", "foo", "(", "c0", "c255", "c500", ")", ")",
+                        "(", "categoryorder", "(", "c0", "c255", "c500", ")", ")",
+                        "(", "sensitivitycategory", "s1", "foo", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_catset *test_catset = (struct cil_catset *)test_db->ast->root->cl_head->next->next->next->next->next->data;
+	cil_resolve_catset(test_db, test_db->ast->root->cl_head->next->next->next->next->next, test_catset, NULL);
+	int rc = cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_senscat_catsetname_neg(CuTest *tc) {
+	char *line[] = {"(", "sensitivity", "s0", ")",
+                        "(", "sensitivity", "s1", ")",
+                        "(", "category", "c0", ")",
+                        "(", "category", "c255", ")",
+                        "(", "category", "c500", ")",
+                        "(", "sensitivitycategory", "s1", "foo", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+}
+
 void test_cil_resolve_senscat_sublist(CuTest *tc) {
       char *line[] = {"(", "sensitivity", "s0", ")",
                         "(", "sensitivity", "s1", ")",
@@ -5286,7 +5352,7 @@ void test_cil_resolve_ast_node_helper_catset(CuTest *tc) {
 	other->head->flavor = CIL_DB;
 	cil_list_item_init(&other->head->next);
 	other->head->next->flavor = CIL_INT;
-	int pass = 7;
+	int pass = 5;
 	other->head->next->data = &pass;
 	cil_list_item_init(&other->head->next->next);
 	other->head->next->next->data = NULL;
@@ -5325,7 +5391,7 @@ void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *tc) {
 	other->head->flavor = CIL_DB;
 	cil_list_item_init(&other->head->next);
 	other->head->next->flavor = CIL_INT;
-	int pass = 7;
+	int pass = 5;
 	other->head->next->data = &pass;
 	cil_list_item_init(&other->head->next->next);
 	other->head->next->next->data = NULL;
@@ -5666,7 +5732,7 @@ void test_cil_resolve_ast_node_helper_senscat(CuTest *tc) {
 	other->head->flavor = CIL_DB;
 	cil_list_item_init(&other->head->next);
 	other->head->next->flavor = CIL_INT;
-	int pass = 5;
+	int pass = 6;
 	other->head->next->data = &pass;
 	cil_list_item_init(&other->head->next->next);
 	other->head->next->next->data = NULL;
@@ -5694,7 +5760,7 @@ void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc) {
                         "(", "category", "c0", ")",
                         "(", "category", "c255", ")",
                         "(", "categoryorder", "(", "c0", "c255", ")", ")",
-                        "(", "sensitivitycategory", "s5", "(", "c0", "c255", ")", ")", NULL};
+                        "(", "sensitivitycategory", "s5", "foo", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5709,7 +5775,7 @@ void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc) {
 	other->head->flavor = CIL_DB;
 	cil_list_item_init(&other->head->next);
 	other->head->next->flavor = CIL_INT;
-	int pass = 5;
+	int pass = 6;
 	other->head->next->data = &pass;
 	cil_list_item_init(&other->head->next->next);
 	other->head->next->next->data = NULL;
@@ -7124,7 +7190,7 @@ void test_cil_resolve_ast_node_helper_nodecon_netmask_neg(CuTest *tc) {
         other->head->flavor = CIL_DB;
         cil_list_item_init(&other->head->next);
         other->head->next->flavor = CIL_INT;
-        int pass = 6;
+        int pass = 7;
         other->head->next->data = &pass;
         cil_list_item_init(&other->head->next->next);
         other->head->next->next->data = NULL;
@@ -7330,7 +7396,7 @@ void test_cil_resolve_ast_node_helper_classcommon(CuTest *tc) {
         other->head->flavor = CIL_DB;
         cil_list_item_init(&other->head->next);
         other->head->next->flavor = CIL_INT;
-        int pass = 5;
+        int pass = 6;
         other->head->next->data = &pass;
         cil_list_item_init(&other->head->next->next);
         other->head->next->next->data = NULL;
@@ -7368,7 +7434,7 @@ void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc) {
         other->head->flavor = CIL_DB;
         cil_list_item_init(&other->head->next);
         other->head->next->flavor = CIL_INT;
-        int pass = 5;
+        int pass = 6;
         other->head->next->data = &pass;
         cil_list_item_init(&other->head->next->next);
         other->head->next->next->data = NULL;

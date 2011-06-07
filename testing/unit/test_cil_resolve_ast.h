@@ -40,6 +40,9 @@ void test_cil_resolve_catset(CuTest *);
 void test_cil_resolve_catset_catlist_neg(CuTest *);
 
 void test_cil_resolve_senscat(CuTest *);
+void test_cil_resolve_senscat_catrange_neg(CuTest *);
+void test_cil_resolve_senscat_catsetname(CuTest *);
+void test_cil_resolve_senscat_catsetname_neg(CuTest *);
 void test_cil_resolve_senscat_sublist(CuTest *);
 void test_cil_resolve_senscat_missingsens_neg(CuTest *);
 void test_cil_resolve_senscat_sublist_neg(CuTest *);

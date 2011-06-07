@@ -7898,6 +7898,25 @@ void test_cil_gen_senscat(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_gen_senscat_nosublist(CuTest *tc) {
+	char *line[] = {"(", "sensitivitycategory", "s1", "c0", "c255", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_senscat(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_gen_senscat_dbnull_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
                         "(", "sensitivity", "s1", ")",
@@ -7990,31 +8009,6 @@ void test_cil_gen_senscat_nosensitivities_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_senscat_nosublist_neg(CuTest *tc) {
-	char *line[] = {"(", "sensitivity", "s0", ")",
-                        "(", "sensitivity", "s1", ")",
-                        "(", "dominance", "(", "s0", "s1", ")", ")",
-			"(", "category", "c0", ")",
-			"(", "category", "c255", ")",
-			"(", "categoryorder", "(", "c0", "c255", ")", ")",
-			"(", "sensitivitycategory", "s1", "c0", "c255", ")", NULL};
-
-        struct cil_tree *test_tree;
-        gen_test_tree(&test_tree, line);
-
-        struct cil_tree_node *test_ast_node;
-        cil_tree_node_init(&test_ast_node);
-
-        struct cil_db *test_db;
-        cil_db_init(&test_db);
-
-        test_ast_node->parent = test_db->ast->root;
-        test_ast_node->line = 1;
-
-        int rc = cil_gen_senscat(test_db, test_tree->root->cl_head->next->next->next->next->next->next->cl_head, test_ast_node);
-        CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
-
 void test_cil_gen_senscat_sublist_neg(CuTest *tc) {
       char *line[] = {"(", "sensitivity", "s0", ")",
                         "(", "sensitivity", "s1", ")",
@@ -8034,6 +8028,22 @@ void test_cil_gen_senscat_sublist_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	int rc = cil_gen_senscat(test_db, test_tree->root->cl_head->next->next->next->next->next->next->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_senscat_nocat_neg(CuTest *tc) {
+      char *line[] = {"(", "sensitivitycategory", "s1", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_senscat(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -13230,7 +13240,7 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc) {
 			"(", "category", "c0", ")",
 			"(", "category", "c255", ")",
 			"(", "categoryorder", "(", "c0", "c255", ")", ")",
-			"(", "sensitivitycategory", "s1", "c0", "c255", ")", NULL};
+			"(", "sensitivitycategory", "s1", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
