@@ -14,6 +14,8 @@ int cil_gen_block(struct cil_db *, struct cil_tree_node *, struct cil_tree_node 
 void cil_destroy_block(struct cil_block *);
 int cil_gen_perm(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_perm(struct cil_perm *);
+int cil_gen_permset(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
+void cil_destroy_permset(struct cil_permset *);
 int cil_gen_class(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);
 void cil_destroy_class(struct cil_class *);
 int cil_gen_common(struct cil_db *, struct cil_tree_node *, struct cil_tree_node *);

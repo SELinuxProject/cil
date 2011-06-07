@@ -56,6 +56,8 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	struct cil_tree_node *src_node = NULL;
 	struct cil_tree_node *tgt_node = NULL;
 	struct cil_tree_node *obj_node = NULL;
+	struct cil_tree_node *permset_node = NULL;
+	struct cil_list *perms_list = NULL;
 
 	int rc = SEPOL_ERR;
 	
@@ -80,9 +82,20 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	}
 	rule->obj = (struct cil_class*)(obj_node->data);
 
-	struct cil_list *perms_list;
+
 	cil_list_init(&perms_list);
-	rc = __cil_resolve_perm_list(rule->obj, rule->perms_str, perms_list);
+
+	if (rule->permset_str != NULL) {
+		rc = cil_resolve_name(db, current, rule->permset_str, CIL_SYM_PERMSETS, CIL_PERMSET, call, &permset_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve permissionset name\n");
+			return rc;
+		}
+		rc = __cil_resolve_perm_list(rule->obj, ((struct cil_permset*)permset_node->data)->perms_list_str, perms_list);
+	} else {
+		rc = __cil_resolve_perm_list(rule->obj, rule->perms_list_str, perms_list);
+	}
+
 	if (rc != SEPOL_OK) {
 		printf("Failed to resolve perm list\n");
 		return rc;
@@ -1686,7 +1699,29 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 					new_arg->arg_str = cil_strdup(pc->data);
 					break;
 				}
-				//permset
+				case CIL_PERMSET : {
+					if (pc->cl_head != NULL) {
+						struct cil_permset *permset = NULL;
+						struct cil_tree_node *permset_node = NULL;
+						rc = cil_permset_init(&permset);
+						if (rc != SEPOL_OK) {
+							return rc;
+						}
+						cil_list_init(&permset->perms_list_str);
+						rc = cil_parse_to_list(pc->cl_head, permset->perms_list_str, CIL_AST_STR);
+						if (rc != SEPOL_OK) {
+							printf("Failed to parse perms\n");
+							return rc;
+						}
+						cil_tree_node_init(&permset_node);
+						permset_node->flavor = CIL_PERMSET;
+						permset_node->data = permset;
+						new_arg->arg = permset_node;
+					} else {
+						new_arg->arg_str = cil_strdup(pc->data);
+					}
+					break;
+				}
 				default : {
 					printf("cil_resolve_call1: unexpected flavor: %d\n", item->flavor);
 					return SEPOL_ERR;
@@ -1761,6 +1796,13 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 				continue; // anonymous, no need to resolve
 			else
 				sym_index = CIL_SYM_IPADDRS;
+			break;
+		case CIL_PERMSET :
+			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+				continue; // anonymous, no need to resolve
+			} else {
+				sym_index = CIL_SYM_PERMSETS;
+			}
 			break;
 		case CIL_TYPE : 
 			sym_index = CIL_SYM_TYPES;

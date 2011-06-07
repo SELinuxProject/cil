@@ -353,7 +353,8 @@ void cil_copy_avrule(struct cil_avrule *orig, struct cil_avrule **copy)
 	new->src_str = cil_strdup(orig->src_str);
 	new->tgt_str = cil_strdup(orig->tgt_str);
 	new->obj_str = cil_strdup(orig->obj_str);
-	cil_copy_list(orig->perms_str, &new->perms_str);
+	cil_copy_list(orig->perms_list_str, &new->perms_list_str);
+	new->permset_str = cil_strdup(orig->permset_str);
 	
 	*copy = new;
 }

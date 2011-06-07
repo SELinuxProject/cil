@@ -208,6 +208,58 @@ void cil_destroy_perm(struct cil_perm *perm)
 	free(perm);
 }
 
+int cil_gen_permset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	char *key = NULL;
+	struct cil_permset *permset = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return rc;
+	}
+
+	if (parse_current->next == NULL
+	|| parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL
+	|| parse_current->next->next->cl_head == NULL) {
+		printf("Invalid permissionset declaration (line %d)\n", parse_current->line);
+		return rc;
+	}
+
+	key = (char*)parse_current->next->data;
+	rc = cil_permset_init(&permset);
+	if (rc != SEPOL_OK) {
+		printf("Failed to init permissionset\n");
+		goto gen_permset_cleanup;
+	}
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)permset, (hashtab_key_t)key, CIL_SYM_PERMSETS, CIL_PERMSET);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create permissionset node\n");
+		goto gen_permset_cleanup;
+	}
+
+	cil_list_init(&permset->perms_list_str);
+	rc = cil_parse_to_list(parse_current->next->next->cl_head, permset->perms_list_str, CIL_AST_STR);
+	if (rc != SEPOL_OK) {
+		printf("Failed to parse perms\n");
+		goto gen_permset_cleanup;
+	}
+
+	return SEPOL_OK;
+
+	gen_permset_cleanup:
+		cil_destroy_permset(permset);
+		return rc;
+}
+
+void cil_destroy_permset(struct cil_permset *permset)
+{
+	cil_symtab_datum_destroy(permset->datum);
+	cil_list_destroy(&permset->perms_list_str, 1);
+	free(permset);
+}
+
 // TODO try to merge some of this with cil_gen_class (helper function for both)
 int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
@@ -649,7 +701,6 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	parse_current->next->next->next == NULL || 
 	parse_current->next->next->next->cl_head != NULL || 
 	parse_current->next->next->next->next == NULL || 
-	parse_current->next->next->next->next->cl_head == NULL || 
 	parse_current->next->next->next->next->next != NULL) {
 		printf("Invalid allow rule (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
@@ -666,8 +717,12 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	rule->tgt_str = cil_strdup(parse_current->next->next->data);
 	rule->obj_str = cil_strdup(parse_current->next->next->next->data);	
 
-	cil_list_init(&rule->perms_str);
-	cil_parse_to_list(parse_current->next->next->next->next->cl_head, rule->perms_str, CIL_AST_STR);
+	if (parse_current->next->next->next->next->cl_head != NULL) {
+		cil_list_init(&rule->perms_list_str);
+		cil_parse_to_list(parse_current->next->next->next->next->cl_head, rule->perms_list_str, CIL_AST_STR);
+	} else if (parse_current->next->next->next->next->cl_head == NULL && parse_current->next->next->next->next->data != NULL) {
+		rule->permset_str = cil_strdup(parse_current->next->next->next->next->data);
+	}
 
 	ast_node->data = rule;
 	ast_node->flavor = CIL_AVRULE;
@@ -683,8 +738,8 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 		free(rule->tgt_str);
 	if (rule->obj_str != NULL)
 		free(rule->obj_str);
-	if (rule->perms_str != NULL)
-		cil_list_destroy(&rule->perms_str, 1);
+	if (rule->perms_list_str != NULL)
+		cil_list_destroy(&rule->perms_list_str, 1);
 	if (rule->perms_list != NULL)
 		cil_list_destroy(&rule->perms_list, 0);
 	free(rule);
@@ -2826,7 +2881,9 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			else if (!strcmp(kind, CIL_KEY_IPADDR)) {
 				param->flavor = CIL_IPADDR;
 			}
-			//TODO permissionset
+			else if (!strcmp(kind, CIL_KEY_PERMSET)) {
+				param->flavor = CIL_PERMSET;
+			}
 			else {
 				printf("Invalid macro declaration (line: %d)\n", parse_current->line);
 				goto gen_macro_cleanup;
@@ -3138,6 +3195,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 					return rc;
 				}
 				// To avoid parsing list of perms again
+				*finished = CIL_TREE_SKIP_NEXT;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_PERMSET)) {
+				rc = cil_gen_permset(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_permset failed, rc: %d\n", rc);
+					return rc;
+				}
 				*finished = CIL_TREE_SKIP_NEXT;
 			}
 			else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {

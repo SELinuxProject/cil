@@ -44,54 +44,55 @@
 #define CIL_CONSTRAIN		28
 #define CIL_MLSCONSTRAIN	29
 #define CIL_PERM		30
-#define CIL_USERROLE		31
-#define CIL_TYPE_ATTR		32
-#define CIL_TYPE_RULE 		33
-#define CIL_TYPEBOUNDS		34
-#define CIL_TYPEPERMISSIVE	35
+#define CIL_PERMSET		31
+#define CIL_USERROLE		32
+#define CIL_TYPE_ATTR		33
+#define CIL_TYPE_RULE 		34
+#define CIL_TYPEBOUNDS		35
 #define CIL_FILETRANSITION	36
-#define CIL_ROLETRANS		37
-#define CIL_ROLEALLOW		38
-#define CIL_ROLETYPE		39
-#define CIL_ROLEDOMINANCE	40
-#define CIL_CATORDER		41
-#define CIL_DOMINANCE		42
-#define CIL_SENSCAT		43
-#define CIL_CLASSCOMMON		44
-#define CIL_CONSTRAIN_NODE	45
-#define CIL_SIDCONTEXT		46
-#define CIL_CALL		47
-#define CIL_ARGS		48
-#define CIL_BOOLEANIF		49
-#define CIL_TUNABLEIF		50
-#define CIL_TUNABLEIFDEF	51
-#define CIL_TUNABLEIFNDEF	52
-#define CIL_AND			53
-#define CIL_OR			54
-#define CIL_XOR			55
-#define CIL_NOT			56
-#define CIL_EQ			57
-#define CIL_NEQ			58
-#define CIL_ELSE		59
-#define CIL_COND		60
-#define CIL_PARAM		61
-#define CIL_CONS_AND		62
-#define CIL_CONS_OR		63
-#define CIL_CONS_NOT		64
-#define CIL_CONS_EQ		65
-#define CIL_CONS_DOM		66
-#define CIL_CONS_DOMBY		67
-#define CIL_CONS_INCOMP		68
-#define CIL_CONS_U1		69
-#define CIL_CONS_U2		70
-#define CIL_CONS_T1		71
-#define CIL_CONS_T2		72
-#define CIL_CONS_R1		73
-#define CIL_CONS_R2		74
-#define CIL_CONS_L1		75
-#define CIL_CONS_L2		76
-#define CIL_CONS_H1		77
-#define CIL_CONS_H2		78
+#define CIL_TYPEPERMISSIVE	37
+#define CIL_ROLETRANS		38
+#define CIL_ROLEALLOW		39
+#define CIL_ROLETYPE		40
+#define CIL_ROLEDOMINANCE	41
+#define CIL_CATORDER		42
+#define CIL_DOMINANCE		43
+#define CIL_SENSCAT		44
+#define CIL_CLASSCOMMON		45
+#define CIL_CONSTRAIN_NODE	46
+#define CIL_SIDCONTEXT		47
+#define CIL_CALL		48
+#define CIL_ARGS		49
+#define CIL_BOOLEANIF		50
+#define CIL_TUNABLEIF		51
+#define CIL_TUNABLEIFDEF	52
+#define CIL_TUNABLEIFNDEF	53
+#define CIL_AND			54
+#define CIL_OR			55
+#define CIL_XOR			56
+#define CIL_NOT			57
+#define CIL_EQ			58
+#define CIL_NEQ			59
+#define CIL_ELSE		60
+#define CIL_COND		61
+#define CIL_PARAM		62
+#define CIL_CONS_AND		63
+#define CIL_CONS_OR		64
+#define CIL_CONS_NOT		65
+#define CIL_CONS_EQ		66
+#define CIL_CONS_DOM		67
+#define CIL_CONS_DOMBY		68
+#define CIL_CONS_INCOMP		69
+#define CIL_CONS_U1		70
+#define CIL_CONS_U2		71
+#define CIL_CONS_T1		72
+#define CIL_CONS_T2		73
+#define CIL_CONS_R1		74
+#define CIL_CONS_R2		75
+#define CIL_CONS_L1		76
+#define CIL_CONS_L2		77
+#define CIL_CONS_H1		78
+#define CIL_CONS_H2		79
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -121,6 +122,7 @@
 #define CIL_KEY_BLOCK 		"block"
 #define CIL_KEY_CLASS		"class"
 #define CIL_KEY_PERM		"perm"
+#define CIL_KEY_PERMSET		"permissionset"
 #define CIL_KEY_COMMON		"common"
 #define CIL_KEY_CLASSCOMMON	"classcommon"
 #define CIL_KEY_SID		"sid"
@@ -210,23 +212,24 @@
 #define CIL_SYM_TYPES		4
 #define CIL_SYM_COMMONS		5
 #define CIL_SYM_CLASSES		6
-#define CIL_SYM_BOOLS		7
-#define CIL_SYM_TUNABLES	8
-#define CIL_SYM_SENS		9
-#define CIL_SYM_CATS		10
-#define CIL_SYM_SIDS		11
-#define CIL_SYM_FILECONS	12
-#define CIL_SYM_PORTCONS	13
-#define CIL_SYM_NETIFCONS	14
-#define CIL_SYM_MACROS		15
-#define CIL_SYM_CONTEXTS	16
-#define CIL_SYM_LEVELS		17
-#define CIL_SYM_POLICYCAPS	18
-#define CIL_SYM_OPTIONALS	19
-#define CIL_SYM_IPADDRS		20
+#define CIL_SYM_PERMSETS	7
+#define CIL_SYM_BOOLS		8
+#define CIL_SYM_TUNABLES	9
+#define CIL_SYM_SENS		10
+#define CIL_SYM_CATS		11
+#define CIL_SYM_SIDS		12
+#define CIL_SYM_FILECONS	13
+#define CIL_SYM_PORTCONS	14
+#define CIL_SYM_NETIFCONS	15
+#define CIL_SYM_MACROS		16
+#define CIL_SYM_CONTEXTS	17
+#define CIL_SYM_LEVELS		18
+#define CIL_SYM_POLICYCAPS	19
+#define CIL_SYM_OPTIONALS	20
+#define CIL_SYM_IPADDRS		21
 
-#define CIL_SYM_NUM		21
-#define CIL_SYM_UNKNOWN		22
+#define CIL_SYM_NUM		22
+#define CIL_SYM_UNKNOWN		23
 
 #define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
 
@@ -277,6 +280,11 @@ struct cil_class {
 
 struct cil_perm {
 	struct cil_symtab_datum datum;
+};
+
+struct cil_permset {
+	struct cil_symtab_datum datum;
+	struct cil_list *perms_list_str;
 };
 
 struct cil_common {
@@ -392,8 +400,9 @@ struct cil_avrule {
 	struct cil_type *tgt;
 	char *obj_str;
 	struct cil_class *obj;
-	struct cil_list *perms_str;
+	struct cil_list *perms_list_str;
 	struct cil_list *perms_list;
+	char *permset_str;
 };
 
 #define CIL_TYPE_TRANSITION 16
@@ -716,6 +725,7 @@ int cil_fscon_init(struct cil_fscon **fscon);
 int cil_fs_use_init(struct cil_fs_use **fs_use);
 int cil_constrain_init(struct cil_constrain **constrain);
 int cil_perm_init(struct cil_perm **perm);
+int cil_permset_init(struct cil_permset **permset);
 int cil_user_init(struct cil_user **user);
 int cil_role_init(struct cil_role **role);
 int cil_type_init(struct cil_type **type);

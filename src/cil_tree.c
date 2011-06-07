@@ -477,6 +477,21 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
 				return;
 			}
+			case CIL_PERMSET : {
+				struct cil_permset *permset = node->data;
+				printf("PERMSET: %s", permset->datum.name);
+
+				if (permset->perms_list_str != NULL) {
+					printf(" (");
+					struct cil_list_item *item = permset->perms_list_str->head;
+					while(item != NULL) {
+						printf(" %s", (char*)item->data);
+						item = item->next;
+					}
+					printf(" )\n");
+				}
+				return;
+			}
 			case CIL_BOOL : {
 				struct cil_bool *boolean = node->data;
 				printf("BOOL: %s, value: %d\n", boolean->datum.name, boolean->value);
@@ -629,8 +644,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				else
 					printf(" %s", rule->obj_str);
 
-				printf(" (");
 				if (rule->perms_list != NULL) {
+					printf(" (");
 					item = rule->perms_list->head;
 					while(item != NULL) {
 						if (item->flavor == CIL_PERM)
@@ -641,8 +656,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 						}
 						item = item->next;
 					}
-				} else if (rule->perms_str != NULL) {
-					item = rule->perms_str->head;
+					printf(" )\n");
+				} else if (rule->perms_list_str != NULL) {
+					printf(" (");
+					item = rule->perms_list_str->head;
 					while(item != NULL) {
 						if (item->flavor == CIL_AST_STR)
 							printf(" %s", (char*)item->data);
@@ -652,8 +669,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 						}
 						item = item->next;
 					}
+					printf(" )\n");
+				} else if (rule->permset_str != NULL) {
+					printf(" permset: %s", rule->permset_str);
 				}
-				printf(" )\n");
+
 				return;
 			}
 			case CIL_TYPE_RULE : {

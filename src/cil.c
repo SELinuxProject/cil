@@ -84,6 +84,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 			cil_destroy_perm(*data);
 			break;
 		}
+		case (CIL_PERMSET) : {
+			cil_destroy_permset(*data);
+			break;
+		}
 		case (CIL_COMMON) : {
 			cil_destroy_common(*data);
 			break;
@@ -884,8 +888,9 @@ int cil_avrule_init(struct cil_avrule **avrule)
 	new_avrule->tgt = NULL;
 	new_avrule->obj_str = NULL;
 	new_avrule->obj = NULL;
-	new_avrule->perms_str = NULL;
+	new_avrule->perms_list_str = NULL;
 	new_avrule->perms_list = NULL;
+	new_avrule->permset_str = NULL;
 
 	*avrule = new_avrule;
 
@@ -1176,6 +1181,22 @@ int cil_perm_init(struct cil_perm **perm)
 	cil_symtab_datum_init(&new_perm->datum);
 
 	*perm = new_perm;
+
+	return SEPOL_OK;
+}
+
+int cil_permset_init(struct cil_permset **permset)
+{
+	if (permset == NULL) {
+		return SEPOL_ERR;
+	}
+
+	struct cil_permset *new_permset = cil_malloc(sizeof(struct cil_permset));
+
+	cil_symtab_datum_init(&new_permset->datum);
+	new_permset->perms_list_str = NULL;
+
+	*permset = new_permset;
 
 	return SEPOL_OK;
 }
