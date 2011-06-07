@@ -1222,6 +1222,9 @@ int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct ci
 		rc = cil_gen_expr_stack(current->cl_head, flavor, stack);
 		if (rc != SEPOL_OK) 
 			return SEPOL_ERR;
+	} else if (current->data == NULL) {
+		printf("cil_gen_expr_stack: Expression cannot contain empty lists\n");
+		return SEPOL_ERR;
 	}
 	if (current->next != NULL) {
 		rc = cil_gen_expr_stack(current->next, flavor, stack);
