@@ -982,6 +982,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				} else {
 					printf(" %s", fsuse->context_str);
 				}
+				printf("\n");
 				return;
 			}
 			case CIL_SID : {

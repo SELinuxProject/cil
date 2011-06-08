@@ -2881,7 +2881,7 @@ int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	fsuse->fs_str = cil_strdup(parse_current->next->next->data);
 
 	if (parse_current->next->next->next->cl_head == NULL) {
-		fsuse->fs_str = cil_strdup(parse_current->next->next->next->data);
+		fsuse->context_str = cil_strdup(parse_current->next->next->next->data);
 	} else {
 		rc = cil_context_init(&fsuse->context);
 		if (rc != SEPOL_OK) {
