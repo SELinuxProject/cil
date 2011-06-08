@@ -1,0 +1,52 @@
+SELinux Common Intermediate Language (CIL) Compiler
+
+INTRODUCTION
+
+	The SELinux CIL Compiler is a compiler that converts the CIL language as
+	described on the CIL design wiki into a policy.conf file. Please see the
+	CIL Design Wiki at http://userspace.selinuxproject.org/trac/wiki/CilDesign
+	for more information about the goals and features on the CIL language.
+
+DEPENDENCIES
+
+	gcc >= 4.5.1
+	libsepol-static >= 2.0.41
+	lcov >= 1.9
+
+
+BUILD STEPS
+
+	Open a terminal client and execute the following command to download the source code:
+ 			git clone http://oss.tresys.com/git/cil.git
+	Change directory into the "cil" directory.
+	Run "make" with one of the following targets:
+
+	make
+		Build the CIL compiler (cilc)
+
+	make unit
+		Build the unit_test application to run unit tests
+
+	make coverage
+		Build the unit test binary and create coverage reports
+
+	make clean
+		Remove temporary build files
+	
+	make bare
+		Remove temporary build files and compile binaries
+
+
+USAGE
+
+	Execute 'cilc' with any number of CIL files as arguments. A policy.conf and
+	file_contexts file will be created.
+
+
+KNOWN ISSUES
+
+	- In some cases, empty anonymous statements are not properly detected as
+	  errors and will causes unexpected behavoir.  For example, the following
+	  error will fail to be detected:
+	  
+	  (genfscon msdos / ())
