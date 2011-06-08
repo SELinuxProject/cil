@@ -8,7 +8,7 @@ UNITDIR ?= $(TESTDIR)/unit
 
 LEX = flex
 
-DEBUG=1
+DEBUG=0
 
 CILC_NAME = cilc
 
