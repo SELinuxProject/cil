@@ -33,7 +33,7 @@ COVCFLAGS = -fprofile-arcs -ftest-coverage
 CFLAGS ?= -Wall -Werror -Wshadow -W -Wundef -Wmissing-format-attribute
 
 ifeq ($(DEBUG),1)
-	override CFLAGS += -g3 -O0 -gdwarf-2 -fno-strict-aliasing
+	override CFLAGS += -g3 -O0 -gdwarf-2 -fno-strict-aliasing -DDEBUG
 	override LDFLAGS += -g
 endif
 

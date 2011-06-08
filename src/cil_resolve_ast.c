@@ -2608,24 +2608,31 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	other->head->next->next->next->next->next->flavor = CIL_AST_NODE;
 
 	for (pass = 1; pass <= 8; pass++) {
-
+#ifdef DEBUG
 		printf("---------- Pass %i ----------\n", pass);
+#endif
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	
 		if (rc != SEPOL_OK) {
 			printf("cil_resolve_ast: Pass %i failed\n", pass);
 			return rc;
 		}
 
+#ifdef DEBUG
 		cil_tree_print(db->ast->root, 0);
+#endif
 
 		if (pass == 4) {
+#ifdef DEBUG
 			printf("----- Verify Catorder ------\n");
+#endif
 			rc = __cil_verify_order(db->catorder, current, CIL_CAT);
 			if (rc != SEPOL_OK) {
 				printf("Failed to verify categoryorder\n");
 				return rc;
 			}
+#ifdef DEBUG
 			printf("----- Verify Dominance -----\n");
+#endif
 			rc = __cil_verify_order(db->dominance, current, CIL_SENS);
 			if (rc != SEPOL_OK) {
 				printf("Failed to verify dominance\n");
@@ -2634,7 +2641,9 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		}
 
 		if (changed) {
+#ifdef DEBUG
 			printf("----- Redoing resolve passes -----\n");
+#endif
 			/* Need to re-resolve because an optional was disabled. We only
 			 * need to reset to the thrid pass because things done in pass 1
 			 * and 2 aren't allowed in optionals, and thus can't be disabled.
