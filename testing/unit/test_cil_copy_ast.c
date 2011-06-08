@@ -1133,6 +1133,64 @@ void test_cil_copy_optional(CuTest *tc) {
 		((struct cil_optional *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_fill_ipaddr(CuTest *tc) {
+	char *line[] = {"(", "ipaddr", "ip", "192.168.1.1", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_ipaddr(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	struct cil_ipaddr *new;
+	cil_ipaddr_init(&new);
+	struct cil_ipaddr *old;
+	cil_ipaddr_init(&new);
+
+	old = (struct cil_ipaddr*)test_ast_node->data;
+	cil_copy_fill_ipaddr(old, new);
+
+	CuAssertIntEquals(tc, old->family, new->family);
+}
+
+void test_cil_copy_ipaddr(CuTest *tc) {
+	char *line[] = {"(", "ipaddr", "ip", "192.168.1.1", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_ipaddr(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_ipaddr(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+}
+
 void test_cil_copy_conditional(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
@@ -2692,6 +2750,65 @@ void test_cil_copy_node_helper_optional(CuTest *tc) {
 
 void test_cil_copy_node_helper_optional_neg(CuTest *tc) {
 	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+
+	uint32_t finished = 0;
+
+	cil_list_item_init(&other->head);
+	cil_list_item_init(&other->head->next);
+	other->head->data = test_db->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	other->head->next->flavor = CIL_DB;
+	other->head->next->data = test_db;
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, other);
+	CuAssertIntEquals(tc, finished, 0);
+	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+}
+
+void test_cil_copy_node_helper_ipaddr(CuTest *tc) {
+	char *line[] = {"(", "ipaddr", "ip", "192.168.1.1", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_db *test_db2;
+	cil_db_init(&test_db2);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+
+	uint32_t finished = 0;
+
+	cil_list_item_init(&other->head);
+	cil_list_item_init(&other->head->next);
+	other->head->data = test_db2->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	other->head->next->flavor = CIL_DB;
+	other->head->next->data = test_db2;
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, other);
+	CuAssertIntEquals(tc, finished, 0);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_copy_node_helper_ipaddr_neg(CuTest *tc) {
+	char *line[] = {"(", "ipaddr", "ip", "192.168.1.1", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

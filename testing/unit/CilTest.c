@@ -1389,6 +1389,12 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_optional);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_optional_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_copy_fill_ipaddr);
+	
+	SUITE_ADD_TEST(suite, test_cil_copy_ipaddr);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_ipaddr);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_ipaddr_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_copy_conditional);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_boolif);
