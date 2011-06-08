@@ -10,9 +10,9 @@ LEX = flex
 
 DEBUG=1
 
-AST_NAME = ast
+CILC_NAME = cilc
 
-AST_TEST = $(TESTDIR)/test_ast.c
+CILC = cilc.c
 TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
 CIL_SRCS =  cil.c cil_tree.c cil_ast.c cil_parser.c cil_symtab.c cil_lexer.c
 
@@ -48,13 +48,13 @@ endif
 
 all: cil
 
-cil: ast
+cil: cilc
 
 cil_lexer.c: cil_lexer.l
 	$(LEX) -t $< > $@
 
-ast: $(AST_TEST) $(ALL_SRCS)
-	$(CC) $(CFLAGS) -o $(AST_NAME) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) 
+cilc: $(CILC) $(ALL_SRCS)
+	$(CC) $(CFLAGS) -o $(CILC_NAME) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) 
 
 unit: $(TEST_SRCS) $(ALL_SRCS)
 	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
@@ -67,18 +67,18 @@ coverage: clean unit
 	lcov --directory . --capture --output-file cov/app.info --ignore-errors source
 	genhtml -o ./cov/html ./cov/app.info
 
-test: ast
-	./ast testing/test.txt
+test: cilc
+	./cilc testing/test.txt
 
 install:
 
 clean: 
 	-rm -f $(SRCDIR)/$(ALL_OBJS) $(SRCDIR)/$(GENERATED) run_tests
 	-rm -f *.gcno *.gcda *.gcov unit_tests policy.conf file_contexts
-	-rm -f $(AST_NAME)
+	-rm -f $(CILC_NAME)
 	-rm -rf cov/
 
 bare: clean
-	-rm -f $(AST_NAME)
+	-rm -f $(CILC_NAME)
 
 .PHONY: cil all clean install bare test

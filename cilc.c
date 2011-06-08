@@ -4,16 +4,16 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#include "../src/cil.h"
-#include "../src/cil_tree.h"
-#include "../src/cil_lexer.h"
-#include "../src/cil_parser.h"
-#include "../src/cil_build_ast.h"
-#include "../src/cil_resolve_ast.h"
-#include "../src/cil_fqn.h"
-#include "../src/cil_policy.h"
+#include "src/cil.h"
+#include "src/cil_tree.h"
+#include "src/cil_lexer.h"
+#include "src/cil_parser.h"
+#include "src/cil_build_ast.h"
+#include "src/cil_resolve_ast.h"
+#include "src/cil_fqn.h"
+#include "src/cil_policy.h"
 
-#include "../src/cil_copy_ast.h"
+#include "src/cil_copy_ast.h"
 
 #include <sepol/policydb/hashtab.h>
 
