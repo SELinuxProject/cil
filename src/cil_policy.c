@@ -26,7 +26,6 @@
 #define ALLOWS				11
 #define CONDS				12
 #define USERROLES			13
-//fs_use, genfscon, portcon
 #define SIDS				14
 #define NETIFCONS			15 
 
@@ -147,6 +146,45 @@ int cil_filecon_compare(const void *a, const void *b)
 	return rc;
 }
 
+int cil_filecon_to_policy(struct cil_sort *sort)
+{
+	int rc;
+	FILE *file_contexts;
+	file_contexts = fopen("file_contexts", "w+");
+	uint32_t i;
+	for (i=0; i<sort->count; i++) {
+		struct cil_filecon *filecon = (struct cil_filecon*)sort->array[i];
+		fprintf(file_contexts, "filecon %s%s ", filecon->root_str, filecon->path_str);
+		if (filecon->type == CIL_FILECON_FILE) {
+			fprintf(file_contexts, "-- ");
+		} else if (filecon->type == CIL_FILECON_DIR) {
+			fprintf(file_contexts, "-d ");
+		} else if (filecon->type == CIL_FILECON_CHAR) {
+			fprintf(file_contexts, "-c ");
+		} else if (filecon->type == CIL_FILECON_BLOCK) {
+			fprintf(file_contexts, "-b ");
+		} else if (filecon->type == CIL_FILECON_SOCKET) {
+			fprintf(file_contexts, "-s ");
+		} else if (filecon->type == CIL_FILECON_PIPE) {
+			fprintf(file_contexts, "-p ");
+		} else if (filecon->type == CIL_FILECON_SYMLINK) {
+			fprintf(file_contexts, "-l ");
+		} else if (filecon->type == CIL_FILECON_ANY) {
+			fprintf(file_contexts, "  ");
+		} else {
+			fclose(file_contexts);
+			return SEPOL_ERR;
+		}
+		cil_context_to_policy(&file_contexts, 0, filecon->context);
+		fprintf(file_contexts, ";\n");
+	}
+	rc = fclose(file_contexts);
+	if (rc != 0) {
+		return SEPOL_ERR;
+	}
+	return SEPOL_OK;
+}
+
 int cil_portcon_compare(const void *a, const void *b)
 {
 	int rc;
@@ -166,6 +204,20 @@ int cil_portcon_compare(const void *a, const void *b)
 	return rc;
 }
 
+int cil_portcon_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i;
+	for (i=0; i<sort->count; i++) {
+		struct cil_portcon *portcon = (struct cil_portcon*)sort->array[i];
+		fprintf(file_arr[NETIFCONS], "portcon %s ", portcon->type_str);
+		fprintf(file_arr[NETIFCONS], "%d ", portcon->port_low);
+		fprintf(file_arr[NETIFCONS], "%d ", portcon->port_high);
+		cil_context_to_policy(file_arr, NETIFCONS, portcon->context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+	return SEPOL_OK;
+}
+
 int cil_genfscon_compare(const void *a, const void *b)
 {
 	int rc;
@@ -180,6 +232,19 @@ int cil_genfscon_compare(const void *a, const void *b)
 	return rc;
 }
 
+int cil_genfscon_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i;
+	for (i=0; i<sort->count; i++) {
+		struct cil_genfscon *genfscon = (struct cil_genfscon*)sort->array[i];
+		fprintf(file_arr[NETIFCONS], "genfscon %s ", genfscon->type_str);
+		fprintf(file_arr[NETIFCONS], "%s ", genfscon->path_str);
+		cil_context_to_policy(file_arr, NETIFCONS, genfscon->context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+	return SEPOL_OK;
+}
+
 int cil_netifcon_compare(const void *a, const void *b)
 {
 	struct cil_netifcon *anetifcon;
@@ -187,6 +252,20 @@ int cil_netifcon_compare(const void *a, const void *b)
 	anetifcon = *(struct cil_netifcon**)a;
 	bnetifcon = *(struct cil_netifcon**)b;
 	return  strcmp(anetifcon->interface_str, bnetifcon->interface_str);
+}
+
+int cil_netifcon_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i;
+	for (i=0; i<sort->count; i++) {
+		struct cil_netifcon *netifcon = (struct cil_netifcon*)sort->array[i];
+		fprintf(file_arr[NETIFCONS], "netifcon %s ", netifcon->interface_str);
+		cil_context_to_policy(file_arr, NETIFCONS, netifcon->if_context);
+		fprintf(file_arr[NETIFCONS], " ");
+		cil_context_to_policy(file_arr, NETIFCONS, netifcon->packet_context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+	return SEPOL_OK;
 }
 
 int cil_nodecon_compare(const void *a, const void *b)
@@ -221,6 +300,19 @@ int cil_nodecon_compare(const void *a, const void *b)
 	}
 }
 
+int cil_nodecon_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i;
+	for (i=0; i<sort->count; i++) {
+		struct cil_nodecon *nodecon = (struct cil_nodecon*)sort->array[i];
+		fprintf(file_arr[NETIFCONS], "nodecon %s ", nodecon->addr_str);
+		fprintf(file_arr[NETIFCONS], "%s ", nodecon->mask_str);
+		cil_context_to_policy(file_arr, NETIFCONS, nodecon->context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+	return SEPOL_OK;
+}
+
 int cil_fsuse_compare(const void *a, const void *b)
 {
 	int rc;
@@ -236,6 +328,27 @@ int cil_fsuse_compare(const void *a, const void *b)
 		rc = strcmp(afsuse->fs_str, bfsuse->fs_str);
 	}
 	return rc;
+}
+
+int cil_fsuse_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i;
+	for (i=0; i<sort->count; i++) {
+		struct cil_fsuse *fsuse = (struct cil_fsuse*)sort->array[i];
+		if (fsuse->type == CIL_FSUSE_XATTR) {
+			fprintf(file_arr[NETIFCONS], "fs_use_xattr ");
+		} else if (fsuse->type == CIL_FSUSE_TASK) {
+			fprintf(file_arr[NETIFCONS], "fs_use_task ");
+		} else if (fsuse->type == CIL_FSUSE_TRANS) {
+			fprintf(file_arr[NETIFCONS], "fs_use_trans ");
+		} else {
+			return SEPOL_ERR;
+		}
+		fprintf(file_arr[NETIFCONS], "%s ", fsuse->fs_str);
+		cil_context_to_policy(file_arr, NETIFCONS, fsuse->context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+	return SEPOL_OK;
 }
 
 static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
@@ -957,16 +1070,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			cil_constrain_to_policy(file_arr, CONSTRAINS, (struct cil_constrain*)current->data);
 			break;
 		}
-		case CIL_NETIFCON : {
-			struct cil_netifcon *netifcon = (struct cil_netifcon*)current->data;
-			fprintf(file_arr[NETIFCONS], "netifcon %s ", netifcon->interface_str);
-			cil_context_to_policy(file_arr, NETIFCONS, netifcon->if_context);
-			fprintf(file_arr[NETIFCONS], " ");
-			cil_context_to_policy(file_arr, NETIFCONS, netifcon->packet_context);
-			fprintf(file_arr[NETIFCONS], "\n");
-			
-			break;
-		}
 		case CIL_SID : {
 			fprintf(file_arr[ISIDS], "sid %s\n", name);
 			break;
@@ -1205,12 +1308,42 @@ int cil_gen_policy(struct cil_db *db)
 		return rc;
 	}
 
-	qsort(db->filecon->array, db->filecon->count, sizeof(struct cil_filecon*), cil_filecon_compare);
-	qsort(db->portcon->array, db->portcon->count, sizeof(struct cil_portcon*), cil_portcon_compare);
-	qsort(db->genfscon->array, db->genfscon->count, sizeof(struct cil_genfscon*), cil_genfscon_compare);
 	qsort(db->netifcon->array, db->netifcon->count, sizeof(struct cil_netifcon*), cil_netifcon_compare);
+	rc = cil_netifcon_to_policy(file_arr, db->netifcon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
+	qsort(db->genfscon->array, db->genfscon->count, sizeof(struct cil_genfscon*), cil_genfscon_compare);
+	rc = cil_genfscon_to_policy(file_arr, db->genfscon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
+	qsort(db->portcon->array, db->portcon->count, sizeof(struct cil_portcon*), cil_portcon_compare);
+	rc = cil_portcon_to_policy(file_arr, db->portcon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
 	qsort(db->nodecon->array, db->nodecon->count, sizeof(struct cil_nodecon*), cil_nodecon_compare);
+	rc = cil_nodecon_to_policy(file_arr, db->nodecon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
 	qsort(db->fsuse->array, db->fsuse->count, sizeof(struct cil_fsuse*), cil_fsuse_compare);
+	rc = cil_fsuse_to_policy(file_arr, db->fsuse);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
+	qsort(db->filecon->array, db->filecon->count, sizeof(struct cil_filecon*), cil_filecon_compare);
+	rc = cil_filecon_to_policy(db->filecon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {

@@ -17,7 +17,8 @@ struct fc_data {
 };
 
 int cil_combine_policy(FILE **, FILE *);
-int cil_name_to_policy(FILE **, struct cil_tree_node *); 
+int cil_name_to_policy(FILE **, struct cil_tree_node *);
+void cil_context_to_policy(FILE **, uint32_t, struct cil_context *);
 int cil_gen_policy(struct cil_db *);
 int cil_nodecon_compare(const void *a, const void *b);
 int cil_filecon_compare(const void *a, const void *b);
