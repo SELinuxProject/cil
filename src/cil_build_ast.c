@@ -2260,12 +2260,13 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	if (user_node == NULL || context == NULL) 
 		return SEPOL_ERR;
 
-	if (user_node->next == NULL || user_node->next->next == NULL
-	|| user_node->next->next->next == NULL || user_node->next->next->next->next == NULL) {
+	if (user_node->next == NULL
+	|| user_node->next->next == NULL
+	|| user_node->next->next->next == NULL
+	|| user_node->next->next->next->next == NULL) {
 		printf("Invalid context (line: %d)\n", user_node->line);
 		return SEPOL_ERR;
 	}
-
 	int rc = SEPOL_ERR;
 
 	context->user_str = cil_strdup(user_node->data);
@@ -2786,8 +2787,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	|| parse_current->next->cl_head != NULL
 	|| parse_current->next->next == NULL
 	|| parse_current->next->next->next == NULL
-	|| (parse_current->next->next->cl_head != NULL && parse_current->next->next->next->cl_head == NULL)
-	|| (parse_current->next->next->cl_head == NULL && parse_current->next->next->next->cl_head != NULL)) {
+	|| parse_current->next->next->next->next != NULL) {
 		printf("Invalid netifcon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -2801,7 +2801,11 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	netifcon->interface_str = cil_strdup(parse_current->next->data);
 	
 	if (parse_current->next->next->cl_head == NULL) {
-		netifcon->if_context_str = cil_strdup(parse_current->next->next->data);
+		if (parse_current->next->next->data != NULL) {
+			netifcon->if_context_str = cil_strdup(parse_current->next->next->data);
+		} else {
+			return SEPOL_ERR;
+		}
 	}
 	else {
 		rc = cil_context_init(&netifcon->if_context);
@@ -2817,8 +2821,12 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 		}
 	}
 
-	if (parse_current->next->next->next->cl_head == NULL ) {
-		netifcon->packet_context_str = cil_strdup(parse_current->next->next->next->data);
+	if (parse_current->next->next->next->cl_head == NULL) {
+		if (parse_current->next->next->next->data != NULL) {
+			netifcon->packet_context_str = cil_strdup(parse_current->next->next->next->data);
+		} else {
+			return SEPOL_ERR;
+		}
 	}
 	else {
 		rc = cil_context_init(&netifcon->packet_context);

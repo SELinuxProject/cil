@@ -10680,7 +10680,7 @@ void test_cil_gen_netifcon_nested_neg(CuTest *tc) {
 void test_cil_gen_netifcon_nested_emptysecondlist_neg(CuTest *tc) {
 	char *line[] = {"(", "netifcon", "eth1", 
 			"(", "system_u", "object_r", "netif_t", "low", "high", ")",
-			"(", ")", NULL};
+			"(", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -10701,7 +10701,7 @@ void test_cil_gen_netifcon_nested_emptysecondlist_neg(CuTest *tc) {
 void test_cil_gen_netifcon_extra_nested_secondlist_neg(CuTest *tc) {
 	char *line[] = {"(", "netifcon", "eth0", "extra",  
 			"(", "system_u", "object_r", "netif_t", "low", "high", ")",
-			"(", "foo", ")", NULL};
+			"(", "foo", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
