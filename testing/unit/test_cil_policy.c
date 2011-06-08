@@ -22,7 +22,7 @@ void test_cil_filecon_compare_meta_a_not_b(CuTest *tc) {
 	
 	
 	int rc = cil_filecon_compare(&afilecon, &bfilecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_filecon_compare_meta_b_not_a(CuTest *tc) {
@@ -40,7 +40,7 @@ void test_cil_filecon_compare_meta_b_not_a(CuTest *tc) {
 	
 	
 	int rc = cil_filecon_compare(&afilecon, &bfilecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_filecon_compare_meta_a_and_b_strlen_a_greater_b(CuTest *tc) {
@@ -58,7 +58,7 @@ void test_cil_filecon_compare_meta_a_and_b_strlen_a_greater_b(CuTest *tc) {
 	
 	
 	int rc = cil_filecon_compare(&afilecon, &bfilecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_filecon_compare_type_atype_greater_btype(CuTest *tc) {
@@ -77,7 +77,7 @@ void test_cil_filecon_compare_type_atype_greater_btype(CuTest *tc) {
 	bfilecon->type = CIL_FILECON_DIR;
 	
 	int rc = cil_filecon_compare(&afilecon, &bfilecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_filecon_compare_type_btype_greater_atype(CuTest *tc) {
@@ -97,7 +97,7 @@ void test_cil_filecon_compare_type_btype_greater_atype(CuTest *tc) {
 	
 	
 	int rc = cil_filecon_compare(&afilecon, &bfilecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_filecon_compare_meta_a_and_b_strlen_b_greater_a(CuTest *tc) {
@@ -115,7 +115,7 @@ void test_cil_filecon_compare_meta_a_and_b_strlen_b_greater_a(CuTest *tc) {
 	
 	
 	int rc = cil_filecon_compare(&afilecon, &bfilecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_filecon_compare_stemlen_a_greater_b(CuTest *tc) {
@@ -133,7 +133,7 @@ void test_cil_filecon_compare_stemlen_a_greater_b(CuTest *tc) {
 	
 	
 	int rc = cil_filecon_compare(&afilecon, &bfilecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_filecon_compare_stemlen_b_greater_a(CuTest *tc) {
@@ -151,7 +151,7 @@ void test_cil_filecon_compare_stemlen_b_greater_a(CuTest *tc) {
 	
 	
 	int rc = cil_filecon_compare(&afilecon, &bfilecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_filecon_compare_equal(CuTest *tc) {
@@ -269,7 +269,7 @@ void test_cil_genfscon_compare_atypestr_greater_btypestr(CuTest *tc) {
 	bgenfscon->type_str = "bbbb";
 
 	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_genfscon_compare_btypestr_greater_atypestr(CuTest *tc) {
@@ -282,7 +282,7 @@ void test_cil_genfscon_compare_btypestr_greater_atypestr(CuTest *tc) {
 	bgenfscon->type_str = "aaaa";
 
 	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_genfscon_compare_apathstr_greater_bpathstr(CuTest *tc) {
@@ -297,7 +297,7 @@ void test_cil_genfscon_compare_apathstr_greater_bpathstr(CuTest *tc) {
 	bgenfscon->type_str = "gg";
 
 	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_genfscon_compare_bpathstr_greater_apathstr(CuTest *tc) {
@@ -312,7 +312,7 @@ void test_cil_genfscon_compare_bpathstr_greater_apathstr(CuTest *tc) {
 	bgenfscon->path_str = "aaaa";
 
 	int rc = cil_genfscon_compare(&agenfscon, &bgenfscon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_genfscon_compare_equal(CuTest *tc) {
@@ -389,7 +389,7 @@ void test_cil_nodecon_compare_aipv4_bipv6(CuTest *tc) {
 	bnodecon->addr->family = AF_INET6;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_nodecon_compare_aipv6_bipv4(CuTest *tc) {
@@ -412,7 +412,7 @@ void test_cil_nodecon_compare_aipv6_bipv4(CuTest *tc) {
 	bnodecon->addr->family = AF_INET;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_nodecon_compare_aipv4_greaterthan_bipv4(CuTest *tc) {
@@ -435,7 +435,7 @@ void test_cil_nodecon_compare_aipv4_greaterthan_bipv4(CuTest *tc) {
 	bnodecon->addr->family = AF_INET;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_nodecon_compare_aipv4_lessthan_bipv4(CuTest *tc) {
@@ -458,7 +458,7 @@ void test_cil_nodecon_compare_aipv4_lessthan_bipv4(CuTest *tc) {
 	bnodecon->addr->family = AF_INET;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_nodecon_compare_amaskipv4_greaterthan_bmaskipv4(CuTest *tc) {
@@ -481,7 +481,7 @@ void test_cil_nodecon_compare_amaskipv4_greaterthan_bmaskipv4(CuTest *tc) {
 	bnodecon->addr->family = AF_INET;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_nodecon_compare_amaskipv4_lessthan_bmaskipv4(CuTest *tc) {
@@ -504,7 +504,7 @@ void test_cil_nodecon_compare_amaskipv4_lessthan_bmaskipv4(CuTest *tc) {
 	bnodecon->addr->family = AF_INET;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_nodecon_compare_aipv6_greaterthan_bipv6(CuTest *tc) {
@@ -527,7 +527,7 @@ void test_cil_nodecon_compare_aipv6_greaterthan_bipv6(CuTest *tc) {
 	bnodecon->addr->family = AF_INET6;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
 void test_cil_nodecon_compare_aipv6_lessthan_bipv6(CuTest *tc) {
@@ -550,7 +550,7 @@ void test_cil_nodecon_compare_aipv6_lessthan_bipv6(CuTest *tc) {
 	bnodecon->addr->family = AF_INET6;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_nodecon_compare_amaskipv6_greaterthan_bmaskipv6(CuTest *tc) {
@@ -573,7 +573,7 @@ void test_cil_nodecon_compare_amaskipv6_greaterthan_bmaskipv6(CuTest *tc) {
 	bnodecon->addr->family = AF_INET6;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, -1, rc);
+	CuAssertTrue(tc, rc < 0);
 }
 
 void test_cil_nodecon_compare_amaskipv6_lessthan_bmaskipv6(CuTest *tc) {
@@ -596,6 +596,6 @@ void test_cil_nodecon_compare_amaskipv6_lessthan_bmaskipv6(CuTest *tc) {
 	bnodecon->addr->family = AF_INET6;
 	
 	int rc = cil_nodecon_compare(&anodecon, &bnodecon);
-	CuAssertIntEquals(tc, 1, rc);
+	CuAssertTrue(tc, rc > 0);
 }
 
