@@ -438,6 +438,9 @@ void test_cil_fill_level_nocat(CuTest *tc);
 void test_cil_fill_level_emptycat_neg(CuTest *tc);
 
 void test_cil_gen_level(CuTest *tc);
+void test_cil_gen_level_nameinparens_neg(CuTest *tc);
+void test_cil_gen_level_emptysensparens_neg(CuTest *tc);
+void test_cil_gen_level_extra_neg(CuTest *tc);
 void test_cil_gen_level_emptycat_neg(CuTest *tc);
 void test_cil_gen_level_noname_neg(CuTest *tc);
 void test_cil_gen_level_nosens_neg(CuTest *tc);
