@@ -35,6 +35,8 @@ int cil_copy_level(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 void cil_copy_fill_context(struct cil_context *, struct cil_context *);
 int cil_copy_context(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
 int cil_copy_netifcon(struct cil_tree_node *, struct cil_tree_node *, symtab_t *);
+void cil_copy_conditional(struct cil_conditional *orig, struct cil_conditional *new);
+int cil_copy_boolif(struct cil_booleanif *orig, struct cil_booleanif **copy);
 void cil_copy_constrain(struct cil_db *, struct cil_constrain *, struct cil_constrain **);
 void cil_copy_call(struct cil_db *, struct cil_call *, struct cil_call **);
 int cil_copy_optional(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);

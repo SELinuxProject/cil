@@ -119,6 +119,11 @@ void test_cil_copy_optional(CuTest *);
 void test_cil_copy_node_helper_optional(CuTest *tc); 
 void test_cil_copy_node_helper_optional_neg(CuTest *tc); 
 
+void test_cil_copy_conditional(CuTest *);
+
+void test_cil_copy_boolif(CuTest *);
+void test_cil_copy_node_helper_boolif(CuTest *tc); 
+
 void test_cil_copy_constrain(CuTest *);
 void test_cil_copy_node_helper_mlsconstrain(CuTest *tc); 
 

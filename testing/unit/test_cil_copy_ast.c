@@ -1115,6 +1115,60 @@ void test_cil_copy_optional(CuTest *tc) {
 		((struct cil_optional *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_conditional(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_boolif(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_tree_node *curr_old;
+	curr_old = ((struct cil_booleanif*)test_ast_node->data)->expr_stack;
+
+	struct cil_conditional *cond_new;
+	cil_conditional_init(&cond_new);
+	cil_copy_conditional(curr_old->data, cond_new);
+
+	CuAssertStrEquals(tc, ((struct cil_conditional*)curr_old->data)->str, cond_new->str);
+	CuAssertIntEquals(tc, ((struct cil_conditional*)curr_old->data)->flavor, cond_new->flavor);
+}
+
+void test_cil_copy_boolif(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_boolif(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_booleanif *test_copy;
+	cil_boolif_init(&test_copy);
+
+	int rc = cil_copy_boolif((struct cil_booleanif *)test_ast_node->data, &test_copy);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+}
+
 void test_cil_copy_constrain(CuTest *tc) {
 	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 	
@@ -2644,6 +2698,38 @@ void test_cil_copy_node_helper_optional_neg(CuTest *tc) {
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, other);
 	CuAssertIntEquals(tc, finished, 0);
 	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+}
+
+void test_cil_copy_node_helper_boolif(CuTest *tc) {
+	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_db *test_db2;
+	cil_db_init(&test_db2);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+
+	uint32_t finished = 0;
+
+	cil_list_item_init(&other->head);
+	cil_list_item_init(&other->head->next);
+	other->head->data = test_db2->ast->root;
+	other->head->flavor = CIL_AST_NODE;
+	other->head->next->flavor = CIL_DB;
+	other->head->next->data = test_db2;
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, other);
+	CuAssertIntEquals(tc, finished, 0);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_mlsconstrain(CuTest *tc) {
