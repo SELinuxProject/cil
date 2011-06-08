@@ -1132,12 +1132,12 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 	if (level->catset_str != NULL) {
 		rc = cil_resolve_name(db, current, level->catset_str, CIL_SYM_CATS, CIL_CATSET, call, &catset_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_level: Failed to resolve categoryset, rc: %d\n", rc);
+			printf("Failed to resolve categoryset, rc: %d\n", rc);
 			return rc;
 		}
 		rc = cil_resolve_catset(db, current, (struct cil_catset*)catset_node->data, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_level: failed to resolve catset\n");
+			printf("Failed to resolve catset\n");
 			return rc;
 		}
 		rc = __cil_verify_sens_cats(sens_node->data, ((struct cil_catset*)catset_node->data)->cat_list);
@@ -1308,7 +1308,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		if (context->low->datum.name == NULL) {
 			rc = cil_resolve_level(db, current, context->low, call);
 			if (rc != SEPOL_OK) {
-				printf("cil_resolve_context: Failed to resolve low level, rc: %d\n", rc);
+				printf("Failed to resolve low level, rc: %d\n", rc);
 				return rc;
 			}
 		}
@@ -1317,12 +1317,12 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 	else if (context->low != NULL) {
 		rc = cil_resolve_level(db, current, context->low, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_context: Failed to resolve low level, rc: %d\n", rc);
+			printf("Failed to resolve low level, rc: %d\n", rc);
 			return rc;
 		}
 	}
 	else {
-		printf("cil_resolve_context: Invalid context, low level not found\n");
+		printf("Invalid context, low level not found\n");
 		return SEPOL_ERR;
 	}
 
@@ -1337,7 +1337,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		if (context->high->datum.name == NULL) {
 			rc = cil_resolve_level(db, current, context->high, call);
 			if (rc != SEPOL_OK) {
-				printf("cil_resolve_context: Failed to resolve high level, rc: %d\n", rc);
+				printf("Failed to resolve high level, rc: %d\n", rc);
 				return rc;
 			}
 		}
@@ -1345,19 +1345,19 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 	else if (context->high != NULL) {
 		rc = cil_resolve_level(db, current, context->high, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_context: Failed to resolve high level, rc: %d\n", rc);
+			printf("Failed to resolve high level, rc: %d\n", rc);
 			return rc;
 		}
 	}
 	else {
-		printf("cil_resolve_context: Invalid context, high level not found\n");
+		printf("Invalid context, high level not found\n");
 		return SEPOL_ERR;
 	}
 
 	return SEPOL_OK;
 
 	resolve_context_cleanup:
-		printf(" cil_resolve_context: Name resolution failed for %s\n", error);
+		printf("Name resolution failed for %s\n", error);
 		return rc;
 }
 
@@ -1370,7 +1370,7 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (filecon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, filecon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_filecon: Failed to resolve file context: %s, rc: %d\n", filecon->context_str, rc);
+			printf("Failed to resolve file context: %s, rc: %d\n", filecon->context_str, rc);
 			return rc;
 		}
 		filecon->context = (struct cil_context*)context_node->data;
@@ -1378,7 +1378,7 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 	else {
 		rc = cil_resolve_context(db, current, filecon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_filecon: Failed to resolve file context\n");
+			printf("Failed to resolve file context\n");
 			return rc;
 		}
 	}
@@ -1396,7 +1396,7 @@ int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (portcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, portcon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_portcon: Failed to resolve port context: %s, rc: %d\n", portcon->context_str, rc);
+			printf("Failed to resolve port context: %s, rc: %d\n", portcon->context_str, rc);
 			return rc;
 		}
 		portcon->context = (struct cil_context*)context_node->data;
@@ -1404,7 +1404,7 @@ int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct
 	else {
 		rc = cil_resolve_context(db, current, portcon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_portcon: Failed to resolve port context\n");
+			printf("Failed to resolve port context\n");
 			return rc;
 		}
 	}
@@ -1422,7 +1422,7 @@ int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struc
 	if (genfscon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, genfscon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_genfscon: Failed to resolve genfs context: %s, rc: %d\n", genfscon->context_str, rc);
+			printf("Failed to resolve genfs context: %s, rc: %d\n", genfscon->context_str, rc);
 			return rc;
 		}
 		genfscon->context = (struct cil_context*)context_node->data;
@@ -1430,7 +1430,7 @@ int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struc
 	else {
 		rc = cil_resolve_context(db, current, genfscon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_genfscon: Failed to resolve genfs context\n");
+			printf("Failed to resolve genfs context\n");
 			return rc;
 		}
 	}
@@ -1450,7 +1450,7 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (nodecon->addr_str != NULL) {
 		rc = cil_resolve_name(db, current, nodecon->addr_str, CIL_SYM_IPADDRS, CIL_IPADDR, call, &addr_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_nodecon: Failed to resolve node addr: %s, rc: %d\n", nodecon->addr_str, rc);
+			printf("Failed to resolve node addr: %s, rc: %d\n", nodecon->addr_str, rc);
 			return rc;
 		}
 		nodecon->addr = (struct cil_ipaddr*)addr_node->data;
@@ -1459,7 +1459,7 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (nodecon->mask_str != NULL) {
 		rc = cil_resolve_name(db, current, nodecon->mask_str, CIL_SYM_IPADDRS, CIL_IPADDR, call, &mask_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_nodecon: Failed to resolve node mask: %s, rc: %d\n", nodecon->mask_str, rc);
+			printf("Failed to resolve node mask: %s, rc: %d\n", nodecon->mask_str, rc);
 			return rc;
 		}
 		nodecon->mask = (struct cil_ipaddr*)mask_node->data;
@@ -1468,7 +1468,7 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (nodecon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, nodecon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_nodecon: Failed to resolve node context: %s, rc: %d\n", nodecon->context_str, rc);
+			printf("Failed to resolve node context: %s, rc: %d\n", nodecon->context_str, rc);
 			return rc;
 		}
 		nodecon->context = (struct cil_context*)context_node->data;
@@ -1476,7 +1476,7 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 	else {
 		rc = cil_resolve_context(db, current, nodecon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_nodecon: Failed to resolve node context\n");
+			printf("Failed to resolve node context\n");
 			return rc;
 		}
 	}
@@ -1502,7 +1502,7 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 	if (netifcon->if_context_str != NULL) {
 		rc = cil_resolve_name(db, current, netifcon->if_context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &ifcon_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_netifcon: Failed to resolve interface context: %s, rc: %d\n", netifcon->if_context_str, rc);
+			printf("Failed to resolve interface context: %s, rc: %d\n", netifcon->if_context_str, rc);
 			return rc;
 		}
 		netifcon->if_context = (struct cil_context*)ifcon_node->data;
@@ -1510,7 +1510,7 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 	else {
 		rc = cil_resolve_context(db, current, netifcon->if_context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_netifcon: Failed to resolve OTF interface context\n");
+			printf("Failed to resolve OTF interface context\n");
 			return rc;
 		}
 	}
@@ -1518,7 +1518,7 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 	if (netifcon->packet_context_str != NULL) {
 		rc = cil_resolve_name(db, current, netifcon->packet_context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &packcon_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_netifcon: Failed to resolve packet context: %s, rc: %d\n", netifcon->packet_context_str, rc);
+			printf("Failed to resolve packet context: %s, rc: %d\n", netifcon->packet_context_str, rc);
 			return rc;
 		}
 		netifcon->packet_context = (struct cil_context*)packcon_node->data;
@@ -1526,7 +1526,7 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 	else {
 		rc = cil_resolve_context(db, current, netifcon->packet_context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_netifcon: Failed to resolve OTF packet context\n");
+			printf("Failed to resolve OTF packet context\n");
 			return rc;
 		}
 	}
@@ -1543,14 +1543,14 @@ int cil_resolve_fsuse(struct cil_db *db, struct cil_tree_node *current, struct c
 	if (fsuse->context_str != NULL) {
 		rc = cil_resolve_name(db, current, fsuse->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_fsuse: Failed to resolve context, rc: %d\n", rc);
+			printf("Failed to resolve context, rc: %d\n", rc);
 			return rc;
 		}
 		fsuse->context = (struct cil_context*)context_node->data;
 	} else if (fsuse->context != NULL) {
 		rc = cil_resolve_context(db, current, fsuse->context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_fsuse: Failed to resolve context, rc: %d\n", rc);
+			printf("Failed to resolve context, rc: %d\n", rc);
 			return rc;
 		}
 	}
@@ -1568,7 +1568,7 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 
 	rc = cil_resolve_name(db, current, sidcon->sid_str, CIL_SYM_SIDS, CIL_SID, call, &sid_node);
 	if (rc != SEPOL_OK) {
-		printf("cil_resolve_sidcontext: Failed to resolve sid, rc: %d : %s\n", rc, sidcon->sid_str);
+		printf("Failed to resolve sid, rc: %d : %s\n", rc, sidcon->sid_str);
 		return rc;
 	}
 	sidcon->sid = (struct cil_sid*)sid_node->data;
@@ -1576,7 +1576,7 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 	if (sidcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, sidcon->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_sidcontext: Failed to resolve context, rc: %d\n", rc);
+			printf("Failed to resolve context, rc: %d\n", rc);
 			return rc;
 		}
 		sidcon->context = (struct cil_context*)context_node->data;
@@ -1584,7 +1584,7 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 	else if (sidcon->context != NULL) {
 		rc = cil_resolve_context(db, current, sidcon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_sid: Failed to resolve context, rc: %d\n", rc);
+			printf("Failed to resolve context, rc: %d\n", rc);
 			return rc;
 		}
 	}
@@ -1601,13 +1601,13 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 	if (new_call->macro_str != NULL) {
 		rc = cil_resolve_name(db, current, new_call->macro_str, CIL_SYM_MACROS, CIL_MACRO, call, &macro_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_call1: Failed to resolve macro, rc: %d\n", rc);
+			printf("Failed to resolve macro, rc: %d\n", rc);
 			return rc;
 		}
 		new_call->macro = (struct cil_macro*)macro_node->data;
 	}
 	else {
-		printf("cil_resolve_call1: macro string is null\n");
+		printf("Macro string is null\n");
 		return SEPOL_ERR;
 	}
 
@@ -1619,7 +1619,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 		struct cil_tree_node *pc = NULL;
 
 		if (new_call->args_tree == NULL) {
-			printf("cil_resolve_call1 failed: missing arguments (line: %d)\n", current->line);
+			printf("Missing arguments (line: %d)\n", current->line);
 			return SEPOL_ERR;
 		}
 
@@ -1629,7 +1629,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 
 		while (item != NULL) {
 			if (item != NULL && pc == NULL) {
-				printf("cil_resolve_call1 failed: missing arguments (line: %d)\n", current->line);
+				printf("Missing arguments (line: %d)\n", current->line);
 				return SEPOL_ERR;
 			}
 			if (item->flavor != CIL_PARAM)
@@ -1667,7 +1667,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 						cil_list_init(&catset->cat_list_str);
 						rc = cil_fill_cat_list(pc, catset->cat_list_str);
 						if (rc != SEPOL_OK) {
-							printf("cil_resolve_call1: cil_fill_cat_list failed, rc: %d\n", rc);
+							printf("Failed to create anonymous category set, rc: %d\n", rc);
 							cil_destroy_catset(catset);
 							return rc;
 						}
@@ -1686,7 +1686,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 						struct cil_level *level = cil_malloc(sizeof(struct cil_level));
 						rc = cil_fill_level(pc->cl_head, level);
 						if (rc != SEPOL_OK) {
-							printf("cil_resolve_call1: cil_fill_level failed, rc: %d\n", rc);
+							printf("Failed to create anonymous level, rc: %d\n", rc);
 							cil_destroy_level(level);
 							return rc;
 						}
@@ -1712,7 +1712,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 						
 						rc = cil_fill_ipaddr(pc->cl_head, ipaddr);
 						if (rc != SEPOL_OK) {
-							printf("cil_resolve_call1: cil_fill_ipaddr failed, rc; %d\n", rc);
+							printf("Failed to create anonymous ip address, rc; %d\n", rc);
 							cil_destroy_ipaddr(ipaddr);
 							return rc;
 						}
@@ -1754,7 +1754,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 					break;
 				}
 				default : {
-					printf("cil_resolve_call1: unexpected flavor: %d\n", item->flavor);
+					printf("Unexpected flavor: %d\n", item->flavor);
 					return SEPOL_ERR;
 				}
 			}
@@ -1781,17 +1781,17 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 		}
 
 		if (pc != NULL) {
-			printf("cil_resolve_call1 failed: unexpected arguments (line: %d)\n", current->line);
+			printf("Unexpected arguments (line: %d)\n", current->line);
 			return SEPOL_ERR;
 		}
 	} else if (new_call->args_tree != NULL) {
-		printf("cil_resolve_call1 failed: unexpected arguments (line: %d)\n", current->line);
+		printf("Rnexpected arguments (line: %d)\n", current->line);
 		return SEPOL_ERR;
 	}
 
 	rc = cil_copy_ast(db, macro_node, current);
 	if (rc != SEPOL_OK) {
-		printf("cil_resolve_call1: cil_copy_ast failed, rc: %d\n", rc);
+		printf("Failed to copy macro, rc: %d\n", rc);
 		return rc;
 	}
 
@@ -1811,7 +1811,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 	
 	for (item = new_call->args->head; item != NULL; item = item->next) {
 		if (((struct cil_args*)item->data)->arg == NULL && ((struct cil_args*)item->data)->arg_str == NULL) {
-			printf("cil_resolve_call2: arg and arg_str are both NULL\n");
+			printf("Arguments not created correctly\n");
 			return SEPOL_ERR;
 		}
 		
@@ -1867,7 +1867,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 		if (sym_index != CIL_SYM_UNKNOWN) {
 			rc = cil_resolve_name(db, current, ((struct cil_args*)item->data)->arg_str, sym_index, ((struct cil_args*)item->data)->flavor, call, &(((struct cil_args*)item->data)->arg));
 			if (rc != SEPOL_OK) {
-				printf("cil_resolve_call2: cil_resolve_name failed, rc: %d\n", rc);
+				printf("Failed to resolve argument, rc: %d\n", rc);
 				return rc;
 			}
 		}
@@ -1929,7 +1929,7 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *expr_stack, 
 			printf("Invalid expression\n");
 			return SEPOL_ERR;
 		}
-		printf("resolving: %s\n", ((struct cil_conditional*)curr_expr->data)->str);
+		
 		rc = cil_resolve_name(db, parent, ((struct cil_conditional*)curr_expr->data)->str, sym_index, flavor, call, &res_node);
 		if (rc != SEPOL_OK) {
 			printf("Name resolution failed for %s\n", ((struct cil_conditional*)curr_expr->data)->str);
@@ -2035,8 +2035,6 @@ int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result)
 		}
 		stack = stack->cl_head;
 	}
-
-	printf("result: %d\n", *result);
 
 	return SEPOL_OK;
 }
@@ -2555,10 +2553,9 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, struct cil_l
 			optlist->head->data = current->data;
 			optlist->head->flavor = CIL_OPTIONAL;
 	
-			printf("OPTIONAL %s was disabled %i, disabling children....\n", ((struct cil_optional *)current->data)->datum.name, ((struct cil_optional *)current->data)->datum.state);	
 			int rc = cil_tree_walk(current, __cil_disable_children_helper, NULL, NULL, optlist);
 			if (rc != SEPOL_OK) {
-				printf("cil_resolve_ast_reverse_helper: failed\n");
+				printf("Failed to disable optional children\n");
 				return rc;
 			}
 
@@ -2613,7 +2610,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 #endif
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, other);	
 		if (rc != SEPOL_OK) {
-			printf("cil_resolve_ast: Pass %i failed\n", pass);
+			printf("Pass %i fo resolution failed\n", pass);
 			return rc;
 		}
 
@@ -2700,17 +2697,17 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 				if (rc == SEPOL_OK) {
 					rc = cil_symtab_get_node(symtab, tok_current, node);
 					if (rc != SEPOL_OK) {
-						printf("__cil_resolve_name_helper: failed to get node from parent symtab of call\n");
+						printf("Failed to get node from parent symtab of call\n");
 						return rc;
 					}
 				} else {
-					printf("__cil_resolve_name_helper: failed to get symtab from call parent\n");
+					printf("Failed to get symtab from call parent\n");
 					return rc;
 				}
 			} else if (rc == SEPOL_ENOENT) {
 				rc = cil_get_parent_symtab(db, call->macro->datum.node, &symtab, CIL_SYM_BLOCKS);
 				if (rc != SEPOL_OK) {
-					printf("__cil_resolve_name_helper: failed to get node from parent symtab of macro\n");
+					printf("Failed to get node from parent symtab of macro\n");
 					return rc;
 				} else {
 					symtab = &(db->symtab[CIL_SYM_BLOCKS]);	
@@ -2722,7 +2719,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		} else {
 			rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_BLOCKS);
 			if (rc != SEPOL_OK) {
-				printf("__cil_resolve_name_helper: cil_get_parent_symtab failed, rc: %d\n", rc);
+				printf("Failed to get parent symtab, rc: %d\n", rc);
 				goto resolve_name_helper_cleanup;
 			}
 		}
@@ -2738,7 +2735,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		if (tok_next != NULL) {
 			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
 			if (rc != SEPOL_OK) {
-				printf("__cil_resolve_name_helper: Failed to find table, block current: %s\n", tok_current);
+				printf("Failed to find table, block current: %s\n", tok_current);
 				goto resolve_name_helper_cleanup;
 			}
 			symtab = &(((struct cil_block*)tmp_node->data)->symtab[CIL_SYM_BLOCKS]);
@@ -2748,7 +2745,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			symtab = &(((struct cil_block*)tmp_node->data)->symtab[sym_index]);
 			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
 			if (rc != SEPOL_OK) {
-				printf("__cil_resolve_name_helper: Failed to resolve name, current: %s\n", tok_current);
+				printf("Failed to resolve name, current: %s\n", tok_current);
 				goto resolve_name_helper_cleanup;
 			}
 		}
@@ -2791,12 +2788,12 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 					if (rc == SEPOL_OK) {
 						rc = cil_symtab_get_node(symtab, name, node);
 						if (rc != SEPOL_OK) {
-							printf("cil_resolve_name: failed to get node from parent symtab of call\n");
+							printf("Failed to get node from parent symtab of call\n");
 						}
 						return rc;
 					}
 					else {
-						printf("failed to get parent symtab from call\n");
+						printf("Failed to get parent symtab from call\n");
 						return rc;
 					}
 						
@@ -2822,7 +2819,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 			else {
 				rc = cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
 				if (rc != SEPOL_OK) {
-					printf("cil_resolve_name: cil_get_parent_symtab failed, rc: %d\n", rc);
+					printf("Failed to get parent symtab, rc: %d\n", rc);
 					return rc;
 				}
 				rc = cil_symtab_get_node(symtab, name, node);
