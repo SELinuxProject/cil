@@ -88,19 +88,28 @@ int main(int argc, char *argv[])
 
 		printf("----------------------------------------------\n\n");
 		printf("Destroying AST symtabs\n");
-		cil_destroy_ast_symtabs(db->ast->root);
+		if (cil_destroy_ast_symtabs(db->ast->root)) {
+			printf("Failed to destroy ast symtabs, exiting\n");
+			return SEPOL_ERR;
+		}
 		printf("Symtabs destroyed\n\n");
 	
 		printf("----------------------------------------------\n\n");
 		printf("Qualifying names\n");
-		cil_qualify_name(db->ast->root);
+		if (cil_qualify_name(db->ast->root)) {
+			printf("Failed to qualify names, exiting\n");
+			return SEPOL_ERR;
+		}
 		printf("Names fully qualified\n\n");
 
 		cil_tree_print(db->ast->root, 0);
 
 		printf("----------------------------------------------\n\n");
 		printf("Generating policy\n");
-		cil_gen_policy(db);
+		if (cil_gen_policy(db)){
+			printf("Failed to generate policy, exiting\n");
+			return SEPOL_ERR;
+		}
 		printf("Policy generated\n\n");
 	
 		printf("----------------------------------------------\n\n");
