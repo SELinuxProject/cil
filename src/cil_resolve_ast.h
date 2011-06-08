@@ -32,6 +32,7 @@ int cil_resolve_portcon(struct cil_db *, struct cil_tree_node *, struct cil_call
 int cil_resolve_genfscon(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_nodecon(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_netifcon(struct cil_db *, struct cil_tree_node *, struct cil_call *);
+int cil_resolve_fsuse(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_sidcontext(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_classcommon(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_call1(struct cil_db *, struct cil_tree_node *, struct cil_call *);

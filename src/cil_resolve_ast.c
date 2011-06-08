@@ -1534,6 +1534,30 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 	return SEPOL_OK;
 }
 
+int cil_resolve_fsuse(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_fsuse *fsuse = (struct cil_fsuse*)current->data;
+	struct cil_tree_node *context_node = NULL;
+	int rc = SEPOL_ERR;
+
+	if (fsuse->context_str != NULL) {
+		rc = cil_resolve_name(db, current, fsuse->context_str, CIL_SYM_CONTEXTS, CIL_CONTEXT, call, &context_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_fsuse: Failed to resolve context, rc: %d\n", rc);
+			return rc;
+		}
+		fsuse->context = (struct cil_context*)context_node->data;
+	} else if (fsuse->context != NULL) {
+		rc = cil_resolve_context(db, current, fsuse->context, call);
+		if (rc != SEPOL_OK) {
+			printf("cil_resolve_fsuse: Failed to resolve context, rc: %d\n", rc);
+			return rc;
+		}
+	}
+	db->fsuse->count++;
+	return SEPOL_OK;
+}
+
 int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_sidcontext *sidcon = (struct cil_sidcontext*)current->data;
@@ -2251,6 +2275,10 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						rc = cil_resolve_netifcon(db, node, call);
 						break;
 					}
+					case CIL_FSUSE : {
+						rc = cil_resolve_fsuse(db, node, call);
+						break;
+					}
 					case CIL_SIDCONTEXT : {
 						rc = cil_resolve_sidcontext(db, node, call);
 						break;
@@ -2268,6 +2296,17 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 						uint32_t i = sort->index;
 						if (sort->array == NULL) {
 							sort->array = cil_malloc(sizeof(struct cil_netifcon*)*count);
+						}
+						sort->array[i] = node->data;
+						sort->index++;
+						break;
+					}
+					case CIL_FSUSE : {
+						struct cil_sort *sort = db->fsuse;
+						uint32_t count = sort->count;
+						uint32_t i = sort->index;
+						if (sort->array == NULL) {
+							sort->array = cil_malloc(sizeof(struct cil_fsuse*)*count);
 						}
 						sort->array[i] = node->data;
 						sort->index++;

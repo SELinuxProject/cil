@@ -2841,6 +2841,85 @@ void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 	free(netifcon);
 }
 
+int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (parse_current->next == NULL
+	|| parse_current->next->cl_head != NULL
+	|| parse_current->next->next == NULL
+	|| parse_current->next->next->cl_head != NULL
+	|| parse_current->next->next->next == NULL
+	|| parse_current->next->next->next->next != NULL) {
+		printf("Invalid fsuse declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	char *type = (char*)parse_current->next->data;
+	struct cil_fsuse *fsuse;
+	int rc = cil_fsuse_init(&fsuse);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	if (!strcmp(type, "xattr")) {
+		fsuse->type = CIL_FSUSE_XATTR;
+	}
+	else if (!strcmp(type, "task")) {
+		fsuse->type = CIL_FSUSE_TASK;
+	}
+	else if (!strcmp(type, "transition")) {
+		fsuse->type = CIL_FSUSE_TRANSITION;
+	}
+	else {
+		printf("Invalid fsuse type\n");
+		goto gen_fsuse_cleanup;
+	}
+
+	fsuse->fs_str = cil_strdup(parse_current->next->next->data);
+
+	if (parse_current->next->next->next->cl_head == NULL) {
+		fsuse->fs_str = cil_strdup(parse_current->next->next->next->data);
+	} else {
+		rc = cil_context_init(&fsuse->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init fsuse context\n");
+			goto gen_fsuse_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->next->cl_head, fsuse->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill fsuse context\n");
+			goto gen_fsuse_cleanup;
+		}
+	}
+
+	ast_node->data = fsuse;
+	ast_node->flavor = CIL_FSUSE;
+
+	return SEPOL_OK;
+
+	gen_fsuse_cleanup:
+		cil_destroy_fsuse(fsuse);
+		return SEPOL_ERR;
+}
+
+void cil_destroy_fsuse(struct cil_fsuse *fsuse)
+{
+	if (fsuse->fs_str != NULL) {
+		free(fsuse->fs_str);
+	}
+	if (fsuse->context_str != NULL) {
+		free(fsuse->context_str);
+	}
+	else if (fsuse->context != NULL) {
+		cil_destroy_context(fsuse->context);
+	}
+	free(fsuse);
+}
+
 void cil_destroy_param(struct cil_param *param)
 {
 	if (param->str != NULL)
@@ -3575,6 +3654,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				rc = cil_gen_netifcon(db, parse_current, ast_node);
 				if (rc != SEPOL_OK) {
 					printf("cil_gen_netifcon failed, rc: %d\n", rc);
+					return rc;
+				}
+				*finished = CIL_TREE_SKIP_NEXT;
+			}
+			else if (!strcmp(parse_current->data, CIL_KEY_FSUSE)) {
+				rc = cil_gen_fsuse(db, parse_current, ast_node);
+				if (rc != SEPOL_OK) {
+					printf("cil_gen_fsuse failed, rc: %d\n", rc);
 					return rc;
 				}
 				*finished = CIL_TREE_SKIP_NEXT;

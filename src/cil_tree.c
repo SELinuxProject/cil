@@ -950,20 +950,36 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_netifcon *netifcon = node->data;
 				printf("NETIFCON %s", netifcon->interface_str);
 				if (netifcon->if_context != NULL) {
-					printf(" (");
 					cil_tree_print_context(netifcon->if_context);
-					printf(" )");
 				} else if (netifcon->if_context_str != NULL) {
 					printf(" %s", netifcon->if_context_str);
 				}
 				if (netifcon->packet_context != NULL) {
-					printf(" (");
 					cil_tree_print_context(netifcon->packet_context);
-					printf(" )");
 				} else if (netifcon->packet_context_str != NULL) {
 					printf(" %s", netifcon->packet_context_str);
 				}
 				printf("\n");
+				return;
+			}
+			case CIL_FSUSE : {
+				struct cil_fsuse *fsuse = node->data;
+				printf("FSUSE: ");
+				if (fsuse->type == CIL_FSUSE_XATTR) {
+					printf("xattr ");
+				} else if (fsuse->type == CIL_FSUSE_TASK) {
+					printf("task ");
+				} else if (fsuse->type == CIL_FSUSE_TRANSITION) {
+					printf("transition ");
+				} else {
+					printf("unknown ");
+				}
+				printf("%s ", fsuse->fs_str);
+				if (fsuse->context != NULL) {
+					cil_tree_print_context(fsuse->context);
+				} else {
+					printf(" %s", fsuse->context_str);
+				}
 				return;
 			}
 			case CIL_SID : {

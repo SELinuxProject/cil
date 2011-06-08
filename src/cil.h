@@ -39,60 +39,59 @@
 #define CIL_NODECON		23
 #define CIL_GENFSCON		24
 #define CIL_NETIFCON		25
-#define CIL_FSCON		26
-#define CIL_FS_USE		27
-#define CIL_CONSTRAIN		28
-#define CIL_MLSCONSTRAIN	29
-#define CIL_PERM		30
-#define CIL_PERMSET		31
-#define CIL_USERROLE		32
-#define CIL_TYPE_ATTR		33
-#define CIL_TYPE_RULE 		34
-#define CIL_TYPEBOUNDS		35
-#define CIL_FILETRANSITION	36
-#define CIL_TYPEPERMISSIVE	37
-#define CIL_ROLETRANS		38
-#define CIL_ROLEALLOW		39
-#define CIL_ROLETYPE		40
-#define CIL_ROLEDOMINANCE	41
-#define CIL_CATORDER		42
-#define CIL_DOMINANCE		43
-#define CIL_SENSCAT		44
-#define CIL_CLASSCOMMON		45
-#define CIL_CONSTRAIN_NODE	46
-#define CIL_SIDCONTEXT		47
-#define CIL_CALL		48
-#define CIL_ARGS		49
-#define CIL_BOOLEANIF		50
-#define CIL_TUNABLEIF		51
-#define CIL_TUNABLEIFDEF	52
-#define CIL_TUNABLEIFNDEF	53
-#define CIL_AND			54
-#define CIL_OR			55
-#define CIL_XOR			56
-#define CIL_NOT			57
-#define CIL_EQ			58
-#define CIL_NEQ			59
-#define CIL_ELSE		60
-#define CIL_COND		61
-#define CIL_PARAM		62
-#define CIL_CONS_AND		63
-#define CIL_CONS_OR		64
-#define CIL_CONS_NOT		65
-#define CIL_CONS_EQ		66
-#define CIL_CONS_DOM		67
-#define CIL_CONS_DOMBY		68
-#define CIL_CONS_INCOMP		69
-#define CIL_CONS_U1		70
-#define CIL_CONS_U2		71
-#define CIL_CONS_T1		72
-#define CIL_CONS_T2		73
-#define CIL_CONS_R1		74
-#define CIL_CONS_R2		75
-#define CIL_CONS_L1		76
-#define CIL_CONS_L2		77
-#define CIL_CONS_H1		78
-#define CIL_CONS_H2		79
+#define CIL_FSUSE		26
+#define CIL_CONSTRAIN		27
+#define CIL_MLSCONSTRAIN	28
+#define CIL_PERM		29
+#define CIL_PERMSET		30
+#define CIL_USERROLE		31
+#define CIL_TYPE_ATTR		32
+#define CIL_TYPE_RULE 		33
+#define CIL_TYPEBOUNDS		34
+#define CIL_FILETRANSITION	35
+#define CIL_TYPEPERMISSIVE	36
+#define CIL_ROLETRANS		37
+#define CIL_ROLEALLOW		38
+#define CIL_ROLETYPE		39
+#define CIL_ROLEDOMINANCE	40
+#define CIL_CATORDER		41
+#define CIL_DOMINANCE		42
+#define CIL_SENSCAT		43
+#define CIL_CLASSCOMMON		44
+#define CIL_CONSTRAIN_NODE	45
+#define CIL_SIDCONTEXT		46
+#define CIL_CALL		47
+#define CIL_ARGS		48
+#define CIL_BOOLEANIF		49
+#define CIL_TUNABLEIF		50
+#define CIL_TUNABLEIFDEF	51
+#define CIL_TUNABLEIFNDEF	52
+#define CIL_AND			53
+#define CIL_OR			54
+#define CIL_XOR			55
+#define CIL_NOT			56
+#define CIL_EQ			57
+#define CIL_NEQ			58
+#define CIL_ELSE		59
+#define CIL_COND		60
+#define CIL_PARAM		61
+#define CIL_CONS_AND		62
+#define CIL_CONS_OR		63
+#define CIL_CONS_NOT		64
+#define CIL_CONS_EQ		65
+#define CIL_CONS_DOM		66
+#define CIL_CONS_DOMBY		67
+#define CIL_CONS_INCOMP		68
+#define CIL_CONS_U1		69
+#define CIL_CONS_U2		70
+#define CIL_CONS_T1		71
+#define CIL_CONS_T2		72
+#define CIL_CONS_R1		73
+#define CIL_CONS_R2		74
+#define CIL_CONS_L1		75
+#define CIL_CONS_L2		76
+#define CIL_CONS_H1		77
+#define CIL_CONS_H2		78
 
 #define CIL_BLOCK		CIL_MIN_DECLARATIVE
 #define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
@@ -158,6 +157,7 @@
 #define CIL_KEY_NODECON		"nodecon"
 #define CIL_KEY_GENFSCON	"genfscon"
 #define CIL_KEY_NETIFCON	"netifcon"
+#define CIL_KEY_FSUSE		"fsuse"
 #define CIL_KEY_SENSITIVITY	"sensitivity"
 #define CIL_KEY_SENSALIAS	"sensitivityalias"
 #define CIL_KEY_CATEGORY	"category"
@@ -245,6 +245,7 @@ struct cil_db {
 	struct cil_sort *filecon;
 	struct cil_sort *nodecon;
 	struct cil_sort *portcon;
+	struct cil_sort *fsuse;
 };
 
 struct cil_sort {
@@ -591,28 +592,17 @@ struct cil_netifcon {
 	char *context_str;
 };
 
-/* There is no fs declaration, but we will create a cil_fs on demand when the cil_fscon or cil_fs_use statements need one */
-struct cil_fs {
-	struct cil_symtab_datum datum;
+enum cil_fsuse_types {
+	CIL_FSUSE_XATTR = 1,
+	CIL_FSUSE_TASK,
+	CIL_FSUSE_TRANSITION
 };
 
-struct cil_fscon {
+struct cil_fsuse {
+	enum cil_fsuse_types type;
 	char *fs_str;
-	struct cil_fs *fs;
-	char *path;
-	struct cil_context *context;
 	char *context_str;
-};
-
-#define CIL_FS_USE_XATTR 1
-#define CIL_FS_USE_TASK 2
-#define CIL_FS_USE_TRANS 3
-struct cil_fs_use {
-	uint32_t flavor;
-	char *fs_str;
-	struct cil_fs *fs;
 	struct cil_context *context;
-	char *context_str;
 };
 
 /*struct constrain {
@@ -721,8 +711,7 @@ int cil_filecon_init(struct cil_filecon **filecon);
 int cil_portcon_init(struct cil_portcon **portcon);
 int cil_nodecon_init(struct cil_nodecon **nodecon);
 int cil_genfscon_init(struct cil_genfscon **genfscon);
-int cil_fscon_init(struct cil_fscon **fscon);
-int cil_fs_use_init(struct cil_fs_use **fs_use);
+int cil_fsuse_init(struct cil_fsuse **fsuse);
 int cil_constrain_init(struct cil_constrain **constrain);
 int cil_perm_init(struct cil_perm **perm);
 int cil_permset_init(struct cil_permset **permset);

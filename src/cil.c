@@ -33,6 +33,7 @@ int cil_db_init(struct cil_db **db)
 	cil_sort_init(&new_db->filecon);
 	cil_sort_init(&new_db->nodecon);
 	cil_sort_init(&new_db->portcon);
+	cil_sort_init(&new_db->fsuse);
 
 	*db = new_db;
 
@@ -263,6 +264,10 @@ void cil_destroy_data(void **data, uint32_t flavor)
 		}
 		case (CIL_NETIFCON) : {
 			cil_destroy_netifcon(*data);
+			break;
+		}
+		case (CIL_FSUSE) : {
+			cil_destroy_fsuse(*data);
 			break;
 		}
 		case (CIL_PARAM) : {
@@ -1115,38 +1120,20 @@ int cil_genfscon_init(struct cil_genfscon **genfscon)
 	return SEPOL_OK;
 }
 
-int cil_fscon_init(struct cil_fscon **fscon)
+int cil_fsuse_init(struct cil_fsuse **fsuse)
 {
-	if (fscon == NULL) {
+	if (fsuse == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_fscon *new_fscon = cil_malloc(sizeof(struct cil_fscon));
+	struct cil_fsuse *new_fsuse = cil_malloc(sizeof(struct cil_fsuse));
 
-	new_fscon->fs_str = NULL;
-	new_fscon->fs = NULL;
-	new_fscon->path = NULL;
-	new_fscon->context = NULL;
+	new_fsuse->type = 0;
+	new_fsuse->fs_str = NULL;
+	new_fsuse->context_str = NULL;
+	new_fsuse->context = NULL;
 
-	*fscon = new_fscon;
-
-	return SEPOL_OK;
-}
-
-int cil_fs_use_init(struct cil_fs_use **fs_use)
-{
-	if (fs_use == NULL) {
-		return SEPOL_ERR;
-	}
-
-	struct cil_fs_use *new_fs_use = cil_malloc(sizeof(struct cil_fs_use));
-
-	new_fs_use->flavor = 0;
-	new_fs_use->fs_str = NULL;
-	new_fs_use->fs = NULL;
-	new_fs_use->context = NULL;
-
-	*fs_use = new_fs_use;
+	*fsuse = new_fsuse;
 
 	return SEPOL_OK;
 }

@@ -24,5 +24,6 @@ int cil_filecon_compare(const void *a, const void *b);
 int cil_portcon_compare(const void *a, const void *b);
 int cil_genfscon_compare(const void *a, const void *b);
 int cil_netifcon_compare(const void *a, const void *b);
+int cil_fsuse_compare(const void *a, const void *b);
 
 #endif
