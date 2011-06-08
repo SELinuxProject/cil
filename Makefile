@@ -11,10 +11,8 @@ LEX = flex
 DEBUG=1
 
 AST_NAME = ast
-PARSER_NAME = parser
 
 AST_TEST = $(TESTDIR)/test_ast.c
-PARSER_TEST = $(TESTDIR)/test_parser.c
 TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
 CIL_SRCS =  cil.c cil_tree.c cil_ast.c cil_parser.c cil_symtab.c cil_lexer.c
 
@@ -50,16 +48,13 @@ endif
 
 all: cil
 
-cil: parser ast
+cil: ast
 
 cil_lexer.c: cil_lexer.l
 	$(LEX) -t $< > $@
 
 ast: $(AST_TEST) $(ALL_SRCS)
 	$(CC) $(CFLAGS) -o $(AST_NAME) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) 
-
-parser: $(PARSER_TEST) $(ALL_SRCS)
-	$(CC) $(CFLAGS) -o $(PARSER_NAME) $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
 
 unit: $(TEST_SRCS) $(ALL_SRCS)
 	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
@@ -80,10 +75,10 @@ install:
 clean: 
 	-rm -f $(SRCDIR)/$(ALL_OBJS) $(SRCDIR)/$(GENERATED) run_tests
 	-rm -f *.gcno *.gcda *.gcov unit_tests policy.conf file_contexts
-	-rm -f $(PARSER_NAME) $(AST_NAME)
+	-rm -f $(AST_NAME)
 	-rm -rf cov/
 
 bare: clean
-	-rm -f $(AST_NAME) $(PARSER_NAME)
+	-rm -f $(AST_NAME)
 
 .PHONY: cil all clean install bare test
