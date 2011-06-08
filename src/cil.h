@@ -605,10 +605,6 @@ struct cil_fsuse {
 	struct cil_context *context;
 };
 
-/*struct constrain {
-	//Design
-};*/
-
 #define CIL_MLS_LEVELS "l1 l2 h1 h2" 
 #define CIL_CONSTRAIN_KEYS "t1 t2 r1 r2 u1 u2"
 #define CIL_MLSCONSTRAIN_KEYS CIL_MLS_LEVELS CIL_CONSTRAIN_KEYS
