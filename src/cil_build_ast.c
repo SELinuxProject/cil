@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "cil.h"
 #include "cil_mem.h"
@@ -10,10 +11,27 @@
 #include "cil_build_ast.h"
 #include "cil_copy_ast.h"
 
+int __cil_verify_name(const char *name)
+{
+	int i;
+	for (i=0; i<strlen(name); i++) {
+		if (!isalnum(name[i]) && name[i] != '_') {
+			printf("Invalid character %c in %s\n", name[i], name);
+			return SEPOL_ERR;
+		}
+	}
+	return SEPOL_OK;
+}
+
 int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, uint32_t sflavor, uint32_t nflavor)
 {
 	symtab_t *symtab = NULL;
 	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_name((const char*)key);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
 
 	rc = cil_get_parent_symtab(db, ast_node, &symtab, sflavor);
 	if (rc != SEPOL_OK) 
