@@ -878,7 +878,7 @@ int cil_resolve_dominance(struct cil_db *db, struct cil_tree_node *current, stru
 
 int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct cil_list *res_list)
 {
-	if (cat_list == NULL || res_list == NULL)
+	if (cat_list == NULL || res_list == NULL || db->catorder->head == NULL)
 		return SEPOL_ERR;
 
 	if (cat_list->head == NULL || cat_list->head->next == NULL || cat_list->head->next->next != NULL) {
