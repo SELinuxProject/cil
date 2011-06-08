@@ -159,12 +159,8 @@ int cil_portcon_compare(const void *a, const void *b)
 	if (rc == 0) {
 		if (aportcon->port_low < bportcon->port_low) {
 			rc = -1;
-		}
-		else if (aportcon->port_low > bportcon->port_low) {
+		} else if (bportcon->port_low < aportcon->port_low) {
 			rc = 1;
-		}
-		else {
-			rc = 0;
 		}
 	}
 	return rc;
