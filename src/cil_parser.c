@@ -72,7 +72,12 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 		else if ((tok.type == SYMBOL) || (tok.type == QSTRING)) {
 			cil_tree_node_init(&item);
 			item->parent = current;
-			item->data = cil_strdup(tok.value);
+			if (tok.type == QSTRING) {
+				item->data = cil_strdup(tok.value + 1);
+				((char*)item->data)[strlen(item->data) - 1] = '\0';
+			} else {
+				item->data = cil_strdup(tok.value);
+			}
 			item->flavor = CIL_PARSE_NODE;
 			item->line = tok.line;
 			if (current->cl_head == NULL)
