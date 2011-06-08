@@ -1433,7 +1433,7 @@ void test_cil_resolve_avrule_permset_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_avrule(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_avrule_firsttype_neg(CuTest *tc) {
