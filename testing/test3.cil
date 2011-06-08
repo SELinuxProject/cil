@@ -1,12 +1,12 @@
 (block test
-	(block test-test1
-		(block test-test1-test1
-			(type test-test1-test1-test1)
-			(type test-test1-test1-test2))
-		(block test-test1-test2
-			(type test-test1-test2-test1)
-			(type test-test1-test2-test2)))
-	(block test-test2
-		(block test-test2-test1
-			(type test-test2-test1-test1)
-			(type test-test2-test1-test2))))
+	(block test_test1
+		(block test_test1_test1
+			(type test_test1_test1_test1)
+			(type test_test1_test1_test2))
+		(block test_test1_test2
+			(type test_test1_test2_test1)
+			(type test_test1_test2_test2)))
+	(block test_test2
+		(block test_test2_test1
+			(type test_test2_test1_test1)
+			(type test_test2_test1_test2))))

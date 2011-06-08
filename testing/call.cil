@@ -51,8 +51,8 @@
 
 (categoryorder (c0 c1))
 
-(level low s0 (c0))
-(level high s1 (c1))
+(level low (s0 (c0)))
+(level high (s1 (c1)))
 
 ;(call lvl_test (low high))
 (call lvl_test ((s0 (c0)) (s1 (c1))))

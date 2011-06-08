@@ -2,16 +2,16 @@
 ;(sid kernel2 (system_u system_r kernel_t low high))
 ;(sid kernel3 (system_u system_r kernel_t low (s1 (c0))))
 
-;(common ipc (mem))
-;(common file (read write execute))
-;(class file (open))
-;(classcommon file file)
-;(class msg (send receive))
-;(classcommon msg ipc)
-;(class dir (read))
+(common ipc (mem))
+(common file (read write execute))
+(class file (open))
+(classcommon file file)
+(class msg (send receive))
+(classcommon msg ipc)
+(class dir (read))
 
 (user sysadm)
-;(user system_u)
+(user system_u)
 
 (type global1)
 (type global2)
@@ -19,7 +19,7 @@
 
 (role sysadm_r)
 (role audadm_r)
-;(role object_r)
+(role object_r)
 (role system_r)
 
 (type etc_t)
@@ -47,18 +47,18 @@
 	(allow bar test.alpha test.foo (b c))
 )
 
-;(sensitivity s0)
+(sensitivity s0)
 (sensitivity s1)
 (dominance (s0 s1))
-;(category c0)
+(category c0)
 (category c255)
 (categoryorder (c0 c255))
 (sensitivitycategory s0 (c0))
 (sensitivitycategory s1 ((c0 c255)))
 (sensitivityalias s0 unclassified)
 
-(level low2 (s0 (c0)))
-(level high2 (s1 ((c0 c255))))
+(level low (s0 (c0)))
+(level high (s1 ((c0 c255))))
 
 (type netif_t)
 
@@ -66,8 +66,8 @@
 (context def2 (system_u object_r etc_t low high))
 (context etc_default (system_u object_r etc_t (s0 (c0)) (s1 ((c0 c255)))))
 
-(context if_default2 (system_u object_r etc_t low (s1 ((c0 c255)))))
-(context packet_default2 (system_u object_r etc_t low high))
+(context if_default (system_u object_r etc_t low (s1 ((c0 c255)))))
+(context packet_default (system_u object_r etc_t low high))
 
 (netifcon eth0 if_default packet_default)
 (netifcon eth1 (system_u object_r netif_t low high) (system_u object_r netif_t low high))

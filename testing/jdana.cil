@@ -1,5 +1,5 @@
-(class file inherits file
-	(read write open))
+(class file (read write open))
+(classcommon file file)
 
 (user sysadm)
 (role sysadm_r)
@@ -73,7 +73,7 @@
 
 (sensitivitycategory s0 (c0 c1 c2 c3 c4 (c5 c10)))
 
-(level SystemHigh s0 ((c0 c2) c3 c4 c5 (c6 c10)))
+(level SystemHigh (s0 ((c0 c2) c3 c4 c5 (c6 c10))))
 
 (attribute mlsfilereadtoclr)
 (attribute mlsfileread)
