@@ -26,7 +26,7 @@ LIBSEPOL_STATIC = /usr/lib/libsepol.a
 
 LIBS = 
 LDFLAGS = -lfl
-COVCFLAGS = -fprofile-arcs -ftest-coverage
+COVCFLAGS = -fprofile-arcs -ftest-coverage -O0
 
 CFLAGS ?= -Wall -Werror -Wshadow -W -Wundef -Wmissing-format-attribute
 
