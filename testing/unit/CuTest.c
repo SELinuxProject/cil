@@ -83,6 +83,7 @@ void CuStringAppendChar(CuString* str, char ch)
 	CuStringAppend(str, text);
 }
 
+void CuStringAppendFormat(CuString* str, const char* format, ...) __attribute__ ((format (printf, 2, 3)));
 void CuStringAppendFormat(CuString* str, const char* format, ...)
 {
 	va_list argp;
