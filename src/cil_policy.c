@@ -459,7 +459,7 @@ void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_cont
 
 	fprintf(file_arr[file_index], "%s:%s:%s:", user->datum.name, role->datum.name, type->datum.name);
 	cil_level_to_policy(file_arr, file_index, low);
-	fprintf(file_arr[file_index], " - ");
+	fprintf(file_arr[file_index], "-");
 	cil_level_to_policy(file_arr, file_index, high);
 }
 
