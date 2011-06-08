@@ -68,7 +68,7 @@ coverage: clean unit
 	genhtml -o ./cov/html ./cov/app.info
 
 test: cilc
-	./cilc testing/test.txt
+	./cilc testing/test.cil
 
 install:
 
