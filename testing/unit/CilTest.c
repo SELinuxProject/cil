@@ -1382,7 +1382,7 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_copy_ast);
 	//SUITE_ADD_TEST(suite, test_cil_copy_ast_neg);
 	
-//	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_orignull_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_orignull_neg);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernull_neg);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_otherheadnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernextnull_neg);
