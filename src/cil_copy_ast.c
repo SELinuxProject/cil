@@ -1085,7 +1085,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	}
 
 	if (orig->cl_head != NULL) {
-		printf("orig->cl_head not null\n");
 		other->head->data = new;
 	}
 

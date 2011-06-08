@@ -2735,7 +2735,6 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		if (tok_next != NULL) {
 			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to find table, block current: %s\n", tok_current);
 				goto resolve_name_helper_cleanup;
 			}
 			symtab = &(((struct cil_block*)tmp_node->data)->symtab[CIL_SYM_BLOCKS]);
