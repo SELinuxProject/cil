@@ -1402,7 +1402,7 @@ void test_cil_resolve_avrule_permset(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")",
-			"(", "permissionset", "baz", "(", "open", "close", ")", ")",
+			"(", "permissionset", "baz", "(", "open", "write", ")", ")",
 	                "(", "allow", "test", "foo", "bar", "baz", ")", NULL};
 
 	struct cil_tree *test_tree;
