@@ -1097,6 +1097,7 @@ int cil_ipaddr_init(struct cil_ipaddr **ipaddr)
 	struct cil_ipaddr *new_ipaddr = cil_malloc(sizeof(struct cil_ipaddr));
 
 	cil_symtab_datum_init(&new_ipaddr->datum);
+	memset(&new_ipaddr->ip, 0, sizeof(new_ipaddr->ip));
 
 	*ipaddr = new_ipaddr;
 
