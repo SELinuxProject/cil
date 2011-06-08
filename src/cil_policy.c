@@ -225,25 +225,6 @@ int cil_nodecon_compare(const void *a, const void *b)
 	}
 }
 
-int cil_fsuse_compare(const void *a, const void *b)
-{
-	int rc;
-	struct cil_fsuse *afsuse;
-	struct cil_fsuse *bfsuse;
-	afsuse = *(struct cil_fsuse**)a;
-	bfsuse = *(struct cil_fsuse**)b;
-	rc = strcmp(afsuse->fs_str, bfsuse->fs_str);
-	if (rc == 0) {
-		if (afsuse->type < bfsuse->type) {
-			rc = -1;
-		}
-		else if (bfsuse->type < afsuse->type) {
-			rc = 1;
-		}
-	}
-	return rc;
-}
-
 static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
 	struct cil_list_item *new_key = NULL;
@@ -1216,7 +1197,6 @@ int cil_gen_policy(struct cil_db *db)
 	qsort(db->genfscon->array, db->genfscon->count, sizeof(struct cil_genfscon*), cil_genfscon_compare);
 	qsort(db->netifcon->array, db->netifcon->count, sizeof(struct cil_netifcon*), cil_netifcon_compare);
 	qsort(db->nodecon->array, db->nodecon->count, sizeof(struct cil_nodecon*), cil_nodecon_compare);
-	qsort(db->fsuse->array, db->fsuse->count, sizeof(struct cil_fsuse*), cil_fsuse_compare);
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {

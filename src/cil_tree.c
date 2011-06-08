@@ -232,6 +232,7 @@ void cil_tree_print_level(struct cil_level *level)
 
 void cil_tree_print_context(struct cil_context *context)
 {
+	printf(" (");
 	if (context->user != NULL)
 		printf(" %s", context->user->datum.name);
 	else if (context->user_str != NULL)
@@ -262,6 +263,7 @@ void cil_tree_print_context(struct cil_context *context)
 	} else if (context->high_str != NULL) {
 		printf(" %s", context->high_str);
 	}
+	printf(" )");
 	return;
 }
 
@@ -1033,7 +1035,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf(" %s", call->macro_str);
 
 				if (call->args != NULL) {
-					printf(", args:( ");
+					printf(", args: ( ");
 					struct cil_list_item *item = call->args->head;
 					while(item != NULL) {
 						if (((struct cil_args*)item->data)->arg != NULL) {
