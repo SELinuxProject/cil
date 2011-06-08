@@ -543,7 +543,7 @@ void test_cil_resolve_senscat_catsetname_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_senscat_sublist(CuTest *tc) {
@@ -1824,7 +1824,7 @@ void test_cil_resolve_filecon_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_filecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_filecon_anon_context(CuTest *tc) {
@@ -1867,7 +1867,7 @@ void test_cil_resolve_filecon_anon_context_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_filecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_portcon(CuTest *tc) {
@@ -1913,7 +1913,7 @@ void test_cil_resolve_portcon_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_portcon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_portcon_anon_context(CuTest *tc) {
@@ -1956,7 +1956,7 @@ void test_cil_resolve_portcon_anon_context_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_portcon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_genfscon(CuTest *tc) {
@@ -2002,7 +2002,7 @@ void test_cil_resolve_genfscon_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_genfscon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_genfscon_anon_context(CuTest *tc) {
@@ -2045,7 +2045,7 @@ void test_cil_resolve_genfscon_anon_context_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_genfscon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_nodecon_ipv4(CuTest *tc) {
@@ -2240,7 +2240,7 @@ void test_cil_resolve_nodecon_context_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_nodecon_ipaddr_neg(CuTest *tc) {
@@ -2265,7 +2265,7 @@ void test_cil_resolve_nodecon_ipaddr_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_nodecon_netmask_neg(CuTest *tc) {
@@ -2289,7 +2289,7 @@ void test_cil_resolve_nodecon_netmask_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_nodecon_anon_context(CuTest *tc) {
@@ -2334,7 +2334,7 @@ void test_cil_resolve_nodecon_anon_context_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_nodecon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_netifcon(CuTest *tc) {
@@ -3862,7 +3862,7 @@ void test_cil_resolve_expr_stack_neg(CuTest *tc) {
 	struct cil_booleanif *bif = (struct cil_booleanif*)test_db->ast->root->cl_head->next->next->next->data; 
 
 	int rc = cil_resolve_expr_stack(test_db, bif->expr_stack,test_db->ast->root->cl_head->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_expr_stack_emptystr_neg(CuTest *tc) {
@@ -3922,7 +3922,7 @@ void test_cil_resolve_boolif_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
 	int rc = cil_resolve_boolif(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_evaluate_expr_stack_and(CuTest *tc) {
@@ -4209,7 +4209,7 @@ void test_cil_resolve_tunif_resolveexpr_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
 	int rc = cil_resolve_tunif(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_tunif_evaluateexpr_neg(CuTest *tc) {
@@ -5003,7 +5003,7 @@ void test_cil_resolve_ast_node_helper_boolif_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, other);	
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
 
@@ -5087,7 +5087,7 @@ void test_cil_resolve_ast_node_helper_tunif_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, other);	
-	CuAssertIntEquals(tc, SEPOL_ENOTSUP, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
 
