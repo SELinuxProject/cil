@@ -340,7 +340,28 @@ void test_cil_resolve_cat_list_catrange(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-	
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 4;
+	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
+	int changed = 0;
+	cil_list_item_init(&other->head->next->next->next->next);
+	other->head->next->next->next->next->data = &changed;
+	cil_list_item_init(&other->head->next->next->next->next->next);
+	other->head->next->next->next->next->next->data = NULL;
+
+	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, other);
+	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
+
 	struct cil_list *test_cat_list;
 	cil_list_init(&test_cat_list);
 
@@ -542,6 +563,27 @@ void test_cil_resolve_senscat_sublist(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 4;
+	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
+	int changed = 0;
+	cil_list_item_init(&other->head->next->next->next->next);
+	other->head->next->next->next->next->data = &changed;
+	cil_list_item_init(&other->head->next->next->next->next->next);
+	other->head->next->next->next->next->next->data = NULL;
+
+	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, other);
+	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
 
 	int rc = cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
