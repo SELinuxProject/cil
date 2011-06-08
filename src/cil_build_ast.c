@@ -2870,8 +2870,8 @@ int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	else if (!strcmp(type, "task")) {
 		fsuse->type = CIL_FSUSE_TASK;
 	}
-	else if (!strcmp(type, "transition")) {
-		fsuse->type = CIL_FSUSE_TRANSITION;
+	else if (!strcmp(type, "trans")) {
+		fsuse->type = CIL_FSUSE_TRANS;
 	}
 	else {
 		printf("Invalid fsuse type\n");

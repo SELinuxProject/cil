@@ -971,8 +971,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf("xattr ");
 				} else if (fsuse->type == CIL_FSUSE_TASK) {
 					printf("task ");
-				} else if (fsuse->type == CIL_FSUSE_TRANSITION) {
-					printf("transition ");
+				} else if (fsuse->type == CIL_FSUSE_TRANS) {
+					printf("trans ");
 				} else {
 					printf("unknown ");
 				}

@@ -595,7 +595,7 @@ struct cil_netifcon {
 enum cil_fsuse_types {
 	CIL_FSUSE_XATTR = 1,
 	CIL_FSUSE_TASK,
-	CIL_FSUSE_TRANSITION
+	CIL_FSUSE_TRANS
 };
 
 struct cil_fsuse {
