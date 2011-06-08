@@ -319,6 +319,13 @@ CuSuite* CilTreeGetResolveSuite() {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_netifcon_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_fsuse);
+	SUITE_ADD_TEST(suite, test_cil_resolve_fsuse_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_fsuse_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_fsuse_anon_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_fsuse);
+	//SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_fsuse_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_levels);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context);
@@ -1109,6 +1116,25 @@ CuSuite* CilTreeGetBuildSuite() {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_netifcon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_anoncontext);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_anoncontext_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_xattr);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_task);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_transition);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_invalidtype_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_notype_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_typeinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_nofilesystem_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_filesysteminparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_nocontext_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_emptyconparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_fsuse);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_fsuse_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_noparams);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_type);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_role);
@@ -1398,6 +1424,12 @@ CuSuite* CilTreeGetSuite() {
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_lessthan_bipv6);
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv6_greaterthan_bmaskipv6);
 	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv6_lessthan_bmaskipv6);
+	
+	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_type_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_type_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_fsstr_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_fsstr_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_equal);
 	
 	return suite;
 }

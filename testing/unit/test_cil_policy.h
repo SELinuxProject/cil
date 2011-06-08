@@ -40,4 +40,10 @@ void test_cil_nodecon_compare_aipv6_lessthan_bipv6(CuTest *tc);
 void test_cil_nodecon_compare_amaskipv6_greaterthan_bmaskipv6(CuTest *tc);
 void test_cil_nodecon_compare_amaskipv6_lessthan_bmaskipv6(CuTest *tc);
 
+void test_cil_fsuse_compare_type_a_greater_b(CuTest *tc);
+void test_cil_fsuse_compare_type_b_greater_a(CuTest *tc);
+void test_cil_fsuse_compare_fsstr_a_greater_b(CuTest *tc);
+void test_cil_fsuse_compare_fsstr_b_greater_a(CuTest *tc);
+void test_cil_fsuse_compare_equal(CuTest *tc);
+
 #endif

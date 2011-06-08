@@ -1547,7 +1547,7 @@ int cil_resolve_fsuse(struct cil_db *db, struct cil_tree_node *current, struct c
 			return rc;
 		}
 		fsuse->context = (struct cil_context*)context_node->data;
-	} else if (fsuse->context != NULL) {
+	} else {
 		rc = cil_resolve_context(db, current, fsuse->context, call);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve context, rc: %d\n", rc);

@@ -599,3 +599,74 @@ void test_cil_nodecon_compare_amaskipv6_lessthan_bmaskipv6(CuTest *tc) {
 	CuAssertTrue(tc, rc > 0);
 }
 
+void test_cil_fsuse_compare_type_a_greater_b(CuTest *tc) {
+	struct cil_fsuse *afsuse;
+	cil_fsuse_init(&afsuse);
+	afsuse->type = CIL_FSUSE_XATTR;
+
+	struct cil_fsuse *bfsuse;
+	cil_fsuse_init(&bfsuse);
+	bfsuse->type = CIL_FSUSE_TASK;
+	
+	int rc = cil_fsuse_compare(&afsuse, &bfsuse);
+	CuAssertTrue(tc, rc < 0);
+}
+
+void test_cil_fsuse_compare_type_b_greater_a(CuTest *tc) {
+	struct cil_fsuse *afsuse;
+	cil_fsuse_init(&afsuse);
+	afsuse->type = CIL_FSUSE_TASK;
+
+	struct cil_fsuse *bfsuse;
+	cil_fsuse_init(&bfsuse);
+	bfsuse->type = CIL_FSUSE_XATTR;
+	
+	int rc = cil_fsuse_compare(&afsuse, &bfsuse);
+	CuAssertTrue(tc, rc > 0);
+}
+
+void test_cil_fsuse_compare_fsstr_a_greater_b(CuTest *tc) {
+	struct cil_fsuse *afsuse;
+	cil_fsuse_init(&afsuse);
+	afsuse->type = CIL_FSUSE_XATTR;
+	afsuse->fs_str = "aaa";
+
+	struct cil_fsuse *bfsuse;
+	cil_fsuse_init(&bfsuse);
+	bfsuse->type = CIL_FSUSE_XATTR;
+	bfsuse->fs_str = "bbb";
+	
+	int rc = cil_fsuse_compare(&afsuse, &bfsuse);
+	CuAssertTrue(tc, rc < 0);
+}
+
+void test_cil_fsuse_compare_fsstr_b_greater_a(CuTest *tc) {
+	struct cil_fsuse *afsuse;
+	cil_fsuse_init(&afsuse);
+	afsuse->type = CIL_FSUSE_XATTR;
+	afsuse->fs_str = "bbb";
+
+	struct cil_fsuse *bfsuse;
+	cil_fsuse_init(&bfsuse);
+	bfsuse->type = CIL_FSUSE_XATTR;
+	bfsuse->fs_str = "aaa";
+	
+	int rc = cil_fsuse_compare(&afsuse, &bfsuse);
+	CuAssertTrue(tc, rc > 0);
+}
+
+void test_cil_fsuse_compare_equal(CuTest *tc) {
+	struct cil_fsuse *afsuse;
+	cil_fsuse_init(&afsuse);
+	afsuse->type = CIL_FSUSE_XATTR;
+	afsuse->fs_str = "foo";
+
+	struct cil_fsuse *bfsuse;
+	cil_fsuse_init(&bfsuse);
+	bfsuse->type = CIL_FSUSE_XATTR;
+	bfsuse->fs_str = "foo";
+	
+	int rc = cil_fsuse_compare(&afsuse, &bfsuse);
+	CuAssertTrue(tc, rc == 0);
+}
+

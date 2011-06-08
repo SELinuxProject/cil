@@ -160,6 +160,13 @@ void test_cil_resolve_netifcon_unnamed_otf_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_netifcon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_netifcon_neg(CuTest *tc);
 
+void test_cil_resolve_fsuse(CuTest *);
+void test_cil_resolve_fsuse_neg(CuTest *);
+void test_cil_resolve_fsuse_anon(CuTest *);
+void test_cil_resolve_fsuse_anon_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_fsuse(CuTest *tc);
+void test_cil_resolve_ast_node_helper_fsuse_neg(CuTest *tc);
+
 void test_cil_resolve_sidcontext(CuTest *);
 void test_cil_resolve_sidcontext_named_levels(CuTest *);
 void test_cil_resolve_sidcontext_named_context(CuTest *);
