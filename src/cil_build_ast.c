@@ -13,8 +13,9 @@
 
 int __cil_verify_name(const char *name)
 {
+	int len = strlen(name);
 	int i;
-	for (i=0; i<strlen(name); i++) {
+	for (i = 0; i < len; i++) {
 		if (!isalnum(name[i]) && name[i] != '_') {
 			printf("Invalid character %c in %s\n", name[i], name);
 			return SEPOL_ERR;

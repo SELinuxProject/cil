@@ -450,7 +450,7 @@ void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_cont
 	cil_level_to_policy(file_arr, file_index, high);
 }
 
-void cil_constrain_to_policy(FILE **file_arr, uint32_t file_index, struct cil_constrain *cons)
+void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_constrain *cons)
 {
 	struct cil_list_item *class_curr = cons->class_list->head;
 	struct cil_list_item *perm_curr = cons->perm_list->head;
@@ -507,7 +507,7 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 	return SEPOL_OK;
 }
 
-int cil_typerule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_type_rule *rule)
+int cil_typerule_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_type_rule *rule)
 {
 	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
 	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
@@ -694,7 +694,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 }
 
 
-int __cil_booleanif_node_helper(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other)
+int __cil_booleanif_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
 {
 	int rc = SEPOL_ERR;
 	FILE **file_arr = (FILE**)other->head->data;

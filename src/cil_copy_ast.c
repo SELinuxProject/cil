@@ -173,7 +173,7 @@ int cil_copy_sid(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_
 	return SEPOL_OK;
 }
 
-int cil_copy_sidcontext(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_sidcontext(struct cil_tree_node *orig, struct cil_tree_node *copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_sidcontext *new;
 	int rc = cil_sidcontext_init(&new);
@@ -575,7 +575,7 @@ int cil_copy_context(struct cil_tree_node *orig, struct cil_tree_node *copy, sym
 	return SEPOL_OK;
 }
 
-int cil_copy_netifcon(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_netifcon(struct cil_tree_node *orig, struct cil_tree_node *copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_netifcon *new;
 	int rc = cil_netifcon_init(&new);
@@ -811,7 +811,7 @@ int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct
 	return SEPOL_OK;
 }
 
-int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, struct cil_list *other)
+int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *parent = NULL;

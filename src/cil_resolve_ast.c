@@ -292,7 +292,7 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 	return SEPOL_OK;
 }
 
-int cil_reset_class(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+int cil_reset_class(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
 {
 	struct cil_class *class = (struct cil_class *)current->data;
 	
@@ -303,7 +303,7 @@ int cil_reset_class(struct cil_db *db, struct cil_tree_node *current, struct cil
 	return SEPOL_OK;
 }
 
-int cil_reset_sens(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+int cil_reset_sens(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
 {
 	struct cil_sens *sens = (struct cil_sens *)current->data;
 	/* during a re-resolve, we need to reset the categories associated with
@@ -655,7 +655,7 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 }
 
 /* other is a cil_list containing order, ordered, empty, and found */
-int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other)
+int __cil_verify_order_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
 {
 	uint32_t *empty = NULL, *found = NULL, *flavor = NULL;
 	struct cil_list_item *ordered = NULL;
