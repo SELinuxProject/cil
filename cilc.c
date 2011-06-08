@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 			 fprintf(stderr, "Could not open file: %s\n", argv[i]);
 			 return SEPOL_ERR;
 		}
-		if (stat(argv[1], &filedata) == -1) {
+		if (stat(argv[i], &filedata) == -1) {
 			printf("Could not stat file: %s\n", argv[i]);
 			return SEPOL_ERR;
 		}
