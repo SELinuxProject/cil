@@ -15097,7 +15097,7 @@ void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_constrain(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -15123,6 +15123,58 @@ void test_cil_build_ast_node_helper_gen_constrain(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_constrain_neg(CuTest *tc) {
+	char *line[] = {"(", "constrain", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *cil_l;
+	cil_list_init(&cil_l);
+
+	uint32_t finished = 0;
+
+	cil_list_item_init(&cil_l->head);
+	cil_list_item_init(&cil_l->head->next);
+	cil_l->head->data = test_db->ast->root;
+	cil_l->head->flavor = CIL_AST_NODE;
+	cil_l->head->next->flavor = CIL_DB;
+	cil_l->head->next->data = test_db;
+	
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, cil_l);
+	CuAssertIntEquals(tc, finished, 0);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_build_ast_node_helper_gen_mlsconstrain(CuTest *tc) {
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *cil_l;
+	cil_list_init(&cil_l);
+
+	uint32_t finished = 0;
+
+	cil_list_item_init(&cil_l->head);
+	cil_list_item_init(&cil_l->head->next);
+	cil_l->head->data = test_db->ast->root;
+	cil_l->head->flavor = CIL_AST_NODE;
+	cil_l->head->next->flavor = CIL_DB;
+	cil_l->head->next->data = test_db;
+	
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, cil_l);
+	CuAssertIntEquals(tc, finished, 1);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_build_ast_node_helper_gen_mlsconstrain_neg(CuTest *tc) {
 	char *line[] = {"(", "mlsconstrain", ")", NULL};
 	
 	struct cil_tree *test_tree;

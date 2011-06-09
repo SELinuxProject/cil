@@ -244,6 +244,8 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_perm_resolve_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_constrain);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_constrain_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_context);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_user_neg);
@@ -1099,6 +1101,8 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_constrain);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_constrain_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_mlsconstrain);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_mlsconstrain_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_fill_context);
 	SUITE_ADD_TEST(suite, test_cil_fill_context_unnamedlvl);

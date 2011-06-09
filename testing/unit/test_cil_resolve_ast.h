@@ -362,6 +362,8 @@ void test_cil_resolve_ast_node_helper_level_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_constrain(CuTest *);
 void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *);
+void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_context(CuTest *);
 void test_cil_resolve_ast_node_helper_context_neg(CuTest *);

@@ -6111,6 +6111,92 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "sensitivity", "s0", ")",
 			"(", "category", "c1", ")",
+			"(", "role", "r1", ")",
+			"(", "role", "r2", ")",
+			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 7;
+	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
+	int changed = 0;
+    	cil_list_item_init(&other->head->next->next->next->next);
+    	other->head->next->next->next->next->data = &changed;
+    	cil_list_item_init(&other->head->next->next->next->next->next);
+    	other->head->next->next->next->next->next->data = NULL;
+
+	uint32_t *finished = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, finished, other);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
+}
+
+void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", ")", ")",
+			"(", "class", "dir", "(", "create", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
+			"(", "role", "r1", ")",
+			"(", "role", "r2", ")",
+			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 7;
+	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
+	int changed = 0;
+    	cil_list_item_init(&other->head->next->next->next->next);
+    	other->head->next->next->next->next->data = &changed;
+    	cil_list_item_init(&other->head->next->next->next->next->next);
+    	other->head->next->next->next->next->next->data = NULL;
+
+	uint32_t *finished = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, finished, other);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
+}
+
+void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
+        char *line[] = {"(", "class", "file", "(", "create", "relabelto", ")", ")",
+			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
@@ -6149,7 +6235,7 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 	CuAssertPtrEquals(tc, NULL, finished);
 }
 
-void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
         char *line[] = {"(", "class", "file", "(", "read", ")", ")",
 			"(", "class", "dir", "(", "read", ")", ")",
 			"(", "sensitivity", "s0", ")",
