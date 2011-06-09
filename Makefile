@@ -28,7 +28,7 @@ LIBS =
 LDFLAGS = -lfl
 COVCFLAGS = -fprofile-arcs -ftest-coverage -O0
 
-CFLAGS ?= -Wall -Werror -Wshadow -W -Wundef -Wmissing-format-attribute
+CFLAGS ?= -Wall -Werror -Wshadow -Wextra -Wundef -Wmissing-format-attribute -Wcast-align -Wstrict-prototypes -Wpointer-arith -Wunused-but-set-parameter
 
 ifeq ($(DEBUG),1)
 	override CFLAGS += -g3 -O0 -gdwarf-2 -fno-strict-aliasing -DDEBUG

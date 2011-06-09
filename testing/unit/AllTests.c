@@ -19,9 +19,9 @@
 #include <stdio.h>
 #include "CuTest.h"
 
-CuSuite* CilTreeGetSuite();
-CuSuite* CilTreeGetResolveSuite();
-CuSuite* CilTreeGetBuildSuite();
+CuSuite* CilTreeGetSuite(void);
+CuSuite* CilTreeGetResolveSuite(void);
+CuSuite* CilTreeGetBuildSuite(void);
 
 void RunAllTests(void) {
     CuString *output  = CuStringNew();
@@ -49,7 +49,7 @@ void RunAllTests(void) {
     printf("%s\n", output->buffer);
 }
 
-int main() {
+int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
     RunAllTests();
 
     return 0;

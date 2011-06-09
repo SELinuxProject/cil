@@ -140,7 +140,7 @@ void test_symtab_init_no_table_neg(CuTest *tc) {
 	free(test_new_db);
 }
 
-CuSuite* CilTreeGetResolveSuite() {
+CuSuite* CilTreeGetResolveSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 	
 	/* test_cil_resolve_ast.c */
@@ -478,7 +478,7 @@ CuSuite* CilTreeGetResolveSuite() {
 	return suite;
 }
 
-CuSuite* CilTreeGetBuildSuite() {
+CuSuite* CilTreeGetBuildSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 
 	/* test_cil_build_ast.c */
@@ -1217,7 +1217,7 @@ CuSuite* CilTreeGetBuildSuite() {
 	return suite;
 }
 
-CuSuite* CilTreeGetSuite() {
+CuSuite* CilTreeGetSuite(void) {
 	CuSuite* suite = CuSuiteNew();
 
 	/* CilTest.c */

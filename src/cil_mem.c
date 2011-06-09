@@ -20,15 +20,15 @@
 #include <stdio.h>
 #include <string.h>
 
-__attribute__((noreturn)) void cil_default_malloc_error_handler()
+__attribute__((noreturn)) void cil_default_malloc_error_handler(void)
 {
 	fprintf(stderr, "Unable to proceed, failed to allocate memory\n");
 	exit(1);
 }
 
-static void (*cil_malloc_error_handler)() = &cil_default_malloc_error_handler;
+static void (*cil_malloc_error_handler)(void) = &cil_default_malloc_error_handler;
 
-void cil_set_malloc_error_handler(void (*handler)())
+void cil_set_malloc_error_handler(void (*handler)(void))
 {
 	cil_malloc_error_handler = handler;
 }
