@@ -109,6 +109,9 @@ void test_cil_resolve_typebounds(CuTest *);
 void test_cil_resolve_typebounds_type1_neg(CuTest *);
 void test_cil_resolve_typebounds_type2_neg(CuTest *);
 
+void test_cil_resolve_typepermissive(CuTest *);
+void test_cil_resolve_typepermissive_neg(CuTest *);
+
 void test_cil_resolve_classcommon(CuTest *);
 void test_cil_resolve_classcommon_no_class_neg(CuTest *);
 void test_cil_resolve_classcommon_neg(CuTest *);
@@ -373,6 +376,9 @@ void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_typebounds(CuTest *);
 void test_cil_resolve_ast_node_helper_typebounds_neg(CuTest *);
+
+void test_cil_resolve_ast_node_helper_typepermissive(CuTest *);
+void test_cil_resolve_ast_node_helper_typepermissive_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_avrule(CuTest *);
 void test_cil_resolve_ast_node_helper_avrule_src_nores_neg(CuTest *);

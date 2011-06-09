@@ -161,6 +161,11 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typebounds);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typebounds_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_typepermissive);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typepermissive_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typepermissive);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typepermissive_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon_no_class_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon_no_common_neg);
@@ -628,6 +633,16 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typebounds);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typebounds_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_typepermissive);
+	SUITE_ADD_TEST(suite, test_cil_gen_typepermissive_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typepermissive_typeinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typepermissive_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typepermissive_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typepermissive_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typepermissive_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typepermissive);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typepermissive_neg);
+
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_and);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_or);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_xor);
