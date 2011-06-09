@@ -30,6 +30,7 @@ int cil_resolve_typeattr(struct cil_db *, struct cil_tree_node *, struct cil_cal
 int cil_resolve_typealias(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_typebounds(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_typepermissive(struct cil_db *, struct cil_tree_node *, struct cil_call *);
+int cil_resolve_filetransition(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_userrole(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_roletype(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_roletrans(struct cil_db *, struct cil_tree_node *, struct cil_call *);

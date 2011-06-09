@@ -166,6 +166,14 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typepermissive);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typepermissive_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_filetransition);
+	SUITE_ADD_TEST(suite, test_cil_resolve_filetransition_type1_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_filetransition_type2_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_filetransition_class_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_filetransition_type3_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filetransition);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filetransition_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon_no_class_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon_no_common_neg);
@@ -643,6 +651,24 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typepermissive);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typepermissive_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_notype1_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_type1inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_notype2_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_type2inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_classinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_notype3_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_type3inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_nostr_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_strinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_filetransition_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_filetransition);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_filetransition_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_and);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_or);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_xor);

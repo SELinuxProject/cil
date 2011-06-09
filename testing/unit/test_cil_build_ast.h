@@ -144,6 +144,22 @@ void test_cil_gen_typepermissive_dbnull_neg(CuTest *);
 void test_cil_gen_typepermissive_currnull_neg(CuTest *);
 void test_cil_gen_typepermissive_astnull_neg(CuTest *);
 
+void test_cil_gen_filetransition(CuTest *);
+void test_cil_gen_filetransition_notype1_neg(CuTest *);
+void test_cil_gen_filetransition_type1inparens_neg(CuTest *);
+void test_cil_gen_filetransition_notype2_neg(CuTest *);
+void test_cil_gen_filetransition_type2inparens_neg(CuTest *);
+void test_cil_gen_filetransition_noclass_neg(CuTest *);
+void test_cil_gen_filetransition_classinparens_neg(CuTest *);
+void test_cil_gen_filetransition_notype3_neg(CuTest *);
+void test_cil_gen_filetransition_type3inparens_neg(CuTest *);
+void test_cil_gen_filetransition_nostr_neg(CuTest *);
+void test_cil_gen_filetransition_strinparens_neg(CuTest *);
+void test_cil_gen_filetransition_extra_neg(CuTest *);
+void test_cil_gen_filetransition_dbnull_neg(CuTest *);
+void test_cil_gen_filetransition_currnull_neg(CuTest *);
+void test_cil_gen_filetransition_astnull_neg(CuTest *);
+
 void test_cil_gen_expr_stack_and(CuTest *);
 void test_cil_gen_expr_stack_or(CuTest *);
 void test_cil_gen_expr_stack_xor(CuTest *);
@@ -751,6 +767,9 @@ void test_cil_build_ast_node_helper_typebounds_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_typepermissive(CuTest *);
 void test_cil_build_ast_node_helper_typepermissive_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_filetransition(CuTest *);
+void test_cil_build_ast_node_helper_filetransition_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_role(CuTest *);
 void test_cil_build_ast_node_helper_role_neg(CuTest *);
