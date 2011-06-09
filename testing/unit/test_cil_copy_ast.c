@@ -1133,6 +1133,54 @@ void test_cil_copy_optional(CuTest *tc) {
 		((struct cil_optional *)test_ast_node->data)->datum.name);
 }
 
+void test_cil_copy_nodecon(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "ipaddr", "ipaddr", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_nodecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_nodecon *test_copy;
+	cil_nodecon_init(&test_copy);
+
+	int rc = cil_copy_nodecon((struct cil_nodecon *)test_ast_node->data, &test_copy);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+}
+
+void test_cil_copy_nodecon_anon(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "(", "192.168.1.1", ")", "(", "192.168.1.1", ")", "(", "user", "role", "type", "low", "high", ")", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        cil_gen_nodecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_nodecon *test_copy;
+	cil_nodecon_init(&test_copy);
+
+	int rc = cil_copy_nodecon((struct cil_nodecon *)test_ast_node->data, &test_copy);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+}
+
 void test_cil_copy_fill_ipaddr(CuTest *tc) {
 	char *line[] = {"(", "ipaddr", "ip", "192.168.1.1", ")", NULL};
 

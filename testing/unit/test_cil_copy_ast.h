@@ -137,6 +137,9 @@ void test_cil_copy_optional(CuTest *);
 void test_cil_copy_node_helper_optional(CuTest *tc); 
 void test_cil_copy_node_helper_optional_neg(CuTest *tc); 
 
+void test_cil_copy_nodecon(CuTest *);
+void test_cil_copy_nodecon_anon(CuTest *);
+
 void test_cil_copy_fill_ipaddr(CuTest *);
 
 void test_cil_copy_ipaddr(CuTest *);
