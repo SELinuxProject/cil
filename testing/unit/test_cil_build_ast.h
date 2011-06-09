@@ -126,6 +126,16 @@ void test_cil_gen_typeattr_attrnull_neg(CuTest *);
 void test_cil_gen_typeattr_attrlist_neg(CuTest *);
 void test_cil_gen_typeattr_extra_neg(CuTest *);
 
+void test_cil_gen_typebounds(CuTest *);
+void test_cil_gen_typebounds_notype1_neg(CuTest *);
+void test_cil_gen_typebounds_type1inparens_neg(CuTest *);
+void test_cil_gen_typebounds_notype2_neg(CuTest *);
+void test_cil_gen_typebounds_type2inparens_neg(CuTest *);
+void test_cil_gen_typebounds_extra_neg(CuTest *);
+void test_cil_gen_typebounds_dbnull_neg(CuTest *);
+void test_cil_gen_typebounds_currnull_neg(CuTest *);
+void test_cil_gen_typebounds_astnull_neg(CuTest *);
+
 void test_cil_gen_expr_stack_and(CuTest *);
 void test_cil_gen_expr_stack_or(CuTest *);
 void test_cil_gen_expr_stack_xor(CuTest *);
@@ -727,6 +737,9 @@ void test_cil_build_ast_node_helper_tunif_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_typealias(CuTest *);
 void test_cil_build_ast_node_helper_typealias_notype_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_typebounds(CuTest *);
+void test_cil_build_ast_node_helper_typebounds_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_role(CuTest *);
 void test_cil_build_ast_node_helper_role_neg(CuTest *);

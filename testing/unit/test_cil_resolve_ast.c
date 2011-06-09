@@ -1398,6 +1398,56 @@ void test_cil_resolve_typealias_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
+void test_cil_resolve_typebounds(CuTest *tc) {
+	char *line[] = {"(", "type", "type_a", ")",
+			"(", "type", "type_b", ")",
+			"(", "typebounds", "type_a", "type_b", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_typebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_typebounds_type1_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "type_b", ")",
+			"(", "typebounds", "type_a", "type_b", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_typebounds(test_db, test_db->ast->root->cl_head->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_typebounds_type2_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "type_a", ")",
+			"(", "typebounds", "type_a", "type_b", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_typebounds(test_db, test_db->ast->root->cl_head->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 void test_cil_resolve_classcommon(CuTest *tc) {
 	char *line[] = {"(", "class", "file", "(", "read", ")", ")",
 			"(", "common", "file", "(", "write", ")", ")",	
@@ -6517,6 +6567,83 @@ void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->cl_head, finished, other);	
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
+}
+
+void test_cil_resolve_ast_node_helper_typebounds(CuTest *tc) {
+	char *line[] = {"(", "type", "type_a", ")",
+			"(", "type", "type_b", ")",
+			"(", "typebounds", "type_a", "type_b", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 7;
+	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
+	int changed = 0;
+    	cil_list_item_init(&other->head->next->next->next->next);
+    	other->head->next->next->next->next->data = &changed;
+	cil_list_item_init(&other->head->next->next->next->next->next);
+	other->head->next->next->next->next->next->data = NULL;
+
+	uint32_t *finished = NULL;
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, other);	
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertPtrEquals(tc, NULL, finished);
+}
+
+void test_cil_resolve_ast_node_helper_typebounds_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "type_b", ")",
+			"(", "typebounds", "type_a", "type_b", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_list *other;
+	cil_list_init(&other);
+	cil_list_item_init(&other->head);
+	other->head->data = test_db;
+	other->head->flavor = CIL_DB;
+	cil_list_item_init(&other->head->next);
+	other->head->next->flavor = CIL_INT;
+	int pass = 7;
+	other->head->next->data = &pass;
+	cil_list_item_init(&other->head->next->next);
+	other->head->next->next->data = NULL;
+	cil_list_item_init(&other->head->next->next->next);
+	other->head->next->next->next->data = NULL;
+	int changed = 0;
+    	cil_list_item_init(&other->head->next->next->next->next);
+    	other->head->next->next->next->next->data = &changed;
+	cil_list_item_init(&other->head->next->next->next->next->next);
+	other->head->next->next->next->next->next->data = NULL;
+
+	uint32_t *finished = NULL;
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, other);	
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertPtrEquals(tc, NULL, finished);
 }

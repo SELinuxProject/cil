@@ -1512,7 +1512,11 @@ int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+	if (parse_current->next == NULL || 
+	parse_current->next->cl_head != NULL || 
+	parse_current->next->next == NULL || 
+	parse_current->next->next->cl_head != NULL ||
+	parse_current->next->next->next != NULL) {
 		printf("Invalid typebounds declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
