@@ -254,6 +254,12 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roleallow);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roleallow_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_roledominance);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roledominance_role1_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roledominance_role2_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roledominance);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roledominance_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_permset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_permset_neg);
@@ -799,9 +805,21 @@ CuSuite* CilTreeGetBuildSuite(void) {
         SUITE_ADD_TEST(suite, test_cil_gen_roleallow_srcnull_neg);
         SUITE_ADD_TEST(suite, test_cil_gen_roleallow_tgtnull_neg);
         SUITE_ADD_TEST(suite, test_cil_gen_roleallow_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roleallow_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roleallow);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roleallow_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance);
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance_norole1_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance_role1inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance_norole2_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance_role2inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roledominance_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roledominance);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roledominance_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permset);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permset_anon);

@@ -311,6 +311,16 @@ void test_cil_gen_roleallow_srcnull_neg(CuTest *);
 void test_cil_gen_roleallow_tgtnull_neg(CuTest *);
 void test_cil_gen_roleallow_extra_neg(CuTest *);
 
+void test_cil_gen_roledominance(CuTest *);
+void test_cil_gen_roledominance_norole1_neg(CuTest *);
+void test_cil_gen_roledominance_role1inparens_neg(CuTest *);
+void test_cil_gen_roledominance_norole2_neg(CuTest *);
+void test_cil_gen_roledominance_role2inparens_neg(CuTest *);
+void test_cil_gen_roledominance_extra_neg(CuTest *);
+void test_cil_gen_roledominance_dbnull_neg(CuTest *);
+void test_cil_gen_roledominance_currnull_neg(CuTest *);
+void test_cil_gen_roledominance_astnull_neg(CuTest *);
+
 void test_cil_gen_avrule(CuTest *);
 void test_cil_gen_avrule_permset(CuTest *);
 void test_cil_gen_avrule_permset_anon(CuTest *);
@@ -726,6 +736,9 @@ void test_cil_build_ast_node_helper_roletrans_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_roleallow(CuTest *);
 void test_cil_build_ast_node_helper_roleallow_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_roledominance(CuTest *);
+void test_cil_build_ast_node_helper_roledominance_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_avrule_allow(CuTest *);
 void test_cil_build_ast_node_helper_avrule_allow_neg(CuTest *);

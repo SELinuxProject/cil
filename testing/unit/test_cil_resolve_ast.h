@@ -35,6 +35,10 @@ void test_cil_resolve_roleallow(CuTest *);
 void test_cil_resolve_roleallow_srcdecl_neg(CuTest *);
 void test_cil_resolve_roleallow_tgtdecl_neg(CuTest *);
 
+void test_cil_resolve_roledominance(CuTest *);
+void test_cil_resolve_roledominance_role1_neg(CuTest *);
+void test_cil_resolve_roledominance_role2_neg(CuTest *);
+
 void test_cil_resolve_sensalias(CuTest *);
 void test_cil_resolve_sensalias_sensdecl_neg(CuTest *);
 
@@ -327,6 +331,9 @@ void test_cil_resolve_ast_node_helper_dominance_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_roleallow(CuTest *);
 void test_cil_resolve_ast_node_helper_roleallow_neg(CuTest *);
+
+void test_cil_resolve_ast_node_helper_roledominance(CuTest *);
+void test_cil_resolve_ast_node_helper_roledominance_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_sensalias(CuTest *);
 void test_cil_resolve_ast_node_helper_sensalias_neg(CuTest *);
