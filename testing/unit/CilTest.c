@@ -552,6 +552,16 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_common);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_common_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_sid);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_nameinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_sid_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_sid);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_sid_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext);
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_namedcontext);
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_halfcontext_neg);

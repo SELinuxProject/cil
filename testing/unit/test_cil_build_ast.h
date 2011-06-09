@@ -82,6 +82,14 @@ void test_cil_gen_common_twoperms_neg(CuTest *tc);
 void test_cil_gen_common_permsublist_neg(CuTest *tc);
 void test_cil_gen_common_noperms_neg(CuTest *tc);
 
+void test_cil_gen_sid(CuTest *);
+void test_cil_gen_sid_noname_neg(CuTest *);
+void test_cil_gen_sid_nameinparens_neg(CuTest *);
+void test_cil_gen_sid_extra_neg(CuTest *);
+void test_cil_gen_sid_dbnull_neg(CuTest *);
+void test_cil_gen_sid_currnull_neg(CuTest *);
+void test_cil_gen_sid_astnull_neg(CuTest *);
+
 void test_cil_gen_sidcontext(CuTest *);
 void test_cil_gen_sidcontext_namedcontext(CuTest *);
 void test_cil_gen_sidcontext_halfcontext_neg(CuTest *);
@@ -682,6 +690,9 @@ void test_cil_build_ast_node_helper_class_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_common(CuTest *);
 void test_cil_build_ast_node_helper_common_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_sid(CuTest *);
+void test_cil_build_ast_node_helper_sid_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_sidcontext(CuTest *);
 void test_cil_build_ast_node_helper_sidcontext_neg(CuTest *);
