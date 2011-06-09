@@ -70,16 +70,16 @@ void cil_list_item_destroy(struct cil_list_item **item, uint8_t destroy_data)
 }
 
 
-int cil_list_get_tail(struct cil_list *list, struct cil_list_item *tail)
+int cil_list_get_tail(struct cil_list *list, struct cil_list_item **tail)
 {
-	if (list == NULL)
+	if (list == NULL || tail == NULL)
 		return SEPOL_ERR;
 
 	struct cil_list_item *curr = list->head;
 	while (curr->next != NULL)
 		curr = curr->next;
 
-	tail = curr;
+	*tail = curr;
 	return SEPOL_OK;
 }
 
