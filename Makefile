@@ -65,6 +65,7 @@ coverage: clean unit
 	test -d cov || mkdir cov
 	export GCOV_PREFIX_STRIP=1
 	lcov --directory . --capture --output-file cov/app.info --ignore-errors source
+	lcov --remove cov/app.info 'testing/unit/*' --output-file cov/app.info
 	genhtml -o ./cov/html ./cov/app.info
 
 test: cilc
