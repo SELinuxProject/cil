@@ -11068,6 +11068,121 @@ void test_cil_gen_portcon_extra_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_fill_ipaddr(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "(", "192.168.1.1", ")", "ipaddr", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_nodecon *nodecon;
+	cil_nodecon_init(&nodecon);
+	cil_ipaddr_init(&nodecon->addr);
+
+        int rc = cil_fill_ipaddr(test_tree->root->cl_head->cl_head->next->cl_head, nodecon->addr);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_fill_ipaddr_addrnodenull_neg(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "(", "192.168.1.1", ")", "ipaddr", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_nodecon *nodecon;
+	cil_nodecon_init(&nodecon);
+	cil_ipaddr_init(&nodecon->addr);
+
+        int rc = cil_fill_ipaddr(NULL, nodecon->addr);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_ipaddr_addrnull_neg(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "(", "192.168.1.1", ")", "ipaddr", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_nodecon *nodecon;
+	cil_nodecon_init(&nodecon);
+	nodecon->addr = NULL;
+
+        int rc = cil_fill_ipaddr(test_tree->root->cl_head->cl_head->next->cl_head, nodecon->addr);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_ipaddr_addrinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "(", "(", "192.168.1.1", ")", ")", "ipaddr", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_nodecon *nodecon;
+	cil_nodecon_init(&nodecon);
+	cil_ipaddr_init(&nodecon->addr);
+
+        int rc = cil_fill_ipaddr(test_tree->root->cl_head->cl_head->next->cl_head, nodecon->addr);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_ipaddr_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "nodecon", "(", "192.168.1.1", "extra", ")", "ipaddr", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+	struct cil_nodecon *nodecon;
+	cil_nodecon_init(&nodecon);
+	cil_ipaddr_init(&nodecon->addr);
+
+        int rc = cil_fill_ipaddr(test_tree->root->cl_head->cl_head->next->cl_head, nodecon->addr);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_nodecon(CuTest *tc) {
 	char *line[] = {"(", "nodecon", "ipaddr", "ipaddr", "con", ")", NULL};
 

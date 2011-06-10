@@ -1177,6 +1177,12 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_portcon);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_portcon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_fill_ipaddr);
+	SUITE_ADD_TEST(suite, test_cil_fill_ipaddr_addrnodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_ipaddr_addrnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_ipaddr_addrinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_ipaddr_extra_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon);
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_anon_context);
 	SUITE_ADD_TEST(suite, test_cil_gen_nodecon_dbnull_neg);

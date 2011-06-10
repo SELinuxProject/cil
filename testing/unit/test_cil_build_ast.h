@@ -604,6 +604,12 @@ void test_cil_gen_portcon_contextnull_neg(CuTest *tc);
 void test_cil_gen_portcon_context_neg(CuTest *tc);
 void test_cil_gen_portcon_extra_neg(CuTest *tc);
 
+void test_cil_fill_ipaddr(CuTest *tc);
+void test_cil_fill_ipaddr_addrnodenull_neg(CuTest *tc);
+void test_cil_fill_ipaddr_addrnull_neg(CuTest *tc);
+void test_cil_fill_ipaddr_addrinparens_neg(CuTest *tc);
+void test_cil_fill_ipaddr_extra_neg(CuTest *tc);
+
 void test_cil_gen_nodecon(CuTest *tc);
 void test_cil_gen_nodecon_anon_context(CuTest *tc);
 void test_cil_gen_nodecon_dbnull_neg(CuTest *tc);
