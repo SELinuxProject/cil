@@ -797,7 +797,7 @@ void test_cil_resolve_level(CuTest *tc) {
 			"(", "user", "blah_u", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+			"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -814,6 +814,160 @@ void test_cil_resolve_level(CuTest *tc) {
 	int rc2 = cil_resolve_level(test_db, level->next, (struct cil_level*)level->next->data, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
+}
+
+void test_cil_resolve_level_catlist(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "categoryorder", "(", "c0", "c1", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", "c1", ")", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", "c1", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", "c1", ")", ")", ")",
+			"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	
+	struct cil_tree_node *level = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next;
+	int rc = cil_resolve_level(test_db, level, (struct cil_level*)level->data, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	rc = cil_resolve_level(test_db, level, (struct cil_level*)level->data, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_level_catset(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "cats", "(", "c0", "c1", "c2", ")", ")",	
+			"(", "categoryorder", "(", "c0", "c1", "c2", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "cats", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "level", "low", "(", "s0", "cats", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "cats", ")", ")", ")",
+			"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	struct cil_catset *cs = (struct cil_catset *)test_db->ast->root->cl_head->next->next->next->data;
+
+	cil_resolve_catset(test_db, test_db->ast->root->cl_head->next->next->next, cs, NULL);
+	cil_resolve_catorder(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	
+	struct cil_tree_node *level = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next;
+	int rc = cil_resolve_level(test_db, level, (struct cil_level*)level->data, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_level_catset_verifysenscat_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "cats", "(", "c0", "c1", "c2", ")", ")",	
+			"(", "categoryorder", "(", "c0", "c1", "c2", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "cats", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "level", "low", "(", "s0", "cats", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	
+	struct cil_tree_node *level = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next;
+	int rc = cil_resolve_level(test_db, level, (struct cil_level*)level->data, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_level_catset_name_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "cats", "(", "c0", "c1", "c2", ")", ")",	
+			"(", "categoryorder", "(", "c0", "c1", "c2", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "cats", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "level", "low", "(", "s0", "dne", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	
+	struct cil_tree_node *level = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next;
+	int rc = cil_resolve_level(test_db, level, (struct cil_level*)level->data, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_level_catset_resolvecatset_neg(CuTest *tc) {
+	char *line[] = {"(", "category", "c0", ")",
+			"(", "category", "c1", ")",
+			"(", "category", "c2", ")",
+			"(", "categoryset", "cats", "(", "c0", "c1", "c2", "c4", ")", ")",	
+			"(", "categoryorder", "(", "c0", "c1", "c2", ")", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "cats", ")",
+			"(", "type", "blah_t", ")",
+			"(", "role", "blah_r", ")",
+			"(", "user", "blah_u", ")",
+			"(", "level", "low", "(", "s0", "cats", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	
+	struct cil_tree_node *level = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->next;
+	int rc = cil_resolve_level(test_db, level, (struct cil_level*)level->data, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
 void test_cil_resolve_level_sens_neg(CuTest *tc) {
