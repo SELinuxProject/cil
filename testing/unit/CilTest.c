@@ -1301,6 +1301,16 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_optional);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_optional_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_policycap);
+	SUITE_ADD_TEST(suite, test_cil_gen_policycap_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_policycap_nameinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_policycap_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_policycap_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_policycap_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_policycap_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_policycap);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_policycap_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_ipv4);
 	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_ipv4_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_ipaddr_ipv6);

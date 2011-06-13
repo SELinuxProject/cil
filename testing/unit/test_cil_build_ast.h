@@ -711,6 +711,14 @@ void test_cil_gen_optional_nameinparens_neg(CuTest *tc);
 void test_cil_gen_optional_emptyoptional_neg(CuTest *tc);
 void test_cil_gen_optional_norule(CuTest *tc);
 
+void test_cil_gen_policycap(CuTest *tc);
+void test_cil_gen_policycap_noname_neg(CuTest *tc);
+void test_cil_gen_policycap_nameinparens_neg(CuTest *tc);
+void test_cil_gen_policycap_extra_neg(CuTest *tc);
+void test_cil_gen_policycap_dbnull_neg(CuTest *tc);
+void test_cil_gen_policycap_currnull_neg(CuTest *tc);
+void test_cil_gen_policycap_astnull_neg(CuTest *tc);
+
 void test_cil_gen_ipaddr_ipv4(CuTest *tc);
 void test_cil_gen_ipaddr_ipv4_neg(CuTest *tc);
 void test_cil_gen_ipaddr_ipv6(CuTest *tc);
@@ -880,6 +888,9 @@ void test_cil_build_ast_node_helper_gen_macro_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_optional(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_optional_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_policycap(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_policycap_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_ipaddr(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_ipaddr_neg(CuTest *tc);
