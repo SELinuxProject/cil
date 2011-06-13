@@ -1345,6 +1345,11 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadflavor_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadnextflavor_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper_flavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper_othernull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper_otherheadnull_neg);
+	
 	return suite;
 }
 
