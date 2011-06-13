@@ -981,6 +981,11 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_category_catlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_extra_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_fill_cat_list);
+	SUITE_ADD_TEST(suite, test_cil_fill_cat_list_startnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_cat_list_listnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_cat_list_emptycats_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_catset);
 	SUITE_ADD_TEST(suite, test_cil_gen_catset_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_catset_currnull_neg);

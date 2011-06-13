@@ -431,6 +431,11 @@ void test_cil_gen_category_catnull_neg(CuTest *);
 void test_cil_gen_category_catlist_neg(CuTest *);
 void test_cil_gen_category_extra_neg(CuTest *);
 
+void test_cil_fill_cat_list(CuTest *);
+void test_cil_fill_cat_list_startnull_neg(CuTest *);
+void test_cil_fill_cat_list_listnull_neg(CuTest *);
+void test_cil_fill_cat_list_emptycats_neg(CuTest *);
+
 void test_cil_gen_catset(CuTest *);
 void test_cil_gen_catset_dbnull_neg(CuTest *);
 void test_cil_gen_catset_currnull_neg(CuTest *);
