@@ -748,6 +748,9 @@ void test_cil_build_ast_treenull_neg(CuTest *);
 void test_cil_build_ast_node_helper_block(CuTest *);
 void test_cil_build_ast_node_helper_block_neg(CuTest *);
 
+void test_cil_build_ast_node_helper_permset(CuTest *);
+void test_cil_build_ast_node_helper_permset_neg(CuTest *);
+
 void test_cil_build_ast_node_helper_class(CuTest *);
 void test_cil_build_ast_node_helper_class_neg(CuTest *);
 
@@ -829,11 +832,17 @@ void test_cil_build_ast_node_helper_bool_neg(CuTest *);
 void test_cil_build_ast_node_helper_bool_tunable(CuTest *);
 void test_cil_build_ast_node_helper_bool_tunable_neg(CuTest *);
 
+void test_cil_build_ast_node_helper_else(CuTest *);
+void test_cil_build_ast_node_helper_else_neg(CuTest *);
+
 void test_cil_build_ast_node_helper_sensitivity(CuTest *);
 void test_cil_build_ast_node_helper_sensitivity_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_sensalias(CuTest *);
 void test_cil_build_ast_node_helper_sensalias_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_category(CuTest *);
+void test_cil_build_ast_node_helper_category_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_catset(CuTest *tc);
 void test_cil_build_ast_node_helper_catset_neg(CuTest *tc);
@@ -891,6 +900,9 @@ void test_cil_build_ast_node_helper_gen_fsuse_neg(CuTest *tc);
 void test_cil_build_ast_node_helper_gen_macro(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_macro_neg(CuTest *tc);
 
+void test_cil_build_ast_node_helper_gen_call(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_call_neg(CuTest *tc);
+
 void test_cil_build_ast_node_helper_gen_optional(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_optional_neg(CuTest *tc);
 
@@ -899,4 +911,10 @@ void test_cil_build_ast_node_helper_gen_policycap_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_ipaddr(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_ipaddr_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_othernull_neg(CuTest *);
+void test_cil_build_ast_node_helper_otherheadnull_neg(CuTest *);
+void test_cil_build_ast_node_helper_otherheadnextnull_neg(CuTest *);
+void test_cil_build_ast_node_helper_otherheadflavor_neg(CuTest *);
+void test_cil_build_ast_node_helper_otherheadnextflavor_neg(CuTest *);
 #endif

@@ -554,6 +554,8 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_permset_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_permset_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_permset_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_permset);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_permset_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_failgen_neg);
@@ -715,6 +717,8 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_else_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_else_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_else_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_else);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_else_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif);
 	SUITE_ADD_TEST(suite, test_cil_gen_tunif_nocond);
@@ -980,6 +984,8 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_category_catnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_catlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_category_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_category);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_category_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_fill_cat_list);
 	SUITE_ADD_TEST(suite, test_cil_fill_cat_list_startnull_neg);
@@ -1294,6 +1300,8 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_call_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_name_inparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_call);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_call_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_optional);
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_dbnull_neg);
@@ -1331,6 +1339,12 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_ipaddr);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_ipaddr_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_othernull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadnextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadflavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadnextflavor_neg);
+	
 	return suite;
 }
 
