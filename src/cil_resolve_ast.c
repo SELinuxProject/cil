@@ -2094,68 +2094,17 @@ int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct c
 	return SEPOL_OK;
 }
 
-int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
+
+int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *db, struct cil_call *call)
 {
 	int rc = SEPOL_OK;
 
-	if (node == NULL || other == NULL || other->head == NULL)
+	if (node == NULL || db == NULL) {
 		return SEPOL_ERR;
-
-	int *pass = NULL;
-	struct cil_db *db = NULL;
-	struct cil_call *call = NULL;
-	struct cil_tree_node *callstack = NULL;
-	struct cil_tree_node *optstack = NULL;
-	struct cil_tree_node *macrostack = NULL;
-	int *changed = NULL;
-
-	if (other->head->flavor == CIL_DB)
-		db = (struct cil_db*)other->head->data;
-	else
-		return SEPOL_ERR;	
-		
-	if (other->head->next->flavor == CIL_INT)
-		pass = (int*)other->head->next->data;
-	else
-		return SEPOL_ERR;
-
-	if (other->head->next->next != NULL) {
-		callstack = (struct cil_tree_node*)other->head->next->next->data;
-		if (callstack != NULL) {
-			call = (struct cil_call *)callstack->data;
-		}
-	} else {
-		return SEPOL_ERR;
-	}
-
-	if (other->head->next->next->next != NULL) {
-		optstack = (struct cil_tree_node *)other->head->next->next->next->data;
-	} else {
-		return SEPOL_ERR;
-	}
-
-	if (other->head->next->next->next->next != NULL) {
-		changed = (int *)other->head->next->next->next->next->data;
-	} else {
-		return SEPOL_ERR;
-	}
-
-	if (other->head->next->next->next->next->next != NULL) {
-		macrostack = (struct cil_tree_node *)other->head->next->next->next->next->next->data;
-	} else {
-		return SEPOL_ERR;
-	}
-
-	if (optstack != NULL || macrostack != NULL) {
-		if (node->flavor == CIL_TUNABLE || node->flavor == CIL_MACRO) {
-			/* tuanbles and macros are not allowed in optionals or macros */
-			printf("Node of flavor %i is not allowed in optionals or macros\n", node->flavor);
-			return SEPOL_ERR;
-		}
 	}
 
 	if (node->cl_head == NULL) {
-		switch (*pass) {
+		switch (pass) {
 			case 2 : {
 				if (node->flavor == CIL_CALL) {
 					rc = cil_resolve_call1(db, node, call);
@@ -2393,7 +2342,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		}
 	}
 	else {
-		switch (*pass) {
+		switch (pass) {
 			case 1 : {
 				switch (node->flavor) {
 					case CIL_TUNABLEIF : {
@@ -2427,13 +2376,80 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		}
 	}	
 
-	if (rc == SEPOL_ENOENT && optstack != NULL) {
-		/* disable an optional if something failed to resolve */
-		struct cil_optional *opt = (struct cil_optional *)optstack->data;
-		opt->datum.state = CIL_STATE_DISABLING;
-		/* let the resolve loop know something was changed */
-		*changed = 1;
-		rc = SEPOL_OK;
+	return rc;
+}
+
+int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
+{
+	int rc = SEPOL_OK;
+
+	if (node == NULL || other == NULL || other->head == NULL)
+		return SEPOL_ERR;
+
+	int *pass = NULL;
+	struct cil_db *db = NULL;
+	struct cil_call *call = NULL;
+	struct cil_tree_node *callstack = NULL;
+	struct cil_tree_node *optstack = NULL;
+	struct cil_tree_node *macrostack = NULL;
+	int *changed = NULL;
+
+	if (other->head->flavor == CIL_DB)
+		db = (struct cil_db*)other->head->data;
+	else
+		return SEPOL_ERR;	
+		
+	if (other->head->next->flavor == CIL_INT)
+		pass = (int*)other->head->next->data;
+	else
+		return SEPOL_ERR;
+
+	if (other->head->next->next != NULL) {
+		callstack = (struct cil_tree_node*)other->head->next->next->data;
+		if (callstack != NULL) {
+			call = (struct cil_call *)callstack->data;
+		}
+	} else {
+		return SEPOL_ERR;
+	}
+
+	if (other->head->next->next->next != NULL) {
+		optstack = (struct cil_tree_node *)other->head->next->next->next->data;
+	} else {
+		return SEPOL_ERR;
+	}
+
+	if (other->head->next->next->next->next != NULL) {
+		changed = (int *)other->head->next->next->next->next->data;
+	} else {
+		return SEPOL_ERR;
+	}
+
+	if (other->head->next->next->next->next->next != NULL) {
+		macrostack = (struct cil_tree_node *)other->head->next->next->next->next->next->data;
+	} else {
+		return SEPOL_ERR;
+	}
+
+	if (optstack != NULL || macrostack != NULL) {
+		if (node->flavor == CIL_TUNABLE || node->flavor == CIL_MACRO) {
+			/* tuanbles and macros are not allowed in optionals or macros */
+			printf("Node of flavor %i is not allowed in optionals or macros\n", node->flavor);
+			return SEPOL_ERR;
+		}
+	}
+
+	/* don't resolve statements inside a macro, they're resolved when called */
+	if (macrostack == NULL) {
+		rc = __cil_resolve_ast_node(node, *pass, db, call);
+		if (rc == SEPOL_ENOENT && optstack != NULL) {
+			/* disable an optional if something failed to resolve */
+			struct cil_optional *opt = (struct cil_optional *)optstack->data;
+			opt->datum.state = CIL_STATE_DISABLING;
+			/* let the resolve loop know something was changed */
+			*changed = 1;
+			rc = SEPOL_OK;
+		}
 	}
 
 	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL || node->flavor == CIL_MACRO) {
