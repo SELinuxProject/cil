@@ -2393,11 +2393,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		}
 	}
 	else {
-		if (node->flavor == CIL_MACRO) {
-			/* Macros are not resolved */
-			*finished = CIL_TREE_SKIP_HEAD;
-			return SEPOL_OK;
-		}
 		switch (*pass) {
 			case 1 : {
 				switch (node->flavor) {
