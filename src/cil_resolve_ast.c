@@ -2103,278 +2103,255 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		return SEPOL_ERR;
 	}
 
-	if (node->cl_head == NULL) {
-		switch (pass) {
-			case 2 : {
-				if (node->flavor == CIL_CALL) {
-					rc = cil_resolve_call1(db, node, call);
-				}
-				break;
+	switch (pass) {
+		case 1 : {
+			if (node->flavor == CIL_TUNABLEIF) {
+				rc = cil_resolve_tunif(db, node, call);
 			}
-			case 3 : {
-				break;
-			}
-			case 4 : {
-				switch (node->flavor) {
-					case CIL_CATORDER : {
-						rc = cil_resolve_catorder(db, node, call);
-						break;
-					}
-					case CIL_DOMINANCE : {
-						rc = cil_resolve_dominance(db, node, call);
-						break;
-					}
-					case CIL_CLASS : {
-						rc = cil_reset_class(db, node, call);
-						break;
-					}
-					case CIL_SENS: {
-						rc = cil_reset_sens(db, node, call);
-						break;
-					}
-				}
-				break;
-			}
-			case 5 : {
-				switch (node->flavor) {
-					case CIL_CATSET : {
-						rc = cil_resolve_catset(db, node, (struct cil_catset*)node->data, call);
-						break;
-					}
-				}
-				break;
-			}
-			case 6 : {
-				switch (node->flavor) {
-					case CIL_SENSCAT : {
-						rc = cil_resolve_senscat(db, node, call);
-						break;
-					}
-					case CIL_CLASSCOMMON : {
-						rc = cil_resolve_classcommon(db, node, call);
-						break;
-					}
-				}
-				break;
-			}
-			case 7 : {
-				switch (node->flavor) {
-					case CIL_TYPE_ATTR : {
-						rc = cil_resolve_typeattr(db, node, call);
-						break;
-					}
-					case CIL_TYPEALIAS : {
-						rc = cil_resolve_typealias(db, node, call);
-						break;
-					}
-					case CIL_TYPEBOUNDS : {
-						rc = cil_resolve_typebounds(db, node, call);
-						break;
-					}
-					case CIL_TYPEPERMISSIVE : {
-						rc = cil_resolve_typepermissive(db, node, call);
-						break;
-					}
-					case CIL_FILETRANSITION : {
-						rc = cil_resolve_filetransition(db, node, call);
-						break;
-					}
-					case CIL_AVRULE : {
-						rc = cil_resolve_avrule(db, node, call);
-						break;
-					}
-					case CIL_TYPE_RULE : {
-						rc = cil_resolve_type_rule(db, node, call);
-						break;
-					}
-					case CIL_USERROLE : {
-						rc = cil_resolve_userrole(db, node, call);
-						break;
-					}
-					case CIL_ROLETYPE : {
-						rc = cil_resolve_roletype(db, node, call);
-						break;
-					}
-					case CIL_ROLETRANS : {
-						rc = cil_resolve_roletrans(db, node, call);
-						break;
-					}
-					case CIL_ROLEALLOW : {
-						rc = cil_resolve_roleallow(db, node, call);
-						break;
-					}
-					case CIL_ROLEDOMINANCE : {
-						rc = cil_resolve_roleallow(db, node, call);
-						break;
-					}
-					case CIL_SENSALIAS : {
-						rc = cil_resolve_sensalias(db, node, call);
-						break;
-					}
-					case CIL_CATALIAS : {
-						rc = cil_resolve_catalias(db, node, call);
-						break;
-					}
-					case CIL_LEVEL : {
-						rc = cil_resolve_level(db, node, (struct cil_level*)node->data, call);
-						break;
-					}
-					case CIL_CONSTRAIN : {
-						rc = cil_resolve_constrain(db, node, call);
-						break;
-					}
-					case CIL_MLSCONSTRAIN : {
-						rc = cil_resolve_constrain(db, node, call);
-						break;
-					}
-					case CIL_CONTEXT : {
-						rc = cil_resolve_context(db, node, (struct cil_context*)node->data, call);
-						break;
-					}
-					case CIL_FILECON : {
-						rc = cil_resolve_filecon(db, node, call);
-						break;
-					}
-					case CIL_PORTCON : {
-						rc = cil_resolve_portcon(db, node, call);
-						break;
-					}
-					case CIL_NODECON : {
-						rc = cil_resolve_nodecon(db, node, call);
-						break;
-					}
-					case CIL_GENFSCON : {
-						rc = cil_resolve_genfscon(db, node, call);
-						break;
-					}
-					case CIL_NETIFCON : {
-						rc = cil_resolve_netifcon(db, node, call);
-						break;
-					}
-					case CIL_FSUSE : {
-						rc = cil_resolve_fsuse(db, node, call);
-						break;
-					}
-					case CIL_SIDCONTEXT : {
-						rc = cil_resolve_sidcontext(db, node, call);
-						break;
-					}
-					default : 
-						break;
-				}
-				break;	
-			}
-			case 8 : {
-				switch (node->flavor) {
-					case CIL_NETIFCON : {
-						struct cil_sort *sort = db->netifcon;
-						uint32_t count = sort->count;
-						uint32_t i = sort->index;
-						if (sort->array == NULL) {
-							sort->array = cil_malloc(sizeof(struct cil_netifcon*)*count);
-						}
-						sort->array[i] = node->data;
-						sort->index++;
-						break;
-					}
-					case CIL_FSUSE : {
-						struct cil_sort *sort = db->fsuse;
-						uint32_t count = sort->count;
-						uint32_t i = sort->index;
-						if (sort->array == NULL) {
-							sort->array = cil_malloc(sizeof(struct cil_fsuse*)*count);
-						}
-						sort->array[i] = node->data;
-						sort->index++;
-						break;
-					}
-					case CIL_GENFSCON : {
-						struct cil_sort *sort = db->genfscon;
-						uint32_t count = sort->count;
-						uint32_t i = sort->index;
-						if (sort->array == NULL) {
-							sort->array = cil_malloc(sizeof(struct cil_genfscon*)*count);
-						}
-						sort->array[i] = node->data;
-						sort->index++;
-						break;
-					}
-					case CIL_FILECON : {
-						struct cil_sort *sort = db->filecon;
-						uint32_t count = sort->count;
-						uint32_t i = sort->index;
-						if (sort->array == NULL) {
-							sort->array = cil_malloc(sizeof(struct cil_filecon*)*count);
-						}
-						sort->array[i] = node->data;
-						sort->index++;
-						break;
-					}
-					case CIL_NODECON : {
-						struct cil_sort *sort = db->nodecon;
-						uint32_t count = sort->count;
-						uint32_t i = sort->index;
-						if (sort->array == NULL) {
-							sort->array = cil_malloc(sizeof(struct cil_nodecon*)*count);
-						}
-						sort->array[i] = node->data;
-						sort->index++;
-						break;
-					}
-					case CIL_PORTCON : {
-						struct cil_sort *sort = db->portcon;
-						uint32_t count = sort->count;
-						uint32_t i = sort->index;
-						if (sort->array == NULL) {
-							sort->array = cil_malloc(sizeof(struct cil_portcon*)*count);
-						}
-						sort->array[i] = node->data;
-						sort->index++;
-						break;
-					}
-					default :
-						break;
-				}
-				break;
-			}
-			default : 
-				break;
+			break;	
 		}
+		case 2 : {
+			if (node->flavor == CIL_CALL) {
+				rc = cil_resolve_call1(db, node, call);
+			}
+			break;
+		}
+		case 3 : {
+			if (node->flavor == CIL_CALL) {
+				rc = cil_resolve_call2(db, node, call);
+			}
+			break;
+		}
+		case 4 : {
+			switch (node->flavor) {
+				case CIL_CATORDER : {
+					rc = cil_resolve_catorder(db, node, call);
+					break;
+				}
+				case CIL_DOMINANCE : {
+					rc = cil_resolve_dominance(db, node, call);
+					break;
+				}
+				case CIL_CLASS : {
+					rc = cil_reset_class(db, node, call);
+					break;
+				}
+				case CIL_SENS: {
+					rc = cil_reset_sens(db, node, call);
+					break;
+				}
+				case CIL_BOOLEANIF : {
+					rc = cil_resolve_boolif(db, node, call);
+					break;
+				}
+			}
+			break;
+		}
+		case 5 : {
+			switch (node->flavor) {
+				case CIL_CATSET : {
+					rc = cil_resolve_catset(db, node, (struct cil_catset*)node->data, call);
+					break;
+				}
+			}
+			break;
+		}
+		case 6 : {
+			switch (node->flavor) {
+				case CIL_SENSCAT : {
+					rc = cil_resolve_senscat(db, node, call);
+					break;
+				}
+				case CIL_CLASSCOMMON : {
+					rc = cil_resolve_classcommon(db, node, call);
+					break;
+				}
+			}
+			break;
+		}
+		case 7 : {
+			switch (node->flavor) {
+				case CIL_TYPE_ATTR : {
+					rc = cil_resolve_typeattr(db, node, call);
+					break;
+				}
+				case CIL_TYPEALIAS : {
+					rc = cil_resolve_typealias(db, node, call);
+					break;
+				}
+				case CIL_TYPEBOUNDS : {
+					rc = cil_resolve_typebounds(db, node, call);
+					break;
+				}
+				case CIL_TYPEPERMISSIVE : {
+					rc = cil_resolve_typepermissive(db, node, call);
+					break;
+				}
+				case CIL_FILETRANSITION : {
+					rc = cil_resolve_filetransition(db, node, call);
+					break;
+				}
+				case CIL_AVRULE : {
+					rc = cil_resolve_avrule(db, node, call);
+					break;
+				}
+				case CIL_TYPE_RULE : {
+					rc = cil_resolve_type_rule(db, node, call);
+					break;
+				}
+				case CIL_USERROLE : {
+					rc = cil_resolve_userrole(db, node, call);
+					break;
+				}
+				case CIL_ROLETYPE : {
+					rc = cil_resolve_roletype(db, node, call);
+					break;
+				}
+				case CIL_ROLETRANS : {
+					rc = cil_resolve_roletrans(db, node, call);
+					break;
+				}
+				case CIL_ROLEALLOW : {
+					rc = cil_resolve_roleallow(db, node, call);
+					break;
+				}
+				case CIL_ROLEDOMINANCE : {
+					rc = cil_resolve_roleallow(db, node, call);
+					break;
+				}
+				case CIL_SENSALIAS : {
+					rc = cil_resolve_sensalias(db, node, call);
+					break;
+				}
+				case CIL_CATALIAS : {
+					rc = cil_resolve_catalias(db, node, call);
+					break;
+				}
+				case CIL_LEVEL : {
+					rc = cil_resolve_level(db, node, (struct cil_level*)node->data, call);
+					break;
+				}
+				case CIL_CONSTRAIN : {
+					rc = cil_resolve_constrain(db, node, call);
+					break;
+				}
+				case CIL_MLSCONSTRAIN : {
+					rc = cil_resolve_constrain(db, node, call);
+					break;
+				}
+				case CIL_CONTEXT : {
+					rc = cil_resolve_context(db, node, (struct cil_context*)node->data, call);
+					break;
+				}
+				case CIL_FILECON : {
+					rc = cil_resolve_filecon(db, node, call);
+					break;
+				}
+				case CIL_PORTCON : {
+					rc = cil_resolve_portcon(db, node, call);
+					break;
+				}
+				case CIL_NODECON : {
+					rc = cil_resolve_nodecon(db, node, call);
+					break;
+				}
+				case CIL_GENFSCON : {
+					rc = cil_resolve_genfscon(db, node, call);
+					break;
+				}
+				case CIL_NETIFCON : {
+					rc = cil_resolve_netifcon(db, node, call);
+					break;
+				}
+				case CIL_FSUSE : {
+					rc = cil_resolve_fsuse(db, node, call);
+					break;
+				}
+				case CIL_SIDCONTEXT : {
+					rc = cil_resolve_sidcontext(db, node, call);
+					break;
+				}
+				default : 
+					break;
+			}
+			break;	
+		}
+		case 8 : {
+			switch (node->flavor) {
+				case CIL_NETIFCON : {
+					struct cil_sort *sort = db->netifcon;
+					uint32_t count = sort->count;
+					uint32_t i = sort->index;
+					if (sort->array == NULL) {
+						sort->array = cil_malloc(sizeof(struct cil_netifcon*)*count);
+					}
+					sort->array[i] = node->data;
+					sort->index++;
+					break;
+				}
+				case CIL_FSUSE : {
+					struct cil_sort *sort = db->fsuse;
+					uint32_t count = sort->count;
+					uint32_t i = sort->index;
+					if (sort->array == NULL) {
+						sort->array = cil_malloc(sizeof(struct cil_fsuse*)*count);
+					}
+					sort->array[i] = node->data;
+					sort->index++;
+					break;
+				}
+				case CIL_GENFSCON : {
+					struct cil_sort *sort = db->genfscon;
+					uint32_t count = sort->count;
+					uint32_t i = sort->index;
+					if (sort->array == NULL) {
+						sort->array = cil_malloc(sizeof(struct cil_genfscon*)*count);
+					}
+					sort->array[i] = node->data;
+					sort->index++;
+					break;
+				}
+				case CIL_FILECON : {
+					struct cil_sort *sort = db->filecon;
+					uint32_t count = sort->count;
+					uint32_t i = sort->index;
+					if (sort->array == NULL) {
+						sort->array = cil_malloc(sizeof(struct cil_filecon*)*count);
+					}
+					sort->array[i] = node->data;
+					sort->index++;
+					break;
+				}
+				case CIL_NODECON : {
+					struct cil_sort *sort = db->nodecon;
+					uint32_t count = sort->count;
+					uint32_t i = sort->index;
+					if (sort->array == NULL) {
+						sort->array = cil_malloc(sizeof(struct cil_nodecon*)*count);
+					}
+					sort->array[i] = node->data;
+					sort->index++;
+					break;
+				}
+				case CIL_PORTCON : {
+					struct cil_sort *sort = db->portcon;
+					uint32_t count = sort->count;
+					uint32_t i = sort->index;
+					if (sort->array == NULL) {
+						sort->array = cil_malloc(sizeof(struct cil_portcon*)*count);
+					}
+					sort->array[i] = node->data;
+					sort->index++;
+					break;
+				}
+				default :
+					break;
+			}
+			break;
+		}
+		default : 
+			break;
 	}
-	else {
-		switch (pass) {
-			case 1 : {
-				switch (node->flavor) {
-					case CIL_TUNABLEIF : {
-						rc = cil_resolve_tunif(db, node, call);
-						break;
-					}
-					default:
-						break;
-				}
-			
-				break;	
-			}
-			case 3 : {
-				if (node->flavor == CIL_CALL) {
-					rc = cil_resolve_call2(db, node, call);
-				}
-				break;
-			}
-			case 4 : {
-				switch (node->flavor) {
-					case CIL_BOOLEANIF : {
-						rc = cil_resolve_boolif(db, node, call);
-						break;
-					}
-					default:
-						break;
-				}
-			}
-			default :
-				break;
-		}
-	}	
 
 	return rc;
 }
