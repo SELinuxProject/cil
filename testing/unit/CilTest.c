@@ -517,6 +517,21 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_sensalias);
 	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_tunable);
 	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_unknown);
+	
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optional);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_macro);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_tunable_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_macro_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_othernull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadflavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextflavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextnextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextnextnextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextnextnextnextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextnextnextnextnextnull_neg);
 
 	return suite;
 }
