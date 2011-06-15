@@ -8614,6 +8614,51 @@ void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc) {
         CuAssertIntEquals(tc, 0, finished);
 }
 
+void test_cil_resolve_ast_node_helper_call(CuTest *tc) {
+	char *line[] = {"(", "call", "mm", "(", "foo", ")", ")", NULL};
+		
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_tree_node *test_ast_node_call;
+	cil_tree_node_init(&test_ast_node_call);
+	test_ast_node_call->flavor = CIL_CALL;
+
+	struct cil_list *cil_l;
+	cil_list_init(&cil_l);
+
+	uint32_t *finished = NULL;
+
+	cil_list_item_init(&cil_l->head);
+	cil_l->head->data = test_db;
+	cil_l->head->flavor = CIL_DB;
+	cil_list_item_init(&cil_l->head->next);
+	cil_l->head->next->flavor = CIL_INT;
+	int pass = 7;
+	cil_l->head->next->data = &pass;
+	cil_list_item_init(&cil_l->head->next->next);
+	cil_l->head->next->next->data = test_ast_node_call;
+	cil_list_item_init(&cil_l->head->next->next->next);
+	cil_l->head->next->next->next->data = NULL;
+	int changed = 0;
+	cil_list_item_init(&cil_l->head->next->next->next->next);
+	cil_l->head->next->next->next->next->data = &changed;
+	cil_list_item_init(&cil_l->head->next->next->next->next->next);
+	cil_l->head->next->next->next->next->next->data = NULL;
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	test_db->ast->root->cl_head->flavor = CIL_CALL;
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, cil_l);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_ast_node_helper_optional(CuTest *tc) {
 	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
 		
@@ -9154,5 +9199,51 @@ void test_cil_resolve_ast_node_helper_macrostack_neg(CuTest *tc) {
 	
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, cil_l);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_resolve_ast_node_helper_optfailedtoresolve(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "read", ")", ")",
+			"(", "classcommon", "file", "file", ")", NULL};
+        
+	struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+	struct cil_optional *opt;
+	cil_optional_init(&opt);
+
+	struct cil_tree_node *test_ast_node_opt;
+	cil_tree_node_init(&test_ast_node_opt);
+	test_ast_node_opt->flavor = CIL_OPTIONAL;
+	test_ast_node_opt->data = opt;
+
+        struct cil_list *other;
+        cil_list_init(&other);
+        cil_list_item_init(&other->head);
+        other->head->data = test_db;
+        other->head->flavor = CIL_DB;
+        cil_list_item_init(&other->head->next);
+        other->head->next->flavor = CIL_INT;
+        int pass = 6;
+        other->head->next->data = &pass;
+        cil_list_item_init(&other->head->next->next);
+        other->head->next->next->data = NULL;
+        cil_list_item_init(&other->head->next->next->next);
+        other->head->next->next->next->data = test_ast_node_opt;
+	int changed = 0;
+    	cil_list_item_init(&other->head->next->next->next->next);
+    	other->head->next->next->next->next->data = &changed;
+		cil_list_item_init(&other->head->next->next->next->next->next);
+		other->head->next->next->next->next->next->data = NULL;
+
+        uint32_t finished = 0;
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, other);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+        CuAssertIntEquals(tc, 0, finished);
 }
 
