@@ -8890,7 +8890,7 @@ void test_cil_resolve_ast_node_helper_othernull_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_ast_node_helper_otherheadnull_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_dbnull_neg(CuTest *tc) {
 	char *line[] = {"(", "role",  "staff_r", ")",
 			"(", "user", "staff_u", ")",
 			"(", "userrole", "staff_u", "staff_r", ")", NULL};
@@ -8919,7 +8919,7 @@ void test_cil_resolve_ast_node_helper_otherheadnull_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_ast_node_helper_otherheadflavor_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_dbflavor_neg(CuTest *tc) {
 	char *line[] = {"(", "role",  "staff_r", ")",
 			"(", "user", "staff_u", ")",
 			"(", "userrole", "staff_u", "staff_r", ")", NULL};
@@ -8961,7 +8961,7 @@ void test_cil_resolve_ast_node_helper_otherheadflavor_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_ast_node_helper_otherheadnextflavor_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_pass_neg(CuTest *tc) {
 	char *line[] = {"(", "role",  "staff_r", ")",
 			"(", "user", "staff_u", ")",
 			"(", "userrole", "staff_u", "staff_r", ")", NULL};
@@ -9003,7 +9003,7 @@ void test_cil_resolve_ast_node_helper_otherheadnextflavor_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_ast_node_helper_otherheadnextnextnull_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_callstack_neg(CuTest *tc) {
 	char *line[] = {"(", "role",  "staff_r", ")",
 			"(", "user", "staff_u", ")",
 			"(", "userrole", "staff_u", "staff_r", ")", NULL};
@@ -9038,7 +9038,7 @@ void test_cil_resolve_ast_node_helper_otherheadnextnextnull_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_ast_node_helper_otherheadnextnextnextnull_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_optstack_neg(CuTest *tc) {
 	char *line[] = {"(", "role",  "staff_r", ")",
 			"(", "user", "staff_u", ")",
 			"(", "userrole", "staff_u", "staff_r", ")", NULL};
@@ -9075,7 +9075,7 @@ void test_cil_resolve_ast_node_helper_otherheadnextnextnextnull_neg(CuTest *tc) 
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_ast_node_helper_otherheadnextnextnextnextnull_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_changed_neg(CuTest *tc) {
 	char *line[] = {"(", "role",  "staff_r", ")",
 			"(", "user", "staff_u", ")",
 			"(", "userrole", "staff_u", "staff_r", ")", NULL};
@@ -9114,7 +9114,7 @@ void test_cil_resolve_ast_node_helper_otherheadnextnextnextnextnull_neg(CuTest *
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_ast_node_helper_otherheadnextnextnextnextnextnull_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_macrostack_neg(CuTest *tc) {
 	char *line[] = {"(", "role",  "staff_r", ")",
 			"(", "user", "staff_u", ")",
 			"(", "userrole", "staff_u", "staff_r", ")", NULL};

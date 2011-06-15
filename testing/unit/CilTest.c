@@ -525,13 +525,13 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_macro_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodenull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_othernull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadflavor_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextflavor_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextnextnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextnextnextnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextnextnextnextnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_otherheadnextnextnextnextnextnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dbflavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_pass_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_callstack_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_changed_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_macrostack_neg);
 
 	return suite;
 }
