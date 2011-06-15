@@ -261,7 +261,7 @@ void test_cil_copy_common(CuTest *tc) {
 }
 
 void test_cil_copy_classcommon(CuTest *tc) {
-	char *line[] = {"(", "classcommon", "file", "(", "read", "write", "open", ")", ")", NULL};
+	char *line[] = {"(", "classcommon", "file", "file", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -1634,7 +1634,7 @@ void test_cil_copy_node_helper_common_neg(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_classcommon(CuTest *tc) {
-	char *line[] = {"(", "classcommon", "file", "(", "read", "write", "open", ")", ")", NULL};
+	char *line[] = {"(", "classcommon", "file", "file", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

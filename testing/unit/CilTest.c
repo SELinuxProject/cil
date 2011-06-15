@@ -392,7 +392,6 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context_wrongname_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context_invaliduser_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_sidcontext_named_context_sidcontextnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sidcontext); 
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sidcontext_neg); 
 

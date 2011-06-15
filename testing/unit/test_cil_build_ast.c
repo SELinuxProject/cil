@@ -8722,7 +8722,7 @@ void test_cil_gen_userrole_rolelist_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classcommon(CuTest *tc) {
-	char *line[] = {"(", "classcommon", "file", "(", "read", "write", "open", ")", ")", NULL};
+	char *line[] = {"(", "classcommon", "file", "file", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8750,7 +8750,7 @@ void test_cil_gen_classcommon(CuTest *tc) {
 }
 
 void test_cil_gen_classcommon_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "classcommon", "file", "(", "read", "write", "open", ")", ")", NULL};
+	char *line[] = {"(", "classcommon", "file", "file", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8781,7 +8781,7 @@ void test_cil_gen_classcommon_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classcommon_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "classcommon", "file", "(", "read", "write", "open", ")", ")", NULL};
+	char *line[] = {"(", "classcommon", "file", "file", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8840,7 +8840,7 @@ void test_cil_gen_classcommon_noperms_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classcommon_extraperms_neg(CuTest *tc) {
-	char *line[] = {"(", "classcommon", "file", "(", "read", "write", ")", "(", "open", ")", ")", NULL};
+	char *line[] = {"(", "classcommon", "file", "file", "file", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -15387,8 +15387,8 @@ void test_cil_build_ast_node_helper_userrole_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_classcommon(CuTest *tc) {
-	char *line[] = {"(", "classcommon", "foo", "(", "staff_r", ")", ")", NULL};
-	
+	char *line[] = {"(", "classcommon", "foo", "foo", NULL};
+
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 

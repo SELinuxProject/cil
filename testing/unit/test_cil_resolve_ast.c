@@ -3143,31 +3143,6 @@ void test_cil_resolve_sidcontext_named_context_invaliduser_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
-void test_cil_resolve_sidcontext_named_context_sidcontextnull_neg(CuTest *tc) {
-           char *line[] = {"(", "category", "c0", ")",
-                        "(", "categoryorder", "(", "c0", ")", ")",
-                        "(", "sensitivity", "s0", ")",
-                        "(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
-                        "(", "type", "blah_t", ")",
-                        "(", "role", "blah_r", ")",
-                        "(", "user", "blah_u", ")",
-			"(", "sid", "test", ")",
-                        "(", "sidcontext", "test", "(", ")", ")", NULL};
-
-        struct cil_tree *test_tree;
-        gen_test_tree(&test_tree, line);
-
-        struct cil_db *test_db;
-        cil_db_init(&test_db);
-
-        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-        cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
-
-        int rc = cil_resolve_sidcontext(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
-        CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
 void test_cil_resolve_call1_noparam(CuTest *tc) {
 	char *line[] = {"(", "type", "qaz", ")",
 			"(", "class", "file", "(", "read", ")", ")",

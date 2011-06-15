@@ -53,6 +53,40 @@ int __cil_verify_name(const char *name)
 	return SEPOL_OK;
 }
 
+int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[], int len)
+{
+	struct cil_tree_node *c = parse_current;
+	int i;
+	for (i=0; i<len; i++) {
+		if ((s[i] & SYM_END) && !c) {
+			break;
+		}
+		if (c == NULL) {
+			return SEPOL_ERR;
+		}
+		if (s[i] & SYM_STRING) {
+			if (!c->cl_head && c->data) {
+				c = c->next;
+				continue;
+			}
+		}
+		if (s[i] & SYM_LIST) {
+			if (!c->data && c->cl_head) {
+				c = c->next;
+				continue;
+			}
+		}
+		if (s[i] & SYM_EMPTY_LIST) {
+			if (!c->data && !c->cl_head) {
+				c = c->next;
+				continue;
+			}
+		}
+		return SEPOL_ERR;
+	}
+	return SEPOL_OK;
+}
+
 int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, uint32_t sflavor, uint32_t nflavor)
 {
 	symtab_t *symtab = NULL;
@@ -139,14 +173,22 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_block *block;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid block declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	char *name;
-	struct cil_block *block;
-	int rc = cil_block_init(&block);
+	rc = cil_block_init(&block);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -154,9 +196,9 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	block->is_abstract = is_abstract;
 	block->condition = condition;
 
-	name = (char *)parse_current->next->data;
+	key = parse_current->next->data;
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)block, (hashtab_key_t)name, CIL_SYM_BLOCKS, CIL_BLOCK);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)block, (hashtab_key_t)key, CIL_SYM_BLOCKS, CIL_BLOCK);
 	if (rc != SEPOL_OK) 
 		goto gen_block_cleanup;
 
@@ -179,20 +221,29 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL || parse_current->next->next->cl_head == NULL
-	|| parse_current->next->next->next != NULL) {
-		goto failed_decl;	
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_class *cls;
+	struct cil_tree_node *perms;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto failed_decl;
 	}
 
-	char *key = parse_current->next->data;
-	struct cil_class *cls;
-	int rc = cil_class_init(&cls);
+	rc = cil_class_init(&cls);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	struct cil_tree_node *perms;
+	key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cls, (hashtab_key_t)key, CIL_SYM_CLASSES, CIL_CLASS);
 	if (rc != SEPOL_OK) 
@@ -231,13 +282,14 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
+	char *key;
 	struct cil_perm *perm;
 	int rc = cil_perm_init(&perm);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = (char*)parse_current->data;
+	key = parse_current->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)perm, (hashtab_key_t)key, CIL_SYM_UNKNOWN, CIL_PERM);
 	if (rc != SEPOL_OK) 
@@ -258,29 +310,34 @@ void cil_destroy_perm(struct cil_perm *perm)
 
 int cil_gen_permset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	char *key = NULL;
-	struct cil_permset *permset = NULL;
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_permset *permset;
 	int rc = SEPOL_ERR;
 
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		return rc;
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid permissionset declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL
-	|| parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL
-	|| parse_current->next->next->cl_head == NULL
-	|| parse_current->next->next->next != NULL) {
-		printf("Invalid permissionset declaration (line %d)\n", parse_current->line);
-		return rc;
-	}
-
-	key = (char*)parse_current->next->data;
 	rc = cil_permset_init(&permset);
 	if (rc != SEPOL_OK) {
 		printf("Failed to init permissionset\n");
 		goto gen_permset_cleanup;
 	}
+
+	key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)permset, (hashtab_key_t)key, CIL_SYM_PERMSETS, CIL_PERMSET);
 	if (rc != SEPOL_OK) {
@@ -315,17 +372,29 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head == NULL || parse_current->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_common *common;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid common declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	char *key = parse_current->next->data;
-	struct cil_common *common;
-	int rc = cil_common_init(&common);
+	rc = cil_common_init(&common);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
+
+	key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)common, (hashtab_key_t)key, CIL_SYM_COMMONS, CIL_COMMON);
 	if (rc != SEPOL_OK) 
@@ -357,14 +426,23 @@ int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL
-	|| parse_current->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_classcommon *clscom;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid classcommon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_classcommon *clscom;
-	int rc = cil_classcommon_init(&clscom);
+	rc = cil_classcommon_init(&clscom);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -394,19 +472,28 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL  || parse_current->next->cl_head != NULL
-	|| parse_current->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_sid *sid;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid sid declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_sid *sid;
-	int rc = cil_sid_init(&sid);
+	rc = cil_sid_init(&sid);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = parse_current->next->data;
+	key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)sid, (hashtab_key_t)key, CIL_SYM_SIDS, CIL_SID);
 	if (rc != SEPOL_OK) 
@@ -431,16 +518,25 @@ int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, s
 		return SEPOL_ERR;
 	}
 
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_sidcontext *sidcon;
-	int rc = cil_sidcontext_init(&sidcon);
-	if (rc != SEPOL_OK) {
-		return rc;
-	}
+	int rc = SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL
-	|| parse_current->next->next->next != NULL) {
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid sidcontext declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
+	}
+
+	rc = cil_sidcontext_init(&sidcon);
+	if (rc != SEPOL_OK) {
+		return rc;
 	}
 
 	sidcon->sid_str = cil_strdup(parse_current->next->data);
@@ -488,18 +584,28 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_user *user;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid user declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_user *user;
-	int rc = cil_user_init(&user);
+	rc = cil_user_init(&user);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = parse_current->next->data;
+	key = parse_current->next->data;
 	
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)user, (hashtab_key_t)key, CIL_SYM_USERS, CIL_USER);
 	if (rc != SEPOL_OK) 
@@ -523,18 +629,28 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_role *role;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid role declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_role *role;
-	int rc = cil_role_init(&role);	
+	rc = cil_role_init(&role);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = parse_current->next->data;
+	key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)role, (hashtab_key_t)key, CIL_SYM_ROLES, CIL_ROLE);
 	if (rc != SEPOL_OK) 
@@ -558,13 +674,23 @@ int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_roletype *roletype;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid roletype declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
-	
-	struct cil_roletype *roletype;
-	int rc = cil_roletype_init(&roletype);
+
+	rc = cil_roletype_init(&roletype);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -592,13 +718,23 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_userrole *userrole;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid userrole declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_userrole *userrole;
-	int rc = cil_userrole_init(&userrole);
+	rc = cil_userrole_init(&userrole);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -625,19 +761,26 @@ int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node 
 {
 	if (parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
-	
-	if (parse_current->next == NULL ||
-		parse_current->next->next == NULL ||
-		parse_current->next->next->next == NULL ||
-		parse_current->next->next->next->next == NULL ||
-		parse_current->next->next->next->next->next != NULL) 
-	{
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_role_trans *roletrans;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid roletransition declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_role_trans *roletrans;
-	int rc = cil_role_trans_init(&roletrans);
+	rc = cil_role_trans_init(&roletrans);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -670,17 +813,24 @@ int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, st
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
-	
-	if (parse_current->next == NULL || \
-		parse_current->next->next == NULL || \
-		parse_current->next->next->next != NULL)
-	{
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_role_allow *roleallow;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid roleallow declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_role_allow *roleallow;
-	int rc = cil_role_allow_init(&roleallow);
+	rc = cil_role_allow_init(&roleallow);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -709,17 +859,23 @@ int cil_gen_roledominance(struct cil_db *db, struct cil_tree_node *parse_current
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL || 
-	parse_current->next->cl_head != NULL || 
-	parse_current->next->next == NULL || 
-	parse_current->next->next->cl_head != NULL ||
-	parse_current->next->next->next != NULL) {
-		printf("Invalid roledominance declaration (line: %d)\n", parse_current->line);
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_roledominance *roledom;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid roledominance delcaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_roledominance *roledom;
-	int rc = cil_roledominance_init(&roledom);
+	rc = cil_roledominance_init(&roledom);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -746,21 +902,26 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 {
 	if (parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
-	
-	if (parse_current->next == NULL || 
-	parse_current->next->cl_head != NULL ||
-	parse_current->next->next == NULL || 
-	parse_current->next->next->cl_head != NULL || 
-	parse_current->next->next->next == NULL || 
-	parse_current->next->next->next->cl_head != NULL || 
-	parse_current->next->next->next->next == NULL || 
-	parse_current->next->next->next->next->next != NULL) {
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_avrule *rule;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid allow rule (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 	
-	struct cil_avrule *rule;
-	int rc = cil_avrule_init(&rule);
+	rc = cil_avrule_init(&rule);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -802,19 +963,26 @@ int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node 
 {
 	if (parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
-	
-	if (parse_current->next == NULL || \
-		parse_current->next->next == NULL || \
-		parse_current->next->next->next == NULL || \
-		parse_current->next->next->next->next == NULL || \
-		parse_current->next->next->next->next->next != NULL) 
-	{
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_type_rule *rule;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid type rule (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
-	
-	struct cil_type_rule *rule;
-	int rc = cil_type_rule_init(&rule);
+
+	rc = cil_type_rule_init(&rule);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -849,31 +1017,32 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next != NULL) {
-		if (flavor == CIL_TYPE) {
-			printf("Invalid type declaration (line: %d)\n", parse_current->line);
-			return SEPOL_ERR;
-		}
-		if (flavor == CIL_ATTR) {
-			printf("Invalid attribute declaration (line %d)\n", parse_current->line);
-			return SEPOL_ERR;
-		}
-		else {
-			printf("Error while handling unknown declaration (line %d)\n", parse_current->line);
-			return SEPOL_ERR;
-		}
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_type *type;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid %s declaration (line: %d)\n", (char*)parse_current->data, parse_current->line);
+		return SEPOL_ERR;
 	}
 
-	char *key = (char*)parse_current->next->data; 
-	struct cil_type *type;
-	int rc = cil_type_init(&type);
+	rc = cil_type_init(&type);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	if (flavor == CIL_TYPE || flavor == CIL_ATTR) 
+	key = parse_current->next->data; 
+
+	if (flavor == CIL_TYPE || flavor == CIL_ATTR) { 
 		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)type, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPE);
-	else {
+	} else {
 		printf("Error: cil_gen_type called on invalid node\n");
 		rc = SEPOL_ERR;
 		goto gen_type_cleanup;
@@ -905,35 +1074,48 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_bool *boolean;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid boolean declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_bool *boolean;
-	int rc = cil_bool_init(&boolean);
+	rc = cil_bool_init(&boolean);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = parse_current->next->data;
+	key = parse_current->next->data;
 
-	if (!strcmp(parse_current->next->next->data, "true"))
+	if (!strcmp(parse_current->next->next->data, "true")) {
 		boolean->value = CIL_TRUE;
-	else if (!strcmp(parse_current->next->next->data, "false"))
+	} else if (!strcmp(parse_current->next->next->data, "false")) {
 		boolean->value = CIL_FALSE;
-	else {
+	} else {
 		printf("Error: value must be \'true\' or \'false\'");
 		rc = SEPOL_ERR;	
 		goto gen_bool_cleanup;
 	}
 
-	if (flavor == CIL_BOOL)	
+	if (flavor == CIL_BOOL)	{
 		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)boolean, (hashtab_key_t)key, CIL_SYM_BOOLS, CIL_BOOL);
-	else
+	} else {
 		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)boolean, (hashtab_key_t)key, CIL_SYM_TUNABLES, CIL_TUNABLE);
-	if (rc != SEPOL_OK) 
+	}
+	if (rc != SEPOL_OK) {
 		goto gen_bool_cleanup;
+	}
 	
 	return SEPOL_OK;
 
@@ -1293,13 +1475,22 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL) {
-		printf("Invalid booleanif declaration (line:%d)\n", parse_current->line);
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_LIST,
+		SYM_LIST | SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_booleanif *bif;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid booleanif declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	int rc = SEPOL_ERR;
-	struct cil_booleanif *bif;
 	rc = cil_boolif_init(&bif);
 	if (rc != SEPOL_OK)
 		return rc;
@@ -1384,13 +1575,22 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_tunableif *tif;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid tunableif declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	int rc = SEPOL_ERR;
-	struct cil_tunableif *tif;
 	rc = cil_tunif_init(&tif);
 	if (rc != SEPOL_OK)
 		return rc;
@@ -1452,18 +1652,29 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_typealias *alias;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid typealias declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_typealias *alias;
-	int rc = cil_typealias_init(&alias);
+	rc = cil_typealias_init(&alias);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = parse_current->next->next->data;
+	key = parse_current->next->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPEALIAS);
 	if (rc != SEPOL_OK) 
@@ -1491,14 +1702,23 @@ int cil_gen_typeattr(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || \
-		parse_current->next->next->cl_head != NULL || parse_current->next->next->next != NULL ) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_typeattribute *typeattr;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid typeattribute declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_typeattribute *typeattr;
-	int rc = cil_typeattribute_init(&typeattr);
+	rc = cil_typeattribute_init(&typeattr);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -1523,11 +1743,15 @@ int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL || 
-	parse_current->next->cl_head != NULL || 
-	parse_current->next->next == NULL || 
-	parse_current->next->next->cl_head != NULL ||
-	parse_current->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+
+	if (__cil_verify_syntax(parse_current, syntax, syntax_len) != SEPOL_OK) {
 		printf("Invalid typebounds declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
@@ -1594,23 +1818,26 @@ int cil_gen_filetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL
-	|| parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL
-	|| parse_current->next->next->cl_head != NULL
-	|| parse_current->next->next->next == NULL
-	|| parse_current->next->next->next->cl_head != NULL
-	|| parse_current->next->next->next->next == NULL
-	|| parse_current->next->next->next->next->cl_head != NULL
-	|| parse_current->next->next->next->next->next == NULL
-	|| parse_current->next->next->next->next->next->cl_head != NULL
-	|| parse_current->next->next->next->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_filetransition *filetrans;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid filetransition declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_filetransition *filetrans;
-	int rc = cil_filetransition_init(&filetrans);
+	rc = cil_filetransition_init(&filetrans);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -1646,18 +1873,27 @@ int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, 
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next != NULL || parse_current->next->cl_head != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_sens *sens;
+	int rc = SEPOL_ERR;
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid sensitivity declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_sens *sens;
-	int rc = cil_sens_init(&sens);
+	rc = cil_sens_init(&sens);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = parse_current->next->data;
+	key = parse_current->next->data;
 	
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)sens, (hashtab_key_t)key, CIL_SYM_SENS, CIL_SENS);
 	if (rc != SEPOL_OK)
@@ -1681,19 +1917,29 @@ int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL \
-	 || parse_current->next->cl_head != NULL || parse_current->next->next->cl_head != NULL ) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_sensalias *alias;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid sensitivityalias declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_sensalias *alias;
-	int rc = cil_sensalias_init(&alias);
+	rc = cil_sensalias_init(&alias);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 	
-	char *key = parse_current->next->next->data;
+	key = parse_current->next->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_SENS, CIL_SENSALIAS);
 	if (rc != SEPOL_OK)
@@ -1721,19 +1967,29 @@ int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next != NULL || parse_current->next->cl_head != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_cat *cat;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid category declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_cat *cat;
-	int rc = cil_cat_init(&cat);
+	rc = cil_cat_init(&cat);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = parse_current->next->data;
-	
+	key = parse_current->next->data;
+
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cat, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CAT);
 	if (rc != SEPOL_OK)
 		goto gen_cat_cleanup;
@@ -1756,18 +2012,29 @@ int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_catalias *alias;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid sensitivityalias declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_catalias *alias;
-	int rc = cil_catalias_init(&alias);
+	rc = cil_catalias_init(&alias);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	char *key = parse_current->next->next->data;
+	key = parse_current->next->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CATALIAS);
 	if (rc != SEPOL_OK) 
@@ -1886,19 +2153,28 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || 
-	parse_current->next->cl_head != NULL || parse_current->next->next->next != NULL ||
-	parse_current->next->next->cl_head == NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_catset *catset;
+	int rc = SEPOL_ERR;
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid categoryset declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	char *key = parse_current->next->data;
-	struct cil_catset *catset;
-	int rc = cil_catset_init(&catset);
+	rc = cil_catset_init(&catset);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
+
+	key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)catset, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CATSET);
 	if (rc != SEPOL_OK) 
@@ -1932,14 +2208,23 @@ int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, str
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
-	
-	if (parse_current->next == NULL || parse_current->next->cl_head == NULL) {
-		printf("Invalid categoryorder declaration (line %d)\n", parse_current->line);
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_catorder *catorder;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc !=  SEPOL_OK) {
+		printf("Invalid categoryorder declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_catorder *catorder;
-	int rc = cil_catorder_init(&catorder);
+	rc = cil_catorder_init(&catorder);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -1971,14 +2256,23 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
-	
-	if (parse_current->next == NULL || parse_current->next->cl_head == NULL) {
-		printf("Invalid dominance declaration (line %d)\n", parse_current->line);
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_sens_dominates *dom;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid dominance declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_sens_dominates *dom;
-	int rc = cil_sens_dominates_init(&dom);
+	rc = cil_sens_dominates_init(&dom);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -2011,13 +2305,22 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL) {
-		printf("Invalid sensitivitycategory declaration (line %d)\n", parse_current->line);
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_senscat *senscat;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid sensitivitycategory declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_senscat *senscat;
-	int rc = cil_senscat_init(&senscat);
+	rc = cil_senscat_init(&senscat);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -2101,21 +2404,29 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || 
-	parse_current->next->cl_head != NULL ||
-	parse_current->next->next == NULL ||
-	parse_current->next->next->cl_head == NULL ||
-	parse_current->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_level *level;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid level declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	char *key = parse_current->next->data;
-	struct cil_level *level;
-	int rc = cil_level_init(&level);
+	rc = cil_level_init(&level);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
+
+	key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)level, (hashtab_key_t)key, CIL_SYM_LEVELS, CIL_LEVEL);
 	if (rc != SEPOL_OK) 
@@ -2204,19 +2515,25 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
-	
-	if (parse_current->next == NULL || 
-		parse_current->next->cl_head == NULL || 
-		parse_current->next->next == NULL || 
-		parse_current->next->next->cl_head == NULL || 
-		parse_current->next->next->next == NULL || 
-		parse_current->next->next->next->cl_head == NULL) {
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_LIST,
+		SYM_LIST,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_constrain *cons;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid constrain declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_constrain *cons;
-	int rc = cil_constrain_init(&cons);
+	rc = cil_constrain_init(&cons);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -2279,14 +2596,22 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	if (user_node == NULL || context == NULL) 
 		return SEPOL_ERR;
 
-	if (user_node->next == NULL
-	|| user_node->next->next == NULL
-	|| user_node->next->next->next == NULL
-	|| user_node->next->next->next->next == NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(user_node, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid context (line: %d)\n", user_node->line);
 		return SEPOL_ERR;
 	}
-	int rc = SEPOL_ERR;
 
 	context->user_str = cil_strdup(user_node->data);
 	context->role_str = cil_strdup(user_node->next->data);
@@ -2366,46 +2691,37 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_context *context;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid context declaration (line: %d)\n", parse_current->line);
-		return SEPOL_ERR;
+		return rc;
 	}
 
-	struct cil_context *context;
-	int rc = cil_context_init(&context);
+	rc = cil_context_init(&context);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
-	
-	// Syntax for 'context' statements (named)
-	if (parse_current->next->next->cl_head != NULL) {
-		if (parse_current->next->next->next != NULL
-		|| parse_current->next->next->cl_head->cl_head != NULL
-		|| parse_current->next->next->cl_head->next == NULL
- 		|| parse_current->next->next->cl_head->next->cl_head != NULL
-		|| parse_current->next->next->cl_head->next->next == NULL
-		|| parse_current->next->next->cl_head->next->next->cl_head != NULL
-		|| parse_current->next->next->cl_head->next->next->next == NULL
-		|| parse_current->next->next->cl_head->next->next->next->next == NULL
-		|| parse_current->next->next->cl_head->next->next->next->next->next != NULL) {
-			printf("Invalid context declaration (line: %d)\n", parse_current->line);
-			goto gen_context_cleanup;
-		}
 
-		char *key = (char*)parse_current->next->data;
+	key = parse_current->next->data;
 
-		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)context, (hashtab_key_t)key, CIL_SYM_CONTEXTS, CIL_CONTEXT);
-		if (rc != SEPOL_OK) 
-			goto gen_context_cleanup;
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)context, (hashtab_key_t)key, CIL_SYM_CONTEXTS, CIL_CONTEXT);
+	if (rc != SEPOL_OK) 
+		goto gen_context_cleanup;
 	
-		rc = cil_fill_context(parse_current->next->next->cl_head, context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to fill context, rc: %d\n", rc);
-			goto gen_context_cleanup;
-		}
-	}
-	else {
-		printf("Invalid context declaration (line: %d)\n", parse_current->line);
+	rc = cil_fill_context(parse_current->next->next->cl_head, context);
+	if (rc != SEPOL_OK) {
+		printf("Failed to fill context, rc: %d\n", rc);
 		goto gen_context_cleanup;
 	}
 	
@@ -2440,21 +2756,26 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL
-	|| parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL
-	|| parse_current->next->next->cl_head != NULL
-	|| parse_current->next->next->next == NULL
-	|| parse_current->next->next->next->cl_head != NULL
-	|| parse_current->next->next->next->next == NULL
-	|| parse_current->next->next->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid filecon declaration (line: %d)\n", parse_current->line);
-		return SEPOL_ERR;
+		return rc;
 	}
 
 	struct cil_filecon *filecon;
 	char *type = (char*)parse_current->next->next->next->data;
-	int rc = cil_filecon_init(&filecon);
+	rc = cil_filecon_init(&filecon);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -2464,37 +2785,28 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	if (!strcmp(type, "file")) {
 		filecon->type = CIL_FILECON_FILE;
-	}
-	else if (!strcmp(type, "dir")) {
+	} else if (!strcmp(type, "dir")) {
 		filecon->type = CIL_FILECON_DIR;
-	}
-	else if (!strcmp(type, "char")) {
+	} else if (!strcmp(type, "char")) {
 		filecon->type = CIL_FILECON_CHAR;
-	}
-	else if (!strcmp(type, "block")) {
+	} else if (!strcmp(type, "block")) {
 		filecon->type = CIL_FILECON_BLOCK;
-	}
-	else if (!strcmp(type, "socket")) {
+	} else if (!strcmp(type, "socket")) {
 		filecon->type = CIL_FILECON_SOCKET;
-	}
-	else if (!strcmp(type, "pipe")) {
+	} else if (!strcmp(type, "pipe")) {
 		filecon->type = CIL_FILECON_PIPE;
-	}
-	else if (!strcmp(type, "symlink")) {
+	} else if (!strcmp(type, "symlink")) {
 		filecon->type = CIL_FILECON_SYMLINK;
-	}
-	else if (!strcmp(type, "any")) {
+	} else if (!strcmp(type, "any")) {
 		filecon->type = CIL_FILECON_ANY;
-	}
-	else {
+	} else {
 		printf("cil_gen_filecon: Invalid file type\n");
 		return SEPOL_ERR;
 	}
 		
 	if (parse_current->next->next->next->next->cl_head == NULL) {
 		filecon->context_str = cil_strdup(parse_current->next->next->next->next->data);
-	}
-	else {
+	} else {
 		rc = cil_context_init(&filecon->context);
 		if (rc != SEPOL_OK) {
 			printf("Failed to init file context\n");
@@ -2537,17 +2849,24 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL
-	|| parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL
-	|| parse_current->next->next->next == NULL
-	|| parse_current->next->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid portcon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
 	struct cil_portcon *portcon;
-	int rc = cil_portcon_init(&portcon);
+	rc = cil_portcon_init(&portcon);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -2642,16 +2961,24 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL ||
-	    parse_current->next->next == NULL ||
-	    parse_current->next->next->next == NULL ||
-	    parse_current->next->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid nodecon declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
 	struct cil_nodecon *nodecon;
-	int rc = cil_nodecon_init(&nodecon);
+	rc = cil_nodecon_init(&nodecon);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -2802,17 +3129,23 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL
-	|| parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL
-	|| parse_current->next->next->next == NULL
-	|| parse_current->next->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid netifcon declaration (line: %d)\n", parse_current->line);
-		return SEPOL_ERR;
+		return rc;
 	}
 	
 	struct cil_netifcon *netifcon;
-	int rc = cil_netifcon_init(&netifcon);
+	rc = cil_netifcon_init(&netifcon);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -2825,8 +3158,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 		} else {
 			return SEPOL_ERR;
 		}
-	}
-	else {
+	} else {
 		rc = cil_context_init(&netifcon->if_context);
 		if (rc != SEPOL_OK) {
 			printf("Failed to init if_context\n");	
@@ -2846,8 +3178,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 		} else {
 			return SEPOL_ERR;
 		}
-	}
-	else {
+	} else {
 		rc = cil_context_init(&netifcon->packet_context);
 		if (rc != SEPOL_OK) {
 			printf("Failed to init packet_context\n");
@@ -2892,19 +3223,27 @@ int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		return SEPOL_ERR;
 	}
 
-	if (parse_current->next == NULL
-	|| parse_current->next->cl_head != NULL
-	|| parse_current->next->next == NULL
-	|| parse_current->next->next->cl_head != NULL
-	|| parse_current->next->next->next == NULL
-	|| parse_current->next->next->next->next != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *type;
+	struct cil_fsuse *fsuse;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid fsuse declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	char *type = (char*)parse_current->next->data;
-	struct cil_fsuse *fsuse;
-	int rc = cil_fsuse_init(&fsuse);
+	type = parse_current->next->data;
+
+	rc = cil_fsuse_init(&fsuse);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -2977,17 +3316,30 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next == NULL || parse_current->next->next->next == NULL){
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST | SYM_EMPTY_LIST,
+		SYM_LIST
+	};
+	int syntax_len = sizeof(syntax)/ sizeof(*syntax);
+	char *key;
+	struct cil_macro *macro;
+	struct cil_tree_node *next;
+	int rc = SEPOL_ERR;
+
+	rc =__cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid macro declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	char *name = (char*)parse_current->next->data;
-	struct cil_macro *macro;
-	int rc = cil_macro_init(&macro);	
+	rc = cil_macro_init(&macro);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
+
+	key = parse_current->next->data;
 
 	if (parse_current->next->next->cl_head != NULL) {
 		cil_list_init(&macro->params);
@@ -3076,11 +3428,11 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		}
 	}
 
-	struct cil_tree_node *next = parse_current->next->next->next;
+	next = parse_current->next->next->next;
 	cil_tree_subtree_destroy(parse_current->next->next);
 	parse_current->next->next = next;
 	
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)macro, (hashtab_key_t)name, CIL_SYM_MACROS, CIL_MACRO);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)macro, (hashtab_key_t)key, CIL_SYM_MACROS, CIL_MACRO);
 	if (rc != SEPOL_OK)
 		goto gen_macro_cleanup;
 
@@ -3108,15 +3460,24 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 {
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
+	
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST | SYM_END,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_call *call;
+	int rc = SEPOL_ERR;
 
-	if ((parse_current->next == NULL || parse_current->next->cl_head != NULL)
-	|| (parse_current->next->next != NULL && parse_current->next->next->cl_head == NULL)) {
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid call declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_call *call;
-	int rc = cil_call_init(&call);
+	rc = cil_call_init(&call);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
@@ -3151,21 +3512,31 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next == NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_optional *optional;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid optional declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	char *name;
-	struct cil_optional *optional;
-	int rc = cil_optional_init(&optional);
+	rc = cil_optional_init(&optional);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 	
-	name = (char *)parse_current->next->data;
+	key = parse_current->next->data;
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)optional, (hashtab_key_t)name, CIL_SYM_OPTIONALS, CIL_OPTIONAL);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)optional, (hashtab_key_t)key, CIL_SYM_OPTIONALS, CIL_OPTIONAL);
 	if (rc != SEPOL_OK) 
 		goto gen_optional_cleanup;
 
@@ -3212,17 +3583,28 @@ int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (db == NULL || parse_current == NULL || ast_node == NULL)
 		return SEPOL_ERR;
 
-	if (parse_current->next == NULL || parse_current->next->next != NULL || parse_current->next->cl_head != NULL) {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
+	struct cil_policycap *polcap;
+	int rc = SEPOL_ERR;
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid policycap declaration (line: %d)\n", parse_current->line);
 		return SEPOL_ERR;
 	}
 
-	struct cil_policycap *polcap;
-	int rc = cil_policycap_init(&polcap);
+	rc = cil_policycap_init(&polcap);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
-	char *key = parse_current->next->data;
+
+	key = parse_current->next->data;
 	
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)polcap, (hashtab_key_t)key, CIL_SYM_POLICYCAPS, CIL_POLICYCAP);
 	if (rc != SEPOL_OK)
@@ -3243,34 +3625,39 @@ void cil_destroy_policycap(struct cil_policycap *polcap)
 
 int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
-	char * name;
+	if (db == NULL || parse_current == NULL || ast_node == NULL)
+		return SEPOL_ERR;
+
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key;
 	struct cil_ipaddr *ipaddr;
 	int rc = SEPOL_ERR;
 
-	if (db == NULL || parse_current == NULL || ast_node == NULL)
-		return rc;
-
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL ||
-		parse_current->next->next == NULL || parse_current->next->next->cl_head != NULL ||
-		parse_current->next->next->next != NULL)
-	{
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid ipaddr rule (line: %d)\n", parse_current->line);
 		return rc;
 	}
-	
+
 	rc = cil_ipaddr_init(&ipaddr);
 	if (rc != SEPOL_OK) {
 		return rc;
 	}
 
-	name  = (char *)parse_current->next->data;
+	key  = parse_current->next->data;
 
 	rc = cil_fill_ipaddr(parse_current->next->next, ipaddr);
 	if (rc != SEPOL_OK) {
 		goto gen_ipaddr_cleanup;
 	}
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)ipaddr, (hashtab_key_t)name, CIL_SYM_IPADDRS, CIL_IPADDR);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)ipaddr, (hashtab_key_t)key, CIL_SYM_IPADDRS, CIL_IPADDR);
 	if (rc != SEPOL_OK) {
 		goto gen_ipaddr_cleanup;
 	}
