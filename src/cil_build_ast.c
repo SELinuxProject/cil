@@ -2655,34 +2655,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	return SEPOL_OK;
 	
 	cil_fill_context_cleanup:
-		if (context->user_str != NULL) {
-			free(context->user_str);
-			context->user_str = NULL;
-		}
-		if (context->role_str != NULL) {
-			free(context->role_str);
-			context->role_str = NULL;
-		}
-		if (context->type_str != NULL) {
-			free(context->type_str);
-			context->type_str = NULL;
-		}
-		if (context->low_str != NULL) {
-			free(context->low_str);
-			context->low_str = NULL;
-		}
-		if (context->low != NULL) {
-			cil_destroy_level(context->low);
-			context->low = NULL;
-		}
-		if (context->high_str != NULL) {
-			free(context->high_str);
-			context->high_str = NULL;
-		}
-		if (context->high != NULL) {
-			cil_destroy_level(context->high);
-			context->high = NULL;
-		}
+		cil_destroy_context(context);
 		return rc;
 } 
 
@@ -2742,12 +2715,12 @@ void cil_destroy_context(struct cil_context *context)
 		free(context->type_str);
 	if (context->low_str != NULL)
 		free(context->low_str);
+	else if (context->low != NULL)
+		cil_destroy_level(context->low);
 	if (context->high_str != NULL)
 		free(context->high_str);
-//	if (context->low != NULL)
-//		cil_destroy_level(low);
-//	if (context->high != NULL)
-//		cil_destroy_level(high);	
+	else if (context->high != NULL)
+		cil_destroy_level(context->high);
 }
 
 int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
