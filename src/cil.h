@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <arpa/inet.h>
+
 #include "cil_symtab.h"
 #include "cil_mem.h"
 
@@ -693,13 +694,16 @@ struct cil_policycap {
 	struct cil_symtab_datum datum;
 };
 
-int cil_db_init(struct cil_db **);
-void cil_db_destroy(struct cil_db **);
-int cil_symtab_array_init(symtab_t [], uint32_t);
-void cil_symtab_array_destroy(symtab_t []);
-int cil_destroy_ast_symtabs(struct cil_tree_node *);
-int cil_get_parent_symtab(struct cil_db *, struct cil_tree_node *, symtab_t **, uint32_t);
-void cil_destroy_data(void **, uint32_t);
+int cil_db_init(struct cil_db **db);
+void cil_db_destroy(struct cil_db **db);
+
+void cil_destroy_data(void **data, uint32_t flavor);
+
+int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
+void cil_symtab_array_destroy(symtab_t symtab[]);
+int cil_destroy_ast_symtabs(struct cil_tree_node *root);
+int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, uint32_t cil_sym_index);
+
 int cil_sort_init(struct cil_sort **sort);
 void cil_sort_destroy(struct cil_sort **sort);
 int cil_netifcon_init(struct cil_netifcon **netifcon);
@@ -738,6 +742,7 @@ int cil_nodecon_init(struct cil_nodecon **nodecon);
 int cil_genfscon_init(struct cil_genfscon **genfscon);
 int cil_fsuse_init(struct cil_fsuse **fsuse);
 int cil_constrain_init(struct cil_constrain **constrain);
+int cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 int cil_perm_init(struct cil_perm **perm);
 int cil_permset_init(struct cil_permset **permset);
 int cil_user_init(struct cil_user **user);
@@ -748,11 +753,8 @@ int cil_catorder_init(struct cil_catorder **catorder);
 int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates);
 int cil_call_init(struct cil_call **call);
 int cil_optional_init(struct cil_optional **optional);
-int cil_conditional_init(struct cil_conditional **conditional);
-int cil_booleanif_init(struct cil_booleanif **booleanif);
-int cil_macro_init(struct cil_macro **macro);
 int cil_param_init(struct cil_param **param);
+int cil_macro_init(struct cil_macro **macro);
 int cil_policycap_init(struct cil_policycap **policycap);
-int cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 
 #endif

@@ -44,7 +44,7 @@ int cil_db_init(struct cil_db **db)
 {
 	int rc = SEPOL_ERR;	
 
-	struct cil_db *new_db;
+	struct cil_db *new_db = NULL;
 	new_db = cil_malloc(sizeof(struct cil_db));
 
 	rc = cil_symtab_array_init(new_db->symtab, CIL_SYM_NUM);
@@ -86,248 +86,188 @@ void cil_db_destroy(struct cil_db **db)
 void cil_destroy_data(void **data, uint32_t flavor)
 {
 	switch(flavor) {
-		case (CIL_ROOT) : {
-			free(*data);
-			break;
-		}
-		case (CIL_PARSE_NODE) : {
-			free(*data);
-			break;
-		}
-		case (CIL_AST_STR) : {
-			free(*data);
-			break;
-		}
-		case (CIL_LIST) : {
-			free(*data);	
-			break;
-		}
-		case (CIL_BLOCK) : {
-			cil_destroy_block(*data);
-			break;
-		}
-		case (CIL_CLASS) : {
-			cil_destroy_class(*data);
-			break;
-		}
-		case (CIL_PERM) : {
-			cil_destroy_perm(*data);
-			break;
-		}
-		case (CIL_PERMSET) : {
-			cil_destroy_permset(*data);
-			break;
-		}
-		case (CIL_COMMON) : {
-			cil_destroy_common(*data);
-			break;
-		}
-		case (CIL_CLASSCOMMON) : {
-			cil_destroy_classcommon(*data);
-			break;
-		}
-		case (CIL_SID) : {
-			cil_destroy_sid(*data);
-			break;
-		}
-		case (CIL_SIDCONTEXT) : {
-			cil_destroy_sidcontext(*data);
-			break;
-		}
-		case (CIL_POLICYCAP) : {
-			cil_destroy_policycap(*data);
-			break;
-		}
-		case (CIL_AVRULE) : {
-			cil_destroy_avrule(*data);
-			break;
-		}
-		case (CIL_TYPE_RULE) : {
-			cil_destroy_type_rule(*data);
-			break;
-		}
-		case (CIL_TYPE) : {
-			cil_destroy_type(*data);
-			break;
-		}
-		case (CIL_ATTR) : {
-			cil_destroy_type(*data);
-			break;
-		}
-		case (CIL_USER) : {
-			cil_destroy_user(*data);
-			break;
-		}
-		case (CIL_ROLE) : {
-			cil_destroy_role(*data);
-			break;
-		}
-		case (CIL_ROLETRANS) : {
-			cil_destroy_roletrans(*data);
-			break;
-		}
-		case (CIL_ROLEALLOW) : {
-			cil_destroy_roleallow(*data);
-			break;
-		}
-		case (CIL_ROLEDOMINANCE) : {
-			cil_destroy_roledominance(*data);
-			break;
-		}
-		case (CIL_BOOL) : {
-			cil_destroy_bool(*data);
-			break;
-		}
-		case (CIL_TUNABLE) : {
-			cil_destroy_bool(*data);
-			break;
-		}
-		case (CIL_BOOLEANIF) : {
-			cil_destroy_boolif(*data);
-			break;
-		}
-		case (CIL_ELSE) : break;
-		case (CIL_COND) : {
-			cil_destroy_conditional(*data);
-			break;
-		}
-		case (CIL_TUNABLEIF) : {
-			cil_destroy_tunif(*data);
-			break;
-		}
-		case (CIL_TYPEALIAS) : {
-			cil_destroy_typealias(*data);
-			break;
-		}
-		case (CIL_TYPE_ATTR) : {
-			cil_destroy_typeattr(*data);
-			break;
-		}
-		case (CIL_TYPEBOUNDS) : {
-			cil_destroy_typebounds(*data);
-			break;
-		}
-		case (CIL_TYPEPERMISSIVE) : {
-			cil_destroy_typepermissive(*data);
-			break;
-		}
-		case (CIL_FILETRANSITION) : {
-			cil_destroy_filetransition(*data);
-			break;
-		}
-		case (CIL_SENS) : {
-			cil_destroy_sensitivity(*data);
-			break;
-		}
-		case (CIL_SENSALIAS) : {
-			cil_destroy_sensalias(*data);
-			break;
-		}
-		case (CIL_CAT) : {
-			cil_destroy_category(*data);
-			break;
-		}
-		case (CIL_CATALIAS) : {
-			cil_destroy_catalias(*data);
-			break;
-		}
-		case (CIL_CATSET) : {
-			cil_destroy_catset(*data);
-			break;
-		}
-		case (CIL_CATORDER) : {
-			cil_destroy_catorder(*data);
-			break;
-		}
-		case (CIL_DOMINANCE) : {
-			cil_destroy_dominance(*data);
-			break;
-		}
-		case (CIL_SENSCAT) : {
-			cil_destroy_senscat(*data);
-			break;
-		}
-		case (CIL_LEVEL) : {
-			cil_destroy_level(*data);
-			break;
-		}
-		case (CIL_CONSTRAIN) : {
-			cil_destroy_constrain(*data);
-			break;
-		}
-		case (CIL_MLSCONSTRAIN) : {
-			cil_destroy_constrain(*data);
-			break;
-		}
-		case (CIL_CONSTRAIN_NODE) : {
-			cil_destroy_constrain_node(*data);
-			break;
-		}
-		case (CIL_ROLETYPE) : {
-			cil_destroy_roletype(*data);
-			break;
-		}
-		case (CIL_USERROLE) : { 
-			cil_destroy_userrole(*data);
-			break;
-		}
-		case (CIL_CONTEXT) : {
-			cil_destroy_context(*data);
-			break;
-		}
-		case (CIL_FILECON) : {
-			cil_destroy_filecon(*data);
-			break;
-		}
-		case (CIL_PORTCON) : {
-			cil_destroy_portcon(*data);
-			break;
-		}
-		case (CIL_NODECON) : {
-			cil_destroy_nodecon(*data);
-			break;
-		}
-		case (CIL_GENFSCON) : {
-			cil_destroy_genfscon(*data);
-			break;
-		}
-		case (CIL_NETIFCON) : {
-			cil_destroy_netifcon(*data);
-			break;
-		}
-		case (CIL_FSUSE) : {
-			cil_destroy_fsuse(*data);
-			break;
-		}
-		case (CIL_PARAM) : {
-			cil_destroy_param(*data);
-			break;
-		}
-		case (CIL_MACRO) : {
-			cil_destroy_macro(*data);
-			break;
-		}
-		case (CIL_CALL) : {
-			cil_destroy_call(*data);
-			break;
-		}
-		case (CIL_ARGS) : {
-			cil_destroy_args(*data);
-			break;
-		}
-		case (CIL_OPTIONAL) : {
-			cil_destroy_optional(*data);
-			break;
-		}
-		case (CIL_IPADDR) : {
-			cil_destroy_ipaddr(*data);
-			break;
-		}
-		case (CIL_INT) : break;
-		default : {
-			printf("Unknown data flavor: %d\n", flavor);
-			break;
-		}
+	case CIL_ROOT:
+		free(*data);
+		break;
+	case CIL_PARSE_NODE:
+		free(*data);
+		break;
+	case CIL_AST_STR:
+		free(*data);
+		break;
+	case CIL_LIST:
+		free(*data);
+		break;
+	case CIL_BLOCK:
+		cil_destroy_block(*data);
+		break;
+	case CIL_CLASS:
+		cil_destroy_class(*data);
+		break;
+	case CIL_PERM:
+		cil_destroy_perm(*data);
+		break;
+	case CIL_PERMSET:
+		cil_destroy_permset(*data);
+		break;
+	case CIL_COMMON:
+		cil_destroy_common(*data);
+		break;
+	case CIL_CLASSCOMMON:
+		cil_destroy_classcommon(*data);
+		break;
+	case CIL_SID:
+		cil_destroy_sid(*data);
+		break;
+	case CIL_SIDCONTEXT:
+		cil_destroy_sidcontext(*data);
+		break;
+	case CIL_POLICYCAP:
+		cil_destroy_policycap(*data);
+		break;
+	case CIL_AVRULE:
+		cil_destroy_avrule(*data);
+		break;
+	case CIL_TYPE_RULE:
+		cil_destroy_type_rule(*data);
+		break;
+	case CIL_TYPE:
+		cil_destroy_type(*data);
+		break;
+	case CIL_ATTR:
+		cil_destroy_type(*data);
+		break;
+	case CIL_USER:
+		cil_destroy_user(*data);
+		break;
+	case CIL_ROLE:
+		cil_destroy_role(*data);
+		break;
+	case CIL_ROLETRANS:
+		cil_destroy_roletrans(*data);
+		break;
+	case CIL_ROLEALLOW:
+		cil_destroy_roleallow(*data);
+		break;
+	case CIL_ROLEDOMINANCE:
+		cil_destroy_roledominance(*data);
+		break;
+	case CIL_BOOL:
+		cil_destroy_bool(*data);
+		break;
+	case CIL_TUNABLE:
+		cil_destroy_bool(*data);
+		break;
+	case CIL_BOOLEANIF:
+		cil_destroy_boolif(*data);
+		break;
+	case CIL_ELSE : break;
+	case CIL_COND:
+		cil_destroy_conditional(*data);
+		break;
+	case CIL_TUNABLEIF:
+		cil_destroy_tunif(*data);
+		break;
+	case CIL_TYPEALIAS:
+		cil_destroy_typealias(*data);
+		break;
+	case CIL_TYPE_ATTR:
+		cil_destroy_typeattr(*data);
+		break;
+	case CIL_TYPEBOUNDS:
+		cil_destroy_typebounds(*data);
+		break;
+	case CIL_TYPEPERMISSIVE:
+		cil_destroy_typepermissive(*data);
+		break;
+	case CIL_FILETRANSITION:
+		cil_destroy_filetransition(*data);
+		break;
+	case CIL_SENS:
+		cil_destroy_sensitivity(*data);
+		break;
+	case CIL_SENSALIAS:
+		cil_destroy_sensalias(*data);
+		break;
+	case CIL_CAT:
+		cil_destroy_category(*data);
+		break;
+	case CIL_CATALIAS:
+		cil_destroy_catalias(*data);
+		break;
+	case CIL_CATSET:
+		cil_destroy_catset(*data);
+		break;
+	case CIL_CATORDER:
+		cil_destroy_catorder(*data);
+		break;
+	case CIL_DOMINANCE:
+		cil_destroy_dominance(*data);
+		break;
+	case CIL_SENSCAT:
+		cil_destroy_senscat(*data);
+		break;
+	case CIL_LEVEL:
+		cil_destroy_level(*data);
+		break;
+	case CIL_CONSTRAIN:
+		cil_destroy_constrain(*data);
+		break;
+	case CIL_MLSCONSTRAIN:
+		cil_destroy_constrain(*data);
+		break;
+	case CIL_CONSTRAIN_NODE:
+		cil_destroy_constrain_node(*data);
+		break;
+	case CIL_ROLETYPE:
+		cil_destroy_roletype(*data);
+		break;
+	case CIL_USERROLE:
+		cil_destroy_userrole(*data);
+		break;
+	case CIL_CONTEXT:
+		cil_destroy_context(*data);
+		break;
+	case CIL_FILECON:
+		cil_destroy_filecon(*data);
+		break;
+	case CIL_PORTCON:
+		cil_destroy_portcon(*data);
+		break;
+	case CIL_NODECON:
+		cil_destroy_nodecon(*data);
+		break;
+	case CIL_GENFSCON:
+		cil_destroy_genfscon(*data);
+		break;
+	case CIL_NETIFCON:
+		cil_destroy_netifcon(*data);
+		break;
+	case CIL_FSUSE:
+		cil_destroy_fsuse(*data);
+		break;
+	case CIL_PARAM:
+		cil_destroy_param(*data);
+		break;
+	case CIL_MACRO:
+		cil_destroy_macro(*data);
+		break;
+	case CIL_CALL:
+		cil_destroy_call(*data);
+		break;
+	case CIL_ARGS:
+		cil_destroy_args(*data);
+		break;
+	case CIL_OPTIONAL:
+		cil_destroy_optional(*data);
+		break;
+	case CIL_IPADDR:
+		cil_destroy_ipaddr(*data);
+		break;
+	case CIL_INT: break;
+	default:
+		printf("Unknown data flavor: %d\n", flavor);
+		break;
 	}
 	
 	*data = NULL;		
@@ -336,7 +276,7 @@ void cil_destroy_data(void **data, uint32_t flavor)
 int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 {
 	uint32_t i = 0, rc = 0;
-	for (i=0; i<symtab_num; i++) {
+	for (i = 0; i < symtab_num; i++) {
 		rc = symtab_init(&symtab[i], CIL_SYM_SIZE);
 		if (rc != SEPOL_OK) {
 			printf("Symtab init failed\n");
@@ -349,8 +289,8 @@ int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 
 void cil_symtab_array_destroy(symtab_t symtab[])
 {
-	int i=0;
-	for (i=0;i<CIL_SYM_NUM; i++) {
+	int i = 0;
+	for (i = 0; i < CIL_SYM_NUM; i++) {
 		cil_symtab_destroy(&symtab[i]);
 	}
 }
@@ -363,42 +303,34 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 	do {
 		if (current->cl_head != NULL && !reverse) {
 			switch (current->flavor) {
-				case (CIL_ROOT) :
-					break;
-				case (CIL_BLOCK) : {
-					cil_symtab_array_destroy(((struct cil_block*)current->data)->symtab);
-					break;
-				}
-				case (CIL_CLASS) : {
-					cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
-					break;
-				}
-				case (CIL_COMMON) : {
-					cil_symtab_destroy(&((struct cil_common*)current->data)->perms);
-					break;
-				}
-				case (CIL_MACRO) : {
-					cil_symtab_array_destroy(((struct cil_macro*)current->data)->symtab);
-					break;
-				}
-				case (CIL_CALL) : {
-					/* do nothing */
-					break;
-				}
-				case (CIL_OPTIONAL) : {
-					/* do nothing */
-					break;
-				}
-				default : 
-					printf("destroy symtab error, wrong flavor node\n");
+			case CIL_ROOT:
+				break;
+			case CIL_BLOCK:
+				cil_symtab_array_destroy(((struct cil_block*)current->data)->symtab);
+				break;
+			case CIL_CLASS:
+				cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
+				break;
+			case CIL_COMMON:
+				cil_symtab_destroy(&((struct cil_common*)current->data)->perms);
+				break;
+			case CIL_MACRO:
+				cil_symtab_array_destroy(((struct cil_macro*)current->data)->symtab);
+				break;
+			case CIL_CALL:
+				/* do nothing */
+				break;
+			case CIL_OPTIONAL:
+				/* do nothing */
+				break;
+			default:
+				printf("destroy symtab error, wrong flavor node\n");
 			}
 			current = current->cl_head;
-		}
-		else if (current->next != NULL) {
+		} else if (current->next != NULL) {
 			current = current->next;
 			reverse = 0;
-		}
-		else {
+		} else {
 			current = current->parent;
 			reverse = 1;
 		}
@@ -410,55 +342,51 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 
 int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, uint32_t cil_sym_index)
 {
-	if (db == NULL || ast_node == NULL)
-		return SEPOL_ERR;
-
 	int rc = SEPOL_ERR;
 
+	if (db == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
 	if (ast_node->parent != NULL) {
-		if (ast_node->parent->flavor == CIL_BLOCK && cil_sym_index < CIL_SYM_NUM) 
+		if (ast_node->parent->flavor == CIL_BLOCK && cil_sym_index < CIL_SYM_NUM) {
 			*symtab = &((struct cil_block*)ast_node->parent->data)->symtab[cil_sym_index];
-		else if (ast_node->parent->flavor == CIL_MACRO  && cil_sym_index < CIL_SYM_NUM) 
+		} else if (ast_node->parent->flavor == CIL_MACRO  && cil_sym_index < CIL_SYM_NUM) {
 			*symtab = &((struct cil_macro*)ast_node->parent->data)->symtab[cil_sym_index];
-		else if (ast_node->parent->flavor == CIL_CALL  && cil_sym_index < CIL_SYM_NUM) {
+		} else if (ast_node->parent->flavor == CIL_CALL  && cil_sym_index < CIL_SYM_NUM) {
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_call failed, rc: %d\n", rc);
 				return rc;
 			}
-		}
-		else if (ast_node->parent->flavor == CIL_CLASS) 
+		} else if (ast_node->parent->flavor == CIL_CLASS) {
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
-		else if (ast_node->parent->flavor == CIL_COMMON)
+		} else if (ast_node->parent->flavor == CIL_COMMON) {
 			*symtab = &((struct cil_common*)ast_node->parent->data)->perms;
-		else if (ast_node->parent->flavor == CIL_TUNABLEIF)
+		} else if (ast_node->parent->flavor == CIL_TUNABLEIF) {
 			*symtab = &((struct cil_tunableif*)ast_node->parent->data)->symtab[cil_sym_index];
-		else if ((ast_node->parent->flavor == CIL_BOOLEANIF || ast_node->parent->flavor == CIL_ELSE) && cil_sym_index < CIL_SYM_NUM) {
+		} else if ((ast_node->parent->flavor == CIL_BOOLEANIF || ast_node->parent->flavor == CIL_ELSE) && cil_sym_index < CIL_SYM_NUM) {
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_booleanif failed, rc: %d\n", rc);
 				return rc;
 			}
-		}
-		else if (ast_node->parent->flavor == CIL_OPTIONAL && cil_sym_index < CIL_SYM_NUM) {
+		} else if (ast_node->parent->flavor == CIL_OPTIONAL && cil_sym_index < CIL_SYM_NUM) {
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_optional failed, rc: %d\n", rc);
 				return rc;
 			}
-		}
-		else if (ast_node->parent->flavor == CIL_ROOT && cil_sym_index < CIL_SYM_NUM)
+		} else if (ast_node->parent->flavor == CIL_ROOT && cil_sym_index < CIL_SYM_NUM) {
 			*symtab = &db->symtab[cil_sym_index];
-		else if (cil_sym_index >= CIL_SYM_NUM) {
+		} else if (cil_sym_index >= CIL_SYM_NUM) {
 			printf("Invalid index passed to cil_get_parent_symtab\n");
 			return SEPOL_ERR;
-		}
-		else {
+		} else {
 			printf("Failed to get symtab from parent node\n");
 			return SEPOL_ERR;
 		}
-	}
-	else {
+	} else {
 		printf("Failed to get symtab: no parent node\n");
 		return SEPOL_ERR;
 	}
@@ -468,11 +396,13 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 
 int cil_sort_init(struct cil_sort **sort)
 {
+	struct cil_sort *new_sort = NULL;
+
 	if (sort == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_sort *new_sort = cil_malloc(sizeof(struct cil_sort));
+	new_sort = cil_malloc(sizeof(struct cil_sort));
 
 	new_sort->flavor = 0;
 	new_sort->count = 0;
@@ -499,11 +429,13 @@ void cil_sort_destroy(struct cil_sort **sort)
 
 int cil_netifcon_init(struct cil_netifcon **netifcon)
 {
+	struct cil_netifcon *new_netifcon = NULL;
+
 	if (netifcon == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_netifcon *new_netifcon = cil_malloc(sizeof(struct cil_netifcon));	
+	new_netifcon = cil_malloc(sizeof(struct cil_netifcon));
 
 	new_netifcon->interface_str = NULL;
 	new_netifcon->if_context_str = NULL;
@@ -518,11 +450,13 @@ int cil_netifcon_init(struct cil_netifcon **netifcon)
 
 int cil_context_init(struct cil_context **context)
 {
-	if(context == NULL) {
+	struct cil_context *new_context = NULL;
+
+	if (context == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_context *new_context = cil_malloc(sizeof(struct cil_context));
+	new_context = cil_malloc(sizeof(struct cil_context));
 
 	cil_symtab_datum_init(&new_context->datum);
 	new_context->user_str = NULL;
@@ -543,11 +477,13 @@ int cil_context_init(struct cil_context **context)
 
 int cil_level_init(struct cil_level **level)
 {
+	struct cil_level *new_level = NULL;
+
 	if (level == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_level *new_level = cil_malloc(sizeof(struct cil_level));
+	new_level = cil_malloc(sizeof(struct cil_level));
 
 	cil_symtab_datum_init(&new_level->datum);
 	new_level->sens_str = NULL;
@@ -562,14 +498,18 @@ int cil_level_init(struct cil_level **level)
 
 int cil_sens_init(struct cil_sens **sens)
 {
+	struct cil_sens *new_sens = NULL;
+	int rc = SEPOL_ERR;
+
 	if (sens == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_sens *new_sens = cil_malloc(sizeof(struct cil_sens));
+	new_sens = cil_malloc(sizeof(struct cil_sens));
 
 	cil_symtab_datum_init(&new_sens->datum);
-	int rc = symtab_init(&new_sens->cats, CIL_SYM_SIZE);
+
+	rc = symtab_init(&new_sens->cats, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
 		free(new_sens);
 		return rc;
@@ -582,15 +522,18 @@ int cil_sens_init(struct cil_sens **sens)
 
 int cil_block_init(struct cil_block **block)
 {
+	struct cil_block *new_block = NULL;
+	int rc = SEPOL_ERR;
+
 	if (block == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_block *new_block = cil_malloc(sizeof(struct cil_block));
+	new_block = cil_malloc(sizeof(struct cil_block));
 
 	cil_symtab_datum_init(&new_block->datum);
-	int rc = cil_symtab_array_init(new_block->symtab, CIL_SYM_NUM);
 
+	rc = cil_symtab_array_init(new_block->symtab, CIL_SYM_NUM);
 	if (rc == SEPOL_ERR) {
 		cil_destroy_block(new_block);
 		return SEPOL_ERR;
@@ -606,14 +549,18 @@ int cil_block_init(struct cil_block **block)
 
 int cil_class_init(struct cil_class **class)
 {
+	struct cil_class *new_class = NULL;
+	int rc = SEPOL_ERR;
+
 	if (class == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_class *new_class = cil_malloc(sizeof(struct cil_class));
+	new_class = cil_malloc(sizeof(struct cil_class));
 
 	cil_symtab_datum_init(&new_class->datum);
-	int rc = symtab_init(&new_class->perms, CIL_SYM_SIZE);
+
+	rc = symtab_init(&new_class->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
 		free(new_class);
 		return rc;
@@ -628,19 +575,21 @@ int cil_class_init(struct cil_class **class)
 
 int cil_common_init(struct cil_common **common)
 {
+	struct cil_common *new_common = NULL;
+	int rc = SEPOL_ERR;
+
 	if (common == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_common *new_common = cil_malloc(sizeof(struct cil_common));
+	new_common = cil_malloc(sizeof(struct cil_common));
 
 	cil_symtab_datum_init(&new_common->datum);
-	int rc = symtab_init(&new_common->perms, CIL_SYM_SIZE);
+	rc = symtab_init(&new_common->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
 		free(new_common);
 		return rc;
 	}
-
 
 	*common = new_common;
 
@@ -649,12 +598,13 @@ int cil_common_init(struct cil_common **common)
 
 int cil_classcommon_init(struct cil_classcommon **classcommon)
 {
+	struct cil_classcommon *new_classcommon = NULL;
+
 	if (classcommon == NULL) {
 		return SEPOL_ERR;
 	}
 
-
-	struct cil_classcommon *new_classcommon = cil_malloc(sizeof(struct cil_classcommon));
+	new_classcommon = cil_malloc(sizeof(struct cil_classcommon));
 
 	new_classcommon->class_str = NULL;
 	new_classcommon->class = NULL;
@@ -668,12 +618,13 @@ int cil_classcommon_init(struct cil_classcommon **classcommon)
 
 int cil_sid_init(struct cil_sid **sid)
 {
+	struct cil_sid *new_sid = NULL;
+
 	if (sid == NULL) {
 		return SEPOL_ERR;
 	}
 
-
-	struct cil_sid *new_sid = cil_malloc(sizeof(struct cil_sid));
+	new_sid = cil_malloc(sizeof(struct cil_sid));
 
 	cil_symtab_datum_init(&new_sid->datum);
 
@@ -684,11 +635,13 @@ int cil_sid_init(struct cil_sid **sid)
 
 int cil_sidcontext_init(struct cil_sidcontext **sidcontext)
 {
+	struct cil_sidcontext *new_sidcontext = NULL;
+
 	if (sidcontext == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_sidcontext *new_sidcontext = cil_malloc(sizeof(struct cil_sidcontext));
+	new_sidcontext = cil_malloc(sizeof(struct cil_sidcontext));
 
 	new_sidcontext->sid_str = NULL;
 	new_sidcontext->sid = NULL;
@@ -702,11 +655,13 @@ int cil_sidcontext_init(struct cil_sidcontext **sidcontext)
 
 int cil_userrole_init(struct cil_userrole **userrole)
 {
+	struct cil_userrole *new_userrole = NULL;
+
 	if (userrole == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_userrole *new_userrole = cil_malloc(sizeof(struct cil_userrole));
+	new_userrole = cil_malloc(sizeof(struct cil_userrole));
 
 	new_userrole->user_str = NULL;
 	new_userrole->user = NULL;
@@ -720,11 +675,13 @@ int cil_userrole_init(struct cil_userrole **userrole)
 
 int cil_roledominance_init(struct cil_roledominance **roledominance)
 {
+	struct cil_roledominance *new_roledominance = NULL;
+
 	if (roledominance == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_roledominance *new_roledominance = cil_malloc(sizeof(struct cil_roledominance));
+	new_roledominance = cil_malloc(sizeof(struct cil_roledominance));
 
 	new_roledominance->role_str = NULL;
 	new_roledominance->role = NULL;
@@ -738,11 +695,13 @@ int cil_roledominance_init(struct cil_roledominance **roledominance)
 
 int cil_roletype_init(struct cil_roletype **roletype)
 {
+	struct cil_roletype *new_roletype = NULL;
+
 	if (roletype == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_roletype *new_roletype = cil_malloc(sizeof(struct cil_roletype));
+	new_roletype = cil_malloc(sizeof(struct cil_roletype));
 
 	new_roletype->role_str = NULL;
 	new_roletype->role = NULL;
@@ -756,11 +715,13 @@ int cil_roletype_init(struct cil_roletype **roletype)
 
 int cil_typeattribute_init(struct cil_typeattribute **typeattribute)
 {
+	struct cil_typeattribute *new_typeattribute = NULL;
+
 	if (typeattribute == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_typeattribute *new_typeattribute = cil_malloc(sizeof(struct cil_typeattribute));
+	new_typeattribute = cil_malloc(sizeof(struct cil_typeattribute));
 
 	new_typeattribute->type_str = NULL;
 	new_typeattribute->type = NULL;
@@ -774,11 +735,13 @@ int cil_typeattribute_init(struct cil_typeattribute **typeattribute)
 
 int cil_typealias_init(struct cil_typealias **typealias)
 {
+	struct cil_typealias *new_typealias = NULL;
+
 	if (typealias == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_typealias *new_typealias = cil_malloc(sizeof(struct cil_typealias));
+	new_typealias = cil_malloc(sizeof(struct cil_typealias));
 
 	cil_symtab_datum_init(&new_typealias->datum);
 	new_typealias->type_str = NULL;
@@ -791,11 +754,13 @@ int cil_typealias_init(struct cil_typealias **typealias)
 
 int cil_typebounds_init(struct cil_typebounds **typebnds)
 {
+	struct cil_typebounds *new_typebnds = NULL;
+
 	if (typebnds == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_typebounds *new_typebnds = cil_malloc(sizeof(struct cil_typebounds));
+	new_typebnds = cil_malloc(sizeof(struct cil_typebounds));
 
 	new_typebnds->parent_str = NULL;
 	new_typebnds->child_str = NULL;
@@ -807,11 +772,13 @@ int cil_typebounds_init(struct cil_typebounds **typebnds)
 
 int cil_typepermissive_init(struct cil_typepermissive **typeperm)
 {
+	struct cil_typepermissive *new_typeperm = NULL;
+
 	if (typeperm == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_typepermissive *new_typeperm = cil_malloc(sizeof(struct cil_typepermissive));
+	new_typeperm = cil_malloc(sizeof(struct cil_typepermissive));
 
 	new_typeperm->type_str = NULL;
 
@@ -822,11 +789,13 @@ int cil_typepermissive_init(struct cil_typepermissive **typeperm)
 
 int cil_filetransition_init(struct cil_filetransition **filetrans)
 {
+	struct cil_filetransition *new_filetrans = NULL;
+
 	if (filetrans == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_filetransition *new_filetrans = cil_malloc(sizeof(struct cil_filetransition));
+	new_filetrans = cil_malloc(sizeof(struct cil_filetransition));
 
 	new_filetrans->src_str = NULL;
 	new_filetrans->src = NULL;
@@ -845,11 +814,13 @@ int cil_filetransition_init(struct cil_filetransition **filetrans)
 
 int cil_bool_init(struct cil_bool **cilbool)
 {
+	struct cil_bool *new_cilbool = NULL;
+
 	if (cilbool == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_bool *new_cilbool = cil_malloc(sizeof(struct cil_bool));
+	new_cilbool = cil_malloc(sizeof(struct cil_bool));
 
 	cil_symtab_datum_init(&new_cilbool->datum);
 	new_cilbool->value = 0;
@@ -861,10 +832,13 @@ int cil_bool_init(struct cil_bool **cilbool)
 
 int cil_boolif_init(struct cil_booleanif **bif)
 {
-	if (bif == NULL)
-		return SEPOL_ERR;
+	struct cil_booleanif *new_bif = NULL;
 
-	struct cil_booleanif *new_bif = cil_malloc(sizeof(struct cil_booleanif));
+	if (bif == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_bif = cil_malloc(sizeof(struct cil_booleanif));
 
 	new_bif->expr_stack = NULL;
 
@@ -875,10 +849,13 @@ int cil_boolif_init(struct cil_booleanif **bif)
 
 int cil_conditional_init(struct cil_conditional **cond)
 {
-	if (cond == NULL)
-		return SEPOL_ERR;
+	struct cil_conditional *new_cond = NULL;
 
-	struct cil_conditional *new_cond = cil_malloc(sizeof(struct cil_conditional));
+	if (cond == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_cond = cil_malloc(sizeof(struct cil_conditional));
 
 	new_cond->str = NULL;
 	new_cond->data = NULL;
@@ -891,11 +868,14 @@ int cil_conditional_init(struct cil_conditional **cond)
 
 int cil_tunif_init(struct cil_tunableif **tif)
 {
-	if (tif == NULL)
-		return SEPOL_ERR;
-
 	int rc = SEPOL_ERR;
-	struct cil_tunableif *new_tif = cil_malloc(sizeof(struct cil_tunableif));
+	struct cil_tunableif *new_tif = NULL;
+
+	if (tif == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_tif = cil_malloc(sizeof(struct cil_tunableif));
 
 	new_tif->expr_stack = NULL;
 	rc = cil_symtab_array_init(new_tif->symtab, CIL_SYM_NUM);
@@ -909,11 +889,13 @@ int cil_tunif_init(struct cil_tunableif **tif)
 
 int cil_avrule_init(struct cil_avrule **avrule)
 {
+	struct cil_avrule *new_avrule = NULL;
+
 	if (avrule == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_avrule *new_avrule = cil_malloc(sizeof(struct cil_avrule));
+	new_avrule = cil_malloc(sizeof(struct cil_avrule));
 
 	new_avrule->rule_kind = 0;
 	new_avrule->src_str = NULL;
@@ -933,11 +915,13 @@ int cil_avrule_init(struct cil_avrule **avrule)
 
 int cil_type_rule_init(struct cil_type_rule **type_rule)
 {
+	struct cil_type_rule *new_type_rule = NULL;
+
 	if (type_rule == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_type_rule *new_type_rule = cil_malloc(sizeof(struct cil_type_rule));
+	new_type_rule = cil_malloc(sizeof(struct cil_type_rule));
 
 	new_type_rule->rule_kind = 0;
 	new_type_rule->src_str = NULL;
@@ -956,11 +940,13 @@ int cil_type_rule_init(struct cil_type_rule **type_rule)
 
 int cil_role_trans_init(struct cil_role_trans **role_trans)
 {
+	struct cil_role_trans *new_role_trans = NULL;
+
 	if (role_trans == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_role_trans *new_role_trans = cil_malloc(sizeof(struct cil_role_trans));
+	new_role_trans = cil_malloc(sizeof(struct cil_role_trans));
 
 	new_role_trans->src_str = NULL;
 	new_role_trans->src = NULL;
@@ -978,11 +964,13 @@ int cil_role_trans_init(struct cil_role_trans **role_trans)
 
 int cil_role_allow_init(struct cil_role_allow **role_allow)
 {
+	struct cil_role_allow *new_role_allow = NULL;
+
 	if (role_allow == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_role_allow *new_role_allow = cil_malloc(sizeof(struct cil_role_allow));
+	new_role_allow = cil_malloc(sizeof(struct cil_role_allow));
 
 	new_role_allow->src_str = NULL;
 	new_role_allow->src = NULL;
@@ -996,11 +984,13 @@ int cil_role_allow_init(struct cil_role_allow **role_allow)
 
 int cil_sensalias_init(struct cil_sensalias **sensalias)
 {
+	struct cil_sensalias *new_sensalias = NULL;
+
 	if (sensalias == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_sensalias *new_sensalias = cil_malloc(sizeof(struct cil_sensalias));
+	new_sensalias = cil_malloc(sizeof(struct cil_sensalias));
 
 	cil_symtab_datum_init(&new_sensalias->datum);
 	new_sensalias->sens_str = NULL;
@@ -1013,11 +1003,13 @@ int cil_sensalias_init(struct cil_sensalias **sensalias)
 
 int cil_catalias_init(struct cil_catalias **catalias)
 {
+	struct cil_catalias *new_catalias = NULL;
+
 	if (catalias == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_catalias *new_catalias = cil_malloc(sizeof(struct cil_catalias));
+	new_catalias = cil_malloc(sizeof(struct cil_catalias));
 
 	cil_symtab_datum_init(&new_catalias->datum);
 	new_catalias->cat_str = NULL;
@@ -1030,11 +1022,13 @@ int cil_catalias_init(struct cil_catalias **catalias)
 
 int cil_catset_init(struct cil_catset **catset)
 {
+	struct cil_catset *new_catset = NULL;
+
 	if (catset == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_catset *new_catset = cil_malloc(sizeof(struct cil_catset));
+	new_catset = cil_malloc(sizeof(struct cil_catset));
 
 	cil_symtab_datum_init(&new_catset->datum);
 	new_catset->cat_list_str = NULL;
@@ -1047,11 +1041,13 @@ int cil_catset_init(struct cil_catset **catset)
 
 int cil_senscat_init(struct cil_senscat **senscat)
 {
+	struct cil_senscat *new_senscat = NULL;
+
 	if (senscat == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_senscat *new_senscat = cil_malloc(sizeof(struct cil_senscat));
+	new_senscat = cil_malloc(sizeof(struct cil_senscat));
 
 	new_senscat->sens_str = NULL;
 	new_senscat->cat_list_str = NULL;
@@ -1064,11 +1060,13 @@ int cil_senscat_init(struct cil_senscat **senscat)
 
 int cil_filecon_init(struct cil_filecon **filecon)
 {
+	struct cil_filecon *new_filecon = NULL;
+
 	if (filecon == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_filecon *new_filecon = cil_malloc(sizeof(struct cil_filecon));
+	new_filecon = cil_malloc(sizeof(struct cil_filecon));
 
 	new_filecon->root_str = NULL;
 	new_filecon->path_str = NULL;
@@ -1082,11 +1080,13 @@ int cil_filecon_init(struct cil_filecon **filecon)
 
 int cil_portcon_init(struct cil_portcon **portcon)
 {
+	struct cil_portcon *new_portcon = NULL;
+
 	if (portcon == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_portcon *new_portcon = cil_malloc(sizeof(struct cil_portcon));
+	new_portcon = cil_malloc(sizeof(struct cil_portcon));
 
 	new_portcon->type_str = NULL;
 	new_portcon->context_str = NULL;
@@ -1099,11 +1099,13 @@ int cil_portcon_init(struct cil_portcon **portcon)
 
 int cil_nodecon_init(struct cil_nodecon **nodecon)
 {
+	struct cil_nodecon *new_nodecon = NULL;
+
 	if (nodecon == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_nodecon *new_nodecon = cil_malloc(sizeof(struct cil_nodecon));
+	new_nodecon = cil_malloc(sizeof(struct cil_nodecon));
 
 	new_nodecon->addr_str = NULL;
 	new_nodecon->addr = NULL;
@@ -1117,29 +1119,15 @@ int cil_nodecon_init(struct cil_nodecon **nodecon)
 	return SEPOL_OK;
 }
 
-int cil_ipaddr_init(struct cil_ipaddr **ipaddr)
-{
-	if (ipaddr == NULL) {
-		return SEPOL_ERR;
-	}
-
-	struct cil_ipaddr *new_ipaddr = cil_malloc(sizeof(struct cil_ipaddr));
-
-	cil_symtab_datum_init(&new_ipaddr->datum);
-	memset(&new_ipaddr->ip, 0, sizeof(new_ipaddr->ip));
-
-	*ipaddr = new_ipaddr;
-
-	return SEPOL_OK;
-}
-
 int cil_genfscon_init(struct cil_genfscon **genfscon)
 {
+	struct cil_genfscon *new_genfscon = NULL;
+
 	if (genfscon == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_genfscon *new_genfscon = cil_malloc(sizeof(struct cil_genfscon));
+	new_genfscon = cil_malloc(sizeof(struct cil_genfscon));
 
 	new_genfscon->type_str = NULL;
 	new_genfscon->context_str = NULL;
@@ -1152,11 +1140,13 @@ int cil_genfscon_init(struct cil_genfscon **genfscon)
 
 int cil_fsuse_init(struct cil_fsuse **fsuse)
 {
+	struct cil_fsuse *new_fsuse = NULL;
+
 	if (fsuse == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_fsuse *new_fsuse = cil_malloc(sizeof(struct cil_fsuse));
+	new_fsuse = cil_malloc(sizeof(struct cil_fsuse));
 
 	new_fsuse->type = 0;
 	new_fsuse->fs_str = NULL;
@@ -1170,11 +1160,13 @@ int cil_fsuse_init(struct cil_fsuse **fsuse)
 
 int cil_constrain_init(struct cil_constrain **constrain)
 {
+	struct cil_constrain *new_constrain = NULL;
+
 	if (constrain == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_constrain *new_constrain = cil_malloc(sizeof(struct cil_constrain));
+	new_constrain = cil_malloc(sizeof(struct cil_constrain));
 
 	new_constrain->class_list_str = NULL;
 	new_constrain->class_list = NULL;
@@ -1187,13 +1179,33 @@ int cil_constrain_init(struct cil_constrain **constrain)
 	return SEPOL_OK;
 }
 
+int cil_ipaddr_init(struct cil_ipaddr **ipaddr)
+{
+	struct cil_ipaddr *new_ipaddr = NULL;
+
+	if (ipaddr == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_ipaddr = cil_malloc(sizeof(struct cil_ipaddr));
+
+	cil_symtab_datum_init(&new_ipaddr->datum);
+	memset(&new_ipaddr->ip, 0, sizeof(new_ipaddr->ip));
+
+	*ipaddr = new_ipaddr;
+
+	return SEPOL_OK;
+}
+
 int cil_perm_init(struct cil_perm **perm)
 {
+	struct cil_perm *new_perm = NULL;
+
 	if (perm == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_perm *new_perm = cil_malloc(sizeof(struct cil_perm));
+	new_perm = cil_malloc(sizeof(struct cil_perm));
 
 	cil_symtab_datum_init(&new_perm->datum);
 
@@ -1204,11 +1216,13 @@ int cil_perm_init(struct cil_perm **perm)
 
 int cil_permset_init(struct cil_permset **permset)
 {
+	struct cil_permset *new_permset = NULL;
+
 	if (permset == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_permset *new_permset = cil_malloc(sizeof(struct cil_permset));
+	new_permset = cil_malloc(sizeof(struct cil_permset));
 
 	cil_symtab_datum_init(&new_permset->datum);
 	new_permset->perms_list_str = NULL;
@@ -1220,11 +1234,13 @@ int cil_permset_init(struct cil_permset **permset)
 
 int cil_user_init(struct cil_user **user)
 {
+	struct cil_user *new_user = NULL;
+
 	if (user == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_user *new_user = cil_malloc(sizeof(struct cil_user));
+	new_user = cil_malloc(sizeof(struct cil_user));
 
 	cil_symtab_datum_init(&new_user->datum);
 
@@ -1235,11 +1251,13 @@ int cil_user_init(struct cil_user **user)
 
 int cil_role_init(struct cil_role **role)
 {
+	struct cil_role *new_role = NULL;
+
 	if (role == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_role *new_role = cil_malloc(sizeof(struct cil_role));
+	new_role = cil_malloc(sizeof(struct cil_role));
 
 	cil_symtab_datum_init(&new_role->datum);
 
@@ -1250,11 +1268,13 @@ int cil_role_init(struct cil_role **role)
 
 int cil_type_init(struct cil_type **type)
 {
+	struct cil_type *new_type = NULL;
+
 	if (type == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_type *new_type = cil_malloc(sizeof(struct cil_type));
+	new_type = cil_malloc(sizeof(struct cil_type));
 
 	cil_symtab_datum_init(&new_type->datum);
 
@@ -1265,11 +1285,13 @@ int cil_type_init(struct cil_type **type)
 
 int cil_cat_init(struct cil_cat **cat)
 {
+	struct cil_cat *new_cat = NULL;
+
 	if (cat == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_cat *new_cat = cil_malloc(sizeof(struct cil_cat));
+	new_cat = cil_malloc(sizeof(struct cil_cat));
 
 	cil_symtab_datum_init(&new_cat->datum);
 
@@ -1280,11 +1302,13 @@ int cil_cat_init(struct cil_cat **cat)
 
 int cil_catorder_init(struct cil_catorder **catorder)
 {
+	struct cil_catorder *new_catorder = NULL;
+
 	if (catorder == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_catorder *new_catorder = cil_malloc(sizeof(struct cil_catorder));
+	new_catorder = cil_malloc(sizeof(struct cil_catorder));
 
 	new_catorder->cat_list_str = NULL;
 
@@ -1295,11 +1319,13 @@ int cil_catorder_init(struct cil_catorder **catorder)
 
 int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates)
 {
+	struct cil_sens_dominates *new_sens_dominates = NULL;
+
 	if (sens_dominates == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_sens_dominates *new_sens_dominates = cil_malloc(sizeof(struct cil_sens_dominates));
+	new_sens_dominates = cil_malloc(sizeof(struct cil_sens_dominates));
 
 	new_sens_dominates->sens_list_str = NULL;
 
@@ -1310,11 +1336,13 @@ int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates)
 
 int cil_call_init(struct cil_call **call)
 {
+	struct cil_call *new_call = NULL;
+
 	if (call == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_call *new_call = cil_malloc(sizeof(struct cil_call));
+	new_call = cil_malloc(sizeof(struct cil_call));
 
 	new_call->macro_str = NULL;
 	new_call->macro = NULL;
@@ -1328,11 +1356,13 @@ int cil_call_init(struct cil_call **call)
 
 int cil_optional_init(struct cil_optional **optional)
 {
+	struct cil_optional *new_optional = NULL;
+
 	if (optional == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_optional *new_optional = cil_malloc(sizeof(struct cil_optional));
+	new_optional = cil_malloc(sizeof(struct cil_optional));
 	cil_symtab_datum_init(&new_optional->datum);
 
 	*optional = new_optional;
@@ -1342,11 +1372,13 @@ int cil_optional_init(struct cil_optional **optional)
 
 int cil_param_init(struct cil_param **param)
 {
+	struct cil_param *new_param = NULL;
+
 	if (param == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_param *new_param = cil_malloc(sizeof(struct cil_param));
+	new_param = cil_malloc(sizeof(struct cil_param));
 
 	new_param->str = NULL;
 	new_param->flavor = CIL_AST_STR;
@@ -1358,14 +1390,17 @@ int cil_param_init(struct cil_param **param)
 
 int cil_macro_init(struct cil_macro **macro)
 {
+	struct cil_macro *new_macro = NULL;
+	int rc = SEPOL_ERR;
+
 	if (macro == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_macro *new_macro = cil_malloc(sizeof(struct cil_macro));
+	new_macro = cil_malloc(sizeof(struct cil_macro));
 
 	cil_symtab_datum_init(&new_macro->datum);
-	int rc = cil_symtab_array_init(new_macro->symtab, CIL_SYM_NUM);
+	rc = cil_symtab_array_init(new_macro->symtab, CIL_SYM_NUM);
 	if (rc != SEPOL_OK) {
 		printf("Failed to initialize symtab array\n");
 		free(new_macro);
@@ -1380,11 +1415,13 @@ int cil_macro_init(struct cil_macro **macro)
 
 int cil_policycap_init(struct cil_policycap **policycap)
 {
+	struct cil_policycap *new_policycap = NULL;
+
 	if (policycap == NULL) {
 		return SEPOL_ERR;
 	}
 
-	struct cil_policycap *new_policycap = cil_malloc(sizeof(struct cil_policycap));
+	new_policycap = cil_malloc(sizeof(struct cil_policycap));
 
 	cil_symtab_datum_init(&new_policycap->datum);
 
