@@ -32,6 +32,6 @@
 
 #include "cil_tree.h"
 
-int cil_parser(char *, uint32_t, struct cil_tree **);
+int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree);
 
 #endif /* CIL_PARSER_H_ */
