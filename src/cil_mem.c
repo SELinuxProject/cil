@@ -48,20 +48,27 @@ void *cil_malloc(size_t size)
 {
 	void *mem = malloc(size);
 	if (mem == NULL){
-		if (size == 0)
+		if (size == 0) {
 			return NULL;
+		}
 		(*cil_malloc_error_handler)();
 	}
+
 	return mem;
 }
 
 char *cil_strdup(char *str)
 {
-	if (str == NULL)
+	char *mem = NULL;
+
+	if (str == NULL) {
 		return NULL;
-	char *mem = strdup(str);
-	if (mem == NULL) 
+	}
+
+	mem = strdup(str);
+	if (mem == NULL) {
 		(*cil_malloc_error_handler)();
+	}
+
 	return mem;
 }
-
