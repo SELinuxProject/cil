@@ -45,15 +45,15 @@ struct fc_data {
 	int str_len;
 };
 
-int cil_combine_policy(FILE **, FILE *);
-int cil_name_to_policy(FILE **, struct cil_tree_node *);
-void cil_context_to_policy(FILE **, uint32_t, struct cil_context *);
-int cil_gen_policy(struct cil_db *);
-int cil_nodecon_compare(const void *a, const void *b);
+int cil_combine_policy(FILE **file_arr, FILE *policy_file);
 int cil_filecon_compare(const void *a, const void *b);
 int cil_portcon_compare(const void *a, const void *b);
 int cil_genfscon_compare(const void *a, const void *b);
 int cil_netifcon_compare(const void *a, const void *b);
+int cil_nodecon_compare(const void *a, const void *b);
 int cil_fsuse_compare(const void *a, const void *b);
+void cil_context_to_policy(FILE **, uint32_t, struct cil_context *);
+int cil_name_to_policy(FILE **, struct cil_tree_node *);
+int cil_gen_policy(struct cil_db *);
 
 #endif
