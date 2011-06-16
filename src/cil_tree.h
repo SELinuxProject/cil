@@ -32,6 +32,7 @@
 
 #include <stdint.h>
 
+#include "cil.h"
 #include "cil_list.h"
 
 struct cil_tree {
@@ -48,20 +49,28 @@ struct cil_tree_node {
 	//TODO add file path here
 	void *data;
 };
-int cil_tree_init(struct cil_tree **);
-int cil_tree_node_init(struct cil_tree_node **);
-void cil_tree_destroy(struct cil_tree **);
-void cil_tree_subtree_destroy(struct cil_tree_node *);
-void cil_tree_node_destroy(struct cil_tree_node **);
+
+int cil_tree_init(struct cil_tree **tree);
+void cil_tree_destroy(struct cil_tree **tree);
+void cil_tree_subtree_destroy(struct cil_tree_node *node);
+
+int cil_tree_node_init(struct cil_tree_node **node);
+void cil_tree_node_destroy(struct cil_tree_node **node);
 
 //finished values
 #define CIL_TREE_SKIP_NOTHING	0
 #define CIL_TREE_SKIP_NEXT	1
 #define CIL_TREE_SKIP_HEAD	2
 #define CIL_TREE_SKIP_ALL	(CIL_TREE_SKIP_NOTHING | CIL_TREE_SKIP_NEXT | CIL_TREE_SKIP_HEAD)
-int cil_tree_walk(struct cil_tree_node *, int (*process)(struct cil_tree_node *, uint32_t *, struct cil_list *), int (*reverse_node)(struct cil_tree_node *, struct cil_list *), int (*finished_branch)(struct cil_tree_node *, struct cil_list *), struct cil_list *);
-void cil_tree_print_node(struct cil_tree_node *);
-void cil_tree_print(struct cil_tree_node *, uint32_t);
-void cil_tree_print_perms_list(struct cil_tree_node *);
+int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other), int (*reverse_node)(struct cil_tree_node *node, struct cil_list *other), int (*finished_branch)(struct cil_tree_node *node, struct cil_list *other), struct cil_list *other);
+
+void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
+void cil_tree_print_level(struct cil_level *level);
+void cil_tree_print_context(struct cil_context *context);
+void cil_tree_print_expr_tree(struct cil_tree_node *expr_root);
+void cil_tree_print_constrain(struct cil_constrain *cons);
+void cil_tree_print_node(struct cil_tree_node *node);
+void cil_tree_print(struct cil_tree_node *tree, uint32_t depth);
+
 #endif /* CIL_TREE_H_ */
 

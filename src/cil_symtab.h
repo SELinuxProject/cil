@@ -42,10 +42,10 @@ struct cil_symtab_datum {
 	int state;
 };
 
-void cil_symtab_datum_init(struct cil_symtab_datum *);
-void cil_symtab_datum_destroy(struct cil_symtab_datum);
-int cil_symtab_insert(symtab_t *, hashtab_key_t, struct cil_symtab_datum *, struct cil_tree_node *);
-int cil_symtab_get_node(symtab_t *, char *, struct cil_tree_node **);
-void cil_symtab_destroy(symtab_t *);
+void cil_symtab_datum_init(struct cil_symtab_datum *datum);
+void cil_symtab_datum_destroy(struct cil_symtab_datum datum);
+int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node);
+int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node);
+void cil_symtab_destroy(symtab_t *symtab);
 
 #endif
