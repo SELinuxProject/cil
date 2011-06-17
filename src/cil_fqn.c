@@ -42,8 +42,9 @@ int cil_qualify_name(struct cil_tree_node *root)
 	uint16_t reverse = 0;
 	uint32_t length;
 	char fqp[MAX_CIL_NAME_LENGTH];
-	*fqp = '\0';
 	char *fqn, *uqn;
+
+	*fqp = '\0';
 
 	do {
 		if (curr->cl_head != NULL &&
@@ -57,13 +58,11 @@ int cil_qualify_name(struct cil_tree_node *root)
 					strcat(fqp, ((struct cil_symtab_datum*)curr->data)->name);
 					strcat(fqp, ".");
 				}
-			}
-			else {
+			} else {
 				length = strlen(fqp) - (strlen(((struct cil_symtab_datum*)curr->data)->name) + 1);
 				fqp[length] = '\0';
 			}
-		}
-		else if (curr->flavor >= CIL_MIN_DECLARATIVE){
+		} else if (curr->flavor >= CIL_MIN_DECLARATIVE){
 			uqn = ((struct cil_symtab_datum*)curr->data)->name; 
 			length = strlen(fqp) + strlen(uqn) + 1;
 			fqn = cil_malloc(length + 1);
@@ -75,13 +74,12 @@ int cil_qualify_name(struct cil_tree_node *root)
 			free(uqn);
 		}
 
-		if (curr->cl_head != NULL && !reverse) 
+		if (curr->cl_head != NULL && !reverse) {
 			curr = curr->cl_head;
-		else if (curr->next != NULL) {
+		} else if (curr->next != NULL) {
 			curr = curr->next;
 			reverse = 0;
-		}
-		else {
+		} else {
 			curr = curr->parent;
 			reverse = 1;
 		}
