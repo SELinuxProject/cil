@@ -2147,7 +2147,7 @@ int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct c
 
 int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *db, struct cil_call *call)
 {
-	int rc = SEPOL_ERR;
+	int rc = SEPOL_OK;
 
 	if (node == NULL || db == NULL) {
 		return SEPOL_ERR;
