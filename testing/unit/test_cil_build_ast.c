@@ -12311,7 +12311,7 @@ void test_cil_gen_fsuse_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_macro_noparams(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", ")", "(", "type", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", ")", "(", "type", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12330,7 +12330,7 @@ void test_cil_gen_macro_noparams(CuTest *tc) {
 }
 
 void test_cil_gen_macro_type(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")", "(", "type", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")", "(", "type", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12349,7 +12349,7 @@ void test_cil_gen_macro_type(CuTest *tc) {
 }
 
 void test_cil_gen_macro_role(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "role", "a", ")", ")", "(", "role", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "role", "a", ")", ")", "(", "role", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12368,7 +12368,7 @@ void test_cil_gen_macro_role(CuTest *tc) {
 }
 
 void test_cil_gen_macro_user(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "user", "a", ")", ")", "(", "user", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "user", "a", ")", ")", "(", "user", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12387,7 +12387,7 @@ void test_cil_gen_macro_user(CuTest *tc) {
 }
 
 void test_cil_gen_macro_sensitivity(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "sensitivity", "a", ")", ")", "(", "sensitivity", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "sensitivity", "a", ")", ")", "(", "sensitivity", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12406,7 +12406,7 @@ void test_cil_gen_macro_sensitivity(CuTest *tc) {
 }
 
 void test_cil_gen_macro_category(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "category", "a", ")", ")", "(", "category", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "category", "a", ")", ")", "(", "category", "b", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12425,7 +12425,7 @@ void test_cil_gen_macro_category(CuTest *tc) {
 }
 
 void test_cil_gen_macro_catset(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "categoryset", "a", ")", ")", "(", "categoryset", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "categoryset", "a", ")", ")", "(", "categoryset", "b", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12444,7 +12444,7 @@ void test_cil_gen_macro_catset(CuTest *tc) {
 }
 
 void test_cil_gen_macro_level(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "level", "a", ")", ")", "(", "level", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "level", "a", ")", ")", "(", "level", "b", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12463,7 +12463,7 @@ void test_cil_gen_macro_level(CuTest *tc) {
 }
 
 void test_cil_gen_macro_class(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "class", "a", ")", ")", "(", "class", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "class", "a", ")", ")", "(", "class", "b", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12483,8 +12483,7 @@ void test_cil_gen_macro_class(CuTest *tc) {
 
 void test_cil_gen_macro_permset(CuTest *tc) {
 	char *line[] = {"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
-				"(", "allow", "foo", "bar", "baz", "a", ")",
-				"(", "call", "m", "(", "dead", ")", ")", ")", NULL};
+				"(", "allow", "foo", "bar", "baz", "a", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12503,7 +12502,7 @@ void test_cil_gen_macro_permset(CuTest *tc) {
 }
 
 void test_cil_gen_macro_duplicate(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "class", "a",")", "(", "class", "x", ")", ")", "(", "class", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "class", "a",")", "(", "class", "x", ")", ")", "(", "class", "b", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12522,7 +12521,7 @@ void test_cil_gen_macro_duplicate(CuTest *tc) {
 }
 
 void test_cil_gen_macro_duplicate_neg(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "class", "a",")", "(", "class", "a", ")", ")", "(", "class", "b", "(", "read," ")", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "class", "a",")", "(", "class", "a", ")", ")", "(", "class", "b", "(", "read," ")", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12541,7 +12540,7 @@ void test_cil_gen_macro_duplicate_neg(CuTest *tc) {
 }
 
 void test_cil_gen_macro_unknown_neg(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "foo", "a", ")", ")", "(", "foo", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "foo", "a", ")", ")", "(", "foo", "b", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12560,7 +12559,7 @@ void test_cil_gen_macro_unknown_neg(CuTest *tc) {
 }
 
 void test_cil_gen_macro_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "foo", "a", ")", ")", "(", "foo", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "foo", "a", ")", ")", "(", "foo", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12594,7 +12593,7 @@ void test_cil_gen_macro_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_macro_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "foo", "a", ")", ")", "(", "foo", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "foo", "a", ")", ")", "(", "foo", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12688,7 +12687,7 @@ void test_cil_gen_macro_noparam_name_neg(CuTest *tc) {
 }
 
 void test_cil_gen_macro_emptyparam_neg(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", ")", ")", "(", "foo", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", ")", ")", "(", "foo", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12707,7 +12706,7 @@ void test_cil_gen_macro_emptyparam_neg(CuTest *tc) {
 }
 
 void test_cil_gen_macro_paramcontainsperiod_neg(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a.", ")", ")", "(", "type", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a.", ")", ")", "(", "type", "b", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -16087,7 +16086,7 @@ void test_cil_build_ast_node_helper_gen_fsuse_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_macro(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")", "(", "type", "b", ")", "(", "call", "m", "(", "a", "b", ")", ")", ")", NULL};
+	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")", "(", "type", "b", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
