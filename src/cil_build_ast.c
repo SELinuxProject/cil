@@ -548,7 +548,7 @@ int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, s
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_sidcontext *sidcon = NULL;
-	int rc = SEPOL_ERR = NULL;
+	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
 		return SEPOL_ERR;
@@ -2920,7 +2920,7 @@ void cil_destroy_context(struct cil_context *context)
 
 	if (context->high_str != NULL) {
 		free(context->high_str);
-	} else if (context->high != NULL)
+	} else if (context->high != NULL) {
 		cil_destroy_level(context->high);
 	}
 }
