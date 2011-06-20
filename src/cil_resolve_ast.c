@@ -2437,6 +2437,8 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			*changed = 1;
 			rc = SEPOL_OK;
 		}
+	} else {
+		rc = SEPOL_OK;
 	}
 
 	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL) {
