@@ -62,6 +62,21 @@
 #define BUFFER				1024
 #define NUM_POLICY_FILES		16
 
+enum args_genpolicy {
+	ARGS_GENPOLICY_USERS,
+	ARGS_GENPOLICY_SENS,
+	ARGS_GENPOLICY_CATS,
+	ARGS_GENPOLICY_FILEARR,
+	ARGS_GENPOLICY_COUNT,
+};
+
+enum args_booleanif {
+	ARGS_BOOLEANIF_FILEARR,
+	ARGS_BOOLEANIF_FILEINDEX,
+	ARGS_BOOLEANIF_COUNT,
+};
+
+
 int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tree_node *stack);
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
@@ -890,11 +905,11 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tr
 }
 
 
-int __cil_booleanif_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
+int __cil_booleanif_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void **extra_args)
 {
 	int rc = SEPOL_ERR;
-	FILE **file_arr = (FILE**)other->head->data;
-	uint32_t *file_index = (uint32_t*)other->head->next->data;
+	FILE **file_arr = extra_args[ARGS_BOOLEANIF_FILEARR];
+	uint32_t *file_index = extra_args[ARGS_BOOLEANIF_FILEINDEX];
 
 	switch (node->flavor) {
 	case CIL_AVRULE:
@@ -921,10 +936,10 @@ int __cil_booleanif_node_helper(struct cil_tree_node *node, __attribute__((unuse
 	return SEPOL_OK;
 }
 
-int __cil_booleanif_reverse_helper(struct cil_tree_node *node, struct cil_list *other)
+int __cil_booleanif_reverse_helper(struct cil_tree_node *node, void **extra_args)
 {
-	FILE **file_arr = (FILE**)other->head->data;
-	uint32_t *file_index = (uint32_t*)other->head->next->data;
+	FILE **file_arr = extra_args[ARGS_BOOLEANIF_FILEARR];
+	uint32_t *file_index = extra_args[ARGS_BOOLEANIF_FILEINDEX];
 
 	if (node->flavor == CIL_ELSE) {
 		fprintf(file_arr[*file_index], "}\n");
@@ -932,19 +947,17 @@ int __cil_booleanif_reverse_helper(struct cil_tree_node *node, struct cil_list *
 	
 	return SEPOL_OK;
 }
+
 int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_booleanif *bif = node->data;
 	struct cil_tree_node *stack = bif->expr_stack;
-	struct cil_list *other = NULL;
+	void **extra_args = NULL;
 
-	cil_list_init(&other);
-	cil_list_item_init(&other->head);
-	cil_list_item_init(&other->head->next);
-
-	other->head->data = file_arr;
-	other->head->next->data = &file_index;
+	extra_args = cil_malloc(sizeof(*extra_args) * ARGS_BOOLEANIF_COUNT);
+	extra_args[ARGS_BOOLEANIF_FILEARR] = file_arr;
+	extra_args[ARGS_BOOLEANIF_FILEINDEX] = &file_index;;
 
 	fprintf(file_arr[file_index], "if ");
 
@@ -958,13 +971,15 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 
 	fprintf(file_arr[file_index], "{\n");
 
-	rc = cil_tree_walk(node, __cil_booleanif_node_helper, __cil_booleanif_reverse_helper, NULL, other);
+	rc = cil_tree_walk(node, __cil_booleanif_node_helper, __cil_booleanif_reverse_helper, NULL, extra_args);
 	if (rc != SEPOL_OK) {
 		printf("Failed to write booleanif content to file, rc: %d\n", rc);
 		return rc;
 	}
 
 	fprintf(file_arr[file_index], "}\n");
+
+	free(extra_args);
 
 	return SEPOL_OK;
 }
@@ -1158,42 +1173,24 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	return SEPOL_OK;
 }
 
-/* other is a list containing users list, sensitivities list, categories list, and the file array */
-int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other)
+int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished, void **extra_args)
 {
 	int rc = SEPOL_ERR;
-	struct cil_list *users = NULL, *sens = NULL, *cats = NULL;
+	struct cil_list *users = NULL;
+	struct cil_list *sens = NULL;
+	struct cil_list *cats = NULL;
 	FILE **file_arr = NULL;
 
-	if (other == NULL || other->head == NULL || other->head->next == NULL || other->head->next->next == NULL) {
+	if (extra_args == NULL) {
 		return SEPOL_ERR;
 	}
 
 	*finished = CIL_TREE_SKIP_NOTHING;
 
-	if (other->head->flavor == CIL_LIST) {
-		users = other->head->data;
-	} else {
-		return SEPOL_ERR;
-	}
-
-	if (other->head->next->flavor == CIL_LIST) {
-		sens = other->head->next->data;
-	} else {
-		return SEPOL_ERR;
-	}
-
-	if (other->head->next->next->flavor == CIL_LIST) {
-		cats = other->head->next->next->data;
-	} else {
-		return SEPOL_ERR;
-	}
-
-	if (other->head->next->next->next->flavor == CIL_FILES) {
-		file_arr = other->head->next->next->next->data;
-	} else {
-		return SEPOL_ERR;
-	}
+	users = extra_args[ARGS_GENPOLICY_USERS];
+	sens = extra_args[ARGS_GENPOLICY_SENS];
+	cats = extra_args[ARGS_GENPOLICY_CATS];
+	file_arr = extra_args[ARGS_GENPOLICY_FILEARR];
 
 	if (node->cl_head != NULL) {
 		if (node->flavor == CIL_MACRO) {
@@ -1266,7 +1263,7 @@ int cil_gen_policy(struct cil_db *db)
 	struct cil_list *users = NULL;
 	struct cil_list *cats = NULL;
 	struct cil_list *sens = NULL;
-	struct cil_list *other = NULL;
+	void **extra_args = NULL;
 
 	cil_list_init(&users);
 	cil_list_init(&cats);
@@ -1356,21 +1353,13 @@ int cil_gen_policy(struct cil_db *db)
 		fprintf(file_arr[SENS], "};\n");
 	}
 
-	cil_list_init(&other);
-	cil_list_item_init(&other->head);
-	other->head->flavor = CIL_LIST;
-	other->head->data = users;
-	cil_list_item_init(&other->head->next);
-	other->head->next->flavor = CIL_LIST;
-	other->head->next->data = sens;
-	cil_list_item_init(&other->head->next->next);
-	other->head->next->next->flavor = CIL_LIST;
-	other->head->next->next->data = cats;
-	cil_list_item_init(&other->head->next->next->next);
-	other->head->next->next->next->flavor = CIL_FILES;
-	other->head->next->next->next->data = file_arr;
+	extra_args = cil_malloc(sizeof(*extra_args) * ARGS_GENPOLICY_COUNT);
+	extra_args[ARGS_GENPOLICY_USERS] = users;
+	extra_args[ARGS_GENPOLICY_SENS] = sens;
+	extra_args[ARGS_GENPOLICY_CATS] = cats;
+	extra_args[ARGS_GENPOLICY_FILEARR] = file_arr;
 
-	rc = cil_tree_walk(curr, __cil_gen_policy_node_helper, NULL, NULL, other);
+	rc = cil_tree_walk(curr, __cil_gen_policy_node_helper, NULL, NULL, extra_args);
 	if (rc != SEPOL_OK) {
 		printf("Error walking tree\n");
 		return rc;
@@ -1464,6 +1453,8 @@ int cil_gen_policy(struct cil_db *db)
 		return SEPOL_ERR;
 	}
 	free(file_arr);
+
+	free(extra_args);
 
 	return SEPOL_OK;
 }

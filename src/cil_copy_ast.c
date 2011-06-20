@@ -39,6 +39,12 @@
 #include "cil_copy_ast.h"
 #include "cil_build_ast.h"
 
+enum args_copy {
+	ARGS_COPY_DEST,
+	ARGS_COPY_DB,
+	ARGS_COPY_COUNT,
+};
+
 void cil_copy_list(struct cil_list *orig, struct cil_list **copy)
 {
 	struct cil_list *new = NULL;
@@ -1035,28 +1041,19 @@ copy_data_helper_out:
 	return rc;
 }
 
-int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, struct cil_list *other)
+int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, void **extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *parent = NULL;
 	struct cil_tree_node *new = NULL;
 	struct cil_db *db = NULL;
-	
-	if (orig == NULL || other == NULL || other->head == NULL || other->head->next == NULL) {
+
+	if (orig == NULL || extra_args == NULL) {
 		goto copy_node_helper_out;
 	}
 
-	if (other->head->flavor == CIL_AST_NODE) {
-		parent = (struct cil_tree_node*)other->head->data;	
-	} else {
-		goto copy_node_helper_out;
-	}
-	
-	if (other->head->next->flavor == CIL_DB) {
-		db = (struct cil_db *)other->head->next->data;
-	} else {
-		goto copy_node_helper_out;
-	}
+	parent = extra_args[ARGS_COPY_DEST];
+	db = extra_args[ARGS_COPY_DB];
 
 	rc = cil_tree_node_init(&new);
 	if (rc != SEPOL_OK) {
@@ -1277,7 +1274,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	}
 
 	if (orig->cl_head != NULL) {
-		other->head->data = new;
+		extra_args[ARGS_COPY_DEST] = new;
 	}
 
 	return SEPOL_OK;
@@ -1286,20 +1283,19 @@ copy_node_helper_out:
 	return rc;
 }
 
-int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig, struct cil_list *other)
+int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig, void **extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_tree_node *node = NULL;
 
-	if (other == NULL || other->head == NULL) {
+	if (extra_args == NULL) {
 		goto copy_branch_helper_out;
 	}
 
-	if (other->head->flavor != CIL_AST_NODE) {
-		goto copy_branch_helper_out;
-	}
-
-	if (((struct cil_tree_node *)other->head->data)->flavor != CIL_ROOT) {
-		other->head->data = ((struct cil_tree_node*)other->head->data)->parent;
+	node = extra_args[ARGS_COPY_DEST];
+	
+	if (node->flavor != CIL_ROOT) {
+		extra_args[ARGS_COPY_DEST] = node->parent;
 	}
 
 	return SEPOL_OK;
@@ -1307,27 +1303,25 @@ int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig,
 copy_branch_helper_out:
 	return rc;
 }
-
+	
 // dest is the parent node to copy into
 // if the copy is for a call to a macro, dest should be a pointer to the call
 int cil_copy_ast(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *dest)
 {
 	int rc = SEPOL_ERR;
-	struct cil_list *other = NULL;
+	void **extra_args = NULL;
 
-	cil_list_init(&other);
-	cil_list_item_init(&other->head);	
-	other->head->data = dest;
-	other->head->flavor = CIL_AST_NODE;
-	cil_list_item_init(&other->head->next);
-	other->head->next->data = db;
-	other->head->next->flavor = CIL_DB;
+	extra_args = cil_malloc(sizeof(*extra_args) * ARGS_COPY_COUNT);
+	extra_args[ARGS_COPY_DEST] = dest;
+	extra_args[ARGS_COPY_DB] = db;
 
-	rc = cil_tree_walk(orig, __cil_copy_node_helper, NULL,  __cil_copy_branch_helper, other);
+	rc = cil_tree_walk(orig, __cil_copy_node_helper, NULL,  __cil_copy_branch_helper, extra_args);
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		goto copy_ast_out;
 	}
+
+	free(extra_args);
 
 	return SEPOL_OK;
 
