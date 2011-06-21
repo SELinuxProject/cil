@@ -2572,7 +2572,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			/* let the resolve loop know something was changed */
 			*changed = 1;
 			rc = SEPOL_OK;
-		} else {
+		} else if (rc != SEPOL_OK) {
 			goto resolve_ast_node_helper_out;
 		}
 	} else {
