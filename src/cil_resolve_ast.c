@@ -2805,14 +2805,14 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		/* reset the arguments */
 		changed = 0;
 		while (extra_args[ARGS_RESOLVE_CALLS] != NULL) {
-			struct cil_list_item *curr = ((struct cil_list_item *)extra_args[ARGS_RESOLVE_CALLS]);
-			struct cil_list_item *next = curr->next;
+			struct cil_tree_node *curr = extra_args[ARGS_RESOLVE_CALLS];
+			struct cil_tree_node *next = curr->cl_head;
 			free(curr);
 			extra_args[ARGS_RESOLVE_CALLS] = next;
 		}
 		while (extra_args[ARGS_RESOLVE_OPTIONALS] != NULL) {
-			struct cil_list_item *curr = ((struct cil_list_item *)extra_args[ARGS_RESOLVE_OPTIONALS]);
-			struct cil_list_item *next = curr->next;
+			struct cil_tree_node *curr = extra_args[ARGS_RESOLVE_OPTIONALS];
+			struct cil_tree_node *next = curr->cl_head;
 			free(curr);
 			extra_args[ARGS_RESOLVE_OPTIONALS] = next;
 		}
