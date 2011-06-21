@@ -66,11 +66,26 @@ verify_name_out:
 int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[], int len)
 {
 	int rc = SEPOL_ERR;
+	int num_lists = 0;
 	struct cil_tree_node *c = parse_current;
 	int i = 0;
-	for (i = 0; i < len; i++) {
-		if ((s[i] & SYM_END) && !c) {
+	while (i < len) {
+		if ((s[i] & SYM_END) && c == NULL) {
 			break;
+		}
+
+		if (s[i] & SYM_N_LISTS) {
+			if (c == NULL) {
+				if (num_lists > 0) {
+					break;
+				} else {
+					goto verify_syntax_out;
+				}
+			} else if (c->data == NULL && c->cl_head != NULL) {
+				c = c->next;
+				num_lists++;
+				continue;
+			}
 		}
 
 		if (c == NULL) {
@@ -78,26 +93,28 @@ int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[]
 		}
 
 		if (s[i] & SYM_STRING) {
-			if (!c->cl_head && c->data) {
+			if (c->data != NULL && c->cl_head == NULL) {
 				c = c->next;
+				i++;
 				continue;
 			}
 		}
 
 		if (s[i] & SYM_LIST) {
-			if (!c->data && c->cl_head) {
+			if (c->data == NULL && c->cl_head != NULL) {
 				c = c->next;
+				i++;
 				continue;
 			}
 		}
 
 		if (s[i] & SYM_EMPTY_LIST) {
-			if (!c->data && !c->cl_head) {
+			if (c->data == NULL && c->cl_head == NULL) {
 				c = c->next;
+				i++;
 				continue;
 			}
 		}
-
 		goto verify_syntax_out;
 	}
 	return SEPOL_OK;
@@ -172,7 +189,8 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
-		SYM_STRING
+		SYM_STRING,
+		SYM_N_LISTS
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -1724,8 +1742,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING | SYM_LIST,
-		SYM_LIST,
-		SYM_LIST | SYM_END
+		SYM_N_LISTS
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_booleanif *bif = NULL;
@@ -1844,8 +1861,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING | SYM_LIST,
-		SYM_LIST,
-		SYM_END
+		SYM_N_LISTS
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_tunableif *tif = NULL;
@@ -2052,7 +2068,8 @@ int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 		goto gen_typebounds_cleanup;
 	}
 
-	if (__cil_verify_syntax(parse_current, syntax, syntax_len) != SEPOL_OK) {
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid typebounds declaration (line: %d)\n", parse_current->line);
 		goto gen_typebounds_cleanup;
 	}
@@ -2092,6 +2109,12 @@ void cil_destroy_typebounds(struct cil_typebounds *typebnds)
 
 int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_typepermissive *typeperm = NULL;
 	int rc = SEPOL_ERR;
 
@@ -2099,7 +2122,8 @@ int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_curren
 		goto gen_typepermissive_cleanup;
 	}
 
-	if (parse_current->next == NULL || parse_current->next->cl_head != NULL || parse_current->next->next != NULL) {
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		printf("Invalid typepermissive declaration (line: %d)\n", parse_current->line);
 		goto gen_typepermissive_cleanup;
 	}
@@ -3784,7 +3808,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		SYM_STRING,
 		SYM_STRING,
 		SYM_LIST | SYM_EMPTY_LIST,
-		SYM_LIST
+		SYM_N_LISTS
 	};
 	int syntax_len = sizeof(syntax)/ sizeof(*syntax);
 	char *key = NULL;
@@ -4016,8 +4040,7 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		SYM_N_LISTS
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;

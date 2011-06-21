@@ -6318,7 +6318,7 @@ void test_cil_resolve_ast_node_helper_typebounds_neg(CuTest *tc) {
 
 void test_cil_resolve_ast_node_helper_typepermissive(CuTest *tc) {
 	char *line[] = {"(", "type", "type_a", ")",
-			"(", "typebounds", "type_a", ")", NULL};
+			"(", "typepermissive", "type_a", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

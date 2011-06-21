@@ -40,7 +40,8 @@ enum cil_syntax {
 	SYM_STRING = 1,
 	SYM_LIST = 2,
 	SYM_EMPTY_LIST = 4,
-	SYM_END = 8
+	SYM_N_LISTS = 8,
+	SYM_END = 16
 };
 
 int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, enum cil_sym_index sflavor, enum cil_flavor nflavor);
