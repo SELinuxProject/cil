@@ -106,7 +106,7 @@ verify_syntax_out:
 	return rc;
 }
 
-int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, uint32_t sflavor, uint32_t nflavor)
+int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, enum cil_sym_index sflavor, uint32_t nflavor)
 {
 	symtab_t *symtab = NULL;
 	int rc = SEPOL_ERR;
@@ -136,7 +136,7 @@ gen_node_out:
 	return rc;
 }
 
-int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_cl, uint32_t flavor)
+int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_cl, enum cil_flavor flavor)
 {
 	struct cil_list_item *new_item = NULL;
 	struct cil_tree_node *parse_current = parse_cl_head;
@@ -1181,7 +1181,7 @@ void cil_destroy_type_rule(struct cil_type_rule *rule)
 	free(rule);
 }
 
-int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor)
+int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -1241,7 +1241,7 @@ void cil_destroy_type(struct cil_type *type)
 	free(type);
 }
 
-int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor)
+int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -1306,7 +1306,7 @@ void cil_destroy_bool(struct cil_bool *boolean)
 	free(boolean);
 }
 
-int cil_gen_constrain_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct cil_tree_node **stack)
+int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_tree_node **stack)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *opnode = NULL;
@@ -1616,7 +1616,7 @@ not_valid:
 	return rc;
 }
 
-int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct cil_tree_node **stack)
+int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_tree_node **stack)
 {
 	int rc = SEPOL_ERR;
 
@@ -2866,7 +2866,7 @@ void cil_destroy_level(struct cil_level *level)
 	free(level);
 }
 
-int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_tree_node *expr_root, uint32_t flavor)
+int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_tree_node *expr_root, enum cil_flavor flavor)
 {
 	struct cil_tree_node *curr = parse_current;
 	struct cil_tree_node *expr_curr = expr_root;
@@ -2932,7 +2932,7 @@ void cil_destroy_constrain_node(struct cil_tree_node *cons_node)
 	free(cons_node);
 }
 
-int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor)
+int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,

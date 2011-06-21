@@ -43,107 +43,109 @@
 */
 #define CIL_MIN_DECLARATIVE	500
 
-#define CIL_ROOT		0
-#define CIL_DB			1
-#define CIL_AST_NODE		2
-#define CIL_PARSE_NODE		3
-#define CIL_AST_STR		4
-#define CIL_LIST		5
-#define CIL_LIST_ITEM		6
-#define CIL_INT			7
-#define CIL_FILES		8
-#define CIL_AVRULE		9
-#define CIL_SENS_DOM		10
-#define CIL_LEVEL		11
-#define CIL_SEARCH		12
-#define CIL_TRANS_IF		13
-#define CIL_TRANS_CALL		14
-#define CIL_TRANS_INH_BLK	15
-#define CIL_TRANS_INH_TYPE	16
-#define CIL_TRANS_INH_ROLE	17
-#define CIL_TRANS_DEL		18
-#define CIL_TRANS_TRANS		19
-#define CIL_IN			20
-#define CIL_FILECON		21
-#define CIL_PORTCON		22
-#define CIL_NODECON		23
-#define CIL_GENFSCON		24
-#define CIL_NETIFCON		25
-#define CIL_FSUSE		26
-#define CIL_CONSTRAIN		27
-#define CIL_MLSCONSTRAIN	28
-#define CIL_PERM		29
-#define CIL_PERMSET		30
-#define CIL_USERROLE		31
-#define CIL_TYPE_ATTR		32
-#define CIL_TYPE_RULE 		33
-#define CIL_TYPEBOUNDS		34
-#define CIL_FILETRANSITION	35
-#define CIL_TYPEPERMISSIVE	36
-#define CIL_ROLETRANS		37
-#define CIL_ROLEALLOW		38
-#define CIL_ROLETYPE		39
-#define CIL_ROLEDOMINANCE	40
-#define CIL_CATORDER		41
-#define CIL_DOMINANCE		42
-#define CIL_SENSCAT		43
-#define CIL_CLASSCOMMON		44
-#define CIL_CONSTRAIN_NODE	45
-#define CIL_SIDCONTEXT		46
-#define CIL_CALL		47
-#define CIL_ARGS		48
-#define CIL_BOOLEANIF		49
-#define CIL_TUNABLEIF		50
-#define CIL_TUNABLEIFDEF	51
-#define CIL_TUNABLEIFNDEF	52
-#define CIL_AND			53
-#define CIL_OR			54
-#define CIL_XOR			55
-#define CIL_NOT			56
-#define CIL_EQ			57
-#define CIL_NEQ			58
-#define CIL_ELSE		59
-#define CIL_COND		60
-#define CIL_PARAM		61
-#define CIL_CONS_AND		62
-#define CIL_CONS_OR		63
-#define CIL_CONS_NOT		64
-#define CIL_CONS_EQ		65
-#define CIL_CONS_DOM		66
-#define CIL_CONS_DOMBY		67
-#define CIL_CONS_INCOMP		68
-#define CIL_CONS_U1		69
-#define CIL_CONS_U2		70
-#define CIL_CONS_T1		71
-#define CIL_CONS_T2		72
-#define CIL_CONS_R1		73
-#define CIL_CONS_R2		74
-#define CIL_CONS_L1		75
-#define CIL_CONS_L2		76
-#define CIL_CONS_H1		77
-#define CIL_CONS_H2		78
+enum cil_flavor {
+	CIL_ROOT = 0,
+	CIL_DB,
+	CIL_AST_NODE,
+	CIL_PARSE_NODE,
+	CIL_AST_STR,
+	CIL_LIST,
+	CIL_LIST_ITEM,
+	CIL_INT,
+	CIL_FILES,
+	CIL_AVRULE,
+	CIL_SENS_DOM,
+	CIL_LEVEL,
+	CIL_SEARCH,
+	CIL_TRANS_IF,
+	CIL_TRANS_CALL,
+	CIL_TRANS_INH_BLK,
+	CIL_TRANS_INH_TYPE,
+	CIL_TRANS_INH_ROLE,
+	CIL_TRANS_DEL,
+	CIL_TRANS_TRANS,
+	CIL_IN,
+	CIL_FILECON,
+	CIL_PORTCON,
+	CIL_NODECON,
+	CIL_GENFSCON,
+	CIL_NETIFCON,
+	CIL_FSUSE,
+	CIL_CONSTRAIN,
+	CIL_MLSCONSTRAIN,
+	CIL_PERM,
+	CIL_PERMSET,
+	CIL_USERROLE,
+	CIL_TYPE_ATTR,
+	CIL_TYPE_RULE,
+	CIL_TYPEBOUNDS,
+	CIL_FILETRANSITION,
+	CIL_TYPEPERMISSIVE,
+	CIL_ROLETRANS,
+	CIL_ROLEALLOW,
+	CIL_ROLETYPE,
+	CIL_ROLEDOMINANCE,
+	CIL_CATORDER,
+	CIL_DOMINANCE,
+	CIL_SENSCAT,
+	CIL_CLASSCOMMON,
+	CIL_CONSTRAIN_NODE,
+	CIL_SIDCONTEXT,
+	CIL_CALL,
+	CIL_ARGS,
+	CIL_BOOLEANIF,
+	CIL_TUNABLEIF,
+	CIL_TUNABLEIFDEF,
+	CIL_TUNABLEIFNDEF,
+	CIL_AND,
+	CIL_OR,
+	CIL_XOR,
+	CIL_NOT,
+	CIL_EQ,
+	CIL_NEQ,
+	CIL_ELSE,
+	CIL_COND,
+	CIL_PARAM,
+	CIL_CONS_AND,
+	CIL_CONS_OR,
+	CIL_CONS_NOT,
+	CIL_CONS_EQ,
+	CIL_CONS_DOM,
+	CIL_CONS_DOMBY,
+	CIL_CONS_INCOMP,
+	CIL_CONS_U1,
+	CIL_CONS_U2,
+	CIL_CONS_T1,
+	CIL_CONS_T2,
+	CIL_CONS_R1,
+	CIL_CONS_R2,
+	CIL_CONS_L1,
+	CIL_CONS_L2,
+	CIL_CONS_H1,
+	CIL_CONS_H2,
 
-#define CIL_BLOCK		CIL_MIN_DECLARATIVE
-#define CIL_CLASS		CIL_MIN_DECLARATIVE + 1
-#define CIL_COMMON		CIL_MIN_DECLARATIVE + 2
-#define CIL_SID			CIL_MIN_DECLARATIVE + 3 
-#define CIL_USER		CIL_MIN_DECLARATIVE + 4 
-#define CIL_ROLE		CIL_MIN_DECLARATIVE + 5 
-#define CIL_TYPE		CIL_MIN_DECLARATIVE + 7 
-#define CIL_ATTR		CIL_MIN_DECLARATIVE + 8 
-#define CIL_BOOL		CIL_MIN_DECLARATIVE + 9
-#define CIL_TUNABLE		CIL_MIN_DECLARATIVE + 10
-#define CIL_TYPEALIAS		CIL_MIN_DECLARATIVE + 11
-#define CIL_CONTEXT		CIL_MIN_DECLARATIVE + 12
-#define CIL_SENS		CIL_MIN_DECLARATIVE + 13
-#define CIL_CAT			CIL_MIN_DECLARATIVE + 14
-#define CIL_SENSALIAS		CIL_MIN_DECLARATIVE + 15
-#define CIL_CATALIAS		CIL_MIN_DECLARATIVE + 16
-#define CIL_CATSET		CIL_MIN_DECLARATIVE + 17
-#define CIL_MACRO		CIL_MIN_DECLARATIVE + 18
-#define CIL_OPTIONAL		CIL_MIN_DECLARATIVE + 19
-#define CIL_POLICYCAP		CIL_MIN_DECLARATIVE + 20
-#define CIL_IPADDR		CIL_MIN_DECLARATIVE + 21
+	CIL_BLOCK = CIL_MIN_DECLARATIVE,
+	CIL_CLASS,
+	CIL_COMMON,
+	CIL_SID,
+	CIL_USER,
+	CIL_ROLE,
+	CIL_TYPE,
+	CIL_ATTR,
+	CIL_BOOL,
+	CIL_TUNABLE,
+	CIL_TYPEALIAS,
+	CIL_CONTEXT,
+	CIL_SENS,
+	CIL_CAT,
+	CIL_SENSALIAS,
+	CIL_CATALIAS,
+	CIL_CATSET,
+	CIL_MACRO,
+	CIL_OPTIONAL,
+	CIL_POLICYCAP,
+	CIL_IPADDR
+};
 
 /*
 	Keywords
@@ -235,34 +237,34 @@
 /*
 	Symbol Table Array Indices
 */
-#define CIL_SYM_FILENAMES	0
-#define CIL_SYM_BLOCKS		1
-#define CIL_SYM_USERS		2
-#define CIL_SYM_ROLES		3
-#define CIL_SYM_TYPES		4
-#define CIL_SYM_COMMONS		5
-#define CIL_SYM_CLASSES		6
-#define CIL_SYM_PERMSETS	7
-#define CIL_SYM_BOOLS		8
-#define CIL_SYM_TUNABLES	9
-#define CIL_SYM_SENS		10
-#define CIL_SYM_CATS		11
-#define CIL_SYM_SIDS		12
-#define CIL_SYM_FILECONS	13
-#define CIL_SYM_PORTCONS	14
-#define CIL_SYM_NETIFCONS	15
-#define CIL_SYM_MACROS		16
-#define CIL_SYM_CONTEXTS	17
-#define CIL_SYM_LEVELS		18
-#define CIL_SYM_POLICYCAPS	19
-#define CIL_SYM_OPTIONALS	20
-#define CIL_SYM_IPADDRS		21
+enum cil_sym_index {
+	CIL_SYM_FILENAMES = 0,
+	CIL_SYM_BLOCKS,
+	CIL_SYM_USERS,
+	CIL_SYM_ROLES,
+	CIL_SYM_TYPES,
+	CIL_SYM_COMMONS,
+	CIL_SYM_CLASSES,
+	CIL_SYM_PERMSETS,
+	CIL_SYM_BOOLS,
+	CIL_SYM_TUNABLES,
+	CIL_SYM_SENS,
+	CIL_SYM_CATS,
+	CIL_SYM_SIDS,
+	CIL_SYM_FILECONS,
+	CIL_SYM_PORTCONS,
+	CIL_SYM_NETIFCONS,
+	CIL_SYM_MACROS,
+	CIL_SYM_CONTEXTS,
+	CIL_SYM_LEVELS,
+	CIL_SYM_POLICYCAPS,
+	CIL_SYM_OPTIONALS,
+	CIL_SYM_IPADDRS,
+	CIL_SYM_NUM,
+	CIL_SYM_UNKNOWN,
+};
 
-#define CIL_SYM_NUM		22
-#define CIL_SYM_UNKNOWN		23
-
-#define CIL_SYM_SIZE		256 	//TODO Need to determine symtab sizes
-
+#define CIL_SYM_SIZE		256
 
 struct cil_db {
 	struct cil_tree *ast;
@@ -279,7 +281,7 @@ struct cil_db {
 };
 
 struct cil_sort {
-	uint32_t flavor;
+	enum cil_flavor flavor;
 	uint32_t count;
 	uint32_t index;
 	void **array;
@@ -530,7 +532,7 @@ struct cil_transform_inherit {
 	char *inherit_from_str;
 	void *inherit_from;
 	struct cil_list_item *except;
-	uint32_t flavor;	
+	enum cil_flavor flavor;	
 };
 
 struct cil_transform_del {
@@ -649,7 +651,7 @@ struct cil_constrain {
 
 struct cil_param {
 	char *str;
-	uint32_t flavor;
+	enum cil_flavor flavor;
 };
 
 struct cil_macro {
@@ -662,7 +664,7 @@ struct cil_args {
 	char *arg_str;
 	struct cil_tree_node *arg;
 	char *param_str;
-	uint32_t flavor;
+	enum cil_flavor flavor;
 };
 
 struct cil_call {
@@ -687,7 +689,7 @@ struct cil_tunableif {
 struct cil_conditional {
 	char *str;
 	void *data;
-	uint32_t flavor;
+	enum cil_flavor flavor;
 };
 
 struct cil_policycap {
@@ -697,12 +699,12 @@ struct cil_policycap {
 int cil_db_init(struct cil_db **db);
 void cil_db_destroy(struct cil_db **db);
 
-void cil_destroy_data(void **data, uint32_t flavor);
+void cil_destroy_data(void **data, enum cil_flavor flavor);
 
 int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
 void cil_symtab_array_destroy(symtab_t symtab[]);
 int cil_destroy_ast_symtabs(struct cil_tree_node *root);
-int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, uint32_t cil_sym_index);
+int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index);
 
 int cil_sort_init(struct cil_sort **sort);
 void cil_sort_destroy(struct cil_sort **sort);

@@ -840,7 +840,7 @@ verify_order_node_helper_out:
 	return rc;
 }
 
-int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, uint32_t flavor)
+int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, enum cil_flavor flavor)
 {
 
 	struct cil_list_item *ordered = NULL;
@@ -886,7 +886,7 @@ verify_order_out:
 	return rc;
 }
 
-int __cil_create_edge_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *order, uint32_t sym_flavor, uint32_t flavor, struct cil_list *edge_list, struct cil_call *call)
+int __cil_create_edge_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *order, uint32_t sym_flavor, enum cil_flavor flavor, struct cil_list *edge_list, struct cil_call *call)
 {
 
 	struct cil_tree_node *node = NULL;
@@ -1993,7 +1993,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 {
 	struct cil_call *new_call = (struct cil_call*)current->data;
 	int rc = SEPOL_ERR;
-	uint32_t sym_index = CIL_SYM_UNKNOWN;
+	enum cil_sym_index sym_index = CIL_SYM_UNKNOWN;
 	struct cil_list_item *item = NULL;
 
 	if (new_call->args == NULL) {
@@ -2075,7 +2075,7 @@ resolve_call2_out:
 	return rc;
 }
 
-int cil_resolve_name_call_args(struct cil_call *call, char *name, uint32_t flavor, struct cil_tree_node **node)
+int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_flavor flavor, struct cil_tree_node **node)
 {
 	struct cil_list_item *item = NULL;
 	int rc = SEPOL_ERR;
@@ -2115,8 +2115,8 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *expr_stack, 
 	
 
 	while (curr_expr != NULL) {
-		uint32_t flavor = ((struct cil_conditional*)curr_expr->data)->flavor;
-		int sym_index =  CIL_SYM_UNKNOWN;
+		enum cil_flavor flavor = ((struct cil_conditional*)curr_expr->data)->flavor;
+		enum cil_sym_index sym_index =  CIL_SYM_UNKNOWN;
 
 		if (flavor == CIL_BOOL) {
 			sym_index = CIL_SYM_BOOLS;
@@ -2825,7 +2825,7 @@ resolve_ast_out:
 	return rc;
 }
 
-static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, struct cil_call *call, struct cil_tree_node **node)
+static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, struct cil_call *call, struct cil_tree_node **node)
 {
 	int rc = SEPOL_ERR;
 	char* name_dup = cil_strdup(name);
@@ -2910,7 +2910,7 @@ resolve_name_helper_cleanup:
 	return rc;
 }
 
-int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, uint32_t sym_index, uint32_t flavor, struct cil_call *call, struct cil_tree_node **node)
+int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, enum cil_flavor flavor, struct cil_call *call, struct cil_tree_node **node)
 {
 	int rc = SEPOL_ERR;
 	char *global_symtab_name = NULL;

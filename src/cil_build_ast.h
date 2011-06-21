@@ -43,8 +43,8 @@ enum cil_syntax {
 	SYM_END = 8
 };
 
-int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, uint32_t sflavor, uint32_t nflavor);
-int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_cl, uint32_t flavor);
+int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, enum cil_sym_index sflavor, enum cil_flavor nflavor);
+int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_cl, enum cil_flavor flavor);
 
 int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, char *condition);
 void cil_destroy_block(struct cil_block *block);
@@ -81,12 +81,12 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 void cil_destroy_avrule(struct cil_avrule *rule);
 int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind);
 void cil_destroy_type_rule(struct cil_type_rule *rule);
-int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor);
+int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_type(struct cil_type *type);
-int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor);
+int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_bool(struct cil_bool *boolean);
-int cil_gen_constrain_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct cil_tree_node **stack);
-int cil_gen_expr_stack(struct cil_tree_node *current, uint32_t flavor, struct cil_tree_node **stack);
+int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_tree_node **stack);
+int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_tree_node **stack);
 int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_boolif(struct cil_booleanif *bif);
 void cil_destroy_conditional(struct cil_conditional *cond);
@@ -125,7 +125,7 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level);
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_level(struct cil_level *level);
 void cil_destroy_constrain_node(struct cil_tree_node *cons_node);
-int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t flavor);
+int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_constrain(struct cil_constrain *cons);
 int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context);
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
