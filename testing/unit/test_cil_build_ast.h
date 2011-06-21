@@ -923,14 +923,8 @@ void test_cil_build_ast_node_helper_gen_policycap_neg(CuTest *tc);
 void test_cil_build_ast_node_helper_gen_ipaddr(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_ipaddr_neg(CuTest *tc);
 
-void test_cil_build_ast_node_helper_othernull_neg(CuTest *);
-void test_cil_build_ast_node_helper_otherheadnull_neg(CuTest *);
-void test_cil_build_ast_node_helper_otherheadnextnull_neg(CuTest *);
-void test_cil_build_ast_node_helper_otherheadflavor_neg(CuTest *);
-void test_cil_build_ast_node_helper_otherheadnextflavor_neg(CuTest *);
+void test_cil_build_ast_node_helper_extraargsnull_neg(CuTest *);
 
 void test_cil_build_ast_branch_helper(CuTest *);
-void test_cil_build_ast_branch_helper_flavor_neg(CuTest *);
-void test_cil_build_ast_branch_helper_othernull_neg(CuTest *);
-void test_cil_build_ast_branch_helper_otherheadnull_neg(CuTest *);
+void test_cil_build_ast_branch_helper_extraargsnull_neg(CuTest *);
 #endif

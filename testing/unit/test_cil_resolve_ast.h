@@ -442,13 +442,6 @@ void test_cil_resolve_ast_node_helper_optstack(CuTest *tc);
 void test_cil_resolve_ast_node_helper_optstack_tunable_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_optstack_macro_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_nodenull_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_othernull_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_dbnull_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_dbflavor_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_pass_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_callstack_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_optstack_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_changed_neg(CuTest *tc);
-void test_cil_resolve_ast_node_helper_macrostack_neg(CuTest *tc);
+void test_cil_resolve_ast_node_helper_extraargsnull_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_optfailedtoresolve(CuTest *tc);
 #endif

@@ -169,11 +169,7 @@ void test_cil_copy_ast(CuTest *);
 void test_cil_copy_ast_neg(CuTest *);
 
 void test_cil_copy_node_helper_orignull_neg(CuTest *tc); 
-void test_cil_copy_node_helper_othernull_neg(CuTest *tc); 
-void test_cil_copy_node_helper_otherheadnull_neg(CuTest *tc); 
-void test_cil_copy_node_helper_othernextnull_neg(CuTest *tc); 
-void test_cil_copy_node_helper_otherheadflavor_neg(CuTest *tc); 
-void test_cil_copy_node_helper_othernextflavor_neg(CuTest *tc); 
+void test_cil_copy_node_helper_extraargsnull_neg(CuTest *tc); 
 
 void test_cil_copy_data_helper(CuTest *tc); 
 void test_cil_copy_data_helper_getparentsymtab_neg(CuTest *tc); 

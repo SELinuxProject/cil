@@ -526,14 +526,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_tunable_neg);
 //	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_macro_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodenull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_othernull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dbflavor_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_pass_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_callstack_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_changed_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_macrostack_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_extraargsnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optfailedtoresolve);
 
 	return suite;
@@ -1368,16 +1361,10 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_ipaddr);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_ipaddr_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_othernull_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadnextnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadflavor_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_otherheadnextflavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_extraargsnull_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper_flavor_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper_othernull_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper_otherheadnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper_extraargsnull_neg);
 	
 	return suite;
 }
@@ -1398,7 +1385,7 @@ CuSuite* CilTreeGetSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_block);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_class);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_root);
-	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_other_neg);
+	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_flavor_neg);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_node_null_neg);
 	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_parent_null_neg);
@@ -1575,11 +1562,7 @@ CuSuite* CilTreeGetSuite(void) {
 	//SUITE_ADD_TEST(suite, test_cil_copy_ast_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_orignull_neg);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernull_neg);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_otherheadnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernextnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_otherheadflavor_neg);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_othernextflavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_extraargsnull_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_data_helper);
 	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_getparentsymtab_neg);

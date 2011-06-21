@@ -121,7 +121,7 @@ void test_cil_get_parent_symtab_root(CuTest *tc) {
 	CuAssertPtrNotNull(tc, symtab);
 }
 
-void test_cil_get_parent_symtab_other_neg(CuTest *tc) {
+void test_cil_get_parent_symtab_flavor_neg(CuTest *tc) {
 	symtab_t *symtab = NULL;
 	
 	struct cil_tree_node *test_ast_node;
