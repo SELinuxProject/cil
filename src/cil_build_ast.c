@@ -133,7 +133,6 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 	return SEPOL_OK;
 
 gen_node_out:
-	printf("THIS IS IT: %d\n", rc);
 	return rc;
 }
 
