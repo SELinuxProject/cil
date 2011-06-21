@@ -127,7 +127,7 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 	struct cil_tree_node *node = NULL;
 	uint32_t reverse = 0;
 	uint32_t finished = 0;
-	uint32_t rc = SEPOL_ERR;
+	int rc = SEPOL_ERR;
 
 	if (start_node == NULL) {
 		return SEPOL_ERR;

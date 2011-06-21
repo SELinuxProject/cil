@@ -86,9 +86,10 @@ void cil_list_item_destroy(struct cil_list_item **item, uint8_t destroy_data)
 int cil_list_get_tail(struct cil_list *list, struct cil_list_item **tail)
 {
 	struct cil_list_item *curr = NULL;
+	int rc = SEPOL_ERR;
 
 	if (list == NULL || tail == NULL) {
-		return SEPOL_ERR;
+		goto list_get_tail_out;
 	}
 
 	curr = list->head;
@@ -98,19 +99,24 @@ int cil_list_get_tail(struct cil_list *list, struct cil_list_item **tail)
 
 	*tail = curr;
 	return SEPOL_OK;
+
+list_get_tail_out:
+	return rc;
 }
 
 int cil_list_append_item(struct cil_list *list, struct cil_list_item *item)
 {
 	struct cil_list_item *curr_item = NULL;
+	int rc = SEPOL_ERR;
 
 	if (list == NULL || item == NULL) {
-		return SEPOL_ERR;
+		goto list_append_item_out;
 	}
 
 	if (list->head == NULL) {
 		list->head = item;
-		return SEPOL_OK;
+		rc = SEPOL_OK;
+		goto list_append_item_out;
 	}
 
 	curr_item = list->head;
@@ -122,20 +128,24 @@ int cil_list_append_item(struct cil_list *list, struct cil_list_item *item)
 	curr_item->next = item;
 
 	return SEPOL_OK;
+
+list_append_item_out:
+	return rc;
 }
 
 int cil_list_prepend_item(struct cil_list *list, struct cil_list_item *item) 
 {
 	struct cil_list_item *old_head = NULL;
 	struct cil_list_item *new_head = NULL;
+	int rc = SEPOL_ERR;
 
 	if (list == NULL || item == NULL) {
-		return SEPOL_ERR;
+		goto list_prepend_item_out;
 	}
 
 	if (item->next != NULL) {
 		printf("Error: List item to prepend has next\n");
-		return SEPOL_ERR;
+		goto list_prepend_item_out;
 	}
 
 	old_head = list->head;
@@ -145,6 +155,9 @@ int cil_list_prepend_item(struct cil_list *list, struct cil_list_item *item)
 	new_head->next = old_head;
 
 	return SEPOL_OK;
+
+list_prepend_item_out:
+	return rc;
 }
 
 void cil_print_list_lists(struct cil_list *list_list)

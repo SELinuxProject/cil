@@ -49,7 +49,7 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_
 int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, char *condition);
 void cil_destroy_block(struct cil_block *block);
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_class(struct cil_class *cls);
+void cil_destroy_class(struct cil_class *class);
 int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_perm(struct cil_perm *perm);
 int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node);

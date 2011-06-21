@@ -1161,7 +1161,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 /* other is a list containing users list, sensitivities list, categories list, and the file array */
 int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished, struct cil_list *other)
 {
-	uint32_t rc = SEPOL_ERR;
+	int rc = SEPOL_ERR;
 	struct cil_list *users = NULL, *sens = NULL, *cats = NULL;
 	FILE **file_arr = NULL;
 

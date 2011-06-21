@@ -275,16 +275,20 @@ void cil_destroy_data(void **data, uint32_t flavor)
 
 int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 {
-	uint32_t i = 0, rc = 0;
+	int rc = SEPOL_ERR;
+	uint32_t i = 0;
 	for (i = 0; i < symtab_num; i++) {
 		rc = symtab_init(&symtab[i], CIL_SYM_SIZE);
 		if (rc != SEPOL_OK) {
 			printf("Symtab init failed\n");
-			return SEPOL_ERR;
+			goto symtab_array_init_out;
 		}
 	}
 
 	return SEPOL_OK;
+
+symtab_array_init_out:
+	return rc;
 }
 
 void cil_symtab_array_destroy(symtab_t symtab[])
@@ -345,7 +349,7 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || ast_node == NULL) {
-		return SEPOL_ERR;
+		goto get_parent_symtab_out;
 	}
 
 	if (ast_node->parent != NULL) {
@@ -357,7 +361,7 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_call failed, rc: %d\n", rc);
-				return rc;
+				goto get_parent_symtab_out;
 			}
 		} else if (ast_node->parent->flavor == CIL_CLASS) {
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
@@ -369,29 +373,35 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_booleanif failed, rc: %d\n", rc);
-				return rc;
+				goto get_parent_symtab_out;
 			}
 		} else if (ast_node->parent->flavor == CIL_OPTIONAL && cil_sym_index < CIL_SYM_NUM) {
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, cil_sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_optional failed, rc: %d\n", rc);
-				return rc;
+				goto get_parent_symtab_out;
 			}
 		} else if (ast_node->parent->flavor == CIL_ROOT && cil_sym_index < CIL_SYM_NUM) {
 			*symtab = &db->symtab[cil_sym_index];
 		} else if (cil_sym_index >= CIL_SYM_NUM) {
 			printf("Invalid index passed to cil_get_parent_symtab\n");
-			return SEPOL_ERR;
+			rc = SEPOL_ERR;
+			goto get_parent_symtab_out;
 		} else {
 			printf("Failed to get symtab from parent node\n");
-			return SEPOL_ERR;
+			rc = SEPOL_ERR;
+			goto get_parent_symtab_out;
 		}
 	} else {
 		printf("Failed to get symtab: no parent node\n");
-		return SEPOL_ERR;
+		rc = SEPOL_ERR;
+		goto get_parent_symtab_out;
 	}
 
 	return SEPOL_OK;
+
+get_parent_symtab_out:
+	return rc;
 }
 
 int cil_sort_init(struct cil_sort **sort)
@@ -490,6 +500,8 @@ int cil_level_init(struct cil_level **level)
 	new_level->sens = NULL;
 	new_level->cat_list_str = NULL;
 	new_level->cat_list = NULL;
+	new_level->catset_str = NULL;
+	new_level->catset = NULL;
 	
 	*level = new_level;
 

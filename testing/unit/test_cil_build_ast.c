@@ -668,7 +668,7 @@ void test_cil_gen_perm_nodes_failgen_neg(CuTest *tc) {
 	test_ast_node->flavor = CIL_CLASS;
 
 	int rc = cil_gen_perm_nodes(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOMEM, rc);
 }
 
 void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *tc) {

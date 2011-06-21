@@ -524,7 +524,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_macro_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_tunable_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_macro_neg);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_macro_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodenull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_othernull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dbnull_neg);

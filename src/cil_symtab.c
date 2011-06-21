@@ -57,31 +57,39 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
 	if (rc != SEPOL_OK) {
 		free(newkey);
-		return rc;
+		goto symtab_insert_out;
 	} else {
 		datum->node = node;
 		datum->name = newkey;
 	}
 	
 	return SEPOL_OK;
+
+symtab_insert_out:
+	return rc;
 }
 
 int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node)
 {
 	struct cil_symtab_datum *datum = NULL;
+	int rc = SEPOL_ERR;
 
 	if (symtab == NULL || symtab->table == NULL || key == NULL || node == NULL) {
-		return SEPOL_ERR;
+		goto symtab_get_node_out;
 	}
 
 	datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
 	if (datum == NULL || datum->state != CIL_STATE_ENABLED) {
-		return SEPOL_ENOENT;
+		rc = SEPOL_ENOENT;
+		goto symtab_get_node_out;
 	}
 
 	*node = datum->node;
 
 	return SEPOL_OK;
+
+symtab_get_node_out:
+	return rc;
 }
 
 void cil_symtab_destroy(symtab_t *symtab)
