@@ -10,11 +10,11 @@ LEX = flex
 
 DEBUG=0
 
-CILC_NAME = cilc
+SECILC = secilc
 
-CILC = cilc.c
+SECILC_SRC = secilc.c
 TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
-CIL_SRCS =  cil.c cil_tree.c cil_ast.c cil_parser.c cil_symtab.c cil_lexer.c
+CIL_SRCS =  secil.c cil_tree.c cil_ast.c cil_parser.c cil_symtab.c cil_lexer.c
 
 GENERATED = cil_lexer.c
 
@@ -46,15 +46,13 @@ ifneq (,$(filter x86_64,$(ARCH)))
 	override LIBSEPOL_STATIC = /usr/lib64/libsepol.a
 endif
 
-all: cil
-
-cil: cilc
+all: $(SECILC)
 
 cil_lexer.c: cil_lexer.l
 	$(LEX) -t $< > $@
 
-cilc: $(CILC) $(ALL_SRCS)
-	$(CC) $(CFLAGS) -o $(CILC_NAME) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) 
+$(SECILC): $(SECILC_SRC) $(ALL_SRCS)
+	$(CC) $(CFLAGS) -o $(SECILC) $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
 
 unit: $(TEST_SRCS) $(ALL_SRCS)
 	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
@@ -68,18 +66,18 @@ coverage: clean unit
 	lcov --remove cov/app.info 'testing/unit/*' --output-file cov/app.info
 	genhtml -o ./cov/html ./cov/app.info
 
-test: cilc
-	./cilc testing/test.cil
+test: $(SECILC)
+	./$(SECILC) testing/test.cil
 
 install:
 
 clean: 
 	-rm -f $(SRCDIR)/$(ALL_OBJS) $(SRCDIR)/$(GENERATED) run_tests
 	-rm -f *.gcno *.gcda *.gcov unit_tests policy.conf file_contexts
-	-rm -f $(CILC_NAME)
+	-rm -f $(SECILC)
 	-rm -rf cov/
 
 bare: clean
-	-rm -f $(CILC_NAME)
+	-rm -f $(SECILC)
 
 .PHONY: cil all clean install bare test
