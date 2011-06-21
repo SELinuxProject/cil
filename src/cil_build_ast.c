@@ -40,6 +40,12 @@
 #include "cil_build_ast.h"
 #include "cil_copy_ast.h"
 
+enum args_build {
+	BUILD_ARGS_AST,
+	BUILD_ARGS_DB,
+	BUILD_ARGS_COUNT,
+};
+
 int __cil_verify_name(const char *name)
 {
 	int rc = SEPOL_ERR;
@@ -4157,12 +4163,6 @@ void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr)
 	cil_symtab_datum_destroy(ipaddr->datum);
 	free(ipaddr);
 }
-
-enum args_build {
-	BUILD_ARGS_AST,
-	BUILD_ARGS_DB,
-	BUILD_ARGS_COUNT,
-};
 
 int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, void **extra_args)
 {
