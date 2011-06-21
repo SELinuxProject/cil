@@ -13021,7 +13021,7 @@ void test_cil_gen_optional_emptyoptional_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_optional_norule(CuTest *tc) {
+void test_cil_gen_optional_norule_neg(CuTest *tc) {
 	char *line[] = {"(", "optional", "opt", "(", ")", ")", NULL};
 
         struct cil_tree *test_tree;
@@ -13037,7 +13037,7 @@ void test_cil_gen_optional_norule(CuTest *tc) {
         test_ast_node->line = 1;
 
         int rc = cil_gen_optional(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-        CuAssertIntEquals(tc, SEPOL_OK, rc);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_policycap(CuTest *tc) {
