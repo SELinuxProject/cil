@@ -82,6 +82,10 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 			}
 			current = current->parent;
 		} else if ((tok.type == SYMBOL) || (tok.type == QSTRING)) {
+			if (paren_count == 0) {
+				printf("Syntax error: Symbol not inside parenthesis: line %d\n", tok.line);
+				return SEPOL_ERR;
+			}
 			cil_tree_node_init(&item);
 			item->parent = current;
 			if (tok.type == QSTRING) {
