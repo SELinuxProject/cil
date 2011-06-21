@@ -4199,396 +4199,407 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 
 	ast_current = extra_args[BUILD_ARGS_AST];
 	db = extra_args[BUILD_ARGS_DB];
-	
-	if (parse_current->cl_head == NULL) {
-		if (parse_current->parent->cl_head == parse_current) {
-
-			rc = cil_tree_node_init(&ast_node);
-			if (rc != SEPOL_OK) {
-				printf("Failed to init tree node, rc: %d\n", rc);
-				goto build_ast_node_helper_out;
-			}
-
-			ast_node->parent = ast_current;
-			ast_node->line = parse_current->line;
-			if (ast_current->cl_head == NULL) {
-				ast_current->cl_head = ast_node;
-			} else {
-				ast_current->cl_tail->next = ast_node;
-			}
-			ast_current->cl_tail = ast_node;
-			ast_current = ast_node;	
-			extra_args[BUILD_ARGS_AST] = ast_current;
-
-			if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
-				rc = cil_gen_block(db, parse_current, ast_node, 0, NULL);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_block failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
-				rc = cil_gen_class(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_class failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				// To avoid parsing list of perms again
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_PERMSET)) {
-				rc = cil_gen_permset(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_permset failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
-				rc = cil_gen_common(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_common failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_CLASSCOMMON)) {
-				rc = cil_gen_classcommon(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_classcommon failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
-				rc = cil_gen_sid(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_sid failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_SIDCONTEXT)) {
-				rc = cil_gen_sidcontext(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_sidcontext failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_USER)) {
-				rc = cil_gen_user(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_user failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
-				rc = cil_gen_type(db, parse_current, ast_node, CIL_TYPE);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_type failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
-				rc = cil_gen_type(db, parse_current, ast_node, CIL_ATTR);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_type (attr) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTR)) {
-				rc = cil_gen_typeattr(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_typeattr failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
-				rc = cil_gen_typealias(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_typealias failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_TYPEBOUNDS)) {
-				rc = cil_gen_typebounds(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_typebounds failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_TYPEPERMISSIVE)) {
-				rc = cil_gen_typepermissive(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_typepermissive failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_FILETRANSITION)) {
-				rc = cil_gen_filetransition(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_filetransition failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
-				rc = cil_gen_role(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_role failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_USERROLE)) {
-				rc = cil_gen_userrole(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_userrole failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_ROLETYPE)) {
-				rc = cil_gen_roletype(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_roletype failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			}
-			else if (!strcmp(parse_current->data, CIL_KEY_ROLETRANS)) {
-				rc = cil_gen_roletrans(parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_roletrans failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_ROLEALLOW)) {
-				rc = cil_gen_roleallow(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_roleallow failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_ROLEDOMINANCE)) {
-				rc = cil_gen_roledominance(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_roledominance failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
-				rc = cil_gen_bool(db, parse_current, ast_node, CIL_BOOL);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_bool failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_BOOLEANIF)) {
-				rc = cil_gen_boolif(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_boolif failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if(!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
-				rc = cil_gen_bool(db, parse_current, ast_node, CIL_TUNABLE);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_bool failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
-				rc = cil_gen_tunif(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_tunif failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_ELSE)) {
-				rc = cil_gen_else(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_else failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
-				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_ALLOWED); 
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_avrule (allow) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				// So that the object and perms lists do not get parsed again
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_AUDITALLOW)) {
-				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_AUDITALLOW);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_avrule (auditallow) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_DONTAUDIT)) {
-				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_DONTAUDIT);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_avrule (dontaudit) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_NEVERALLOW)) {
-				rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_NEVERALLOW);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_avrule (neverallow) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANS)) {
-				rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_TRANSITION);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_type_rule (typetransition) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_TYPECHANGE)) {
-				rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_CHANGE);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_type_rule (typechange) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_TYPEMEMBER)) {
-				rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_MEMBER);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_type_rule (typemember) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_SENSITIVITY)) {
-				rc = cil_gen_sensitivity(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_sensitivity (sensitivity) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_SENSALIAS)) {
-				rc = cil_gen_sensalias(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_sensalias (sensitivityalias) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_CATEGORY)) {
-				rc = cil_gen_category(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_category (category) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_CATALIAS)) {
-				rc = cil_gen_catalias(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_catalias (categoryalias) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_CATSET)) {
-				rc = cil_gen_catset(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_catset (categoryset) failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
-				rc = cil_gen_catorder(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_catorder failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_DOMINANCE)) {
-				rc = cil_gen_dominance(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_dominance failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_SENSCAT)) {
-				rc = cil_gen_senscat(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_senscat failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_LEVEL)) {
-				rc = cil_gen_level(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_level failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_CONSTRAIN)) {
-				rc = cil_gen_constrain(db, parse_current, ast_node, CIL_CONSTRAIN);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_constrain failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_MLSCONSTRAIN)) {
-				rc = cil_gen_constrain(db, parse_current, ast_node, CIL_MLSCONSTRAIN);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_constrain failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
-				rc = cil_gen_context(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_context failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_FILECON)) {
-				rc = cil_gen_filecon(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_filecon failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_PORTCON)) {
-				rc = cil_gen_portcon(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_portcon failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_NODECON)) {
-				rc = cil_gen_nodecon(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_nodecon failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_GENFSCON)) {
-				rc = cil_gen_genfscon(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_genfscon failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_NETIFCON)) {
-				rc = cil_gen_netifcon(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_netifcon failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_FSUSE)) {
-				rc = cil_gen_fsuse(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_fsuse failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = CIL_TREE_SKIP_NEXT;
-			} else if (!strcmp(parse_current->data, CIL_KEY_MACRO)) {
-				rc = cil_gen_macro(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_macro failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_CALL)) {
-				rc = cil_gen_call(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_call failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = 1;
-			} else if (!strcmp(parse_current->data, CIL_KEY_POLICYCAP)) {
-				rc = cil_gen_policycap(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_policycap failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-				*finished = 1;
-			} else if (!strcmp(parse_current->data, CIL_KEY_OPTIONAL)) {
-				rc = cil_gen_optional(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_optional failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else if (!strcmp(parse_current->data, CIL_KEY_IPADDR)) {
-				rc = cil_gen_ipaddr(db, parse_current, ast_node);
-				if (rc != SEPOL_OK) {
-					printf("cil_gen_ipaddr failed, rc: %d\n", rc);
-					goto build_ast_node_helper_out;
-				}
-			} else {
-				printf("Error: Unknown keyword %s\n", (char*)parse_current->data);
-				goto build_ast_node_helper_out;
-			}
+		
+	if (parse_current->parent->cl_head != parse_current) {
+		/* ignore anything that isn't following a parenthesis */
+		rc = SEPOL_OK;
+		goto build_ast_node_helper_out;
+	} else if (parse_current->data == NULL) {
+		/* the only time parenthsis can immediately following parenthesis is if
+		 * the parent is the root node */
+		if (parse_current->parent->parent == NULL) {
+			rc = SEPOL_OK;
+		} else {
+			printf("Syntax Error: Keyword expected after open parenthesis, line: %d\n", parse_current->line);
 		}
+		goto build_ast_node_helper_out;
+	}
+
+	rc = cil_tree_node_init(&ast_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to init tree node, rc: %d\n", rc);
+		goto build_ast_node_helper_out;
+	}
+
+	ast_node->parent = ast_current;
+	ast_node->line = parse_current->line;
+	if (ast_current->cl_head == NULL) {
+		ast_current->cl_head = ast_node;
+	} else {
+		ast_current->cl_tail->next = ast_node;
+	}
+	ast_current->cl_tail = ast_node;
+	ast_current = ast_node;	
+	extra_args[BUILD_ARGS_AST] = ast_current;
+
+	if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
+		rc = cil_gen_block(db, parse_current, ast_node, 0, NULL);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_block failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
+		rc = cil_gen_class(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_class failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		// To avoid parsing list of perms again
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_PERMSET)) {
+		rc = cil_gen_permset(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_permset failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
+		rc = cil_gen_common(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_common failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSCOMMON)) {
+		rc = cil_gen_classcommon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_classcommon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
+		rc = cil_gen_sid(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_sid failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_SIDCONTEXT)) {
+		rc = cil_gen_sidcontext(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_sidcontext failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_USER)) {
+		rc = cil_gen_user(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_user failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
+		rc = cil_gen_type(db, parse_current, ast_node, CIL_TYPE);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_type failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
+		rc = cil_gen_type(db, parse_current, ast_node, CIL_ATTR);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_type (attr) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTR)) {
+		rc = cil_gen_typeattr(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_typeattr failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
+		rc = cil_gen_typealias(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_typealias failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEBOUNDS)) {
+		rc = cil_gen_typebounds(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_typebounds failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEPERMISSIVE)) {
+		rc = cil_gen_typepermissive(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_typepermissive failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_FILETRANSITION)) {
+		rc = cil_gen_filetransition(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_filetransition failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
+		rc = cil_gen_role(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_role failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_USERROLE)) {
+		rc = cil_gen_userrole(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_userrole failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ROLETYPE)) {
+		rc = cil_gen_roletype(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_roletype failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	}
+	else if (!strcmp(parse_current->data, CIL_KEY_ROLETRANS)) {
+		rc = cil_gen_roletrans(parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_roletrans failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEALLOW)) {
+		rc = cil_gen_roleallow(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_roleallow failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEDOMINANCE)) {
+		rc = cil_gen_roledominance(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_roledominance failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
+		rc = cil_gen_bool(db, parse_current, ast_node, CIL_BOOL);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_bool failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_BOOLEANIF)) {
+		rc = cil_gen_boolif(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_boolif failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if(!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
+		rc = cil_gen_bool(db, parse_current, ast_node, CIL_TUNABLE);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_bool failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
+		rc = cil_gen_tunif(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_tunif failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ELSE)) {
+		rc = cil_gen_else(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_else failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
+		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_ALLOWED); 
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_avrule (allow) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		// So that the object and perms lists do not get parsed again
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_AUDITALLOW)) {
+		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_AUDITALLOW);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_avrule (auditallow) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_DONTAUDIT)) {
+		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_DONTAUDIT);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_avrule (dontaudit) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_NEVERALLOW)) {
+		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_NEVERALLOW);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_avrule (neverallow) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANS)) {
+		rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_TRANSITION);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_type_rule (typetransition) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPECHANGE)) {
+		rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_CHANGE);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_type_rule (typechange) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEMEMBER)) {
+		rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_MEMBER);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_type_rule (typemember) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_SENSITIVITY)) {
+		rc = cil_gen_sensitivity(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_sensitivity (sensitivity) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_SENSALIAS)) {
+		rc = cil_gen_sensalias(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_sensalias (sensitivityalias) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_CATEGORY)) {
+		rc = cil_gen_category(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_category (category) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_CATALIAS)) {
+		rc = cil_gen_catalias(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_catalias (categoryalias) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_CATSET)) {
+		rc = cil_gen_catset(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_catset (categoryset) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
+		rc = cil_gen_catorder(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_catorder failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_DOMINANCE)) {
+		rc = cil_gen_dominance(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_dominance failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_SENSCAT)) {
+		rc = cil_gen_senscat(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_senscat failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_LEVEL)) {
+		rc = cil_gen_level(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_level failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CONSTRAIN)) {
+		rc = cil_gen_constrain(db, parse_current, ast_node, CIL_CONSTRAIN);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_constrain failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_MLSCONSTRAIN)) {
+		rc = cil_gen_constrain(db, parse_current, ast_node, CIL_MLSCONSTRAIN);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_constrain failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
+		rc = cil_gen_context(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_context failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_FILECON)) {
+		rc = cil_gen_filecon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_filecon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_PORTCON)) {
+		rc = cil_gen_portcon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_portcon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_NODECON)) {
+		rc = cil_gen_nodecon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_nodecon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_GENFSCON)) {
+		rc = cil_gen_genfscon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_genfscon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_NETIFCON)) {
+		rc = cil_gen_netifcon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_netifcon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_FSUSE)) {
+		rc = cil_gen_fsuse(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_fsuse failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_MACRO)) {
+		rc = cil_gen_macro(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_macro failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_CALL)) {
+		rc = cil_gen_call(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_call failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = 1;
+	} else if (!strcmp(parse_current->data, CIL_KEY_POLICYCAP)) {
+		rc = cil_gen_policycap(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_policycap failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = 1;
+	} else if (!strcmp(parse_current->data, CIL_KEY_OPTIONAL)) {
+		rc = cil_gen_optional(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_optional failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_IPADDR)) {
+		rc = cil_gen_ipaddr(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_ipaddr failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else {
+		printf("Error: Unknown keyword %s\n", (char*)parse_current->data);
+		rc = SEPOL_ERR;
+		goto build_ast_node_helper_out;
 	}
 
 	return SEPOL_OK;
