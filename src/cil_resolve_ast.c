@@ -113,7 +113,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	struct cil_list *perms_list = NULL;
 	int rc = SEPOL_ERR;
 
-	if (rule->src == NULL){
+	if (rule->src_str != NULL){
 		rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, call, &src_node);
 		if (rc != SEPOL_OK) {
 			printf("Name resolution failed for %s\n", rule->src_str);
@@ -129,7 +129,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		}
 	}
 
-	if (rule->tgt == NULL) {
+	if (rule->tgt_str != NULL) {
 		rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
 		if (rc != SEPOL_OK) {
 			printf("Name resolution failed for %s\n", rule->tgt_str);
@@ -151,7 +151,6 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		goto resolve_avrule_out;
 	}
 	rule->obj = (struct cil_class*)(obj_node->data);
-
 
 	cil_list_init(&perms_list);
 
@@ -273,6 +272,11 @@ int cil_resolve_typeset(struct cil_db *db, struct cil_tree_node *current, struct
 {
 	int rc = SEPOL_ERR;
 
+	if (typeset->types_list != NULL) {
+		/* clean up because of re-resolve */
+		cil_list_destroy(&typeset->types_list, 0);
+	}
+
 	cil_list_init(&typeset->types_list);
 
 	if (typeset->types_list_str != NULL) {
@@ -281,6 +285,11 @@ int cil_resolve_typeset(struct cil_db *db, struct cil_tree_node *current, struct
 			printf("Failed to resolve typeset\n");
 			goto resolve_typeset_out;
 		}
+	}
+
+	if (typeset->neg_list != NULL) {
+		/* clean up because of re-resolve */
+		cil_list_destroy(&typeset->neg_list, 0);
 	}
 
 	cil_list_init(&typeset->neg_list);
