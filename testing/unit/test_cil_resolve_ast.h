@@ -271,7 +271,7 @@ void test_cil_resolve_call2_ipaddr_anon(CuTest *);
 void test_cil_resolve_call2_unknown_neg(CuTest *);
 
 void test_cil_resolve_name_call_args(CuTest *);
-void test_cil_resolve_name_call_args_extraparams(CuTest *);
+void test_cil_resolve_name_call_args_multipleparams(CuTest *);
 void test_cil_resolve_name_call_args_diffflavor(CuTest *);
 void test_cil_resolve_name_call_args_callnull_neg(CuTest *);
 void test_cil_resolve_name_call_args_namenull_neg(CuTest *);

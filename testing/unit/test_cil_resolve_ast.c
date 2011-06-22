@@ -68,9 +68,7 @@ void test_cil_resolve_name(CuTest *tc) {
 	struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
 	struct cil_tree_node *type_node = NULL;
 
-	uint32_t test_flavor = 0;
-
-	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_TYPES, test_flavor, NULL, &type_node);
+	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_TYPES, NULL, &type_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -91,9 +89,7 @@ void test_cil_resolve_name_invalid_type_neg(CuTest *tc) {
 	struct cil_typealias *test_alias = (struct cil_typealias*)test_curr->data;
 	struct cil_tree_node *type_node = NULL;
 
-	uint32_t test_flavor = 0;
-
-	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_TYPES, test_flavor, NULL, &type_node);
+	int rc = cil_resolve_name(test_db, test_curr, test_alias->type_str, CIL_SYM_TYPES, NULL, &type_node);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
@@ -3508,7 +3504,7 @@ void test_cil_resolve_call1_unknown_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	struct cil_tree_node *macro_node = NULL;
-	cil_resolve_name(test_db, test_db->ast->root->cl_head->next->next->next, ((struct cil_call*)test_db->ast->root->cl_head->next->next->next->data)->macro_str, CIL_SYM_MACROS, CIL_MACRO, NULL, &macro_node);
+	cil_resolve_name(test_db, test_db->ast->root->cl_head->next->next->next, ((struct cil_call*)test_db->ast->root->cl_head->next->next->next->data)->macro_str, CIL_SYM_MACROS, NULL, &macro_node);
 	((struct cil_call*)test_db->ast->root->cl_head->next->next->next->data)->macro = (struct cil_macro*)macro_node->data;
 	free(((struct cil_call*)test_db->ast->root->cl_head->next->next->next->data)->macro_str);
 	((struct cil_call*)test_db->ast->root->cl_head->next->next->next->data)->macro_str = NULL;
@@ -3622,7 +3618,7 @@ void test_cil_resolve_call1_paramsflavor_neg(CuTest *tc) {
 	struct cil_tree_node *macro_node = NULL;
 
 	struct cil_call *new_call = ((struct cil_call*)test_db->ast->root->cl_head->next->next->next->data);
-	cil_resolve_name(test_db, test_db->ast->root->cl_head->next->next->next, new_call->macro_str, CIL_SYM_MACROS, CIL_MACRO, NULL, &macro_node);
+	cil_resolve_name(test_db, test_db->ast->root->cl_head->next->next->next, new_call->macro_str, CIL_SYM_MACROS, NULL, &macro_node);
 	new_call->macro = (struct cil_macro*)macro_node->data;
 	struct cil_list_item *item = new_call->macro->params->head;
 	item->flavor = CIL_CONTEXT;
@@ -3650,7 +3646,7 @@ void test_cil_resolve_call1_unknownflavor_neg(CuTest *tc) {
 	struct cil_tree_node *macro_node = NULL;
 
 	struct cil_call *new_call = ((struct cil_call*)test_db->ast->root->cl_head->next->next->next->data);
-	cil_resolve_name(test_db, test_db->ast->root->cl_head->next->next->next, new_call->macro_str, CIL_SYM_MACROS, CIL_MACRO, NULL, &macro_node);
+	cil_resolve_name(test_db, test_db->ast->root->cl_head->next->next->next, new_call->macro_str, CIL_SYM_MACROS, NULL, &macro_node);
 	new_call->macro = (struct cil_macro*)macro_node->data;
 	struct cil_list_item *item = new_call->macro->params->head;
 	((struct cil_param*)item->data)->flavor = CIL_CONTEXT;
@@ -4044,11 +4040,11 @@ void test_cil_resolve_name_call_args(CuTest *tc) {
 
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "a", CIL_TYPE, &test_node);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->data, "a", CIL_SYM_TYPES, &test_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_resolve_name_call_args_extraparams(CuTest *tc) {
+void test_cil_resolve_name_call_args_multipleparams(CuTest *tc) {
 	char *line[] = {"(", "category", "c0", ")",
 			"(", "sensitivity", "s0", ")",
 			"(", "user", "system_u", ")",
@@ -4073,7 +4069,7 @@ void test_cil_resolve_name_call_args_extraparams(CuTest *tc) {
 
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
 	cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
-	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->data, "lvl_h", CIL_LEVEL, &test_node);
+	int rc = cil_resolve_name_call_args((struct cil_call *)test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->data, "lvl_h", CIL_SYM_LEVELS, &test_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 

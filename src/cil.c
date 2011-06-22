@@ -316,6 +316,9 @@ int cil_flavor_to_symtab_index(uint32_t flavor, uint32_t *sym_index)
 	case CIL_CONTEXT:
 		*sym_index = CIL_SYM_CONTEXTS;
 		break;
+	case CIL_LEVEL:
+		*sym_index = CIL_SYM_LEVELS;
+		break;
 	case CIL_SENS:
 	case CIL_SENSALIAS:
 		*sym_index = CIL_SYM_SENS;

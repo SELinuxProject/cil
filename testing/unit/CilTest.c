@@ -442,7 +442,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call2_neg); 
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args);
-	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args_extraparams);
+	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args_multipleparams);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args_diffflavor);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args_callnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args_namenull_neg);
@@ -915,8 +915,10 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permset);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permset_anon);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_avrule_sourceparens_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_avrule_targetparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_sourceparens);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_sourceemptyparen_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_targetparens);
+	SUITE_ADD_TEST(suite, test_cil_gen_avrule_targetemptyparen_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_sourcedomainnull_neg);
