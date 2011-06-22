@@ -4192,7 +4192,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	struct cil_tree_node *ast_current = NULL;
 	struct cil_db *db = NULL;
 	struct cil_tree_node *ast_node = NULL;
-	struct cil_macro *macro = NULL;
+	struct cil_tree_node *macro = NULL;
 	int rc = SEPOL_ERR;
 
 	if (parse_current == NULL || finished == NULL || extra_args == NULL) {
