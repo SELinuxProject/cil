@@ -15387,6 +15387,57 @@ void test_cil_build_ast_node_helper_gen_macro_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_build_ast_node_helper_gen_macro_nested_macro_neg(CuTest *tc) {
+	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")", "(", "type", "b", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_macro *macro;
+	cil_macro_init(&macro);
+
+	uint32_t finished = 0;
+
+	void **extra_args = gen_build_args(test_db->ast->root, test_db);
+	extra_args[2] = macro;
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, finished, 0);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+
+	cil_db_destroy(&test_db);
+	cil_destroy_macro(macro);
+}
+
+void test_cil_build_ast_node_helper_gen_macro_nested_tunif_neg(CuTest *tc) {
+	char *line[] = {"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_macro *macro;
+	cil_macro_init(&macro);
+
+	uint32_t finished = 0;
+
+	void **extra_args = gen_build_args(test_db->ast->root, test_db);
+	extra_args[2] = macro;
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, finished, 0);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+
+	cil_db_destroy(&test_db);
+	cil_destroy_macro(macro);
+}
+
 void test_cil_build_ast_node_helper_gen_call(CuTest *tc) {
 	char *line[] = {"(", "call", "mm", "(", "foo", ")", ")", NULL};
 	

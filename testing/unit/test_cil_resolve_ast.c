@@ -39,15 +39,14 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, ui
 int __cil_resolve_ast_node_helper(struct cil_tree_node *, uint32_t *, void **);
 int __cil_disable_children_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void **);
 	
-void **gen_resolve_args(struct cil_db *db, int *pass, int *changed, struct cil_tree_node *calls, struct cil_tree_node *opts, struct cil_macro *macro)
+void **gen_resolve_args(struct cil_db *db, int *pass, int *changed, struct cil_tree_node *calls, struct cil_tree_node *opts)
 {
-	void **args = cil_malloc(sizeof(*args) * 6);
+	void **args = cil_malloc(sizeof(*args) * 5);
 	args[0] = db;
 	args[1] = pass;
 	args[2] = changed;
 	args[3] = calls;
 	args[4] = opts;
-	args[5] = macro;
 
 	return args;
 }
@@ -434,7 +433,7 @@ void test_cil_resolve_cat_list_catrange(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, extra_args);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -643,7 +642,7 @@ void test_cil_resolve_senscat_sublist(CuTest *tc) {
 	
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, extra_args);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -713,7 +712,7 @@ void test_cil_resolve_senscat_currrangecat(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, extra_args);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -743,7 +742,7 @@ void test_cil_resolve_senscat_currrangecat_neg(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, extra_args);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -5224,13 +5223,13 @@ void test_cil_resolve_ast_node_helper_call1(CuTest *tc) {
 
 	int pass = 2;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5251,13 +5250,13 @@ void test_cil_resolve_ast_node_helper_call1_neg(CuTest *tc) {
 
 	int pass = 2;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5278,14 +5277,14 @@ void test_cil_resolve_ast_node_helper_call2(CuTest *tc) {
 
 	int pass = 3;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5306,14 +5305,14 @@ void test_cil_resolve_ast_node_helper_call2_neg(CuTest *tc) {
 
 	int pass = 3;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
@@ -5332,13 +5331,13 @@ void test_cil_resolve_ast_node_helper_boolif(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5358,13 +5357,13 @@ void test_cil_resolve_ast_node_helper_boolif_neg(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5384,13 +5383,13 @@ void test_cil_resolve_ast_node_helper_tunif(CuTest *tc) {
 
 	int pass = 1;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5410,13 +5409,13 @@ void test_cil_resolve_ast_node_helper_tunif_neg(CuTest *tc) {
 
 	int pass = 1;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5435,12 +5434,12 @@ void test_cil_resolve_ast_node_helper_catorder(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5459,13 +5458,13 @@ void test_cil_resolve_ast_node_helper_catorder_neg(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5484,13 +5483,13 @@ void test_cil_resolve_ast_node_helper_dominance(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5509,13 +5508,13 @@ void test_cil_resolve_ast_node_helper_dominance_neg(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -5533,15 +5532,15 @@ void test_cil_resolve_ast_node_helper_roleallow(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);	
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_roleallow_neg(CuTest *tc) {
@@ -5556,15 +5555,15 @@ void test_cil_resolve_ast_node_helper_roleallow_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_roledominance(CuTest *tc) {
@@ -5580,15 +5579,15 @@ void test_cil_resolve_ast_node_helper_roledominance(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);	
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_roledominance_neg(CuTest *tc) {
@@ -5603,15 +5602,15 @@ void test_cil_resolve_ast_node_helper_roledominance_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_sensalias(CuTest *tc) {
@@ -5626,15 +5625,15 @@ void test_cil_resolve_ast_node_helper_sensalias(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_sensalias_neg(CuTest *tc) {
@@ -5648,15 +5647,15 @@ void test_cil_resolve_ast_node_helper_sensalias_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_catalias(CuTest *tc) {
@@ -5671,15 +5670,15 @@ void test_cil_resolve_ast_node_helper_catalias(CuTest *tc) {
 
 	int pass =7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_catalias_neg(CuTest *tc) {
@@ -5693,14 +5692,14 @@ void test_cil_resolve_ast_node_helper_catalias_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
-	uint32_t *finished = NULL;
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);	
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_catset(CuTest *tc) {
@@ -5717,15 +5716,15 @@ void test_cil_resolve_ast_node_helper_catset(CuTest *tc) {
 
 	int pass = 5;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *tc) {
@@ -5741,15 +5740,15 @@ void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *tc) {
 
 	int pass = 5;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_level(CuTest *tc) {
@@ -5766,7 +5765,7 @@ void test_cil_resolve_ast_node_helper_level(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -5803,7 +5802,7 @@ void test_cil_resolve_ast_node_helper_level_neg(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -5841,15 +5840,15 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
@@ -5869,15 +5868,15 @@ void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
@@ -5897,15 +5896,15 @@ void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
@@ -5925,15 +5924,15 @@ void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_context(CuTest *tc) {
@@ -5956,7 +5955,7 @@ void test_cil_resolve_ast_node_helper_context(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -5997,7 +5996,7 @@ void test_cil_resolve_ast_node_helper_context_neg(CuTest *tc) {
 
 	int pass = 4;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -6035,7 +6034,7 @@ void test_cil_resolve_ast_node_helper_senscat(CuTest *tc) {
 
 	int pass = 6;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -6063,7 +6062,7 @@ void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc) {
 
 	int pass = 6;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -6089,15 +6088,15 @@ void test_cil_resolve_ast_node_helper_roletrans(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *tc) {
@@ -6114,15 +6113,15 @@ void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg(CuTest *tc) {
@@ -6139,15 +6138,15 @@ void test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_roletrans_resultdecl_neg(CuTest *tc) {
@@ -6164,15 +6163,15 @@ void test_cil_resolve_ast_node_helper_roletrans_resultdecl_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_typeattr(CuTest *tc) {
@@ -6188,15 +6187,15 @@ void test_cil_resolve_ast_node_helper_typeattr(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);	
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_typeattr_neg(CuTest *tc) {
@@ -6211,15 +6210,15 @@ void test_cil_resolve_ast_node_helper_typeattr_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_typealias(CuTest *tc) {
@@ -6235,15 +6234,15 @@ void test_cil_resolve_ast_node_helper_typealias(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->cl_head, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *tc) {
@@ -6258,15 +6257,15 @@ void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->cl_head, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_typebounds(CuTest *tc) {
@@ -6282,15 +6281,15 @@ void test_cil_resolve_ast_node_helper_typebounds(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_typebounds_neg(CuTest *tc) {
@@ -6305,15 +6304,15 @@ void test_cil_resolve_ast_node_helper_typebounds_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_typepermissive(CuTest *tc) {
@@ -6328,15 +6327,15 @@ void test_cil_resolve_ast_node_helper_typepermissive(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_typepermissive_neg(CuTest *tc) {
@@ -6351,15 +6350,15 @@ void test_cil_resolve_ast_node_helper_typepermissive_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_filetransition(CuTest *tc) {
@@ -6377,15 +6376,15 @@ void test_cil_resolve_ast_node_helper_filetransition(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_filetransition_neg(CuTest *tc) {
@@ -6403,15 +6402,15 @@ void test_cil_resolve_ast_node_helper_filetransition_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_avrule(CuTest *tc) {
@@ -6428,15 +6427,15 @@ void test_cil_resolve_ast_node_helper_avrule(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_avrule_src_nores_neg(CuTest *tc) {
@@ -6450,15 +6449,15 @@ void test_cil_resolve_ast_node_helper_avrule_src_nores_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_avrule_tgt_nores_neg(CuTest *tc) {
@@ -6473,15 +6472,15 @@ void test_cil_resolve_ast_node_helper_avrule_tgt_nores_neg(CuTest *tc) {
 	
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_avrule_class_nores_neg(CuTest *tc) {
@@ -6497,15 +6496,15 @@ void test_cil_resolve_ast_node_helper_avrule_class_nores_neg(CuTest *tc) {
 	
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_avrule_datum_null_neg(CuTest *tc) {
@@ -6521,15 +6520,15 @@ void test_cil_resolve_ast_node_helper_avrule_datum_null_neg(CuTest *tc) {
 	
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_type_rule_transition(CuTest *tc) {
@@ -6547,15 +6546,15 @@ void test_cil_resolve_ast_node_helper_type_rule_transition(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_type_rule_transition_neg(CuTest *tc) {
@@ -6572,15 +6571,15 @@ void test_cil_resolve_ast_node_helper_type_rule_transition_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_type_rule_change(CuTest *tc) {
@@ -6598,15 +6597,15 @@ void test_cil_resolve_ast_node_helper_type_rule_change(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_type_rule_change_neg(CuTest *tc) {
@@ -6623,15 +6622,15 @@ void test_cil_resolve_ast_node_helper_type_rule_change_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_type_rule_member(CuTest *tc) {
@@ -6649,15 +6648,15 @@ void test_cil_resolve_ast_node_helper_type_rule_member(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_type_rule_member_neg(CuTest *tc) {
@@ -6674,15 +6673,15 @@ void test_cil_resolve_ast_node_helper_type_rule_member_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, finished, extra_args);	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertPtrEquals(tc, NULL, finished);
+	CuAssertIntEquals(tc, 0, finished);
 }
 
 void test_cil_resolve_ast_node_helper_roletype(CuTest *tc) {
@@ -6699,16 +6698,16 @@ void test_cil_resolve_ast_node_helper_roletype(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);
-	CuAssertPtrEquals(tc, NULL, finished);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -6725,16 +6724,16 @@ void test_cil_resolve_ast_node_helper_roletype_role_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);
-	CuAssertPtrEquals(tc, NULL, finished);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
@@ -6751,16 +6750,16 @@ void test_cil_resolve_ast_node_helper_roletype_type_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);
-	CuAssertPtrEquals(tc, NULL, finished);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
@@ -6778,16 +6777,16 @@ void test_cil_resolve_ast_node_helper_userrole(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);
-	CuAssertPtrEquals(tc, NULL, finished);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -6804,16 +6803,16 @@ void test_cil_resolve_ast_node_helper_userrole_user_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);
-	CuAssertPtrEquals(tc, NULL, finished);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
@@ -6830,16 +6829,16 @@ void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, finished, extra_args);
-	CuAssertPtrEquals(tc, NULL, finished);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
@@ -6862,7 +6861,7 @@ void test_cil_resolve_ast_node_helper_filecon(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -6892,7 +6891,7 @@ void test_cil_resolve_ast_node_helper_filecon_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -6922,7 +6921,7 @@ void test_cil_resolve_ast_node_helper_portcon(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -6952,7 +6951,7 @@ void test_cil_resolve_ast_node_helper_portcon_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -6982,7 +6981,7 @@ void test_cil_resolve_ast_node_helper_genfscon(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7012,7 +7011,7 @@ void test_cil_resolve_ast_node_helper_genfscon_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7043,7 +7042,7 @@ void test_cil_resolve_ast_node_helper_nodecon(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7075,7 +7074,7 @@ void test_cil_resolve_ast_node_helper_nodecon_ipaddr_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7107,7 +7106,7 @@ void test_cil_resolve_ast_node_helper_nodecon_netmask_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7131,7 +7130,7 @@ void test_cil_resolve_ast_node_helper_netifcon(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7154,7 +7153,7 @@ void test_cil_resolve_ast_node_helper_netifcon_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7185,7 +7184,7 @@ void test_cil_resolve_ast_node_helper_fsuse(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7208,7 +7207,7 @@ void test_cil_resolve_ast_node_helper_fsuse_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7239,7 +7238,7 @@ void test_cil_resolve_ast_node_helper_sidcontext(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7268,7 +7267,7 @@ void test_cil_resolve_ast_node_helper_sidcontext_neg(CuTest *tc) {
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7292,7 +7291,7 @@ void test_cil_resolve_ast_node_helper_classcommon(CuTest *tc) {
 
 	int pass = 6;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7315,7 +7314,7 @@ void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc) {
 
 	int pass = 6;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -7342,15 +7341,15 @@ void test_cil_resolve_ast_node_helper_call(CuTest *tc) {
 	cil_tree_node_init(&test_ast_node_call);
 	test_ast_node_call->flavor = CIL_CALL;
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -7370,15 +7369,15 @@ void test_cil_resolve_ast_node_helper_optional(CuTest *tc) {
 	cil_tree_node_init(&test_ast_node_opt);
 	test_ast_node_opt->flavor = CIL_OPTIONAL;
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -7394,15 +7393,15 @@ void test_cil_resolve_ast_node_helper_optional_optstacknull(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -7420,45 +7419,16 @@ void test_cil_resolve_ast_node_helper_macro(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_resolve_ast_node_helper_macro_neg(CuTest *tc) {
-	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
-				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")", NULL};
-		
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-	
-	struct cil_tree_node *test_ast_node;
-	cil_tree_node_init(&test_ast_node);
-
-	struct cil_macro *macro;
-	cil_macro_init(&macro);
-
-	uint32_t *finished = NULL;
-
-	int pass = 7;
-	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, macro);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, finished, extra_args);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_ast_node_helper_optstack(CuTest *tc) {
@@ -7479,15 +7449,15 @@ void test_cil_resolve_ast_node_helper_optstack(CuTest *tc) {
 	cil_tree_node_init(&test_ast_node_opt);
 	test_ast_node_opt->flavor = CIL_OPTIONAL;
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -7506,7 +7476,7 @@ void test_cil_resolve_ast_node_helper_optstack_tunable_neg(CuTest *tc) {
 
 	int pass = 1;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, test_ast_node_opt, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, test_ast_node_opt);
 
 	uint32_t finished = 0;
 
@@ -7529,20 +7499,21 @@ void test_cil_resolve_ast_node_helper_optstack_macro_neg(CuTest *tc) {
 
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-	
-	struct cil_macro *macro;
-	cil_macro_init(&macro);
+
+	struct cil_tree_node *test_ast_node_opt;
+	cil_tree_node_init(&test_ast_node_opt);
+	test_ast_node_opt->flavor = CIL_OPTIONAL;
 
 	int pass = 3;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, macro);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, test_ast_node_opt);
 
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
+	cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
@@ -7563,13 +7534,13 @@ void test_cil_resolve_ast_node_helper_nodenull_neg(CuTest *tc) {
 
 	int pass = 1;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
-	int rc = __cil_resolve_ast_node_helper(NULL, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(NULL, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -7587,12 +7558,12 @@ void test_cil_resolve_ast_node_helper_extraargsnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, NULL);
-	CuAssertPtrEquals(tc, NULL, finished);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, NULL);
+	CuAssertIntEquals(tc, 0, finished);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -7610,15 +7581,15 @@ void test_cil_resolve_ast_node_helper_dbflavor_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -7636,15 +7607,15 @@ void test_cil_resolve_ast_node_helper_pass_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	uint32_t *finished = NULL;
+	uint32_t finished = 0;
 
 	int pass = 7;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -7668,7 +7639,7 @@ void test_cil_resolve_ast_node_helper_optfailedtoresolve(CuTest *tc) {
 
         int pass = 6;
 	int changed = 0;
-	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, test_ast_node_opt, NULL);
+	void **extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, test_ast_node_opt);
 
         uint32_t finished = 0;
 

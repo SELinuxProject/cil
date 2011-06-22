@@ -521,10 +521,9 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optional);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optional_optstacknull);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_macro);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_macro_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_tunable_neg);
-//	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_macro_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_macro_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_nodenull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_extraargsnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optfailedtoresolve);
@@ -1312,6 +1311,8 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_paramcontainsperiod_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro_nested_macro_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_macro_nested_tunif_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_call);
 	SUITE_ADD_TEST(suite, test_cil_gen_call_noargs);

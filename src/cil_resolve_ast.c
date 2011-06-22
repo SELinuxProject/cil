@@ -46,7 +46,6 @@ enum args_resolve {
 	ARGS_RESOLVE_CHANGED,
 	ARGS_RESOLVE_CALLS,
 	ARGS_RESOLVE_OPTIONALS,
-	ARGS_RESOLVE_MACRO,
 	ARGS_RESOLVE_COUNT,
 };
 
@@ -2536,7 +2535,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	struct cil_call *call = NULL;
 	struct cil_tree_node *callstack = NULL;
 	struct cil_tree_node *optstack = NULL;
-	struct cil_macro *macro = NULL;
 	int *changed = NULL;
 
 	if (node == NULL || extra_args == NULL) {
@@ -2548,35 +2546,35 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	changed = extra_args[ARGS_RESOLVE_CHANGED];
 	callstack = extra_args[ARGS_RESOLVE_CALLS];
 	optstack = extra_args[ARGS_RESOLVE_OPTIONALS];
-	macro = extra_args[ARGS_RESOLVE_MACRO];
 
 	if (callstack != NULL) {
 		call = callstack->data;
 	}
 		
-	if (optstack != NULL || macro != NULL) {
+	if (optstack != NULL) {
 		if (node->flavor == CIL_TUNABLE || node->flavor == CIL_MACRO) {
-			/* tuanbles and macros are not allowed in optionals or macros */
-			printf("Node of flavor %i is not allowed in optionals or macros\n", node->flavor);
+			/* tuanbles and macros are not allowed in optionals*/
+			printf("Node of flavor %i is not allowed in optionals\n", node->flavor);
 			goto resolve_ast_node_helper_out;
 		}
 	}
 
-	/* don't resolve statements inside a macro, they're resolved when called */
-	if (macro == NULL) {
-		rc = __cil_resolve_ast_node(node, *pass, db, call);
-		if (rc == SEPOL_ENOENT && optstack != NULL) {
-			/* disable an optional if something failed to resolve */
-			struct cil_optional *opt = (struct cil_optional *)optstack->data;
-			opt->datum.state = CIL_STATE_DISABLING;
-			/* let the resolve loop know something was changed */
-			*changed = 1;
-			rc = SEPOL_OK;
-		} else if (rc != SEPOL_OK) {
-			goto resolve_ast_node_helper_out;
-		}
-	} else {
+	if (node->flavor == CIL_MACRO) {
+		*finished = CIL_TREE_SKIP_HEAD;
 		rc = SEPOL_OK;
+		goto resolve_ast_node_helper_out;
+	}
+
+	rc = __cil_resolve_ast_node(node, *pass, db, call);
+	if (rc == SEPOL_ENOENT && optstack != NULL) {
+		/* disable an optional if something failed to resolve */
+		struct cil_optional *opt = (struct cil_optional *)optstack->data;
+		opt->datum.state = CIL_STATE_DISABLING;
+		/* let the resolve loop know something was changed */
+		*changed = 1;
+		rc = SEPOL_OK;
+	} else if (rc != SEPOL_OK) {
+		goto resolve_ast_node_helper_out;
 	}
 
 	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL) {
@@ -2603,9 +2601,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 			}
 			extra_args[ARGS_RESOLVE_OPTIONALS] = new;
 		}
-	} else if (node->flavor == CIL_MACRO) {
-		/* set the macro parameter so future resolve know they're in a macro */
-		extra_args[ARGS_RESOLVE_MACRO] = node;
 	}
 	
 	return rc;
@@ -2706,8 +2701,6 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void **extra
 			callstack->cl_head->parent = NULL;
 		}
 		free(callstack);
-	} else if (current->flavor == CIL_MACRO) {
-		extra_args[ARGS_RESOLVE_MACRO] = NULL;
 	} else if (current->flavor == CIL_OPTIONAL) {
 		struct cil_tree_node *optstack;
 
@@ -2753,7 +2746,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args[ARGS_RESOLVE_CHANGED] = &changed;	
 	extra_args[ARGS_RESOLVE_CALLS] = NULL;
 	extra_args[ARGS_RESOLVE_OPTIONALS] = NULL;
-	extra_args[ARGS_RESOLVE_MACRO] = NULL;
 	
 	for (pass = 1; pass <= 8; pass++) {
 #ifdef DEBUG
@@ -2816,7 +2808,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			free(curr);
 			extra_args[ARGS_RESOLVE_OPTIONALS] = next;
 		}
-		extra_args[ARGS_RESOLVE_MACRO] = NULL;
 	}
 
 	return SEPOL_OK;

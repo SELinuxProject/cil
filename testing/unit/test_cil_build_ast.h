@@ -910,6 +910,8 @@ void test_cil_build_ast_node_helper_gen_fsuse_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_macro(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_macro_neg(CuTest *tc);
+void test_cil_build_ast_node_helper_gen_macro_nested_macro_neg(CuTest *tc);
+void test_cil_build_ast_node_helper_gen_macro_nested_tunif_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_call(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_call_neg(CuTest *tc);
