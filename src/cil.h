@@ -271,7 +271,6 @@ enum cil_sym_index {
 struct cil_db {
 	struct cil_tree *ast;
 	symtab_t symtab[CIL_SYM_NUM];
-	symtab_t netif;
 	struct cil_list *catorder;
 	struct cil_list *dominance;
 	struct cil_sort *netifcon;

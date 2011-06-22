@@ -56,7 +56,6 @@ int cil_db_init(struct cil_db **db)
 	cil_tree_init(&new_db->ast);
 	cil_list_init(&new_db->catorder);
 	cil_list_init(&new_db->dominance);
-	symtab_init(&new_db->netif, CIL_SYM_SIZE);
 	cil_sort_init(&new_db->netifcon);
 	cil_sort_init(&new_db->genfscon);
 	cil_sort_init(&new_db->filecon);
