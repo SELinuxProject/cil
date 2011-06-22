@@ -2690,6 +2690,13 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		goto resolve_ast_node_helper_out;
 	}
 
+	if (node->flavor == CIL_OPTIONAL && ((struct cil_symtab_datum *)node->data)->state == CIL_STATE_DISABLED) {
+		/* don't try to resolve children of a disabled optional */
+		*finished = CIL_TREE_SKIP_HEAD;
+		rc = SEPOL_OK;
+		goto resolve_ast_node_helper_out;
+	}
+
 	rc = __cil_resolve_ast_node(node, *pass, db, call);
 	if (rc == SEPOL_ENOENT && optstack != NULL) {
 		/* disable an optional if something failed to resolve */
@@ -2872,6 +2879,8 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			/* reset the global data */
 			cil_list_destroy(&db->catorder, 0);
 			cil_list_destroy(&db->dominance, 0);
+			cil_list_init(&db->catorder);
+			cil_list_init(&db->dominance);
 		}
 
 		/* reset the arguments */
