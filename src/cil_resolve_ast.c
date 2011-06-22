@@ -2736,84 +2736,33 @@ resolve_ast_node_helper_out:
 
 int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void **extra_args)
 {
-	switch (node->flavor) {
-	case CIL_OPTIONAL:
-		if (((struct cil_optional *)node->data)->datum.state == CIL_STATE_DISABLED) {
-			/* don't bother going into an optional that isn't enabled */
-			*finished = CIL_TREE_SKIP_HEAD;
-		} else {
-			((struct cil_optional *)node->data)->datum.state = CIL_STATE_DISABLED;
-		}
-		break;
-	case CIL_BLOCK:
-		((struct cil_block *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_USER:
-		((struct cil_user *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_ROLE:
-		((struct cil_role *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_TYPE:
-		((struct cil_type *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_TYPESET:
-		((struct cil_typeset *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_TYPEALIAS:
-		((struct cil_typealias *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_COMMON:
-		((struct cil_common *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_CLASS:
-		((struct cil_class *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_BOOL:
-		((struct cil_bool *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_SENS:
-		((struct cil_sens *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_CAT:
-		((struct cil_cat *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_CATSET:
-		((struct cil_catset *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_SID:
-		((struct cil_sid *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_MACRO:
-		/* TODO: how to handle macros that have already been copied??? */
-		((struct cil_macro *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_CONTEXT:
-		((struct cil_context *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_LEVEL:
-		((struct cil_level *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_POLICYCAP:
-		((struct cil_policycap *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_PERM:
-		((struct cil_perm *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_PERMSET:
-		((struct cil_permset *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_CATALIAS:
-		((struct cil_catalias *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_SENSALIAS:
-		((struct cil_sensalias *)node->data)->datum.state = CIL_STATE_DISABLED;
-		break;
-	case CIL_TUNABLE: /*TODO not sure how to handle tunables??? */
-		break;
+	int rc = SEPOL_ERR;
+
+	if (node == NULL || finished == NULL) {
+		goto disable_children_helper_out;
 	}
 
+	if (node->flavor < CIL_MIN_DECLARATIVE) {
+		/* only declarative statements need to be disabled */
+		rc = SEPOL_OK;
+		goto disable_children_helper_out;
+	}
+	
+	if (node->flavor == CIL_OPTIONAL) {
+		if (((struct cil_symtab_datum *)node->data)->state == CIL_STATE_DISABLED) {
+			/* don't bother going into an optional that isn't enabled */
+			*finished = CIL_TREE_SKIP_HEAD;
+			rc = SEPOL_OK;
+			goto disable_children_helper_out;
+		}
+	}
+
+	((struct cil_symtab_datum *)node->data)->state = CIL_STATE_DISABLED;
+
 	return SEPOL_OK;
+
+disable_children_helper_out:
+	return rc;
 }
 
 int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void **extra_args)
