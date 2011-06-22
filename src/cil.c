@@ -134,6 +134,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPE:
 		cil_destroy_type(*data);
 		break;
+	case CIL_TYPESET:
+		cil_destroy_typeset(*data);
+		break;
 	case CIL_ATTR:
 		cil_destroy_type(*data);
 		break;
@@ -271,6 +274,75 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	}
 	
 	*data = NULL;		
+}
+
+int cil_flavor_to_symtab_index(uint32_t flavor, uint32_t *sym_index)
+{
+	if (flavor < CIL_MIN_DECLARATIVE) {
+		return SEPOL_ERR;
+	}
+
+	switch(flavor) {
+	case CIL_BLOCK:
+		*sym_index = CIL_SYM_BLOCKS;
+		break;
+	case CIL_CLASS:
+		*sym_index = CIL_SYM_CLASSES;
+		break;
+	case CIL_COMMON:
+		*sym_index = CIL_SYM_COMMONS;
+		break;
+	case CIL_SID:
+		*sym_index = CIL_SYM_SIDS;
+		break;
+	case CIL_USER:
+		*sym_index = CIL_SYM_USERS;
+		break;
+	case CIL_ROLE:
+		*sym_index = CIL_SYM_ROLES;
+		break;
+	case CIL_TYPE:
+	case CIL_TYPESET:
+	case CIL_TYPEALIAS:
+	case CIL_ATTR:
+		*sym_index = CIL_SYM_TYPES;
+		break;
+	case CIL_BOOL:
+		*sym_index = CIL_SYM_BOOLS;
+		break;
+	case CIL_TUNABLE:
+		*sym_index = CIL_SYM_TUNABLES;
+		break;
+	case CIL_CONTEXT:
+		*sym_index = CIL_SYM_CONTEXTS;
+		break;
+	case CIL_SENS:
+	case CIL_SENSALIAS:
+		*sym_index = CIL_SYM_SENS;
+		break;
+	case CIL_CAT:
+	case CIL_CATSET:
+	case CIL_CATALIAS:
+		*sym_index = CIL_SYM_CATS;
+		break;
+	case CIL_MACRO:
+		*sym_index = CIL_SYM_MACROS;
+		break;
+	case CIL_OPTIONAL:
+		*sym_index = CIL_SYM_OPTIONALS;
+		break;
+	case CIL_POLICYCAP:
+		*sym_index = CIL_SYM_POLICYCAPS;
+		break;
+	case CIL_IPADDR:
+		*sym_index = CIL_SYM_IPADDRS;
+		break;
+	default:
+		*sym_index = CIL_SYM_UNKNOWN;
+		return SEPOL_ERR;
+	}
+
+	return SEPOL_OK;
 }
 
 int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
@@ -760,6 +832,27 @@ int cil_typealias_init(struct cil_typealias **typealias)
 	new_typealias->type = NULL;
 
 	*typealias = new_typealias;
+
+	return SEPOL_OK;
+}
+
+int cil_typeset_init(struct cil_typeset **typeset)
+{
+	struct cil_typeset *new_typeset = NULL;
+
+	if (typeset == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_typeset = cil_malloc(sizeof(*new_typeset));
+
+	cil_symtab_datum_init(&new_typeset->datum);
+	new_typeset->types_list_str = NULL;
+	new_typeset->types_list = NULL;
+	new_typeset->neg_list_str = NULL;
+	new_typeset->neg_list = NULL;
+
+	*typeset = new_typeset;
 
 	return SEPOL_OK;
 }

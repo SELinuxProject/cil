@@ -131,6 +131,7 @@ enum cil_flavor {
 	CIL_USER,
 	CIL_ROLE,
 	CIL_TYPE,
+	CIL_TYPESET,
 	CIL_ATTR,
 	CIL_BOOL,
 	CIL_TUNABLE,
@@ -178,6 +179,7 @@ enum cil_flavor {
 #define CIL_KEY_TYPEMEMBER	"typemember"
 #define CIL_KEY_TYPEATTR	"typeattribute"
 #define CIL_KEY_TYPEALIAS	"typealias"
+#define CIL_KEY_TYPESET		"typeset"
 #define CIL_KEY_TYPEBOUNDS	"typebounds"
 #define CIL_KEY_TYPEPERMISSIVE	"typepermissive"
 #define CIL_KEY_MACRO		"macro"
@@ -378,6 +380,14 @@ struct cil_type	{//Also used for attributes
 	struct cil_symtab_datum datum;
 };
 
+struct cil_typeset {
+	struct cil_symtab_datum datum;
+	struct cil_list *types_list_str;
+	struct cil_list *types_list;
+	struct cil_list *neg_list_str;
+	struct cil_list *neg_list;
+};
+
 struct cil_typeattribute {
 	char *type_str;
 	struct cil_type *type;
@@ -428,9 +438,11 @@ struct cil_bool {
 struct cil_avrule {
 	uint32_t rule_kind;
 	char *src_str;
-	struct cil_type *src;
+	void *src;
+	uint32_t src_flavor;
 	char *tgt_str;	
-	struct cil_type *tgt;
+	void *tgt;
+	uint32_t tgt_flavor;
 	char *obj_str;
 	struct cil_class *obj;
 	struct cil_list *perms_list_str;
@@ -701,6 +713,8 @@ void cil_db_destroy(struct cil_db **db);
 
 void cil_destroy_data(void **data, enum cil_flavor flavor);
 
+int cil_flavor_to_symtab_index(uint32_t flavor, uint32_t *index);
+
 int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
 void cil_symtab_array_destroy(symtab_t symtab[]);
 int cil_destroy_ast_symtabs(struct cil_tree_node *root);
@@ -723,6 +737,7 @@ int cil_roledominance_init(struct cil_roledominance **roledominance);
 int cil_roletype_init(struct cil_roletype **roletype);
 int cil_typeattribute_init(struct cil_typeattribute **typeattribute);
 int cil_typealias_init(struct cil_typealias **typealias);
+int cil_typeset_init(struct cil_typeset **typeset);
 int cil_typebounds_init(struct cil_typebounds **typebnds);
 int cil_typepermissive_init(struct cil_typepermissive **typeperm);
 int cil_filetransition_init(struct cil_filetransition **filetrans);

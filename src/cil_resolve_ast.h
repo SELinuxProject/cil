@@ -37,6 +37,8 @@
 
 int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_list *res_list, struct cil_tree_node *current, enum cil_sym_index sym_index, struct cil_call *call);
+int cil_resolve_typeset(struct cil_db *db, struct cil_tree_node *current, struct cil_typeset *typeset, struct cil_call *call);
 int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
@@ -69,14 +71,13 @@ int cil_resolve_fsuse(struct cil_db *db, struct cil_tree_node *current, struct c
 int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_call2(struct cil_db *, struct cil_tree_node *, struct cil_call *);
-int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_flavor flavor, struct cil_tree_node **node);
+int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_index sym_index, struct cil_tree_node **node);
 int cil_resolve_expr_stack(struct cil_db *db, struct cil_tree_node *expr_stack, struct cil_tree_node *parent, struct cil_call *call);
 int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result);
 int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current);
-int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, enum cil_flavor flavor, struct cil_call *call, struct cil_tree_node **node);
-
+int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, struct cil_call *call, struct cil_tree_node **node);
 
 #endif /* CIL_RESOLVE_AST_H_ */

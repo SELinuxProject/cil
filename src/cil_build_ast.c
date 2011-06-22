@@ -124,7 +124,7 @@ verify_syntax_out:
 	return rc;
 }
 
-int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, enum cil_sym_index sflavor, uint32_t nflavor)
+int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, enum cil_sym_index sflavor, enum cil_flavor nflavor)
 {
 	symtab_t *symtab = NULL;
 	int rc = SEPOL_ERR;
@@ -1058,8 +1058,8 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
 		SYM_STRING,
 		SYM_STRING | SYM_LIST,
 		SYM_END
@@ -1084,8 +1084,31 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	}
 
 	rule->rule_kind = rule_kind;
-	rule->src_str = cil_strdup(parse_current->next->data);
-	rule->tgt_str = cil_strdup(parse_current->next->next->data);
+
+	if (parse_current->next->cl_head == NULL) {
+		rule->src_str = cil_strdup(parse_current->next->data);
+	} else {
+		cil_typeset_init((struct cil_typeset**)&rule->src);
+		rule->src_flavor = CIL_TYPESET;	
+		rc = cil_fill_typeset(parse_current->next->cl_head, rule->src);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill src typeset\n");
+			goto gen_avrule_cleanup;
+		}
+	}
+
+	if (parse_current->next->next->cl_head == NULL) {
+		rule->tgt_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		cil_typeset_init((struct cil_typeset**)&rule->tgt);
+		rule->tgt_flavor = CIL_TYPESET;	
+		rc = cil_fill_typeset(parse_current->next->next->cl_head, rule->tgt);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill tgt typeset\n");
+			goto gen_avrule_cleanup;
+		}
+	}
+	
 	rule->obj_str = cil_strdup(parse_current->next->next->next->data);	
 
 	if (parse_current->next->next->next->next->cl_head != NULL) {
@@ -1258,6 +1281,115 @@ void cil_destroy_type(struct cil_type *type)
 {
 	cil_symtab_datum_destroy(type->datum);
 	free(type);
+}
+
+int cil_fill_typeset(struct cil_tree_node *set_start, struct cil_typeset *typeset)
+{
+	struct cil_tree_node *curr = set_start;
+	struct cil_list_item *new_type = NULL;
+	struct cil_list_item *types_list_tail = NULL;
+	struct cil_list_item *neg_list_tail = NULL;
+	char first;
+
+	if (set_start == NULL || typeset == NULL) {
+		return SEPOL_ERR;
+	}
+
+	cil_list_init(&typeset->types_list_str);
+	cil_list_init(&typeset->neg_list_str);
+
+	while(curr != NULL) {
+		cil_list_item_init(&new_type);
+		new_type->flavor = CIL_AST_STR;
+
+		first = *((char*)curr->data);
+		if (first == '-') {
+			new_type->data = cil_strdup((char*)curr->data + 1);
+			if (typeset->neg_list_str->head == NULL) {
+				typeset->neg_list_str->head = new_type;
+			} else {
+				neg_list_tail->next = new_type;
+			}
+			neg_list_tail = new_type;
+		} else {
+			new_type->data = cil_strdup((char*)curr->data);
+			if (typeset->types_list_str->head == NULL) {
+				typeset->types_list_str->head = new_type;
+			} else {
+				types_list_tail->next = new_type;
+			}
+			types_list_tail = new_type;
+		}
+
+		curr = curr->next;
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_gen_typeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_typeset *typeset = NULL;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		return SEPOL_ERR;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid typeset declaration (line: %d)\n", parse_current->line);
+		return SEPOL_ERR;
+	}
+
+	rc = cil_typeset_init(&typeset);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
+
+	key = parse_current->next->data;
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)typeset, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPESET);
+	if (rc != SEPOL_OK) {
+		goto gen_typeset_cleanup;
+	}	
+
+	cil_fill_typeset(parse_current->next->next->cl_head, typeset);
+
+	return SEPOL_OK;
+
+	gen_typeset_cleanup:
+		cil_destroy_typeset(typeset);
+		return rc;
+}
+
+void cil_destroy_typeset(struct cil_typeset *typeset)
+{
+	cil_symtab_datum_destroy(typeset->datum);
+
+	if (typeset->types_list_str != NULL) {
+		cil_list_destroy(&typeset->types_list_str, 1);
+	}
+	if (typeset->types_list != NULL) {
+		cil_list_destroy(&typeset->types_list, 0);
+	}
+
+	if (typeset->neg_list_str != NULL) {
+		cil_list_destroy(&typeset->neg_list_str, 1);
+	}
+	if (typeset->neg_list != NULL) {
+		cil_list_destroy(&typeset->neg_list, 0);
+	}
+
+	free(typeset);
 }
 
 int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
@@ -4295,6 +4427,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			printf("cil_gen_type failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPESET)) {
+		rc = cil_gen_typeset(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_typeset failed, rc: %d\n", rc);
+			return rc;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
 		rc = cil_gen_type(db, parse_current, ast_node, CIL_ATTR);
 		if (rc != SEPOL_OK) {
