@@ -276,7 +276,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	*data = NULL;		
 }
 
-int cil_flavor_to_symtab_index(uint32_t flavor, uint32_t *sym_index)
+int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_index)
 {
 	if (flavor < CIL_MIN_DECLARATIVE) {
 		return SEPOL_ERR;

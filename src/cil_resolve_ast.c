@@ -2181,7 +2181,7 @@ resolve_call2_out:
 int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_index sym_index, struct cil_tree_node **node)
 {
 	struct cil_list_item *item = NULL;
-	uint32_t param_index = CIL_SYM_UNKNOWN;
+	enum cil_sym_index param_index = CIL_SYM_UNKNOWN;
 	int rc = SEPOL_ERR;
 
 	if (call == NULL || name == NULL) {
