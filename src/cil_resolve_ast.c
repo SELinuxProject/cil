@@ -236,7 +236,7 @@ int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_li
 
 	if (str_list == NULL || res_list == NULL || current == NULL) {
 		printf("Invalid call to cil_resolve_list\n");
-		return rc;
+		goto resolve_list_out;
 	}
 
 	curr_str = str_list->head;
@@ -245,7 +245,7 @@ int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_li
 		rc = cil_resolve_name(db, current, (char*)curr_str->data, sym_index, call, &res_node);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve list\n");
-			return rc;
+			goto resolve_list_out;
 		}
 
 		cil_list_item_init(&new_item);
@@ -263,6 +263,10 @@ int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_li
 	}
 
 	return SEPOL_OK;
+
+resolve_list_out:
+	return rc;
+
 }
 
 int cil_resolve_typeset(struct cil_db *db, struct cil_tree_node *current, struct cil_typeset *typeset, struct cil_call *call)
@@ -275,7 +279,7 @@ int cil_resolve_typeset(struct cil_db *db, struct cil_tree_node *current, struct
 		rc = cil_resolve_list(db, typeset->types_list_str, typeset->types_list, current, CIL_SYM_TYPES, call);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve typeset\n");
-			return rc;
+			goto resolve_typeset_out;
 		}
 	}
 
@@ -285,11 +289,14 @@ int cil_resolve_typeset(struct cil_db *db, struct cil_tree_node *current, struct
 		rc = cil_resolve_list(db, typeset->neg_list_str, typeset->neg_list, current, CIL_SYM_TYPES, call);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve typeset\n");
-			return rc;
+			goto resolve_typeset_out;
 		}
 	}
 
 	return SEPOL_OK;
+
+resolve_typeset_out:
+	return rc;
 }
 
 int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
