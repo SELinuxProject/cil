@@ -33,6 +33,8 @@ CFLAGS ?= -Wall -Werror -Wshadow -Wextra -Wundef -Wmissing-format-attribute -Wca
 ifeq ($(DEBUG),1)
 	override CFLAGS += -g3 -O0 -gdwarf-2 -fno-strict-aliasing -DDEBUG
 	override LDFLAGS += -g
+else
+	override CFLAGS += -O2
 endif
 
 override CFLAGS += -I$(INCLUDEDIR) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
