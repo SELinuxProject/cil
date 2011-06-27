@@ -122,7 +122,7 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
    finished_branch:     function to call when finished with a branch of the tree before walking back up
    extra_args:               any additional data to be passed to process_node() and finished_branch()
 */
-int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void **extra_args), int (*reverse_node)(struct cil_tree_node *node, void **extra_args), int (*finished_branch)(struct cil_tree_node *node, void **extra_args), void **extra_args)
+int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args), int (*reverse_node)(struct cil_tree_node *node, void *extra_args), int (*finished_branch)(struct cil_tree_node *node, void *extra_args), void *extra_args)
 {
 	struct cil_tree_node *node = NULL;
 	uint32_t reverse = 0;

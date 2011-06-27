@@ -38,24 +38,21 @@
 #include "cil_build_ast.h"
 #include "cil_resolve_ast.h"
 #include "cil_copy_ast.h"
-	
-	
-enum args_resolve {
-	ARGS_RESOLVE_DB,
-	ARGS_RESOLVE_PASS,
-	ARGS_RESOLVE_CHANGED,
-	ARGS_RESOLVE_CALLS,
-	ARGS_RESOLVE_OPTIONALS,
-	ARGS_RESOLVE_COUNT,
+
+struct cil_args_resolve {
+	struct cil_db *db;
+	uint32_t *pass;
+	uint32_t *changed;
+	struct cil_tree_node *callstack;
+	struct cil_tree_node *optstack;
 };
 
-enum args_verify_order {
-	ARGS_VERIFY_ORDER,
-	ARGS_VERIFY_ORDERED,
-	ARGS_VERIFY_FOUND,
-	ARGS_VERIFY_EMPTY,
-	ARGS_VERIFY_FLAVOR,
-	ARGS_VERIFY_COUNT,
+struct cil_args_verify_order {
+	struct cil_list *order;
+	struct cil_list_item *ordered;
+	uint32_t *found;
+	uint32_t *empty;
+	uint32_t *flavor;
 };
 
 static int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *perm_list_str, struct cil_list *res_list_perms)
@@ -894,8 +891,9 @@ set_order_out:
 	return rc;
 }
 
-int __cil_verify_order_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void **extra_args)
+int __cil_verify_order_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
+	struct cil_args_verify_order *args;
 	struct cil_list *order = NULL;	
 	struct cil_list_item *ordered = NULL;
 	uint32_t *found = NULL;
@@ -907,11 +905,12 @@ int __cil_verify_order_node_helper(struct cil_tree_node *node, __attribute__((un
 		goto verify_order_node_helper_out;
 	}
 
-	order = extra_args[ARGS_VERIFY_ORDER];
-	ordered = extra_args[ARGS_VERIFY_ORDERED];
-	found = extra_args[ARGS_VERIFY_FOUND];
-	empty = extra_args[ARGS_VERIFY_EMPTY];
-	flavor = extra_args[ARGS_VERIFY_FLAVOR];
+	args = extra_args;
+	order = args->order;
+	ordered = args->ordered;
+	found = args->found;
+	empty = args->empty;
+	flavor = args->flavor;
 
 	if (node->flavor == *flavor) {
 		if (*empty) {
@@ -943,9 +942,9 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, en
 {
 
 	struct cil_list_item *ordered = NULL;
-	void **extra_args = NULL;
-	int found = 0;
-	int empty = 0;
+	struct cil_args_verify_order extra_args;
+	uint32_t found = 0;
+	uint32_t empty = 0;
 	int rc = SEPOL_ERR;
 
 	if (order == NULL || current == NULL) {
@@ -966,14 +965,13 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, en
 		}
 	}
 
-	extra_args = cil_malloc(sizeof(*extra_args) * ARGS_VERIFY_COUNT);
-	extra_args[ARGS_VERIFY_ORDER] = order;
-	extra_args[ARGS_VERIFY_ORDERED] = ordered;
-	extra_args[ARGS_VERIFY_FOUND] = &found;
-	extra_args[ARGS_VERIFY_EMPTY] = &empty;
-	extra_args[ARGS_VERIFY_FLAVOR] = &flavor;
+	extra_args.order = order;
+	extra_args.ordered = ordered;
+	extra_args.found = &found;
+	extra_args.empty = &empty;
+	extra_args.flavor = &flavor;
 
-	rc = cil_tree_walk(current, __cil_verify_order_node_helper, NULL, NULL, extra_args); 
+	rc = cil_tree_walk(current, __cil_verify_order_node_helper, NULL, NULL, &extra_args); 
 	if (rc != SEPOL_OK) {
 		printf("Failed to verify category order\n");
 		goto verify_order_out;
@@ -1116,8 +1114,8 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct
 	struct cil_list_item *curr_cat = NULL;
 	struct cil_list_item *catorder = NULL;
 	struct cil_list_item *curr_catorder = NULL;
-	struct cil_list_item *new_item;
-	struct cil_list_item *list_tail;
+	struct cil_list_item *new_item = NULL;
+	struct cil_list_item *list_tail = NULL;
 	int rc = SEPOL_ERR;
 
 	if (cat_list == NULL || res_list == NULL || db->catorder->head == NULL) {
@@ -2652,25 +2650,26 @@ resolve_ast_node_out:
 	return rc;
 }
 
-int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void **extra_args)
+int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
-	int *pass = NULL;
+	struct cil_args_resolve *args = extra_args;
+	uint32_t *pass = NULL;
 	struct cil_db *db = NULL;
 	struct cil_call *call = NULL;
 	struct cil_tree_node *callstack = NULL;
 	struct cil_tree_node *optstack = NULL;
-	int *changed = NULL;
+	uint32_t *changed = NULL;
 
 	if (node == NULL || extra_args == NULL) {
 		goto resolve_ast_node_helper_out;
 	}
 
-	db = extra_args[ARGS_RESOLVE_DB];
-	pass = extra_args[ARGS_RESOLVE_PASS];
-	changed = extra_args[ARGS_RESOLVE_CHANGED];
-	callstack = extra_args[ARGS_RESOLVE_CALLS];
-	optstack = extra_args[ARGS_RESOLVE_OPTIONALS];
+	db = args->db;
+	pass = args->pass;
+	changed = args->changed;
+	callstack = args->callstack;
+	optstack = args->optstack;
 
 	if (callstack != NULL) {
 		call = callstack->data;
@@ -2725,13 +2724,13 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 				callstack->parent = new;
 				new->cl_head = callstack;
 			}
-			extra_args[ARGS_RESOLVE_CALLS] = new;
+			args->callstack = new;
 		} else if (node->flavor == CIL_OPTIONAL) {
 			if (optstack != NULL) {
 				optstack->parent = new;
 				new->cl_head = optstack;
 			}
-			extra_args[ARGS_RESOLVE_OPTIONALS] = new;
+			args->optstack = new;
 		}
 	}
 	
@@ -2741,7 +2740,7 @@ resolve_ast_node_helper_out:
 	return rc;
 }
 
-int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void **extra_args)
+int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void *extra_args)
 {
 	int rc = SEPOL_ERR;
 
@@ -2772,9 +2771,10 @@ disable_children_helper_out:
 	return rc;
 }
 
-int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void **extra_args)
+int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_args_resolve *args = extra_args;
 
 	if (current == NULL ||  extra_args == NULL) {
 		goto resolve_ast_reverse_helper_out;
@@ -2782,8 +2782,8 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void **extra
 
 	if (current->flavor == CIL_CALL) {
 		/* pop off the stack */
-		struct cil_tree_node *callstack = extra_args[ARGS_RESOLVE_CALLS];
-		extra_args[ARGS_RESOLVE_CALLS] = callstack->cl_head;
+		struct cil_tree_node *callstack = args->callstack;
+		args->callstack = callstack->cl_head;
 		if (callstack->cl_head) {
 			callstack->cl_head->parent = NULL;
 		}
@@ -2802,8 +2802,8 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void **extra
 		}
 		
 		/* pop off the stack */
-		optstack = extra_args[ARGS_RESOLVE_OPTIONALS];
-		extra_args[ARGS_RESOLVE_OPTIONALS] = optstack->cl_head;
+		optstack = args->optstack;
+		args->optstack = optstack->cl_head;
 		if (optstack->cl_head) {
 			optstack->cl_head->parent = NULL;
 		}
@@ -2819,26 +2819,25 @@ resolve_ast_reverse_helper_out:
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 {
 	int rc = SEPOL_ERR;
-	void **extra_args = NULL;
-	int pass = 1;
-	int changed = 0;
+	struct cil_args_resolve extra_args;
+	uint32_t pass = 1;
+	uint32_t changed = 0;
 
 	if (db == NULL || current == NULL) {
 		goto resolve_ast_out;
 	}
 
-	extra_args = cil_malloc(sizeof(*extra_args) * ARGS_RESOLVE_COUNT);
-	extra_args[ARGS_RESOLVE_DB] = db;
-	extra_args[ARGS_RESOLVE_PASS] = &pass;
-	extra_args[ARGS_RESOLVE_CHANGED] = &changed;	
-	extra_args[ARGS_RESOLVE_CALLS] = NULL;
-	extra_args[ARGS_RESOLVE_OPTIONALS] = NULL;
+	extra_args.db = db;
+	extra_args.pass = &pass;
+	extra_args.changed = &changed;	
+	extra_args.callstack = NULL;
+	extra_args.optstack = NULL;
 	
 	for (pass = 1; pass <= 8; pass++) {
 #ifdef DEBUG
 		printf("---------- Pass %i ----------\n", pass);
 #endif
-		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, extra_args);
+		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
 			printf("Pass %i fo resolution failed\n", pass);
 			goto resolve_ast_out;
@@ -2885,17 +2884,17 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 		/* reset the arguments */
 		changed = 0;
-		while (extra_args[ARGS_RESOLVE_CALLS] != NULL) {
-			struct cil_tree_node *curr = extra_args[ARGS_RESOLVE_CALLS];
+		while (extra_args.callstack != NULL) {
+			struct cil_tree_node *curr = extra_args.callstack;
 			struct cil_tree_node *next = curr->cl_head;
 			free(curr);
-			extra_args[ARGS_RESOLVE_CALLS] = next;
+			extra_args.callstack = next;
 		}
-		while (extra_args[ARGS_RESOLVE_OPTIONALS] != NULL) {
-			struct cil_tree_node *curr = extra_args[ARGS_RESOLVE_OPTIONALS];
+		while (extra_args.optstack != NULL) {
+			struct cil_tree_node *curr = extra_args.optstack;
 			struct cil_tree_node *next = curr->cl_head;
 			free(curr);
-			extra_args[ARGS_RESOLVE_OPTIONALS] = next;
+			extra_args.optstack = next;
 		}
 	}
 

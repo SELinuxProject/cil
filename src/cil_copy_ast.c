@@ -39,10 +39,9 @@
 #include "cil_copy_ast.h"
 #include "cil_build_ast.h"
 
-enum args_copy {
-	ARGS_COPY_DEST,
-	ARGS_COPY_DB,
-	ARGS_COPY_COUNT,
+struct cil_args_copy {
+	struct cil_tree_node *dest;
+	struct cil_db *db;
 };
 
 void cil_copy_list(struct cil_list *orig, struct cil_list **copy)
@@ -1041,19 +1040,21 @@ copy_data_helper_out:
 	return rc;
 }
 
-int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, void **extra_args)
+int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *parent = NULL;
 	struct cil_tree_node *new = NULL;
 	struct cil_db *db = NULL;
+	struct cil_args_copy *args = NULL;
 
 	if (orig == NULL || extra_args == NULL) {
 		goto copy_node_helper_out;
 	}
 
-	parent = extra_args[ARGS_COPY_DEST];
-	db = extra_args[ARGS_COPY_DB];
+	args = extra_args;
+	parent = args->dest;
+	db = args->db;
 
 	rc = cil_tree_node_init(&new);
 	if (rc != SEPOL_OK) {
@@ -1274,7 +1275,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	}
 
 	if (orig->cl_head != NULL) {
-		extra_args[ARGS_COPY_DEST] = new;
+		args->dest = new;
 	}
 
 	return SEPOL_OK;
@@ -1283,19 +1284,21 @@ copy_node_helper_out:
 	return rc;
 }
 
-int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig, void **extra_args)
+int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *node = NULL;
+	struct cil_args_copy *args = NULL;
 
 	if (extra_args == NULL) {
 		goto copy_branch_helper_out;
 	}
 
-	node = extra_args[ARGS_COPY_DEST];
+	args = extra_args;
+	node = args->dest;
 	
 	if (node->flavor != CIL_ROOT) {
-		extra_args[ARGS_COPY_DEST] = node->parent;
+		args->dest = node->parent;
 	}
 
 	return SEPOL_OK;
@@ -1309,19 +1312,16 @@ copy_branch_helper_out:
 int cil_copy_ast(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *dest)
 {
 	int rc = SEPOL_ERR;
-	void **extra_args = NULL;
+	struct cil_args_copy extra_args;
 
-	extra_args = cil_malloc(sizeof(*extra_args) * ARGS_COPY_COUNT);
-	extra_args[ARGS_COPY_DEST] = dest;
-	extra_args[ARGS_COPY_DB] = db;
+	extra_args.dest = dest;
+	extra_args.db = db;
 
-	rc = cil_tree_walk(orig, __cil_copy_node_helper, NULL,  __cil_copy_branch_helper, extra_args);
+	rc = cil_tree_walk(orig, __cil_copy_node_helper, NULL,  __cil_copy_branch_helper, &extra_args);
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		goto copy_ast_out;
 	}
-
-	free(extra_args);
 
 	return SEPOL_OK;
 

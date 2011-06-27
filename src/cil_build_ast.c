@@ -40,11 +40,10 @@
 #include "cil_build_ast.h"
 #include "cil_copy_ast.h"
 
-enum args_build {
-	ARGS_BUILD_AST,
-	ARGS_BUILD_DB,
-	ARGS_BUILD_MACRO,
-	ARGS_BUILD_COUNT,
+struct cil_args_build {
+	struct cil_tree_node *ast;
+	struct cil_db *db;
+	struct cil_tree_node *macro;
 };
 
 int __cil_verify_name(const char *name)
@@ -4319,8 +4318,9 @@ void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr)
 	free(ipaddr);
 }
 
-int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, void **extra_args)
+int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, void *extra_args)
 {
+	struct cil_args_build *args = NULL;
 	struct cil_tree_node *ast_current = NULL;
 	struct cil_db *db = NULL;
 	struct cil_tree_node *ast_node = NULL;
@@ -4331,9 +4331,10 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		goto build_ast_node_helper_out;
 	}
 
-	ast_current = extra_args[ARGS_BUILD_AST];
-	db = extra_args[ARGS_BUILD_DB];
-	macro = extra_args[ARGS_BUILD_MACRO];
+	args = extra_args;
+	ast_current = args->ast;
+	db = args->db;
+	macro = args->macro;
 
 	if (parse_current->parent->cl_head != parse_current) {
 		/* ignore anything that isn't following a parenthesis */
@@ -4365,7 +4366,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	}
 	ast_current->cl_tail = ast_node;
 	ast_current = ast_node;	
-	extra_args[ARGS_BUILD_AST] = ast_current;
+	args->ast = ast_current;
 
 	if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
 		rc = cil_gen_block(db, parse_current, ast_node, 0, NULL);
@@ -4762,16 +4763,17 @@ build_ast_node_helper_out:
 	return rc;
 }
 
-int __cil_build_ast_reverse_helper(struct cil_tree_node *current, void **extra_args)
+int __cil_build_ast_reverse_helper(struct cil_tree_node *current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_args_build *args = extra_args;
 
 	if (current == NULL || extra_args == NULL) {
 		goto build_ast_reverse_helper_out;
 	}
 
 	if (current->flavor == CIL_MACRO) {
-		extra_args[ARGS_BUILD_MACRO] = NULL;
+		args->macro = NULL;
 	}
 	
 	return SEPOL_OK;
@@ -4780,17 +4782,19 @@ build_ast_reverse_helper_out:
 	return rc;
 }
 
-int __cil_build_ast_branch_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void **extra_args)
+int __cil_build_ast_branch_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *ast;
+	struct cil_args_build *args;
 
 	if (extra_args == NULL) {
 		goto build_ast_branch_helper_out;
 	}
 
-	ast = extra_args[ARGS_BUILD_AST];
-	extra_args[ARGS_BUILD_AST] = ast->parent;
+	args = extra_args;
+	ast = args->ast;
+	args->ast = ast->parent;
 
 	return SEPOL_OK;
 
@@ -4801,25 +4805,22 @@ build_ast_branch_helper_out:
 int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast)
 {
 	int rc = SEPOL_ERR;
-	void **extra_args = NULL;
+	struct cil_args_build extra_args;
 
 	if (db == NULL || parse_tree == NULL || ast == NULL) {
 		goto build_ast_out;
 	}
 
-	extra_args = cil_malloc(sizeof(*extra_args) * ARGS_BUILD_COUNT);
-	extra_args[ARGS_BUILD_AST] = ast;
-	extra_args[ARGS_BUILD_DB] = db;
-	extra_args[ARGS_BUILD_MACRO] = NULL;
+	extra_args.ast = ast;
+	extra_args.db = db;
+	extra_args.macro = NULL;	
 
-	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_reverse_helper, __cil_build_ast_branch_helper, extra_args); 
+	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_reverse_helper, __cil_build_ast_branch_helper, &extra_args); 
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		goto build_ast_out;
 	}
 
-	free(extra_args);
-	
 	return SEPOL_OK;
 
 build_ast_out:

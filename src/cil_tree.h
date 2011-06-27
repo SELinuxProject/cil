@@ -62,7 +62,7 @@ void cil_tree_node_destroy(struct cil_tree_node **node);
 #define CIL_TREE_SKIP_NEXT	1
 #define CIL_TREE_SKIP_HEAD	2
 #define CIL_TREE_SKIP_ALL	(CIL_TREE_SKIP_NOTHING | CIL_TREE_SKIP_NEXT | CIL_TREE_SKIP_HEAD)
-int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void **extra_args), int (*reverse_node)(struct cil_tree_node *node, void **extra_args), int (*finished_branch)(struct cil_tree_node *node, void **extra_args), void **extra_args);
+int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args), int (*reverse_node)(struct cil_tree_node *node, void *extra_args), int (*finished_branch)(struct cil_tree_node *node, void *extra_args), void *extra_args);
 
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
 void cil_tree_print_level(struct cil_level *level);
