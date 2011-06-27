@@ -35,15 +35,19 @@
 #include "../../src/cil_build_ast.h"
 #include "../../src/cil_resolve_ast.h"
 
-int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, void **extra_args);
+int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, void *extra_args);
 int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, uint32_t index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym));
 
+struct cil_args_copy {
+	struct cil_tree_node *dest;
+	struct cil_db *db;
+};
 
-void ** gen_copy_args(struct cil_tree_node *node, struct cil_db *db)
+struct cil_args_copy *gen_copy_args(struct cil_tree_node *node, struct cil_db *db)
 {
-	void **args = cil_malloc(sizeof(*args) * 2);
-	args[0] = node;
-	args[1] = db;
+	struct cil_args_copy *args = cil_malloc(sizeof(*args));
+	args->dest = node;
+	args->db = db;
 
 	return args;
 }
@@ -1413,7 +1417,7 @@ void test_cil_copy_node_helper_block(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1433,7 +1437,7 @@ void test_cil_copy_node_helper_block_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1464,7 +1468,7 @@ void test_cil_copy_node_helper_perm(CuTest *tc) {
 	parent_node->flavor = CIL_CLASS;
 	parent_node->data = test_class;
 
-	void **extra_args = gen_copy_args(parent_node, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(parent_node, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1484,7 +1488,7 @@ void test_cil_copy_node_helper_perm_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1507,7 +1511,7 @@ void test_cil_copy_node_helper_class(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1527,7 +1531,7 @@ void test_cil_copy_node_helper_class_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1550,7 +1554,7 @@ void test_cil_copy_node_helper_common(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1570,7 +1574,7 @@ void test_cil_copy_node_helper_common_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1593,7 +1597,7 @@ void test_cil_copy_node_helper_classcommon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1616,7 +1620,7 @@ void test_cil_copy_node_helper_sid(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1636,7 +1640,7 @@ void test_cil_copy_node_helper_sid_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1659,7 +1663,7 @@ void test_cil_copy_node_helper_sidcontext(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1682,7 +1686,7 @@ void test_cil_copy_node_helper_user(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1702,7 +1706,7 @@ void test_cil_copy_node_helper_user_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1725,7 +1729,7 @@ void test_cil_copy_node_helper_role(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1745,7 +1749,7 @@ void test_cil_copy_node_helper_role_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1768,7 +1772,7 @@ void test_cil_copy_node_helper_userrole(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1791,7 +1795,7 @@ void test_cil_copy_node_helper_type(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1811,7 +1815,7 @@ void test_cil_copy_node_helper_type_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1834,7 +1838,7 @@ void test_cil_copy_node_helper_typeattr(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1857,7 +1861,7 @@ void test_cil_copy_node_helper_attr(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1877,7 +1881,7 @@ void test_cil_copy_node_helper_attr_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1900,7 +1904,7 @@ void test_cil_copy_node_helper_typealias(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1920,7 +1924,7 @@ void test_cil_copy_node_helper_typealias_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1943,7 +1947,7 @@ void test_cil_copy_node_helper_bool(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1963,7 +1967,7 @@ void test_cil_copy_node_helper_bool_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -1986,7 +1990,7 @@ void test_cil_copy_node_helper_avrule(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2009,7 +2013,7 @@ void test_cil_copy_node_helper_type_rule(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2032,7 +2036,7 @@ void test_cil_copy_node_helper_sens(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2052,7 +2056,7 @@ void test_cil_copy_node_helper_sens_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2075,7 +2079,7 @@ void test_cil_copy_node_helper_sensalias(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2095,7 +2099,7 @@ void test_cil_copy_node_helper_sensalias_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2118,7 +2122,7 @@ void test_cil_copy_node_helper_cat(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2138,7 +2142,7 @@ void test_cil_copy_node_helper_cat_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2161,7 +2165,7 @@ void test_cil_copy_node_helper_catalias(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2181,7 +2185,7 @@ void test_cil_copy_node_helper_catalias_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2218,7 +2222,7 @@ void test_cil_copy_node_helper_senscat(CuTest *tc) {
 	parent_node->flavor = CIL_SENSCAT;
 	parent_node->data = test_senscat;
 
-	void **extra_args = gen_copy_args(parent_node, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(parent_node, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2251,7 +2255,7 @@ void test_cil_copy_node_helper_catorder(CuTest *tc) {
 	parent_node->flavor = CIL_CATORDER;
 	parent_node->data = test_catorder;
 
-	void **extra_args = gen_copy_args(parent_node, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(parent_node, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2285,7 +2289,7 @@ void test_cil_copy_node_helper_dominance(CuTest *tc) {
 	parent_node->flavor = CIL_SENS;
 	parent_node->data = test_sens;
 
-	void **extra_args = gen_copy_args(parent_node, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(parent_node, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2308,7 +2312,7 @@ void test_cil_copy_node_helper_level(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2328,7 +2332,7 @@ void test_cil_copy_node_helper_level_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2351,7 +2355,7 @@ void test_cil_copy_node_helper_context(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2371,7 +2375,7 @@ void test_cil_copy_node_helper_context_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2394,7 +2398,7 @@ void test_cil_copy_node_helper_netifcon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2417,7 +2421,7 @@ void test_cil_copy_node_helper_call(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2440,7 +2444,7 @@ void test_cil_copy_node_helper_optional(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2460,7 +2464,7 @@ void test_cil_copy_node_helper_optional_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2483,7 +2487,7 @@ void test_cil_copy_node_helper_ipaddr(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2503,7 +2507,7 @@ void test_cil_copy_node_helper_ipaddr_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db->ast->root, test_db);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db->ast->root, test_db);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2527,7 +2531,7 @@ void test_cil_copy_node_helper_boolif(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2550,7 +2554,7 @@ void test_cil_copy_node_helper_mlsconstrain(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2573,7 +2577,7 @@ void test_cil_copy_node_helper_orignull_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	void **extra_args = gen_copy_args(test_db2->ast->root, test_db2);
+	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -2591,7 +2595,7 @@ void test_cil_copy_node_helper_extraargsnull_neg(CuTest *tc) {
 	struct cil_db *test_db2;
 	cil_db_init(&test_db2);
 
-	void **extra_args = NULL;
+	struct cil_args_copy *extra_args = NULL;
 
 	uint32_t finished = 0;
 
