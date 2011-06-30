@@ -36,7 +36,7 @@
 
 int cil_tree_init(struct cil_tree **tree)
 {
-	struct cil_tree *new_tree = cil_malloc(sizeof(struct cil_tree));
+	struct cil_tree *new_tree = cil_malloc(sizeof(*new_tree));
 	cil_tree_node_init(&new_tree->root);
 	
 	*tree = new_tree;
@@ -90,7 +90,7 @@ void cil_tree_subtree_destroy(struct cil_tree_node *node)
 
 int cil_tree_node_init(struct cil_tree_node **node)
 {
-	struct cil_tree_node *new_node = cil_malloc(sizeof(struct cil_tree_node));
+	struct cil_tree_node *new_node = cil_malloc(sizeof(*new_node));
 	new_node->cl_head = NULL;
 	new_node->cl_tail = NULL;
 	new_node->parent = NULL;

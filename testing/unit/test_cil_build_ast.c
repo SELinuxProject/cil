@@ -67,7 +67,7 @@ void test_cil_parse_to_list(CuTest *tc) {
 	struct cil_tree_node *test_current;
 	test_current = test_tree->root->cl_head->cl_head;
 
-	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
+	struct cil_avrule *test_avrule = malloc(sizeof(*test_avrule));
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = cil_strdup(test_current->next->data);
 	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
@@ -94,7 +94,7 @@ void test_cil_parse_to_list_currnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_current;
 	test_current = test_tree->root->cl_head->cl_head;
 
-	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
+	struct cil_avrule *test_avrule = malloc(sizeof(*test_avrule));
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = cil_strdup(test_current->next->data);
 	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
@@ -121,7 +121,7 @@ void test_cil_parse_to_list_listnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_current;
 	test_current = test_tree->root->cl_head->cl_head;
 
-	struct cil_avrule *test_avrule = malloc(sizeof(struct cil_avrule));
+	struct cil_avrule *test_avrule = malloc(sizeof(*test_avrule));
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = cil_strdup(test_current->next->data);
 	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
@@ -644,7 +644,7 @@ void test_cil_gen_perm_nodes(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	char *test_key = test_tree->root->cl_head->cl_head->next->data;
-	struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+	struct cil_class *test_cls = malloc(sizeof(*test_cls));
 	symtab_init(&test_cls->perms, CIL_SYM_SIZE);
 
 	test_ast_node->parent = test_db->ast->root;
@@ -672,7 +672,7 @@ void test_cil_gen_perm_nodes_failgen_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	char *test_key = test_tree->root->cl_head->cl_head->next->data;
-	struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+	struct cil_class *test_cls = malloc(sizeof(*test_cls));
 	//symtab_init(&test_cls->perms, CIL_SYM_SIZE);
 
 	test_ast_node->parent = test_db->ast->root;
@@ -700,7 +700,7 @@ void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	char *test_key = test_tree->root->cl_head->cl_head->next->data;
-	struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+	struct cil_class *test_cls = malloc(sizeof(*test_cls));
 	symtab_init(&test_cls->perms, CIL_SYM_SIZE);
 
 	test_ast_node->parent = test_db->ast->root;
@@ -8794,7 +8794,7 @@ void test_cil_gen_classcommon(CuTest *tc) {
         cil_db_init(&test_db);
 
         char *test_key = test_tree->root->cl_head->cl_head->next->data;
-        struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+        struct cil_class *test_cls = malloc(sizeof(*test_cls));
         symtab_init(&test_cls->perms, CIL_SYM_SIZE);
 
         test_ast_node->parent = test_db->ast->root;
@@ -8884,7 +8884,7 @@ void test_cil_gen_classcommon_noperms_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
         char *test_key = test_tree->root->cl_head->cl_head->next->data;
-        struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+        struct cil_class *test_cls = malloc(sizeof(*test_cls));
         symtab_init(&test_cls->perms, CIL_SYM_SIZE);
 
         test_ast_node->parent = test_db->ast->root;
@@ -8912,7 +8912,7 @@ void test_cil_gen_classcommon_extraperms_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
         char *test_key = test_tree->root->cl_head->cl_head->next->data;
-        struct cil_class *test_cls = malloc(sizeof(struct cil_class));
+        struct cil_class *test_cls = malloc(sizeof(*test_cls));
         symtab_init(&test_cls->perms, CIL_SYM_SIZE);
 
         test_ast_node->parent = test_db->ast->root;

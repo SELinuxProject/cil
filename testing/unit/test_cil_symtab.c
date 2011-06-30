@@ -39,7 +39,7 @@
 void test_cil_symtab_insert(CuTest *tc) {
 	symtab_t *test_symtab = NULL;
 	char* test_name = "test";
-	struct cil_block *test_block = malloc(sizeof(struct cil_block));
+	struct cil_block *test_block = malloc(sizeof(*test_block));
 
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);

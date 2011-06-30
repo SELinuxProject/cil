@@ -836,7 +836,7 @@ void cil_copy_constrain(struct cil_db *db, struct cil_constrain *orig, struct ci
 
 void cil_copy_call(struct cil_db *db, struct cil_call *orig, struct cil_call **copy)
 {
-	struct cil_call *new = cil_malloc(sizeof(struct cil_call));
+	struct cil_call *new = cil_malloc(sizeof(*new));
 	new->macro_str = cil_strdup(orig->macro_str);
 
 	cil_tree_init(&new->args_tree);

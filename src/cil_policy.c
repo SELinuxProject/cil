@@ -400,7 +400,7 @@ int cil_fsuse_to_policy(FILE **file_arr, struct cil_sort *sort)
 static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
 	struct cil_list_item *new_key = NULL;
-	struct cil_multimap_item *new_data = cil_malloc(sizeof(struct cil_multimap_item));
+	struct cil_multimap_item *new_data = cil_malloc(sizeof(*new_data));
 
 	cil_list_item_init(&new_key);
 	new_data->key = key;
@@ -1371,42 +1371,42 @@ int cil_gen_policy(struct cil_db *db)
 		return rc;
 	}
 
-	qsort(db->netifcon->array, db->netifcon->count, sizeof(struct cil_netifcon*), cil_netifcon_compare);
+	qsort(db->netifcon->array, db->netifcon->count, sizeof(db->netifcon->array), cil_netifcon_compare);
 	rc = cil_netifcon_to_policy(file_arr, db->netifcon);
 	if (rc != SEPOL_OK) {
 		printf("Error creating policy.conf\n");
 		return rc;
 	}
 
-	qsort(db->genfscon->array, db->genfscon->count, sizeof(struct cil_genfscon*), cil_genfscon_compare);
+	qsort(db->genfscon->array, db->genfscon->count, sizeof(db->genfscon->array), cil_genfscon_compare);
 	rc = cil_genfscon_to_policy(file_arr, db->genfscon);
 	if (rc != SEPOL_OK) {
 		printf("Error creating policy.conf\n");
 		return rc;
 	}
 
-	qsort(db->portcon->array, db->portcon->count, sizeof(struct cil_portcon*), cil_portcon_compare);
+	qsort(db->portcon->array, db->portcon->count, sizeof(db->portcon->array), cil_portcon_compare);
 	rc = cil_portcon_to_policy(file_arr, db->portcon);
 	if (rc != SEPOL_OK) {
 		printf("Error creating policy.conf\n");
 		return rc;
 	}
 
-	qsort(db->nodecon->array, db->nodecon->count, sizeof(struct cil_nodecon*), cil_nodecon_compare);
+	qsort(db->nodecon->array, db->nodecon->count, sizeof(db->nodecon->array), cil_nodecon_compare);
 	rc = cil_nodecon_to_policy(file_arr, db->nodecon);
 	if (rc != SEPOL_OK) {
 		printf("Error creating policy.conf\n");
 		return rc;
 	}
 
-	qsort(db->fsuse->array, db->fsuse->count, sizeof(struct cil_fsuse*), cil_fsuse_compare);
+	qsort(db->fsuse->array, db->fsuse->count, sizeof(db->fsuse->array), cil_fsuse_compare);
 	rc = cil_fsuse_to_policy(file_arr, db->fsuse);
 	if (rc != SEPOL_OK) {
 		printf("Error creating policy.conf\n");
 		return rc;
 	}
 
-	qsort(db->filecon->array, db->filecon->count, sizeof(struct cil_filecon*), cil_filecon_compare);
+	qsort(db->filecon->array, db->filecon->count, sizeof(db->filecon->array), cil_filecon_compare);
 	rc = cil_filecon_to_policy(db->filecon);
 	if (rc != SEPOL_OK) {
 		printf("Error creating policy.conf\n");

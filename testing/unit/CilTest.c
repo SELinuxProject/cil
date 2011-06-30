@@ -52,7 +52,7 @@
 #include "test_cil_policy.h"
 
 void set_cil_file_data(struct cil_file_data **data) {
-	struct cil_file_data *new_data = malloc(sizeof(struct cil_file_data));
+	struct cil_file_data *new_data = malloc(sizeof(*new_data));
 	FILE *file;
 	struct stat filedata;
 	uint32_t file_size;
@@ -83,7 +83,7 @@ void set_cil_file_data(struct cil_file_data **data) {
 }
 
 void gen_test_tree(struct cil_tree **test_root, char *line[]) {
-	struct cil_tree *new_tree = malloc(sizeof(struct cil_tree));
+	struct cil_tree *new_tree = malloc(sizeof(*new_tree));
 	struct cil_tree_node *node, *item, *current;
 
 	cil_tree_init(&new_tree);
@@ -128,7 +128,7 @@ void gen_test_tree(struct cil_tree **test_root, char *line[]) {
 
 void test_symtab_init(CuTest *tc) {
 	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
+	test_new_db = malloc(sizeof(*test_new_db));
 
 	uint32_t rc = 0, i =0;
 	
@@ -143,7 +143,7 @@ void test_symtab_init(CuTest *tc) {
 
 void test_symtab_init_no_table_neg(CuTest *tc) {
 	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
+	test_new_db = malloc(sizeof(*test_new_db));
 
 	int rc = symtab_init(&test_new_db->symtab[0], (uint32_t)SIZE_MAX);
 	CuAssertIntEquals(tc, -1, rc);

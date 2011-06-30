@@ -45,7 +45,7 @@ int cil_db_init(struct cil_db **db)
 	int rc = SEPOL_ERR;	
 
 	struct cil_db *new_db = NULL;
-	new_db = cil_malloc(sizeof(struct cil_db));
+	new_db = cil_malloc(sizeof(*new_db));
 
 	rc = cil_symtab_array_init(new_db->symtab, CIL_SYM_NUM);
 	if (rc != SEPOL_OK) {
@@ -486,7 +486,7 @@ int cil_sort_init(struct cil_sort **sort)
 		return SEPOL_ERR;
 	}
 
-	new_sort = cil_malloc(sizeof(struct cil_sort));
+	new_sort = cil_malloc(sizeof(*new_sort));
 
 	new_sort->flavor = 0;
 	new_sort->count = 0;
@@ -519,7 +519,7 @@ int cil_netifcon_init(struct cil_netifcon **netifcon)
 		return SEPOL_ERR;
 	}
 
-	new_netifcon = cil_malloc(sizeof(struct cil_netifcon));
+	new_netifcon = cil_malloc(sizeof(*new_netifcon));
 
 	new_netifcon->interface_str = NULL;
 	new_netifcon->if_context_str = NULL;
@@ -540,7 +540,7 @@ int cil_context_init(struct cil_context **context)
 		return SEPOL_ERR;
 	}
 
-	new_context = cil_malloc(sizeof(struct cil_context));
+	new_context = cil_malloc(sizeof(*new_context));
 
 	cil_symtab_datum_init(&new_context->datum);
 	new_context->user_str = NULL;
@@ -567,7 +567,7 @@ int cil_level_init(struct cil_level **level)
 		return SEPOL_ERR;
 	}
 
-	new_level = cil_malloc(sizeof(struct cil_level));
+	new_level = cil_malloc(sizeof(*new_level));
 
 	cil_symtab_datum_init(&new_level->datum);
 	new_level->sens_str = NULL;
@@ -591,7 +591,7 @@ int cil_sens_init(struct cil_sens **sens)
 		return SEPOL_ERR;
 	}
 
-	new_sens = cil_malloc(sizeof(struct cil_sens));
+	new_sens = cil_malloc(sizeof(*new_sens));
 
 	cil_symtab_datum_init(&new_sens->datum);
 
@@ -615,7 +615,7 @@ int cil_block_init(struct cil_block **block)
 		return SEPOL_ERR;
 	}
 
-	new_block = cil_malloc(sizeof(struct cil_block));
+	new_block = cil_malloc(sizeof(*new_block));
 
 	cil_symtab_datum_init(&new_block->datum);
 
@@ -642,7 +642,7 @@ int cil_class_init(struct cil_class **class)
 		return SEPOL_ERR;
 	}
 
-	new_class = cil_malloc(sizeof(struct cil_class));
+	new_class = cil_malloc(sizeof(*new_class));
 
 	cil_symtab_datum_init(&new_class->datum);
 
@@ -668,7 +668,7 @@ int cil_common_init(struct cil_common **common)
 		return SEPOL_ERR;
 	}
 
-	new_common = cil_malloc(sizeof(struct cil_common));
+	new_common = cil_malloc(sizeof(*new_common));
 
 	cil_symtab_datum_init(&new_common->datum);
 	rc = symtab_init(&new_common->perms, CIL_SYM_SIZE);
@@ -690,7 +690,7 @@ int cil_classcommon_init(struct cil_classcommon **classcommon)
 		return SEPOL_ERR;
 	}
 
-	new_classcommon = cil_malloc(sizeof(struct cil_classcommon));
+	new_classcommon = cil_malloc(sizeof(*new_classcommon));
 
 	new_classcommon->class_str = NULL;
 	new_classcommon->class = NULL;
@@ -710,7 +710,7 @@ int cil_sid_init(struct cil_sid **sid)
 		return SEPOL_ERR;
 	}
 
-	new_sid = cil_malloc(sizeof(struct cil_sid));
+	new_sid = cil_malloc(sizeof(*new_sid));
 
 	cil_symtab_datum_init(&new_sid->datum);
 
@@ -727,7 +727,7 @@ int cil_sidcontext_init(struct cil_sidcontext **sidcontext)
 		return SEPOL_ERR;
 	}
 
-	new_sidcontext = cil_malloc(sizeof(struct cil_sidcontext));
+	new_sidcontext = cil_malloc(sizeof(*new_sidcontext));
 
 	new_sidcontext->sid_str = NULL;
 	new_sidcontext->sid = NULL;
@@ -747,7 +747,7 @@ int cil_userrole_init(struct cil_userrole **userrole)
 		return SEPOL_ERR;
 	}
 
-	new_userrole = cil_malloc(sizeof(struct cil_userrole));
+	new_userrole = cil_malloc(sizeof(*new_userrole));
 
 	new_userrole->user_str = NULL;
 	new_userrole->user = NULL;
@@ -767,7 +767,7 @@ int cil_roledominance_init(struct cil_roledominance **roledominance)
 		return SEPOL_ERR;
 	}
 
-	new_roledominance = cil_malloc(sizeof(struct cil_roledominance));
+	new_roledominance = cil_malloc(sizeof(*new_roledominance));
 
 	new_roledominance->role_str = NULL;
 	new_roledominance->role = NULL;
@@ -787,7 +787,7 @@ int cil_roletype_init(struct cil_roletype **roletype)
 		return SEPOL_ERR;
 	}
 
-	new_roletype = cil_malloc(sizeof(struct cil_roletype));
+	new_roletype = cil_malloc(sizeof(*new_roletype));
 
 	new_roletype->role_str = NULL;
 	new_roletype->role = NULL;
@@ -807,7 +807,7 @@ int cil_typeattribute_init(struct cil_typeattribute **typeattribute)
 		return SEPOL_ERR;
 	}
 
-	new_typeattribute = cil_malloc(sizeof(struct cil_typeattribute));
+	new_typeattribute = cil_malloc(sizeof(*new_typeattribute));
 
 	new_typeattribute->type_str = NULL;
 	new_typeattribute->type = NULL;
@@ -827,7 +827,7 @@ int cil_typealias_init(struct cil_typealias **typealias)
 		return SEPOL_ERR;
 	}
 
-	new_typealias = cil_malloc(sizeof(struct cil_typealias));
+	new_typealias = cil_malloc(sizeof(*new_typealias));
 
 	cil_symtab_datum_init(&new_typealias->datum);
 	new_typealias->type_str = NULL;
@@ -867,7 +867,7 @@ int cil_typebounds_init(struct cil_typebounds **typebnds)
 		return SEPOL_ERR;
 	}
 
-	new_typebnds = cil_malloc(sizeof(struct cil_typebounds));
+	new_typebnds = cil_malloc(sizeof(*new_typebnds));
 
 	new_typebnds->parent_str = NULL;
 	new_typebnds->child_str = NULL;
@@ -885,7 +885,7 @@ int cil_typepermissive_init(struct cil_typepermissive **typeperm)
 		return SEPOL_ERR;
 	}
 
-	new_typeperm = cil_malloc(sizeof(struct cil_typepermissive));
+	new_typeperm = cil_malloc(sizeof(*new_typeperm));
 
 	new_typeperm->type_str = NULL;
 
@@ -902,7 +902,7 @@ int cil_filetransition_init(struct cil_filetransition **filetrans)
 		return SEPOL_ERR;
 	}
 
-	new_filetrans = cil_malloc(sizeof(struct cil_filetransition));
+	new_filetrans = cil_malloc(sizeof(*new_filetrans));
 
 	new_filetrans->src_str = NULL;
 	new_filetrans->src = NULL;
@@ -927,7 +927,7 @@ int cil_bool_init(struct cil_bool **cilbool)
 		return SEPOL_ERR;
 	}
 
-	new_cilbool = cil_malloc(sizeof(struct cil_bool));
+	new_cilbool = cil_malloc(sizeof(*new_cilbool));
 
 	cil_symtab_datum_init(&new_cilbool->datum);
 	new_cilbool->value = 0;
@@ -945,7 +945,7 @@ int cil_boolif_init(struct cil_booleanif **bif)
 		return SEPOL_ERR;
 	}
 
-	new_bif = cil_malloc(sizeof(struct cil_booleanif));
+	new_bif = cil_malloc(sizeof(*new_bif));
 
 	new_bif->expr_stack = NULL;
 
@@ -962,7 +962,7 @@ int cil_conditional_init(struct cil_conditional **cond)
 		return SEPOL_ERR;
 	}
 
-	new_cond = cil_malloc(sizeof(struct cil_conditional));
+	new_cond = cil_malloc(sizeof(*new_cond));
 
 	new_cond->str = NULL;
 	new_cond->data = NULL;
@@ -982,7 +982,7 @@ int cil_tunif_init(struct cil_tunableif **tif)
 		return SEPOL_ERR;
 	}
 
-	new_tif = cil_malloc(sizeof(struct cil_tunableif));
+	new_tif = cil_malloc(sizeof(*new_tif));
 
 	new_tif->expr_stack = NULL;
 	rc = cil_symtab_array_init(new_tif->symtab, CIL_SYM_NUM);
@@ -1002,7 +1002,7 @@ int cil_avrule_init(struct cil_avrule **avrule)
 		return SEPOL_ERR;
 	}
 
-	new_avrule = cil_malloc(sizeof(struct cil_avrule));
+	new_avrule = cil_malloc(sizeof(*new_avrule));
 
 	new_avrule->rule_kind = 0;
 	new_avrule->src_str = NULL;
@@ -1028,7 +1028,7 @@ int cil_type_rule_init(struct cil_type_rule **type_rule)
 		return SEPOL_ERR;
 	}
 
-	new_type_rule = cil_malloc(sizeof(struct cil_type_rule));
+	new_type_rule = cil_malloc(sizeof(*new_type_rule));
 
 	new_type_rule->rule_kind = 0;
 	new_type_rule->src_str = NULL;
@@ -1053,7 +1053,7 @@ int cil_role_trans_init(struct cil_role_trans **role_trans)
 		return SEPOL_ERR;
 	}
 
-	new_role_trans = cil_malloc(sizeof(struct cil_role_trans));
+	new_role_trans = cil_malloc(sizeof(*new_role_trans));
 
 	new_role_trans->src_str = NULL;
 	new_role_trans->src = NULL;
@@ -1077,7 +1077,7 @@ int cil_role_allow_init(struct cil_role_allow **role_allow)
 		return SEPOL_ERR;
 	}
 
-	new_role_allow = cil_malloc(sizeof(struct cil_role_allow));
+	new_role_allow = cil_malloc(sizeof(*new_role_allow));
 
 	new_role_allow->src_str = NULL;
 	new_role_allow->src = NULL;
@@ -1097,7 +1097,7 @@ int cil_sensalias_init(struct cil_sensalias **sensalias)
 		return SEPOL_ERR;
 	}
 
-	new_sensalias = cil_malloc(sizeof(struct cil_sensalias));
+	new_sensalias = cil_malloc(sizeof(*new_sensalias));
 
 	cil_symtab_datum_init(&new_sensalias->datum);
 	new_sensalias->sens_str = NULL;
@@ -1116,7 +1116,7 @@ int cil_catalias_init(struct cil_catalias **catalias)
 		return SEPOL_ERR;
 	}
 
-	new_catalias = cil_malloc(sizeof(struct cil_catalias));
+	new_catalias = cil_malloc(sizeof(*new_catalias));
 
 	cil_symtab_datum_init(&new_catalias->datum);
 	new_catalias->cat_str = NULL;
@@ -1135,7 +1135,7 @@ int cil_catset_init(struct cil_catset **catset)
 		return SEPOL_ERR;
 	}
 
-	new_catset = cil_malloc(sizeof(struct cil_catset));
+	new_catset = cil_malloc(sizeof(*new_catset));
 
 	cil_symtab_datum_init(&new_catset->datum);
 	new_catset->cat_list_str = NULL;
@@ -1154,7 +1154,7 @@ int cil_senscat_init(struct cil_senscat **senscat)
 		return SEPOL_ERR;
 	}
 
-	new_senscat = cil_malloc(sizeof(struct cil_senscat));
+	new_senscat = cil_malloc(sizeof(*new_senscat));
 
 	new_senscat->sens_str = NULL;
 	new_senscat->cat_list_str = NULL;
@@ -1173,7 +1173,7 @@ int cil_filecon_init(struct cil_filecon **filecon)
 		return SEPOL_ERR;
 	}
 
-	new_filecon = cil_malloc(sizeof(struct cil_filecon));
+	new_filecon = cil_malloc(sizeof(*new_filecon));
 
 	new_filecon->root_str = NULL;
 	new_filecon->path_str = NULL;
@@ -1193,7 +1193,7 @@ int cil_portcon_init(struct cil_portcon **portcon)
 		return SEPOL_ERR;
 	}
 
-	new_portcon = cil_malloc(sizeof(struct cil_portcon));
+	new_portcon = cil_malloc(sizeof(*new_portcon));
 
 	new_portcon->type_str = NULL;
 	new_portcon->context_str = NULL;
@@ -1212,7 +1212,7 @@ int cil_nodecon_init(struct cil_nodecon **nodecon)
 		return SEPOL_ERR;
 	}
 
-	new_nodecon = cil_malloc(sizeof(struct cil_nodecon));
+	new_nodecon = cil_malloc(sizeof(*new_nodecon));
 
 	new_nodecon->addr_str = NULL;
 	new_nodecon->addr = NULL;
@@ -1234,7 +1234,7 @@ int cil_genfscon_init(struct cil_genfscon **genfscon)
 		return SEPOL_ERR;
 	}
 
-	new_genfscon = cil_malloc(sizeof(struct cil_genfscon));
+	new_genfscon = cil_malloc(sizeof(*new_genfscon));
 
 	new_genfscon->type_str = NULL;
 	new_genfscon->context_str = NULL;
@@ -1253,7 +1253,7 @@ int cil_fsuse_init(struct cil_fsuse **fsuse)
 		return SEPOL_ERR;
 	}
 
-	new_fsuse = cil_malloc(sizeof(struct cil_fsuse));
+	new_fsuse = cil_malloc(sizeof(*new_fsuse));
 
 	new_fsuse->type = 0;
 	new_fsuse->fs_str = NULL;
@@ -1273,7 +1273,7 @@ int cil_constrain_init(struct cil_constrain **constrain)
 		return SEPOL_ERR;
 	}
 
-	new_constrain = cil_malloc(sizeof(struct cil_constrain));
+	new_constrain = cil_malloc(sizeof(*new_constrain));
 
 	new_constrain->class_list_str = NULL;
 	new_constrain->class_list = NULL;
@@ -1294,7 +1294,7 @@ int cil_ipaddr_init(struct cil_ipaddr **ipaddr)
 		return SEPOL_ERR;
 	}
 
-	new_ipaddr = cil_malloc(sizeof(struct cil_ipaddr));
+	new_ipaddr = cil_malloc(sizeof(*new_ipaddr));
 
 	cil_symtab_datum_init(&new_ipaddr->datum);
 	memset(&new_ipaddr->ip, 0, sizeof(new_ipaddr->ip));
@@ -1312,7 +1312,7 @@ int cil_perm_init(struct cil_perm **perm)
 		return SEPOL_ERR;
 	}
 
-	new_perm = cil_malloc(sizeof(struct cil_perm));
+	new_perm = cil_malloc(sizeof(*new_perm));
 
 	cil_symtab_datum_init(&new_perm->datum);
 
@@ -1329,7 +1329,7 @@ int cil_permset_init(struct cil_permset **permset)
 		return SEPOL_ERR;
 	}
 
-	new_permset = cil_malloc(sizeof(struct cil_permset));
+	new_permset = cil_malloc(sizeof(*new_permset));
 
 	cil_symtab_datum_init(&new_permset->datum);
 	new_permset->perms_list_str = NULL;
@@ -1347,7 +1347,7 @@ int cil_user_init(struct cil_user **user)
 		return SEPOL_ERR;
 	}
 
-	new_user = cil_malloc(sizeof(struct cil_user));
+	new_user = cil_malloc(sizeof(*new_user));
 
 	cil_symtab_datum_init(&new_user->datum);
 
@@ -1364,7 +1364,7 @@ int cil_role_init(struct cil_role **role)
 		return SEPOL_ERR;
 	}
 
-	new_role = cil_malloc(sizeof(struct cil_role));
+	new_role = cil_malloc(sizeof(*new_role));
 
 	cil_symtab_datum_init(&new_role->datum);
 
@@ -1381,7 +1381,7 @@ int cil_type_init(struct cil_type **type)
 		return SEPOL_ERR;
 	}
 
-	new_type = cil_malloc(sizeof(struct cil_type));
+	new_type = cil_malloc(sizeof(*new_type));
 
 	cil_symtab_datum_init(&new_type->datum);
 
@@ -1398,7 +1398,7 @@ int cil_cat_init(struct cil_cat **cat)
 		return SEPOL_ERR;
 	}
 
-	new_cat = cil_malloc(sizeof(struct cil_cat));
+	new_cat = cil_malloc(sizeof(*new_cat));
 
 	cil_symtab_datum_init(&new_cat->datum);
 
@@ -1415,7 +1415,7 @@ int cil_catorder_init(struct cil_catorder **catorder)
 		return SEPOL_ERR;
 	}
 
-	new_catorder = cil_malloc(sizeof(struct cil_catorder));
+	new_catorder = cil_malloc(sizeof(*new_catorder));
 
 	new_catorder->cat_list_str = NULL;
 
@@ -1432,7 +1432,7 @@ int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates)
 		return SEPOL_ERR;
 	}
 
-	new_sens_dominates = cil_malloc(sizeof(struct cil_sens_dominates));
+	new_sens_dominates = cil_malloc(sizeof(*new_sens_dominates));
 
 	new_sens_dominates->sens_list_str = NULL;
 
@@ -1449,7 +1449,7 @@ int cil_call_init(struct cil_call **call)
 		return SEPOL_ERR;
 	}
 
-	new_call = cil_malloc(sizeof(struct cil_call));
+	new_call = cil_malloc(sizeof(*new_call));
 
 	new_call->macro_str = NULL;
 	new_call->macro = NULL;
@@ -1469,7 +1469,7 @@ int cil_optional_init(struct cil_optional **optional)
 		return SEPOL_ERR;
 	}
 
-	new_optional = cil_malloc(sizeof(struct cil_optional));
+	new_optional = cil_malloc(sizeof(*new_optional));
 	cil_symtab_datum_init(&new_optional->datum);
 
 	*optional = new_optional;
@@ -1485,7 +1485,7 @@ int cil_param_init(struct cil_param **param)
 		return SEPOL_ERR;
 	}
 
-	new_param = cil_malloc(sizeof(struct cil_param));
+	new_param = cil_malloc(sizeof(*new_param));
 
 	new_param->str = NULL;
 	new_param->flavor = CIL_AST_STR;
@@ -1504,7 +1504,7 @@ int cil_macro_init(struct cil_macro **macro)
 		return SEPOL_ERR;
 	}
 
-	new_macro = cil_malloc(sizeof(struct cil_macro));
+	new_macro = cil_malloc(sizeof(*new_macro));
 
 	cil_symtab_datum_init(&new_macro->datum);
 	rc = cil_symtab_array_init(new_macro->symtab, CIL_SYM_NUM);
@@ -1528,7 +1528,7 @@ int cil_policycap_init(struct cil_policycap **policycap)
 		return SEPOL_ERR;
 	}
 
-	new_policycap = cil_malloc(sizeof(struct cil_policycap));
+	new_policycap = cil_malloc(sizeof(*new_policycap));
 
 	cil_symtab_datum_init(&new_policycap->datum);
 

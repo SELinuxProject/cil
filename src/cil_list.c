@@ -41,7 +41,7 @@
 
 void cil_list_init(struct cil_list **list)
 {
-	struct cil_list *new_list = cil_malloc(sizeof(struct cil_list));
+	struct cil_list *new_list = cil_malloc(sizeof(*new_list));
 	new_list->head = NULL;
 
 	*list = new_list;
@@ -65,7 +65,7 @@ void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
 
 void cil_list_item_init(struct cil_list_item **item)
 {
-	struct cil_list_item *new_item = cil_malloc(sizeof(struct cil_list_item));
+	struct cil_list_item *new_item = cil_malloc(sizeof(*new_item));
 	new_item->next = NULL;
 	new_item->flavor = 0;
 	new_item->data = NULL;

@@ -37,7 +37,7 @@
 
 void test_cil_symtab_array_init(CuTest *tc) {
 	struct cil_db *test_new_db;
-	test_new_db = malloc(sizeof(struct cil_db));
+	test_new_db = malloc(sizeof(*test_new_db));
 
 	int rc = cil_symtab_array_init(test_new_db->symtab, CIL_SYM_NUM);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
