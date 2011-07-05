@@ -382,18 +382,20 @@ copy_type_out:
 	return rc;
 }
 
-void cil_copy_typeattr(struct cil_typeattribute *orig, struct cil_typeattribute **copy)
+void cil_copy_attrtypes(struct cil_attrtypes *orig, struct cil_attrtypes **copy)
 {
-	struct cil_typeattribute *new = NULL;
+	struct cil_attrtypes *new = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_typeattribute_init(&new);
+	rc = cil_attrtypes_init(&new);
 	if (rc != SEPOL_OK) {
 		return;
 	}
 
-	new->type_str = cil_strdup(orig->type_str);
 	new->attr_str = cil_strdup(orig->attr_str);
+
+	cil_copy_list(orig->types_list_str, &new->types_list_str);
+	cil_copy_list(orig->neg_list_str, &new->neg_list_str);
 
 	*copy = new;
 }
@@ -1153,8 +1155,8 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 			goto copy_node_helper_out;
 		}
 		break;
-	case CIL_TYPE_ATTR:
-		cil_copy_typeattr((struct cil_typeattribute*)orig->data, (struct cil_typeattribute**)&new->data);
+	case CIL_ATTRTYPES:
+		cil_copy_attrtypes((struct cil_attrtypes*)orig->data, (struct cil_attrtypes**)&new->data);
 		break;
 	case CIL_TYPEALIAS:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_typealias);

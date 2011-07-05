@@ -118,12 +118,6 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		}
 		rule->src = (struct cil_type*)(src_node->data);
 		rule->src_flavor = src_node->flavor;
-	} else {
-		rc = cil_resolve_typeset(db, current, rule->src, call);
-		if (rc != SEPOL_OK) {
-			printf("Failed to resolve src typeset\n");
-			goto resolve_avrule_out;
-		}
 	}
 
 	if (rule->tgt_str != NULL) {
@@ -134,12 +128,6 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		}
 		rule->tgt = (struct cil_type*)(tgt_node->data);
 		rule->tgt_flavor = tgt_node->flavor;
-	} else {
-		rc = cil_resolve_typeset(db, current, rule->tgt, call);
-		if (rc != SEPOL_OK) {
-			printf("Failed to resolve tgt typeset\n");
-			goto resolve_avrule_out;
-		}
 	}
 
 	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, call, &obj_node);
@@ -230,7 +218,7 @@ int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_li
 	struct cil_list_item *new_item = NULL;
 	struct cil_list_item *list_tail = NULL;
 
-	if (str_list == NULL || res_list == NULL || current == NULL) {
+	if (str_list == NULL || res_list == NULL || current == NULL || res_list->head != NULL) {
 		printf("Invalid call to cil_resolve_list\n");
 		goto resolve_list_out;
 	}
@@ -265,70 +253,79 @@ resolve_list_out:
 
 }
 
-int cil_resolve_typeset(struct cil_db *db, struct cil_tree_node *current, struct cil_typeset *typeset, struct cil_call *call)
+int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
-	int rc = SEPOL_ERR;
-
-	if (typeset->types_list != NULL) {
-		/* clean up because of re-resolve */
-		cil_list_destroy(&typeset->types_list, 0);
-	}
-
-	cil_list_init(&typeset->types_list);
-
-	if (typeset->types_list_str != NULL) {
-		rc = cil_resolve_list(db, typeset->types_list_str, typeset->types_list, current, CIL_SYM_TYPES, call);
-		if (rc != SEPOL_OK) {
-			printf("Failed to resolve typeset\n");
-			goto resolve_typeset_out;
-		}
-	}
-
-	if (typeset->neg_list != NULL) {
-		/* clean up because of re-resolve */
-		cil_list_destroy(&typeset->neg_list, 0);
-	}
-
-	cil_list_init(&typeset->neg_list);
-
-	if (typeset->neg_list_str != NULL) {
-		rc = cil_resolve_list(db, typeset->neg_list_str, typeset->neg_list, current, CIL_SYM_TYPES, call);
-		if (rc != SEPOL_OK) {
-			printf("Failed to resolve typeset\n");
-			goto resolve_typeset_out;
-		}
-	}
-
-	return SEPOL_OK;
-
-resolve_typeset_out:
-	return rc;
-}
-
-int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
-{
-	struct cil_typeattribute *typeattr = (struct cil_typeattribute*)current->data;
-	struct cil_tree_node *type_node = NULL;
+	struct cil_attrtypes *attrtypes = (struct cil_attrtypes*)current->data;
 	struct cil_tree_node *attr_node = NULL;
+	struct cil_attribute *attr = NULL;
+	struct cil_list_item *curr = NULL;
+	struct cil_list *res_list = NULL;
+	struct cil_list_item *tmp = NULL;
+	struct cil_list_item *new_attr = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(db, current, typeattr->type_str, CIL_SYM_TYPES, call, &type_node);
+	rc = cil_resolve_name(db, current, attrtypes->attr_str, CIL_SYM_TYPES, call, &attr_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", typeattr->type_str);
-		goto resolve_typeattr_out;
+		printf("Name resolution failed for %s\n", attrtypes->attr_str);
+		goto resolve_attrtypes_out;
 	}
-	typeattr->type = (struct cil_type*)(type_node->data);
+	attr = attr_node->data;
 
-	rc = cil_resolve_name(db, current, typeattr->attr_str, CIL_SYM_TYPES, call, &attr_node);
-	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", typeattr->attr_str);
-		goto resolve_typeattr_out;
+	if (attrtypes->types_list_str != NULL) {
+		cil_list_init(&res_list);
+		rc = cil_resolve_list(db, attrtypes->types_list_str, res_list, current, CIL_SYM_TYPES, call);
+		if (rc != SEPOL_OK) {
+			goto resolve_attrtypes_out;
+		}
+
+		curr = res_list->head;
+		while (curr != NULL) {
+			if (curr->flavor == CIL_TYPE) {
+				if (((struct cil_type*)curr->data)->attrs_list != NULL) {
+					tmp = ((struct cil_type*)curr->data)->attrs_list->head;
+				} else {
+					cil_list_init(&((struct cil_type*)curr->data)->attrs_list);
+				}
+				cil_list_item_init(&new_attr);
+				new_attr->flavor = CIL_ATTR;
+				new_attr->data = attr;
+				((struct cil_type*)curr->data)->attrs_list->head = new_attr;
+				new_attr->next = tmp;
+			}
+			if (attr->types_list == NULL) {
+				cil_list_init(&attr->types_list);
+			}
+			tmp = attr->types_list->head;
+			attr->types_list->head = curr;
+			curr = curr->next;
+			attr->types_list->head->next = tmp;
+		}
 	}
-	typeattr->attr = (struct cil_type*)(attr_node->data);
+
+	res_list->head = NULL;
+
+	if (attrtypes->neg_list_str != NULL) {
+		rc = cil_resolve_list(db, attrtypes->neg_list_str, res_list, current, CIL_SYM_TYPES, call);
+		if (rc != SEPOL_OK) {
+			goto resolve_attrtypes_out;
+		}
+
+		curr = res_list->head;
+		while (curr != NULL) {
+			if (attr->neg_list == NULL) {
+				cil_list_init(&attr->neg_list);
+			}
+			tmp = attr->neg_list->head;
+			attr->neg_list->head = curr;
+			curr = curr->next;
+			attr->neg_list->head->next = tmp;
+		}
+	}
 
 	return SEPOL_OK;
 
-resolve_typeattr_out:
+resolve_attrtypes_out:
+	printf("Failed to resolve attributetypes\n");
 	return rc;
 }
 
@@ -452,21 +449,19 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 		printf("Name resolution failed for %s\n", clscom->class_str);
 		goto resolve_classcommon_out;
 	}
-	clscom->class = (struct cil_class*)(class_node->data);
 
 	rc = cil_resolve_name(db, current, clscom->common_str, CIL_SYM_COMMONS, call, &common_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", clscom->common_str);
 		goto resolve_classcommon_out;
 	}
-	clscom->common = (struct cil_common*)(common_node->data);
 
-	if (clscom->class->common != NULL) {
+	if (((struct cil_class*)class_node->data)->common != NULL) {
 		printf("class cannot be associeated with more than one common\n");
 		goto resolve_classcommon_out;
 	}
 
-	clscom->class->common = clscom->common;
+	((struct cil_class*)class_node->data)->common = common_node->data;
 
 	return SEPOL_OK;
 
@@ -1926,23 +1921,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 
 			switch (((struct cil_param*)item->data)->flavor) {
 			case CIL_TYPE:
-				if (pc->cl_head != NULL) {
-					struct cil_typeset *typeset = NULL;
-					cil_typeset_init(&typeset);
-					rc = cil_fill_typeset(pc->cl_head, typeset);
-					if (rc != SEPOL_OK) {
-						printf("Failed to create anonymous typeset, rc: %d\n", rc);
-						cil_destroy_typeset(typeset);
-						goto resolve_call1_out;
-					}
-					struct cil_tree_node *typeset_node;
-					cil_tree_node_init(&typeset_node);
-					typeset_node->flavor = CIL_TYPESET;
-					typeset_node->data = typeset;
-					new_arg->arg = typeset_node;
-				} else {
-					new_arg->arg_str = cil_strdup(pc->data);
-				}
+				new_arg->arg_str = cil_strdup(pc->data);
 				break;
 			case CIL_ROLE:
 				new_arg->arg_str = cil_strdup(pc->data);
@@ -2466,9 +2445,6 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_BOOLEANIF:
 			rc = cil_resolve_boolif(db, node, call);
 			break;
-		case CIL_TYPESET:
-			rc = cil_resolve_typeset(db, node, (struct cil_typeset*)node->data, call);
-			break;
 		}
 		break;
 	case 5:
@@ -2490,8 +2466,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		break;
 	case 7:
 		switch (node->flavor) {
-		case CIL_TYPE_ATTR:
-			rc = cil_resolve_typeattr(db, node, call);
+		case CIL_ATTRTYPES:
+			rc = cil_resolve_attrtypes(db, node, call);
 			break;
 		case CIL_TYPEALIAS:
 			rc = cil_resolve_typealias(db, node, call);

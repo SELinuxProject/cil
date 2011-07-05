@@ -133,9 +133,6 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPE:
 		cil_destroy_type(*data);
 		break;
-	case CIL_TYPESET:
-		cil_destroy_typeset(*data);
-		break;
 	case CIL_ATTR:
 		cil_destroy_type(*data);
 		break;
@@ -173,8 +170,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPEALIAS:
 		cil_destroy_typealias(*data);
 		break;
-	case CIL_TYPE_ATTR:
-		cil_destroy_typeattr(*data);
+	case CIL_ATTRTYPES:
+		cil_destroy_attrtypes(*data);
 		break;
 	case CIL_TYPEBOUNDS:
 		cil_destroy_typebounds(*data);
@@ -301,7 +298,6 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		*sym_index = CIL_SYM_ROLES;
 		break;
 	case CIL_TYPE:
-	case CIL_TYPESET:
 	case CIL_TYPEALIAS:
 	case CIL_ATTR:
 		*sym_index = CIL_SYM_TYPES;
@@ -693,9 +689,7 @@ int cil_classcommon_init(struct cil_classcommon **classcommon)
 	new_classcommon = cil_malloc(sizeof(*new_classcommon));
 
 	new_classcommon->class_str = NULL;
-	new_classcommon->class = NULL;
 	new_classcommon->common_str = NULL;
-	new_classcommon->common = NULL;
 
 	*classcommon = new_classcommon;
 
@@ -799,22 +793,41 @@ int cil_roletype_init(struct cil_roletype **roletype)
 	return SEPOL_OK;
 }
 
-int cil_typeattribute_init(struct cil_typeattribute **typeattribute)
+int cil_attribute_init(struct cil_attribute **attr)
 {
-	struct cil_typeattribute *new_typeattribute = NULL;
+	struct cil_attribute *new_attr = NULL;
 
-	if (typeattribute == NULL) {
+	if (attr == NULL) {
+		return SEPOL_OK;
+	}
+
+	new_attr = cil_malloc(sizeof(*new_attr));
+
+	cil_symtab_datum_init(&new_attr->datum);
+
+	new_attr->types_list = NULL;
+	new_attr->neg_list = NULL;
+
+	*attr = new_attr;
+
+	return SEPOL_OK;
+}
+
+int cil_attrtypes_init(struct cil_attrtypes **attrtypes)
+{
+	struct cil_attrtypes *new_attrtypes = NULL;
+
+	if (attrtypes == NULL) {
 		return SEPOL_ERR;
 	}
 
-	new_typeattribute = cil_malloc(sizeof(*new_typeattribute));
+	new_attrtypes = cil_malloc(sizeof(*new_attrtypes));
 
-	new_typeattribute->type_str = NULL;
-	new_typeattribute->type = NULL;
-	new_typeattribute->attr_str = NULL;
-	new_typeattribute->attr = NULL;
+	new_attrtypes->attr_str = NULL;
+	new_attrtypes->types_list_str = NULL;
+	new_attrtypes->neg_list_str = NULL;
 
-	*typeattribute = new_typeattribute;
+	*attrtypes = new_attrtypes;
 
 	return SEPOL_OK;
 }
@@ -827,34 +840,13 @@ int cil_typealias_init(struct cil_typealias **typealias)
 		return SEPOL_ERR;
 	}
 
-	new_typealias = cil_malloc(sizeof(*new_typealias));
+	new_typealias = cil_malloc(sizeof(struct cil_typealias));
 
 	cil_symtab_datum_init(&new_typealias->datum);
 	new_typealias->type_str = NULL;
 	new_typealias->type = NULL;
 
 	*typealias = new_typealias;
-
-	return SEPOL_OK;
-}
-
-int cil_typeset_init(struct cil_typeset **typeset)
-{
-	struct cil_typeset *new_typeset = NULL;
-
-	if (typeset == NULL) {
-		return SEPOL_ERR;
-	}
-
-	new_typeset = cil_malloc(sizeof(*new_typeset));
-
-	cil_symtab_datum_init(&new_typeset->datum);
-	new_typeset->types_list_str = NULL;
-	new_typeset->types_list = NULL;
-	new_typeset->neg_list_str = NULL;
-	new_typeset->neg_list = NULL;
-
-	*typeset = new_typeset;
 
 	return SEPOL_OK;
 }
@@ -1384,6 +1376,8 @@ int cil_type_init(struct cil_type **type)
 	new_type = cil_malloc(sizeof(*new_type));
 
 	cil_symtab_datum_init(&new_type->datum);
+
+	new_type->attrs_list = NULL;
 
 	*type = new_type;
 

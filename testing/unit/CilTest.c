@@ -191,12 +191,6 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_classcommon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_classcommon_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr_typedecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattr_attrdecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typeattr);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typeattr_neg);
-
 	SUITE_ADD_TEST(suite, test_cil_resolve_sensalias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sensalias_sensdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sensalias);
@@ -647,17 +641,6 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type_attribute);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type_attribute_neg);
-
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattr);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_typenull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_attrnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_attrlist_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattr_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattr);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattr_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_typebounds);
 	SUITE_ADD_TEST(suite, test_cil_gen_typebounds_notype1_neg);
@@ -1475,8 +1458,6 @@ CuSuite* CilTreeGetSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_copy_typeattr);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typeattr);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_attr);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_attr_neg);
 	

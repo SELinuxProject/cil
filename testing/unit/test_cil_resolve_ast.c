@@ -1439,55 +1439,6 @@ void test_cil_resolve_roletrans_resultdecl_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
-void test_cil_resolve_typeattr(CuTest *tc) {
-	char *line[] = {"(", "type", "foo", ")", 
-			"(", "attribute", "bar", ")", 
-			"(", "typeattribute", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = cil_resolve_typeattr(test_db, test_db->ast->root->cl_head->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_resolve_typeattr_typedecl_neg(CuTest *tc) {
-	char *line[] = {"(", "attribute", "bar", ")", 
-			"(", "typeattribute", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = cil_resolve_typeattr(test_db, test_db->ast->root->cl_head->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-}
-
-void test_cil_resolve_typeattr_attrdecl_neg(CuTest *tc) {
-	char *line[] = {"(", "type", "foo", ")", 
-			"(", "typeattribute", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = cil_resolve_typeattr(test_db, test_db->ast->root->cl_head->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-}
-
 void test_cil_resolve_typealias(CuTest *tc) {
 	char *line[] = {"(", "block", "foo", 
 				"(", "typealias", ".foo.test", "type_t", ")", 

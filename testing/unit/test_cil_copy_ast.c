@@ -478,31 +478,6 @@ void test_cil_copy_type(CuTest *tc) {
 		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
-void test_cil_copy_typeattr(CuTest *tc) {
-	char *line[] = {"(", "typeattribute", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_tree_node *test_ast_node;
-	cil_tree_node_init(&test_ast_node);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	test_ast_node->parent = test_db->ast->root;
-	test_ast_node->line = 1;
-
-	cil_gen_typeattr(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-
-	struct cil_typeattribute *test_copy;
-	cil_typeattribute_init(&test_copy);
-
-	cil_copy_typeattr((struct cil_typeattribute *)test_ast_node->data, &test_copy);
-	CuAssertStrEquals(tc, ((struct cil_typeattribute *)test_ast_node->data)->type_str, test_copy->type_str);
-	CuAssertStrEquals(tc, ((struct cil_typeattribute *)test_ast_node->data)->attr_str, test_copy->attr_str);
-}
-
 void test_cil_copy_typealias(CuTest *tc) {
 	char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
 
@@ -1822,29 +1797,6 @@ void test_cil_copy_node_helper_type_neg(CuTest *tc) {
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
 	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
-}
-
-void test_cil_copy_node_helper_typeattr(CuTest *tc) {
-	char *line[] = {"(", "typeattribute", "foo", "bar", ")", NULL};
-	
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	struct cil_db *test_db2;
-	cil_db_init(&test_db2);
-
-	uint32_t finished = 0;
-
-	struct cil_args_copy *extra_args = gen_copy_args(test_db2->ast->root, test_db2);
-	
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-	
-	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
-	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_attr(CuTest *tc) {

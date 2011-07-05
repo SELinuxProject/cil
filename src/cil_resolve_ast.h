@@ -38,8 +38,7 @@
 int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_list *res_list, struct cil_tree_node *current, enum cil_sym_index sym_index, struct cil_call *call);
-int cil_resolve_typeset(struct cil_db *db, struct cil_tree_node *current, struct cil_typeset *typeset, struct cil_call *call);
-int cil_resolve_typeattr(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_typepermissive(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);

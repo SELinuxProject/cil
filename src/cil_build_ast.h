@@ -84,9 +84,6 @@ int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node 
 void cil_destroy_type_rule(struct cil_type_rule *rule);
 int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_type(struct cil_type *type);
-int cil_fill_typeset(struct cil_tree_node *set_start, struct cil_typeset *typeset);
-int cil_gen_typeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_typeset(struct cil_typeset *typeset);
 int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_bool(struct cil_bool *boolean);
 int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_tree_node **stack);
@@ -99,8 +96,8 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 void cil_destroy_tunif(struct cil_tunableif *tif);
 int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_typealias(struct cil_typealias *alias);
-int cil_gen_typeattr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_typeattr(struct cil_typeattribute *typeattr);
+int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_attrtypes(struct cil_attrtypes *attrtypes);
 int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_typebounds(struct cil_typebounds *typebnds);
 int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

@@ -1002,13 +1002,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	case CIL_TYPE:
 		fprintf(file_arr[ATTRTYPES], "type %s;\n", name);
 		break;
-	case CIL_TYPE_ATTR: {
-		struct cil_typeattribute *typeattr = (struct cil_typeattribute*)current->data;
-		char *type_str = ((struct cil_symtab_datum*)typeattr->type)->name;
-		char *attr_str = ((struct cil_symtab_datum*)typeattr->attr)->name;
-		fprintf(file_arr[ALLOWS], "typeattribute %s %s;\n", type_str, attr_str);
-		break;
-	}
 	case CIL_TYPEALIAS: {
 		struct cil_typealias *alias = (struct cil_typealias*)current->data;
 		fprintf(file_arr[ALIASES], "typealias %s alias %s;\n", ((struct cil_symtab_datum*)alias->type)->name, name);

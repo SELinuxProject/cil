@@ -387,24 +387,27 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_TYPE: {
 				struct cil_type *type = node->data;
-				printf("TYPE: %s\n", type->datum.name);
-				return;
-			}
-			case CIL_TYPESET: {
-				struct cil_typeset *typeset = node->data;
 				struct cil_list_item *curr = NULL;
-				printf("TYPESET: %s", typeset->datum.name);
-				if (typeset->types_list != NULL) {
-					printf(" resolved types list: (");
-					curr = typeset->types_list->head;
+				printf("TYPE: %s", type->datum.name);
+				if (type->attrs_list != NULL) {
+					curr = type->attrs_list->head;
+					printf(" attrs: (");
 					while (curr != NULL) {
-						printf(" %s", ((struct cil_symtab_datum*)curr->data)->name);
+						printf(" %s ", ((struct cil_attribute*)curr->data)->datum.name);
 						curr = curr->next;
 					}
-					printf(" )");
-				} else if (typeset->types_list_str != NULL) {
+					printf(")");
+				}
+				printf("\n");
+				return;
+			}
+			case CIL_ATTRTYPES: {
+				struct cil_attrtypes *attrtypes = node->data;
+				struct cil_list_item *curr = NULL;
+				printf("ATTRTYPES: attr: %s", attrtypes->attr_str);
+				if (attrtypes->types_list_str != NULL) {
 					printf(" types list: (");
-					curr = typeset->types_list_str->head;
+					curr = attrtypes->types_list_str->head;
 					while (curr != NULL) {
 						printf(" %s", (char*)curr->data);
 						curr = curr->next;
@@ -412,17 +415,9 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf(" )");
 				}
 
-				if (typeset->neg_list != NULL) {
-					printf(" resolved neg list: (");
-					curr = typeset->neg_list->head;
-					while (curr != NULL) {
-						printf(" %s", ((struct cil_symtab_datum*)curr->data)->name);
-						curr = curr->next;
-					}
-					printf(" )");
-				} else if (typeset->neg_list_str != NULL) {
+				if (attrtypes->neg_list_str != NULL) {
 					printf(" neg list: (");
-					curr = typeset->neg_list_str->head;
+					curr = attrtypes->neg_list_str->head;
 					while (curr != NULL) {
 						printf(" %s", (char*)curr->data);
 						curr = curr->next;
@@ -434,8 +429,28 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				return;
 			}
 			case CIL_ATTR: {
-				struct cil_type *attr = node->data;
-				printf("ATTRIBUTE: %s\n", attr->datum.name);
+				struct cil_attribute *attr = node->data;
+				struct cil_list_item *curr = NULL;
+				printf("ATTRIBUTE: %s", attr->datum.name);
+				if (attr->types_list != NULL) {
+					curr = attr->types_list->head;
+					printf(" types: ( ");
+					while (curr != NULL) {
+						printf("%s ", ((struct cil_type*)curr->data)->datum.name);
+						curr = curr->next;
+					}
+					printf(")");
+				}
+				if (attr->neg_list != NULL) {
+					curr = attr->neg_list->head;
+					printf(" neg types: (");
+					while (curr != NULL) {
+						printf(" %s ", ((struct cil_type*)curr->data)->datum.name);
+						curr = curr->next;
+					}
+					printf(")");
+				}
+				printf("\n");
 				return;
 			}
 			case CIL_ROLE: {
@@ -575,11 +590,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_CLASSCOMMON: {
 				struct cil_classcommon *clscom = node->data;
 
-				if (clscom->class != NULL && clscom->common != NULL) {
-					printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class->datum.name, clscom->common->datum.name);
-				} else {
-					printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
-				}
+				printf("CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
 
 				return;
 			}
@@ -665,17 +676,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_NEQ:
 				printf("!=");
 				return;
-			case CIL_TYPE_ATTR: {
-				struct cil_typeattribute *typeattr = node->data;
-
-				if (typeattr->type != NULL && typeattr->attr != NULL) {
-					printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type->datum.name, typeattr->attr->datum.name);
-				} else {
-					printf("TYPEATTR: type: %s, attribute: %s\n", typeattr->type_str, typeattr->attr_str);
-				}
-
-				return;
-			}
 			case CIL_TYPEALIAS: {
 				struct cil_typealias *alias = node->data;
 
