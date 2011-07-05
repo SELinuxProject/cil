@@ -2013,7 +2013,7 @@ int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, st
 	struct cil_list_item *new_type = NULL;
 	struct cil_list_item *types_list_tail = NULL;
 	struct cil_list_item *neg_list_tail = NULL;
-	char first;
+	char *type = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -2040,9 +2040,14 @@ int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, st
 		cil_list_item_init(&new_type);
 		new_type->flavor = CIL_AST_STR;
 
-		first = *((char*)curr->data);
-		if (first == '-') {
-			new_type->data = cil_strdup((char*)curr->data + 1);
+		type = curr->data;
+		if (type[0] == '-') {
+			if (type[1] == '\0') {
+				printf("Invalid negative type in attributetypes statement\n");
+				rc = SEPOL_ERR;
+				goto cil_gen_attrtypes_cleanup;
+			}
+			new_type->data = cil_strdup(&type[1]);
 			if (attrtypes->neg_list_str->head == NULL) {
 				attrtypes->neg_list_str->head = new_type;
 			} else {
@@ -2050,7 +2055,7 @@ int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, st
 			}
 			neg_list_tail = new_type;
 		} else {
-			new_type->data = cil_strdup((char*)curr->data);
+			new_type->data = cil_strdup(type);
 			if (attrtypes->types_list_str->head == NULL) {
 				attrtypes->types_list_str->head = new_type;
 			} else {
