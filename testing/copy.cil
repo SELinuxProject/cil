@@ -11,7 +11,7 @@
 (user adm_u)
 (role adm_r)
 (userrole adm_u adm_r)
-(typeattribute foo foob)
+(attributetypes foob (foo))
 (sensitivity s0)
 (sensitivity s1)
 (dominance (s0 s1))
