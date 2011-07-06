@@ -3425,7 +3425,7 @@ void test_cil_gen_attrtypes_exclude_multi(CuTest *tc) {
 }
 
 void test_cil_gen_attrtypes_exclude_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-", ")", ")", NULL};
+	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-type_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3444,7 +3444,7 @@ void test_cil_gen_attrtypes_exclude_neg(CuTest *tc) {
 }
 
 void test_cil_gen_attrtypes_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-", ")", ")", NULL};
+	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-type_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
