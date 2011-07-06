@@ -1439,6 +1439,148 @@ void test_cil_resolve_roletrans_resultdecl_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
+void test_cil_resolve_attrtypes_type_in_multiple_attrs(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "attribute", "attrs2", ")",
+			"(", "type", "type_t", ")",
+			"(", "attributetypes", "attrs2", "(", "type_t", ")", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	int rc2 = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
+}
+
+void test_cil_resolve_attrtypes_multiple_excludes(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "type", "type_t", ")",
+			"(", "type", "type_b", ")",
+			"(", "type", "type_a", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", "-type_a", "-type_b", ")", ")", NULL}; 
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_attrtypes_multiple_types(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "type", "type_t", ")",
+			"(", "type", "type_tt", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", "type_tt", ")", ")", NULL}; 
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_attrtypes_list_of_attrs(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "attribute", "attr_a", ")",
+			"(", "attributetypes", "attrs", "(", "attr_a", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_attrtypes_name_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "type_t", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_attrtypes_list_neg(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_attrtypes_exclude(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "type", "type_t", ")",
+			"(", "type", "t_t", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", "-t_t", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_attrtypes_exclude_neg(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "type", "type_t", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", "-t_t", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_attrtypes(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 void test_cil_resolve_typealias(CuTest *tc) {
 	char *line[] = {"(", "block", "foo", 
 				"(", "typealias", ".foo.test", "type_t", ")", 
@@ -6173,6 +6315,55 @@ void test_cil_resolve_ast_node_helper_typeattr_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_resolve_ast_node_helper_attrtypes(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "type", "type_t", ")",
+			"(", "type", "type_tt", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", "type_tt", ")", ")", NULL}; 
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+	uint32_t finished = 0;
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_resolve_ast_node_helper_attrtypes_neg(CuTest *tc) {
+	char *line[] = {"(", "attribute", "attrs", ")",
+			"(", "type", "type_t", ")",
+			"(", "attributetypes", "attrs", "(", "type_t", "-t_t", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+	uint32_t finished = 0;
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }

@@ -161,6 +161,17 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_type_in_multiple_attrs);
+	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_multiple_excludes);
+	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_multiple_types);
+	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_list_of_attrs);
+	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_name_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_list_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_exclude);
+	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_exclude_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_attrtypes);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_attrtypes_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typealias);
