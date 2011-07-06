@@ -223,8 +223,6 @@ void test_cil_gen_tunif_nocond_neg(CuTest *);
 void test_cil_gen_tunif_notruelist_neg(CuTest *);
 
 void test_cil_gen_typealias(CuTest *);
-void test_cil_gen_typealias(CuTest *);
-void test_cil_gen_typealias(CuTest *);
 void test_cil_gen_typealias_incomplete_neg(CuTest *);
 void test_cil_gen_typealias_incomplete_neg2(CuTest *);
 void test_cil_gen_typealias_extratype_neg(CuTest *);
@@ -232,6 +230,19 @@ void test_cil_gen_typealias_dbnull_neg(CuTest *tc);
 void test_cil_gen_typealias_currnull_neg(CuTest *tc);
 void test_cil_gen_typealias_astnull_neg(CuTest *tc);
 
+void test_cil_gen_attrtypes(CuTest *);
+void test_cil_gen_attrtypes_multi(CuTest *);
+void test_cil_gen_attrtypes_exclude(CuTest *);
+void test_cil_gen_attrtypes_exclude_multi(CuTest *);
+void test_cil_gen_attrtypes_exclude_neg(CuTest *);
+void test_cil_gen_attrtypes_dbnull_neg(CuTest *);
+void test_cil_gen_attrtypes_currnull_neg(CuTest *);
+void test_cil_gen_attrtypes_astnull_neg(CuTest *);
+void test_cil_gen_attrtypes_noname_neg(CuTest *);
+void test_cil_gen_attrtypes_nameinparens_neg(CuTest *);
+void test_cil_gen_attrtypes_emptylists_neg(CuTest *);
+void test_cil_gen_attrtypes_listinparens_neg(CuTest *);
+void test_cil_gen_attrtypes_extra_neg(CuTest *);
 
 void test_cil_gen_role(CuTest *);
 void test_cil_gen_role_dbnull_neg(CuTest *tc);

@@ -749,6 +749,20 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_astnull_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_multi);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_exclude);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_exclude_multi);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_exclude_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_dbnull_neg);
+//	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_astnull_neg);
+//	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_nameinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_emptylists_neg);
+//	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_listinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_extra_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_role);
 	SUITE_ADD_TEST(suite, test_cil_gen_role_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_role_currnull_neg);
