@@ -231,9 +231,9 @@ void test_cil_gen_typealias_currnull_neg(CuTest *tc);
 void test_cil_gen_typealias_astnull_neg(CuTest *tc);
 
 void test_cil_gen_attrtypes(CuTest *);
-void test_cil_gen_attrtypes_multi(CuTest *);
+void test_cil_gen_attrtypes_list_of_multi_items(CuTest *);
 void test_cil_gen_attrtypes_exclude(CuTest *);
-void test_cil_gen_attrtypes_exclude_multi(CuTest *);
+void test_cil_gen_attrtypes_exclude_multi_items(CuTest *);
 void test_cil_gen_attrtypes_exclude_neg(CuTest *);
 void test_cil_gen_attrtypes_dbnull_neg(CuTest *);
 void test_cil_gen_attrtypes_currnull_neg(CuTest *);
