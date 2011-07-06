@@ -817,6 +817,9 @@ void test_cil_build_ast_node_helper_typepermissive_neg(CuTest *);
 void test_cil_build_ast_node_helper_filetransition(CuTest *);
 void test_cil_build_ast_node_helper_filetransition_neg(CuTest *);
 
+void test_cil_build_ast_node_helper_attrtypes(CuTest *);
+void test_cil_build_ast_node_helper_attrtypes_neg(CuTest *);
+
 void test_cil_build_ast_node_helper_role(CuTest *);
 void test_cil_build_ast_node_helper_role_neg(CuTest *);
 

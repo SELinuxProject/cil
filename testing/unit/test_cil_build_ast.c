@@ -14264,6 +14264,42 @@ void test_cil_build_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
+void test_cil_build_ast_node_helper_attrtypes(CuTest *tc) {
+	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "test2_t", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 1, finished);
+}
+
+void test_cil_build_ast_node_helper_attrtypes_neg(CuTest *tc) {
+	char *line[] = {"(", "attributetypes", "files", "(", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
 void test_cil_build_ast_node_helper_role(CuTest *tc) {
 	char *line[] = {"(", "role", "test_r", ")", NULL};
 

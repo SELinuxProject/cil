@@ -773,6 +773,8 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_emptylists_neg);
 //	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_listinparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attrtypes);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attrtypes_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_role);
 	SUITE_ADD_TEST(suite, test_cil_gen_role_dbnull_neg);
