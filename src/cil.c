@@ -215,9 +215,6 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_MLSCONSTRAIN:
 		cil_destroy_constrain(*data);
 		break;
-	case CIL_CONSTRAIN_NODE:
-		cil_destroy_constrain_node(*data);
-		break;
 	case CIL_ROLETYPE:
 		cil_destroy_roletype(*data);
 		break;

@@ -302,25 +302,6 @@ void cil_tree_print_context(struct cil_context *context)
 	return;
 }
 
-void cil_tree_print_expr_tree(struct cil_tree_node *expr_root)
-{
-	struct cil_tree_node *curr = expr_root;
-
-	while (curr != NULL) {
-		if (curr->flavor == CIL_CONSTRAIN_NODE) {
-			printf("%s ", (char*)curr->data);
-		} else if (curr->flavor != CIL_ROOT) {
-			printf("%s ", ((struct cil_type*)curr->data)->datum.name);
-		}
-		if (curr->cl_head != NULL) {
-			printf("( ");
-			cil_tree_print_expr_tree(curr->cl_head);
-			printf(") ");
-		}
-		curr = curr->next;
-	}
-}
-
 void cil_tree_print_constrain(struct cil_constrain *cons)
 {
 	struct cil_list_item *class_curr = NULL;

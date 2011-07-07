@@ -1965,7 +1965,8 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				break;
 			case CIL_CATSET: {
 				if (pc->cl_head != NULL) {
-					struct cil_catset *catset = cil_malloc(sizeof(*catset));
+					struct cil_catset *catset = NULL;
+					cil_catset_init(&catset);
 					cil_list_init(&catset->cat_list_str);
 					rc = cil_fill_cat_list(pc, catset->cat_list_str);
 					if (rc != SEPOL_OK) {
@@ -1986,8 +1987,9 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 			}
 			case CIL_LEVEL: {
 				if (pc->cl_head != NULL) {
-					struct cil_level *level = cil_malloc(sizeof(*level));
+					struct cil_level *level = NULL;
 					struct cil_tree_node *lvl = NULL;
+					cil_level_init(&level);
 
 					rc = cil_fill_level(pc->cl_head, level);
 					if (rc != SEPOL_OK) {
@@ -2068,14 +2070,14 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 			new_arg->flavor = ((struct cil_param*)item->data)->flavor;
 
 			if (args_tail == NULL) {
-				new_call->args->head = cil_malloc(sizeof(new_call->args->head));
+				cil_list_item_init(&new_call->args->head);
 				new_call->args->head->flavor = CIL_ARGS;;
 				new_call->args->head->data = new_arg;
 				args_tail = new_call->args->head;
 				args_tail->next = NULL;
 			}
 			else {
-				args_tail->next = cil_malloc(sizeof(args_tail->next));
+				cil_list_item_init(&args_tail->next);
 				args_tail->next->flavor = CIL_ARGS;
 				args_tail->next->data = new_arg;
 				args_tail = args_tail->next;
@@ -2586,7 +2588,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			uint32_t count = sort->count;
 			uint32_t i = sort->index;
 			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(sort->array)*count);
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
 			}
 			sort->array[i] = node->data;
 			sort->index++;
@@ -2597,7 +2599,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			uint32_t count = sort->count;
 			uint32_t i = sort->index;
 			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(sort->array)*count);
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
 			}
 			sort->array[i] = node->data;
 			sort->index++;
@@ -2608,7 +2610,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			uint32_t count = sort->count;
 			uint32_t i = sort->index;
 			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(sort->array)*count);
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
 			}
 			sort->array[i] = node->data;
 			sort->index++;
@@ -2619,7 +2621,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			uint32_t count = sort->count;
 			uint32_t i = sort->index;
 			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(sort->array)*count);
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
 			}
 			sort->array[i] = node->data;
 			sort->index++;
@@ -2630,7 +2632,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			uint32_t count = sort->count;
 			uint32_t i = sort->index;
 			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(sort->array)*count);
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
 			}
 			sort->array[i] = node->data;
 			sort->index++;
@@ -2641,7 +2643,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			uint32_t count = sort->count;
 			uint32_t i = sort->index;
 			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(sort->array)*count);
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
 			}
 			sort->array[i] = node->data;
 			sort->index++;

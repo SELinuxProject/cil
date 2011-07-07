@@ -561,42 +561,6 @@ int cil_sens_to_policy(FILE **file_arr, struct cil_list *sens)
 	return SEPOL_OK;
 }
 
-int cil_print_constrain_expr(FILE **file_arr, struct cil_tree_node *root)
-{
-	struct cil_tree_node *curr = root;
-	int rc = SEPOL_ERR;
-
-	if (curr->flavor == CIL_ROOT) {
-		curr = curr->cl_head;
-	}
-
-	while (curr != NULL) {
-		if (curr->cl_head != NULL) {
-			fprintf(file_arr[CONSTRAINS], "( ");
-			rc = cil_print_constrain_expr(file_arr, curr->cl_head);
-			if (rc != SEPOL_OK) {
-				printf("Failed to print constrain expression\n");
-				return rc;
-			}
-		} else {
-			if (curr->flavor == CIL_CONSTRAIN_NODE) {
-				fprintf(file_arr[CONSTRAINS], "%s", (char*)curr->data);
-			} else {
-				fprintf(file_arr[CONSTRAINS], "%s", ((struct cil_type*)curr->data)->datum.name);
-			}
-		}
-		if (curr->next != NULL) {
-			fprintf(file_arr[CONSTRAINS], " %s ", (char*)curr->parent->data);
-		} else if (curr->parent->flavor != CIL_ROOT) {
-			fprintf(file_arr[CONSTRAINS], " )");
-		}
-
-		curr = curr->next;
-	}
-
-	return SEPOL_OK;
-}
-
 void cil_level_to_policy(FILE **file_arr, uint32_t file_index, struct cil_level *level)
 {
 	struct cil_list_item *cat = NULL;

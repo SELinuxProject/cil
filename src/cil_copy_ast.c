@@ -1242,9 +1242,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_MLSCONSTRAIN:
 		cil_copy_constrain(db, (struct cil_constrain*)orig->data, (struct cil_constrain**)&new->data);
 		break;
-	case CIL_CONSTRAIN_NODE:
-		new->data = cil_strdup(((char*)orig->data));
-		break;
 	case CIL_CALL:
 		cil_copy_call(db, (struct cil_call*)orig->data, (struct cil_call**)&new->data);
 		break;
