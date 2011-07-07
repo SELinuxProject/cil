@@ -42,6 +42,43 @@ struct cil_args_binary {
 	int pass;
 };
 
+int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	struct cil_common *cil_common = node->data;
+	struct cil_tree_node *cil_perm = node->cl_head;
+	common_datum_t *sepol_common = cil_malloc(sizeof(*sepol_common));
+	memset(sepol_common, 0, sizeof(common_datum_t));
+	rc = symtab_insert(pdb, SYM_COMMONS, cil_common->datum.name, sepol_common, SCOPE_DECL, 0, &value);
+	if (rc != SEPOL_OK) {
+		goto common_to_binary_out;
+	}
+	sepol_common->s.value = value;
+	rc = symtab_init(&sepol_common->permissions, PERM_SYMTAB_SIZE);
+	if (rc != SEPOL_OK) {
+		goto common_to_binary_out;
+	}
+	while (cil_perm != NULL) {
+		struct cil_perm *curr = cil_perm->data;
+		perm_datum_t *sepol_perm = cil_malloc(sizeof(*sepol_perm));
+		memset(sepol_perm, 0, sizeof(perm_datum_t));
+		sepol_perm->s.value = sepol_common->permissions.nprim + 1;
+		rc = hashtab_insert(sepol_common->permissions.table,
+					curr->datum.name,
+					sepol_perm);
+		if (rc != SEPOL_OK) {
+			goto common_to_binary_out;
+		}
+		sepol_common->permissions.nprim++;
+		cil_perm = cil_perm->next;
+	}
+	return SEPOL_OK;
+
+common_to_binary_out:
+	return rc;
+}
+
 int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -90,6 +127,9 @@ int __cil_node_to_policydb(const struct cil_db *db, policydb_t *pdb, struct cil_
 	switch (pass) {
 	case 1:
 		switch (node->flavor) {
+		case CIL_COMMON:
+			rc = cil_common_to_policydb(pdb, node);
+			break;
 		case CIL_CLASS:
 			rc = cil_class_to_policydb(pdb, node);
 			break;
