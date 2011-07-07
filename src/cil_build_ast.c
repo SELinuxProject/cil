@@ -2020,7 +2020,7 @@ int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
-		printf("Invalid attributetypes declaration (line: %d)\n", parse_current->line);
+		printf("Invalid attributetypes statement (line: %d)\n", parse_current->line);
 		goto gen_attrtypes_cleanup;
 	}
 
@@ -2034,6 +2034,12 @@ int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, st
 	curr = parse_current->next->next->cl_head;
 
 	while(curr != NULL) {
+		if (curr->cl_head != NULL) {
+			printf("Invalid attributetypes statement (line: %d)\n", parse_current->line);
+			rc = SEPOL_ERR;
+			goto gen_attrtypes_cleanup;
+		}
+
 		cil_list_item_init(&new_type);
 		new_type->flavor = CIL_AST_STR;
 
