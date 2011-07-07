@@ -2009,32 +2009,29 @@ int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, st
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_attrtypes *attrtypes = NULL;
-	struct cil_tree_node *curr = parse_current->next->next->cl_head;
+	struct cil_tree_node *curr = NULL;
 	struct cil_list_item *new_type = NULL;
-	struct cil_list_item *types_list_tail = NULL;
-	struct cil_list_item *neg_list_tail = NULL;
 	char *type = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto cil_gen_attrtypes_cleanup;
+		goto gen_attrtypes_cleanup;
 	}
 
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		printf("Invalid attributetypes declaration (line: %d)\n", parse_current->line);
-		goto cil_gen_attrtypes_cleanup;
+		goto gen_attrtypes_cleanup;
 	}
 
 	rc = cil_attrtypes_init(&attrtypes);
 	if (rc != SEPOL_OK) {
-		goto cil_gen_attrtypes_cleanup;
+		goto gen_attrtypes_cleanup;
 	}
 
 	attrtypes->attr_str = cil_strdup(parse_current->next->data);
 
-	cil_list_init(&attrtypes->types_list_str);
-	cil_list_init(&attrtypes->neg_list_str);
+	curr = parse_current->next->next->cl_head;
 
 	while(curr != NULL) {
 		cil_list_item_init(&new_type);
@@ -2045,23 +2042,28 @@ int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, st
 			if (type[1] == '\0') {
 				printf("Invalid negative type in attributetypes statement\n");
 				rc = SEPOL_ERR;
-				goto cil_gen_attrtypes_cleanup;
+				goto gen_attrtypes_cleanup;
 			}
+
+			if (attrtypes->neg_list_str == NULL) {
+				cil_list_init(&attrtypes->neg_list_str);
+			}
+
 			new_type->data = cil_strdup(&type[1]);
-			if (attrtypes->neg_list_str->head == NULL) {
-				attrtypes->neg_list_str->head = new_type;
-			} else {
-				neg_list_tail->next = new_type;
+			rc = cil_list_prepend_item(attrtypes->neg_list_str, new_type);
+			if (rc != SEPOL_OK) {
+				goto gen_attrtypes_cleanup;
 			}
-			neg_list_tail = new_type;
 		} else {
-			new_type->data = cil_strdup(type);
-			if (attrtypes->types_list_str->head == NULL) {
-				attrtypes->types_list_str->head = new_type;
-			} else {
-				types_list_tail->next = new_type;
+			if (attrtypes->types_list_str == NULL) {
+				cil_list_init(&attrtypes->types_list_str);
 			}
-			types_list_tail = new_type;
+
+			new_type->data = cil_strdup(type);
+			rc = cil_list_prepend_item(attrtypes->types_list_str, new_type);
+			if (rc != SEPOL_OK) {
+				goto gen_attrtypes_cleanup;
+			}
 		}
 
 		curr = curr->next;
@@ -2072,7 +2074,7 @@ int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	return SEPOL_OK;
 
-cil_gen_attrtypes_cleanup:
+gen_attrtypes_cleanup:
 	if (attrtypes != NULL) {
 		cil_destroy_attrtypes(attrtypes);
 	}

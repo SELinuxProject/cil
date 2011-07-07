@@ -498,6 +498,34 @@ reset_sens_out:
 	return rc;
 }
 
+int cil_reset_attr(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
+{
+	struct cil_attribute *attr = (struct cil_attribute*)current->data;
+
+	/* during a re-resolve, we need to reset the lists of types (and negative types) associated with this attribute from a attributetypes statement */
+	if (attr->types_list != NULL) {
+		cil_list_destroy(&attr->types_list, 0);
+	}
+
+	if (attr->neg_list != NULL) {
+		cil_list_destroy(&attr->neg_list, 0);
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_reset_type(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
+{
+	struct cil_type *type = (struct cil_type*)current->data;
+
+	/* during a re-resolve, we need toreset the list of attributes associated with this type from a attributetypes statement */
+	if (type->attrs_list != NULL) {
+		cil_list_destroy(&type->attrs_list, 0);
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_userrole *userrole = (struct cil_userrole*)current->data;
@@ -2438,6 +2466,12 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		case CIL_CLASS:
 			rc = cil_reset_class(db, node, call);
+			break;
+		case CIL_TYPE:
+			rc = cil_reset_type(db, node, call);
+			break;
+		case CIL_ATTR:
+			rc = cil_reset_attr(db, node, call);
 			break;
 		case CIL_SENS:
 			rc = cil_reset_sens(db, node, call);
