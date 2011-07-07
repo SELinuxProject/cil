@@ -3550,7 +3550,7 @@ void test_cil_gen_attrtypes_emptylists_neg(CuTest *tc) {
 }
 
 void test_cil_gen_attrtypes_listinparens_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "(", "parens", ")", ")", ")", NULL};
+	char *line[] = {"(", "attributetypes", "filetypes", "(", "(", "test_t", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
