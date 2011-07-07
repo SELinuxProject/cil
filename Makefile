@@ -75,7 +75,7 @@ install:
 
 clean: 
 	-rm -f $(SRCDIR)/$(ALL_OBJS) $(SRCDIR)/$(GENERATED) run_tests
-	-rm -f *.gcno *.gcda *.gcov unit_tests policy.conf file_contexts
+	-rm -f *.gcno *.gcda *.gcov unit_tests policy.* file_contexts
 	-rm -f $(SECILC)
 	-rm -rf cov/
 

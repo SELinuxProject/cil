@@ -40,15 +40,19 @@
 #include "src/cil_build_ast.h"
 #include "src/cil_resolve_ast.h"
 #include "src/cil_fqn.h"
-#include "src/cil_policy.h"
+#include "src/cil_binary.h"
 
 #include "src/cil_copy_ast.h"
 
 #include <sepol/policydb/hashtab.h>
+#include <sepol/policydb/policydb.h>
+#include <sepol/policydb/services.h>
 
 int main(int argc, char *argv[])
 {
+	int rc = SEPOL_ERR;
 	struct stat filedata;
+	policydb_t pdb;
 	uint32_t file_size;
 	char *buffer;
 	FILE *file;
@@ -64,9 +68,8 @@ int main(int argc, char *argv[])
 
 	struct cil_db *db;
 	cil_db_init(&db);
-	
+
 	int i;
-	int rc;
 
 	if (argc <= 1) {
 		printf("Usage: %s [files]\n", argv[0]);
@@ -140,13 +143,24 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
 	cil_tree_print(db->ast->root, 0);
 #endif
-	printf("Generating Policy...\n");
-	if (cil_gen_policy(db)){
-		printf("Failed to generate policy, exiting\n");
+	printf("Generating Binary...\n");
+	policydb_init(&pdb);
+	sepol_set_policydb(&pdb);
+	pdb.policy_type = POLICY_KERN;
+	pdb.policyvers = POLICYDB_VERSION_MAX;
+	pdb.mls = 0;
+	rc = policydb_set_target_platform(&pdb, SEPOL_TARGET_SELINUX);
+	if (rc != 0) {
+		printf("Failed to set target platform: %d\n", rc);
+		goto main_out;
+	}
+	if (cil_binary_create(db, &pdb, "policy.24")) {
+		printf("Failed to generate binary, exiting\n");
 		goto main_out;
 	}
 
 	printf("Destroying DB...\n");
+	policydb_destroy(&pdb);
 	cil_db_destroy(&db);
 
 	return SEPOL_OK;
