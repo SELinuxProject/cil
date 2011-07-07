@@ -1435,6 +1435,25 @@ int cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates)
 	return SEPOL_OK;
 }
 
+int cil_args_init(struct cil_args **args)
+{
+	struct cil_args *new_args = NULL;
+
+	if (args == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_args = cil_malloc(sizeof(*new_args));
+	new_args->arg_str = NULL;
+	new_args->arg = NULL;
+	new_args->param_str = NULL;
+	new_args->flavor = CIL_AST_STR;
+
+	*args = new_args;
+
+	return SEPOL_OK;
+}
+
 int cil_call_init(struct cil_call **call)
 {
 	struct cil_call *new_call = NULL;

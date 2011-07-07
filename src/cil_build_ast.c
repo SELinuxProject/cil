@@ -159,11 +159,11 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_
 	struct cil_tree_node *parse_current = parse_cl_head;
 	struct cil_list_item *list_tail = NULL;
 	int rc = SEPOL_ERR;
-	
+
 	if (parse_current == NULL || ast_cl == NULL) {
 		goto parse_to_list_out;
 	}
-	
+
 	while(parse_current != NULL) {
 		cil_list_item_init(&new_item);
 		new_item->flavor = flavor;
@@ -183,7 +183,7 @@ int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_
 
 parse_to_list_out:
 	return rc;
-} 
+}
 
 int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, char *condition)
 {
@@ -295,7 +295,7 @@ void cil_destroy_class(struct cil_class *class)
 {
 	cil_symtab_datum_destroy(class->datum);
 	cil_symtab_destroy(&class->perms);
-	
+
 	free(class);
 }
 
@@ -473,7 +473,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		printf("Common: failed to parse perms\n");
 		goto gen_common_cleanup;
 	}
-	
+
 	return SEPOL_OK;
 
 gen_common_cleanup:
@@ -481,7 +481,7 @@ gen_common_cleanup:
 		cil_destroy_common(common);
 	}
 	return rc;
-	
+
 }
 
 void cil_destroy_common(struct cil_common *common)
@@ -523,7 +523,7 @@ int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, 
 
 	ast_node->data = clscom;
 	ast_node->flavor = CIL_CLASSCOMMON;
-	
+
 	return SEPOL_OK;
 
 gen_classcommon_cleanup:
@@ -630,7 +630,7 @@ int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, s
 	} else {
 		rc = cil_context_init(&sidcon->context);
 		if (rc != SEPOL_OK) {
-			printf("Failed to init context\n");	
+			printf("Failed to init context\n");
 			goto gen_sidcontext_cleanup;
 		}
 
@@ -696,12 +696,12 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	}
 
 	key = parse_current->next->data;
-	
+
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)user, (hashtab_key_t)key, CIL_SYM_USERS, CIL_USER);
 	if (rc != SEPOL_OK) {
 		goto gen_user_cleanup;
 	}
-	
+
 	return SEPOL_OK;
 
 gen_user_cleanup:
@@ -750,7 +750,7 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (rc != SEPOL_OK) {
 		goto gen_role_cleanup;
 	}
-	
+
 	return SEPOL_OK;
 
 gen_role_cleanup:
@@ -798,7 +798,7 @@ int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	ast_node->data = roletype;
 	ast_node->flavor = CIL_ROLETYPE;
-	
+
 	return SEPOL_OK;
 
 gen_roletype_cleanup:
@@ -853,7 +853,7 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	ast_node->data = userrole;
 	ast_node->flavor = CIL_USERROLE;
-	
+
 	return SEPOL_OK;
 
 gen_userrole_cleanup:
@@ -1076,7 +1076,7 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 		printf("Invalid allow rule (line: %d)\n", parse_current->line);
 		goto gen_avrule_cleanup;
 	}
-	
+
 	rc = cil_avrule_init(&rule);
 	if (rc != SEPOL_OK) {
 		goto gen_avrule_cleanup;
@@ -1086,7 +1086,7 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 
 	rule->src_str = cil_strdup(parse_current->next->data);
 	rule->tgt_str = cil_strdup(parse_current->next->next->data);
-	rule->obj_str = cil_strdup(parse_current->next->next->next->data);	
+	rule->obj_str = cil_strdup(parse_current->next->next->next->data);
 
 	if (parse_current->next->next->next->next->cl_head != NULL) {
 		cil_list_init(&rule->perms_list_str);
@@ -1164,7 +1164,7 @@ int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node 
 	rule->rule_kind = rule_kind;
 	rule->src_str = cil_strdup(parse_current->next->data);
 	rule->tgt_str = cil_strdup(parse_current->next->next->data);
-	rule->obj_str = cil_strdup(parse_current->next->next->next->data);	
+	rule->obj_str = cil_strdup(parse_current->next->next->next->data);
 	rule->result_str = cil_strdup(parse_current->next->next->next->next->data);
 
 	ast_node->data = rule;
@@ -1227,9 +1227,9 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto gen_type_cleanup;
 	}
 
-	key = parse_current->next->data; 
+	key = parse_current->next->data;
 
-	if (flavor == CIL_TYPE || flavor == CIL_ATTR) { 
+	if (flavor == CIL_TYPE || flavor == CIL_ATTR) {
 		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)type, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPE);
 	} else {
 		printf("Error: cil_gen_type called on invalid node\n");
@@ -1241,9 +1241,9 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		printf("Failed to insert %s (line: %d), rc:%d\n", key, parse_current->line, rc);
 		goto gen_type_cleanup;
 	}
-	
+
 	ast_node->data = type;
-	ast_node->flavor = flavor;	
+	ast_node->flavor = flavor;
 
 	return SEPOL_OK;
 
@@ -1296,7 +1296,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		boolean->value = CIL_FALSE;
 	} else {
 		printf("Error: value must be \'true\' or \'false\'");
-		rc = SEPOL_ERR;	
+		rc = SEPOL_ERR;
 		goto gen_bool_cleanup;
 	}
 
@@ -1309,7 +1309,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	if (rc != SEPOL_OK) {
 		goto gen_bool_cleanup;
 	}
-	
+
 	return SEPOL_OK;
 
 gen_bool_cleanup:
@@ -1337,7 +1337,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	struct cil_conditional *rcond = NULL;
 	char * rstr = NULL;
 	int riskeyword = 0;
-	
+
 	if (current == NULL || stack == NULL) {
 		goto not_valid;
 	}
@@ -1345,7 +1345,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	if (current->cl_head != NULL) {
 		goto not_valid;
 	}
-	
+
 	if (current->parent->cl_head != current) {
 		goto not_valid;
 	}
@@ -1444,7 +1444,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	if (rc != SEPOL_OK) {
 		goto not_valid;
 	}
-	
+
 	rc = cil_conditional_init(&lcond);
 	if (rc != SEPOL_OK) {
 		goto not_valid;
@@ -1459,7 +1459,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	if (rc != SEPOL_OK) {
 		goto not_valid;
 	}
-	
+
 	lstr = current->next->data;
 	rstr = current->next->next->data;
 
@@ -1475,7 +1475,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 
 	rnode->cl_head = lnode;
 	*stack = rnode;
-	
+
 	if (strcmp(lstr, CIL_KEY_CONS_T1) && strcmp(lstr, CIL_KEY_CONS_T2) &&
 	    strcmp(lstr, CIL_KEY_CONS_R1) && strcmp(lstr, CIL_KEY_CONS_R2) &&
 	    strcmp(lstr, CIL_KEY_CONS_U1) && strcmp(lstr, CIL_KEY_CONS_U2) &&
@@ -1485,7 +1485,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 		rc = SEPOL_ERR;
 		goto not_valid;
 	}
-	
+
 	if (!strcmp(rstr, CIL_KEY_CONS_T1) || !strcmp(rstr, CIL_KEY_CONS_T2) ||
         !strcmp(rstr, CIL_KEY_CONS_R1) || !strcmp(rstr, CIL_KEY_CONS_R2) ||
 		!strcmp(rstr, CIL_KEY_CONS_U1) || !strcmp(rstr, CIL_KEY_CONS_U2) ||
@@ -1518,8 +1518,8 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 			}
 			rcond->flavor = CIL_TYPE;
 			goto valid;
-	
-		/* role constrains */	
+
+		/* role constrains */
 		} else if (!strcmp(lstr, CIL_KEY_CONS_R1)) {
 			lcond->flavor = CIL_CONS_R1;
 			if (!strcmp(rstr, CIL_KEY_CONS_R2)) {
@@ -1539,7 +1539,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 				rc = SEPOL_ERR;
 				goto not_valid;
 			}
-			rcond->flavor = CIL_ROLE;		
+			rcond->flavor = CIL_ROLE;
 			goto valid;
 
 		/* user constrains */
@@ -1581,7 +1581,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 			goto valid;
 		}
 	}
-	
+
 	if (flavor == CIL_MLSCONSTRAIN) {
 		/* check mls specific levels */
 		if (!strcmp(lstr, CIL_KEY_CONS_L1)) {
@@ -1698,7 +1698,7 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 		} else {
 			cond->flavor = flavor;
 		}
-		
+
 		cond->str = cil_strdup(current->data);
 
 		new->data = cond;
@@ -1764,7 +1764,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (rc != SEPOL_OK) {
 		goto gen_boolif_cleanup;
 	}
-	
+
 	if (parse_current->next->cl_head == NULL) {
 		struct cil_conditional *cond = NULL;
 		if (parse_current->next->data == NULL) {
@@ -1792,7 +1792,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 	ast_node->flavor = CIL_BOOLEANIF;
 	ast_node->data = bif;
-	
+
 	return SEPOL_OK;
 
 gen_boolif_cleanup:
@@ -1802,7 +1802,7 @@ gen_boolif_cleanup:
 	return rc;
 }
 
-void cil_destroy_boolif(struct cil_booleanif *bif) 
+void cil_destroy_boolif(struct cil_booleanif *bif)
 {
 	struct cil_tree_node *curr = NULL;
 	struct cil_tree_node *next = NULL;
@@ -1906,7 +1906,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	ast_node->flavor = CIL_TUNABLEIF;
 	ast_node->data = tif;
-	
+
 	return SEPOL_OK;
 
 gen_tunif_cleanup:
@@ -1916,7 +1916,7 @@ gen_tunif_cleanup:
 	return rc;
 }
 
-void cil_destroy_tunif(struct cil_tunableif *tif) 
+void cil_destroy_tunif(struct cil_tunableif *tif)
 {
 	struct cil_tree_node *curr = NULL;
 	struct cil_tree_node *next = NULL;
@@ -1976,11 +1976,11 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (rc != SEPOL_OK) {
 		goto gen_typealias_cleanup;
 	}
-	
+
 	alias->type_str = cil_strdup(parse_current->next->data);
-	
+
 	return SEPOL_OK;
-	
+
 gen_typealias_cleanup:
 	if (alias != NULL) {
 		cil_destroy_typealias(alias);
@@ -2289,12 +2289,12 @@ int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, 
 	}
 
 	key = parse_current->next->data;
-	
+
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)sens, (hashtab_key_t)key, CIL_SYM_SENS, CIL_SENS);
 	if (rc != SEPOL_OK) {
 		goto gen_sens_cleanup;
 	}
-	
+
 	return SEPOL_OK;
 
 gen_sens_cleanup:
@@ -2337,18 +2337,18 @@ int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (rc != SEPOL_OK) {
 		goto gen_sensalias_cleanup;
 	}
-	
+
 	key = parse_current->next->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_SENS, CIL_SENSALIAS);
 	if (rc != SEPOL_OK) {
 		goto gen_sensalias_cleanup;
 	}
-	
+
 	alias->sens_str = cil_strdup(parse_current->next->data);
 
 	return SEPOL_OK;
-	
+
 gen_sensalias_cleanup:
 	if (alias != NULL) {
 		cil_destroy_sensalias(alias);
@@ -2400,7 +2400,7 @@ int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (rc != SEPOL_OK) {
 		goto gen_cat_cleanup;
 	}
-	
+
 	return SEPOL_OK;
 
 gen_cat_cleanup:
@@ -2450,11 +2450,11 @@ int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (rc != SEPOL_OK) {
 		goto gen_catalias_cleanup;
 	}
-	
+
 	alias->cat_str = cil_strdup(parse_current->next->data);
-	
+
 	return SEPOL_OK;
-	
+
 gen_catalias_cleanup:
 	if (alias != NULL) {
 		cil_destroy_catalias(alias);
@@ -2548,7 +2548,7 @@ int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl
 		list_tail = new_item;
 		curr = curr->next;
 	}
-	
+
 	return SEPOL_OK;
 
 set_to_list_out:
@@ -2562,7 +2562,7 @@ int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list)
 	if (start == NULL || list == NULL) {
 		goto fill_cat_list_out;
 	}
-	
+
 	rc = cil_set_to_list(start, list, 1);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create category list\n");
@@ -2629,7 +2629,7 @@ gen_catset_cleanup:
 	if (catset != NULL) {
 		cil_destroy_catset(catset);
 	}
-	return rc;	
+	return rc;
 }
 
 void cil_destroy_catset(struct cil_catset *catset)
@@ -2673,7 +2673,7 @@ int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto gen_catorder_cleanup;
 	}
 	cil_list_init(&catorder->cat_list_str);
-	
+
 	rc = cil_set_to_list(parse_current->next, catorder->cat_list_str, 0);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create category list\n");
@@ -2726,7 +2726,7 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto gen_dominance_cleanup;
 	}
 	cil_list_init(&dom->sens_list_str);
-	
+
 	rc = cil_set_to_list(parse_current->next, dom->sens_list_str, 0);
 	if (rc != SEPOL_OK) {
 		printf("Failed to create sensitivity list\n");
@@ -2889,13 +2889,13 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (rc != SEPOL_OK) {
 		goto gen_level_cleanup;
 	}
-	
+
 	rc = cil_fill_level(parse_current->next->next->cl_head, level);
 	if (rc != SEPOL_OK) {
 		printf("Failed to populate level\n");
 		goto gen_level_cleanup;
 	}
-	
+
 	return SEPOL_OK;
 
 gen_level_cleanup:
@@ -2975,7 +2975,7 @@ int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_t
 		curr = curr->next;
 	}
 	expr_curr = expr_curr->parent;
-	
+
 	return SEPOL_OK;
 
 build_constrain_tree_out:
@@ -3075,13 +3075,13 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 			curr = next;
 		}
 	}
-	
+
 	free(cons);
 }
 
 /* Fills in context starting from user */
-int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context) 
-{	
+int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context)
+{
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING,
@@ -3106,7 +3106,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	context->user_str = cil_strdup(user_node->data);
 	context->role_str = cil_strdup(user_node->next->data);
 	context->type_str = cil_strdup(user_node->next->next->data);
-	
+
 	context->low_str = NULL;
 	context->high_str = NULL;
 
@@ -3121,7 +3121,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 
 		rc = cil_fill_level(user_node->next->next->next->cl_head, context->low);
 		if (rc != SEPOL_OK) {
-			printf("cil_fill_context: Failed to fill low level, rc: %d\n", rc); 
+			printf("cil_fill_context: Failed to fill low level, rc: %d\n", rc);
 			goto cil_fill_context_cleanup;
 		}
 	}
@@ -3143,10 +3143,10 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	}
 
 	return SEPOL_OK;
-	
+
 cil_fill_context_cleanup:
 	return rc;
-} 
+}
 
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
@@ -3182,15 +3182,15 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (rc != SEPOL_OK) {
 		goto gen_context_cleanup;
 	}
-	
+
 	rc = cil_fill_context(parse_current->next->next->cl_head, context);
 	if (rc != SEPOL_OK) {
 		printf("Failed to fill context, rc: %d\n", rc);
 		goto gen_context_cleanup;
 	}
-	
+
 	return SEPOL_OK;
-	
+
 gen_context_cleanup:
 	if (context != NULL) {
 		cil_destroy_context(context);
@@ -3280,7 +3280,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		rc = SEPOL_ERR;
 		goto gen_filecon_cleanup;
 	}
-		
+
 	if (parse_current->next->next->next->next->cl_head == NULL) {
 		filecon->context_str = cil_strdup(parse_current->next->next->next->next->data);
 	} else {
@@ -3298,7 +3298,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	ast_node->data = filecon;
-	ast_node->flavor = CIL_FILECON; 
+	ast_node->flavor = CIL_FILECON;
 
 	return SEPOL_OK;
 
@@ -3391,7 +3391,7 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	ast_node->data = portcon;
-	ast_node->flavor = CIL_PORTCON; 
+	ast_node->flavor = CIL_PORTCON;
 
 	return SEPOL_OK;
 
@@ -3526,7 +3526,7 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	ast_node->data = nodecon;
-	ast_node->flavor = CIL_NODECON; 
+	ast_node->flavor = CIL_NODECON;
 
 	return SEPOL_OK;
 
@@ -3576,7 +3576,7 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
 		goto gen_genfscon_cleanup;
 	}
-	
+
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		printf("Invalid genfscon declaration (line: %d)\n", parse_current->line);
@@ -3608,7 +3608,7 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	}
 
 	ast_node->data = genfscon;
-	ast_node->flavor = CIL_GENFSCON; 
+	ast_node->flavor = CIL_GENFSCON;
 
 	return SEPOL_OK;
 
@@ -3661,14 +3661,14 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 		printf("Invalid netifcon declaration (line: %d)\n", parse_current->line);
 		goto gen_netifcon_cleanup;
 	}
-	
+
 	rc = cil_netifcon_init(&netifcon);
 	if (rc != SEPOL_OK) {
 		goto gen_netifcon_cleanup;
 	}
-	
+
 	netifcon->interface_str = cil_strdup(parse_current->next->data);
-	
+
 	if (parse_current->next->next->cl_head == NULL) {
 		if (parse_current->next->next->data != NULL) {
 			netifcon->if_context_str = cil_strdup(parse_current->next->next->data);
@@ -3679,8 +3679,8 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	} else {
 		rc = cil_context_init(&netifcon->if_context);
 		if (rc != SEPOL_OK) {
-			printf("Failed to init if_context\n");	
-			goto gen_netifcon_cleanup;	
+			printf("Failed to init if_context\n");
+			goto gen_netifcon_cleanup;
 		}
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, netifcon->if_context);
@@ -3712,7 +3712,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	}
 
 	ast_node->data = netifcon;
-	ast_node->flavor = CIL_NETIFCON; 
+	ast_node->flavor = CIL_NETIFCON;
 
 	return SEPOL_OK;
 
@@ -3851,7 +3851,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	int syntax_len = sizeof(syntax)/ sizeof(*syntax);
 	char *key = NULL;
 	struct cil_macro *macro = NULL;
-	struct cil_tree_node *next = NULL;
+	struct cil_tree_node *macro_content = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -3871,97 +3871,95 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	key = parse_current->next->data;
 
-	if (parse_current->next->next->cl_head != NULL) {
-		struct cil_tree_node *current_item = parse_current->next->next->cl_head;
-		struct cil_list_item *params_tail = NULL;
-		cil_list_init(&macro->params);
-		while (current_item != NULL) {
-			char *kind = NULL;
-			struct cil_param *param = NULL;
+	struct cil_tree_node *current_item = parse_current->next->next->cl_head;
+	struct cil_list_item *params_tail = NULL;
+	cil_list_init(&macro->params);
+	while (current_item != NULL) {
+		char *kind = NULL;
+		struct cil_param *param = NULL;
 
-			if (current_item->cl_head == NULL) {
-				printf("Invalid macro declaration (line: %d)\n", parse_current->line);
-				goto gen_macro_cleanup;
-			}
-
-			kind = current_item->cl_head->data;
-			cil_param_init(&param);
-
-			if (!strcmp(kind, CIL_KEY_TYPE)) {
-				param->flavor = CIL_TYPE;
-			} else if (!strcmp(kind, CIL_KEY_ROLE)) {
-				param->flavor = CIL_ROLE;
-			} else if (!strcmp(kind, CIL_KEY_USER)) {
-				param->flavor = CIL_USER;
-			} else if (!strcmp(kind, CIL_KEY_SENSITIVITY)) {
-				param->flavor = CIL_SENS;
-			} else if (!strcmp(kind, CIL_KEY_CATEGORY)) {
-				param->flavor = CIL_CAT;
-			} else if (!strcmp(kind, CIL_KEY_CATSET)) {
-				param->flavor = CIL_CATSET;
-			} else if (!strcmp(kind, CIL_KEY_LEVEL)) {
-				param->flavor = CIL_LEVEL;
-			} else if (!strcmp(kind, CIL_KEY_CLASS)) {
-				param->flavor = CIL_CLASS;
-			} else if (!strcmp(kind, CIL_KEY_IPADDR)) {
-				param->flavor = CIL_IPADDR;
-			} else if (!strcmp(kind, CIL_KEY_PERMSET)) {
-				param->flavor = CIL_PERMSET;
-			} else {
-				printf("Invalid macro declaration (line: %d)\n", parse_current->line);
-				goto gen_macro_cleanup;
-			}
-
-			param->str =  cil_strdup(current_item->cl_head->next->data);
-
-			if (strchr(param->str, '.')) {
-				printf("Invalid macro declaration: parameter names cannot contain a '.' (line: %d)\n", parse_current->line);
-				cil_destroy_param(param);
-				goto gen_macro_cleanup;
-			}
-
-			if (params_tail == NULL) {
-				cil_list_item_init(&macro->params->head);
-				macro->params->head->data = param;
-				macro->params->head->flavor = CIL_PARAM;
-
-				params_tail = macro->params->head;
-			} else {
-				//walk current list and check for duplicate parameters
-				struct cil_list_item *curr_param = macro->params->head;
-				while (curr_param != NULL) {
-					if (!strcmp(param->str, ((struct cil_param*)curr_param->data)->str)) {
-						if (param->flavor == ((struct cil_param*)curr_param->data)->flavor) {
-							printf("Invalid macro declaration (line: %d): Duplicate parameter\n", parse_current->line);
-							goto gen_macro_cleanup;
-						}
-					}
-					curr_param = curr_param->next;
-				}
-
-				cil_list_item_init(&params_tail->next);
-				params_tail->next->data = param;
-				params_tail->next->flavor = CIL_PARAM;
-				
-				params_tail = params_tail->next;
-				params_tail->next = NULL;
-			}
-
-			current_item = current_item->next;
+		if (current_item->cl_head == NULL) {
+			printf("Invalid macro declaration (line: %d)\n", parse_current->line);
+			goto gen_macro_cleanup;
 		}
+
+		kind = current_item->cl_head->data;
+		cil_param_init(&param);
+
+		if (!strcmp(kind, CIL_KEY_TYPE)) {
+			param->flavor = CIL_TYPE;
+		} else if (!strcmp(kind, CIL_KEY_ROLE)) {
+			param->flavor = CIL_ROLE;
+		} else if (!strcmp(kind, CIL_KEY_USER)) {
+			param->flavor = CIL_USER;
+		} else if (!strcmp(kind, CIL_KEY_SENSITIVITY)) {
+			param->flavor = CIL_SENS;
+		} else if (!strcmp(kind, CIL_KEY_CATEGORY)) {
+			param->flavor = CIL_CAT;
+		} else if (!strcmp(kind, CIL_KEY_CATSET)) {
+			param->flavor = CIL_CATSET;
+		} else if (!strcmp(kind, CIL_KEY_LEVEL)) {
+			param->flavor = CIL_LEVEL;
+		} else if (!strcmp(kind, CIL_KEY_CLASS)) {
+			param->flavor = CIL_CLASS;
+		} else if (!strcmp(kind, CIL_KEY_IPADDR)) {
+			param->flavor = CIL_IPADDR;
+		} else if (!strcmp(kind, CIL_KEY_PERMSET)) {
+			param->flavor = CIL_PERMSET;
+		} else {
+			printf("Invalid macro declaration (line: %d)\n", parse_current->line);
+			cil_destroy_param(param);
+			goto gen_macro_cleanup;
+		}
+
+		param->str =  cil_strdup(current_item->cl_head->next->data);
+
+		if (strchr(param->str, '.')) {
+			printf("Invalid macro declaration: parameter names cannot contain a '.' (line: %d)\n", parse_current->line);
+			cil_destroy_param(param);
+			goto gen_macro_cleanup;
+		}
+
+		if (params_tail == NULL) {
+			cil_list_item_init(&macro->params->head);
+			macro->params->head->data = param;
+			macro->params->head->flavor = CIL_PARAM;
+
+			params_tail = macro->params->head;
+		} else {
+			//walk current list and check for duplicate parameters
+			struct cil_list_item *curr_param = macro->params->head;
+			while (curr_param != NULL) {
+				if (!strcmp(param->str, ((struct cil_param*)curr_param->data)->str)) {
+					if (param->flavor == ((struct cil_param*)curr_param->data)->flavor) {
+						printf("Invalid macro declaration (line: %d): Duplicate parameter\n", parse_current->line);
+						cil_destroy_param(param);
+						goto gen_macro_cleanup;
+					}
+				}
+				curr_param = curr_param->next;
+			}
+
+			cil_list_item_init(&params_tail->next);
+			params_tail->next->data = param;
+			params_tail->next->flavor = CIL_PARAM;
+
+			params_tail = params_tail->next;
+		}
+
+		current_item = current_item->next;
 	}
 
-	next = parse_current->next->next->next;
+	/* we don't want the tree walker to walk the macro parameters (they were just handled above), so the subtree is deleted, and the next pointer of the
+           node containing the macro name is updated to point to the start of the macro content */
+	macro_content = parse_current->next->next->next;
 	cil_tree_subtree_destroy(parse_current->next->next);
-	parse_current->next->next = next;
-	
+	parse_current->next->next = macro_content;
+
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)macro, (hashtab_key_t)key, CIL_SYM_MACROS, CIL_MACRO);
 	if (rc != SEPOL_OK) {
 		goto gen_macro_cleanup;
 	}
-
-	ast_node->data = macro;
-	ast_node->flavor = CIL_MACRO; 
 
 	return SEPOL_OK;
 
@@ -3989,7 +3987,7 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING,
-		SYM_STRING | SYM_LIST | SYM_END,
+		SYM_LIST | SYM_END,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -4099,11 +4097,11 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (rc != SEPOL_OK) {
 		goto gen_optional_cleanup;
 	}
-	
+
 	key = parse_current->next->data;
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)optional, (hashtab_key_t)key, CIL_SYM_OPTIONALS, CIL_OPTIONAL);
-	if (rc != SEPOL_OK) 
+	if (rc != SEPOL_OK)
 		goto gen_optional_cleanup;
 
 	return SEPOL_OK;
@@ -4149,11 +4147,11 @@ int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, st
 	}
 
 	key = parse_current->next->data;
-	
+
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)polcap, (hashtab_key_t)key, CIL_SYM_POLICYCAPS, CIL_POLICYCAP);
 	if (rc != SEPOL_OK)
 		goto gen_policycap_cleanup;
-	
+
 	return SEPOL_OK;
 
 gen_policycap_cleanup:
@@ -4271,7 +4269,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		ast_current->cl_tail->next = ast_node;
 	}
 	ast_current->cl_tail = ast_node;
-	ast_current = ast_node;	
+	ast_current = ast_node;
 	args->ast = ast_current;
 
 	if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
@@ -4439,7 +4437,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto build_ast_node_helper_out;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
-		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_ALLOWED); 
+		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_ALLOWED);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_avrule (allow) failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
@@ -4675,7 +4673,7 @@ int __cil_build_ast_reverse_helper(struct cil_tree_node *current, void *extra_ar
 	if (current->flavor == CIL_MACRO) {
 		args->macro = NULL;
 	}
-	
+
 	return SEPOL_OK;
 
 build_ast_reverse_helper_out:
@@ -4713,9 +4711,9 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 
 	extra_args.ast = ast;
 	extra_args.db = db;
-	extra_args.macro = NULL;	
+	extra_args.macro = NULL;
 
-	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_reverse_helper, __cil_build_ast_branch_helper, &extra_args); 
+	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_reverse_helper, __cil_build_ast_branch_helper, &extra_args);
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		goto build_ast_out;

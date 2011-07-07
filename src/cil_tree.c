@@ -119,6 +119,10 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
                             node:     node being visited
                             finished: boolean indicating to the tree walker that it should move on from this branch
                             extra_args:    additional data
+   reverse_node:	function to call when visiting a node while walking out of a branch (in reverse)
+                        Takes parameters:
+                            node:     node being visited
+                            extra args:     additional data
    finished_branch:     function to call when finished with a branch of the tree before walking back up
    extra_args:               any additional data to be passed to process_node() and finished_branch()
 */
