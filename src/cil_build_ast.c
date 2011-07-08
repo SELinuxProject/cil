@@ -2093,6 +2093,14 @@ void cil_destroy_attrtypes(struct cil_attrtypes *attrtypes)
 		free(attrtypes->attr_str);
 	}
 
+	if (attrtypes->types_list_str != NULL) {
+		cil_list_destroy(&attrtypes->types_list_str, 1);
+	}
+
+	if (attrtypes->neg_list_str != NULL) {
+		cil_list_destroy(&attrtypes->neg_list_str, 1);
+	}
+
 	free(attrtypes);
 }
 
