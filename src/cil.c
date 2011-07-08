@@ -182,6 +182,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_FILETRANSITION:
 		cil_destroy_filetransition(*data);
 		break;
+	case CIL_RANGETRANSITION:
+		cil_destroy_rangetransition(*data);
+		break;
 	case CIL_SENS:
 		cil_destroy_sensitivity(*data);
 		break;
@@ -906,6 +909,32 @@ int cil_filetransition_init(struct cil_filetransition **filetrans)
 	*filetrans = new_filetrans;
 
 	return SEPOL_OK;
+}
+
+int cil_rangetransition_init(struct cil_rangetransition **rangetrans)
+{
+        struct cil_rangetransition *new_rangetrans = NULL;
+
+        if (rangetrans == NULL) {
+                return SEPOL_ERR;
+        }
+
+        new_rangetrans = cil_malloc(sizeof(*new_rangetrans));
+
+        new_rangetrans->src_str = NULL;
+        new_rangetrans->src = NULL;
+        new_rangetrans->exec_str = NULL;
+        new_rangetrans->exec = NULL;
+        new_rangetrans->obj_str = NULL;
+        new_rangetrans->obj = NULL;
+        new_rangetrans->low_str = NULL;
+        new_rangetrans->low = NULL;
+        new_rangetrans->high_str = NULL;
+        new_rangetrans->high = NULL;
+
+        *rangetrans = new_rangetrans;
+
+        return SEPOL_OK;
 }
 
 int cil_bool_init(struct cil_bool **cilbool)

@@ -49,6 +49,7 @@ int cil_copy_type(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab
 void cil_copy_attrtypes(struct cil_attrtypes *orig, struct cil_attrtypes **copy);
 int cil_copy_typealias(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 void cil_copy_filetransition(struct cil_filetransition *orig, struct cil_filetransition **copy);
+void cil_copy_rangetransition(struct cil_rangetransition *orig, struct cil_rangetransition **copy);
 int cil_copy_bool(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 void cil_copy_avrule(struct cil_avrule *orig, struct cil_avrule **copy);
 void cil_copy_type_rule(struct cil_type_rule *orig, struct cil_type_rule **copy);

@@ -2267,6 +2267,103 @@ void cil_destroy_filetransition(struct cil_filetransition *filetrans)
 	}
 }
 
+int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_rangetransition *rangetrans = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL ) {
+		goto gen_rangetransition_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid rangetransition declaration (line: %d)\n", parse_current->line);
+		goto gen_rangetransition_cleanup;
+	}
+
+	rc = cil_rangetransition_init(&rangetrans);
+	if (rc != SEPOL_OK) {
+		goto gen_rangetransition_cleanup;
+	}
+
+	rangetrans->src_str = cil_strdup(parse_current->next->data);
+	rangetrans->exec_str = cil_strdup(parse_current->next->next->data);
+	rangetrans->obj_str = cil_strdup(parse_current->next->next->next->data);
+
+	if (parse_current->next->next->next->next->cl_head == NULL) {
+		rangetrans->low_str = cil_strdup(parse_current->next->next->next->next->data);
+	} else {
+		rc = cil_level_init(&rangetrans->low);
+		if (rc != SEPOL_OK) {
+			printf("Couldn't initialize low level\n");
+			goto gen_rangetransition_cleanup;
+		}
+
+		rc = cil_fill_level(parse_current->next->next->next->next->cl_head, rangetrans->low);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_rangetransition: Failed to fill low level, rc: %d\n", rc);
+			goto gen_rangetransition_cleanup;
+		}
+	}
+
+	if (parse_current->next->next->next->next->next->cl_head == NULL) {
+		rangetrans->high_str = cil_strdup(parse_current->next->next->next->next->next->data);
+	} else {
+		rc = cil_level_init(&rangetrans->high);
+		if (rc != SEPOL_OK) {
+			printf("Couldn't initialize high level\n");
+			goto gen_rangetransition_cleanup;
+		}
+
+		rc = cil_fill_level(parse_current->next->next->next->next->next->cl_head, rangetrans->high);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_rangetransition: Failed to fill high level, rc: %d\n", rc);
+			goto gen_rangetransition_cleanup;
+		}
+	}
+
+	ast_node->data = rangetrans;
+	ast_node->flavor = CIL_RANGETRANSITION;
+
+	return SEPOL_OK;
+
+gen_rangetransition_cleanup:
+	if (rangetrans != NULL) {
+		cil_destroy_rangetransition(rangetrans);
+	}
+	return rc;
+}
+
+void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans)
+{
+	if (rangetrans->src_str != NULL) {
+		free(rangetrans->src_str);
+	}
+	if (rangetrans->exec_str != NULL) {
+		free(rangetrans->exec_str);
+	}
+	if (rangetrans->obj_str != NULL) {
+		free(rangetrans->obj_str);
+	}
+	if (rangetrans->low_str != NULL) {
+		free(rangetrans->low_str);
+	}
+	if (rangetrans->high_str != NULL) {
+		free(rangetrans->high_str);
+	}
+}
+
 int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -3813,10 +3910,13 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	struct cil_tree_node *current_item = parse_current->next->next->cl_head;
 	struct cil_list_item *params_tail = NULL;
-	cil_list_init(&macro->params);
 	while (current_item != NULL) {
 		char *kind = NULL;
 		struct cil_param *param = NULL;
+
+		if (macro->params == NULL) {
+			cil_list_init(&macro->params);
+		}
 
 		if (current_item->cl_head == NULL) {
 			printf("Invalid macro declaration (line: %d)\n", parse_current->line);
@@ -4309,6 +4409,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			printf("cil_gen_filetransition failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_RANGETRANSITION)) {
+		rc = cil_gen_rangetransition(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_rangetransition failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
 		rc = cil_gen_role(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {

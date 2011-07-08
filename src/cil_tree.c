@@ -719,6 +719,47 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(" %s\n", filetrans->path_str);
 				return;
 			}
+			case CIL_RANGETRANSITION: {
+				struct cil_rangetransition *rangetrans = node->data;
+				printf("RANGETRANSITION:");
+
+				if (rangetrans->src != NULL) {
+					printf(" %s", rangetrans->src->datum.name);
+				} else {
+					printf(" %s", rangetrans->src_str);
+				}
+
+				if (rangetrans->exec != NULL) {
+					printf(" %s", rangetrans->exec->datum.name);
+				} else {
+					printf(" %s", rangetrans->exec_str);
+				}
+
+				if (rangetrans->obj != NULL) {
+					printf(" %s", rangetrans->obj->datum.name);
+				} else {
+					printf(" %s", rangetrans->obj_str);
+				}
+
+				if (rangetrans->low != NULL) {
+					printf(" (");
+					cil_tree_print_level(rangetrans->low);
+					printf(" )");
+				} else {
+					printf(" %s", rangetrans->low_str);
+				}
+
+				if (rangetrans->high != NULL) {
+					printf(" (");
+					cil_tree_print_level(rangetrans->high);
+					printf(" )");
+				} else {
+					printf(" %s", rangetrans->high_str);
+				}
+
+				printf("\n");
+				return;
+			}
 			case CIL_AVRULE: {
 				struct cil_avrule *rule = node->data;
 				struct cil_list_item *item = NULL;
@@ -1176,8 +1217,9 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 						curr_param = curr_param->next;
 					}
-					printf(" )\n");
+					printf(" )");
 				}
+				printf("\n");
 
 				return;
 			}

@@ -104,6 +104,8 @@ int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_curren
 void cil_destroy_typepermissive(struct cil_typepermissive *typeperm);
 int cil_gen_filetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_filetransition(struct cil_filetransition *filetrans);
+int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans);
 int cil_gen_sensitivity(struct cil_db *idb, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_sensitivity(struct cil_sens *sens);
 int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

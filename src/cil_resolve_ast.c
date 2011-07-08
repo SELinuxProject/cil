@@ -437,6 +437,99 @@ resolve_filetransition_out:
 	return rc;
 }
 
+int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_rangetransition *rangetrans = (struct cil_rangetransition*)current->data;
+	struct cil_tree_node *src_node = NULL;
+	struct cil_tree_node *exec_node = NULL;
+	struct cil_tree_node *obj_node = NULL;
+	struct cil_tree_node *low_node = NULL;
+	struct cil_tree_node *high_node = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, rangetrans->src_str, CIL_SYM_TYPES, call, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rangetrans->src_str);
+		goto resolve_rangetransition_out;
+	}
+	rangetrans->src = (struct cil_type*)src_node->data;
+
+	rc = cil_resolve_name(db, current, rangetrans->exec_str, CIL_SYM_TYPES, call, &exec_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rangetrans->exec_str);
+		goto resolve_rangetransition_out;
+	}
+	rangetrans->exec = (struct cil_type*)exec_node->data;
+
+	rc = cil_resolve_name(db, current, rangetrans->obj_str, CIL_SYM_CLASSES, call, &obj_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rangetrans->obj_str);
+		goto resolve_rangetransition_out;
+	}
+	rangetrans->obj = (struct cil_class*)obj_node->data;
+
+	if (rangetrans->low_str != NULL) {
+		rc = cil_resolve_name(db, current, rangetrans->low_str, CIL_SYM_LEVELS, call, &low_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve low level, rc: %d\n", rc);
+			goto resolve_rangetransition_out;
+		}
+		rangetrans->low = (struct cil_level*)low_node->data;
+
+		/* This could still be an anonymous level even if low_str is set, if low_str is a param_str*/
+		if (rangetrans->low->datum.name == NULL) {
+			rc = cil_resolve_level(db, current, rangetrans->low, call);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve low level, rc: %d\n", rc);
+				goto resolve_rangetransition_out;
+			}
+		}
+	} else if (rangetrans->low != NULL) {
+		rc = cil_resolve_level(db, current, rangetrans->low, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve low level, rc: %d\n", rc);
+			goto resolve_rangetransition_out;
+		}
+	} else {
+		printf("Invalid rangetrans, low level not found\n");
+		rc = SEPOL_ERR;
+		goto resolve_rangetransition_out;
+	}
+
+	if (rangetrans->high_str != NULL) {
+		rc = cil_resolve_name(db, current, rangetrans->high_str, CIL_SYM_LEVELS, call, &high_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve high level, rc: %d\n", rc);
+			goto resolve_rangetransition_out;
+		}
+		rangetrans->high = (struct cil_level*)high_node->data;
+
+		/* This could still be an anonymous level even if low_str is set, if low_str is a param_str*/
+		if (rangetrans->high->datum.name == NULL) {
+			rc = cil_resolve_level(db, current, rangetrans->high, call);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve high level, rc: %d\n", rc);
+				goto resolve_rangetransition_out;
+			}
+		}
+	} else if (rangetrans->high != NULL) {
+		rc = cil_resolve_level(db, current, rangetrans->high, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve high level, rc: %d\n", rc);
+			goto resolve_rangetransition_out;
+		}
+	} else {
+		printf("Invalid rangetrans, high level not found\n");
+		rc = SEPOL_ERR;
+		goto resolve_rangetransition_out;
+	}
+
+	return SEPOL_OK;
+
+resolve_rangetransition_out:
+	return rc;
+}
+
 int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_classcommon *clscom = (struct cil_classcommon*)current->data;
@@ -1429,7 +1522,7 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 			goto resolve_level_out;
 		}
 		level->catset = catset_node->data;
-	} else {
+	} else if (level->cat_list_str != NULL) {
 		cil_list_init(&res_cat_list);
 		rc = cil_resolve_cat_list(db, current, level->cat_list_str, res_cat_list, call);
 		if (rc != SEPOL_OK) {
@@ -1598,6 +1691,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		}
 		context->low = (struct cil_level*)low_node->data;
 
+		/* This could still be an anonymous level even if low_str is set, if low_str is a param_str*/
 		if (context->low->datum.name == NULL) {
 			rc = cil_resolve_level(db, current, context->low, call);
 			if (rc != SEPOL_OK) {
@@ -1626,6 +1720,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		}
 		context->high = (struct cil_level*)high_node->data;
 
+		/* This could still be an anonymous level even if high_str is set, if high_str is a param_str*/
 		if (context->high->datum.name == NULL) {
 			rc = cil_resolve_level(db, current, context->high, call);
 			if (rc != SEPOL_OK) {
@@ -2516,6 +2611,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		case CIL_FILETRANSITION:
 			rc = cil_resolve_filetransition(db, node, call);
+			break;
+		case CIL_RANGETRANSITION:
+			rc = cil_resolve_rangetransition(db, node, call);
 			break;
 		case CIL_AVRULE:
 			rc = cil_resolve_avrule(db, node, call);

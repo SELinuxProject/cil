@@ -448,6 +448,46 @@ void cil_copy_filetransition(struct cil_filetransition *orig, struct cil_filetra
 	*copy = new;
 }
 
+void cil_copy_rangetransition(struct cil_rangetransition *orig, struct cil_rangetransition **copy)
+{
+	struct cil_rangetransition *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_rangetransition_init(&new);
+	if (rc != SEPOL_OK) {
+		goto copy_rangetransition_out;
+	}
+
+	new->src_str = cil_strdup(orig->src_str);
+	new->exec_str = cil_strdup(orig->exec_str);
+	new->obj_str = cil_strdup(orig->obj_str);
+	new->low_str = cil_strdup(orig->low_str);
+	new->high_str = cil_strdup(orig->high_str);
+
+	if (orig->low != NULL) {
+		rc = cil_level_init(&new->low);
+		if (rc != SEPOL_OK) {
+			goto copy_rangetransition_out;
+		}
+
+		cil_copy_fill_level(orig->low, new->low);
+	}
+
+	if (orig->high != NULL) {
+		rc = cil_level_init(&new->high);
+		if (rc != SEPOL_OK) {
+			goto copy_rangetransition_out;
+		}
+
+		cil_copy_fill_level(orig->high, new->high);
+	}
+
+	*copy = new;
+
+copy_rangetransition_out:
+	return;
+}
+
 int cil_copy_bool(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
 {
 	struct cil_bool *new = NULL;
@@ -1167,6 +1207,9 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_FILETRANSITION:
 		cil_copy_filetransition((struct cil_filetransition*)orig->data, (struct cil_filetransition**)&new->data);
+		break;
+	case CIL_RANGETRANSITION:
+		cil_copy_rangetransition((struct cil_rangetransition*)orig->data, (struct cil_rangetransition**)&new->data);
 		break;
 	case CIL_BOOL:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_BOOLS, &cil_copy_bool);
