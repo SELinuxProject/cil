@@ -53,7 +53,7 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_class_to_binary(policydb_t *pdb, struct cil_tree_node *node);
+int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 
 #endif //_CIL_BINARY_INTERNAL_H_
