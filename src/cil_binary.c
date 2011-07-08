@@ -160,14 +160,9 @@ type_ebitmap_out:
         return rc;
 }
 
-int __cil_node_to_policydb(const struct cil_db *db, policydb_t *pdb, struct cil_tree_node *node, int pass)
+int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
-
-	if (db == NULL || &pdb == NULL || node == NULL) {
-		goto node_to_policydb_out;
-	}
-
 	switch (pass) {
 	case 1:
 		switch (node->flavor) {
@@ -190,9 +185,6 @@ int __cil_node_to_policydb(const struct cil_db *db, policydb_t *pdb, struct cil_
 	default:
 		break;
 	}
-	return SEPOL_OK;
-
-node_to_policydb_out:
 	return rc;
 }
 
@@ -200,19 +192,13 @@ int __cil_binary_create_helper(struct cil_tree_node *node, __attribute__((unused
 {
 	int rc = SEPOL_ERR;
 	int pass;
-	const struct cil_db *db = NULL;
 	struct cil_args_binary *args = extra_args;
 	policydb_t *pdb;
 
-	if (node == NULL || extra_args == NULL) {
-		goto binary_create_helper_out;
-	}
-
-	db = args->db;
 	pdb = args->pdb;
 	pass = args->pass;
 
-	rc = __cil_node_to_policydb(db, pdb, node, pass);
+	rc = __cil_node_to_policydb(pdb, node, pass);
 	if (rc != SEPOL_OK) {
 		goto binary_create_helper_out;
 	}
