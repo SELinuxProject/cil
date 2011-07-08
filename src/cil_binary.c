@@ -46,11 +46,13 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
+	char *key;
 	struct cil_common *cil_common = node->data;
 	struct cil_tree_node *cil_perm = node->cl_head;
 	common_datum_t *sepol_common = cil_malloc(sizeof(*sepol_common));
 	memset(sepol_common, 0, sizeof(common_datum_t));
-	rc = symtab_insert(pdb, SYM_COMMONS, cil_common->datum.name, sepol_common, SCOPE_DECL, 0, &value);
+	key = cil_strdup(cil_common->datum.name);
+	rc = symtab_insert(pdb, SYM_COMMONS, key, sepol_common, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
 		goto common_to_binary_out;
 	}
@@ -83,11 +85,13 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
+	char *key;
 	struct cil_class *cil_class = node->data;
 	struct cil_tree_node *cil_perm = node->cl_head;
 	class_datum_t *sepol_class = cil_malloc(sizeof(*sepol_class));
 	memset(sepol_class, 0, sizeof(class_datum_t));
-	rc = symtab_insert(pdb, SYM_CLASSES, cil_class->datum.name, sepol_class, SCOPE_DECL, 0, &value);
+	key = cil_strdup(cil_class->datum.name);
+	rc = symtab_insert(pdb, SYM_CLASSES, key, sepol_class, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
 		goto class_to_policydb_out;
 	}
@@ -100,10 +104,9 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		struct cil_perm *curr = cil_perm->data;
 		perm_datum_t *sepol_perm = cil_malloc(sizeof(*sepol_perm));
 		memset(sepol_perm, 0, sizeof(perm_datum_t));
+		key = cil_strdup(curr->datum.name);
 		sepol_perm->s.value = sepol_class->permissions.nprim + 1;
-		rc = hashtab_insert(sepol_class->permissions.table,
-					curr->datum.name,
-					sepol_perm);
+		rc = hashtab_insert(sepol_class->permissions.table, key, sepol_perm);
 		if (rc != SEPOL_OK) {
 			goto class_to_policydb_out;
 		}
@@ -120,13 +123,14 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
         int rc = SEPOL_ERR;
         uint32_t value = 0;
+	char *key;
         struct cil_type *cil_type = node->data;
         type_datum_t *sepol_type = cil_malloc(sizeof(*sepol_type));
         type_datum_init(sepol_type);
-
+	key = cil_strdup(cil_type->datum.name);
         sepol_type->primary = 1;
         sepol_type->flavor = TYPE_TYPE;
-        rc = symtab_insert(pdb, SYM_TYPES, cil_type->datum.name, sepol_type, SCOPE_DECL, 0, &value);
+        rc = symtab_insert(pdb, SYM_TYPES, key, sepol_type, SCOPE_DECL, 0, &value);
         if (rc != SEPOL_OK) {
                 goto type_to_binary_out;
         }
