@@ -55,5 +55,26 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  */
 int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
+/**
+ * Insert cil type structure into sepol policydb.
+ *
+ * @param[in] pdb The policy database to insert the type into.
+ * @param[in] node The tree node that contains the cil_type.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
+ * Initialize type attribute and attribute type bitmaps within the
+ * policy database.
+ *
+ * @param[in] pdb The policy database which contains the types, which
+ * contain the bitmaps.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int policydb_type_ebitmap_init(policydb_t *pdb);
+
 
 #endif //_CIL_BINARY_INTERNAL_H_

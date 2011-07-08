@@ -116,6 +116,50 @@ class_to_policydb_out:
 	return rc;
 }
 
+int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+        int rc = SEPOL_ERR;
+        uint32_t value = 0;
+        struct cil_type *cil_type = node->data;
+        type_datum_t *sepol_type = cil_malloc(sizeof(*sepol_type));
+        type_datum_init(sepol_type);
+
+        sepol_type->primary = 1;
+        sepol_type->flavor = TYPE_TYPE;
+        rc = symtab_insert(pdb, SYM_TYPES, cil_type->datum.name, sepol_type, SCOPE_DECL, 0, &value);
+        if (rc != SEPOL_OK) {
+                goto type_to_binary_out;
+        }
+        sepol_type->s.value = value;
+        return SEPOL_OK;
+
+type_to_binary_out:
+        return rc;
+}
+
+int policydb_type_ebitmap_init(policydb_t *pdb)
+{
+        int rc = SEPOL_ERR;
+        uint32_t i;
+        if (pdb->attr_type_map != NULL && pdb->type_attr_map != NULL) {
+                rc = SEPOL_OK;
+		goto type_ebitmap_out;
+        }
+        pdb->attr_type_map = cil_malloc(pdb->p_types.nprim * sizeof(ebitmap_t));
+        pdb->type_attr_map = cil_malloc(pdb->p_types.nprim * sizeof(ebitmap_t));
+        for (i = 0; i < pdb->p_types.nprim; i++) {
+                ebitmap_init(&pdb->attr_type_map[i]);
+                ebitmap_init(&pdb->type_attr_map[i]);
+                if (ebitmap_set_bit(&pdb->type_attr_map[i], i, 1)) {
+                        goto type_ebitmap_out;
+                }
+        }
+        return SEPOL_OK;
+
+type_ebitmap_out:
+        return rc;
+}
+
 int __cil_node_to_policydb(const struct cil_db *db, policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
@@ -133,9 +177,15 @@ int __cil_node_to_policydb(const struct cil_db *db, policydb_t *pdb, struct cil_
 		case CIL_CLASS:
 			rc = cil_class_to_policydb(pdb, node);
 			break;
+		case CIL_TYPE:
+			rc = cil_type_to_policydb(pdb, node);
+			break;
 		default:
 			break;
 		}
+		break;
+	case 2:
+		rc = policydb_type_ebitmap_init(pdb);
 		break;
 	default:
 		break;
@@ -187,7 +237,7 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 
 	extra_args.db = db;
 	extra_args.pdb = pdb;
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 2; i++) {
 		extra_args.pass = i;
 		rc = cil_tree_walk(db->ast->root, __cil_binary_create_helper, NULL, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
