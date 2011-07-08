@@ -38,8 +38,8 @@
 /**
  * Insert cil common structure into sepol policydb.
  *
- * @param[in] pdb The policy database to insert the class into.
- * @param[in] node The tree node that contains the cil_class.
+ * @param[in] pdb The policy database to insert the common into.
+ * @param[in] node The tree node that contains the cil_common.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
