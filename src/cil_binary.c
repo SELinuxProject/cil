@@ -129,6 +129,28 @@ class_to_policydb_out:
 	return rc;
 }
 
+int cil_role_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_role *cil_role = node->data;
+	role_datum_t *sepol_role = cil_malloc(sizeof(*sepol_role));
+	role_datum_init(sepol_role);
+
+	key = cil_strdup(cil_role->datum.name);
+	rc = symtab_insert(pdb, SYM_ROLES, key, sepol_role, SCOPE_DECL, 0, &value);
+	if (rc != SEPOL_OK) {
+		goto role_to_policydb_out;
+	}
+	sepol_role->s.value = value;
+
+	return SEPOL_OK;
+
+role_to_policydb_out:
+	return rc;
+}
+
 int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -193,6 +215,8 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_CLASS:
 			rc = cil_class_to_policydb(pdb, node);
 			break;
+		case CIL_ROLE:
+			rc = cil_role_to_policydb(pdb, node);
 		case CIL_TYPE:
 			rc = cil_type_to_policydb(pdb, node);
 			break;
