@@ -30,7 +30,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+
 #include <sepol/policydb/policydb.h>
+#include <sepol/policydb/polcaps.h>
 
 #include "cil.h"
 #include "cil_mem.h"
@@ -261,6 +263,27 @@ type_ebitmap_out:
 	return rc;
 }
 
+int cil_policycap_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	int capnum;
+	struct cil_policycap *cil_polcap = node->data;
+
+	capnum = sepol_polcap_getnum(cil_polcap->datum.name);
+	if (capnum == -1) {
+		goto policycap_to_policydb_out;
+	}
+
+	if (ebitmap_set_bit(&pdb->policycaps, capnum, 1)) {
+		goto policycap_to_policydb_out;
+	}
+
+	return SEPOL_OK;
+
+policycap_to_policydb_out:
+	return rc;
+}
+
 int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
@@ -277,6 +300,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			rc = cil_role_to_policydb(pdb, node);
 		case CIL_TYPE:
 			rc = cil_type_to_policydb(pdb, node);
+			break;
+		case CIL_POLICYCAP:
+			rc = cil_policycap_to_policydb(pdb, node);
 			break;
 		default:
 			break;

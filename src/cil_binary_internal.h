@@ -106,5 +106,15 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  */
 int policydb_type_ebitmap_init(policydb_t *pdb);
 
+/**
+ * Insert cil policycap structure into sepol policydb.
+ *
+ * @param[in] pdb The policy database to insert the policycap into.
+ * @param[in] node The tree node that contains the cil_policycap.
+ *
+ * @return SEPOL_OK upon success or SEPOL_ERR upon error.
+ */
+int cil_policycap_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
 
 #endif //_CIL_BINARY_INTERNAL_H_
