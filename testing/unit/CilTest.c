@@ -970,6 +970,18 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roledominance);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roledominance_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds);
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds_norole1_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds_role1_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds_norole2_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds_role2_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rolebounds_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_rolebounds);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_rolebounds_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permset);
 	SUITE_ADD_TEST(suite, test_cil_gen_avrule_permset_anon);
