@@ -3903,7 +3903,7 @@ void test_cil_gen_attrtypes_extra_neg(CuTest *tc) {
 }
 
 void test_cil_gen_userbounds(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "type1", "type2", ")", NULL};
+	char *line[] = {"(", "userbounds", "user1", "user2", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3941,7 +3941,7 @@ void test_cil_gen_userbounds_notype1_neg(CuTest *tc) {
 }
 
 void test_cil_gen_userbounds_type1_inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "(", "type1", ")", "type2", ")", NULL};
+	char *line[] = {"(", "userbounds", "(", "user1", ")", "user2", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3960,7 +3960,7 @@ void test_cil_gen_userbounds_type1_inparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_userbounds_notype2_neg(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "type1", ")", NULL};
+	char *line[] = {"(", "userbounds", "user1", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3979,7 +3979,7 @@ void test_cil_gen_userbounds_notype2_neg(CuTest *tc) {
 }
 
 void test_cil_gen_userbounds_type2_inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "type1", "(", "type2", ")", ")", NULL};
+	char *line[] = {"(", "userbounds", "user1", "(", "user2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3998,7 +3998,7 @@ void test_cil_gen_userbounds_type2_inparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_userbounds_extra_neg(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "type1", "type2", "extra", ")", NULL};
+	char *line[] = {"(", "userbounds", "user1", "user2", "extra", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -4017,7 +4017,7 @@ void test_cil_gen_userbounds_extra_neg(CuTest *tc) {
 }
 
 void test_cil_gen_userbounds_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "type1", "type2", ")", NULL};
+	char *line[] = {"(", "userbounds", "user1", "user2", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -4051,7 +4051,7 @@ void test_cil_gen_userbounds_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_userbounds_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "type1", "type2", ")", NULL};
+	char *line[] = {"(", "userbounds", "user1", "user2", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -14978,7 +14978,7 @@ void test_cil_build_ast_node_helper_attrtypes_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_userbounds(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "type1", "type2", ")", NULL};
+	char *line[] = {"(", "userbounds", "user1", "user2", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -14996,7 +14996,7 @@ void test_cil_build_ast_node_helper_userbounds(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_userbounds_neg(CuTest *tc) {
-	char *line[] = {"(", "userbounds", "type1", ")", NULL};
+	char *line[] = {"(", "userbounds", "user1", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
