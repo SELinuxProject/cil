@@ -48,6 +48,7 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 int cil_reset_class(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_reset_sens(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_userbounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);

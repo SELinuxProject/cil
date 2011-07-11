@@ -328,6 +328,11 @@ void test_cil_resolve_tunif_true(CuTest *);
 void test_cil_resolve_tunif_resolveexpr_neg(CuTest *);
 void test_cil_resolve_tunif_evaluateexpr_neg(CuTest *);
 
+void test_cil_resolve_userbounds(CuTest *tc);
+void test_cil_resolve_userbounds_exists_neg(CuTest *tc);
+void test_cil_resolve_userbounds_user1_neg(CuTest *tc);
+void test_cil_resolve_userbounds_user2_neg(CuTest *tc);
+
 void test_cil_resolve_roletype(CuTest *tc);
 void test_cil_resolve_roletype_type_neg(CuTest *tc);
 void test_cil_resolve_roletype_role_neg(CuTest *tc);
@@ -451,6 +456,9 @@ void test_cil_resolve_ast_node_helper_type_rule_change_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_type_rule_member(CuTest *);
 void test_cil_resolve_ast_node_helper_type_rule_member_neg(CuTest *);
+
+void test_cil_resolve_ast_node_helper_userbounds(CuTest *tc);
+void test_cil_resolve_ast_node_helper_userbounds_neg(CuTest *tc);
 
 void test_cil_resolve_ast_node_helper_roletype(CuTest *tc);
 void test_cil_resolve_ast_node_helper_roletype_role_neg(CuTest *tc);

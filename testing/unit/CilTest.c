@@ -501,6 +501,13 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_userbounds);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userbounds_exists_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userbounds_user1_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userbounds_user2_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userbounds);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userbounds_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_type_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roletype_role_neg);
