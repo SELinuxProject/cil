@@ -1550,41 +1550,6 @@ resolve_level_out:
 	return rc;
 }
 
-int __cil_resolve_constrain_expr(struct cil_db *db, struct cil_tree_node *current, struct cil_tree_node *expr_root, struct cil_call *call)
-{
-	struct cil_tree_node *curr = expr_root;
-	struct cil_tree_node *attr_node = NULL;
-	int rc = SEPOL_ERR;
-
-	while (curr != NULL) {
-		if (curr->cl_head == NULL) {
-			if (strstr(CIL_CONSTRAIN_OPER, (char*)curr->data) == NULL && strstr(CIL_MLSCONSTRAIN_KEYS, (char*)curr->data) == NULL) {
-				rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_TYPES, call, &attr_node);
-				if (rc != SEPOL_OK) {
-					printf("Name resolution failed for: %s\n", (char*)curr->data);
-					goto resolve_constrain_expr_out;
-				}
-				free(curr->data);
-				curr->data = NULL;
-				curr->flavor = attr_node->flavor;
-				curr->data = attr_node->data;
-			}
-		} else {
-			rc = __cil_resolve_constrain_expr(db, current, curr->cl_head, call);
-			if (rc != SEPOL_OK) {
-				printf("Failed resolving constrain expression\n");
-				goto resolve_constrain_expr_out;
-			}
-		}
-		curr = curr->next;
-	}
-
-	return SEPOL_OK;
-
-resolve_constrain_expr_out:
-	return rc;
-}
-
 int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_constrain *cons = (struct cil_constrain*)current->data;
