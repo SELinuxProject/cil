@@ -284,6 +284,29 @@ policycap_to_policydb_out:
 	return rc;
 }
 
+int cil_bool_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_bool *cil_bool = node->data;
+	cond_bool_datum_t *sepol_bool = cil_malloc(sizeof(*sepol_bool));
+	memset(sepol_bool, 0, sizeof(cond_bool_datum_t));
+
+	key = cil_strdup(cil_bool->datum.name);
+	rc = symtab_insert(pdb, SYM_BOOLS, key, sepol_bool, SCOPE_DECL, 0, &value);
+	if (rc != SEPOL_OK) {
+		goto bool_to_policydb_out;
+	}
+	sepol_bool->s.value = value;
+	sepol_bool->state = cil_bool->value;
+
+	return SEPOL_OK;
+
+bool_to_policydb_out:
+	return rc;
+}
+
 int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
@@ -303,6 +326,8 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_POLICYCAP:
 			rc = cil_policycap_to_policydb(pdb, node);
+		case CIL_BOOL:
+			rc = cil_bool_to_policydb(pdb, node);
 			break;
 		default:
 			break;

@@ -116,5 +116,15 @@ int policydb_type_ebitmap_init(policydb_t *pdb);
  */
 int cil_policycap_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
+/**
+ * Insert cil bool structure into sepol policydb.
+ *
+ * @param[in] pdb THe policy database to insert the bool into.
+ * @param[in] node The tree node that contains the cil_bool.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_bool_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
 
 #endif //_CIL_BINARY_INTERNAL_H_
