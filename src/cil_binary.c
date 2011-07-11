@@ -166,12 +166,18 @@ int cil_role_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	role_datum_init(sepol_role);
 
 	key = cil_strdup(cil_role->datum.name);
-	rc = symtab_insert(pdb, SYM_ROLES, key, sepol_role, SCOPE_DECL, 0, &value);
+	if (!strcmp(key, "object_r")) {
+		/* special case
+		 * object_r defaults to 1 in libsepol symtab */
+		rc = SEPOL_OK;
+		goto role_to_policydb_out;
+	}
+
+	rc = symtab_insert(pdb, SYM_ROLES, (hashtab_key_t)key, sepol_role, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
 		goto role_to_policydb_out;
 	}
 	sepol_role->s.value = value;
-
 	return SEPOL_OK;
 
 role_to_policydb_out:
