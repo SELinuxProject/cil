@@ -129,6 +129,31 @@ class_to_policydb_out:
 	return rc;
 }
 
+int cil_classcommon_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_classcommon *cil_classcom = node->data;
+	class_datum_t *sepol_class;
+	common_datum_t *sepol_common;
+
+	sepol_class = hashtab_search(pdb->p_classes.table, cil_classcom->class_str);
+	if (sepol_class == NULL) {
+		goto classcommon_to_policydb_out;
+	}
+
+	sepol_common = hashtab_search(pdb->p_commons.table, cil_classcom->common_str);
+	if (sepol_common == NULL) {
+		goto classcommon_to_policydb_out;
+	}
+
+	sepol_class->comdatum = sepol_common;
+
+	return SEPOL_OK;
+
+classcommon_to_policydb_out:
+	return rc;
+}
+
 int cil_role_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -259,6 +284,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		break;
 	case 2:
 		switch (node->flavor) {
+		case CIL_CLASSCOMMON:
+			rc = cil_classcommon_to_policydb(pdb, node);
+			break;
 		case CIL_ROLETYPE:
 			rc = cil_roletype_to_policydb(pdb, node);
 			break;
