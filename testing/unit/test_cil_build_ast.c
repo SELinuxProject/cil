@@ -14440,7 +14440,7 @@ void test_cil_build_ast_node_helper_rangetransition(CuTest *tc) {
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertIntEquals(tc, 0, finished);
+	CuAssertIntEquals(tc, 1, finished);
 }
 
 void test_cil_build_ast_node_helper_rangetransition_neg(CuTest *tc) {
