@@ -522,9 +522,9 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_tunable);
 	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_unknown);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_callstack);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_call);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optional);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optional_optstacknull);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_macro);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_optstack_tunable_neg);

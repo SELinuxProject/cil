@@ -445,9 +445,9 @@ void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_classcommon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc);
 
+void test_cil_resolve_ast_node_helper_callstack(CuTest *tc);
 void test_cil_resolve_ast_node_helper_call(CuTest *tc);
 void test_cil_resolve_ast_node_helper_optional(CuTest *tc);
-void test_cil_resolve_ast_node_helper_optional_optstacknull(CuTest *tc);
 void test_cil_resolve_ast_node_helper_macro(CuTest *tc);
 void test_cil_resolve_ast_node_helper_optstack(CuTest *tc);
 void test_cil_resolve_ast_node_helper_optstack_tunable_neg(CuTest *tc);

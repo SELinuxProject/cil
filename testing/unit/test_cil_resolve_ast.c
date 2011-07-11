@@ -7472,6 +7472,35 @@ void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc) {
         CuAssertIntEquals(tc, 0, finished);
 }
 
+void test_cil_resolve_ast_node_helper_callstack(CuTest *tc) {
+	char *line[] = {"(", "call", "mm", "(", "foo", ")", ")", NULL};
+		
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_tree_node *test_ast_node_call;
+	cil_tree_node_init(&test_ast_node_call);
+	test_ast_node_call->flavor = CIL_CALL;
+
+	uint32_t finished = 0;
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	__cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_ast_node_helper_call(CuTest *tc) {
 	char *line[] = {"(", "call", "mm", "(", "foo", ")", ")", NULL};
 		
@@ -7501,7 +7530,7 @@ void test_cil_resolve_ast_node_helper_call(CuTest *tc) {
 }
 
 void test_cil_resolve_ast_node_helper_optional(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "file", "(", "read", ")", ")", ")", NULL};
 		
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7524,29 +7553,8 @@ void test_cil_resolve_ast_node_helper_optional(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_resolve_ast_node_helper_optional_optstacknull(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
-		
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-	
-	struct cil_tree_node *test_ast_node;
-	cil_tree_node_init(&test_ast_node);
-
-	uint32_t finished = 0;
-
-	uint32_t pass = 7;
-	uint32_t changed = 0;
-	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	// set optional to disabled
+	((struct cil_symtab_datum *)test_db->ast->root->cl_head->data)->state = CIL_STATE_DISABLED;
 
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -7579,9 +7587,10 @@ void test_cil_resolve_ast_node_helper_macro(CuTest *tc) {
 }
 
 void test_cil_resolve_ast_node_helper_optstack(CuTest *tc) {
-	char *line[] = {"(", "user", "staff_u", ")",
-			"(", "role",  "staff_r", ")",
-			"(", "userrole", "staff_u", "staff_r", ")", NULL};
+	char *line[] = {"(", "class", "baz", "(", "read", ")", ")",
+			"(", "type", "foo", ")",
+			"(", "type", "bar", ")",
+			"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 		
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7604,7 +7613,8 @@ void test_cil_resolve_ast_node_helper_optstack(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
+	__cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
