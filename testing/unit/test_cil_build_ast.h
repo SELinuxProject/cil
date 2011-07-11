@@ -262,6 +262,16 @@ void test_cil_gen_attrtypes_emptylists_neg(CuTest *);
 void test_cil_gen_attrtypes_listinparens_neg(CuTest *);
 void test_cil_gen_attrtypes_extra_neg(CuTest *);
 
+void test_cil_gen_userbounds(CuTest *);
+void test_cil_gen_userbounds_notype1_neg(CuTest *);
+void test_cil_gen_userbounds_type1_inparens_neg(CuTest *);
+void test_cil_gen_userbounds_notype2_neg(CuTest *);
+void test_cil_gen_userbounds_type2_inparens_neg(CuTest *);
+void test_cil_gen_userbounds_extra_neg(CuTest *);
+void test_cil_gen_userbounds_dbnull_neg(CuTest *);
+void test_cil_gen_userbounds_currnull_neg(CuTest *);
+void test_cil_gen_userbounds_astnull_neg(CuTest *);
+
 void test_cil_gen_role(CuTest *);
 void test_cil_gen_role_dbnull_neg(CuTest *tc);
 void test_cil_gen_role_currnull_neg(CuTest *tc);
@@ -840,6 +850,9 @@ void test_cil_build_ast_node_helper_rangetransition_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_attrtypes(CuTest *);
 void test_cil_build_ast_node_helper_attrtypes_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_userbounds(CuTest *);
+void test_cil_build_ast_node_helper_userbounds_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_role(CuTest *);
 void test_cil_build_ast_node_helper_role_neg(CuTest *);

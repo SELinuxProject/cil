@@ -3902,6 +3902,169 @@ void test_cil_gen_attrtypes_extra_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_userbounds(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "type1", "type2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+}
+
+void test_cil_gen_userbounds_notype1_neg(CuTest *tc) {
+	char *line[] = {"(", "userbounds", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
+void test_cil_gen_userbounds_type1_inparens_neg(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "(", "type1", ")", "type2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
+void test_cil_gen_userbounds_notype2_neg(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "type1", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
+void test_cil_gen_userbounds_type2_inparens_neg(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "type1", "(", "type2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
+void test_cil_gen_userbounds_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "type1", "type2", "extra", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
+void test_cil_gen_userbounds_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "type1", "type2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db = NULL;
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
+void test_cil_gen_userbounds_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
+void test_cil_gen_userbounds_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "type1", "type2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_userbounds(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, rc, SEPOL_ERR);
+}
+
 void test_cil_gen_role(CuTest *tc) {
 	char *line[] = {"(", "role", "test_r", ")", NULL};
 
@@ -14635,6 +14798,42 @@ void test_cil_build_ast_node_helper_attrtypes(CuTest *tc) {
 
 void test_cil_build_ast_node_helper_attrtypes_neg(CuTest *tc) {
 	char *line[] = {"(", "attributetypes", "files", "(", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_userbounds(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "type1", "type2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_userbounds_neg(CuTest *tc) {
+	char *line[] = {"(", "userbounds", "type1", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

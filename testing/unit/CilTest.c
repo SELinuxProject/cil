@@ -813,6 +813,18 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attrtypes);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attrtypes_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds);
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_notype1_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_type1_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_notype2_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_type2_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_userbounds);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_userbounds_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_role);
 	SUITE_ADD_TEST(suite, test_cil_gen_role_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_role_currnull_neg);
