@@ -66,6 +66,16 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_role_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
+ * Insert cil roletype structure into sepol policydb.
+ *
+ * @param[in] pdb The policy database to insert the roletype into.
+ * @param[in] node The tree node that contains the cil_roletype.
+ *
+ * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
+ */
+int cil_roletype_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
  * Insert cil type structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the type into.
