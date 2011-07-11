@@ -250,6 +250,30 @@ roledominance_to_policydb_out:
         return rc;
 }
 
+int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_rolebounds *cil_rolebnds = node->data;
+	role_datum_t *sepol_role;
+	role_datum_t *sepol_rolebnds;
+
+	sepol_role = hashtab_search(pdb->p_roles.table, cil_rolebnds->role_str);
+	if (sepol_role == NULL) {
+		goto rolebounds_to_policydb_out;
+	}
+
+	sepol_rolebnds = hashtab_search(pdb->p_roles.table, cil_rolebnds->bounds_str);
+	if (sepol_rolebnds == NULL) {
+		goto rolebounds_to_policydb_out;
+	}
+	sepol_role->bounds = sepol_rolebnds->s.value;
+
+        return SEPOL_OK;
+
+rolebounds_to_policydb_out:
+	return rc;
+}
+
 int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -447,6 +471,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_ROLEDOMINANCE:
 			rc = cil_roledominance_to_policydb(pdb, node);
+			break;
+		case CIL_ROLEBOUNDS:
+			rc = cil_rolebounds_to_policydb(pdb, node);
 			break;
 		case CIL_USERROLE:
 			rc = cil_userrole_to_policydb(pdb, node);
