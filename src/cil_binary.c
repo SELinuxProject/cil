@@ -217,6 +217,39 @@ roletype_to_policydb_out:
 	return rc;
 }
 
+int cil_roledominance_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+        int rc = SEPOL_ERR;
+        struct cil_role *cil_doming;
+        struct cil_role *cil_domed;
+        struct cil_roledominance *cil_roledom;
+        role_datum_t *sepol_doming;
+        role_datum_t *sepol_domed;
+
+	cil_roledom = node->data;
+	cil_doming = cil_roledom->role;
+	cil_domed = cil_roledom->domed;
+
+	sepol_doming = hashtab_search(pdb->p_roles.table, cil_doming->datum.name);
+	if (sepol_doming == NULL) {
+		goto roledominance_to_policydb_out;
+	}
+
+	sepol_domed = hashtab_search(pdb->p_roles.table, cil_domed->datum.name);
+	if (sepol_domed == NULL) {
+		goto roledominance_to_policydb_out;
+	}
+
+	if (ebitmap_set_bit(&sepol_domed->dominates, sepol_doming->s.value - 1, 1)) {
+		goto roledominance_to_policydb_out;
+	}
+
+	return SEPOL_OK;
+
+roledominance_to_policydb_out:
+        return rc;
+}
+
 int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -411,6 +444,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_ROLETYPE:
 			rc = cil_roletype_to_policydb(pdb, node);
+			break;
+		case CIL_ROLEDOMINANCE:
+			rc = cil_roledominance_to_policydb(pdb, node);
 			break;
 		case CIL_USERROLE:
 			rc = cil_userrole_to_policydb(pdb, node);
