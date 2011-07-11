@@ -171,6 +171,24 @@ void test_cil_gen_filetransition_dbnull_neg(CuTest *);
 void test_cil_gen_filetransition_currnull_neg(CuTest *);
 void test_cil_gen_filetransition_astnull_neg(CuTest *);
 
+void test_cil_gen_rangetransition(CuTest *);
+void test_cil_gen_rangetransition_anon_low_l(CuTest *);
+void test_cil_gen_rangetransition_anon_low_l_neg(CuTest *);
+void test_cil_gen_rangetransition_anon_high_l(CuTest *);
+void test_cil_gen_rangetransition_anon_high_l_neg(CuTest *);
+void test_cil_gen_rangetransition_dbnull_neg(CuTest *);
+void test_cil_gen_rangetransition_currnull_neg(CuTest *);
+void test_cil_gen_rangetransition_astnull_neg(CuTest *);
+void test_cil_gen_rangetransition_nofirsttype_neg(CuTest *);
+void test_cil_gen_rangetransition_firsttype_inparens_neg(CuTest *);
+void test_cil_gen_rangetransition_nosecondtype_neg(CuTest *);
+void test_cil_gen_rangetransition_secondtype_inparens_neg(CuTest *);
+void test_cil_gen_rangetransition_noclass_neg(CuTest *);
+void test_cil_gen_rangetransition_class_inparens_neg(CuTest *);
+void test_cil_gen_rangetransition_nolevel_l_neg(CuTest *);
+void test_cil_gen_rangetransition_nolevel_h_neg(CuTest *);
+void test_cil_gen_rangetransition_extra_neg(CuTest *);
+
 void test_cil_gen_expr_stack_and(CuTest *);
 void test_cil_gen_expr_stack_or(CuTest *);
 void test_cil_gen_expr_stack_xor(CuTest *);
@@ -816,6 +834,9 @@ void test_cil_build_ast_node_helper_typepermissive_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_filetransition(CuTest *);
 void test_cil_build_ast_node_helper_filetransition_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_rangetransition(CuTest *);
+void test_cil_build_ast_node_helper_rangetransition_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_attrtypes(CuTest *);
 void test_cil_build_ast_node_helper_attrtypes_neg(CuTest *);

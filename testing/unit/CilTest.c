@@ -693,6 +693,26 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_filetransition);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_filetransition_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_anon_low_l);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_anon_low_l_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_anon_high_l);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_anon_high_l_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_nofirsttype_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_firsttype_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_nosecondtype_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_secondtype_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_class_inparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_nolevel_l_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_nolevel_h_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_rangetransition);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_rangetransition_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_and);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_or);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_xor);
