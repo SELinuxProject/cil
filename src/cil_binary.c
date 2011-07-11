@@ -321,11 +321,13 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_ROLE:
 			rc = cil_role_to_policydb(pdb, node);
+			break;
 		case CIL_TYPE:
 			rc = cil_type_to_policydb(pdb, node);
 			break;
 		case CIL_POLICYCAP:
 			rc = cil_policycap_to_policydb(pdb, node);
+			break;
 		case CIL_BOOL:
 			rc = cil_bool_to_policydb(pdb, node);
 			break;
