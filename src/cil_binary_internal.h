@@ -117,6 +117,26 @@ int policydb_type_ebitmap_init(policydb_t *pdb);
 int cil_policycap_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
+ * Insert cil user structure into sepol policydb.
+ *
+ * @param[in] pdb THe policy database to insert the user into.
+ * @param[in] node The tree node that contains the cil_user.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_user_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
+ * Insert cil userrole structure into sepol policydb.
+ *
+ * @param[in] pdb THe policy database to insert the userrole into.
+ * @param[in] node The tree node that contains the cil_userrole.
+ *
+ * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
+ */
+int cil_userrole_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
  * Insert cil bool structure into sepol policydb.
  *
  * @param[in] pdb THe policy database to insert the bool into.

@@ -290,6 +290,66 @@ policycap_to_policydb_out:
 	return rc;
 }
 
+int cil_user_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_user *cil_user = node->data;
+	user_datum_t *sepol_user = cil_malloc(sizeof(*sepol_user));
+	user_datum_init(sepol_user);
+
+	key = cil_user->datum.name;
+	rc = symtab_insert(pdb, SYM_USERS, key, sepol_user, SCOPE_DECL, 0, &value);
+	if (rc != SEPOL_OK) {
+		goto user_to_policydb_out;
+	}
+	sepol_user->s.value = value;
+
+	return SEPOL_OK;
+
+user_to_policydb_out:
+	return rc;
+}
+
+int cil_userrole_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_user *cil_user;
+	struct cil_role *cil_role;
+	struct cil_userrole *cil_userrole;
+	user_datum_t *sepol_user;
+	role_datum_t *sepol_role;
+
+	cil_userrole = node->data;
+	cil_user = cil_userrole->user;
+
+	key = cil_user->datum.name;
+	sepol_user = hashtab_search(pdb->p_users.table, key);
+	if (sepol_user == NULL) {
+		goto userrole_to_policydb_out;
+	}
+	cil_role = cil_userrole->role;
+
+	key = cil_role->datum.name;
+	sepol_role = hashtab_search(pdb->p_roles.table, key);
+	if (sepol_role == NULL) {
+		goto userrole_to_policydb_out;
+	}
+
+	value = sepol_role->s.value;
+	if (ebitmap_set_bit(&sepol_user->roles.roles, value - 1, 1)) {
+		goto userrole_to_policydb_out;
+	}
+
+	return SEPOL_OK;
+
+userrole_to_policydb_out:
+	return rc;
+}
+
 int cil_bool_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -334,6 +394,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_POLICYCAP:
 			rc = cil_policycap_to_policydb(pdb, node);
 			break;
+		case CIL_USER:
+			rc = cil_user_to_policydb(pdb, node);
+			break;
 		case CIL_BOOL:
 			rc = cil_bool_to_policydb(pdb, node);
 			break;
@@ -348,6 +411,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_ROLETYPE:
 			rc = cil_roletype_to_policydb(pdb, node);
+			break;
+		case CIL_USERROLE:
+			rc = cil_userrole_to_policydb(pdb, node);
 			break;
 		}
 		break;
