@@ -53,6 +53,7 @@ int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struc
 int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roledominance(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_rolebounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_sensalias(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_catalias(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);

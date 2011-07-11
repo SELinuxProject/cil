@@ -219,6 +219,13 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_classcommon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_classcommon_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_rolebounds);
+	SUITE_ADD_TEST(suite, test_cil_resolve_rolebounds_exists_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_rolebounds_role1_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_rolebounds_role2_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_rolebounds);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_rolebounds_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_sensalias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_sensalias_sensdecl_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sensalias);

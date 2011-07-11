@@ -216,6 +216,75 @@ void test_cil_resolve_roledominance_role2_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
+void test_cil_resolve_rolebounds(CuTest *tc) {
+	char *line[] = {"(", "role", "role1", ")", 
+			"(", "role", "role2", ")", 
+			"(", "rolebounds", "role1", "role2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_rolebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_rolebounds_exists_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "role1", ")", 
+			"(", "role", "role2", ")", 
+			"(", "rolebounds", "role1", "role2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_rolebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	int rc = cil_resolve_rolebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_rolebounds_role1_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "role1", ")", 
+			"(", "role", "role2", ")", 
+			"(", "rolebounds", "role_DNE", "role2", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_rolebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_rolebounds_role2_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "role1", ")", 
+			"(", "role", "role2", ")", 
+			"(", "rolebounds", "role1", "role_DNE", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_rolebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 void test_cil_resolve_sensalias(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "sensitivityalias", "s0", "alias", ")", NULL};
@@ -7991,6 +8060,60 @@ void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
         CuAssertIntEquals(tc, 0, finished);
 }
+
+void test_cil_resolve_ast_node_helper_rolebounds(CuTest *tc) {
+	char *line[] = {"(", "role", "role1", ")",
+			"(", "role", "role2", ")",
+			"(", "rolebounds", "role1", "role2", ")", NULL};
+		
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	uint32_t finished = 0;
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_ast_node_helper_rolebounds_neg(CuTest *tc) {
+	char *line[] = {"(", "role", "role1", ")",
+			"(", "rolebounds", "role1", "role2", ")", NULL};
+		
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	uint32_t finished = 0;
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 
 void test_cil_resolve_ast_node_helper_callstack(CuTest *tc) {
 	char *line[] = {"(", "call", "mm", "(", "foo", ")", ")", NULL};
