@@ -151,6 +151,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_ROLEDOMINANCE:
 		cil_destroy_roledominance(*data);
 		break;
+	case CIL_ROLEBOUNDS:
+		cil_destroy_rolebounds(*data);
+		break;
 	case CIL_BOOL:
 		cil_destroy_bool(*data);
 		break;
@@ -223,6 +226,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_USERROLE:
 		cil_destroy_userrole(*data);
+		break;
+	case CIL_USERBOUNDS:
+		cil_destroy_userbounds(*data);
 		break;
 	case CIL_CONTEXT:
 		cil_destroy_context(*data);
@@ -753,6 +759,24 @@ int cil_userrole_init(struct cil_userrole **userrole)
 	return SEPOL_OK;
 }
 
+int cil_userbounds_init(struct cil_userbounds **userbounds)
+{
+	struct cil_userbounds *new_userbnds = NULL;
+
+	if (userbounds == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_userbnds = cil_malloc(sizeof(*new_userbnds));
+
+	new_userbnds->user_str = NULL;
+	new_userbnds->bounds_str = NULL;
+
+	*userbounds = new_userbnds;
+
+	return SEPOL_OK;
+}
+
 int cil_roledominance_init(struct cil_roledominance **roledominance)
 {
 	struct cil_roledominance *new_roledominance = NULL;
@@ -789,6 +813,24 @@ int cil_roletype_init(struct cil_roletype **roletype)
 	new_roletype->type = NULL;
 	
 	*roletype = new_roletype;
+
+	return SEPOL_OK;
+}
+
+int cil_rolebounds_init(struct cil_rolebounds **rolebounds)
+{
+	struct cil_rolebounds *new_rolebnds = NULL;
+
+	if (rolebounds == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_rolebnds = cil_malloc(sizeof(*new_rolebnds));
+
+	new_rolebnds->role_str = NULL;
+	new_rolebnds->bounds_str = NULL;
+
+	*rolebounds = new_rolebnds;
 
 	return SEPOL_OK;
 }
@@ -861,8 +903,8 @@ int cil_typebounds_init(struct cil_typebounds **typebnds)
 
 	new_typebnds = cil_malloc(sizeof(*new_typebnds));
 
-	new_typebnds->parent_str = NULL;
-	new_typebnds->child_str = NULL;
+	new_typebnds->type_str = NULL;
+	new_typebnds->bounds_str = NULL;
 
 	*typebnds = new_typebnds;
 

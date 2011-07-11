@@ -74,6 +74,7 @@ enum cil_flavor {
 	CIL_MLSCONSTRAIN,
 	CIL_PERM,
 	CIL_USERROLE,
+	CIL_USERBOUNDS,
 	CIL_ATTRTYPES,
 	CIL_TYPE_RULE,
 	CIL_TYPEBOUNDS,
@@ -84,6 +85,7 @@ enum cil_flavor {
 	CIL_ROLEALLOW,
 	CIL_ROLETYPE,
 	CIL_ROLEDOMINANCE,
+	CIL_ROLEBOUNDS,
 	CIL_CATORDER,
 	CIL_DOMINANCE,
 	CIL_SENSCAT,
@@ -159,12 +161,14 @@ enum cil_flavor {
 #define CIL_KEY_SID		"sid"
 #define CIL_KEY_SIDCONTEXT	"sidcontext"
 #define CIL_KEY_USER		"user"
+#define CIL_KEY_USERBOUNDS	"userbounds"
 #define CIL_KEY_ROLE 		"role"
 #define CIL_KEY_USERROLE	"userrole"
 #define CIL_KEY_ROLETYPE	"roletype"
 #define CIL_KEY_ROLETRANS	"roletransition"
 #define CIL_KEY_ROLEALLOW	"roleallow"
 #define CIL_KEY_ROLEDOMINANCE	"roledominance"
+#define CIL_KEY_ROLEBOUNDS	"rolebounds"
 #define CIL_KEY_TYPE 		"type"
 #define CIL_KEY_ATTR		"attribute"
 #define CIL_KEY_BOOL		"bool"
@@ -344,6 +348,7 @@ struct cil_sidcontext {
 
 struct cil_user {
 	struct cil_symtab_datum datum;
+	struct cil_user *bounds;
 };
 
 struct cil_userrole {
@@ -353,8 +358,14 @@ struct cil_userrole {
 	struct cil_role *role;
 };
 
+struct cil_userbounds {
+	char *user_str;
+	char *bounds_str;
+};
+
 struct cil_role {
 	struct cil_symtab_datum datum;
+	struct cil_role *bounds;
 };
 
 /* TODO Waiting on design */
@@ -372,9 +383,15 @@ struct cil_roletype {
 	struct cil_type *type;
 };
 
+struct cil_rolebounds {
+	char *role_str;
+	char *bounds_str;
+};
+
 struct cil_type	{
 	struct cil_symtab_datum datum;
 	struct cil_list *attrs_list;
+	struct cil_type *bounds;
 };
 
 struct cil_attribute {
@@ -396,10 +413,8 @@ struct cil_typealias {
 };
 
 struct cil_typebounds {
-	char *parent_str;
-	struct cil_type *parent;
-	char *child_str;
-	struct cil_type *child;
+	char *type_str;
+	char *bounds_str;
 };
 
 struct cil_typepermissive {
@@ -740,7 +755,9 @@ int cil_classcommon_init(struct cil_classcommon **classcommon);
 int cil_sid_init(struct cil_sid **sid);
 int cil_sidcontext_init(struct cil_sidcontext **sidcontext);
 int cil_userrole_init(struct cil_userrole **userrole);
+int cil_userbounds_init(struct cil_userbounds **userbounds);
 int cil_roledominance_init(struct cil_roledominance **roledominance);
+int cil_rolebounds_init(struct cil_rolebounds **rolebounds);
 int cil_roletype_init(struct cil_roletype **roletype);
 int cil_attribute_init(struct cil_attribute **attribute);
 int cil_attrtypes_init(struct cil_attrtypes **attrtypes);

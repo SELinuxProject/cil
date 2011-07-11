@@ -351,23 +351,28 @@ resolve_typealias_out:
 int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_typebounds *typebnds = (struct cil_typebounds*)current->data;
-	struct cil_tree_node *parent_node = NULL;
-	struct cil_tree_node *child_node = NULL;
+	struct cil_tree_node *type_node = NULL;
+	struct cil_tree_node *bounds_node = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(db, current, typebnds->parent_str, CIL_SYM_TYPES, call, &parent_node);
+	rc = cil_resolve_name(db, current, typebnds->type_str, CIL_SYM_TYPES, call, &type_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", typebnds->parent_str);
+		printf("Name resolution failed for %s\n", typebnds->type_str);
 		goto resolve_typebounds_out;
 	}
-	typebnds->parent = (struct cil_type*)(parent_node->data);
 
-	rc = cil_resolve_name(db, current, typebnds->child_str, CIL_SYM_TYPES, call, &child_node);
+	rc = cil_resolve_name(db, current, typebnds->bounds_str, CIL_SYM_TYPES, call, &bounds_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", typebnds->child_str);
+		printf("Name resolution failed for %s\n", typebnds->bounds_str);
 		goto resolve_typebounds_out;
 	}
-	typebnds->child = (struct cil_type*)(child_node->data);
+
+	if (((struct cil_type*)type_node->data)->bounds != NULL) {
+		printf("type cannot bind more than one type\n");
+		goto resolve_typebounds_out;
+	}
+
+	((struct cil_type*)type_node->data)->bounds = bounds_node->data;
 
 	return SEPOL_OK;
 
@@ -646,6 +651,38 @@ resolve_userrole_out:
 	return rc;
 }
 
+int cil_resolve_userbounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_userbounds *userbnds = (struct cil_userbounds*)current->data;
+	struct cil_tree_node *user_node = NULL;
+	struct cil_tree_node *bounds_node = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, userbnds->user_str, CIL_SYM_USERS, call, &user_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", userbnds->user_str);
+		goto resolve_userbounds_out;
+	}
+
+	rc = cil_resolve_name(db, current, userbnds->bounds_str, CIL_SYM_USERS, call, &bounds_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", userbnds->bounds_str);
+		goto resolve_userbounds_out;
+	}
+
+	if (((struct cil_user*)user_node->data)->bounds != NULL) {
+		printf("user cannot bind more than one user\n");
+		goto resolve_userbounds_out;
+	}
+
+	((struct cil_user*)user_node->data)->bounds = bounds_node->data;
+
+	return SEPOL_OK;
+
+resolve_userbounds_out:
+	return rc;
+}
+
 int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_roletype *roletype = (struct cil_roletype*)current->data;
@@ -767,6 +804,38 @@ int cil_resolve_roledominance(struct cil_db *db, struct cil_tree_node *current, 
 	return SEPOL_OK;
 
 resolve_roledominance_out:
+	return rc;
+}
+
+int cil_resolve_rolebounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_rolebounds *rolebnds = (struct cil_rolebounds*)current->data;
+	struct cil_tree_node *role_node = NULL;
+	struct cil_tree_node *bounds_node = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, rolebnds->role_str, CIL_SYM_ROLES, call, &role_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rolebnds->role_str);
+		goto resolve_rolebounds_out;
+	}
+
+	rc = cil_resolve_name(db, current, rolebnds->bounds_str, CIL_SYM_ROLES, call, &bounds_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rolebnds->bounds_str);
+		goto resolve_rolebounds_out;
+	}
+
+	if (((struct cil_role*)role_node->data)->bounds != NULL) {
+		printf("role cannot bind more than one role\n");
+		goto resolve_rolebounds_out;
+	}
+
+	((struct cil_role*)role_node->data)->bounds = bounds_node->data;
+
+	return SEPOL_OK;
+
+resolve_rolebounds_out:
 	return rc;
 }
 
@@ -2589,6 +2658,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_USERROLE:
 			rc = cil_resolve_userrole(db, node, call);
 			break;
+		case CIL_USERBOUNDS:
+			rc = cil_resolve_userbounds(db, node, call);
+			break;
 		case CIL_ROLETYPE:
 			rc = cil_resolve_roletype(db, node, call);
 			break;
@@ -2600,6 +2672,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		case CIL_ROLEDOMINANCE:
 			rc = cil_resolve_roleallow(db, node, call);
+			break;
+		case CIL_ROLEBOUNDS:
+			rc = cil_resolve_rolebounds(db, node, call);
 			break;
 		case CIL_SENSALIAS:
 			rc = cil_resolve_sensalias(db, node, call);

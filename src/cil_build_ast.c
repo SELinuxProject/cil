@@ -717,6 +717,61 @@ void cil_destroy_user(struct cil_user *user)
 	free(user);
 }
 
+int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_userbounds *userbnds = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_userbounds_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid userbounds declaration (line: %d)\n", parse_current->line);
+		goto gen_userbounds_cleanup;
+	}
+
+	rc = cil_userbounds_init(&userbnds);
+	if (rc != SEPOL_OK) {
+		goto gen_userbounds_cleanup;
+	}
+
+	userbnds->user_str = cil_strdup(parse_current->next->data);
+	userbnds->bounds_str = cil_strdup(parse_current->next->next->data);
+
+	ast_node->data = userbnds;
+	ast_node->flavor = CIL_USERBOUNDS;
+
+	return SEPOL_OK;
+
+gen_userbounds_cleanup:
+	if (userbnds != NULL) {
+		cil_destroy_userbounds(userbnds);
+	}
+	return rc;
+}
+
+void cil_destroy_userbounds(struct cil_userbounds *userbnds)
+{
+	if (userbnds->user_str != NULL) {
+		free(userbnds->user_str);
+	}
+
+	if (userbnds->bounds_str != NULL) {
+		free(userbnds->bounds_str);
+	}
+
+	free(userbnds);
+}
+
 int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -1051,6 +1106,61 @@ void cil_destroy_roledominance(struct cil_roledominance *roledom)
 	}
 
 	free(roledom);
+}
+
+int cil_gen_rolebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_rolebounds *rolebnds = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_rolebounds_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid rolebounds declaration (line: %d)\n", parse_current->line);
+		goto gen_rolebounds_cleanup;
+	}
+
+	rc = cil_rolebounds_init(&rolebnds);
+	if (rc != SEPOL_OK) {
+		goto gen_rolebounds_cleanup;
+	}
+
+	rolebnds->role_str = cil_strdup(parse_current->next->data);
+	rolebnds->bounds_str = cil_strdup(parse_current->next->next->data);
+
+	ast_node->data = rolebnds;
+	ast_node->flavor = CIL_ROLEBOUNDS;
+
+	return SEPOL_OK;
+
+gen_rolebounds_cleanup:
+	if (rolebnds != NULL) {
+		cil_destroy_rolebounds(rolebnds);
+	}
+	return rc;
+}
+
+void cil_destroy_rolebounds(struct cil_rolebounds *rolebnds)
+{
+	if (rolebnds->role_str != NULL) {
+		free(rolebnds->role_str);
+	}
+
+	if (rolebnds->bounds_str != NULL) {
+		free(rolebnds->bounds_str);
+	}
+
+	free(rolebnds);
 }
 
 int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
@@ -2131,8 +2241,8 @@ int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 		goto gen_typebounds_cleanup;
 	}
 
-	typebnds->parent_str = cil_strdup(parse_current->next->data);
-	typebnds->child_str = cil_strdup(parse_current->next->next->data);
+	typebnds->type_str = cil_strdup(parse_current->next->data);
+	typebnds->bounds_str = cil_strdup(parse_current->next->next->data);
 
 	ast_node->data = typebnds;
 	ast_node->flavor = CIL_TYPEBOUNDS;
@@ -2148,12 +2258,12 @@ gen_typebounds_cleanup:
 
 void cil_destroy_typebounds(struct cil_typebounds *typebnds)
 {
-	if (typebnds->parent_str != NULL) {
-		free(typebnds->parent_str);
+	if (typebnds->type_str != NULL) {
+		free(typebnds->type_str);
 	}
 
-	if (typebnds->child_str != NULL) {
-		free(typebnds->child_str);
+	if (typebnds->bounds_str != NULL) {
+		free(typebnds->bounds_str);
 	}
 
 	free(typebnds);
@@ -4374,6 +4484,12 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			printf("cil_gen_user failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_USERBOUNDS)) {
+		rc = cil_gen_userbounds(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_userbounds failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
 		rc = cil_gen_type(db, parse_current, ast_node, CIL_TYPE);
 		if (rc != SEPOL_OK) {
@@ -4459,6 +4575,12 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_roledominance(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_roledominance failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEBOUNDS)) {
+		rc = cil_gen_rolebounds(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_rolebounds failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {

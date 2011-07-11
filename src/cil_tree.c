@@ -462,6 +462,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
+			case CIL_USERBOUNDS: {
+				struct cil_userbounds *userbnds = node->data;
+				printf("USERBOUNDS: user: %s, bounds: %s\n", userbnds->user_str, userbnds->bounds_str);
+				return;
+			}
+
 			case CIL_ROLETYPE: {
 				struct cil_roletype *roletype = node->data;
 				printf("ROLETYPE:");
@@ -547,6 +553,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 
 				printf("\n");
+				return;
+			}
+			case CIL_ROLEBOUNDS: {
+				struct cil_rolebounds *rolebnds = node->data;
+				printf("ROLEBOUNDS: role: %s, bounds: %s\n", rolebnds->role_str, rolebnds->bounds_str);
 				return;
 			}
 			case CIL_CLASS: {
@@ -674,13 +685,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_TYPEBOUNDS: {
 				struct cil_typebounds *typebnds = node->data;
-
-				if (typebnds->parent != NULL && typebnds->child != NULL) {
-					printf("TYPEBOUNDS: parent: %s, child: %s\n", typebnds->parent->datum.name, typebnds->child->datum.name);
-				} else {
-					printf("TYPEBOUNDS: parent: %s, child: %s\n", typebnds->parent_str, typebnds->child_str);
-				}
-
+				printf("TYPEBOUNDS: type: %s, bounds: %s\n", typebnds->type_str, typebnds->bounds_str);
 				return;
 			}
 			case CIL_TYPEPERMISSIVE: {

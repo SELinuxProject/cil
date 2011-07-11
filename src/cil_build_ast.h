@@ -66,6 +66,8 @@ int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, s
 void cil_destroy_sidcontext(struct cil_sidcontext *sidcon);
 int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_user(struct cil_user *user);
+int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_userbounds(struct cil_userbounds *userbnds);
 int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_role(struct cil_role *role);
 int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
@@ -78,6 +80,8 @@ int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, st
 void cil_destroy_roleallow(struct cil_role_allow *roleallow);
 int cil_gen_roledominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_roledominance(struct cil_roledominance *roledom);
+int cil_gen_rolebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_rolebounds(struct cil_rolebounds *rolebnds);
 int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind);
 void cil_destroy_avrule(struct cil_avrule *rule);
 int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind);
