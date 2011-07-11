@@ -200,9 +200,6 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		}
 		break;
-	case 2:
-		rc = policydb_type_ebitmap_init(pdb);
-		break;
 	default:
 		break;
 	}
@@ -244,12 +241,17 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 
 	extra_args.db = db;
 	extra_args.pdb = pdb;
-	for (i = 1; i <= 2; i++) {
+	for (i = 1; i <= 1; i++) {
 		extra_args.pass = i;
 		rc = cil_tree_walk(db->ast->root, __cil_binary_create_helper, NULL, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
 			goto binary_create_out;
 		}
+	}
+
+	rc = policydb_type_ebitmap_init(pdb);
+	if (rc != SEPOL_OK) {
+		goto binary_create_out;
 	}
 
 	binary = fopen(fname, "w");
