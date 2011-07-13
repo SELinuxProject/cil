@@ -167,6 +167,26 @@ int cil_userrole_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_bool_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
+ * Insert all ordered cil category structures into sepol policydb.
+ *
+ * @param[in] pdb The policy database to insert the categories into.
+ * @param[in] db The cil database that contains the category order list.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db);
+
+/**
+ * Insert cil category alias structure into sepol policydb.
+ *
+ * @param[in] pdb The policy database to insert the category alias into.
+ * @param[in] node The tree node that contains the cil_catalias.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_catalias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
  * Insert cil avrule structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the avrule into.

@@ -430,6 +430,68 @@ bool_to_policydb_out:
 	return rc;
 }
 
+int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_list_item *curr_cat = db->catorder->head;
+	struct cil_cat *cil_cat = NULL;
+	cat_datum_t *sepol_cat = NULL;
+
+	while (curr_cat != NULL) {
+		cil_cat = curr_cat->data;
+		sepol_cat = cil_malloc(sizeof(*sepol_cat));
+		cat_datum_init(sepol_cat);
+
+		key = cil_strdup(cil_cat->datum.name);
+		rc = symtab_insert(pdb, SYM_CATS, key, sepol_cat, SCOPE_DECL, 0, &value);
+		if (rc != SEPOL_OK) {
+			goto cat_to_binary_out;
+		}
+		sepol_cat->s.value = value;
+		curr_cat = curr_cat->next;
+	}
+
+	return SEPOL_OK;
+
+cat_to_binary_out:
+	free(key);
+	cat_datum_destroy(sepol_cat);
+	free(sepol_cat);
+	return rc;
+}
+
+int cil_catalias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_catalias *cil_alias = node->data;
+	cat_datum_t *sepol_cat;
+	cat_datum_t *sepol_alias = cil_malloc(sizeof(*sepol_cat));
+	cat_datum_init(sepol_alias);
+
+	key = cil_alias->cat_str;
+	sepol_cat = hashtab_search(pdb->p_cats.table, key);
+	if (sepol_cat == NULL) {
+		goto catalias_to_policydb_out;
+	}
+
+	key = cil_strdup(cil_alias->datum.name);
+	rc = symtab_insert(pdb, SYM_CATS, key, sepol_alias, SCOPE_DECL, 0, &sepol_cat->s.value);
+	if (rc != SEPOL_OK) {
+		free(key);
+		goto catalias_to_policydb_out;
+	}
+	sepol_alias->s.value = sepol_cat->s.value;
+	sepol_alias->isalias = 1;
+
+	return SEPOL_OK;
+
+catalias_to_policydb_out:
+	return rc;
+}
+
 int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -549,6 +611,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_BOOL:
 			rc = cil_bool_to_policydb(pdb, node);
 			break;
+		case CIL_CATALIAS:
+			rc = cil_catalias_to_policydb(pdb, node);
+			break;
 		default:
 			break;
 		}
@@ -617,6 +682,11 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	}
 
 	rc = avtab_alloc(&pdb->te_avtab, MAX_AVTAB_SIZE);
+	if (rc != SEPOL_OK) {
+		goto binary_create_out;
+	}
+
+	rc = cil_catorder_to_policydb(pdb, db);
 	if (rc != SEPOL_OK) {
 		goto binary_create_out;
 	}
