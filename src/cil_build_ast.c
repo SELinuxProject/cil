@@ -2040,7 +2040,7 @@ void cil_destroy_tunif(struct cil_tunableif *tif)
 					((struct cil_conditional*)curr->data)->str = NULL;
 				}
 			}
-			next = curr->next;
+			next = curr->cl_head;
 			free(curr->data);
 			free(curr);
 			curr = next;
@@ -4838,42 +4838,54 @@ build_ast_node_helper_out:
 	return rc;
 }
 
-int __cil_build_ast_reverse_helper(struct cil_tree_node *current, void *extra_args)
+int __cil_build_ast_first_child_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
-	struct cil_args_build *args = extra_args;
+	struct cil_args_build *args = NULL;
 
-	if (current == NULL || extra_args == NULL) {
-		goto build_ast_reverse_helper_out;
+	if (extra_args == NULL) {
+		goto first_child_helper_out;
 	}
 
-	if (current->flavor == CIL_MACRO) {
+	args = extra_args;
+
+	if (args->ast->flavor == CIL_MACRO) {
+		args->macro = args->ast; 
+	}
+
+	return SEPOL_OK;
+
+first_child_helper_out:
+	return rc;
+}
+
+int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *extra_args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_tree_node *ast = NULL;
+	struct cil_args_build *args = NULL;
+
+	if (extra_args == NULL) {
+		goto last_child_helper_out;
+	}
+
+	args = extra_args;
+	ast = args->ast;
+
+	if (ast->flavor == CIL_ROOT) {
+		rc = SEPOL_OK;
+		goto last_child_helper_out;
+	}
+
+	args->ast = ast->parent;
+
+	if (args->ast->flavor == CIL_MACRO) {
 		args->macro = NULL;
 	}
 
 	return SEPOL_OK;
 
-build_ast_reverse_helper_out:
-	return rc;
-}
-
-int __cil_build_ast_branch_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *extra_args)
-{
-	int rc = SEPOL_ERR;
-	struct cil_tree_node *ast;
-	struct cil_args_build *args;
-
-	if (extra_args == NULL) {
-		goto build_ast_branch_helper_out;
-	}
-
-	args = extra_args;
-	ast = args->ast;
-	args->ast = ast->parent;
-
-	return SEPOL_OK;
-
-build_ast_branch_helper_out:
+last_child_helper_out:
 	return rc;
 }
 
@@ -4890,7 +4902,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	extra_args.db = db;
 	extra_args.macro = NULL;
 
-	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_reverse_helper, __cil_build_ast_branch_helper, &extra_args);
+	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_first_child_helper, __cil_build_ast_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		goto build_ast_out;

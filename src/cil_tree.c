@@ -119,14 +119,14 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
                             node:     node being visited
                             finished: boolean indicating to the tree walker that it should move on from this branch
                             extra_args:    additional data
-   reverse_node:	function to call when visiting a node while walking out of a branch (in reverse)
+   first_child:		Function to call before entering list of children
                         Takes parameters:
-                            node:     node being visited
+                            node:     node of first child
                             extra args:     additional data
-   finished_branch:     function to call when finished with a branch of the tree before walking back up
+   last_child:		Function to call when finished with the last child of a node's children
    extra_args:               any additional data to be passed to process_node() and finished_branch()
 */
-int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args), int (*reverse_node)(struct cil_tree_node *node, void *extra_args), int (*finished_branch)(struct cil_tree_node *node, void *extra_args), void *extra_args)
+int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args), int (*first_child)(struct cil_tree_node *node, void *extra_args), int (*last_child)(struct cil_tree_node *node, void *extra_args), void *extra_args)
 {
 	struct cil_tree_node *node = NULL;
 	uint32_t reverse = 0;
@@ -143,6 +143,15 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 
 	node = start_node->cl_head;
 
+
+	if (first_child != NULL) {
+		rc = (*first_child)(node, extra_args);
+		if (rc != SEPOL_OK) {
+			printf("Failed to process first child\n");
+			return rc;
+		}
+	}
+
 	do {
 		if (!reverse) {
 			if (process_node != NULL) {
@@ -152,18 +161,17 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 					return rc;
 				}
 			}
-		} else {
-			if (reverse_node != NULL) {
-				rc = (*reverse_node)(node, extra_args);
-				if (rc != SEPOL_OK) {
-					printf("Failed to reverse process node\n");
-					return rc;
-				}
-			}
 		}
 
 		if (node->cl_head != NULL && !reverse && !(finished & CIL_TREE_SKIP_HEAD)) {
 			node = node->cl_head;
+			if (first_child != NULL) {
+				rc = (*first_child)(node, extra_args);
+				if (rc != SEPOL_OK) {
+					printf("Failed to process first child\n");
+					return rc;
+				}
+			}
 			finished = CIL_TREE_SKIP_NOTHING;
 		} else if (node->next != NULL && reverse && !(finished & CIL_TREE_SKIP_NEXT)) {
 			node = node->next;
@@ -173,10 +181,10 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 			node = node->next;
 			finished = CIL_TREE_SKIP_NOTHING;
 		} else {
-			if (finished_branch != NULL) {
-				rc = (*finished_branch)(node, extra_args);
+			if (last_child != NULL) {
+				rc = (*last_child)(node, extra_args);
 				if (rc != SEPOL_OK) {
-					printf("Failed to process branch\n");
+					printf("Failed to process last child\n");
 					return rc;
 				}
 			}

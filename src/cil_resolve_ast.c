@@ -2850,32 +2850,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		goto resolve_ast_node_helper_out;
 	}
 
-	if (node->flavor == CIL_CALL || node->flavor == CIL_OPTIONAL) {
-		/* push this node onto a stack */
-		struct cil_tree_node *new;
-		rc = cil_tree_node_init(&new);
-		if (rc != SEPOL_OK) {
-			goto resolve_ast_node_helper_out;
-		}
-
-		new->data = node->data;
-		new->flavor = node->flavor;
-
-		if (node->flavor == CIL_CALL) {
-			if (callstack != NULL) {
-				callstack->parent = new;
-				new->cl_head = callstack;
-			}
-			args->callstack = new;
-		} else if (node->flavor == CIL_OPTIONAL) {
-			if (optstack != NULL) {
-				optstack->parent = new;
-				new->cl_head = optstack;
-			}
-			args->optstack = new;
-		}
-	}
-
 	return rc;
 
 resolve_ast_node_helper_out:
@@ -2913,16 +2887,69 @@ disable_children_helper_out:
 	return rc;
 }
 
-int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void *extra_args)
+int __cil_resolve_ast_first_child_helper(struct cil_tree_node *current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_args_resolve *args = extra_args;
+	struct cil_tree_node *callstack = NULL;
+	struct cil_tree_node *optstack = NULL;
+	struct cil_tree_node *parent = NULL;
 
-	if (current == NULL ||  extra_args == NULL) {
-		goto resolve_ast_reverse_helper_out;
+	if (current == NULL || extra_args == NULL) {
+		goto first_child_helper_out;
 	}
 
-	if (current->flavor == CIL_CALL) {
+	callstack = args->callstack;
+	optstack = args->optstack;
+
+	parent = current->parent;
+
+	if (parent->flavor == CIL_CALL || parent->flavor == CIL_OPTIONAL) {
+		/* push this node onto a stack */
+		struct cil_tree_node *new;
+		rc = cil_tree_node_init(&new);
+		if (rc != SEPOL_OK) {
+			goto first_child_helper_out;
+		}
+
+		new->data = parent->data;
+		new->flavor = parent->flavor;
+
+		if (parent->flavor == CIL_CALL) {
+			if (callstack != NULL) {
+				callstack->parent = new;
+				new->cl_head = callstack;
+			}
+			args->callstack = new;
+		} else if (parent->flavor == CIL_OPTIONAL) {
+			if (optstack != NULL) {
+				optstack->parent = new;
+				new->cl_head = optstack;
+			}
+			args->optstack = new;
+		}
+	}
+
+	return SEPOL_OK;
+
+first_child_helper_out:
+	return rc;
+
+}
+
+int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *extra_args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_args_resolve *args = extra_args;
+	struct cil_tree_node *parent = NULL;
+
+	if (current == NULL ||  extra_args == NULL) {
+		goto last_child_helper_out;
+	}
+
+	parent = current->parent;
+
+	if (parent->flavor == CIL_CALL) {
 		/* pop off the stack */
 		struct cil_tree_node *callstack = args->callstack;
 		args->callstack = callstack->cl_head;
@@ -2930,17 +2957,17 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void *extra_
 			callstack->cl_head->parent = NULL;
 		}
 		free(callstack);
-	} else if (current->flavor == CIL_OPTIONAL) {
+	} else if (parent->flavor == CIL_OPTIONAL) {
 		struct cil_tree_node *optstack;
 
-		if (((struct cil_optional *)current->data)->datum.state == CIL_STATE_DISABLING) {
+		if (((struct cil_optional *)parent->data)->datum.state == CIL_STATE_DISABLING) {
 			/* go into the optional, removing everything that it added */
-			rc = cil_tree_walk(current, __cil_disable_children_helper, NULL, NULL, NULL);
+			rc = cil_tree_walk(parent, __cil_disable_children_helper, NULL, NULL, NULL);
 			if (rc != SEPOL_OK) {
 				printf("Failed to disable optional children\n");
-				goto resolve_ast_reverse_helper_out;
+				goto last_child_helper_out;
 			}
-			((struct cil_optional *)current->data)->datum.state = CIL_STATE_DISABLED;
+			((struct cil_optional *)parent->data)->datum.state = CIL_STATE_DISABLED;
 		}
 
 		/* pop off the stack */
@@ -2954,7 +2981,7 @@ int __cil_resolve_ast_reverse_helper(struct cil_tree_node *current, void *extra_
 
 	return SEPOL_OK;
 
-resolve_ast_reverse_helper_out:
+last_child_helper_out:
 	return rc;
 }
 
@@ -2979,7 +3006,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 #ifdef DEBUG
 		printf("---------- Pass %i ----------\n", pass);
 #endif
-		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_reverse_helper, NULL, &extra_args);
+		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_first_child_helper, __cil_resolve_ast_last_child_helper, &extra_args);
 		if (rc != SEPOL_OK) {
 			printf("Pass %i fo resolution failed\n", pass);
 			goto resolve_ast_out;
