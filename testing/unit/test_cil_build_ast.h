@@ -990,6 +990,6 @@ void test_cil_build_ast_node_helper_gen_ipaddr_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_extraargsnull_neg(CuTest *);
 
-void test_cil_build_ast_branch_helper(CuTest *);
-void test_cil_build_ast_branch_helper_extraargsnull_neg(CuTest *);
+void test_cil_build_ast_last_child_helper(CuTest *);
+void test_cil_build_ast_last_child_helper_extraargsnull_neg(CuTest *);
 #endif

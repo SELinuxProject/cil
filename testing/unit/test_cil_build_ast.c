@@ -38,7 +38,7 @@
 #include "../../src/cil_tree.h"
 
 int __cil_build_ast_node_helper(struct cil_tree_node *, uint32_t *, void *);
-int __cil_build_ast_branch_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *);
+int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *);
 //int __cil_build_constrain_tree(struct cil_tree_node *parse_current, struct cil_tree_node *expr_root);
 
 struct cil_args_build {
@@ -16554,7 +16554,7 @@ void test_cil_build_ast_node_helper_extraargsnull_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_build_ast_branch_helper(CuTest *tc) {
+void test_cil_build_ast_last_child_helper(CuTest *tc) {
 	char *line[] = {"(", "ipaddr", "ip", "192.168.1.1", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -16565,11 +16565,11 @@ void test_cil_build_ast_branch_helper(CuTest *tc) {
 
 	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
 	
-	int rc = __cil_build_ast_branch_helper(test_tree->root->cl_head->cl_head, extra_args);
+	int rc = __cil_build_ast_last_child_helper(test_tree->root->cl_head->cl_head, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_build_ast_branch_helper_extraargsnull_neg(CuTest *tc) {
+void test_cil_build_ast_last_child_helper_extraargsnull_neg(CuTest *tc) {
 	char *line[] = {"(", "ipaddr", "ip", "192.168.1.1", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -16578,7 +16578,7 @@ void test_cil_build_ast_branch_helper_extraargsnull_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	int rc = __cil_build_ast_branch_helper(test_tree->root->cl_head->cl_head, NULL);
+	int rc = __cil_build_ast_last_child_helper(test_tree->root->cl_head->cl_head, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 

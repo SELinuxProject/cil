@@ -4915,7 +4915,7 @@ void test_cil_evaluate_expr_stack_and(CuTest *tc) {
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4939,7 +4939,7 @@ void test_cil_evaluate_expr_stack_not(CuTest *tc) {
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4963,7 +4963,7 @@ void test_cil_evaluate_expr_stack_or(CuTest *tc) {
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4987,7 +4987,7 @@ void test_cil_evaluate_expr_stack_xor(CuTest *tc) {
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5011,7 +5011,7 @@ void test_cil_evaluate_expr_stack_eq(CuTest *tc) {
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5035,7 +5035,7 @@ void test_cil_evaluate_expr_stack_neq(CuTest *tc) {
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5060,7 +5060,7 @@ void test_cil_evaluate_expr_stack_oper1(CuTest *tc) {
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->next->data;
 
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5085,7 +5085,7 @@ void test_cil_evaluate_expr_stack_oper2(CuTest *tc) {
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->next->data;
 
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5121,7 +5121,7 @@ void test_cil_evaluate_expr_stack_neg(CuTest *tc) {
 	((struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data)->expr_stack->parent = test_node;
 	struct cil_tunableif *tif = (struct cil_tunableif*)test_db->ast->root->cl_head->next->next->next->data;
 	cil_resolve_expr_stack(test_db, tif->expr_stack, test_db->ast->root->cl_head->next->next->next, NULL);
-	int rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	int rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 

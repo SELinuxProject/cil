@@ -1451,8 +1451,8 @@ CuSuite* CilTreeGetBuildSuite(void) {
 
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_extraargsnull_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_branch_helper_extraargsnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_last_child_helper);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_last_child_helper_extraargsnull_neg);
 	
 	return suite;
 }
