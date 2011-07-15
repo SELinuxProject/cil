@@ -397,6 +397,12 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 			case CIL_MACRO:
 				cil_symtab_array_destroy(((struct cil_macro*)current->data)->symtab);
 				break;
+			case CIL_TUNABLEIF:
+				cil_symtab_array_destroy(((struct cil_tunableif*)current->data)->symtab);
+				break;
+			case CIL_BOOLEANIF:
+				/* do nothing */
+				break;
 			case CIL_CALL:
 				/* do nothing */
 				break;
