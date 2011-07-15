@@ -60,12 +60,6 @@ int main(int argc, char *argv[])
 	struct cil_tree *parse_tree;
 	cil_tree_init(&parse_tree);
 
-	struct cil_tree *copy_ast;
-	cil_tree_init(&copy_ast);
-
-	struct cil_db *copy_db;
-	cil_db_init(&copy_db);
-
 	struct cil_db *db;
 	cil_db_init(&db);
 
