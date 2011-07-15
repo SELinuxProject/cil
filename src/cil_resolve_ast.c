@@ -2420,16 +2420,24 @@ resolve_boolif_out:
 	return rc;
 }
 
-int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result)
+int cil_evaluate_expr_stack(struct cil_tree_node **expr_stack, uint16_t *result)
 {
 	struct cil_conditional *cond = NULL;
 	struct cil_tree_node *new = NULL;
+	struct cil_tree_node *stack = NULL;
 	struct cil_tree_node *oper1 = NULL;
 	struct cil_tree_node *oper2 = NULL;
 	uint16_t value1 = CIL_FALSE;
 	uint16_t value2 = CIL_FALSE;
-	uint16_t new_value = CIL_FALSE;
+	uint16_t *new_value = NULL;
 	int rc = SEPOL_ERR;
+
+	if (expr_stack == NULL || result == NULL) {
+		rc = SEPOL_ERR;
+		goto evaluate_expr_stack_out;
+	}
+
+	stack = *expr_stack;
 
 	while (stack != NULL) {
 		cond = (struct cil_conditional*)stack->data;
@@ -2456,21 +2464,23 @@ int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result)
 				}
 			}
 
+			new_value = cil_malloc(sizeof(uint16_t));
+
 			if (cond->flavor == CIL_NOT) {
-					new_value = !value1;
+				*new_value = !value1;
 			} else if (cond->flavor == CIL_AND) {
-				new_value = (value1 && value2);
+				*new_value = (value1 && value2);
 			} else if (cond->flavor == CIL_OR) {
-				new_value = (value1 || value2);
+				*new_value = (value1 || value2);
 			} else if (cond->flavor == CIL_XOR) {
-				new_value = (value1 ^ value2);
+				*new_value = (value1 ^ value2);
 			} else if (cond->flavor == CIL_EQ) {
-				new_value = (value1 == value2);
+				*new_value = (value1 == value2);
 			} else if (cond->flavor == CIL_NEQ) {
-				new_value = (value1 != value2);
+				*new_value = (value1 != value2);
 			}
 
-			new->data = &new_value;
+			new->data = new_value;
 
 			new->flavor = CIL_INT;
 			new->cl_head = stack->cl_head;
@@ -2495,9 +2505,15 @@ int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result)
 			}
 
 			if (stack->parent->parent != NULL) {
+				if (stack->parent->parent->flavor == CIL_INT) {
+					free(stack->parent->parent->data);
+				}
 				cil_tree_node_destroy(&stack->parent->parent);
 			}
 
+			if (stack->parent->flavor == CIL_INT) {
+				free(stack->parent->data);
+			}
 			cil_tree_node_destroy(&stack->parent);
 			cil_tree_node_destroy(&stack);
 
@@ -2511,6 +2527,8 @@ int cil_evaluate_expr_stack(struct cil_tree_node *stack, uint16_t *result)
 			}
 
 			stack = new;
+			*expr_stack = stack;
+
 		}
 		stack = stack->cl_head;
 	}
@@ -2532,7 +2550,7 @@ int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct c
 		goto resolve_tunif_out;
 	}
 
-	rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	rc = cil_evaluate_expr_stack(&tif->expr_stack, &result);
 	if (rc != SEPOL_OK) {
 		printf("Failed to evaluate expr stack\n");
 		goto resolve_tunif_out;
