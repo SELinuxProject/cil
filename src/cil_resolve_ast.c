@@ -2429,6 +2429,7 @@ resolve_boolif_out:
 	return rc;
 }
 
+/* This modifies/destroys the original stack */
 int cil_evaluate_expr_stack(struct cil_tree_node **expr_stack, uint16_t *result)
 {
 	struct cil_conditional *cond = NULL;
@@ -2536,7 +2537,10 @@ int cil_evaluate_expr_stack(struct cil_tree_node **expr_stack, uint16_t *result)
 			}
 
 			stack = new;
-			*expr_stack = stack;
+
+			if (new->parent == NULL) {
+				*expr_stack = stack;
+			}
 
 		}
 		stack = stack->cl_head;
