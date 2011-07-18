@@ -970,13 +970,15 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_list_item *cat = NULL;
 				struct cil_list_item *parent = NULL;
 
-				printf("SENSCAT: (");
+				printf("SENSCAT: sens:");
 
 				if (senscat->sens_str != NULL) {
-					printf(" %s", senscat->sens_str);
+					printf(" %s ", senscat->sens_str);
 				} else {
 					printf(" [processed]");
 				}
+
+				printf( "(");
 
 				if (senscat->cat_list_str != NULL) {
 					cat = senscat->cat_list_str->head;

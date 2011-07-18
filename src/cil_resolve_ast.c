@@ -1463,6 +1463,10 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct
 		goto resolve_senscat_out;
 	}
 
+	if (sens_node->flavor == CIL_SENSALIAS) {
+		sens_node = ((struct cil_sensalias*)sens_node->data)->sens->datum.node;
+	}
+
 	if (senscat->catset_str != NULL) {
 		rc = cil_resolve_name(db, current, (char*)senscat->catset_str, CIL_SYM_CATS, call, &cat_node);
 		if (rc != SEPOL_OK) {
@@ -1564,6 +1568,11 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 		printf("Failed to get sensitivity node\n");
 		goto resolve_level_out;
 	}
+
+	if (sens_node->flavor == CIL_SENSALIAS) {
+		sens_node = ((struct cil_sensalias*)sens_node->data)->sens->datum.node;
+	}
+
 	level->sens = (struct cil_sens*)sens_node->data;
 
 	if (level->catset_str != NULL) {
@@ -2627,6 +2636,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_CATSET:
 			rc = cil_resolve_catset(db, node, (struct cil_catset*)node->data, call);
 			break;
+		case CIL_SENSALIAS:
+			rc = cil_resolve_sensalias(db, node, call);
+			break;
 		}
 		break;
 	case 6:
@@ -2685,9 +2697,6 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		case CIL_ROLEBOUNDS:
 			rc = cil_resolve_rolebounds(db, node, call);
-			break;
-		case CIL_SENSALIAS:
-			rc = cil_resolve_sensalias(db, node, call);
 			break;
 		case CIL_CATALIAS:
 			rc = cil_resolve_catalias(db, node, call);
