@@ -1326,14 +1326,14 @@ copy_node_helper_out:
 	return rc;
 }
 
-int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig, void *extra_args)
+int __cil_copy_last_child_helper(__attribute__((unused)) struct cil_tree_node *orig, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *node = NULL;
 	struct cil_args_copy *args = NULL;
 
 	if (extra_args == NULL) {
-		goto copy_branch_helper_out;
+		goto copy_last_child_helper_out;
 	}
 
 	args = extra_args;
@@ -1345,7 +1345,7 @@ int __cil_copy_branch_helper(__attribute__((unused)) struct cil_tree_node *orig,
 
 	return SEPOL_OK;
 
-copy_branch_helper_out:
+copy_last_child_helper_out:
 	return rc;
 }
 	
@@ -1359,7 +1359,7 @@ int cil_copy_ast(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_
 	extra_args.dest = dest;
 	extra_args.db = db;
 
-	rc = cil_tree_walk(orig, __cil_copy_node_helper, NULL,  __cil_copy_branch_helper, &extra_args);
+	rc = cil_tree_walk(orig, __cil_copy_node_helper, NULL,  __cil_copy_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {
 		printf("cil_tree_walk failed, rc: %d\n", rc);
 		goto copy_ast_out;

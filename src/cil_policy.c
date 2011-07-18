@@ -903,7 +903,7 @@ int __cil_booleanif_node_helper(struct cil_tree_node *node, __attribute__((unuse
 	return SEPOL_OK;
 }
 
-int __cil_booleanif_reverse_helper(struct cil_tree_node *node, void *extra_args)
+int __cil_booleanif_last_child_helper(struct cil_tree_node *node, void *extra_args)
 {
 	struct cil_args_booleanif *args;
 	FILE **file_arr;
@@ -913,7 +913,7 @@ int __cil_booleanif_reverse_helper(struct cil_tree_node *node, void *extra_args)
 	file_arr = args->file_arr;
 	file_index = args->file_index;
 
-	if (node->flavor == CIL_ELSE) {
+	if (node->parent->flavor == CIL_ELSE) {
 		fprintf(file_arr[*file_index], "}\n");
 	}
 	
@@ -942,7 +942,7 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 
 	fprintf(file_arr[file_index], "{\n");
 
-	rc = cil_tree_walk(node, __cil_booleanif_node_helper, __cil_booleanif_reverse_helper, NULL, &extra_args);
+	rc = cil_tree_walk(node, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
 		printf("Failed to write booleanif content to file, rc: %d\n", rc);
 		return rc;
