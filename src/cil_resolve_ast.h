@@ -45,8 +45,6 @@ int cil_resolve_typepermissive(struct cil_db *db, struct cil_tree_node *current,
 int cil_resolve_filetransition(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
-int cil_reset_class(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
-int cil_reset_sens(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_userbounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
@@ -81,5 +79,11 @@ int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct c
 
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current);
 int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, struct cil_call *call, struct cil_tree_node **node);
+
+int cil_reset_class(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_reset_role(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_reset_sens(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_reset_type(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_reset_user(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 
 #endif /* CIL_RESOLVE_AST_H_ */

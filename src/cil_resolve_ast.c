@@ -615,6 +615,29 @@ int cil_reset_type(__attribute__((unused)) struct cil_db *db, struct cil_tree_no
 		cil_list_destroy(&type->attrs_list, 0);
 	}
 
+	/* reset the bounds to NULL during a re-resolve */
+	type->bounds = NULL;
+
+	return SEPOL_OK;
+}
+
+int cil_reset_user(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
+{
+	struct cil_user *user = (struct cil_user*)current->data;
+
+	/* reset the bounds to NULL during a re-resolve */
+	user->bounds = NULL;
+
+	return SEPOL_OK;
+}
+
+int cil_reset_role(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
+{
+	struct cil_role *role = (struct cil_role*)current->data;
+
+	/* reset the bounds to NULL during a re-resolve */
+	role->bounds = NULL;
+
 	return SEPOL_OK;
 }
 
@@ -2625,8 +2648,14 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_CLASS:
 			rc = cil_reset_class(db, node, call);
 			break;
+		case CIL_ROLE:
+			rc = cil_reset_role(db, node, call);
+			break;
 		case CIL_TYPE:
 			rc = cil_reset_type(db, node, call);
+			break;
+		case CIL_USER:
+			rc = cil_reset_user(db, node, call);
 			break;
 		case CIL_ATTR:
 			rc = cil_reset_attr(db, node, call);
