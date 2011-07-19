@@ -2776,32 +2776,6 @@ set_to_list_out:
 	return rc;
 }
 
-int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list)
-{
-	int rc = SEPOL_ERR;
-
-	if (start == NULL || list == NULL) {
-		goto fill_cat_list_out;
-	}
-
-	rc = cil_set_to_list(start, list, 1);
-	if (rc != SEPOL_OK) {
-		printf("Failed to create category list\n");
-		goto fill_cat_list_out;
-	}
-
-	rc = __cil_verify_ranges(list);
-	if (rc != SEPOL_OK) {
-		printf("Error verifying range syntax\n");
-		goto fill_cat_list_out;
-	}
-
-	return SEPOL_OK;
-
-fill_cat_list_out:
-	return rc;
-}
-
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -3039,43 +3013,6 @@ void cil_destroy_senscat(struct cil_senscat *senscat)
 	free(senscat);
 }
 
-int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
-{
-	int rc = SEPOL_ERR;
-
-	if (sens == NULL || level == NULL) {
-		goto cil_fill_level_cleanup;
-	}
-
-	level->sens_str = cil_strdup(sens->data);
-
-	if (sens->next == NULL) {
-		rc = SEPOL_OK;
-		goto cil_fill_level_cleanup;
-	}
-
-	if (sens->next->cl_head == NULL) {
-		if (sens->next->data != NULL) {
-			level->catset_str = cil_strdup(sens->next->data);
-		} else {
-			rc = SEPOL_ERR;
-			goto cil_fill_level_cleanup;
-		}
-	} else {
-		cil_list_init(&level->cat_list_str);
-		rc = cil_fill_cat_list(sens->next, level->cat_list_str);
-		if (rc != SEPOL_OK) {
-			printf("Failed to create level category list\n");
-			goto cil_fill_level_cleanup;
-		}
-	}
-
-	return SEPOL_OK;
-
-cil_fill_level_cleanup:
-	return rc;
-}
-
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -3232,75 +3169,6 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 	}
 
 	free(cons);
-}
-
-/* Fills in context starting from user */
-int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context)
-{
-	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	int rc = SEPOL_ERR;
-
-	if (user_node == NULL || context == NULL) {
-		goto cil_fill_context_cleanup;
-	}
-
-	rc = __cil_verify_syntax(user_node, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		printf("Invalid context (line: %d)\n", user_node->line);
-		goto cil_fill_context_cleanup;
-	}
-
-	context->user_str = cil_strdup(user_node->data);
-	context->role_str = cil_strdup(user_node->next->data);
-	context->type_str = cil_strdup(user_node->next->next->data);
-
-	context->low_str = NULL;
-	context->high_str = NULL;
-
-	if (user_node->next->next->next->cl_head == NULL) {
-		context->low_str = cil_strdup(user_node->next->next->next->data);
-	} else {
-		rc = cil_level_init(&context->low);
-		if (rc != SEPOL_OK) {
-			printf("Couldn't initialize low level\n");
-			goto cil_fill_context_cleanup;
-		}
-
-		rc = cil_fill_level(user_node->next->next->next->cl_head, context->low);
-		if (rc != SEPOL_OK) {
-			printf("cil_fill_context: Failed to fill low level, rc: %d\n", rc);
-			goto cil_fill_context_cleanup;
-		}
-	}
-
-	if (user_node->next->next->next->next->cl_head == NULL) {
-		context->high_str = cil_strdup(user_node->next->next->next->next->data);
-	} else {
-		rc = cil_level_init(&context->high);
-		if (rc != SEPOL_OK) {
-			printf("Couldn't initialize high level\n");
-			goto cil_fill_context_cleanup;
-		}
-
-		rc = cil_fill_level(user_node->next->next->next->next->cl_head, context->high);
-		if (rc != SEPOL_OK) {
-			printf("cil_fill_context: Failed to fill high level, rc %d\n", rc);
-			goto cil_fill_context_cleanup;
-		}
-	}
-
-	return SEPOL_OK;
-
-cil_fill_context_cleanup:
-	return rc;
 }
 
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -3582,63 +3450,6 @@ void cil_destroy_portcon(struct cil_portcon *portcon)
 	}
 
 	free(portcon);
-}
-
-int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer)
-{
-	int rc = SEPOL_ERR;
-	char *endptr = NULL;
-	int val;
-
-	if (int_node == NULL || integer == NULL) {
-		goto fill_integer_cleanup;	
-	}
-
-	errno = 0;
-	val = strtol(int_node->data, &endptr, 10);
-	if (errno != 0 || endptr == int_node->data || *endptr != '\0') {
-		rc = SEPOL_ERR;
-		goto fill_integer_cleanup;
-	}
-
-	*integer = val;
-	
-	return SEPOL_OK;
-
-fill_integer_cleanup:
-	return rc;
-}
-
-int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr)
-{
-	int rc = SEPOL_ERR;
-
-	if (addr_node == NULL || addr == NULL) {
-		goto fill_ipaddr_cleanup;
-	}
-
-	if (addr_node->cl_head != NULL ||  addr_node->next != NULL) {
-		printf("Invalid ip address (line: %d)\n", addr_node->line);
-		goto fill_ipaddr_cleanup;
-	}
-
-	if (strchr(addr_node->data, '.') != NULL) {
-		addr->family = AF_INET;
-	} else {
-		addr->family = AF_INET6;
-	}
-
-	rc = inet_pton(addr->family, addr_node->data, &addr->ip);
-	if (rc != 1) {
-		printf("Invalid ip address (line: %d)\n", addr_node->line);
-		rc = SEPOL_ERR;
-		goto fill_ipaddr_cleanup;
-	}
-
-	return SEPOL_OK;
-
-fill_ipaddr_cleanup:
-	return rc;
 }
 
 int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -4745,6 +4556,194 @@ void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr)
 {
 	cil_symtab_datum_destroy(ipaddr->datum);
 	free(ipaddr);
+}
+
+int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list)
+{
+	int rc = SEPOL_ERR;
+
+	if (start == NULL || list == NULL) {
+		goto fill_cat_list_out;
+	}
+
+	rc = cil_set_to_list(start, list, 1);
+	if (rc != SEPOL_OK) {
+		printf("Failed to create category list\n");
+		goto fill_cat_list_out;
+	}
+
+	rc = __cil_verify_ranges(list);
+	if (rc != SEPOL_OK) {
+		printf("Error verifying range syntax\n");
+		goto fill_cat_list_out;
+	}
+
+	return SEPOL_OK;
+
+fill_cat_list_out:
+	return rc;
+}
+
+int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	if (user_node == NULL || context == NULL) {
+		goto cil_fill_context_cleanup;
+	}
+
+	rc = __cil_verify_syntax(user_node, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid context (line: %d)\n", user_node->line);
+		goto cil_fill_context_cleanup;
+	}
+
+	context->user_str = cil_strdup(user_node->data);
+	context->role_str = cil_strdup(user_node->next->data);
+	context->type_str = cil_strdup(user_node->next->next->data);
+
+	context->low_str = NULL;
+	context->high_str = NULL;
+
+	if (user_node->next->next->next->cl_head == NULL) {
+		context->low_str = cil_strdup(user_node->next->next->next->data);
+	} else {
+		rc = cil_level_init(&context->low);
+		if (rc != SEPOL_OK) {
+			printf("Couldn't initialize low level\n");
+			goto cil_fill_context_cleanup;
+		}
+
+		rc = cil_fill_level(user_node->next->next->next->cl_head, context->low);
+		if (rc != SEPOL_OK) {
+			printf("cil_fill_context: Failed to fill low level, rc: %d\n", rc);
+			goto cil_fill_context_cleanup;
+		}
+	}
+
+	if (user_node->next->next->next->next->cl_head == NULL) {
+		context->high_str = cil_strdup(user_node->next->next->next->next->data);
+	} else {
+		rc = cil_level_init(&context->high);
+		if (rc != SEPOL_OK) {
+			printf("Couldn't initialize high level\n");
+			goto cil_fill_context_cleanup;
+		}
+
+		rc = cil_fill_level(user_node->next->next->next->next->cl_head, context->high);
+		if (rc != SEPOL_OK) {
+			printf("cil_fill_context: Failed to fill high level, rc %d\n", rc);
+			goto cil_fill_context_cleanup;
+		}
+	}
+
+	return SEPOL_OK;
+
+cil_fill_context_cleanup:
+	return rc;
+}
+
+int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer)
+{
+	int rc = SEPOL_ERR;
+	char *endptr = NULL;
+	int val;
+
+	if (int_node == NULL || integer == NULL) {
+		goto fill_integer_cleanup;	
+	}
+
+	errno = 0;
+	val = strtol(int_node->data, &endptr, 10);
+	if (errno != 0 || endptr == int_node->data || *endptr != '\0') {
+		rc = SEPOL_ERR;
+		goto fill_integer_cleanup;
+	}
+
+	*integer = val;
+	
+	return SEPOL_OK;
+
+fill_integer_cleanup:
+	return rc;
+}
+
+int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr)
+{
+	int rc = SEPOL_ERR;
+
+	if (addr_node == NULL || addr == NULL) {
+		goto fill_ipaddr_cleanup;
+	}
+
+	if (addr_node->cl_head != NULL ||  addr_node->next != NULL) {
+		printf("Invalid ip address (line: %d)\n", addr_node->line);
+		goto fill_ipaddr_cleanup;
+	}
+
+	if (strchr(addr_node->data, '.') != NULL) {
+		addr->family = AF_INET;
+	} else {
+		addr->family = AF_INET6;
+	}
+
+	rc = inet_pton(addr->family, addr_node->data, &addr->ip);
+	if (rc != 1) {
+		printf("Invalid ip address (line: %d)\n", addr_node->line);
+		rc = SEPOL_ERR;
+		goto fill_ipaddr_cleanup;
+	}
+
+	return SEPOL_OK;
+
+fill_ipaddr_cleanup:
+	return rc;
+}
+
+int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
+{
+	int rc = SEPOL_ERR;
+
+	if (sens == NULL || level == NULL) {
+		goto cil_fill_level_cleanup;
+	}
+
+	level->sens_str = cil_strdup(sens->data);
+
+	if (sens->next == NULL) {
+		rc = SEPOL_OK;
+		goto cil_fill_level_cleanup;
+	}
+
+	if (sens->next->cl_head == NULL) {
+		if (sens->next->data != NULL) {
+			level->catset_str = cil_strdup(sens->next->data);
+		} else {
+			rc = SEPOL_ERR;
+			goto cil_fill_level_cleanup;
+		}
+	} else {
+		cil_list_init(&level->cat_list_str);
+		rc = cil_fill_cat_list(sens->next, level->cat_list_str);
+		if (rc != SEPOL_OK) {
+			printf("Failed to create level category list\n");
+			goto cil_fill_level_cleanup;
+		}
+	}
+
+	return SEPOL_OK;
+
+cil_fill_level_cleanup:
+	return rc;
 }
 
 int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, void *extra_args)

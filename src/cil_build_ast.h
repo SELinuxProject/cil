@@ -119,7 +119,6 @@ void cil_destroy_category(struct cil_cat *cat);
 int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_catalias(struct cil_catalias *alias);
 int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl, uint8_t sublists);
-int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list);
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_catset(struct cil_catset *catset);
 int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
@@ -128,20 +127,17 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 void cil_destroy_dominance(struct cil_sens_dominates *dom);
 int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_senscat(struct cil_senscat *senscat);
-int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level);
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_level(struct cil_level *level);
 void cil_destroy_constrain_node(struct cil_tree_node *cons_node);
 int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_constrain(struct cil_constrain *cons);
-int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context);
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_context(struct cil_context *context);
 int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_filecon(struct cil_filecon *filecon);
 int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_portcon(struct cil_portcon *portcon);
-int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr);
 int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_nodecon(struct cil_nodecon *nodecon);
 int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
@@ -171,7 +167,11 @@ void cil_destroy_policycap(struct cil_policycap *polcap);
 int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr);
 
+int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list);
+int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context);
 int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer);
+int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr);
+int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level);
 
 int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast);
 
