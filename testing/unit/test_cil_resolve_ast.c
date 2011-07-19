@@ -6199,7 +6199,7 @@ void test_cil_resolve_ast_node_helper_sensalias(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	uint32_t pass = 7;
+	uint32_t pass = 5;
 	uint32_t changed = 0;
 	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
@@ -6221,7 +6221,7 @@ void test_cil_resolve_ast_node_helper_sensalias_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	uint32_t pass = 7;
+	uint32_t pass = 5;
 	uint32_t changed = 0;
 	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
 
