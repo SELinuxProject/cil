@@ -248,7 +248,7 @@ void test_cil_resolve_rolebounds_exists_neg(CuTest *tc) {
 
 	cil_resolve_rolebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
 	int rc = cil_resolve_rolebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_rolebounds_role1_neg(CuTest *tc) {
@@ -5247,7 +5247,7 @@ void test_cil_resolve_userbounds_exists_neg(CuTest *tc) {
 
 	cil_resolve_userbounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
 	int rc = cil_resolve_userbounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_resolve_userbounds_user1_neg(CuTest *tc) {

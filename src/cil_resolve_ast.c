@@ -369,6 +369,7 @@ int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, str
 
 	if (((struct cil_type*)type_node->data)->bounds != NULL) {
 		printf("type cannot bind more than one type\n");
+		rc = SEPOL_ERR;
 		goto resolve_typebounds_out;
 	}
 
@@ -548,6 +549,7 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 
 	if (((struct cil_class*)class_node->data)->common != NULL) {
 		printf("class cannot be associeated with more than one common\n");
+		rc = SEPOL_ERR;
 		goto resolve_classcommon_out;
 	}
 
@@ -664,6 +666,7 @@ int cil_resolve_userbounds(struct cil_db *db, struct cil_tree_node *current, str
 
 	if (((struct cil_user*)user_node->data)->bounds != NULL) {
 		printf("user cannot bind more than one user\n");
+		rc = SEPOL_ERR;
 		goto resolve_userbounds_out;
 	}
 
@@ -820,6 +823,7 @@ int cil_resolve_rolebounds(struct cil_db *db, struct cil_tree_node *current, str
 
 	if (((struct cil_role*)role_node->data)->bounds != NULL) {
 		printf("role cannot bind more than one role\n");
+		rc = SEPOL_ERR;
 		goto resolve_rolebounds_out;
 	}
 
