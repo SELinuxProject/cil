@@ -110,25 +110,21 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	struct cil_list *perms_list = NULL;
 	int rc = SEPOL_ERR;
 
-	if (rule->src_str != NULL){
-		rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, call, &src_node);
-		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", rule->src_str);
-			goto resolve_avrule_out;
-		}
-		rule->src = (struct cil_type*)(src_node->data);
-		rule->src_flavor = src_node->flavor;
+	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, call, &src_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->src_str);
+		goto resolve_avrule_out;
 	}
+	rule->src = (struct cil_type*)(src_node->data);
+	rule->src_flavor = src_node->flavor;
 
-	if (rule->tgt_str != NULL) {
-		rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
-		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", rule->tgt_str);
-			goto resolve_avrule_out;
-		}
-		rule->tgt = (struct cil_type*)(tgt_node->data);
-		rule->tgt_flavor = tgt_node->flavor;
+	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", rule->tgt_str);
+		goto resolve_avrule_out;
 	}
+	rule->tgt = (struct cil_type*)(tgt_node->data);
+	rule->tgt_flavor = tgt_node->flavor;
 
 	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {
