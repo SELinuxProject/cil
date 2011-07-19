@@ -3517,16 +3517,28 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (parse_current->next->next->cl_head != NULL) {
 		if (parse_current->next->next->cl_head->next != NULL
 		&& parse_current->next->next->cl_head->next->next == NULL) {
-			portcon->port_low = (uint32_t)atoi(parse_current->next->next->cl_head->data);
-			portcon->port_high = (uint32_t)atoi(parse_current->next->next->cl_head->next->data);
+			rc = cil_fill_integer(parse_current->next->next->cl_head, &portcon->port_low);
+			if (rc != SEPOL_OK) {
+				printf("Error: Improper port specified\n");
+				goto gen_portcon_cleanup;
+			}
+			rc = cil_fill_integer(parse_current->next->next->cl_head->next, &portcon->port_high);
+			if (rc != SEPOL_OK) {
+				printf("Error: Improper port specified\n");
+				goto gen_portcon_cleanup;
+			}
 		} else {
 			printf("Error: Improper port range specified\n");
 			rc = SEPOL_ERR;
 			goto gen_portcon_cleanup;
 		}
 	} else {
-		portcon->port_low = (uint32_t)atoi(parse_current->next->next->data);
-		portcon->port_high = (uint32_t)atoi(parse_current->next->next->data);
+		rc = cil_fill_integer(parse_current->next->next, &portcon->port_low);
+		if (rc != SEPOL_OK) {
+			printf("Error: Improper port specified\n");
+			goto gen_portcon_cleanup;
+		}
+		portcon->port_high = portcon->port_low;
 	}
 
 	if (parse_current->next->next->next->cl_head == NULL ) {
@@ -3570,6 +3582,31 @@ void cil_destroy_portcon(struct cil_portcon *portcon)
 	}
 
 	free(portcon);
+}
+
+int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer)
+{
+	int rc = SEPOL_ERR;
+	char *endptr = NULL;
+	int val;
+
+	if (int_node == NULL || integer == NULL) {
+		goto fill_integer_cleanup;	
+	}
+
+	errno = 0;
+	val = strtol(int_node->data, &endptr, 10);
+	if (errno != 0 || endptr == int_node->data || *endptr != '\0') {
+		rc = SEPOL_ERR;
+		goto fill_integer_cleanup;
+	}
+
+	*integer = val;
+	
+	return SEPOL_OK;
+
+fill_integer_cleanup:
+	return rc;
 }
 
 int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr)
@@ -3926,7 +3963,11 @@ int cil_gen_pirqcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto gen_pirqcon_cleanup;
 	}
 
-	pirqcon->pirq = (uint32_t)atoi(parse_current->next->data);
+	rc = cil_fill_integer(parse_current->next, &pirqcon->pirq);
+	if (rc != SEPOL_OK) {
+		printf("Failed to parse pirq\n");
+		goto gen_pirqcon_cleanup;
+	}
 
 	if (parse_current->next->next->cl_head == NULL) {
 		pirqcon->context_str = cil_strdup(parse_current->next->next->data);
@@ -3997,16 +4038,28 @@ int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (parse_current->next->cl_head != NULL) {
 		if (parse_current->next->cl_head->next != NULL &&
 		    parse_current->next->cl_head->next->next == NULL) {
-			iomemcon->iomem_low = (uint32_t)atoi(parse_current->next->cl_head->data);
-			iomemcon->iomem_high = (uint32_t)atoi(parse_current->next->cl_head->next->data);
+			rc = cil_fill_integer(parse_current->next->cl_head, &iomemcon->iomem_low);
+			if (rc != SEPOL_OK) {
+				printf("Error: Improper iomem specified\n");
+				goto gen_iomemcon_cleanup;
+			}
+			rc = cil_fill_integer(parse_current->next->cl_head->next, &iomemcon->iomem_high);
+			if (rc != SEPOL_OK) {
+				printf("Error: Improper iomem specified\n");
+				goto gen_iomemcon_cleanup;
+			}
 		} else {
-			printf("Error: Improper ioport range specified\n");
+			printf("Error: Improper iomem range specified\n");
 			rc = SEPOL_ERR;
 			goto gen_iomemcon_cleanup;
 		}
 	} else {
-		iomemcon->iomem_low = (uint32_t)atoi(parse_current->next->data);
-		iomemcon->iomem_high = (uint32_t)atoi(parse_current->next->data);
+		rc = cil_fill_integer(parse_current->next, &iomemcon->iomem_low);;
+		if (rc != SEPOL_OK) {
+			printf("Error: Improper iomem specified\n");
+			goto gen_iomemcon_cleanup;
+		}
+		iomemcon->iomem_high = iomemcon->iomem_low;
 	}
 
 	if (parse_current->next->next->cl_head == NULL ) {
@@ -4014,13 +4067,13 @@ int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	} else {
 		rc = cil_context_init(&iomemcon->context);
 		if (rc != SEPOL_OK) {
-			printf("Failed to init ioport context\n");
+			printf("Failed to init iomem context\n");
 			goto gen_iomemcon_cleanup;
 		}
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, iomemcon->context);
 		if (rc != SEPOL_OK) {
-			printf("Failed to fill ioport context\n");
+			printf("Failed to fill iomem context\n");
 			goto gen_iomemcon_cleanup;
 		}
 	}
@@ -4078,16 +4131,28 @@ int cil_gen_ioportcon(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (parse_current->next->cl_head != NULL) {
 		if (parse_current->next->cl_head->next != NULL &&
 		    parse_current->next->cl_head->next->next == NULL) {
-			ioportcon->ioport_low = (uint32_t)atoi(parse_current->next->cl_head->data);
-			ioportcon->ioport_high = (uint32_t)atoi(parse_current->next->cl_head->next->data);
+			rc = cil_fill_integer(parse_current->next->cl_head, &ioportcon->ioport_low);
+			if (rc != SEPOL_OK) {
+				printf("Error: Improper ioport specified\n");
+				goto gen_ioportcon_cleanup;
+			}
+			rc = cil_fill_integer(parse_current->next->cl_head->next, &ioportcon->ioport_high);
+			if (rc != SEPOL_OK) {
+				printf("Error: Improper ioport specified\n");
+				goto gen_ioportcon_cleanup;
+			}
 		} else {
 			printf("Error: Improper ioport range specified\n");
 			rc = SEPOL_ERR;
 			goto gen_ioportcon_cleanup;
 		}
 	} else {
-		ioportcon->ioport_low = (uint32_t)atoi(parse_current->next->data);
-		ioportcon->ioport_high = (uint32_t)atoi(parse_current->next->data);
+		rc = cil_fill_integer(parse_current->next, &ioportcon->ioport_low);
+		if (rc != SEPOL_OK) {
+			printf("Error: Improper ioport specified\n");
+			goto gen_ioportcon_cleanup;
+		}
+		ioportcon->ioport_high = ioportcon->ioport_low;
 	}
 
 	if (parse_current->next->next->cl_head == NULL ) {
@@ -4156,20 +4221,24 @@ int cil_gen_pcidevicecon(struct cil_db *db, struct cil_tree_node *parse_current,
 		goto gen_pcidevicecon_cleanup;
 	}
 
-	pcidevicecon->dev = (uint32_t)atoi(parse_current->next->data);
+	rc = cil_fill_integer(parse_current->next, &pcidevicecon->dev);
+	if (rc != SEPOL_OK) {
+		printf("Failed to parse pcidevice number\n");
+		goto gen_pcidevicecon_cleanup;
+	}
 
 	if (parse_current->next->next->cl_head == NULL) {
 		pcidevicecon->context_str = cil_strdup(parse_current->next->next->data);
 	} else {
 		rc = cil_context_init(&pcidevicecon->context);
 		if (rc != SEPOL_OK) {
-			printf("Failed to init pirq context\n");
+			printf("Failed to init pcidevice context\n");
 			goto gen_pcidevicecon_cleanup;
 		}
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, pcidevicecon->context);
 		if (rc != SEPOL_OK) {
-			printf("Failed to fill port context\n");
+			printf("Failed to fill pcidevice context\n");
 			goto gen_pcidevicecon_cleanup;
 		}
 	}

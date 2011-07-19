@@ -171,6 +171,8 @@ void cil_destroy_policycap(struct cil_policycap *polcap);
 int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr);
 
+int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer);
+
 int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast);
 
 #endif /* CIL_BUILD_AST_H_ */
