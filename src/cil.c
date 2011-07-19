@@ -61,6 +61,10 @@ int cil_db_init(struct cil_db **db)
 	cil_sort_init(&new_db->filecon);
 	cil_sort_init(&new_db->nodecon);
 	cil_sort_init(&new_db->portcon);
+	cil_sort_init(&new_db->pirqcon);
+	cil_sort_init(&new_db->iomemcon);
+	cil_sort_init(&new_db->ioportcon);
+	cil_sort_init(&new_db->pcidevicecon);
 	cil_sort_init(&new_db->fsuse);
 
 	*db = new_db;
@@ -77,6 +81,11 @@ void cil_db_destroy(struct cil_db **db)
 	cil_sort_destroy(&(*db)->filecon);
 	cil_sort_destroy(&(*db)->nodecon);
 	cil_sort_destroy(&(*db)->portcon);
+	cil_sort_destroy(&(*db)->pirqcon);
+	cil_sort_destroy(&(*db)->iomemcon);
+	cil_sort_destroy(&(*db)->ioportcon);
+	cil_sort_destroy(&(*db)->pcidevicecon);
+	cil_sort_destroy(&(*db)->fsuse);
 
 	*db = NULL;	
 
@@ -247,6 +256,18 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_NETIFCON:
 		cil_destroy_netifcon(*data);
+		break;
+	case CIL_PIRQCON:
+		cil_destroy_pirqcon(*data);
+		break;
+	case CIL_IOMEMCON:
+		cil_destroy_iomemcon(*data);
+		break;
+	case CIL_IOPORTCON:
+		cil_destroy_ioportcon(*data);
+		break;
+	case CIL_PCIDEVICECON:
+		cil_destroy_pcidevicecon(*data);
 		break;
 	case CIL_FSUSE:
 		cil_destroy_fsuse(*data);
@@ -1307,6 +1328,78 @@ int cil_genfscon_init(struct cil_genfscon **genfscon)
 	new_genfscon->context = NULL;
 
 	*genfscon = new_genfscon;
+
+	return SEPOL_OK;
+}
+
+int cil_pirqcon_init(struct cil_pirqcon **pirqcon)
+{
+	struct cil_pirqcon *new_pirqcon = NULL;
+
+	if (pirqcon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_pirqcon = cil_malloc(sizeof(*new_pirqcon));
+
+	new_pirqcon->context_str = NULL;
+	new_pirqcon->context = NULL;
+
+	*pirqcon = new_pirqcon;
+
+	return SEPOL_OK;
+}
+
+int cil_iomemcon_init(struct cil_iomemcon **iomemcon)
+{
+	struct cil_iomemcon *new_iomemcon = NULL;
+
+	if (iomemcon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_iomemcon = cil_malloc(sizeof(*new_iomemcon));
+
+	new_iomemcon->context_str = NULL;
+	new_iomemcon->context = NULL;
+
+	*iomemcon = new_iomemcon;
+
+	return SEPOL_OK;
+}
+
+int cil_ioportcon_init(struct cil_ioportcon **ioportcon)
+{
+	struct cil_ioportcon *new_ioportcon = NULL;
+
+	if (ioportcon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_ioportcon = cil_malloc(sizeof(*new_ioportcon));
+
+	new_ioportcon->context_str = NULL;
+	new_ioportcon->context = NULL;
+
+	*ioportcon = new_ioportcon;
+
+	return SEPOL_OK;
+}
+
+int cil_pcidevicecon_init(struct cil_pcidevicecon **pcidevicecon)
+{
+	struct cil_pcidevicecon *new_pcidevicecon = NULL;
+
+	if (pcidevicecon == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_pcidevicecon = cil_malloc(sizeof(*new_pcidevicecon));
+
+	new_pcidevicecon->context_str = NULL;
+	new_pcidevicecon->context = NULL;
+
+	*pcidevicecon = new_pcidevicecon;
 
 	return SEPOL_OK;
 }

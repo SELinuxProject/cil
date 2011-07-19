@@ -3899,6 +3899,304 @@ void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 	free(netifcon);
 }
 
+int cil_gen_pirqcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+	struct cil_pirqcon *pirqcon = NULL;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_pirqcon_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid pirqcon declaration (line: %d)\n", parse_current->line);
+		goto gen_pirqcon_cleanup;
+	}
+
+	rc = cil_pirqcon_init(&pirqcon);
+	if (rc != SEPOL_OK) {
+		goto gen_pirqcon_cleanup;
+	}
+
+	pirqcon->pirq = (uint32_t)atoi(parse_current->next->data);
+
+	if (parse_current->next->next->cl_head == NULL) {
+		pirqcon->context_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		rc = cil_context_init(&pirqcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init pirq context\n");
+			goto gen_pirqcon_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->cl_head, pirqcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill port context\n");
+			goto gen_pirqcon_cleanup;
+		}
+	}
+
+	ast_node->data = pirqcon;
+	ast_node->flavor = CIL_PIRQCON;
+
+	return SEPOL_OK;
+
+gen_pirqcon_cleanup:
+	if (pirqcon != NULL) {
+		cil_destroy_pirqcon(pirqcon);
+	}
+	return rc;
+}
+
+void cil_destroy_pirqcon(struct cil_pirqcon *pirqcon)
+{
+	if (pirqcon->context_str != NULL) {
+		free(pirqcon->context_str);
+	} else if (pirqcon->context != NULL) {
+		cil_destroy_context(pirqcon->context);
+	}
+
+	free(pirqcon);
+}
+
+int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+	struct cil_iomemcon *iomemcon = NULL;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_iomemcon_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid iomemcon declaration (line: %d)\n", parse_current->line);
+		goto gen_iomemcon_cleanup;
+	}
+
+	rc = cil_iomemcon_init(&iomemcon);
+	if (rc != SEPOL_OK) {
+		goto gen_iomemcon_cleanup;
+	}
+
+	if (parse_current->next->cl_head != NULL) {
+		if (parse_current->next->cl_head->next != NULL &&
+		    parse_current->next->cl_head->next->next == NULL) {
+			iomemcon->iomem_low = (uint32_t)atoi(parse_current->next->cl_head->data);
+			iomemcon->iomem_high = (uint32_t)atoi(parse_current->next->cl_head->next->data);
+		} else {
+			printf("Error: Improper ioport range specified\n");
+			rc = SEPOL_ERR;
+			goto gen_iomemcon_cleanup;
+		}
+	} else {
+		iomemcon->iomem_low = (uint32_t)atoi(parse_current->next->data);
+		iomemcon->iomem_high = (uint32_t)atoi(parse_current->next->data);
+	}
+
+	if (parse_current->next->next->cl_head == NULL ) {
+		iomemcon->context_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		rc = cil_context_init(&iomemcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init ioport context\n");
+			goto gen_iomemcon_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->cl_head, iomemcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill ioport context\n");
+			goto gen_iomemcon_cleanup;
+		}
+	}
+
+	ast_node->data = iomemcon;
+	ast_node->flavor = CIL_IOMEMCON;
+
+	return SEPOL_OK;
+
+gen_iomemcon_cleanup:
+	if (iomemcon != NULL) {
+		cil_destroy_iomemcon(iomemcon);
+	}
+	return rc;
+}
+
+void cil_destroy_iomemcon(struct cil_iomemcon *iomemcon)
+{
+	if (iomemcon->context_str != NULL) {
+		free(iomemcon->context_str);
+	} else if (iomemcon->context != NULL) {
+		cil_destroy_context(iomemcon->context);
+	}
+
+	free(iomemcon);
+}
+
+int cil_gen_ioportcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+	struct cil_ioportcon *ioportcon = NULL;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_ioportcon_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid ioportcon declaration (line: %d)\n", parse_current->line);
+		goto gen_ioportcon_cleanup;
+	}
+
+	rc = cil_ioportcon_init(&ioportcon);
+	if (rc != SEPOL_OK) {
+		goto gen_ioportcon_cleanup;
+	}
+
+	if (parse_current->next->cl_head != NULL) {
+		if (parse_current->next->cl_head->next != NULL &&
+		    parse_current->next->cl_head->next->next == NULL) {
+			ioportcon->ioport_low = (uint32_t)atoi(parse_current->next->cl_head->data);
+			ioportcon->ioport_high = (uint32_t)atoi(parse_current->next->cl_head->next->data);
+		} else {
+			printf("Error: Improper ioport range specified\n");
+			rc = SEPOL_ERR;
+			goto gen_ioportcon_cleanup;
+		}
+	} else {
+		ioportcon->ioport_low = (uint32_t)atoi(parse_current->next->data);
+		ioportcon->ioport_high = (uint32_t)atoi(parse_current->next->data);
+	}
+
+	if (parse_current->next->next->cl_head == NULL ) {
+		ioportcon->context_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		rc = cil_context_init(&ioportcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init ioport context\n");
+			goto gen_ioportcon_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->cl_head, ioportcon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill ioport context\n");
+			goto gen_ioportcon_cleanup;
+		}
+	}
+
+	ast_node->data = ioportcon;
+	ast_node->flavor = CIL_IOPORTCON;
+
+	return SEPOL_OK;
+
+gen_ioportcon_cleanup:
+	if (ioportcon != NULL) {
+		cil_destroy_ioportcon(ioportcon);
+	}
+	return rc;
+}
+
+void cil_destroy_ioportcon(struct cil_ioportcon *ioportcon)
+{
+	if (ioportcon->context_str != NULL) {
+		free(ioportcon->context_str);
+	} else if (ioportcon->context != NULL) {
+		cil_destroy_context(ioportcon->context);
+	}
+
+	free(ioportcon);
+}
+
+int cil_gen_pcidevicecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+	struct cil_pcidevicecon *pcidevicecon = NULL;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_pcidevicecon_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid pcidevicecon declaration (line: %d)\n", parse_current->line);
+		goto gen_pcidevicecon_cleanup;
+	}
+
+	rc = cil_pcidevicecon_init(&pcidevicecon);
+	if (rc != SEPOL_OK) {
+		goto gen_pcidevicecon_cleanup;
+	}
+
+	pcidevicecon->dev = (uint32_t)atoi(parse_current->next->data);
+
+	if (parse_current->next->next->cl_head == NULL) {
+		pcidevicecon->context_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		rc = cil_context_init(&pcidevicecon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init pirq context\n");
+			goto gen_pcidevicecon_cleanup;
+		}
+
+		rc = cil_fill_context(parse_current->next->next->cl_head, pcidevicecon->context);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill port context\n");
+			goto gen_pcidevicecon_cleanup;
+		}
+	}
+
+	ast_node->data = pcidevicecon;
+	ast_node->flavor = CIL_PCIDEVICECON;
+
+	return SEPOL_OK;
+
+gen_pcidevicecon_cleanup:
+	if (pcidevicecon != NULL) {
+		cil_destroy_pcidevicecon(pcidevicecon);
+	}
+	return rc;
+}
+
+void cil_destroy_pcidevicecon(struct cil_pcidevicecon *pcidevicecon)
+{
+	if (pcidevicecon->context_str != NULL) {
+		free(pcidevicecon->context_str);
+	} else if (pcidevicecon->context != NULL) {
+		cil_destroy_context(pcidevicecon->context);
+	}
+
+	free(pcidevicecon);
+}
+
 int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -4772,6 +5070,34 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_netifcon(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_netifcon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_PIRQCON)) {
+		rc = cil_gen_pirqcon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_pirqcon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_IOMEMCON)) {
+		rc = cil_gen_iomemcon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_iomemcon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_IOPORTCON)) {
+		rc = cil_gen_ioportcon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_ioportcon failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_PCIDEVICECON)) {
+		rc = cil_gen_pcidevicecon(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_pcidevicecon failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
 		*finished = CIL_TREE_SKIP_NEXT;

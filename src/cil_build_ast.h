@@ -148,6 +148,14 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 void cil_destroy_genfscon(struct cil_genfscon *genfscon);
 int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_netifcon(struct cil_netifcon *netifcon);
+int cil_gen_pirqcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_pirqcon(struct cil_pirqcon *pirqcon);
+int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_iomemcon(struct cil_iomemcon *iomemcon);
+int cil_gen_ioportcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_ioportcon(struct cil_ioportcon *ioportcon);
+int cil_gen_pcidevicecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_pcidevicecon(struct cil_pcidevicecon *pcidevicecon);
 int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_fsuse(struct cil_fsuse *fsuse);
 void cil_destroy_param(struct cil_param *param);

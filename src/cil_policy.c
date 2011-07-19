@@ -357,6 +357,134 @@ int cil_nodecon_to_policy(FILE **file_arr, struct cil_sort *sort)
 	return SEPOL_OK;
 }
 
+int cil_pirqcon_compare(const void *a, const void *b)
+{
+	int rc = SEPOL_ERR;
+	struct cil_pirqcon *apirqcon = *(struct cil_pirqcon**)a;
+	struct cil_pirqcon *bpirqcon = *(struct cil_pirqcon**)b;
+
+	if (apirqcon->pirq < bpirqcon->pirq) {
+		rc = -1;
+	} else if (bpirqcon->pirq < apirqcon->pirq) {
+		rc = 1;
+	} else {
+		rc = 0;
+	}
+
+	return rc;
+}
+
+int cil_pirqcon_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i = 0;
+
+	for (i = 0; i < sort->count; i++) {
+		struct cil_pirqcon *pirqcon = (struct cil_pirqcon*)sort->array[i];
+		fprintf(file_arr[NETIFCONS], "pirqcon %d ", pirqcon->pirq);
+		cil_context_to_policy(file_arr, NETIFCONS, pirqcon->context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_iomemcon_compare(const void *a, const void *b)
+{
+	int rc = SEPOL_ERR;
+	struct cil_iomemcon *aiomemcon = *(struct cil_iomemcon**)a;
+	struct cil_iomemcon *biomemcon = *(struct cil_iomemcon**)b;
+
+	rc = (aiomemcon->iomem_high - aiomemcon->iomem_low) 
+		- (biomemcon->iomem_high - biomemcon->iomem_low);
+	if (rc == 0) {
+		if (aiomemcon->iomem_low < biomemcon->iomem_low) {
+			rc = -1;
+		} else if (biomemcon->iomem_low < aiomemcon->iomem_low) {
+			rc = 1;
+		}
+	}
+
+	return rc;
+}
+
+int cil_iomemcon_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i = 0;
+
+	for (i = 0; i < sort->count; i++) {
+		struct cil_iomemcon *iomemcon = (struct cil_iomemcon*)sort->array[i];
+		fprintf(file_arr[NETIFCONS], "iomemcon %d-%d ", iomemcon->iomem_low, iomemcon->iomem_high);
+		cil_context_to_policy(file_arr, NETIFCONS, iomemcon->context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_ioportcon_compare(const void *a, const void *b)
+{
+	int rc = SEPOL_ERR;
+	struct cil_ioportcon *aioportcon = *(struct cil_ioportcon**)a;
+	struct cil_ioportcon *bioportcon = *(struct cil_ioportcon**)b;
+
+	rc = (aioportcon->ioport_high - aioportcon->ioport_low) 
+		- (bioportcon->ioport_high - bioportcon->ioport_low);
+	if (rc == 0) {
+		if (aioportcon->ioport_low < bioportcon->ioport_low) {
+			rc = -1;
+		} else if (bioportcon->ioport_low < aioportcon->ioport_low) {
+			rc = 1;
+		}
+	}
+
+	return rc;
+}
+
+int cil_ioportcon_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i = 0;
+
+	for (i = 0; i < sort->count; i++) {
+		struct cil_ioportcon *ioportcon = (struct cil_ioportcon*)sort->array[i];
+		fprintf(file_arr[NETIFCONS], "ioportcon %d-%d ", ioportcon->ioport_low, ioportcon->ioport_high);
+		cil_context_to_policy(file_arr, NETIFCONS, ioportcon->context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+
+	return SEPOL_OK;
+}
+
+int cil_pcidevicecon_compare(const void *a, const void *b)
+{
+	int rc = SEPOL_ERR;
+	struct cil_pcidevicecon *apcidevicecon = *(struct cil_pcidevicecon**)a;
+	struct cil_pcidevicecon *bpcidevicecon = *(struct cil_pcidevicecon**)b;
+
+	if (apcidevicecon->dev < bpcidevicecon->dev) {
+		rc = -1;
+	} else if (bpcidevicecon->dev < apcidevicecon->dev) {
+		rc = 1;
+	} else {
+		rc = 0;
+	}
+
+	return rc;
+}
+
+int cil_pcidevicecon_to_policy(FILE **file_arr, struct cil_sort *sort)
+{
+	uint32_t i = 0;
+
+	for (i = 0; i < sort->count; i++) {
+		struct cil_pcidevicecon *pcidevicecon = (struct cil_pcidevicecon*)sort->array[i];
+		fprintf(file_arr[NETIFCONS], "pcidevicecon %d ", pcidevicecon->dev);
+		cil_context_to_policy(file_arr, NETIFCONS, pcidevicecon->context);
+		fprintf(file_arr[NETIFCONS], ";\n");
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_fsuse_compare(const void *a, const void *b)
 {
 	int rc;
@@ -1363,6 +1491,34 @@ int cil_gen_policy(struct cil_db *db)
 
 	qsort(db->filecon->array, db->filecon->count, sizeof(db->filecon->array), cil_filecon_compare);
 	rc = cil_filecon_to_policy(db->filecon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
+	
+	qsort(db->pirqcon->array, db->pirqcon->count, sizeof(db->pirqcon->array), cil_pirqcon_compare);
+	rc = cil_pirqcon_to_policy(file_arr, db->pirqcon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
+	
+	qsort(db->iomemcon->array, db->iomemcon->count, sizeof(db->iomemcon->array), cil_iomemcon_compare);
+	rc = cil_iomemcon_to_policy(file_arr, db->iomemcon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
+	
+	qsort(db->ioportcon->array, db->ioportcon->count, sizeof(db->ioportcon->array), cil_ioportcon_compare);
+	rc = cil_ioportcon_to_policy(file_arr, db->ioportcon);
+	if (rc != SEPOL_OK) {
+		printf("Error creating policy.conf\n");
+		return rc;
+	}
+	
+	qsort(db->pcidevicecon->array, db->pcidevicecon->count, sizeof(db->pcidevicecon->array), cil_pcidevicecon_compare);
+	rc = cil_pcidevicecon_to_policy(file_arr, db->pcidevicecon);
 	if (rc != SEPOL_OK) {
 		printf("Error creating policy.conf\n");
 		return rc;

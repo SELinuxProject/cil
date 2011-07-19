@@ -1,0 +1,29 @@
+(user system_u)
+(role object_r)
+(type type_t)
+
+(userrole system_u object_r)
+(roletype object_r type_t)
+
+(sensitivity s0)
+(sensitivity s1)
+(dominance (s0 s1))
+(category c0)
+(category c255)
+(categoryorder (c0 c255))
+(sensitivitycategory s0 (c0))
+(sensitivitycategory s1 ((c0 c255)))
+(sensitivityalias s0 unclassified)
+
+(level low (s0 (c0)))
+(level high (s1 ((c0 c255))))
+
+
+(context con (system_u object_r type_t low high))
+
+(pirqcon 1 con)
+(iomemcon 2 con)
+(iomemcon (3 4) con)
+(ioportcon 5 con)
+(ioportcon (6 7) con)
+(pcidevicecon 8 con)

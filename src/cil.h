@@ -69,6 +69,10 @@ enum cil_flavor {
 	CIL_NODECON,
 	CIL_GENFSCON,
 	CIL_NETIFCON,
+	CIL_PIRQCON,
+	CIL_IOMEMCON,
+	CIL_IOPORTCON,
+	CIL_PCIDEVICECON,
 	CIL_FSUSE,
 	CIL_CONSTRAIN,
 	CIL_MLSCONSTRAIN,
@@ -194,6 +198,10 @@ enum cil_flavor {
 #define CIL_KEY_NODECON		"nodecon"
 #define CIL_KEY_GENFSCON	"genfscon"
 #define CIL_KEY_NETIFCON	"netifcon"
+#define CIL_KEY_PIRQCON		"pirqcon"
+#define CIL_KEY_IOMEMCON	"iomemcon"
+#define CIL_KEY_IOPORTCON	"ioportcon"
+#define CIL_KEY_PCIDEVICECON	"pcidevicecon"
 #define CIL_KEY_FSUSE		"fsuse"
 #define CIL_KEY_SENSITIVITY	"sensitivity"
 #define CIL_KEY_SENSALIAS	"sensitivityalias"
@@ -281,6 +289,10 @@ struct cil_db {
 	struct cil_sort *filecon;
 	struct cil_sort *nodecon;
 	struct cil_sort *portcon;
+	struct cil_sort *pirqcon;
+	struct cil_sort *iomemcon;
+	struct cil_sort *ioportcon;
+	struct cil_sort *pcidevicecon;
 	struct cil_sort *fsuse;
 };
 
@@ -658,6 +670,32 @@ struct cil_netifcon {
 	char *context_str;
 };
 
+struct cil_pirqcon {
+	uint32_t pirq;
+	char *context_str;
+	struct cil_context *context;
+};
+
+struct cil_iomemcon {
+	uint32_t iomem_low;
+	uint32_t iomem_high;
+	char *context_str;
+	struct cil_context *context;
+};
+
+struct cil_ioportcon {
+	uint32_t ioport_low;
+	uint32_t ioport_high;
+	char *context_str;
+	struct cil_context *context;
+};
+
+struct cil_pcidevicecon {
+	uint32_t dev;
+	char *context_str;
+	struct cil_context *context;
+};
+
 enum cil_fsuse_types {
 	CIL_FSUSE_XATTR = 1,
 	CIL_FSUSE_TASK,
@@ -782,6 +820,10 @@ int cil_filecon_init(struct cil_filecon **filecon);
 int cil_portcon_init(struct cil_portcon **portcon);
 int cil_nodecon_init(struct cil_nodecon **nodecon);
 int cil_genfscon_init(struct cil_genfscon **genfscon);
+int cil_pirqcon_init(struct cil_pirqcon **pirqcon);
+int cil_iomemcon_init(struct cil_iomemcon **iomemcon);
+int cil_ioportcon_init(struct cil_ioportcon **ioportcon);
+int cil_pcidevicecon_init(struct cil_pcidevicecon **pcidevicecon);
 int cil_fsuse_init(struct cil_fsuse **fsuse);
 int cil_constrain_init(struct cil_constrain **constrain);
 int cil_ipaddr_init(struct cil_ipaddr **ipaddr);

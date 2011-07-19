@@ -1985,6 +1985,118 @@ resolve_netifcon_out:
 	return rc;
 }
 
+int cil_resolve_pirqcon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_pirqcon *pirqcon = (struct cil_pirqcon*)current->data;
+	struct cil_tree_node *context_node = NULL;
+	int rc = SEPOL_ERR;
+
+	if (pirqcon->context_str != NULL) {
+		rc = cil_resolve_name(db, current, pirqcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve pirq context: %s, rc: %d\n", pirqcon->context_str, rc);
+			goto resolve_pirqcon_out;
+		}
+		pirqcon->context = (struct cil_context*)context_node->data;
+	} else {
+		rc = cil_resolve_context(db, current, pirqcon->context, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve pirq context\n");
+			goto resolve_pirqcon_out;
+		}
+	}
+	db->pirqcon->count++;
+
+	return SEPOL_OK;
+
+resolve_pirqcon_out:
+	return rc;
+}
+
+int cil_resolve_iomemcon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_iomemcon *iomemcon = (struct cil_iomemcon*)current->data;
+	struct cil_tree_node *context_node = NULL;
+	int rc = SEPOL_ERR;
+
+	if (iomemcon->context_str != NULL) {
+		rc = cil_resolve_name(db, current, iomemcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve iomem context: %s, rc: %d\n", iomemcon->context_str, rc);
+			goto resolve_iomemcon_out;
+		}
+		iomemcon->context = (struct cil_context*)context_node->data;
+	} else {
+		rc = cil_resolve_context(db, current, iomemcon->context, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve iomem context\n");
+			goto resolve_iomemcon_out;
+		}
+	}
+	db->iomemcon->count++;
+
+	return SEPOL_OK;
+
+resolve_iomemcon_out:
+	return rc;
+}
+
+int cil_resolve_ioportcon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_ioportcon *ioportcon = (struct cil_ioportcon*)current->data;
+	struct cil_tree_node *context_node = NULL;
+	int rc = SEPOL_ERR;
+
+	if (ioportcon->context_str != NULL) {
+		rc = cil_resolve_name(db, current, ioportcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve ioport context: %s, rc: %d\n", ioportcon->context_str, rc);
+			goto resolve_ioportcon_out;
+		}
+		ioportcon->context = (struct cil_context*)context_node->data;
+	} else {
+		rc = cil_resolve_context(db, current, ioportcon->context, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve ioport context\n");
+			goto resolve_ioportcon_out;
+		}
+	}
+	db->ioportcon->count++;
+
+	return SEPOL_OK;
+
+resolve_ioportcon_out:
+	return rc;
+}
+
+int cil_resolve_pcidevicecon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_pcidevicecon *pcidevicecon = (struct cil_pcidevicecon*)current->data;
+	struct cil_tree_node *context_node = NULL;
+	int rc = SEPOL_ERR;
+
+	if (pcidevicecon->context_str != NULL) {
+		rc = cil_resolve_name(db, current, pcidevicecon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve pcidevice context: %s, rc: %d\n", pcidevicecon->context_str, rc);
+			goto resolve_pcidevicecon_out;
+		}
+		pcidevicecon->context = (struct cil_context*)context_node->data;
+	} else {
+		rc = cil_resolve_context(db, current, pcidevicecon->context, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve pcidevice context\n");
+			goto resolve_pcidevicecon_out;
+		}
+	}
+	db->pcidevicecon->count++;
+
+	return SEPOL_OK;
+
+resolve_pcidevicecon_out:
+	return rc;
+}
+
 int cil_resolve_fsuse(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_fsuse *fsuse = (struct cil_fsuse*)current->data;
@@ -2761,6 +2873,18 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_NETIFCON:
 			rc = cil_resolve_netifcon(db, node, call);
 			break;
+		case CIL_PIRQCON:
+			rc = cil_resolve_pirqcon(db, node, call);
+			break;
+		case CIL_IOMEMCON:
+			rc = cil_resolve_iomemcon(db, node, call);
+			break;
+		case CIL_IOPORTCON:
+			rc = cil_resolve_ioportcon(db, node, call);
+			break;
+		case CIL_PCIDEVICECON:
+			rc = cil_resolve_pcidevicecon(db, node, call);
+			break;
 		case CIL_FSUSE:
 			rc = cil_resolve_fsuse(db, node, call);
 			break;
@@ -2830,6 +2954,50 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		}
 		case CIL_PORTCON: {
 			struct cil_sort *sort = db->portcon;
+			uint32_t count = sort->count;
+			uint32_t i = sort->index;
+			if (sort->array == NULL) {
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
+			}
+			sort->array[i] = node->data;
+			sort->index++;
+			break;
+		}
+		case CIL_PIRQCON: {
+			struct cil_sort *sort = db->pirqcon;
+			uint32_t count = sort->count;
+			uint32_t i = sort->index;
+			if (sort->array == NULL) {
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
+			}
+			sort->array[i] = node->data;
+			sort->index++;
+			break;
+		}
+		case CIL_IOMEMCON: {
+			struct cil_sort *sort = db->iomemcon;
+			uint32_t count = sort->count;
+			uint32_t i = sort->index;
+			if (sort->array == NULL) {
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
+			}
+			sort->array[i] = node->data;
+			sort->index++;
+			break;
+		}
+		case CIL_IOPORTCON: {
+			struct cil_sort *sort = db->ioportcon;
+			uint32_t count = sort->count;
+			uint32_t i = sort->index;
+			if (sort->array == NULL) {
+				sort->array = cil_malloc(sizeof(*sort->array)*count);
+			}
+			sort->array[i] = node->data;
+			sort->index++;
+			break;
+		}
+		case CIL_PCIDEVICECON: {
+			struct cil_sort *sort = db->pcidevicecon;
 			uint32_t count = sort->count;
 			uint32_t i = sort->index;
 			if (sort->array == NULL) {
