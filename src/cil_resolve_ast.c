@@ -1369,6 +1369,7 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 	struct cil_list_item *new_item = NULL;
 	struct cil_list_item *list_tail = NULL;
 	struct cil_list_item *curr = NULL;
+	struct cil_list_item *tmp = NULL;
 	int rc = SEPOL_ERR;
 
 	if (cat_list == NULL || res_cat_list == NULL) {
@@ -1381,13 +1382,14 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 		cil_list_item_init(&new_item);
 		if (curr->flavor == CIL_LIST) {
 			cil_list_init(&sub_list);
-			new_item->flavor = CIL_LIST;
-			new_item->data = sub_list;
 			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
 			if (rc != SEPOL_OK) {
 				printf("Failed to resolve category range\n");
 				goto resolve_cat_list_out;
 			}
+			tmp = sub_list->head;
+			cil_list_item_destroy(&new_item, CIL_TRUE);
+			new_item = tmp;
 		} else {
 			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, call, &cat_node);
 			if (rc != SEPOL_OK) {
