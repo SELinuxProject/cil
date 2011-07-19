@@ -1400,7 +1400,7 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 				printf("categorysets are not allowed inside category lists\n");
 				rc = SEPOL_ERR;
 				goto resolve_cat_list_out;
-                        } else {
+			} else {
 				new_item->flavor = cat_node->flavor;
 				new_item->data = cat_node->data;
 			}
