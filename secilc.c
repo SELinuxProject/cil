@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <getopt.h>
 
 #include "src/cil.h"
 #include "src/cil_tree.h"
@@ -44,11 +45,15 @@
 #include "src/cil_policy.h"
 #include "src/cil_post.h"
 
-#include "src/cil_copy_ast.h"
-
 #include <sepol/policydb/hashtab.h>
 #include <sepol/policydb/policydb.h>
 #include <sepol/policydb/services.h>
+
+void usage(char *prog)
+{
+	printf("Usage: %s [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] <files>...\n", prog);
+	exit(1);
+}
 
 int main(int argc, char *argv[])
 {
@@ -58,28 +63,82 @@ int main(int argc, char *argv[])
 	uint32_t file_size;
 	char *buffer;
 	FILE *file;
-	
+	char output[10];
 	struct cil_tree *parse_tree;
-	cil_tree_init(&parse_tree);
-
 	struct cil_db *db;
-	cil_db_init(&db);
-
+	int target = SEPOL_TARGET_SELINUX;
+	int mls = 0;
+	int policyvers = POLICYDB_VERSION_MAX;
+	int opt_char;
+	int opt_index = 0;
+	static struct option long_opts[] = {
+		{"help", no_argument, 0, 'h'},
+		{"target", required_argument, 0, 't'},
+		{"mls", no_argument, 0, 'M'},
+		{"policyversion", required_argument, 0, 'c'},
+		{0, 0, 0, 0}
+	};
 	int i;
-
-	if (argc <= 1) {
-		printf("Usage: %s [files]\n", argv[0]);
-		exit(1);
+	
+	while (1) {
+		opt_char = getopt_long(argc, argv, "ht:Mc:", long_opts, &opt_index);
+		if (opt_char == -1) {
+			break;
+		}
+		switch (opt_char) {
+			case 't':
+				if (!strcmp(optarg, "selinux")) {
+					target = SEPOL_TARGET_SELINUX;
+				} else if (!strcmp(optarg, "xen")) {
+					target = SEPOL_TARGET_XEN;
+				} else {
+					fprintf(stderr, "Unknown target: %s\n", optarg);
+					usage(argv[0]);
+				}
+				break;
+			case 'M':
+				mls = 1;
+				break;
+			case 'c': {
+				char *endptr = NULL;
+				errno = 0;
+				policyvers = strtol(optarg, &endptr, 10);
+				if (errno != 0 || endptr == optarg || *endptr != '\0') {
+					fprintf(stderr, "Bad policy version: %s\n", optarg);
+					usage(argv[0]);
+				}
+				if (policyvers > POLICYDB_VERSION_MAX || policyvers < POLICYDB_VERSION_MIN) {
+					fprintf(stderr, "Policy version must be between %d and %d\n",
+					       POLICYDB_VERSION_MIN, POLICYDB_VERSION_MAX);
+					usage(argv[0]);
+				}
+				break;
+			}
+			case 'h':
+				usage(argv[0]);
+			case '?':
+				break;
+			default:
+				fprintf(stderr, "Unsupported option: %s\n", optarg);
+				usage(argv[0]);
+		}
 	}
 
-	for (i = 1; i < argc; i++) {
+	if (optind >= argc) {
+		fprintf(stderr, "No cil files specified\n");
+		usage(argv[0]);
+	}
+	
+	cil_tree_init(&parse_tree);
+
+	for (i = optind; i < argc; i++) {
 		file = fopen(argv[i], "r");
 		if (!file) {
 			fprintf(stderr, "Could not open file: %s\n", argv[i]);
 			goto exit;
 		}
 		if (stat(argv[i], &filedata) == -1) {
-			printf("Could not stat file: %s\n", argv[i]);
+			fprintf(stderr, "Could not stat file: %s\n", argv[i]);
 			goto exit;
 		}
 		file_size = filedata.st_size;	
@@ -96,7 +155,7 @@ int main(int argc, char *argv[])
 
 		printf("Building Parse Tree...\n");
 		if (cil_parser(buffer, file_size + 2, &parse_tree)) {
-			printf("Failed to parse CIL policy, exiting\n");
+			fprintf(stderr, "Failed to parse CIL policy, exiting\n");
 			goto exit;
 		}
 
@@ -104,13 +163,15 @@ int main(int argc, char *argv[])
 		buffer = NULL;
 
 #ifdef DEBUG
-	cil_tree_print(parse_tree->root, 0);
+		cil_tree_print(parse_tree->root, 0);
 #endif
 	}
+	
+	cil_db_init(&db);
 
 	printf("Building AST from Parse Tree...\n");
 	if (cil_build_ast(db, parse_tree->root, db->ast->root)) {
-		printf("Failed to build ast, exiting\n");
+		fprintf(stderr, "Failed to build ast, exiting\n");
 		goto exit;
 	}
 #ifdef DEBUG
@@ -121,7 +182,7 @@ int main(int argc, char *argv[])
 
 	printf("Resolving AST...\n");
 	if (cil_resolve_ast(db, db->ast->root)) {
-		printf("Failed to resolve ast, exiting\n");
+		fprintf(stderr, "Failed to resolve ast, exiting\n");
 		goto exit;
 	}
 
@@ -130,26 +191,26 @@ int main(int argc, char *argv[])
 #endif
 	printf("Destroying AST Symtabs...\n");
 	if (cil_destroy_ast_symtabs(db->ast->root)) {
-		printf("Failed to destroy ast symtabs, exiting\n");
+		fprintf(stderr, "Failed to destroy ast symtabs, exiting\n");
 		goto exit;
 	}
 
 	printf("Qualifying Names...\n");
 	if (cil_fqn_qualify(db->ast->root)) {
-		printf("Failed to qualify names, exiting\n");
+		fprintf(stderr, "Failed to qualify names, exiting\n");
 		goto exit;
 	}
 
 	printf("Post process...\n");
 	if (cil_post_process(db)) {
-		printf("Post process failed, exiting\n");
+		fprintf(stderr, "Post process failed, exiting\n");
 		goto exit;
 	}
 
 #ifdef DEBUG
 	rc = cil_gen_policy(db);
 	if (rc != SEPOL_OK) {
-		printf("Failed to print to policy.conf file\n");
+		fprintf(stderr, "Failed to print to policy.conf file\n");
 		goto exit;
 	}
 	cil_tree_print(db->ast->root, 0);
@@ -158,15 +219,16 @@ int main(int argc, char *argv[])
 	policydb_init(&pdb);
 	sepol_set_policydb(&pdb);
 	pdb.policy_type = POLICY_KERN;
-	pdb.policyvers = POLICYDB_VERSION_MAX;
-	pdb.mls = 0;
-	rc = policydb_set_target_platform(&pdb, SEPOL_TARGET_SELINUX);
+	pdb.policyvers = policyvers;
+	pdb.mls = mls;
+	rc = policydb_set_target_platform(&pdb, target);
 	if (rc != 0) {
-		printf("Failed to set target platform: %d\n", rc);
+		fprintf(stderr, "Failed to set target platform: %d\n", rc);
 		goto exit;
 	}
-	if (cil_binary_create(db, &pdb, "policy.24")) {
-		printf("Failed to generate binary, exiting\n");
+	snprintf(output, 10, "policy.%d", policyvers);
+	if (cil_binary_create(db, &pdb, output)) {
+		fprintf(stderr, "Failed to generate binary, exiting\n");
 		goto exit;
 	}
 
