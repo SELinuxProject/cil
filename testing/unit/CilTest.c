@@ -1355,6 +1355,19 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_netifcon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_pirqnotint_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_nopirq_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_pirqinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_nocontext_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_contextinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_pirqcon);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_pirqcon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_anoncontext);
 	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_anoncontext_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_xattr);
