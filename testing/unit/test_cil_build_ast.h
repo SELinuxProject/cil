@@ -730,6 +730,17 @@ void test_cil_gen_pirqcon_dbnull_neg(CuTest *tc);
 void test_cil_gen_pirqcon_currnull_neg(CuTest *tc);
 void test_cil_gen_pirqcon_astnull_neg(CuTest *tc);
 
+void test_cil_gen_pcidevicecon(CuTest *tc);
+void test_cil_gen_pcidevicecon_pcidevicenotint_neg(CuTest *tc);
+void test_cil_gen_pcidevicecon_nopcidevice_neg(CuTest *tc);
+void test_cil_gen_pcidevicecon_pcideviceinparens_neg(CuTest *tc);
+void test_cil_gen_pcidevicecon_nocontext_neg(CuTest *tc);
+void test_cil_gen_pcidevicecon_contextinparens_neg(CuTest *tc);
+void test_cil_gen_pcidevicecon_extra_neg(CuTest *tc);
+void test_cil_gen_pcidevicecon_dbnull_neg(CuTest *tc);
+void test_cil_gen_pcidevicecon_currnull_neg(CuTest *tc);
+void test_cil_gen_pcidevicecon_astnull_neg(CuTest *tc);
+
 void test_cil_gen_fsuse_anoncontext(CuTest *tc);
 void test_cil_gen_fsuse_anoncontext_neg(CuTest *tc);
 void test_cil_gen_fsuse_xattr(CuTest *tc);
@@ -981,6 +992,9 @@ void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_pirqcon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_pirqcon_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_pcidevicecon(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_pcidevicecon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_fsuse(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_fsuse_neg(CuTest *tc);

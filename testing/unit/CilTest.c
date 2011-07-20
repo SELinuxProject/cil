@@ -1375,6 +1375,19 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_pirqcon);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_pirqcon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_pcidevicenotint_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_nopcidevice_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_pcideviceinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_nocontext_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_contextinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_pcidevicecon);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_pcidevicecon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_anoncontext);
 	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_anoncontext_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_fsuse_xattr);
