@@ -10,7 +10,9 @@ LEX = flex
 
 DEBUG=0
 
-SECILC = secilc
+SECILC = secilc 
+
+UNIT = unit_tests
 
 SECILC_SRC = secilc.c
 TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
@@ -53,11 +55,13 @@ all: $(SECILC)
 cil_lexer.c: cil_lexer.l
 	$(LEX) -t $< > $@
 
+$(UNIT): $(TEST_SRCS) $(ALL_SRCS)
+	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
+
 $(SECILC): $(SECILC_SRC) $(ALL_SRCS)
 	$(CC) $(CFLAGS) -o $(SECILC) $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
 
-unit: $(TEST_SRCS) $(ALL_SRCS)
-	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
+unit: $(SECILC) $(UNIT)
 
 # Requires lcov 1.9+ (--ignore-errors)
 coverage: clean unit
