@@ -3349,6 +3349,77 @@ void test_cil_resolve_netifcon_sublist_secondlist_missing_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_pirqcon(CuTest *tc) {
+	char *line[] = {"(", "context", "con", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")",
+			"(", "pirqcon", "1", "con", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_pirqcon(test_db, test_db->ast->root->cl_head->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_pirqcon_context_neg(CuTest *tc) {
+	char *line[] = {"(", "context", "con", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")",
+			"(", "pirqcon", "1", "dne", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_pirqcon(test_db, test_db->ast->root->cl_head->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_pirqcon_anon_context(CuTest *tc) {
+	char *line[] = {"(", "user", "system_u", ")",
+			"(", "role", "object_r", ")",
+			"(", "type", "etc_t", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "pirqcon", "1", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	int rc = cil_resolve_pirqcon(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_pirqcon_anon_context_neg(CuTest *tc) {
+	char *line[] = {"(", "pirqcon", "1", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_pirqcon(test_db, test_db->ast->root->cl_head, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 void test_cil_resolve_fsuse(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")",
 			"(", "category", "c0", ")",
@@ -7881,6 +7952,52 @@ void test_cil_resolve_ast_node_helper_netifcon_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "if_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")",
 			"(", "netifcon", "eth0", "if_default", "packet_default", ")", NULL};
  
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+        uint32_t finished = 0;
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
+        CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+        CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_resolve_ast_node_helper_pirqcon(CuTest *tc) {
+	char *line[] = {"(", "context", "con", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")",
+			"(", "pirqcon", "1", "con", ")", NULL};
+        
+	struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+        uint32_t finished = 0;
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, extra_args);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+        CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_resolve_ast_node_helper_pirqcon_neg(CuTest *tc) {
+	char *line[] = {"(", "context", "con", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")",
+			"(", "pirqcon", "1", "dne", ")", NULL};
+        
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
 
