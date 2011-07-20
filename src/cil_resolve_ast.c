@@ -1365,11 +1365,9 @@ resolve_cat_range_out:
 int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *cat_list, struct cil_list *res_cat_list, struct cil_call *call)
 {
 	struct cil_tree_node *cat_node = NULL;
-	struct cil_list *sub_list = NULL;
 	struct cil_list_item *new_item = NULL;
 	struct cil_list_item *list_tail = NULL;
 	struct cil_list_item *curr = NULL;
-	struct cil_list_item *tmp = NULL;
 	int rc = SEPOL_ERR;
 
 	if (cat_list == NULL || res_cat_list == NULL) {
@@ -1379,17 +1377,15 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 	curr = cat_list->head;
 
 	while (curr != NULL) {
-		cil_list_item_init(&new_item);
 		if (curr->flavor == CIL_LIST) {
-			cil_list_init(&sub_list);
-			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, sub_list);
+			struct cil_list sub_list;
+			sub_list.head = NULL;
+			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, &sub_list);
 			if (rc != SEPOL_OK) {
 				printf("Failed to resolve category range\n");
 				goto resolve_cat_list_out;
 			}
-			tmp = sub_list->head;
-			cil_list_item_destroy(&new_item, CIL_TRUE);
-			new_item = tmp;
+			new_item = sub_list.head;
 		} else {
 			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, call, &cat_node);
 			if (rc != SEPOL_OK) {
@@ -1400,10 +1396,10 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 				printf("categorysets are not allowed inside category lists\n");
 				rc = SEPOL_ERR;
 				goto resolve_cat_list_out;
-			} else {
-				new_item->flavor = cat_node->flavor;
-				new_item->data = cat_node->data;
 			}
+			cil_list_item_init(&new_item);
+			new_item->flavor = cat_node->flavor;
+			new_item->data = cat_node->data;
 		}
 		if (res_cat_list->head == NULL) {
 			res_cat_list->head = new_item;
