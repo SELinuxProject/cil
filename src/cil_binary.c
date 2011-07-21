@@ -492,6 +492,47 @@ catalias_to_policydb_out:
 	return rc;
 }
 
+int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_list_item *curr = db->dominance->head;
+	struct cil_sens *cil_sens = NULL;
+	level_datum_t *sepol_level = NULL;
+	mls_level_t *mls_level = NULL;
+
+	while (curr != NULL) {
+		cil_sens = curr->data;
+		sepol_level = cil_malloc(sizeof(*sepol_level));
+		mls_level = cil_malloc(sizeof(*mls_level));
+		level_datum_init(sepol_level);
+		mls_level_init(mls_level);
+
+		key = cil_strdup(cil_sens->datum.name);
+		rc = symtab_insert(pdb, SYM_LEVELS, key, sepol_level, SCOPE_DECL, 0, &value);
+		if (rc != SEPOL_OK) {
+			goto dominance_to_binary_out;
+		}
+		sepol_level->isalias = 0;
+		sepol_level->defined = 1;
+		mls_level->sens = value;
+		sepol_level->level = mls_level;
+
+		curr = curr->next;
+	}
+
+	return SEPOL_OK;
+
+dominance_to_binary_out:
+	level_datum_destroy(sepol_level);
+	mls_level_destroy(mls_level);
+	free(sepol_level);
+	free(mls_level);
+	free(key);
+	return rc;
+}
+
 int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -687,6 +728,11 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	}
 
 	rc = cil_catorder_to_policydb(pdb, db);
+	if (rc != SEPOL_OK) {
+		goto binary_create_out;
+	}
+
+	rc = cil_dominance_to_policydb(pdb, db);
 	if (rc != SEPOL_OK) {
 		goto binary_create_out;
 	}
