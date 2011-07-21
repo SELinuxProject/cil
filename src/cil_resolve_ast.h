@@ -58,6 +58,7 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current, struc
 int cil_resolve_dominance(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *cat_list, struct cil_list *res_cat_list, struct cil_call *call);
 int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current, struct cil_catset *catset, struct cil_call *call);
+int cil_resolve_catrange(struct cil_db *db, struct cil_tree_node *current, struct cil_catrange *catrange, struct cil_call *call);
 int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct cil_level *level, struct cil_call *call); 
 int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);

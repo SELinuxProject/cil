@@ -2776,6 +2776,71 @@ set_to_list_out:
 	return rc;
 }
 
+int cil_gen_catrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key = NULL;
+	struct cil_catrange *catrange = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_catrange_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid categoryrange declaration (line: %d)\n", parse_current->line);
+		goto gen_catrange_cleanup;
+	}
+
+	rc = cil_catrange_init(&catrange);
+	if (rc != SEPOL_OK) {
+		goto gen_catrange_cleanup;
+	}
+
+	key = parse_current->next->data;
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)catrange, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CATRANGE);
+	if (rc != SEPOL_OK) {
+		goto gen_catrange_cleanup;
+	}
+
+	rc = cil_fill_catrange(parse_current->next->next->cl_head, catrange);
+	if (rc != SEPOL_OK) {
+		printf("Failed to fill categoryset\n");
+		goto gen_catrange_cleanup;
+	}
+
+	return SEPOL_OK;
+
+gen_catrange_cleanup:
+	if (catrange != NULL) {
+		cil_destroy_catrange(catrange);
+	}
+	return rc;
+}
+
+void cil_destroy_catrange(struct cil_catrange *catrange)
+{
+	cil_symtab_datum_destroy(catrange->datum);
+	
+	if (catrange->cat_low_str != NULL) {
+		free(catrange->cat_low_str);
+	}
+
+	if (catrange->cat_high_str != NULL) {
+		free(catrange->cat_high_str);
+	}
+
+	free(catrange);
+}
+
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -4745,6 +4810,35 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 cil_fill_level_cleanup:
 	return rc;
 }
+	
+int cil_fill_catrange(struct cil_tree_node *cats, struct cil_catrange *catrange)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	if (cats == NULL || catrange == NULL) {
+		goto cil_fill_catrange_cleanup;
+	}
+
+	rc = __cil_verify_syntax(cats, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid categoryrange declaration (line: %d)\n", cats->line);
+		goto cil_fill_catrange_cleanup;
+	}
+
+	catrange->cat_low_str = cil_strdup(cats->data);
+	catrange->cat_high_str = cil_strdup(cats->next->data);
+
+	return SEPOL_OK;
+
+cil_fill_catrange_cleanup:
+	return rc;
+}
 
 int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, void *extra_args)
 {
@@ -5050,6 +5144,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			printf("cil_gen_catalias (categoryalias) failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_CATRANGE)) {
+		rc = cil_gen_catrange(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_catrange (categoryrange) failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_CATSET)) {
 		rc = cil_gen_catset(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {

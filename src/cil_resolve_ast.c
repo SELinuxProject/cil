@@ -1467,6 +1467,57 @@ senscat_insert_out:
 	return rc;
 }
 
+int cil_resolve_catrange(struct cil_db *db, struct cil_tree_node *current, struct cil_catrange *catrange, struct cil_call *call)
+{
+	struct cil_tree_node *cat_low_node = NULL;
+	struct cil_tree_node *cat_high_node = NULL;
+	struct cil_list_item *cat;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, catrange->cat_low_str, CIL_SYM_CATS, call, &cat_low_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve category\n");
+		goto resolve_catrange_out;
+	}
+
+	for (cat = db->catorder->head; cat != NULL; cat = cat->next) {
+		if (cat->data == cat_low_node->data) {
+			catrange->cat_low = cat;
+			break;
+		}
+	}
+
+	if (cat == NULL) {
+		printf("Invalid category order\n");
+		rc = SEPOL_ERR;
+		goto resolve_catrange_out;
+	}
+
+	rc = cil_resolve_name(db, current, catrange->cat_high_str, CIL_SYM_CATS, call, &cat_high_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to resolve category\n");
+		goto resolve_catrange_out;
+	}
+
+	for (cat = cat->next; cat != NULL; cat = cat->next) {
+		if (cat->data == cat_high_node->data) {
+			catrange->cat_high = cat;
+			break;
+		}
+	}
+
+	if (cat == NULL) {
+		printf("Invalid category order\n");
+		rc = SEPOL_ERR;
+		goto resolve_catrange_out;
+	}
+
+	return SEPOL_OK;
+
+resolve_catrange_out:
+	return rc;
+}
+
 int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_tree_node *sens_node = NULL;
@@ -2776,6 +2827,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		break;
 	case 5:
 		switch (node->flavor) {
+		case CIL_CATRANGE:
+			rc = cil_resolve_catrange(db, node, (struct cil_catrange*)node->data, call);
+			break;
 		case CIL_CATSET:
 			rc = cil_resolve_catset(db, node, (struct cil_catset*)node->data, call);
 			break;

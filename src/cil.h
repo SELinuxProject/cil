@@ -146,6 +146,7 @@ enum cil_flavor {
 	CIL_CAT,
 	CIL_SENSALIAS,
 	CIL_CATALIAS,
+	CIL_CATRANGE,
 	CIL_CATSET,
 	CIL_MACRO,
 	CIL_OPTIONAL,
@@ -207,6 +208,7 @@ enum cil_flavor {
 #define CIL_KEY_SENSALIAS	"sensitivityalias"
 #define CIL_KEY_CATEGORY	"category"
 #define CIL_KEY_CATALIAS	"categoryalias"
+#define CIL_KEY_CATRANGE	"categoryrange"
 #define CIL_KEY_CATSET		"categoryset"
 #define CIL_KEY_CATORDER	"categoryorder"
 #define CIL_KEY_DOMINANCE	"dominance"
@@ -543,6 +545,14 @@ struct cil_catalias {
 	struct cil_cat *cat;
 };
 
+struct cil_catrange {
+	struct cil_symtab_datum datum;
+	char *cat_low_str;
+	struct cil_list_item *cat_low;
+	char *cat_high_str;
+	struct cil_list_item *cat_high;
+};
+
 struct cil_catset {
 	struct cil_symtab_datum datum;
 	struct cil_list *cat_list_str;
@@ -814,6 +824,7 @@ int cil_role_trans_init(struct cil_role_trans **role_trans);
 int cil_role_allow_init(struct cil_role_allow **role_allow);
 int cil_sensalias_init(struct cil_sensalias **sensalias);
 int cil_catalias_init(struct cil_catalias **catalias);
+int cil_catrange_init(struct cil_catrange **catrange);
 int cil_catset_init(struct cil_catset **catset);
 int cil_senscat_init(struct cil_senscat **senscat);
 int cil_filecon_init(struct cil_filecon **filecon);

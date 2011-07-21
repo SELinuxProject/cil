@@ -119,6 +119,8 @@ void cil_destroy_category(struct cil_cat *cat);
 int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_catalias(struct cil_catalias *alias);
 int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl, uint8_t sublists);
+int cil_gen_catrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_catrange(struct cil_catrange *catrange);
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_catset(struct cil_catset *catset);
 int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
@@ -168,6 +170,7 @@ int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struc
 void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr);
 
 int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list);
+int cil_fill_catrange(struct cil_tree_node *cats, struct cil_catrange *catrange);
 int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context);
 int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer);
 int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr);

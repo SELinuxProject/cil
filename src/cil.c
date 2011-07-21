@@ -209,6 +209,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_CATALIAS:
 		cil_destroy_catalias(*data);
 		break;
+	case CIL_CATRANGE:
+		cil_destroy_catrange(*data);
+		break;
 	case CIL_CATSET:
 		cil_destroy_catset(*data);
 		break;
@@ -1210,6 +1213,27 @@ int cil_catalias_init(struct cil_catalias **catalias)
 	new_catalias->cat = NULL;
 
 	*catalias = new_catalias;
+
+	return SEPOL_OK;
+}
+
+int cil_catrange_init(struct cil_catrange **catrange)
+{
+	struct cil_catrange *new_catrange = NULL;
+
+	if (catrange == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_catrange = cil_malloc(sizeof(*new_catrange));
+
+	cil_symtab_datum_init(&new_catrange->datum);
+	new_catrange->cat_low_str = NULL;
+	new_catrange->cat_low = NULL;
+	new_catrange->cat_high_str = NULL;
+	new_catrange->cat_high = NULL;
+
+	*catrange = new_catrange;
 
 	return SEPOL_OK;
 }
