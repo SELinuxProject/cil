@@ -443,15 +443,11 @@ int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	type_datum_t *sepol_src = NULL;
 	type_datum_t *sepol_tgt = NULL;
 	class_datum_t *sepol_obj = NULL;
+	avtab_ptr_t avtab_ptr;
 	avtab_datum_t *avtab_datum = cil_malloc(sizeof(*avtab_datum));
 	memset(avtab_datum, 0, sizeof(avtab_datum_t));
 	avtab_key_t *avtab_key = cil_malloc(sizeof(*avtab_key));
 	memset(avtab_key, 0, sizeof(avtab_key_t));
-
-	rc = avtab_alloc(&pdb->te_avtab, MAX_AVTAB_SIZE);
-	if (rc != SEPOL_OK) {
-		goto avrule_to_policydb_out;
-	}
 
 	key = ((struct cil_symtab_datum *)cil_avrule->src)->name;
 	sepol_src = hashtab_search(pdb->p_types.table, key);
@@ -502,7 +498,7 @@ int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		avtab_key->specified = AVTAB_NEVERALLOW;
 		break;
 	case CIL_AVRULE_DONTAUDIT:
-		avtab_key->specified = AVRULE_DONTAUDIT;
+		avtab_key->specified = AVTAB_AUDITDENY;
 		avtab_datum->data = ~(avtab_datum->data);
 		break;
 	default:
@@ -511,8 +507,9 @@ int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		break;
 	}
 
-	rc = avtab_insert(&pdb->te_avtab, avtab_key, avtab_datum);
-	if (rc != SEPOL_OK) {
+	avtab_ptr = avtab_insert_nonunique(&pdb->te_avtab, avtab_key, avtab_datum);
+	if (avtab_ptr == NULL) {
+		rc = SEPOL_ERR;
 		goto avrule_to_policydb_out;
 	}
 
@@ -616,6 +613,11 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	struct cil_args_binary extra_args;
 
 	if (db == NULL || &pdb == NULL || fname == NULL) {
+		goto binary_create_out;
+	}
+
+	rc = avtab_alloc(&pdb->te_avtab, MAX_AVTAB_SIZE);
+	if (rc != SEPOL_OK) {
 		goto binary_create_out;
 	}
 
