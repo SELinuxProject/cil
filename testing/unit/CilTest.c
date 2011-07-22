@@ -1382,6 +1382,24 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_pirqcon);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_pirqcon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_iomemrange);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_iomemrange_firstnotint_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_iomemrange_secondnotint_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_iomemrange_empty_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_iomemrange_singleiomem_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_iomemrange_morethantwoiomem_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_iomemnotint_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_noiomem_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_nocontext_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_anoncontext_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_iomemcon_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_iomemcon);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_iomemcon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon);
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_pcidevicenotint_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_nopcidevice_neg);
