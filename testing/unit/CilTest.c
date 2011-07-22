@@ -1152,6 +1152,18 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_catalias);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_catalias_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange);
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange_norange_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange_emptyrange_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange_extrarange_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_catrange_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_catrange);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_catrange_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_roletype);
 	SUITE_ADD_TEST(suite, test_cil_gen_roletype_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_roletype_dbnull_neg);

@@ -518,6 +518,16 @@ void test_cil_gen_catalias_catnull_neg(CuTest *);
 void test_cil_gen_catalias_aliasnull_neg(CuTest *);
 void test_cil_gen_catalias_extra_neg(CuTest *);
 
+void test_cil_gen_catrange(CuTest *);
+void test_cil_gen_catrange_noname_neg(CuTest *);
+void test_cil_gen_catrange_norange_neg(CuTest *);
+void test_cil_gen_catrange_emptyrange_neg(CuTest *);
+void test_cil_gen_catrange_extrarange_neg(CuTest *);
+void test_cil_gen_catrange_dbnull_neg(CuTest *);
+void test_cil_gen_catrange_currnull_neg(CuTest *);
+void test_cil_gen_catrange_astnull_neg(CuTest *);
+void test_cil_gen_catrange_extra_neg(CuTest *);
+
 void test_cil_gen_roletype(CuTest *tc);
 void test_cil_gen_roletype_currnull_neg(CuTest *tc);
 void test_cil_gen_roletype_dbnull_neg(CuTest *tc);
@@ -980,6 +990,9 @@ void test_cil_build_ast_node_helper_catorder_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_catalias(CuTest *tc);
 void test_cil_build_ast_node_helper_catalias_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_catrange(CuTest *tc);
+void test_cil_build_ast_node_helper_catrange_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_roletype(CuTest *tc);
 void test_cil_build_ast_node_helper_roletype_neg(CuTest *tc);

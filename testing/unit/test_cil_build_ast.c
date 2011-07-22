@@ -9260,6 +9260,169 @@ void test_cil_gen_catalias_extra_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_catrange(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", "range", "(", "c0", "c1", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+	
+	int rc = cil_gen_catrange(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_catrange_noname_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+	
+	int rc = cil_gen_catrange(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catrange_norange_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", "range", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+	
+	int rc = cil_gen_catrange(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catrange_emptyrange_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", "range", "(", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+	
+	int rc = cil_gen_catrange(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catrange_extrarange_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", "range", "(", "c0", "c1", "c2", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+	
+	int rc = cil_gen_catrange(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catrange_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", "range", "(", "c0", "c1", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db = NULL;
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	int rc = cil_gen_catrange(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catrange_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_catrange(test_db, NULL, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catrange_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", "range", "(", "c0", "c1", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	int rc = cil_gen_catrange(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_catrange_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", "range", "(", "c0", "c1", ")", "extra", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_catrange(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_roletype(CuTest *tc) {
 	char *line[] = {"(", "roletype", "admin_r", "admin_t", ")", NULL};
 
@@ -16634,7 +16797,43 @@ void test_cil_build_ast_node_helper_catalias(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_catalias_neg(CuTest *tc) {
-	char *line[] = {"(", "categoryalias", "c0", "red", "extra", ")", NULL};
+	char *line[] = {"(", "categoryalias", "range", "(", "c0", "c1", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_catrange(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", "range", "(", "c0", "c1", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 1, finished);
+}
+
+void test_cil_build_ast_node_helper_catrange_neg(CuTest *tc) {
+	char *line[] = {"(", "categoryrange", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
