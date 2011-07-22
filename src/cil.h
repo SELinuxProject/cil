@@ -548,9 +548,9 @@ struct cil_catalias {
 struct cil_catrange {
 	struct cil_symtab_datum datum;
 	char *cat_low_str;
-	struct cil_list_item *cat_low;
+	struct cil_cil *cat_low;
 	char *cat_high_str;
-	struct cil_list_item *cat_high;
+	struct cil_cil *cat_high;
 };
 
 struct cil_catset {

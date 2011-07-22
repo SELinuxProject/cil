@@ -1479,10 +1479,10 @@ int cil_resolve_catrange(struct cil_db *db, struct cil_tree_node *current, struc
 		printf("Failed to resolve category\n");
 		goto resolve_catrange_out;
 	}
+	catrange->cat_low = cat_low_node->data;
 
 	for (cat = db->catorder->head; cat != NULL; cat = cat->next) {
 		if (cat->data == cat_low_node->data) {
-			catrange->cat_low = cat;
 			break;
 		}
 	}
@@ -1498,10 +1498,10 @@ int cil_resolve_catrange(struct cil_db *db, struct cil_tree_node *current, struc
 		printf("Failed to resolve category\n");
 		goto resolve_catrange_out;
 	}
+	catrange->cat_high = cat_high_node->data;
 
 	for (cat = cat->next; cat != NULL; cat = cat->next) {
 		if (cat->data == cat_high_node->data) {
-			catrange->cat_high = cat;
 			break;
 		}
 	}
