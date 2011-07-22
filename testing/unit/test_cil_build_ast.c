@@ -12883,7 +12883,7 @@ void test_cil_gen_pirqcon_nopirq_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_pirqcon_pirqinparens_neg(CuTest *tc) {
+void test_cil_gen_pirqcon_pirqrange_neg(CuTest *tc) {
 	char *line[] = {"(", "pirqcon", "(", "1", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
@@ -12921,7 +12921,7 @@ void test_cil_gen_pirqcon_nocontext_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_pirqcon_contextinparens_neg(CuTest *tc) {
+void test_cil_gen_pirqcon_anoncontext_neg(CuTest *tc) {
 	char *line[] = {"(", "pirqcon", "1", "(", "con", ")", ")", NULL};
 
         struct cil_tree *test_tree;
@@ -13065,7 +13065,7 @@ void test_cil_gen_pcidevicecon_nopcidevice_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_pcidevicecon_pcideviceinparens_neg(CuTest *tc) {
+void test_cil_gen_pcidevicecon_pcidevicerange_neg(CuTest *tc) {
 	char *line[] = {"(", "pcidevicecon", "(", "1", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
@@ -13103,7 +13103,7 @@ void test_cil_gen_pcidevicecon_nocontext_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_pcidevicecon_contextinparens_neg(CuTest *tc) {
+void test_cil_gen_pcidevicecon_anoncontext_neg(CuTest *tc) {
 	char *line[] = {"(", "pcidevicecon", "1", "(", "con", ")", ")", NULL};
 
         struct cil_tree *test_tree;

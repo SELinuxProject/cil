@@ -1372,9 +1372,9 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon);
 	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_pirqnotint_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_nopirq_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_pirqinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_pirqrange_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_nocontext_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_contextinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_anoncontext_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pirqcon_currnull_neg);
@@ -1385,9 +1385,9 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon);
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_pcidevicenotint_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_nopcidevice_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_pcideviceinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_pcidevicerange_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_nocontext_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_contextinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_anoncontext_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_pcidevicecon_currnull_neg);
