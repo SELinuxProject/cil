@@ -218,6 +218,18 @@ int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
+ * Insert cil booleanif structure into sepol policydb.  This populates the
+ * policydb conditional list.  Each conditional node contains an expression
+ * and true/false avtab_ptr lists that point into te_cond_avtab.
+ *
+ * @param[in] pdb The policy database to insert the booleanif into.
+ * @param[in] node The tree node that contains the cil_booleanif.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
  * Insert cil role transition structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the role transition into.
