@@ -254,6 +254,13 @@ void test_cil_resolve_iomemcon_anon_context_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_iomemcon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_iomemcon_neg(CuTest *tc);
 
+void test_cil_resolve_ioportcon(CuTest *);
+void test_cil_resolve_ioportcon_context_neg(CuTest *);
+void test_cil_resolve_ioportcon_anon_context(CuTest *);
+void test_cil_resolve_ioportcon_anon_context_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_ioportcon(CuTest *tc);
+void test_cil_resolve_ast_node_helper_ioportcon_neg(CuTest *tc);
+
 void test_cil_resolve_pcidevicecon(CuTest *);
 void test_cil_resolve_pcidevicecon_context_neg(CuTest *);
 void test_cil_resolve_pcidevicecon_anon_context(CuTest *);
