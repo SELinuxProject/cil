@@ -746,6 +746,22 @@ void test_cil_gen_iomemcon_dbnull_neg(CuTest *tc);
 void test_cil_gen_iomemcon_currnull_neg(CuTest *tc);
 void test_cil_gen_iomemcon_astnull_neg(CuTest *tc);
 
+void test_cil_gen_ioportcon(CuTest *tc);
+void test_cil_gen_ioportcon_ioportrange(CuTest *tc);
+void test_cil_gen_ioportcon_ioportrange_firstnotint_neg(CuTest *tc);
+void test_cil_gen_ioportcon_ioportrange_secondnotint_neg(CuTest *tc);
+void test_cil_gen_ioportcon_ioportrange_empty_neg(CuTest *tc);
+void test_cil_gen_ioportcon_ioportrange_singleioport_neg(CuTest *tc);
+void test_cil_gen_ioportcon_ioportrange_morethantwoioport_neg(CuTest *tc);
+void test_cil_gen_ioportcon_ioportnotint_neg(CuTest *tc);
+void test_cil_gen_ioportcon_noioport_neg(CuTest *tc);
+void test_cil_gen_ioportcon_nocontext_neg(CuTest *tc);
+void test_cil_gen_ioportcon_anoncontext_neg(CuTest *tc);
+void test_cil_gen_ioportcon_extra_neg(CuTest *tc);
+void test_cil_gen_ioportcon_dbnull_neg(CuTest *tc);
+void test_cil_gen_ioportcon_currnull_neg(CuTest *tc);
+void test_cil_gen_ioportcon_astnull_neg(CuTest *tc);
+
 void test_cil_gen_pcidevicecon(CuTest *tc);
 void test_cil_gen_pcidevicecon_pcidevicenotint_neg(CuTest *tc);
 void test_cil_gen_pcidevicecon_nopcidevice_neg(CuTest *tc);
@@ -1011,6 +1027,9 @@ void test_cil_build_ast_node_helper_gen_pirqcon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_iomemcon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_iomemcon_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_ioportcon(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_ioportcon_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_pcidevicecon(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_pcidevicecon_neg(CuTest *tc);
