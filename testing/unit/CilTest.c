@@ -416,6 +416,13 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_pirqcon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_pirqcon_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_iomemcon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_iomemcon_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_iomemcon_anon_context);
+	SUITE_ADD_TEST(suite, test_cil_resolve_iomemcon_anon_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_iomemcon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_iomemcon_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_pcidevicecon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_pcidevicecon_context_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_pcidevicecon_anon_context);

@@ -247,6 +247,13 @@ void test_cil_resolve_pirqcon_anon_context_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_pirqcon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_pirqcon_neg(CuTest *tc);
 
+void test_cil_resolve_iomemcon(CuTest *);
+void test_cil_resolve_iomemcon_context_neg(CuTest *);
+void test_cil_resolve_iomemcon_anon_context(CuTest *);
+void test_cil_resolve_iomemcon_anon_context_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_iomemcon(CuTest *tc);
+void test_cil_resolve_ast_node_helper_iomemcon_neg(CuTest *tc);
+
 void test_cil_resolve_pcidevicecon(CuTest *);
 void test_cil_resolve_pcidevicecon_context_neg(CuTest *);
 void test_cil_resolve_pcidevicecon_anon_context(CuTest *);
