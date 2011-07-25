@@ -197,6 +197,17 @@ int cil_catalias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_dominance_to_policydb(policydb_t *pdb, struct cil_db *db);
 
 /**
+ * Insert cil type rule structure into sepol policydb.  This includes
+ * typetransition, typechange, and typemember.
+ *
+ * @param[in] pdb The policy database to insert the type rule into.
+ * @param[in] node The tree node that contains the cil_type_rule.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
  * Insert cil avrule structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the avrule into.

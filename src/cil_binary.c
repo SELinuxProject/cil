@@ -533,6 +533,85 @@ dominance_to_binary_out:
 	return rc;
 }
 
+int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_type_rule *cil_rule = node->data;
+	uint16_t kind = cil_rule->rule_kind;
+	type_datum_t *sepol_src = NULL;
+	type_datum_t *sepol_tgt = NULL;
+	type_datum_t *sepol_result = NULL;
+	class_datum_t *sepol_obj = NULL;
+	avtab_ptr_t avtab_ptr = NULL;
+	avtab_datum_t *avtab_datum = cil_malloc(sizeof(*avtab_datum));
+	memset(avtab_datum, 0, sizeof(avtab_datum_t));
+	avtab_key_t *avtab_key = cil_malloc(sizeof(*avtab_key));
+	memset(avtab_key, 0, sizeof(avtab_key_t));
+
+	key = ((struct cil_symtab_datum *)cil_rule->src)->name;
+	sepol_src = hashtab_search(pdb->p_types.table, key);
+	if (sepol_src == NULL) {
+		rc = SEPOL_ERR;
+		goto type_rule_to_policydb_out;
+	}
+	avtab_key->source_type = sepol_src->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_rule->tgt)->name;
+	sepol_tgt = hashtab_search(pdb->p_types.table, key);
+	if (sepol_tgt == NULL) {
+		rc = SEPOL_ERR;
+		goto type_rule_to_policydb_out;
+	}
+	avtab_key->target_type = sepol_tgt->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_rule->obj)->name;
+	sepol_obj = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_obj == NULL) {
+		rc = SEPOL_ERR;
+		goto type_rule_to_policydb_out;
+	}
+	avtab_key->target_class = sepol_obj->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_rule->result)->name;
+	sepol_result = hashtab_search(pdb->p_types.table, key);
+	if (sepol_result == NULL) {
+		rc = SEPOL_ERR;
+		goto type_rule_to_policydb_out;
+	}
+	avtab_datum->data = sepol_result->s.value;
+
+	switch (kind) {
+	case CIL_TYPE_TRANSITION:
+		avtab_key->specified = AVTAB_TRANSITION;
+		break;
+	case CIL_TYPE_CHANGE:
+		avtab_key->specified = AVTAB_CHANGE;
+		break;
+	case CIL_TYPE_MEMBER:
+		avtab_key->specified = AVTAB_MEMBER;
+		break;
+	default:
+		rc = SEPOL_ERR;
+		goto type_rule_to_policydb_out;
+		break;
+	}
+
+	avtab_ptr = avtab_insert_nonunique(&pdb->te_avtab, avtab_key, avtab_datum);
+	if (avtab_ptr == NULL) {
+		rc = SEPOL_ERR;
+		goto type_rule_to_policydb_out;
+	}
+
+	return SEPOL_OK;
+
+type_rule_to_policydb_out:
+	free(avtab_datum);
+	free(avtab_key);
+	avtab_destroy(&pdb->te_avtab);
+	return rc;
+}
+
 int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -675,6 +754,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_USERROLE:
 			rc = cil_userrole_to_policydb(pdb, node);
+			break;
+		case CIL_TYPE_RULE:
+			rc = cil_type_rule_to_policydb(pdb, node);
 			break;
 		case CIL_AVRULE:
 			rc = cil_avrule_to_policydb(pdb, node);
