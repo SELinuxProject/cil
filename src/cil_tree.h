@@ -66,6 +66,7 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
 void cil_tree_print_level(struct cil_level *level);
+void cil_tree_print_levelrange(struct cil_levelrange *lvlrange);
 void cil_tree_print_context(struct cil_context *context);
 void cil_tree_print_expr_tree(struct cil_tree_node *expr_root);
 void cil_tree_print_constrain(struct cil_constrain *cons);

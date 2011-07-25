@@ -354,6 +354,62 @@ void cil_copy_userrole(struct cil_userrole *orig, struct cil_userrole **copy)
 	*copy = new;
 }
 
+void cil_copy_userlevel(struct cil_userlevel *orig, struct cil_userlevel **copy)
+{
+	struct cil_userlevel *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_userlevel_init(&new);
+	if (rc != SEPOL_OK) {
+		return;
+	}
+
+	new->user_str = cil_strdup(orig->user_str);
+	new->level_str = cil_strdup(orig->level_str);
+
+	if (orig->level != NULL) {
+		rc = cil_level_init(&new->level);
+		if (rc != SEPOL_OK) {
+			goto copy_userlevel_out;
+		}
+
+		cil_copy_fill_level(orig->level, new->level);
+	}
+
+	*copy = new;
+
+copy_userlevel_out:
+	return;
+}
+
+void cil_copy_userrange(struct cil_userrange *orig, struct cil_userrange **copy)
+{
+	struct cil_userrange *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_userrange_init(&new);
+	if (rc != SEPOL_OK) {
+		return;
+	}
+
+	new->user_str = cil_strdup(orig->user_str);
+	new->lvlrange_str = cil_strdup(orig->lvlrange_str);
+
+	if (orig->lvlrange != NULL) {
+		rc = cil_levelrange_init(&new->lvlrange);
+		if (rc != SEPOL_OK) {
+			goto copy_userrange_out;
+		}
+
+		cil_copy_fill_levelrange(orig->lvlrange, new->lvlrange);
+	}
+
+	*copy = new;
+
+copy_userrange_out:
+	return;
+}
+
 int cil_copy_type(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
 {
 	struct cil_type *new = NULL;
@@ -755,8 +811,31 @@ copy_level_out:
 
 void cil_copy_fill_levelrange(struct cil_levelrange *orig, struct cil_levelrange *new)
 {
+	int rc = SEPOL_ERR;
+
 	new->low_str = cil_strdup(orig->low_str);
 	new->high_str = cil_strdup(orig->high_str);
+
+	if (orig->low != NULL) {
+		rc = cil_level_init(&new->low);
+		if (rc != SEPOL_OK) {
+			goto copy_fill_levelrange_out;
+		}
+
+		cil_copy_fill_level(orig->low, new->low);
+	}
+
+	if (orig->high != NULL) {
+		rc = cil_level_init(&new->high);
+		if (rc != SEPOL_OK) {
+			goto copy_fill_levelrange_out;
+		}
+
+		cil_copy_fill_level(orig->high, new->high);
+	}
+
+copy_fill_levelrange_out:
+	return;
 }
 
 int cil_copy_levelrange(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
@@ -803,7 +882,7 @@ void cil_copy_fill_context(struct cil_context *orig, struct cil_context *new)
 		if (rc != SEPOL_OK) {
 			goto copy_fill_context_out;
 		}
-		
+
 		cil_copy_fill_levelrange(orig->levelrange, new->levelrange);
 	}
 
@@ -1174,6 +1253,12 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_USERROLE:
 		cil_copy_userrole((struct cil_userrole*)orig->data, (struct cil_userrole**)&new->data);
+		break;
+	case CIL_USERLEVEL:
+		cil_copy_userlevel((struct cil_userlevel*)orig->data, (struct cil_userlevel**)&new->data);
+		break;
+	case CIL_USERRANGE:
+		cil_copy_userrange((struct cil_userrange*)orig->data, (struct cil_userrange**)&new->data);
 		break;
 	case CIL_TYPE:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_type);

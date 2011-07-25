@@ -66,6 +66,10 @@ int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, s
 void cil_destroy_sidcontext(struct cil_sidcontext *sidcon);
 int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_user(struct cil_user *user);
+int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_userlevel(struct cil_userlevel *usrlvl);
+int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_userrange(struct cil_userrange *userrange);
 int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_userbounds(struct cil_userbounds *userbnds);
 int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

@@ -482,6 +482,44 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
+			case CIL_USERLEVEL: {
+				struct cil_userlevel *usrlvl = node->data;
+				printf("USERLEVEL:");
+
+				if (usrlvl->user_str != NULL) {
+					printf(" %s", usrlvl->user_str);
+				}
+
+				if (usrlvl->level != NULL) {
+					printf(" (");
+					cil_tree_print_level(usrlvl->level);
+					printf(" )");
+				} else if (usrlvl->level_str != NULL) {
+					printf(" %s", usrlvl->level_str);
+				}
+
+				printf("\n");
+				return;
+			}
+			case CIL_USERRANGE: {
+				struct cil_userrange *userrange = node->data;
+				printf("USERRANGE:");
+
+				if (userrange->user_str != NULL) {
+					printf(" %s", userrange->user_str);
+				}
+
+				if (userrange->lvlrange != NULL) {
+					printf(" (");
+					cil_tree_print_levelrange(userrange->lvlrange);
+					printf(" )");
+				} else if (userrange->lvlrange_str != NULL) {
+					printf(" %s", userrange->lvlrange_str);
+				}
+
+				printf("\n");
+				return;
+			}
 			case CIL_USERBOUNDS: {
 				struct cil_userbounds *userbnds = node->data;
 				printf("USERBOUNDS: user: %s, bounds: %s\n", userbnds->user_str, userbnds->bounds_str);

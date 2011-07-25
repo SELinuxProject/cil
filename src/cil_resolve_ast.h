@@ -46,6 +46,8 @@ int cil_resolve_filetransition(struct cil_db *db, struct cil_tree_node *current,
 int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_userlevel(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_userrange(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_userbounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);

@@ -242,6 +242,12 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_USERROLE:
 		cil_destroy_userrole(*data);
 		break;
+	case CIL_USERLEVEL:
+		cil_destroy_userlevel(*data);
+		break;
+	case CIL_USERRANGE:
+		cil_destroy_userrange(*data);
+		break;
 	case CIL_USERBOUNDS:
 		cil_destroy_userbounds(*data);
 		break;
@@ -1553,8 +1559,49 @@ int cil_user_init(struct cil_user **user)
 	new_user = cil_malloc(sizeof(*new_user));
 
 	cil_symtab_datum_init(&new_user->datum);
+	new_user->bounds = NULL;
+	new_user->dftlevel = NULL;
+	new_user->range = NULL;
 
 	*user = new_user;
+
+	return SEPOL_OK;
+}
+
+int cil_userlevel_init(struct cil_userlevel **usrlvl)
+{
+	struct cil_userlevel *new_usrlvl = NULL;
+
+	if (usrlvl == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_usrlvl = cil_malloc(sizeof(*new_usrlvl));
+
+	new_usrlvl->user_str = NULL;
+	new_usrlvl->level_str = NULL;
+	new_usrlvl->level = NULL;
+
+	*usrlvl = new_usrlvl;
+
+	return SEPOL_OK;
+}
+
+int cil_userrange_init(struct cil_userrange **userrange)
+{
+	struct cil_userrange *new_userrange = NULL;
+
+	if (userrange == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_userrange = cil_malloc(sizeof(*new_userrange));
+
+	new_userrange->user_str = NULL;
+	new_userrange->lvlrange_str = NULL;
+	new_userrange->lvlrange = NULL;
+
+	*userrange = new_userrange;
 
 	return SEPOL_OK;
 }

@@ -78,6 +78,8 @@ enum cil_flavor {
 	CIL_MLSCONSTRAIN,
 	CIL_PERM,
 	CIL_USERROLE,
+	CIL_USERLEVEL,
+	CIL_USERRANGE,
 	CIL_USERBOUNDS,
 	CIL_ATTRTYPES,
 	CIL_TYPE_RULE,
@@ -172,6 +174,8 @@ enum cil_flavor {
 #define CIL_KEY_USERBOUNDS	"userbounds"
 #define CIL_KEY_ROLE 		"role"
 #define CIL_KEY_USERROLE	"userrole"
+#define CIL_KEY_USERLEVEL	"userlevel"
+#define CIL_KEY_USERRANGE	"userrange"
 #define CIL_KEY_ROLETYPE	"roletype"
 #define CIL_KEY_ROLETRANS	"roletransition"
 #define CIL_KEY_ROLEALLOW	"roleallow"
@@ -368,6 +372,8 @@ struct cil_sidcontext {
 struct cil_user {
 	struct cil_symtab_datum datum;
 	struct cil_user *bounds;
+	struct cil_level *dftlevel;
+	struct cil_levelrange *range;
 };
 
 struct cil_userrole {
@@ -375,6 +381,18 @@ struct cil_userrole {
 	struct cil_user *user;
 	char *role_str;
 	struct cil_role *role;
+};
+
+struct cil_userlevel {
+	char *user_str;
+	char *level_str;
+	struct cil_level *level;
+};
+
+struct cil_userrange {
+	char *user_str;
+	char *lvlrange_str;
+	struct cil_levelrange *lvlrange;
 };
 
 struct cil_userbounds {
@@ -853,6 +871,8 @@ int cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 int cil_perm_init(struct cil_perm **perm);
 int cil_permset_init(struct cil_permset **permset);
 int cil_user_init(struct cil_user **user);
+int cil_userlevel_init(struct cil_userlevel **usrlvl);
+int cil_userrange_init(struct cil_userrange **userrange);
 int cil_role_init(struct cil_role **role);
 int cil_type_init(struct cil_type **type);
 int cil_cat_init(struct cil_cat **cat);

@@ -722,6 +722,150 @@ void cil_destroy_user(struct cil_user *user)
 	free(user);
 }
 
+int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_userlevel *usrlvl = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_userlevel_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid userlevel declaration (line: %d)\n", parse_current->line);
+		goto gen_userlevel_cleanup;
+	}
+
+	rc = cil_userlevel_init(&usrlvl);
+	if (rc != SEPOL_OK) {
+		goto gen_userlevel_cleanup;
+	}
+
+	usrlvl->user_str = cil_strdup(parse_current->next->data);
+
+	if (parse_current->next->next->cl_head == NULL) {
+		usrlvl->level_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		rc = cil_level_init(&usrlvl->level);
+		if (rc != SEPOL_OK) {
+			printf("Failed to initialize level\n");
+			goto gen_userlevel_cleanup;
+		}
+
+		rc = cil_fill_level(parse_current->next->next->cl_head, usrlvl->level);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_userlevel: Failed to fill level, rc: %d\n", rc);
+			goto gen_userlevel_cleanup;
+		}
+	}
+
+	ast_node->data = usrlvl;
+	ast_node->flavor = CIL_USERLEVEL;
+
+	return SEPOL_OK;
+
+gen_userlevel_cleanup:
+	if (usrlvl != NULL) {
+		cil_destroy_userlevel(usrlvl);
+	}
+	return rc;
+}
+
+void cil_destroy_userlevel(struct cil_userlevel *usrlvl)
+{
+	if (usrlvl->user_str != NULL) {
+		free(usrlvl->user_str);
+	}
+
+	if (usrlvl->level_str != NULL) {
+		free(usrlvl->level_str);
+	} else if (usrlvl->level != NULL) {
+		cil_destroy_level(usrlvl->level);
+	}
+
+	free(usrlvl);
+}
+
+int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_userrange *userrange = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_userrange_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid userrange declaration (line: %d)\n", parse_current->line);
+		goto gen_userrange_cleanup;
+	}
+
+	rc = cil_userrange_init(&userrange);
+	if (rc != SEPOL_OK) {
+		goto gen_userrange_cleanup;
+	}
+
+	userrange->user_str = cil_strdup(parse_current->next->data);
+
+	if (parse_current->next->next->cl_head == NULL) {
+		userrange->lvlrange_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		rc = cil_levelrange_init(&userrange->lvlrange);
+		if (rc != SEPOL_OK) {
+			printf("Failed to initialize range\n");
+			goto gen_userrange_cleanup;
+		}
+
+		rc = cil_fill_levelrange(parse_current->next->next->cl_head, userrange->lvlrange);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_userrange: Failed to fill levelrange, rc: %d\n", rc);
+			goto gen_userrange_cleanup;
+		}
+	}
+
+	ast_node->data = userrange;
+	ast_node->flavor = CIL_USERRANGE;
+
+	return SEPOL_OK;
+
+gen_userrange_cleanup:
+	if (userrange != NULL) {
+		cil_destroy_userrange(userrange);
+	}
+	return rc;
+}
+
+void cil_destroy_userrange(struct cil_userrange *userrange)
+{
+	if (userrange->user_str != NULL) {
+		free(userrange->user_str);
+	}
+
+	if (userrange->lvlrange_str != NULL) {
+		free(userrange->lvlrange_str);
+	} else if (userrange->lvlrange != NULL) {
+		cil_destroy_levelrange(userrange->lvlrange);
+	}
+
+	free(userrange);
+}
+
 int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -4999,6 +5143,20 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			printf("cil_gen_user failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_USERLEVEL)) {
+		rc = cil_gen_userlevel(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_userlevel failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_USERRANGE)) {
+		rc = cil_gen_userrange(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_userrange failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_USERBOUNDS)) {
 		rc = cil_gen_userbounds(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {

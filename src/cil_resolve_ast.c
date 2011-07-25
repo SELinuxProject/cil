@@ -666,6 +666,106 @@ resolve_userrole_out:
 	return rc;
 }
 
+int cil_resolve_userlevel(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_userlevel *usrlvl = (struct cil_userlevel*)current->data;
+	struct cil_tree_node *user_node = NULL;
+	struct cil_tree_node *lvl_node = NULL;
+	struct cil_user *user = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, usrlvl->user_str, CIL_SYM_USERS, call, &user_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", usrlvl->user_str);
+		goto resolve_userlevel_out;
+	}
+	user = user_node->data;
+
+	if (usrlvl->level_str != NULL) {
+		rc = cil_resolve_name(db, current, usrlvl->level_str, CIL_SYM_LEVELS, call, &lvl_node);
+		if (rc != SEPOL_OK) {
+			goto resolve_userlevel_out;
+		}
+		usrlvl->level = (struct cil_level*)lvl_node->data;
+		user->dftlevel = usrlvl->level;
+
+		/* This could still be an anonymous level even if level_str is set, if level_str is a param_str*/
+		if (user->dftlevel->datum.name == NULL) {
+			rc = cil_resolve_level(db, current, user->dftlevel, call);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve level, rc: %d\n", rc);
+				goto resolve_userlevel_out;
+			}
+		}
+	} else if (usrlvl->level != NULL) {
+		rc = cil_resolve_level(db, current, usrlvl->level, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve level, rc: %d\n", rc);
+			goto resolve_userlevel_out;
+		}
+		user->dftlevel = usrlvl->level;
+	} else {
+		printf("Invalid userlevel, level not found\n");
+		rc = SEPOL_ERR;
+		goto resolve_userlevel_out;
+	}
+
+	return SEPOL_OK;
+
+resolve_userlevel_out:
+	return rc;
+}
+
+int cil_resolve_userrange(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_userrange *userrange = (struct cil_userrange*)current->data;
+	struct cil_tree_node *user_node = NULL;
+	struct cil_tree_node *range_node = NULL;
+	struct cil_user *user = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, userrange->user_str, CIL_SYM_USERS, call, &user_node);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", userrange->user_str);
+		goto resolve_userrange_out;
+	}
+	user = user_node->data;
+
+	if (userrange->lvlrange_str != NULL) {
+		rc = cil_resolve_name(db, current, userrange->lvlrange_str, CIL_SYM_LEVELRANGES, call, &range_node);
+		if (rc != SEPOL_OK) {
+			goto resolve_userrange_out;
+		}
+		userrange->lvlrange = (struct cil_levelrange*)range_node->data;
+		user->range = userrange->lvlrange;
+
+		/* This could still be an anonymous levelrange even if levelrange_str is set, if levelrange_str is a param_str*/
+		if (user->range->datum.name == NULL) {
+			rc = cil_resolve_levelrange(db, current, user->range, call);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve levelramge, rc: %d\n", rc);
+				goto resolve_userrange_out;
+			}
+		}
+	} else if (userrange->lvlrange != NULL) {
+		rc = cil_resolve_levelrange(db, current, userrange->lvlrange, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve levelrange, rc: %d\n", rc);
+			goto resolve_userrange_out;
+		}
+		user->range = userrange->lvlrange;
+	} else {
+		printf("Invalid userrange, levelrange not found\n");
+		rc = SEPOL_ERR;
+		goto resolve_userrange_out;
+	}
+
+	return SEPOL_OK;
+
+resolve_userrange_out:
+	return rc;
+}
+
 int cil_resolve_userbounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_userbounds *userbnds = (struct cil_userbounds*)current->data;
@@ -2855,6 +2955,12 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		case CIL_USERROLE:
 			rc = cil_resolve_userrole(db, node, call);
+			break;
+		case CIL_USERLEVEL:
+			rc = cil_resolve_userlevel(db, node, call);
+			break;
+		case CIL_USERRANGE:
+			rc = cil_resolve_userrange(db, node, call);
 			break;
 		case CIL_USERBOUNDS:
 			rc = cil_resolve_userbounds(db, node, call);
