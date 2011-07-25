@@ -1927,26 +1927,26 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 		}
 
 		if (cond->flavor == CIL_NOT) {
-			enum cil_syntax not_syntax[] = {
+			enum cil_syntax syntax[] = {
 				SYM_STRING,
-				SYM_STRING,
+				SYM_STRING | SYM_LIST,
 				SYM_END
 			};
-			int not_syntax_len = sizeof(not_syntax)/sizeof(*not_syntax);
-			rc = __cil_verify_syntax(node, not_syntax, not_syntax_len);
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
 			if (rc != SEPOL_OK) {
 				rc = SEPOL_ERR;
 				goto gen_expr_stack_helper_out;
 			}
 		} else {
-			enum cil_syntax other_syntax[] = {
+			enum cil_syntax syntax[] = {
 				SYM_STRING,
 				SYM_STRING | SYM_LIST,
 				SYM_STRING | SYM_LIST,
 				SYM_END
 			};
-			int other_syntax_len = sizeof(other_syntax)/sizeof(*other_syntax);
-			rc = __cil_verify_syntax(node, other_syntax, other_syntax_len);
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
 			if (rc != SEPOL_OK) {
 				goto gen_expr_stack_helper_out;
 			}
@@ -1968,6 +1968,12 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 	return SEPOL_OK;
 
 gen_expr_stack_helper_out:
+	if (cond != NULL) {
+		free(cond);
+	}
+	if (new != NULL) {
+		free(new);
+	}
 	return rc;
 }
 
@@ -1975,12 +1981,13 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 {
 	int rc = SEPOL_ERR;
 	struct cil_args_stack extra_args;
+	struct cil_list *new_stack;
 
 	if (current == NULL || stack == NULL) {
 		goto gen_expr_stack_out;
 	}
 
-	cil_list_init(stack);
+	cil_list_init(&new_stack);
 	if (current->cl_head == NULL) {
 		struct cil_conditional *cond = NULL;
 		struct cil_list_item *stack_item = NULL;
@@ -1990,20 +1997,25 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 			goto gen_expr_stack_out;
 		}
 		cil_list_item_init(&stack_item);
-		cil_conditional_init(&cond);
+		rc = cil_conditional_init(&cond);
+		if (rc != SEPOL_OK) {
+			goto gen_expr_stack_out;
+		}
 		cond->str = cil_strdup(current->data);
 		cond->flavor = CIL_BOOL;
 		stack_item->data = cond;
 		stack_item->flavor = CIL_COND;
-		(*stack)->head = stack_item;
+		new_stack->head = stack_item;
 	} else {
-		extra_args.expr_stack = *stack;
+		extra_args.expr_stack = new_stack;
 		extra_args.flavor = flavor;
 		rc = cil_tree_walk(current, __cil_gen_expr_stack_helper, NULL, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
 			goto gen_expr_stack_out;
 		}
 	}
+
+	*stack = new_stack;
 
 	return SEPOL_OK;
 
@@ -2063,7 +2075,7 @@ gen_boolif_cleanup:
 void cil_destroy_boolif(struct cil_booleanif *bif)
 {
 	if (bif->expr_stack != NULL) {
-		cil_list_destroy(&bif->expr_stack, CIL_FALSE);
+		cil_list_destroy(&bif->expr_stack, CIL_TRUE);
 	}
 
 	free(bif);
@@ -2152,7 +2164,7 @@ gen_tunif_cleanup:
 void cil_destroy_tunif(struct cil_tunableif *tif)
 {
 	if (tif->expr_stack != NULL) {
-		cil_list_destroy(&tif->expr_stack, CIL_FALSE);
+		cil_list_destroy(&tif->expr_stack, CIL_TRUE);
 	}
 	cil_symtab_array_destroy(tif->symtab);
 

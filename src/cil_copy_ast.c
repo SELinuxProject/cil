@@ -964,7 +964,11 @@ copy_netifcon_out:
 
 void cil_copy_constrain(struct cil_constrain *orig, struct cil_constrain **copy)
 {
+	struct cil_list_item *curr_old = NULL;
+	struct cil_list *new_list = NULL;
+	struct cil_list_item *curr_new = NULL;
 	struct cil_constrain *new = NULL;
+	struct cil_conditional *cond_new = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_constrain_init(&new);
@@ -974,7 +978,30 @@ void cil_copy_constrain(struct cil_constrain *orig, struct cil_constrain **copy)
 
 	cil_copy_list(orig->class_list_str, &new->class_list_str);
 	cil_copy_list(orig->perm_list_str, &new->perm_list_str);
-	cil_copy_list(orig->expr, &new->expr);
+
+	cil_list_init(&new_list);
+	curr_old = orig->expr->head;
+
+	while (curr_old != NULL) {
+		cil_list_item_init(&curr_new);
+
+		rc = cil_conditional_init(&cond_new);
+		if (rc != SEPOL_OK) {
+			return;
+		}
+
+		cil_copy_conditional(curr_old->data, cond_new);
+		curr_new->data = cond_new;
+		curr_new->flavor = curr_old->flavor;
+
+		rc = cil_list_append_item(new_list, curr_new);
+		if (rc != SEPOL_OK) {
+			return;
+		}
+
+		curr_old = curr_old->next;
+	}
+	new->expr = new_list;
 
 	*copy = new;
 }
@@ -1118,6 +1145,10 @@ void cil_copy_conditional(struct cil_conditional *orig, struct cil_conditional *
 int cil_copy_boolif(struct cil_booleanif *orig, struct cil_booleanif **copy)
 {
 	int rc = SEPOL_ERR;
+	struct cil_list_item *curr_old = NULL;
+	struct cil_list *new_list = NULL;
+	struct cil_list_item *curr_new = NULL;
+	struct cil_conditional *cond_new = NULL;
 	struct cil_booleanif *new = NULL;
 
 	rc = cil_boolif_init(&new);
@@ -1125,7 +1156,29 @@ int cil_copy_boolif(struct cil_booleanif *orig, struct cil_booleanif **copy)
 		goto copy_boolif_out;
 	}
 
-	cil_copy_list(orig->expr_stack, &new->expr_stack);
+	cil_list_init(&new_list);
+	curr_old = orig->expr_stack->head;
+
+	while (curr_old != NULL) {
+		cil_list_item_init(&curr_new);
+
+		rc = cil_conditional_init(&cond_new);
+		if (rc != SEPOL_OK) {
+			goto copy_boolif_out;
+		}
+
+		cil_copy_conditional(curr_old->data, cond_new);
+		curr_new->data = cond_new;
+		curr_new->flavor = curr_old->flavor;
+
+		rc = cil_list_append_item(new_list, curr_new);
+		if (rc != SEPOL_OK) {
+			goto copy_boolif_out;
+		}
+
+		curr_old = curr_old->next;
+	}
+	new->expr_stack = new_list;
 
 	*copy = new;
 

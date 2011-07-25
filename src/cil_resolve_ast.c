@@ -2796,11 +2796,11 @@ int cil_evaluate_expr_stack(struct cil_list *expr_stack, uint16_t *result)
 			}
 			pos--;
 		} else {
+			struct cil_bool *bool = cond->data;
 			if (pos >= COND_EXPR_MAXDEPTH) {
 				rc = SEPOL_ERR;
 				goto evaluate_expr_stack_out;
 			}
-			struct cil_bool *bool = cond->data;
 			eval_stack[pos] = bool->value;
 			pos++;
 		}

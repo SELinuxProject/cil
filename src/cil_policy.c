@@ -926,12 +926,11 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 	return SEPOL_OK;
 
 expr_stack_cleanup:
-	for (i = 0; i < COND_EXPR_MAXDEPTH; i++) {
+	for (i = 0; i < pos; i++) {
 		free(str_stack[i]);
 	}
 	return rc;
 }
-
 
 int __cil_booleanif_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
