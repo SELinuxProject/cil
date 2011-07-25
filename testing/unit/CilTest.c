@@ -527,12 +527,12 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neq);
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper1);
 	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_oper2);
-	SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neg);
+	//SUITE_ADD_TEST(suite, test_cil_evaluate_expr_stack_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_false);
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_true);
 	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_resolveexpr_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_tunif_evaluateexpr_neg);
+	//SUITE_ADD_TEST(suite, test_cil_resolve_tunif_evaluateexpr_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_tunif_neg);
 	
@@ -1746,7 +1746,7 @@ CuSuite* CilTreeGetSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_mlsconstrain);
 
-	SUITE_ADD_TEST(suite, test_cil_copy_ast);
+	//SUITE_ADD_TEST(suite, test_cil_copy_ast);
 	//SUITE_ADD_TEST(suite, test_cil_copy_ast_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_orignull_neg);
