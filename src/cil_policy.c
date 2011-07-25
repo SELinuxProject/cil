@@ -32,6 +32,8 @@
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
+
+#include <sepol/policydb/conditional.h>
 #include <sepol/errcodes.h>
 
 #include "cil_tree.h"
@@ -843,11 +845,12 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 	int rc = SEPOL_ERR;
 	struct cil_conditional *cond = NULL;
 	struct cil_list_item *curr = stack->head;
-	char *str_stack[10] = {};
+	char *str_stack[COND_EXPR_MAXDEPTH] = {};
 	char *expr_str = NULL;
 	char *oper_str = NULL;
 	int pos = 0;
 	int len = 0;
+	int i;
 
 	while (curr != NULL) {
 		cond = curr->data;
@@ -860,28 +863,45 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 
 			oper_str = cond->str;
 			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
+				if (pos <= 1) {
+					rc = SEPOL_ERR;
+					goto expr_stack_cleanup;
+				}
+
 				len = strlen(str_stack[pos - 1]) + strlen(str_stack[pos - 2]) + strlen(oper_str) + 5;
 				expr_str = cil_malloc(len);
 				rc = snprintf(expr_str, len, "(%s %s %s)", str_stack[pos - 1], oper_str, str_stack[pos - 2]);
 				if (rc < 0) {
-					return SEPOL_ERR;
+					free(expr_str);
+					goto expr_stack_cleanup;
 				}
 				free(str_stack[pos - 2]);
 				free(str_stack[pos - 1]);
 				str_stack[pos - 2] = expr_str;
 				str_stack[pos - 1] = 0;
 			} else {
+				if (pos == 0) {
+					rc = SEPOL_ERR;
+					goto expr_stack_cleanup;
+				}
+
 				len = strlen(str_stack[pos - 1]) + strlen(oper_str) + 4;
 				expr_str = cil_malloc(len);
 				rc = snprintf(expr_str, len, "(%s %s)", oper_str, str_stack[pos - 1]);
 				if (rc < 0) {
-					return SEPOL_ERR;
+					rc = SEPOL_ERR;
+					goto expr_stack_cleanup;
 				}
 				free(str_stack[pos - 1]);
 				str_stack[pos - 1] = expr_str;
 			}
 			pos--;
 		} else {
+			if (pos >= COND_EXPR_MAXDEPTH) {
+				rc = SEPOL_ERR;
+				goto expr_stack_cleanup;
+			}
+
 			if (cond->flavor == CIL_BOOL || (cond->flavor == CIL_TYPE)
 				|| (cond->flavor == CIL_ROLE) || (cond->flavor == CIL_USER)) {
 
@@ -897,6 +917,12 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 	fprintf(file_arr[file_index], "%s", str_stack[0]);
 
 	return SEPOL_OK;
+
+expr_stack_cleanup:
+	for (i = 0; i < COND_EXPR_MAXDEPTH; i++) {
+		free(str_stack[i]);
+	}
+	return rc;
 }
 
 

@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <sepol/policydb/conditional.h>
+
 #include "cil.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
@@ -2557,9 +2559,9 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_list *expr_stack, struc
 
 
 	while (curr_expr != NULL) {
-		enum cil_flavor flavor = ((struct cil_conditional*)curr_expr->data)->flavor;
-		enum cil_sym_index sym_index =  CIL_SYM_UNKNOWN;
 		struct cil_conditional *cond = curr_expr->data;
+		enum cil_flavor flavor = cond->flavor;
+		enum cil_sym_index sym_index =  CIL_SYM_UNKNOWN;
 
 		if (flavor == CIL_BOOL) {
 			sym_index = CIL_SYM_BOOLS;
@@ -2619,7 +2621,7 @@ int cil_evaluate_expr_stack(struct cil_list *expr_stack, uint16_t *result)
 {
 	struct cil_conditional *cond = NULL;
 	struct cil_list_item *curr = NULL;
-	uint16_t eval_stack[10];
+	uint16_t eval_stack[COND_EXPR_MAXDEPTH];
 	uint16_t value1 = CIL_FALSE;
 	uint16_t value2 = CIL_FALSE;
 	uint16_t pos = 0;
@@ -2664,7 +2666,7 @@ int cil_evaluate_expr_stack(struct cil_list *expr_stack, uint16_t *result)
 			}
 			pos--;
 		} else {
-			if (pos >= 10) {
+			if (pos >= COND_EXPR_MAXDEPTH) {
 				rc = SEPOL_ERR;
 				goto evaluate_expr_stack_out;
 			}
