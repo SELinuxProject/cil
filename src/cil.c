@@ -227,6 +227,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_LEVEL:
 		cil_destroy_level(*data);
 		break;
+	case CIL_LEVELRANGE:
+		cil_destroy_levelrange(*data);
+		break;
 	case CIL_CONSTRAIN:
 		cil_destroy_constrain(*data);
 		break;
@@ -581,10 +584,8 @@ int cil_context_init(struct cil_context **context)
 	new_context->role = NULL;
 	new_context->type_str = NULL;
 	new_context->type = NULL;
-	new_context->low_str = NULL;
-	new_context->low = NULL;
-	new_context->high_str = NULL;
-	new_context->high = NULL;
+	new_context->levelrange_str = NULL;
+	new_context->levelrange = NULL;
 
 	*context = new_context;	
 
@@ -610,6 +611,25 @@ int cil_level_init(struct cil_level **level)
 	new_level->catset = NULL;
 	
 	*level = new_level;
+
+	return SEPOL_OK;
+}
+
+int cil_levelrange_init(struct cil_levelrange **range)
+{
+	struct cil_levelrange *new_range = NULL;
+
+	if (range == NULL) {
+		return SEPOL_ERR;
+	}
+
+	new_range = cil_malloc(sizeof(*new_range));
+
+	cil_symtab_datum_init(&new_range->datum);
+	new_range->low = NULL;
+	new_range->high = NULL;
+
+	*range = new_range;
 
 	return SEPOL_OK;
 }

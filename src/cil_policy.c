@@ -730,18 +730,25 @@ void cil_level_to_policy(FILE **file_arr, uint32_t file_index, struct cil_level 
 	}
 }
 
+void cil_levelrange_to_policy(FILE **file_arr, uint32_t file_index, struct cil_levelrange *lvlrange)
+{
+	struct cil_level *low = lvlrange->low;
+	struct cil_level *high = lvlrange->high;
+
+	cil_level_to_policy(file_arr, file_index, low);
+	fprintf(file_arr[file_index], "-");
+	cil_level_to_policy(file_arr, file_index, high);
+}
+
 void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_context *context)
 {
 	struct cil_user *user = context->user;
 	struct cil_role *role = context->role;
 	struct cil_type *type = context->type;
-	struct cil_level *low = context->low;
-	struct cil_level *high = context->high;
+	struct cil_levelrange *lvlrange = context->levelrange;
 
 	fprintf(file_arr[file_index], "%s:%s:%s:", user->datum.name, role->datum.name, type->datum.name);
-	cil_level_to_policy(file_arr, file_index, low);
-	fprintf(file_arr[file_index], "-");
-	cil_level_to_policy(file_arr, file_index, high);
+	cil_levelrange_to_policy(file_arr, file_index, lvlrange);
 }
 
 void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_constrain *cons)

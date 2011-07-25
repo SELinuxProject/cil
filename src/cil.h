@@ -144,6 +144,7 @@ enum cil_flavor {
 	CIL_TYPEALIAS,
 	CIL_CONTEXT,
 	CIL_LEVEL,
+	CIL_LEVELRANGE,
 	CIL_SENS,
 	CIL_CAT,
 	CIL_SENSALIAS,
@@ -216,6 +217,7 @@ enum cil_flavor {
 #define CIL_KEY_DOMINANCE	"dominance"
 #define CIL_KEY_SENSCAT		"sensitivitycategory"
 #define CIL_KEY_LEVEL		"level"
+#define CIL_KEY_LEVELRANGE	"levelrange"
 #define CIL_KEY_MLSCONSTRAIN	"mlsconstrain"
 #define CIL_KEY_CONSTRAIN	"constrain"
 #define CIL_KEY_BOOLEANIF	"booleanif"
@@ -274,6 +276,7 @@ enum cil_sym_index {
 	CIL_SYM_MACROS,
 	CIL_SYM_CONTEXTS,
 	CIL_SYM_LEVELS,
+	CIL_SYM_LEVELRANGES,
 	CIL_SYM_POLICYCAPS,
 	CIL_SYM_OPTIONALS,
 	CIL_SYM_IPADDRS,
@@ -582,6 +585,14 @@ struct cil_level {
 	struct cil_catset *catset;
 };
 
+struct cil_levelrange {
+	struct cil_symtab_datum datum;
+	char *low_str;
+	struct cil_level *low;
+	char *high_str;
+	struct cil_level *high;
+};
+
 #define CIL_INHERIT_BLOCK 1
 #define CIL_INHERIT_ROLE  2
 #define CIL_INHERIT_TYPE  3
@@ -615,10 +626,8 @@ struct cil_context {
 	struct cil_role *role;
 	char *type_str;
 	struct cil_type *type;
-	char *low_str;
-	struct cil_level *low;
-	char *high_str;
-	struct cil_level *high;
+	char *levelrange_str;
+	struct cil_levelrange *levelrange;
 };
 
 enum cil_filecon_types {
@@ -797,6 +806,7 @@ void cil_sort_destroy(struct cil_sort **sort);
 int cil_netifcon_init(struct cil_netifcon **netifcon);
 int cil_context_init(struct cil_context **context);
 int cil_level_init(struct cil_level **level);
+int cil_levelrange_init(struct cil_levelrange **lvlrange);
 int cil_sens_init(struct cil_sens **sens);
 int cil_block_init(struct cil_block **block);
 int cil_class_init(struct cil_class **class);

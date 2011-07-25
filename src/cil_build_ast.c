@@ -3114,6 +3114,134 @@ void cil_destroy_level(struct cil_level *level)
 	free(level);
 }
 
+/* low should be pointing to either the name of the low level or to an open paren for an anonymous low level */
+int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlrange)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	if (low == NULL || lvlrange == NULL) {
+		goto fill_levelrange_cleanup;
+	}
+
+	rc = __cil_verify_syntax(low, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid levelrange declaration (line: %d)\n", low->line);
+		goto fill_levelrange_cleanup;
+	}
+
+	if (low->cl_head == NULL) {
+		lvlrange->low_str = cil_strdup(low->data);
+	} else {
+		rc = cil_level_init(&lvlrange->low);
+		if (rc != SEPOL_OK) {
+			printf("Failed to initialize low level\n");
+			goto fill_levelrange_cleanup;
+		}
+
+		rc = cil_fill_level(low->cl_head, lvlrange->low);
+		if (rc != SEPOL_OK) {
+			printf("cil_fill_levelrange: Failed to fill low level, rc: %d\n", rc);
+			goto fill_levelrange_cleanup;
+		}
+	}
+
+	if (low->next->cl_head == NULL) {
+		lvlrange->high_str = cil_strdup(low->next->data);
+	} else {
+		rc = cil_level_init(&lvlrange->high);
+		if (rc != SEPOL_OK) {
+			printf("Failed to initialize high level\n");
+			goto fill_levelrange_cleanup;
+		}
+
+		rc = cil_fill_level(low->next->cl_head, lvlrange->high);
+		if (rc != SEPOL_OK) {
+			printf("cil_fill_levelrange: Failed to fill high level, rc: %d\n", rc);
+			goto fill_levelrange_cleanup;
+		}
+	}
+
+	return SEPOL_OK;
+
+fill_levelrange_cleanup:
+	return rc;
+}
+
+int cil_gen_levelrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key = NULL;
+	struct cil_levelrange *lvlrange = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_levelrange_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid levelrange declaration (line: %d)\n", parse_current->line);
+		goto gen_levelrange_cleanup;
+	}
+
+	rc = cil_levelrange_init(&lvlrange);
+	if (rc != SEPOL_OK) {
+		goto gen_levelrange_cleanup;
+	}
+
+	key = parse_current->next->data;
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)lvlrange, (hashtab_key_t)key, CIL_SYM_LEVELRANGES, CIL_LEVELRANGE);
+	if (rc != SEPOL_OK) {
+		goto gen_levelrange_cleanup;
+	}
+
+	rc = cil_fill_levelrange(parse_current->next->next->cl_head, lvlrange);
+	if (rc != SEPOL_OK) {
+		printf("Failed to pupulate levelrange\n");
+		goto gen_levelrange_cleanup;
+	}
+
+	return SEPOL_OK;
+
+gen_levelrange_cleanup:
+	if (lvlrange != NULL) {
+		cil_destroy_levelrange(lvlrange);
+	}
+	return rc;
+}
+
+void cil_destroy_levelrange(struct cil_levelrange *lvlrange)
+{
+	cil_symtab_datum_destroy(lvlrange->datum);
+
+	if (lvlrange->low_str == NULL) {
+		cil_destroy_level(lvlrange->low);
+	} else {
+		free(lvlrange->low_str);
+	}
+
+	if (lvlrange->high_str == NULL) {
+		cil_destroy_level(lvlrange->high);
+	} else {
+		free(lvlrange->high_str);
+	}
+
+	free(lvlrange);
+}
+
 int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
@@ -3186,6 +3314,57 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 	free(cons);
 }
 
+/* Fills in context starting from user */
+int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	if (user_node == NULL || context == NULL) {
+		goto cil_fill_context_cleanup;
+	}
+
+	rc = __cil_verify_syntax(user_node, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid context (line: %d)\n", user_node->line);
+		goto cil_fill_context_cleanup;
+	}
+
+	context->user_str = cil_strdup(user_node->data);
+	context->role_str = cil_strdup(user_node->next->data);
+	context->type_str = cil_strdup(user_node->next->next->data);
+
+	context->levelrange_str = NULL;
+
+	if (user_node->next->next->next->cl_head == NULL) {
+		context->levelrange_str = cil_strdup(user_node->next->next->next->data);
+	} else {
+		rc = cil_levelrange_init(&context->levelrange);
+		if (rc != SEPOL_OK) {
+			printf("Couldn't initialize levelrange\n");
+			goto cil_fill_context_cleanup;
+		}
+
+		rc = cil_fill_levelrange(user_node->next->next->next->cl_head, context->levelrange);
+		if (rc != SEPOL_OK) {
+			printf("cil_fill_context: Failed to fill levelrange, rc: %d\n", rc);
+			goto cil_fill_context_cleanup;
+		}
+	}
+
+	return SEPOL_OK;
+
+cil_fill_context_cleanup:
+	return rc;
+}
+
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -3250,16 +3429,10 @@ void cil_destroy_context(struct cil_context *context)
 		free(context->type_str);
 	}
 
-	if (context->low_str != NULL) {
-		free(context->low_str);
-	} else if (context->low != NULL) {
-		cil_destroy_level(context->low);
-	}
-
-	if (context->high_str != NULL) {
-		free(context->high_str);
-	} else if (context->high != NULL) {
-		cil_destroy_level(context->high);
+	if (context->levelrange_str != NULL) {
+		free(context->levelrange_str);
+	} else if (context->levelrange != NULL) {
+		cil_destroy_levelrange(context->levelrange);
 	}
 }
 
@@ -4599,74 +4772,6 @@ fill_cat_list_out:
 	return rc;
 }
 
-int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context)
-{
-	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	int rc = SEPOL_ERR;
-
-	if (user_node == NULL || context == NULL) {
-		goto cil_fill_context_cleanup;
-	}
-
-	rc = __cil_verify_syntax(user_node, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		printf("Invalid context (line: %d)\n", user_node->line);
-		goto cil_fill_context_cleanup;
-	}
-
-	context->user_str = cil_strdup(user_node->data);
-	context->role_str = cil_strdup(user_node->next->data);
-	context->type_str = cil_strdup(user_node->next->next->data);
-
-	context->low_str = NULL;
-	context->high_str = NULL;
-
-	if (user_node->next->next->next->cl_head == NULL) {
-		context->low_str = cil_strdup(user_node->next->next->next->data);
-	} else {
-		rc = cil_level_init(&context->low);
-		if (rc != SEPOL_OK) {
-			printf("Couldn't initialize low level\n");
-			goto cil_fill_context_cleanup;
-		}
-
-		rc = cil_fill_level(user_node->next->next->next->cl_head, context->low);
-		if (rc != SEPOL_OK) {
-			printf("cil_fill_context: Failed to fill low level, rc: %d\n", rc);
-			goto cil_fill_context_cleanup;
-		}
-	}
-
-	if (user_node->next->next->next->next->cl_head == NULL) {
-		context->high_str = cil_strdup(user_node->next->next->next->next->data);
-	} else {
-		rc = cil_level_init(&context->high);
-		if (rc != SEPOL_OK) {
-			printf("Couldn't initialize high level\n");
-			goto cil_fill_context_cleanup;
-		}
-
-		rc = cil_fill_level(user_node->next->next->next->next->cl_head, context->high);
-		if (rc != SEPOL_OK) {
-			printf("cil_fill_context: Failed to fill high level, rc %d\n", rc);
-			goto cil_fill_context_cleanup;
-		}
-	}
-
-	return SEPOL_OK;
-
-cil_fill_context_cleanup:
-	return rc;
-}
-
 int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer)
 {
 	int rc = SEPOL_ERR;
@@ -5133,6 +5238,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_level(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_level failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_LEVELRANGE)) {
+		rc = cil_gen_levelrange(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_levelrange failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
 		*finished = CIL_TREE_SKIP_NEXT;

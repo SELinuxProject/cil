@@ -62,6 +62,8 @@ void cil_copy_catorder(struct cil_catorder *orig, struct cil_catorder **copy);
 void cil_copy_dominance(struct cil_sens_dominates *orig, struct cil_sens_dominates **copy);
 void cil_copy_fill_level(struct cil_level *orig, struct cil_level *new);
 int cil_copy_level(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
+void cil_copy_fill_levelrange(struct cil_levelrange *orig, struct cil_levelrange *new);
+int cil_copy_levelrange(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 void cil_copy_fill_context(struct cil_context *orig, struct cil_context *new);
 int cil_copy_context(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 int cil_copy_netifcon(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);

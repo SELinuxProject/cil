@@ -61,6 +61,7 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current, struct 
 int cil_resolve_catrange(struct cil_db *db, struct cil_tree_node *current, struct cil_catrange *catrange, struct cil_call *call);
 int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct cil_level *level, struct cil_call *call); 
+int cil_resolve_levelrange(struct cil_db *db, struct cil_tree_node *current, struct cil_levelrange *levelrange, struct cil_call *call); 
 int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct cil_context *context, struct cil_call *call);
 int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);

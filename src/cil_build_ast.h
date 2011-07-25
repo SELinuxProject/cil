@@ -131,6 +131,9 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 void cil_destroy_senscat(struct cil_senscat *senscat);
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_level(struct cil_level *level);
+int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlrange);
+int cil_gen_levelrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_levelrange(struct cil_levelrange *lvlrange);
 void cil_destroy_constrain_node(struct cil_tree_node *cons_node);
 int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_constrain(struct cil_constrain *cons);

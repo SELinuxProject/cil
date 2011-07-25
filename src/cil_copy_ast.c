@@ -753,6 +753,42 @@ copy_level_out:
 	return rc;
 }
 
+void cil_copy_fill_levelrange(struct cil_levelrange *orig, struct cil_levelrange *new)
+{
+	new->low_str = cil_strdup(orig->low_str);
+	new->high_str = cil_strdup(orig->high_str);
+}
+
+int cil_copy_levelrange(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_levelrange *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_levelrange_init(&new);
+	if (rc != SEPOL_OK) {
+		goto copy_levelrange_out;
+	}
+
+	if (((struct cil_levelrange*)orig->data)->datum.name != NULL) {
+		char *key = ((struct cil_symtab_datum*)orig->data)->name;
+		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+		if (rc != SEPOL_OK) {
+			printf("cil_copy_levelrange: cil_symtab_insert failed, rc: %d\n", rc);
+			free(new);
+			goto copy_levelrange_out;
+		}
+	}
+
+	cil_copy_fill_levelrange((struct cil_levelrange*)orig->data, new);
+
+	copy->data = new;
+
+	return SEPOL_OK;
+
+copy_levelrange_out:
+	return rc;
+}
+
 void cil_copy_fill_context(struct cil_context *orig, struct cil_context *new)
 {
 	int rc = SEPOL_ERR;	
@@ -760,25 +796,15 @@ void cil_copy_fill_context(struct cil_context *orig, struct cil_context *new)
 	new->user_str = cil_strdup(orig->user_str);
 	new->role_str = cil_strdup(orig->role_str);
 	new->type_str = cil_strdup(orig->type_str);
-	new->low_str = cil_strdup(orig->low_str);
-	new->high_str = cil_strdup(orig->high_str);
+	new->levelrange_str = cil_strdup(orig->levelrange_str);
 
-	if (orig->low != NULL) {
-		rc = cil_level_init(&new->low);
+	if (orig->levelrange != NULL) {
+		rc = cil_levelrange_init(&new->levelrange);
 		if (rc != SEPOL_OK) {
 			goto copy_fill_context_out;
 		}
 		
-		cil_copy_fill_level(orig->low, new->low);
-	}
-
-	if (orig->high != NULL) {
-		rc = cil_level_init(&new->high);
-		if (rc != SEPOL_OK) {
-			goto copy_fill_context_out;
-		}
-	
-		cil_copy_fill_level(orig->high, new->high);
+		cil_copy_fill_levelrange(orig->levelrange, new->levelrange);
 	}
 
 copy_fill_context_out:
@@ -1231,6 +1257,13 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_LEVEL:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_LEVELS, &cil_copy_level);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto copy_node_helper_out;
+		}
+		break;
+	case CIL_LEVELRANGE:
+		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_LEVELRANGES, &cil_copy_levelrange);
 		if (rc != SEPOL_OK) {
 			free(new);
 			goto copy_node_helper_out;

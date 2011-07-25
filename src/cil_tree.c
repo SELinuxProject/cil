@@ -269,6 +269,27 @@ void cil_tree_print_level(struct cil_level *level)
 	return;
 }
 
+void cil_tree_print_levelrange(struct cil_levelrange *lvlrange)
+{
+	printf(" (");
+	if (lvlrange->low != NULL) {
+		printf(" (");
+		cil_tree_print_level(lvlrange->low);
+		printf(" )");
+	} else if (lvlrange->low_str != NULL) {
+		printf(" %s", lvlrange->low_str);
+	}
+
+	if (lvlrange->high != NULL) {
+		printf(" (");
+		cil_tree_print_level(lvlrange->high);
+		printf(" )");
+	} else if (lvlrange->high_str != NULL) {
+		printf(" %s", lvlrange->high_str);
+	}
+	printf(" )");
+}
+
 void cil_tree_print_context(struct cil_context *context)
 {
 	printf(" (");
@@ -290,21 +311,12 @@ void cil_tree_print_context(struct cil_context *context)
 		printf(" %s", context->type_str);
 	}
 
-	if (context->low != NULL) {
-		printf(" (");
-		cil_tree_print_level(context->low);
-		printf(" )");
-	} else if (context->low_str != NULL) {
-		printf(" %s", context->low_str);
+	if (context->levelrange != NULL) {
+		cil_tree_print_levelrange(context->levelrange);
+	} else if (context->levelrange_str != NULL) {
+		printf(" %s", context->levelrange_str);
 	}
 
-	if (context->high != NULL) {
-		printf(" (");
-		cil_tree_print_level(context->high);
-		printf(" )");
-	} else if (context->high_str != NULL) {
-		printf(" %s", context->high_str);
-	}
 	printf(" )");
 
 	return;
@@ -1055,6 +1067,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_level *level = node->data;
 				printf("LEVEL %s:", level->datum.name); 
 				cil_tree_print_level(level);
+				printf("\n");
+				return;
+			}
+			case CIL_LEVELRANGE: {
+				struct cil_levelrange *lvlrange = node->data;
+				printf("LEVELRANGE %s:", lvlrange->datum.name);
+				cil_tree_print_levelrange(lvlrange);
 				printf("\n");
 				return;
 			}
