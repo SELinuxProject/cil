@@ -46,6 +46,11 @@ struct cil_args_build {
 	struct cil_tree_node *macro;
 };
 
+struct cil_args_stack {
+	struct cil_list *expr_stack;
+	enum cil_flavor flavor;
+};
+
 int __cil_verify_name(const char *name)
 {
 	int rc = SEPOL_ERR;
@@ -1435,16 +1440,16 @@ void cil_destroy_bool(struct cil_bool *boolean)
 	free(boolean);
 }
 
-int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_tree_node **stack)
+int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **stack)
 {
 	int rc = SEPOL_ERR;
-	struct cil_tree_node *opnode = NULL;
 	struct cil_conditional *opcond = NULL;
-	struct cil_tree_node *lnode = NULL;
 	struct cil_conditional *lcond = NULL;
-	char * lstr = NULL;
-	struct cil_tree_node *rnode = NULL;
 	struct cil_conditional *rcond = NULL;
+	struct cil_list_item *opnode = NULL;
+	struct cil_list_item *lnode = NULL;
+	struct cil_list_item *rnode = NULL;
+	char * lstr = NULL;
 	char * rstr = NULL;
 	int riskeyword = 0;
 
@@ -1460,7 +1465,7 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 		goto not_valid;
 	}
 
-	cil_tree_node_init(&opnode);
+	cil_list_item_init(&opnode);
 
 	rc = cil_conditional_init(&opcond);
 	if (rc != SEPOL_OK) {
@@ -1533,11 +1538,10 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	opnode->data = opcond;
 	opnode->flavor = CIL_COND;
 
-	if (*stack != NULL) {
-		(*stack)->parent = opnode;
-		opnode->cl_head = *stack;
+	rc = cil_list_prepend_item(*stack, opnode);
+	if (rc != SEPOL_OK) {
+		goto not_valid;
 	}
-	*stack = opnode;
 
 	if (opcond->flavor == CIL_CONS_NOT) {
 		return cil_gen_constrain_expr_stack(current->next->cl_head, flavor, stack);
@@ -1549,21 +1553,14 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 		return cil_gen_constrain_expr_stack(current->next->next->cl_head, flavor, stack);
 	}
 
-	/* this wasn't an expression, figure out left and right of the constrain op */
-	rc = cil_tree_node_init(&lnode);
-	if (rc != SEPOL_OK) {
-		goto not_valid;
-	}
+	cil_list_item_init(&lnode);
 
 	rc = cil_conditional_init(&lcond);
 	if (rc != SEPOL_OK) {
 		goto not_valid;
 	}
 
-	rc = cil_tree_node_init(&rnode);
-	if (rc != SEPOL_OK) {
-		goto not_valid;
-	}
+	cil_list_item_init(&rnode);
 
 	rc = cil_conditional_init(&rcond);
 	if (rc != SEPOL_OK) {
@@ -1578,13 +1575,14 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	lnode->flavor = CIL_COND;
 	rnode->flavor = CIL_COND;
 
-	lnode->parent = rnode;
-	lnode->cl_head = *stack;
-
-	(*stack)->parent = lnode;
-
-	rnode->cl_head = lnode;
-	*stack = rnode;
+	rc = cil_list_prepend_item(*stack, rnode);
+	if (rc != SEPOL_OK) {
+		goto not_valid;
+	}
+	rc = cil_list_prepend_item(*stack, lnode);
+	if (rc != SEPOL_OK) {
+		goto not_valid;
+	}
 
 	if (strcmp(lstr, CIL_KEY_CONS_T1) && strcmp(lstr, CIL_KEY_CONS_T2) &&
 	    strcmp(lstr, CIL_KEY_CONS_R1) && strcmp(lstr, CIL_KEY_CONS_R2) &&
@@ -1745,98 +1743,119 @@ not_valid:
 	return rc;
 }
 
-int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_tree_node **stack)
+int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_args_stack *args = extra_args;
+	struct cil_list *stack = args->expr_stack;
+	enum cil_flavor flavor = args->flavor;
+	struct cil_list_item *new = NULL;
+	struct cil_conditional *cond = NULL;
+
+	if (node->data == NULL) {
+		rc = SEPOL_OK;
+		goto gen_expr_stack_helper_out;
+	}
+
+	rc = cil_conditional_init(&cond);
+	if (rc != SEPOL_OK) {
+		goto gen_expr_stack_helper_out;
+	}
+
+	cil_list_item_init(&new);
+	if (node == node->parent->cl_head) {
+
+		if (!strcmp((char*)node->data, CIL_KEY_AND)) {
+			cond->flavor = CIL_AND;
+		} else if (!strcmp((char*)node->data, CIL_KEY_OR)) {
+			cond->flavor = CIL_OR;
+		} else if (!strcmp((char*)node->data, CIL_KEY_XOR)) {
+			cond->flavor = CIL_XOR;
+		} else if (!strcmp((char*)node->data, CIL_KEY_NOT)) {
+			cond->flavor = CIL_NOT;
+		} else if (!strcmp((char*)node->data, CIL_KEY_EQ)) {
+			cond->flavor = CIL_EQ;
+		} else if (!strcmp((char*)node->data, CIL_KEY_NEQ)) {
+			cond->flavor = CIL_NEQ;
+		} else {
+			rc = SEPOL_ERR;
+			goto gen_expr_stack_helper_out;
+		}
+
+		if (cond->flavor == CIL_NOT) {
+			enum cil_syntax not_syntax[] = {
+				SYM_STRING,
+				SYM_STRING,
+				SYM_END
+			};
+			int not_syntax_len = sizeof(not_syntax)/sizeof(*not_syntax);
+			rc = __cil_verify_syntax(node, not_syntax, not_syntax_len);
+			if (rc != SEPOL_OK) {
+				rc = SEPOL_ERR;
+				goto gen_expr_stack_helper_out;
+			}
+		} else {
+			enum cil_syntax other_syntax[] = {
+				SYM_STRING,
+				SYM_STRING | SYM_LIST,
+				SYM_STRING | SYM_LIST,
+				SYM_END
+			};
+			int other_syntax_len = sizeof(other_syntax)/sizeof(*other_syntax);
+			rc = __cil_verify_syntax(node, other_syntax, other_syntax_len);
+			if (rc != SEPOL_OK) {
+				goto gen_expr_stack_helper_out;
+			}
+		}
+	} else {
+		cond->flavor = flavor;
+	}
+
+	cond->str = cil_strdup(node->data);
+
+	new->data = cond;
+	new->flavor = CIL_COND;
+
+	rc = cil_list_prepend_item(stack, new);
+	if (rc != SEPOL_OK) {
+		goto gen_expr_stack_helper_out;
+	}
+
+	return SEPOL_OK;
+
+gen_expr_stack_helper_out:
+	return rc;
+}
+
+int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **stack)
+{
+	int rc = SEPOL_ERR;
+	struct cil_args_stack extra_args;
 
 	if (current == NULL || stack == NULL) {
 		goto gen_expr_stack_out;
 	}
 
+	cil_list_init(stack);
 	if (current->cl_head == NULL) {
-		struct cil_conditional *cond;
-		struct cil_tree_node *new = NULL;
-		cil_tree_node_init(&new);
-		rc = cil_conditional_init(&cond);
-		if (rc != SEPOL_OK) {
-			goto gen_expr_stack_out;
-		}
-
-		if (current == current->parent->cl_head) {
-			if (!strcmp((char*)current->data, CIL_KEY_AND)) {
-				cond->flavor = CIL_AND;
-			} else if (!strcmp((char*)current->data, CIL_KEY_OR)) {
-				cond->flavor = CIL_OR;
-			} else if (!strcmp((char*)current->data, CIL_KEY_XOR)) {
-				cond->flavor = CIL_XOR;
-			} else if (!strcmp((char*)current->data, CIL_KEY_NOT)) {
-				cond->flavor = CIL_NOT;
-			} else if (!strcmp((char*)current->data, CIL_KEY_EQ)) {
-				cond->flavor = CIL_EQ;
-			} else if (!strcmp((char*)current->data, CIL_KEY_NEQ)) {
-				cond->flavor = CIL_NEQ;
-			} else {
-				rc = SEPOL_ERR;
-				goto gen_expr_stack_out;
-			}
-
-			if (cond->flavor == CIL_NOT) {
-				enum cil_syntax not_syntax[] = {
-					SYM_STRING,
-					SYM_STRING,
-					SYM_END
-				};
-				int not_syntax_len = sizeof(not_syntax)/sizeof(*not_syntax);
-				rc = __cil_verify_syntax(current, not_syntax, not_syntax_len);
-				if (rc != SEPOL_OK) {
-					rc = SEPOL_ERR;
-					goto gen_expr_stack_out;
-				}
-			} else {
-				enum cil_syntax other_syntax[] = {
-					SYM_STRING,
-					SYM_STRING | SYM_LIST,
-					SYM_STRING | SYM_LIST,
-					SYM_END
-				};
-				int other_syntax_len = sizeof(other_syntax)/sizeof(*other_syntax);
-				rc = __cil_verify_syntax(current, other_syntax, other_syntax_len);
-				if (rc != SEPOL_OK) {
-					goto gen_expr_stack_out;
-				}
-			}
-		} else {
-			cond->flavor = flavor;
-		}
-
-		cond->str = cil_strdup(current->data);
-
-		new->data = cond;
-		new->flavor = CIL_COND;
-
-		if (*stack != NULL) {
-			(*stack)->parent = new;
-			new->cl_head = *stack;
-		}
-		*stack = new;
-	} else {
-		if (current == current->parent->cl_head) {
-			printf("Invalid booleanif expression\n");
+		struct cil_conditional *cond = NULL;
+		struct cil_list_item *stack_item = NULL;
+		if (current->data == NULL) {
+			printf("Invalid expression (line: %d)\n", current->line);
 			rc = SEPOL_ERR;
 			goto gen_expr_stack_out;
 		}
-		rc = cil_gen_expr_stack(current->cl_head, flavor, stack);
-		if (rc != SEPOL_OK) {
-			goto gen_expr_stack_out;
-		}
-	}/* else if (current->data == NULL) {
-		printf("cil_gen_expr_stack: Expression cannot contain empty lists\n");
-		rc = SEPOL_ERR;
-		goto gen_expr_stack_out;
-	}*/
-
-	if (current->next != NULL) {
-		rc = cil_gen_expr_stack(current->next, flavor, stack);
+		cil_list_item_init(&stack_item);
+		cil_conditional_init(&cond);
+		cond->str = cil_strdup(current->data);
+		cond->flavor = CIL_BOOL;
+		stack_item->data = cond;
+		stack_item->flavor = CIL_COND;
+		(*stack)->head = stack_item;
+	} else {
+		extra_args.expr_stack = *stack;
+		extra_args.flavor = flavor;
+		rc = cil_tree_walk(current, __cil_gen_expr_stack_helper, NULL, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
 			goto gen_expr_stack_out;
 		}
@@ -1875,25 +1894,10 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto gen_boolif_cleanup;
 	}
 
-	if (parse_current->next->cl_head == NULL) {
-		struct cil_conditional *cond = NULL;
-		if (parse_current->next->data == NULL) {
-			printf("Invalid booleanif expression (line: %d)\n", parse_current->line);
-			rc = SEPOL_ERR;
-			goto gen_boolif_cleanup;
-		}
-		cil_conditional_init(&cond);
-		cil_tree_node_init(&bif->expr_stack);
-		bif->expr_stack->flavor = CIL_COND;
-		cond->str = cil_strdup(parse_current->next->data);
-		cond->flavor = CIL_BOOL;
-		bif->expr_stack->data = cond;
-	} else {
-		rc = cil_gen_expr_stack(parse_current->next->cl_head, CIL_BOOL, &bif->expr_stack);
-		if (rc != SEPOL_OK) {
-			printf("cil_gen_boolif (line %d): failed to create expr tree, rc: %d\n", parse_current->line, rc);
-			goto gen_boolif_cleanup;
-		}
+	rc = cil_gen_expr_stack(parse_current->next, CIL_BOOL, &bif->expr_stack);
+	if (rc != SEPOL_OK) {
+		printf("cil_gen_boolif (line %d): failed to create expr tree, rc: %d\n", parse_current->line, rc);
+		goto gen_boolif_cleanup;
 	}
 
 	next = parse_current->next->next;
@@ -1914,23 +1918,8 @@ gen_boolif_cleanup:
 
 void cil_destroy_boolif(struct cil_booleanif *bif)
 {
-	struct cil_tree_node *curr = NULL;
-	struct cil_tree_node *next = NULL;
-
 	if (bif->expr_stack != NULL) {
-		curr = bif->expr_stack;
-		while (curr != NULL) {
-			if (curr->flavor == CIL_COND && curr->data != NULL) {
-				if (((struct cil_conditional*)curr->data)->str != NULL) {
-					free(((struct cil_conditional*)curr->data)->str);
-					((struct cil_conditional*)curr->data)->str = NULL;
-				}
-			}
-			next = curr->next;
-			free(curr->data);
-			free(curr);
-			curr = next;
-		}
+		cil_list_destroy(&bif->expr_stack, CIL_FALSE);
 	}
 
 	free(bif);
@@ -1994,20 +1983,10 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto gen_tunif_cleanup;
 	}
 
-	if (parse_current->next->cl_head == NULL) {
-		struct cil_conditional *cond;
-		cil_conditional_init(&cond);
-		cil_tree_node_init(&tif->expr_stack);
-		tif->expr_stack->flavor = CIL_COND;
-		cond->str = cil_strdup(parse_current->next->data);
-		cond->flavor = CIL_TUNABLE;
-		tif->expr_stack->data = cond;
-	} else {
-		rc = cil_gen_expr_stack(parse_current->next->cl_head, CIL_TUNABLE, &tif->expr_stack);
-		if (rc != SEPOL_OK) {
-			printf("cil_gen_tunif (line %d): failed to create expr tree, rc: %d\n", parse_current->line, rc);
-			goto gen_tunif_cleanup;
-		}
+	rc = cil_gen_expr_stack(parse_current->next, CIL_TUNABLE, &tif->expr_stack);
+	if (rc != SEPOL_OK) {
+		printf("cil_gen_tunif (line %d): failed to create expr tree, rc: %d\n", parse_current->line, rc);
+		goto gen_tunif_cleanup;
 	}
 
 	next = parse_current->next->next;
@@ -2028,25 +2007,9 @@ gen_tunif_cleanup:
 
 void cil_destroy_tunif(struct cil_tunableif *tif)
 {
-	struct cil_tree_node *curr = NULL;
-	struct cil_tree_node *next = NULL;
-
 	if (tif->expr_stack != NULL) {
-		curr = tif->expr_stack;
-		while (curr != NULL) {
-			if (curr->flavor == CIL_COND && curr->data != NULL) {
-				if (((struct cil_conditional*)curr->data)->str != NULL) {
-					free(((struct cil_conditional*)curr->data)->str);
-					((struct cil_conditional*)curr->data)->str = NULL;
-				}
-			}
-			next = curr->cl_head;
-			free(curr->data);
-			free(curr);
-			curr = next;
-		}
+		cil_list_destroy(&tif->expr_stack, CIL_FALSE);
 	}
-
 	cil_symtab_array_destroy(tif->symtab);
 
 	free(tif);
@@ -3217,20 +3180,7 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 		cil_list_destroy(&cons->perm_list, 0);
 	}
 	if (cons->expr != NULL) {
-		struct cil_tree_node *curr = cons->expr;
-		struct cil_tree_node *next = NULL;
-		while (curr != NULL) {
-			if (curr->flavor == CIL_COND && curr->data != NULL) {
-				if (((struct cil_conditional*)curr->data)->str != NULL) {
-					free(((struct cil_conditional*)curr->data)->str);
-					((struct cil_conditional*)curr->data)->str = NULL;
-				}
-			}
-			next = curr->next;
-			free(curr->data);
-			free(curr);
-			curr = next;
-		}
+		cil_list_destroy(&cons->expr, CIL_FALSE);
 	}
 
 	free(cons);

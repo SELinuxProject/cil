@@ -101,6 +101,7 @@ enum cil_flavor {
 	CIL_TUNABLEIF,
 	CIL_TUNABLEIFDEF,
 	CIL_TUNABLEIFNDEF,
+
 	CIL_AND,
 	CIL_OR,
 	CIL_XOR,
@@ -117,6 +118,7 @@ enum cil_flavor {
 	CIL_CONS_DOM,
 	CIL_CONS_DOMBY,
 	CIL_CONS_INCOMP,
+
 	CIL_CONS_U1,
 	CIL_CONS_U2,
 	CIL_CONS_T1,
@@ -728,7 +730,7 @@ struct cil_constrain {
 	struct cil_list *class_list;
 	struct cil_list *perm_list_str;
 	struct cil_list *perm_list;
-	struct cil_tree_node *expr;
+	struct cil_list *expr;
 };
 
 struct cil_param {
@@ -760,12 +762,12 @@ struct cil_call {
 #define CIL_FALSE	0
 
 struct cil_booleanif {
-	struct cil_tree_node *expr_stack;
+	struct cil_list *expr_stack;
 };
 
 struct cil_tunableif {
 	symtab_t symtab[CIL_SYM_NUM];
-	struct cil_tree_node *expr_stack;
+	struct cil_list *expr_stack;
 };
 
 struct cil_conditional {

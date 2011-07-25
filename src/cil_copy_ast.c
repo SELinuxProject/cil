@@ -857,7 +857,7 @@ copy_netifcon_out:
 	return rc;
 }
 
-void cil_copy_constrain(struct cil_db *db, struct cil_constrain *orig, struct cil_constrain **copy)
+void cil_copy_constrain(struct cil_constrain *orig, struct cil_constrain **copy)
 {
 	struct cil_constrain *new = NULL;
 	int rc = SEPOL_ERR;
@@ -869,9 +869,7 @@ void cil_copy_constrain(struct cil_db *db, struct cil_constrain *orig, struct ci
 
 	cil_copy_list(orig->class_list_str, &new->class_list_str);
 	cil_copy_list(orig->perm_list_str, &new->perm_list_str);
-
-	cil_tree_node_init(&new->expr);
-	cil_copy_ast(db, orig->expr, new->expr);
+	cil_copy_list(orig->expr, &new->expr);
 
 	*copy = new;
 }
@@ -1014,45 +1012,15 @@ void cil_copy_conditional(struct cil_conditional *orig, struct cil_conditional *
 
 int cil_copy_boolif(struct cil_booleanif *orig, struct cil_booleanif **copy)
 {
-	struct cil_booleanif *new = NULL;
-	struct cil_conditional *cond_new = NULL;
-	struct cil_tree_node *curr_new = NULL;
-	struct cil_tree_node *curr_old = NULL;
-	struct cil_tree_node *temp = NULL;
 	int rc = SEPOL_ERR;
+	struct cil_booleanif *new = NULL;
 
 	rc = cil_boolif_init(&new);
 	if (rc != SEPOL_OK) {
 		goto copy_boolif_out;
 	}
 
-	curr_old = orig->expr_stack;
-
-	while (curr_old != NULL) {
-		rc = cil_tree_node_init(&curr_new);
-		if (rc != SEPOL_OK) {
-			goto copy_boolif_out;
-		}
-
-		rc = cil_conditional_init(&cond_new);
-		if (rc != SEPOL_OK) {
-			goto copy_boolif_out;
-		}
-
-		cil_copy_conditional(curr_old->data, cond_new);
-		curr_new->data = cond_new;
-		curr_new->flavor = curr_old->flavor;
-
-		if (temp != NULL) {
-			temp->cl_head = curr_new;
-			curr_new->parent = temp;
-		} else {
-			new->expr_stack = curr_new;
-		}
-
-		temp = curr_new;
-		curr_old = curr_old->cl_head;
-	}
+	cil_copy_list(orig->expr_stack, &new->expr_stack);
 
 	*copy = new;
 
@@ -1283,7 +1251,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		}
 		break;
 	case CIL_MLSCONSTRAIN:
-		cil_copy_constrain(db, (struct cil_constrain*)orig->data, (struct cil_constrain**)&new->data);
+		cil_copy_constrain((struct cil_constrain*)orig->data, (struct cil_constrain**)&new->data);
 		break;
 	case CIL_CALL:
 		cil_copy_call(db, (struct cil_call*)orig->data, (struct cil_call**)&new->data);

@@ -65,7 +65,7 @@ int cil_copy_level(struct cil_tree_node *orig, struct cil_tree_node *copy, symta
 void cil_copy_fill_context(struct cil_context *orig, struct cil_context *new);
 int cil_copy_context(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 int cil_copy_netifcon(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
-void cil_copy_constrain(struct cil_db *db, struct cil_constrain *orig, struct cil_constrain **copy);
+void cil_copy_constrain(struct cil_constrain *orig, struct cil_constrain **copy);
 void cil_copy_call(struct cil_db *db, struct cil_call *orig, struct cil_call **copy);
 int cil_copy_optional(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 int cil_copy_nodecon(struct cil_nodecon *orig, struct cil_nodecon **copy);

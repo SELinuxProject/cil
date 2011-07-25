@@ -75,7 +75,7 @@ struct cil_args_booleanif {
 };
 
 
-int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tree_node *stack);
+int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *stack);
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 {
@@ -838,158 +838,63 @@ int cil_filetransition_to_policy(FILE **file_arr, uint32_t file_index, struct ci
 	return SEPOL_OK;
 }
 
-int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tree_node *stack)
+int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *stack)
 {
+	int rc = SEPOL_ERR;
 	struct cil_conditional *cond = NULL;
-	struct cil_tree_node *new = NULL;
-	char *oper1_str = NULL;
-	char *oper2_str = NULL;
-	char *oper = NULL;
-	char *policy = NULL;
-	struct cil_tree_node *prev_stack = NULL;
+	struct cil_list_item *curr = stack->head;
+	char *str_stack[10] = {};
+	char *expr_str = NULL;
+	char *oper_str = NULL;
+	int pos = 0;
+	int len = 0;
 
-	while (stack != NULL) {
-		cond = (struct cil_conditional*)stack->data;
+	while (curr != NULL) {
+		cond = curr->data;
 		if ((cond->flavor == CIL_AND) || (cond->flavor == CIL_OR) || (cond->flavor == CIL_XOR) ||
 			(cond->flavor == CIL_NOT) || (cond->flavor == CIL_EQ) || (cond->flavor == CIL_NEQ) ||
 			(cond->flavor == CIL_CONS_AND) || (cond->flavor == CIL_CONS_DOM) ||
 			(cond->flavor == CIL_CONS_DOMBY) || (cond->flavor == CIL_CONS_EQ) ||
 			(cond->flavor == CIL_CONS_INCOMP) || (cond->flavor == CIL_CONS_NOT) ||
 			(cond->flavor == CIL_CONS_OR)) {
-			
-			int len1 = 0;
-			int len2 = 0;
-			int oplen = 0;
-			cil_tree_node_init(&new);
-			
 
-			if (stack->parent->flavor != CIL_COND) {
-				oper1_str = (char *)stack->parent->data;
+			oper_str = cond->str;
+			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
+				len = strlen(str_stack[pos - 1]) + strlen(str_stack[pos - 2]) + strlen(oper_str) + 5;
+				expr_str = cil_malloc(len);
+				rc = snprintf(expr_str, len, "(%s %s %s)", str_stack[pos - 1], oper_str, str_stack[pos - 2]);
+				if (rc < 0) {
+					return SEPOL_ERR;
+				}
+				free(str_stack[pos - 2]);
+				free(str_stack[pos - 1]);
+				str_stack[pos - 2] = expr_str;
+				str_stack[pos - 1] = 0;
 			} else {
-				struct cil_conditional *cond1 = stack->parent->data;
-				if (cond1->flavor == CIL_BOOL) {
-					oper1_str = ((struct cil_bool *)cond1->data)->datum.name;
-				} else if (cond1->flavor == CIL_TYPE) {
-					oper1_str = ((struct cil_type *)cond1->data)->datum.name;
-				} else if (cond1->flavor == CIL_ROLE) {
-					oper1_str = ((struct cil_role *)cond1->data)->datum.name;
-				} else if (cond1->flavor == CIL_USER) {
-					oper1_str = ((struct cil_user *)cond1->data)->datum.name;
-				} else {
-					oper1_str = cond1->str;
+				len = strlen(str_stack[pos - 1]) + strlen(oper_str) + 4;
+				expr_str = cil_malloc(len);
+				rc = snprintf(expr_str, len, "(%s %s)", oper_str, str_stack[pos - 1]);
+				if (rc < 0) {
+					return SEPOL_ERR;
 				}
+				free(str_stack[pos - 1]);
+				str_stack[pos - 1] = expr_str;
 			}
-
-			len1 = strlen(oper1_str);
-
-			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
-				if (stack->parent->parent->flavor != CIL_COND) {
-					oper2_str = (char *)stack->parent->parent->data;
-				} else {
-					struct cil_conditional *cond2 = stack->parent->parent->data;
-					if (cond2->flavor == CIL_BOOL) {
-						oper2_str = ((struct cil_bool *)cond2->data)->datum.name;
-					} else if (cond2->flavor == CIL_TYPE) {
-						oper2_str = ((struct cil_type *)cond2->data)->datum.name;
-					} else if (cond2->flavor == CIL_ROLE) {
-						oper2_str = ((struct cil_role *)cond2->data)->datum.name;
-					} else if (cond2->flavor == CIL_USER) {
-						oper2_str = ((struct cil_user *)cond2->data)->datum.name;
-					} else {
-						oper2_str = cond2->str;
-					}
-				}
-				len2 = strlen(oper2_str);
-			}
-			
-			oper = ((struct cil_conditional*)stack->data)->str;
-			oplen = strlen(oper);
-
-			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
-				new->data = cil_malloc(len1 + len2 + oplen + 5);
-				strcpy(new->data, "(");
-				strncat(new->data, oper1_str, len1);
-				strncat(new->data, " ", 1);
-				strncat(new->data, oper, oplen);
-				strncat(new->data, " ", 1);
-				strncat(new->data, oper2_str, len2);
-				strncat(new->data, ")", 1);
-			} else {
-				new->data = cil_malloc(len1 + len2 + oplen + 4);
-				strcpy(new->data, "(");
-				strncat(new->data, oper, oplen);
-				strncat(new->data, " ", 1);
-				strncat(new->data, oper1_str, len1);
-				strncat(new->data, ")", 1);
-			}
-		
-			new->flavor = CIL_AST_STR;
-			new->cl_head = stack->cl_head;
-
-			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
-				new->parent = stack->parent->parent->parent;
-			} else {
-				new->parent = stack->parent->parent;
-			}
-
-			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
-				if (stack->parent->parent->parent != NULL) {
-					stack->parent->parent->parent->cl_head = new;
-				}
-			} else {
-				if (stack->parent->parent != NULL) {
-					stack->parent->parent->cl_head = new;
-				}
-			}
-
-			if (stack->cl_head != NULL) {
-				stack->cl_head->parent = new;
-			}
-
-			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
-				if (stack->parent->parent != NULL) {
-					cil_tree_node_destroy(&stack->parent->parent);
-				}
-			}
-			cil_tree_node_destroy(&stack->parent);
-			cil_tree_node_destroy(&stack);
-
-			
-			stack = new;
-		}
-		prev_stack = stack;
-		stack = stack->cl_head;
-	}
-
-	if (prev_stack == NULL || prev_stack->parent != NULL || prev_stack->cl_head != NULL) {
-		/* there should only be one item on the stack at this point */
-		return SEPOL_ERR;
-	}
-
-	if (prev_stack->flavor == CIL_COND) {
-		cond = prev_stack->data;
-		if (cond->flavor == CIL_BOOL) {
-			/* a single boolean is left on the stack, e.g (booleanif foo */
-			char * bname = ((struct cil_bool *)cond->data)->datum.name;
-			struct cil_tree_node *bnode = NULL;
-			policy = cil_malloc(strlen(bname) + 3);
-			strcpy(policy, "(");
-			strncat(policy, bname, strlen(bname));
-			strncat(policy, ")", 1);
-
-			cil_tree_node_init(&bnode);
-			bnode->data = policy;
-			bnode->flavor = CIL_AST_STR;
-			cil_tree_node_destroy(&prev_stack);
-			prev_stack = bnode;
+			pos--;
 		} else {
-			return SEPOL_ERR;
-		}
-	}
-	
-	fprintf(file_arr[file_index], "%s", (char *)prev_stack->data);
+			if (cond->flavor == CIL_BOOL || (cond->flavor == CIL_TYPE)
+				|| (cond->flavor == CIL_ROLE) || (cond->flavor == CIL_USER)) {
 
-	cil_tree_node_destroy(&prev_stack);
+				oper_str = ((struct cil_symtab_datum *)cond->data)->name;
+			} else {
+				oper_str = cond->str;
+			}
+			str_stack[pos] = cil_strdup(oper_str);
+			pos++;
+		}
+		curr = curr->next;
+	}
+	fprintf(file_arr[file_index], "%s", str_stack[0]);
 
 	return SEPOL_OK;
 }
@@ -1052,7 +957,7 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 {
 	int rc = SEPOL_ERR;
 	struct cil_booleanif *bif = node->data;
-	struct cil_tree_node *stack = bif->expr_stack;
+	struct cil_list *stack = bif->expr_stack;
 	struct cil_args_booleanif extra_args;
 
 	extra_args.file_arr = file_arr;
