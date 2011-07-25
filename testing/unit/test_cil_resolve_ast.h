@@ -77,6 +77,12 @@ void test_cil_resolve_cat_list_catname_neg(CuTest *);
 void test_cil_resolve_catset(CuTest *);
 void test_cil_resolve_catset_catlist_neg(CuTest *);
 
+void test_cil_resolve_catrange(CuTest *);
+void test_cil_resolve_catrange_catloworder_neg(CuTest *);
+void test_cil_resolve_catrange_cathighorder_neg(CuTest *);
+void test_cil_resolve_catrange_cat1_neg(CuTest *);
+void test_cil_resolve_catrange_cat2_neg(CuTest *);
+
 void test_cil_resolve_senscat(CuTest *);
 void test_cil_resolve_senscat_catrange_neg(CuTest *);
 void test_cil_resolve_senscat_catsetname(CuTest *);
@@ -448,6 +454,9 @@ void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_context(CuTest *);
 void test_cil_resolve_ast_node_helper_context_neg(CuTest *);
+
+void test_cil_resolve_ast_node_helper_catrange(CuTest *tc);
+void test_cil_resolve_ast_node_helper_catrange_neg(CuTest *tc);
 
 void test_cil_resolve_ast_node_helper_senscat(CuTest *tc);
 void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc);

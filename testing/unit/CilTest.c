@@ -259,6 +259,14 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catset_catlist_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_catrange);
+	SUITE_ADD_TEST(suite, test_cil_resolve_catrange_catloworder_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_catrange_cathighorder_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_catrange_cat1_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_catrange_cat2_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catrange);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catrange_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_catrange_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_catsetname);
