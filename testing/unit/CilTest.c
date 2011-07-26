@@ -50,6 +50,7 @@
 #include "test_cil_fqn.h"
 #include "test_cil_copy_ast.h"
 #include "test_cil_policy.h"
+#include "test_integration.h"
 
 void set_cil_file_data(struct cil_file_data **data) {
 	struct cil_file_data *new_data = malloc(sizeof(*new_data));
@@ -1794,5 +1795,12 @@ CuSuite* CilTreeGetSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_fsstr_b_greater_a);
 	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_equal);
 	
+	return suite;
+}
+
+CuSuite* CilTestFullCil(void) {
+	CuSuite* suite = CuSuiteNew();
+	SUITE_ADD_TEST(suite, test_min_policy);
+
 	return suite;
 }

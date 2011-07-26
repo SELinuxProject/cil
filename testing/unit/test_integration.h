@@ -27,46 +27,11 @@
  * either expressed or implied, of Tresys Technology, LLC.
  */
 
-#include <stdio.h>
+#ifndef TEST_INTEGRATION_H
+#define TEST_INTEGRATION_H
+
 #include "CuTest.h"
 
-CuSuite* CilTreeGetSuite(void);
-CuSuite* CilTreeGetResolveSuite(void);
-CuSuite* CilTreeGetBuildSuite(void);
-CuSuite* CilTestFullCil(void);
+void test_min_policy(CuTest *);
 
-void RunAllTests(void) {
-    CuString *output  = CuStringNew();
-    CuSuite* suite = CuSuiteNew();
-    CuSuite* suiteResolve = CuSuiteNew();
-    CuSuite* suiteBuild = CuSuiteNew(); 
-    CuSuite* suiteIntegration = CuSuiteNew();
-
-    CuSuiteAddSuite(suite, CilTreeGetSuite());
-    CuSuiteAddSuite(suiteResolve, CilTreeGetResolveSuite());
-    CuSuiteAddSuite(suiteBuild, CilTreeGetBuildSuite());
-    CuSuiteAddSuite(suiteIntegration, CilTestFullCil());
-
-    CuSuiteRun(suite);
-    CuSuiteDetails(suite, output);
-    CuSuiteSummary(suite, output);
-
-    CuSuiteRun(suiteResolve);
-    CuSuiteDetails(suiteResolve, output);
-    CuSuiteSummary(suiteResolve, output);
-
-    CuSuiteRun(suiteBuild);
-    CuSuiteDetails(suiteBuild, output);
-    CuSuiteSummary(suiteBuild, output);
-
-    CuSuiteRun(suiteIntegration);
-    CuSuiteDetails(suiteIntegration, output);
-    CuSuiteSummary(suiteIntegration, output);
-    printf("\n%s\n", output->buffer);
-}
-
-int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
-    RunAllTests();
-
-    return 0;
-}
+#endif

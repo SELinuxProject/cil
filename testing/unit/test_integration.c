@@ -27,46 +27,45 @@
  * either expressed or implied, of Tresys Technology, LLC.
  */
 
-#include <stdio.h>
+#include <sepol/policydb/policydb.h>
+
 #include "CuTest.h"
+#include "test_integration.h"
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-CuSuite* CilTreeGetSuite(void);
-CuSuite* CilTreeGetResolveSuite(void);
-CuSuite* CilTreeGetBuildSuite(void);
-CuSuite* CilTestFullCil(void);
+void test_min_policy(CuTest *tc) {
+	pid_t pid;
+	int status, ex;
+	int fd;
+	
+	pid = fork();
 
-void RunAllTests(void) {
-    CuString *output  = CuStringNew();
-    CuSuite* suite = CuSuiteNew();
-    CuSuite* suiteResolve = CuSuiteNew();
-    CuSuite* suiteBuild = CuSuiteNew(); 
-    CuSuite* suiteIntegration = CuSuiteNew();
+	if (pid == 0) {
+		fd = open("/dev/null", O_RDWR);
+		dup2(fd, STDIN_FILENO);
+		dup2(fd, STDOUT_FILENO);
+		dup2(fd, STDERR_FILENO);
 
-    CuSuiteAddSuite(suite, CilTreeGetSuite());
-    CuSuiteAddSuite(suiteResolve, CilTreeGetResolveSuite());
-    CuSuiteAddSuite(suiteBuild, CilTreeGetBuildSuite());
-    CuSuiteAddSuite(suiteIntegration, CilTestFullCil());
+		ex = execl("./secilc", "./secilc", "testing/integration_testing/small.cil", (char*)NULL);
+		if (ex == -1) {
+			printf("Execl error\n");
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		wait(&status);
 
-    CuSuiteRun(suite);
-    CuSuiteDetails(suite, output);
-    CuSuiteSummary(suite, output);
+		if (!WIFEXITED(status)) {
+			printf("Exec terminated abruptly.\n");
+			exit(EXIT_FAILURE);
+		} else if (WEXITSTATUS(status)) {
+			printf("Exec failed.\n");
+			exit(EXIT_FAILURE);
+		}
+	}
 
-    CuSuiteRun(suiteResolve);
-    CuSuiteDetails(suiteResolve, output);
-    CuSuiteSummary(suiteResolve, output);
-
-    CuSuiteRun(suiteBuild);
-    CuSuiteDetails(suiteBuild, output);
-    CuSuiteSummary(suiteBuild, output);
-
-    CuSuiteRun(suiteIntegration);
-    CuSuiteDetails(suiteIntegration, output);
-    CuSuiteSummary(suiteIntegration, output);
-    printf("\n%s\n", output->buffer);
-}
-
-int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
-    RunAllTests();
-
-    return 0;
+	CuAssertIntEquals(tc, 0, 0);
 }
