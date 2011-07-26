@@ -1005,14 +1005,15 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 		return rc;
 	}
 
+
 	fprintf(file_arr[file_index], "{\n");
-
-	rc = cil_tree_walk(bif->condtrue, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
-	if (rc != SEPOL_OK) {
-		printf("Failed to write booleanif content to file, rc: %d\n", rc);
-		return rc;
+	if (bif->condtrue != NULL) {
+		rc = cil_tree_walk(bif->condtrue, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
+		if (rc != SEPOL_OK) {
+			printf("Failed to write booleanif content to file, rc: %d\n", rc);
+			return rc;
+		}
 	}
-
 	fprintf(file_arr[file_index], "}\n");
 
 	if (bif->condfalse != NULL) {
