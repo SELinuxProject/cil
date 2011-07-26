@@ -2090,28 +2090,6 @@ void cil_destroy_conditional(struct cil_conditional *cond)
 	free(cond);
 }
 
-int cil_gen_else(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto gen_else_cleanup;
-	}
-
-	if (ast_node->parent->flavor != CIL_BOOLEANIF) {
-		printf("Invalid else statement: Not within booleanif\n");
-		goto gen_else_cleanup;
-	}
-
-	ast_node->flavor = CIL_ELSE;
-	ast_node->data = "else";
-
-	return SEPOL_OK;
-
-gen_else_cleanup:
-	return rc;
-}
-
 int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -2169,6 +2147,72 @@ void cil_destroy_tunif(struct cil_tunableif *tif)
 	cil_symtab_array_destroy(tif->symtab);
 
 	free(tif);
+}
+
+int cil_gen_condtrue(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_N_LISTS
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_condtrue_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid true condition declaration (line: %d)\n", parse_current->line);
+		goto gen_condtrue_cleanup;
+	}
+
+	ast_node->flavor = CIL_CONDTRUE;
+
+	if (ast_node->parent->flavor == CIL_TUNABLEIF) {
+		((struct cil_tunableif*)ast_node->parent->data)->condtrue = ast_node;
+	} else if (ast_node->parent->flavor == CIL_BOOLEANIF) {
+		((struct cil_booleanif*)ast_node->parent->data)->condtrue = ast_node;
+	}
+
+	return SEPOL_OK;
+
+gen_condtrue_cleanup:
+	return rc;	
+}
+
+int cil_gen_condfalse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_N_LISTS
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_condfalse_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid false condition declaration (line: %d\n", parse_current->line);
+		goto gen_condfalse_cleanup;
+	}
+
+	ast_node->flavor = CIL_CONDFALSE;
+
+	if (ast_node->parent->flavor == CIL_TUNABLEIF) {
+		((struct cil_tunableif*)ast_node->parent->data)->condfalse = ast_node;
+	} else if (ast_node->parent->flavor == CIL_BOOLEANIF) {
+		((struct cil_booleanif*)ast_node->parent->data)->condfalse = ast_node;
+	}
+
+	return SEPOL_OK;
+
+gen_condfalse_cleanup:
+	return rc;
 }
 
 int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -5292,10 +5336,16 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			printf("cil_gen_tunif failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
-	} else if (!strcmp(parse_current->data, CIL_KEY_ELSE)) {
-		rc = cil_gen_else(db, parse_current, ast_node);
+	} else if (!strcmp(parse_current->data, CIL_KEY_CONDTRUE)) {
+		rc = cil_gen_condtrue(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_gen_else failed, rc: %d\n", rc);
+			printf("cil_gen_condtrue failed, rc: %d\n", rc);
+			goto build_ast_node_helper_out;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_CONDFALSE)) {
+		rc = cil_gen_condfalse(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_condfalse failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {

@@ -169,10 +169,11 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TUNABLE:
 		cil_destroy_bool(*data);
 		break;
+	case CIL_CONDTRUE: break;
+	case CIL_CONDFALSE: break;
 	case CIL_BOOLEANIF:
 		cil_destroy_boolif(*data);
 		break;
-	case CIL_ELSE : break;
 	case CIL_COND:
 		cil_destroy_conditional(*data);
 		break;
@@ -484,7 +485,7 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			*symtab = &((struct cil_common*)ast_node->parent->data)->perms;
 		} else if (ast_node->parent->flavor == CIL_TUNABLEIF) {
 			*symtab = &((struct cil_tunableif*)ast_node->parent->data)->symtab[sym_index];
-		} else if ((ast_node->parent->flavor == CIL_BOOLEANIF || ast_node->parent->flavor == CIL_ELSE) && sym_index < CIL_SYM_NUM) {
+		} else if ((ast_node->parent->flavor == CIL_BOOLEANIF || ast_node->parent->flavor == CIL_CONDTRUE || ast_node->parent->flavor == CIL_CONDFALSE) && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_booleanif failed, rc: %d\n", rc);

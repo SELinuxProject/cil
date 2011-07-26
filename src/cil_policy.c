@@ -958,8 +958,10 @@ int __cil_booleanif_node_helper(struct cil_tree_node *node, __attribute__((unuse
 			return rc;
 		}
 		break;
-	case CIL_ELSE:
+	case CIL_FALSE:
 		fprintf(file_arr[*file_index], "else {\n");
+		break;
+	case CIL_TRUE:
 		break;
 	default:
 		return SEPOL_ERR;
@@ -978,7 +980,7 @@ int __cil_booleanif_last_child_helper(struct cil_tree_node *node, void *extra_ar
 	file_arr = args->file_arr;
 	file_index = args->file_index;
 
-	if (node->parent->flavor == CIL_ELSE) {
+	if (node->parent->flavor == CIL_FALSE) {
 		fprintf(file_arr[*file_index], "}\n");
 	}
 	
@@ -1003,17 +1005,25 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 		return rc;
 	}
 
-	bif->expr_stack = NULL;
-
 	fprintf(file_arr[file_index], "{\n");
 
-	rc = cil_tree_walk(node, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
+	rc = cil_tree_walk(bif->condtrue, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
 		printf("Failed to write booleanif content to file, rc: %d\n", rc);
 		return rc;
 	}
 
 	fprintf(file_arr[file_index], "}\n");
+
+	if (bif->condfalse != NULL) {
+		fprintf(file_arr[file_index], "else {\n");
+		rc = cil_tree_walk(bif->condfalse, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
+		if (rc != SEPOL_OK) {
+			printf("Failed to write booleanif false content to file, rc: %d\n", rc);
+			return rc;
+		}
+		fprintf(file_arr[file_index], "}\n");
+	}
 
 	return SEPOL_OK;
 }

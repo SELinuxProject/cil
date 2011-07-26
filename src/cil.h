@@ -101,6 +101,8 @@ enum cil_flavor {
 	CIL_ARGS,
 	CIL_BOOLEANIF,
 	CIL_TUNABLEIF,
+	CIL_CONDTRUE,
+	CIL_CONDFALSE,
 	CIL_TUNABLEIFDEF,
 	CIL_TUNABLEIFNDEF,
 
@@ -110,7 +112,6 @@ enum cil_flavor {
 	CIL_NOT,
 	CIL_EQ,
 	CIL_NEQ,
-	CIL_ELSE,
 	CIL_COND,
 	CIL_PARAM,
 	CIL_CONS_AND,
@@ -183,7 +184,7 @@ enum cil_flavor {
 #define CIL_KEY_ROLEBOUNDS	"rolebounds"
 #define CIL_KEY_TYPE 		"type"
 #define CIL_KEY_ATTR		"attribute"
-#define CIL_KEY_BOOL		"bool"
+#define CIL_KEY_BOOL		"boolean"
 #define CIL_KEY_ALLOW		"allow"
 #define CIL_KEY_AUDITALLOW	"auditallow"
 #define CIL_KEY_DONTAUDIT	"dontaudit"
@@ -227,6 +228,8 @@ enum cil_flavor {
 #define CIL_KEY_BOOLEANIF	"booleanif"
 #define CIL_KEY_TUNABLE		"tunable"
 #define CIL_KEY_TUNABLEIF	"tunableif"
+#define CIL_KEY_CONDTRUE	"true"
+#define CIL_KEY_CONDFALSE	"false"
 #define CIL_KEY_TUNABLEIFDEF	"tunableifdef"
 #define CIL_KEY_TUNABLEIFNDEF	"tunableifndef"
 #define CIL_KEY_AND		"&&"
@@ -235,7 +238,6 @@ enum cil_flavor {
 #define CIL_KEY_NOT		"!"
 #define CIL_KEY_EQ		"=="
 #define CIL_KEY_NEQ		"!="
-#define CIL_KEY_ELSE		"else"
 #define CIL_KEY_OPTIONAL	"optional"
 #define CIL_KEY_IPADDR		"ipaddr"
 
@@ -790,11 +792,15 @@ struct cil_call {
 
 struct cil_booleanif {
 	struct cil_list *expr_stack;
+	struct cil_tree_node *condtrue;
+	struct cil_tree_node *condfalse;
 };
 
 struct cil_tunableif {
 	symtab_t symtab[CIL_SYM_NUM];
 	struct cil_list *expr_stack;
+	struct cil_tree_node *condtrue;
+	struct cil_tree_node *condfalse;
 };
 
 struct cil_conditional {

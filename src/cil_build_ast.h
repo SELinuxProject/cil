@@ -99,9 +99,10 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_boolif(struct cil_booleanif *bif);
 void cil_destroy_conditional(struct cil_conditional *cond);
-int cil_gen_else(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_tunif(struct cil_tunableif *tif);
+int cil_gen_condtrue(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+int cil_gen_condfalse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_typealias(struct cil_typealias *alias);
 int cil_gen_attrtypes(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

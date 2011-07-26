@@ -376,7 +376,14 @@ void cil_tree_print_constrain(struct cil_constrain *cons)
 void cil_tree_print_node(struct cil_tree_node *node)
 {
 	if (node->data == NULL) {
-		printf("FLAVOR: %d", node->flavor);
+		if (node->flavor ==  CIL_CONDTRUE) {
+			printf("true\n");
+		} else if (node->flavor == CIL_CONDFALSE) {
+			printf("false\n");
+		} else {
+			printf("FLAVOR: %d", node->flavor);
+		}
+
 		return;
 	} else {
 		switch( node->flavor ) {
@@ -716,9 +723,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf(")\n");
 				return;
 			}
-			case CIL_ELSE:
-				printf("else\n"); 
-				return;
 			case CIL_AND:
 				printf("&&");
 				return;

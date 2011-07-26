@@ -2833,8 +2833,13 @@ int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct c
 	}
 
 	if (result == CIL_TRUE) {
-		rc = cil_copy_ast(db, current, current->parent);
+		rc = cil_copy_ast(db, tif->condtrue, current->parent);
 		if (rc != SEPOL_OK) {
+			goto resolve_tunif_out;
+		}
+	} else {
+		rc = cil_copy_ast(db, tif->condfalse, current->parent);
+		if (rc  != SEPOL_OK) {
 			goto resolve_tunif_out;
 		}
 	}
@@ -2975,7 +2980,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			rc = cil_resolve_roleallow(db, node, call);
 			break;
 		case CIL_ROLEDOMINANCE:
-			rc = cil_resolve_roleallow(db, node, call);
+			rc = cil_resolve_roledominance(db, node, call);
 			break;
 		case CIL_ROLEBOUNDS:
 			rc = cil_resolve_rolebounds(db, node, call);
