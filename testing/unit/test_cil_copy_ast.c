@@ -338,7 +338,7 @@ void test_cil_copy_sid(CuTest *tc) {
 }
 
 void test_cil_copy_sidcontext(CuTest *tc) {
-	char *line[] = {"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "(", "low", "high", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -926,8 +926,8 @@ void test_cil_copy_netifcon(CuTest *tc) {
 
 void test_cil_copy_netifcon_nested(CuTest *tc) {
 	char *line[] = {"(", "netifcon", "eth1", 
-			"(", "system_u", "object_r", "netif_t", "low", "high", ")",
-			"(", "system_u", "object_r", "netif_t", "low", "high", ")", ")", NULL};
+			"(", "system_u", "object_r", "netif_t", "(", "low", "high", ")", ")",
+			"(", "system_u", "object_r", "netif_t", "(", "low", "high", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -963,10 +963,8 @@ void test_cil_copy_netifcon_nested(CuTest *tc) {
 		((struct cil_netifcon *)test_ast_node->data)->packet_context->role_str);
 	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->type_str,
 		((struct cil_netifcon *)test_ast_node->data)->packet_context->type_str);
-	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->low_str,
-		((struct cil_netifcon *)test_ast_node->data)->packet_context->low_str);
-	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->high_str,
-		((struct cil_netifcon *)test_ast_node->data)->packet_context->high_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->levelrange_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context->levelrange_str);
 }
 
 void test_cil_copy_fill_context(CuTest *tc) {
@@ -1000,10 +998,8 @@ void test_cil_copy_fill_context(CuTest *tc) {
 		((struct cil_context *)test_ast_node->data)->role_str);
 	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->type_str,
 		((struct cil_context *)test_ast_node->data)->type_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->low_str,
-		((struct cil_context *)test_ast_node->data)->low_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->high_str,
-		((struct cil_context *)test_ast_node->data)->high_str);
+	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->levelrange_str,
+		((struct cil_context *)test_ast_node->data)->levelrange_str);
 }
 
 void test_cil_copy_fill_context_anonlow(CuTest *tc) {
@@ -1037,10 +1033,8 @@ void test_cil_copy_fill_context_anonlow(CuTest *tc) {
 		((struct cil_context *)test_ast_node->data)->role_str);
 	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->type_str,
 		((struct cil_context *)test_ast_node->data)->type_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->low_str,
-		((struct cil_context *)test_ast_node->data)->low_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->high_str,
-		((struct cil_context *)test_ast_node->data)->high_str);
+	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->levelrange_str,
+		((struct cil_context *)test_ast_node->data)->levelrange_str);
 }
 
 void test_cil_copy_fill_context_anonhigh(CuTest *tc) {
@@ -1074,10 +1068,8 @@ void test_cil_copy_fill_context_anonhigh(CuTest *tc) {
 		((struct cil_context *)test_ast_node->data)->role_str);
 	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->type_str,
 		((struct cil_context *)test_ast_node->data)->type_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->low_str,
-		((struct cil_context *)test_ast_node->data)->low_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->high_str,
-		((struct cil_context *)test_ast_node->data)->high_str);
+	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->levelrange_str,
+		((struct cil_context *)test_ast_node->data)->levelrange_str);
 }
 
 void test_cil_copy_call(CuTest *tc) {
@@ -1158,7 +1150,7 @@ void test_cil_copy_nodecon(CuTest *tc) {
 }
 
 void test_cil_copy_nodecon_anon(CuTest *tc) {
-	char *line[] = {"(", "nodecon", "(", "192.168.1.1", ")", "(", "192.168.1.1", ")", "(", "user", "role", "type", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "nodecon", "(", "192.168.1.1", ")", "(", "192.168.1.1", ")", "(", "user", "role", "type", "(", "low", "high", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -1625,7 +1617,7 @@ void test_cil_copy_node_helper_sid_neg(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_sidcontext(CuTest *tc) {
-	char *line[] = {"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "sidcontext", "test", "(", "blah_u", "blah_r", "blah_t", "(", "low", "high", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

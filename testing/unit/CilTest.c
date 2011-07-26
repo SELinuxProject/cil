@@ -196,7 +196,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filetransition);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filetransition_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition);
+/*	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_type1_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_type2_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_class_neg);
@@ -211,7 +211,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_anon_level_h);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_anon_level_h_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_rangetransition);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_rangetransition_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_rangetransition_neg); */
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon_no_class_neg);
@@ -291,14 +291,14 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_level_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_resolve_constrain);
+/*	SUITE_ADD_TEST(suite, test_cil_resolve_constrain);
 	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_class_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_perm_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_perm_resolve_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_constrain);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_constrain_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain_neg); */
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_context);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_user_neg);
@@ -308,8 +308,8 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_high_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_low_unnamed_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_high_unnamed_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_context_lownull_unnamed_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_context_highnull_unnamed_neg);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_context_lownull_unnamed_neg);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_context_highnull_unnamed_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_context);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_context_neg);
 	
@@ -514,13 +514,13 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	//SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args_callargsnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_call_args_name_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_bools);
-	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_tunables);
-	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_type);
-	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_role);
-	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_user);
-	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_emptystr_neg);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_bools);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_tunables);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_type);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_role);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_user);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_neg);
+//	SUITE_ADD_TEST(suite, test_cil_resolve_expr_stack_emptystr_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_boolif);
 	SUITE_ADD_TEST(suite, test_cil_resolve_boolif_neg);
@@ -1751,7 +1751,7 @@ CuSuite* CilTreeGetSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_copy_boolif);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_boolif);
 	
-	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
+//	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_mlsconstrain);
 
 	//SUITE_ADD_TEST(suite, test_cil_copy_ast);
