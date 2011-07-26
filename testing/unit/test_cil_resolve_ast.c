@@ -5097,8 +5097,8 @@ void test_cil_resolve_name_call_args_name_neg(CuTest *tc) {
 }
 
 void test_cil_resolve_expr_stack_bools(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")",
-			"(", "bool", "bar", "false", ")",
+	char *line[] = {"(", "boolean", "foo", "true", ")",
+			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
@@ -5202,8 +5202,8 @@ void test_cil_resolve_expr_stack_user(CuTest *tc) {
 }
 
 void test_cil_resolve_expr_stack_neg(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")",
-			"(", "bool", "bar", "false", ")",
+	char *line[] = {"(", "boolean", "foo", "true", ")",
+			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "beef", "baf", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
@@ -5223,8 +5223,8 @@ void test_cil_resolve_expr_stack_neg(CuTest *tc) {
 }
 
 void test_cil_resolve_expr_stack_emptystr_neg(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")",
-			"(", "bool", "bar", "false", ")",
+	char *line[] = {"(", "boolean", "foo", "true", ")",
+			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
@@ -5245,8 +5245,8 @@ void test_cil_resolve_expr_stack_emptystr_neg(CuTest *tc) {
 }
 
 void test_cil_resolve_boolif(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")",
-			"(", "bool", "bar", "false", ")",
+	char *line[] = {"(", "boolean", "foo", "true", ")",
+			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
@@ -5264,8 +5264,8 @@ void test_cil_resolve_boolif(CuTest *tc) {
 }
 
 void test_cil_resolve_boolif_neg(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")",
-			"(", "bool", "bar", "false", ")",
+	char *line[] = {"(", "boolean", "foo", "true", ")",
+			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "dne", "N/A", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
@@ -5929,7 +5929,7 @@ void test_cil_disable_children_helper_class(CuTest *tc) {
 }
 
 void test_cil_disable_children_helper_bool(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")", NULL};
+	char *line[] = {"(", "boolean", "foo", "true", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6284,8 +6284,8 @@ void test_cil_resolve_ast_node_helper_call2_neg(CuTest *tc) {
 }
 
 void test_cil_resolve_ast_node_helper_boolif(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")",
-			"(", "bool", "bar", "false", ")",
+	char *line[] = {"(", "boolean", "foo", "true", ")",
+			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
@@ -6310,8 +6310,8 @@ void test_cil_resolve_ast_node_helper_boolif(CuTest *tc) {
 }
 
 void test_cil_resolve_ast_node_helper_boolif_neg(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")",
-			"(", "bool", "bar", "false", ")",
+	char *line[] = {"(", "boolean", "foo", "true", ")",
+			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "dne", "N/A", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};

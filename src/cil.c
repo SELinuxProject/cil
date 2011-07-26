@@ -443,8 +443,14 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 			case CIL_OPTIONAL:
 				/* do nothing */
 				break;
+			case CIL_CONDTRUE:
+				/* do nothing */
+				break;
+			case CIL_CONDFALSE:
+				/* do nothing */
+				break;
 			default:
-				printf("destroy symtab error, wrong flavor node\n");
+				printf("destroy symtab error, wrong flavor node: %d\n", current->flavor);
 			}
 			current = current->cl_head;
 		} else if (current->next != NULL) {
