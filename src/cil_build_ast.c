@@ -238,6 +238,10 @@ gen_block_cleanup:
 
 void cil_destroy_block(struct cil_block *block)
 {
+	if (block == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(block->datum);
 	cil_symtab_array_destroy(block->symtab);
 	free(block);
@@ -298,6 +302,10 @@ gen_class_cleanup:
 
 void cil_destroy_class(struct cil_class *class)
 {
+	if (class == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(class->datum);
 	cil_symtab_destroy(&class->perms);
 
@@ -337,6 +345,10 @@ gen_perm_cleanup:
 
 void cil_destroy_perm(struct cil_perm *perm)
 {
+	if (perm == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(perm->datum);
 	free(perm);
 }
@@ -432,6 +444,10 @@ gen_permset_cleanup:
 
 void cil_destroy_permset(struct cil_permset *permset)
 {
+	if (permset == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(permset->datum);
 	cil_list_destroy(&permset->perms_list_str, 1);
 	free(permset);
@@ -491,6 +507,10 @@ gen_common_cleanup:
 
 void cil_destroy_common(struct cil_common *common)
 {
+	if (common == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(common->datum);
 	cil_symtab_destroy(&common->perms);
 	free(common);
@@ -541,6 +561,10 @@ gen_classcommon_cleanup:
 
 void cil_destroy_classcommon(struct cil_classcommon *clscom)
 {
+	if (clscom == NULL) {
+		return;
+	}
+
 	if (clscom->class_str != NULL) {
 		free(clscom->class_str);
 	}
@@ -597,6 +621,10 @@ gen_sid_cleanup:
 
 void cil_destroy_sid(struct cil_sid *sid)
 {
+	if (sid == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(sid->datum);
 	free(sid);
 }
@@ -660,6 +688,10 @@ gen_sidcontext_cleanup:
 
 void cil_destroy_sidcontext(struct cil_sidcontext *sidcon)
 {
+	if (sidcon == NULL) {
+		return;
+	}
+
 	if (sidcon->sid_str != NULL) {
 		free(sidcon->sid_str);
 	}
@@ -718,6 +750,10 @@ gen_user_cleanup:
 
 void cil_destroy_user(struct cil_user *user)
 {
+	if (user == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(user->datum);
 	free(user);
 }
@@ -781,6 +817,10 @@ gen_userlevel_cleanup:
 
 void cil_destroy_userlevel(struct cil_userlevel *usrlvl)
 {
+	if (usrlvl == NULL) {
+		return;
+	}
+
 	if (usrlvl->user_str != NULL) {
 		free(usrlvl->user_str);
 	}
@@ -853,6 +893,10 @@ gen_userrange_cleanup:
 
 void cil_destroy_userrange(struct cil_userrange *userrange)
 {
+	if (userrange == NULL) {
+		return;
+	}
+
 	if (userrange->user_str != NULL) {
 		free(userrange->user_str);
 	}
@@ -910,6 +954,10 @@ gen_userbounds_cleanup:
 
 void cil_destroy_userbounds(struct cil_userbounds *userbnds)
 {
+	if (userbnds == NULL) {
+		return;
+	}
+
 	if (userbnds->user_str != NULL) {
 		free(userbnds->user_str);
 	}
@@ -966,6 +1014,10 @@ gen_role_cleanup:
 
 void cil_destroy_role(struct cil_role *role)
 {
+	if (role == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(role->datum);
 	free(role);
 }
@@ -1014,6 +1066,10 @@ gen_roletype_cleanup:
 
 void cil_destroy_roletype(struct cil_roletype *roletype)
 {
+	if (roletype == NULL) {
+		return;
+	}
+
 	if (roletype->role_str != NULL) {
 		free(roletype->role_str);
 	}
@@ -1069,6 +1125,10 @@ gen_userrole_cleanup:
 
 void cil_destroy_userrole(struct cil_userrole *userrole)
 {
+	if (userrole == NULL) {
+		return;
+	}
+
 	if (userrole->user_str != NULL) {
 		free(userrole->user_str);
 	}
@@ -1128,6 +1188,10 @@ gen_roletrans_cleanup:
 
 void cil_destroy_roletrans(struct cil_role_trans *roletrans)
 {
+	if (roletrans == NULL) {
+		return;
+	}
+
 	if (roletrans->src_str != NULL) {
 		free(roletrans->src_str);
 	}
@@ -1191,6 +1255,10 @@ gen_roleallow_cleanup:
 
 void cil_destroy_roleallow(struct cil_role_allow *roleallow)
 {
+	if (roleallow == NULL) {
+		return;
+	}
+
 	if (roleallow->src_str != NULL) {
 		free(roleallow->src_str);
 	}
@@ -1246,6 +1314,10 @@ gen_roledominance_cleanup:
 
 void cil_destroy_roledominance(struct cil_roledominance *roledom)
 {
+	if (roledom == NULL) {
+		return;
+	}
+
 	if (roledom->role_str != NULL) {
 		free(roledom->role_str);
 	}
@@ -1301,6 +1373,10 @@ gen_rolebounds_cleanup:
 
 void cil_destroy_rolebounds(struct cil_rolebounds *rolebnds)
 {
+	if (rolebnds == NULL) {
+		return;
+	}
+
 	if (rolebnds->role_str != NULL) {
 		free(rolebnds->role_str);
 	}
@@ -1368,6 +1444,10 @@ gen_avrule_cleanup:
 
 void cil_destroy_avrule(struct cil_avrule *rule)
 {
+	if (rule == NULL) {
+		return;
+	}
+
 	if (rule->src_str != NULL) {
 		free(rule->src_str);
 	}
@@ -1440,6 +1520,10 @@ gen_type_rule_cleanup:
 
 void cil_destroy_type_rule(struct cil_type_rule *rule)
 {
+	if (rule == NULL) {
+		return;
+	}
+
 	if (rule->src_str != NULL) {
 		free(rule->src_str);
 	}
@@ -1515,6 +1599,10 @@ gen_type_cleanup:
 
 void cil_destroy_type(struct cil_type *type)
 {
+	if (type == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(type->datum);
 	free(type);
 }
@@ -1580,6 +1668,10 @@ gen_bool_cleanup:
 
 void cil_destroy_bool(struct cil_bool *boolean)
 {
+	if (boolean == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(boolean->datum);
 	free(boolean);
 }
@@ -2076,6 +2168,10 @@ gen_boolif_cleanup:
 
 void cil_destroy_boolif(struct cil_booleanif *bif)
 {
+	if (bif == NULL) {
+		return;
+	}
+
 	if (bif->expr_stack != NULL) {
 		cil_list_destroy(&bif->expr_stack, CIL_TRUE);
 	}
@@ -2085,6 +2181,10 @@ void cil_destroy_boolif(struct cil_booleanif *bif)
 
 void cil_destroy_conditional(struct cil_conditional *cond)
 {
+	if (cond == NULL) {
+		return;
+	}
+
 	if (cond->str != NULL) {
 		free(cond->str);
 	}
@@ -2145,6 +2245,10 @@ gen_tunif_cleanup:
 
 void cil_destroy_tunif(struct cil_tunableif *tif)
 {
+	if (tif == NULL) {
+		return;
+	}
+
 	if (tif->expr_stack != NULL) {
 		cil_list_destroy(&tif->expr_stack, CIL_TRUE);
 	}
@@ -2291,6 +2395,10 @@ gen_typealias_cleanup:
 
 void cil_destroy_typealias(struct cil_typealias *alias)
 {
+	if (alias == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(alias->datum);
 
 	if (alias->type_str != NULL) {
@@ -2390,6 +2498,10 @@ gen_attrtypes_cleanup:
 
 void cil_destroy_attrtypes(struct cil_attrtypes *attrtypes)
 {
+	if (attrtypes == NULL) {
+		return;
+	}
+
 	if (attrtypes->attr_str != NULL) {
 		free(attrtypes->attr_str);
 	}
@@ -2449,6 +2561,10 @@ gen_typebounds_cleanup:
 
 void cil_destroy_typebounds(struct cil_typebounds *typebnds)
 {
+	if (typebnds == NULL) {
+		return;
+	}
+
 	if (typebnds->type_str != NULL) {
 		free(typebnds->type_str);
 	}
@@ -2502,6 +2618,10 @@ gen_typepermissive_cleanup:
 
 void cil_destroy_typepermissive(struct cil_typepermissive *typeperm)
 {
+	if (typeperm == NULL) {
+		return;
+	}
+
 	if (typeperm->type_str != NULL) {
 		free(typeperm->type_str);
 	}
@@ -2559,6 +2679,10 @@ gen_filetransition_cleanup:
 
 void cil_destroy_filetransition(struct cil_filetransition *filetrans)
 {
+	if (filetrans == NULL) {
+		return;
+	}
+
 	if (filetrans->src_str != NULL) {
 		free(filetrans->src_str);
 	}
@@ -2641,6 +2765,10 @@ gen_rangetransition_cleanup:
 
 void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans)
 {
+	if (rangetrans == NULL) {
+		return;
+	}
+
 	if (rangetrans->src_str != NULL) {
 		free(rangetrans->src_str);
 	}
@@ -2700,6 +2828,10 @@ gen_sens_cleanup:
 
 void cil_destroy_sensitivity(struct cil_sens *sens)
 {
+	if (sens == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(sens->datum);
 	free(sens);
 }
@@ -2752,6 +2884,10 @@ gen_sensalias_cleanup:
 
 void cil_destroy_sensalias(struct cil_sensalias *alias)
 {
+	if (alias == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(alias->datum);
 
 	if (alias->sens_str != NULL) {
@@ -2806,6 +2942,10 @@ gen_cat_cleanup:
 
 void cil_destroy_category(struct cil_cat *cat)
 {
+	if (cat == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(cat->datum);
 	free(cat);
 }
@@ -2858,6 +2998,10 @@ gen_catalias_cleanup:
 
 void cil_destroy_catalias(struct cil_catalias *alias)
 {
+	if (alias == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(alias->datum);
 
 	if (alias->cat_str != NULL) {
@@ -3001,6 +3145,10 @@ gen_catrange_cleanup:
 
 void cil_destroy_catrange(struct cil_catrange *catrange)
 {
+	if (catrange == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(catrange->datum);
 	
 	if (catrange->cat_low_str != NULL) {
@@ -3067,6 +3215,10 @@ gen_catset_cleanup:
 
 void cil_destroy_catset(struct cil_catset *catset)
 {
+	if (catset == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(catset->datum);
 
 	if (catset->cat_list_str != NULL) {
@@ -3126,6 +3278,10 @@ gen_catorder_cleanup:
 
 void cil_destroy_catorder(struct cil_catorder *catorder)
 {
+	if (catorder == NULL) {
+		return;
+	}
+
 	if (catorder->cat_list_str != NULL) {
 		cil_list_destroy(&catorder->cat_list_str, 1);
 	}
@@ -3180,6 +3336,10 @@ gen_dominance_cleanup:
 
 void cil_destroy_dominance(struct cil_sens_dominates *dom)
 {
+	if (dom == NULL) {
+		return;
+	}
+
 	if (dom->sens_list_str != NULL) {
 		cil_list_destroy(&dom->sens_list_str, 1);
 	}
@@ -3240,6 +3400,10 @@ gen_senscat_cleanup:
 
 void cil_destroy_senscat(struct cil_senscat *senscat)
 {
+	if (senscat == NULL) {
+		return;
+	}
+
 	if (senscat->sens_str != NULL) {
 		free(senscat->sens_str);
 	}
@@ -3303,6 +3467,10 @@ gen_level_cleanup:
 
 void cil_destroy_level(struct cil_level *level)
 {
+	if (level == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(level->datum);
 
 	if (level->sens_str != NULL) {
@@ -3435,6 +3603,10 @@ gen_levelrange_cleanup:
 
 void cil_destroy_levelrange(struct cil_levelrange *lvlrange)
 {
+	if (lvlrange == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(lvlrange->datum);
 
 	if (lvlrange->low_str == NULL) {
@@ -3505,6 +3677,10 @@ gen_constrain_cleanup:
 
 void cil_destroy_constrain(struct cil_constrain *cons)
 {
+	if (cons == NULL) {
+		return;
+	}
+
 	if (cons->class_list_str != NULL) {
 		cil_list_destroy(&cons->class_list_str, 1);
 	}
@@ -3627,6 +3803,10 @@ gen_context_cleanup:
 
 void cil_destroy_context(struct cil_context *context)
 {
+	if (context == NULL) {
+		return;
+	}
+
 	if (context->user_str != NULL) {
 		free(context->user_str);
 	}
@@ -3733,6 +3913,10 @@ gen_filecon_cleanup:
 //TODO: Should we be checking if the pointer is NULL when passed in?
 void cil_destroy_filecon(struct cil_filecon *filecon)
 {
+	if (filecon == NULL) {
+		return;
+	}
+
 	if (filecon->root_str != NULL) {
 		free(filecon->root_str);
 	}
@@ -3837,6 +4021,10 @@ gen_portcon_cleanup:
 
 void cil_destroy_portcon(struct cil_portcon *portcon)
 {
+	if (portcon == NULL) {
+		return;
+	}
+
 	if (portcon->type_str != NULL) {
 		free(portcon->type_str);
 	}
@@ -3940,6 +4128,10 @@ gen_nodecon_cleanup:
 
 void cil_destroy_nodecon(struct cil_nodecon *nodecon)
 {
+	if (nodecon == NULL) {
+		return;
+	}
+
 	if (nodecon->addr_str != NULL) {
 		free(nodecon->addr_str);
 	} else if (nodecon->addr != NULL) {
@@ -4022,6 +4214,10 @@ gen_genfscon_cleanup:
 
 void cil_destroy_genfscon(struct cil_genfscon *genfscon)
 {
+	if (genfscon == NULL) {
+		return;
+	}
+
 	if (genfscon->type_str != NULL) {
 		free(genfscon->type_str);
 	}
@@ -4126,6 +4322,10 @@ gen_netifcon_cleanup:
 
 void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 {
+	if (netifcon == NULL) {
+		return;
+	}
+
 	if (netifcon->interface_str != NULL) {
 		free(netifcon->interface_str);
 	}
@@ -4208,6 +4408,10 @@ gen_pirqcon_cleanup:
 
 void cil_destroy_pirqcon(struct cil_pirqcon *pirqcon)
 {
+	if (pirqcon == NULL) {
+		return;
+	}
+
 	if (pirqcon->context_str != NULL) {
 		free(pirqcon->context_str);
 	} else if (pirqcon->context != NULL) {
@@ -4301,6 +4505,10 @@ gen_iomemcon_cleanup:
 
 void cil_destroy_iomemcon(struct cil_iomemcon *iomemcon)
 {
+	if (iomemcon == NULL) {
+		return;
+	}
+
 	if (iomemcon->context_str != NULL) {
 		free(iomemcon->context_str);
 	} else if (iomemcon->context != NULL) {
@@ -4394,6 +4602,10 @@ gen_ioportcon_cleanup:
 
 void cil_destroy_ioportcon(struct cil_ioportcon *ioportcon)
 {
+	if (ioportcon == NULL) {
+		return;
+	}
+
 	if (ioportcon->context_str != NULL) {
 		free(ioportcon->context_str);
 	} else if (ioportcon->context != NULL) {
@@ -4466,6 +4678,10 @@ gen_pcidevicecon_cleanup:
 
 void cil_destroy_pcidevicecon(struct cil_pcidevicecon *pcidevicecon)
 {
+	if (pcidevicecon == NULL) {
+		return;
+	}
+
 	if (pcidevicecon->context_str != NULL) {
 		free(pcidevicecon->context_str);
 	} else if (pcidevicecon->context != NULL) {
@@ -4549,6 +4765,10 @@ gen_fsuse_cleanup:
 
 void cil_destroy_fsuse(struct cil_fsuse *fsuse)
 {
+	if (fsuse == NULL) {
+		return;
+	}
+
 	if (fsuse->fs_str != NULL) {
 		free(fsuse->fs_str);
 	}
@@ -4564,6 +4784,10 @@ void cil_destroy_fsuse(struct cil_fsuse *fsuse)
 
 void cil_destroy_param(struct cil_param *param)
 {
+	if (param == NULL) {
+		return;
+	}
+
 	if (param->str != NULL) {
 		free(param->str);
 	}
@@ -4708,6 +4932,10 @@ gen_macro_cleanup:
 
 void cil_destroy_macro(struct cil_macro *macro)
 {
+	if (macro == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(macro->datum);
 	cil_symtab_array_destroy(macro->symtab);
 
@@ -4767,6 +4995,10 @@ gen_call_cleanup:
 
 void cil_destroy_call(struct cil_call *call)
 {
+	if (call == NULL) {
+		return;
+	}
+
 	if (call->macro_str != NULL) {
 		free(call->macro_str);
 	}
@@ -4784,6 +5016,10 @@ void cil_destroy_call(struct cil_call *call)
 
 void cil_destroy_args(struct cil_args *args)
 {
+	if (args == NULL) {
+		return;
+	}
+
 	args->param_str = NULL;
 	if (args->arg_str == NULL) {
 		switch (args->arg->flavor) {
@@ -4851,6 +5087,10 @@ gen_optional_cleanup:
 
 void cil_destroy_optional(struct cil_optional *optional)
 {
+	if (optional == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(optional->datum);
 	free(optional);
 }
@@ -4899,6 +5139,10 @@ gen_policycap_cleanup:
 
 void cil_destroy_policycap(struct cil_policycap *polcap)
 {
+	if (polcap == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(polcap->datum);
 	free(polcap);
 }
@@ -4954,6 +5198,10 @@ gen_ipaddr_cleanup:
 
 void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr)
 {
+	if (ipaddr == NULL) {
+		return;
+	}
+
 	cil_symtab_datum_destroy(ipaddr->datum);
 	free(ipaddr);
 }
