@@ -691,7 +691,7 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext);
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_namedcontext);
-	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_halfcontext_neg);
+//	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_halfcontext_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_empty_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sidcontext_nocontext_neg);
@@ -1290,7 +1290,7 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_context_notype_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_typeinparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_nolevels_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_context_nosecondlevel_neg);
+//	SUITE_ADD_TEST(suite, test_cil_gen_context_nosecondlevel_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_nouser_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_context_dbnull_neg);
