@@ -253,13 +253,6 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_dominance_neg);
 	//TODO: test for __cil_set_order
 
-	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list);
-	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catlistnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_rescatlistnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catrange);
-	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catrange_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_cat_list_catname_neg);
-	
 	SUITE_ADD_TEST(suite, test_cil_resolve_catset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_catset_catlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_catset);
@@ -281,16 +274,13 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_missingsens_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_category_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_currrangecat);
-	SUITE_ADD_TEST(suite, test_cil_resolve_senscat_currrangecat_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_senscat);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_senscat_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_level_catlist);
 	SUITE_ADD_TEST(suite, test_cil_resolve_level_catset);
-	SUITE_ADD_TEST(suite, test_cil_resolve_level_catset_verifysenscat_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_level_catset_name_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_level_catset_resolvecatset_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_level_sens_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_level_cat_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_level_senscat_neg);
@@ -1186,11 +1176,6 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_category);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_category_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_fill_cat_list);
-	SUITE_ADD_TEST(suite, test_cil_fill_cat_list_startnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_fill_cat_list_listnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_fill_cat_list_emptycats_neg);
-	
 	SUITE_ADD_TEST(suite, test_cil_gen_catset);
 	SUITE_ADD_TEST(suite, test_cil_gen_catset_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_catset_currnull_neg);

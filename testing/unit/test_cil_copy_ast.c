@@ -745,8 +745,10 @@ void test_cil_copy_senscat(CuTest *tc) {
 
 	cil_copy_senscat((struct cil_senscat *)test_ast_node->data, &test_copy);
 	CuAssertStrEquals(tc, ((struct cil_senscat *)test_ast_node->data)->sens_str, test_copy->sens_str);
-	CuAssertStrEquals(tc, (char*)((struct cil_senscat *)test_ast_node->data)->cat_list_str->head->data, (char*)test_copy->cat_list_str->head->data);
-	CuAssertStrEquals(tc, (char*)((struct cil_senscat *)test_ast_node->data)->cat_list_str->head->next->data, (char*)test_copy->cat_list_str->head->next->data);
+	CuAssertStrEquals(tc, (char*)((struct cil_senscat *)test_ast_node->data)->catset->cat_list_str->head->data,
+	                      (char*)test_copy->catset->cat_list_str->head->data);
+	CuAssertStrEquals(tc, (char*)((struct cil_senscat *)test_ast_node->data)->catset->cat_list_str->head->next->data,
+	                      (char*)test_copy->catset->cat_list_str->head->next->data);
 }
 
 void test_cil_copy_catorder(CuTest *tc) {
