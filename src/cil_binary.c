@@ -704,6 +704,63 @@ avrule_to_policydb_out:
 	return rc;
 }
 
+int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_role_trans *cil_roletrans = node->data;
+	role_datum_t *sepol_src;
+	type_datum_t *sepol_tgt;
+	class_datum_t *sepol_obj;
+	role_datum_t *sepol_result;
+	role_trans_t *sepol_roletrans = cil_malloc(sizeof(*sepol_roletrans));
+	memset(sepol_roletrans, 0, sizeof(role_trans_t));
+
+	key = ((struct cil_symtab_datum *)cil_roletrans->src)->name;
+	sepol_src = hashtab_search(pdb->p_roles.table, key);
+	if (sepol_src == NULL) {
+		rc = SEPOL_ERR;
+		goto roletrans_to_policydb_out;
+	}
+	sepol_roletrans->role = sepol_src->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_roletrans->tgt)->name;
+	sepol_tgt = hashtab_search(pdb->p_types.table, key);
+	if (sepol_tgt == NULL) {
+		rc = SEPOL_ERR;
+		goto roletrans_to_policydb_out;
+	}
+	sepol_roletrans->type = sepol_tgt->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_roletrans->obj)->name;
+	sepol_obj = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_obj == NULL) {
+		rc = SEPOL_ERR;
+		goto roletrans_to_policydb_out;
+	}
+	sepol_roletrans->tclass = sepol_obj->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_roletrans->result)->name;
+	sepol_result = hashtab_search(pdb->p_roles.table, key);
+	if (sepol_result == NULL) {
+		rc = SEPOL_ERR;
+		goto roletrans_to_policydb_out;
+	}
+	sepol_roletrans->new_role = sepol_result->s.value;
+
+	if (pdb->role_tr == NULL) {
+		pdb->role_tr = sepol_roletrans;
+	} else {
+		pdb->role_tr->next = sepol_roletrans;
+	}
+
+	return SEPOL_OK;
+
+roletrans_to_policydb_out:
+	return rc;
+
+}
+
 int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
@@ -760,6 +817,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_AVRULE:
 			rc = cil_avrule_to_policydb(pdb, node);
+			break;
+		case CIL_ROLETRANS:
+			rc = cil_roletrans_to_policydb(pdb, node);
 			break;
 		default:
 			break;

@@ -217,5 +217,15 @@ int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  */
 int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
+/**
+ * Insert cil role transition structure into sepol policydb.
+ *
+ * @param[in] pdb The policy database to insert the role transition into.
+ * @param[in] node The tree node that contains the cil_role_trans.
+ *
+ * @return SEPOL_OK upon success or SEPOL_ERR upon error.
+ */
+int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
 
 #endif //_CIL_BINARY_INTERNAL_H_
