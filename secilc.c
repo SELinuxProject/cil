@@ -41,6 +41,7 @@
 #include "src/cil_resolve_ast.h"
 #include "src/cil_fqn.h"
 #include "src/cil_binary.h"
+#include "src/cil_policy.h"
 
 #include "src/cil_copy_ast.h"
 
@@ -135,6 +136,11 @@ int main(int argc, char *argv[])
 	}
 
 #ifdef DEBUG
+	rc = cil_gen_policy(db);
+	if (rc != SEPOL_OK) {
+		printf("Failed to print to policy.conf file\n");
+		goto main_out;
+	}
 	cil_tree_print(db->ast->root, 0);
 #endif
 	printf("Generating Binary...\n");
