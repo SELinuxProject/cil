@@ -2067,7 +2067,7 @@ void test_cil_resolve_rangetransition_call_level_l_anon(CuTest *tc) {
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "l", ")", ")",
-				"(", "rangetransition", "type_a", "type_b", "class_", "l", "high", ")", ")",
+				"(", "rangetransition", "type_a", "type_b", "class_", "(", "l", "high", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2096,7 +2096,7 @@ void test_cil_resolve_rangetransition_call_level_l_anon_neg(CuTest *tc) {
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "l", ")", ")",
-				"(", "rangetransition", "type_a", "type_b", "class_", "l", "high", ")", ")",
+				"(", "rangetransition", "type_a", "type_b", "class_", "(", "l", "high", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "s0", "(", "c4", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2125,7 +2125,7 @@ void test_cil_resolve_rangetransition_call_level_h_anon(CuTest *tc) {
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "h", ")", ")",
-				"(", "rangetransition", "type_a", "type_b", "class_", "low", "h", ")", ")",
+				"(", "rangetransition", "type_a", "type_b", "class_", "(", "low", "h", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2154,7 +2154,7 @@ void test_cil_resolve_rangetransition_call_level_h_anon_neg(CuTest *tc) {
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "macro", "mm", "(", "(", "level", "h", ")", ")",
-				"(", "rangetransition", "type_a", "type_b", "class_", "low", "h", ")", ")",
+				"(", "rangetransition", "type_a", "type_b", "class_", "(", "low", "h", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "s0", "(", "c4", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2182,7 +2182,7 @@ void test_cil_resolve_rangetransition_level_l_neg(CuTest *tc) {
 			"(", "category", "c0", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "rangetransition", "type_a", "type_b", "class_", "low_DNE", "high", ")", NULL};
+			"(", "rangetransition", "type_a", "type_b", "class_", "(", "low_DNE", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2204,7 +2204,7 @@ void test_cil_resolve_rangetransition_level_h_neg(CuTest *tc) {
 			"(", "category", "c0", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "rangetransition", "type_a", "type_b", "class_", "low", "high_DNE", ")", NULL};
+			"(", "rangetransition", "type_a", "type_b", "class_", "(", "low", "high_DNE", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2226,7 +2226,7 @@ void test_cil_resolve_rangetransition_anon_level_l(CuTest *tc) {
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "rangetransition", "type_a", "type_b", "class_", "(", "s0", "(", "c0", ")", ")", "high", ")", NULL};
+			"(", "rangetransition", "type_a", "type_b", "class_", "(", "(", "s0", "(", "c0", ")", ")", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2249,7 +2249,7 @@ void test_cil_resolve_rangetransition_anon_level_l_neg(CuTest *tc) {
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "rangetransition", "type_a", "type_b", "class_", "(", "s0", "(", "c_DNE", ")", ")", "high", ")", NULL};
+			"(", "rangetransition", "type_a", "type_b", "class_", "(", "(", "s0", "(", "c_DNE", ")", ")", "high", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2272,7 +2272,7 @@ void test_cil_resolve_rangetransition_anon_level_h(CuTest *tc) {
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "rangetransition", "type_a", "type_b", "class_", "low", "(", "s0", "(", "c0", ")",  ")", NULL};
+			"(", "rangetransition", "type_a", "type_b", "class_", "(", "low", "(", "s0", "(", "c0", ")",  ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2295,7 +2295,7 @@ void test_cil_resolve_rangetransition_anon_level_h_neg(CuTest *tc) {
 			"(", "category", "c0", ")",
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "rangetransition", "type_a", "type_b", "class_", "low", "(", "s_DNE", "(", "c0", ")",  ")", NULL};
+			"(", "rangetransition", "type_a", "type_b", "class_", "(", "low", "(", "s_DNE", "(", "c0", ")",  ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

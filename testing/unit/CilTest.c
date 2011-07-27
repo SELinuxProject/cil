@@ -197,7 +197,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filetransition);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filetransition_neg);
 	
-/*	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition);
+	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_type1_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_type2_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_class_neg);
@@ -212,7 +212,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_anon_level_h);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_anon_level_h_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_rangetransition);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_rangetransition_neg); */
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_rangetransition_neg); 
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_classcommon_no_class_neg);
