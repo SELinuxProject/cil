@@ -1071,6 +1071,8 @@ int cil_boolif_init(struct cil_booleanif **bif)
 	new_bif = cil_malloc(sizeof(*new_bif));
 
 	new_bif->expr_stack = NULL;
+	new_bif->condtrue = NULL;
+	new_bif->condfalse = NULL;
 
 	*bif = new_bif;
 
@@ -1111,6 +1113,9 @@ int cil_tunif_init(struct cil_tunableif **tif)
 	rc = cil_symtab_array_init(new_tif->symtab, CIL_SYM_NUM);
 	if (rc != SEPOL_OK)
 		return SEPOL_ERR;
+
+	new_tif->condtrue = NULL;
+	new_tif->condfalse = NULL;
 
 	*tif = new_tif;
 

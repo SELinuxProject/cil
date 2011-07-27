@@ -2220,8 +2220,8 @@ int cil_gen_condfalse(struct cil_db *db, struct cil_tree_node *parse_current, st
 	ast_node->flavor = CIL_CONDFALSE;
 
 	if (ast_node->parent->flavor == CIL_TUNABLEIF) {
-		if (((struct cil_booleanif*)ast_node->parent->data)->condfalse == NULL) {
-			((struct cil_booleanif*)ast_node->parent->data)->condfalse = ast_node;
+		if (((struct cil_tunableif*)ast_node->parent->data)->condfalse == NULL) {
+			((struct cil_tunableif*)ast_node->parent->data)->condfalse = ast_node;
 		} else {
 			printf("Duplicate false condition declaration (line: %d)\n", parse_current->line);
 			rc = SEPOL_ERR;
@@ -5686,6 +5686,10 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 
 	if (args->ast->flavor == CIL_MACRO) {
 		args->macro = NULL;
+	}
+
+	if (args->ast->flavor == CIL_TUNABLEIF) {
+		cil_symtab_destroy(((struct cil_tunableif*)args->ast->data)->symtab);
 	}
 
 	return SEPOL_OK;
