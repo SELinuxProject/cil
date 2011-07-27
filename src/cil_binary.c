@@ -709,10 +709,10 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 	struct cil_role_trans *cil_roletrans = node->data;
-	role_datum_t *sepol_src;
-	type_datum_t *sepol_tgt;
-	class_datum_t *sepol_obj;
-	role_datum_t *sepol_result;
+	role_datum_t *sepol_src = NULL;
+	type_datum_t *sepol_tgt = NULL;
+	class_datum_t *sepol_obj = NULL;
+	role_datum_t *sepol_result = NULL;
 	role_trans_t *sepol_roletrans = cil_malloc(sizeof(*sepol_roletrans));
 	memset(sepol_roletrans, 0, sizeof(role_trans_t));
 
@@ -757,6 +757,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	return SEPOL_OK;
 
 roletrans_to_policydb_out:
+	free(sepol_roletrans);
 	return rc;
 
 }
