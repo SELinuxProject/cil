@@ -1097,6 +1097,20 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_user);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_user_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_anon_level);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_anon_level_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_usernull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_userrange_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_levelnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_levelrangeempty_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_userlevel_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_userlevel);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_userlevel_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_sensitivity_currnull_neg);

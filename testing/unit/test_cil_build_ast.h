@@ -468,6 +468,18 @@ void test_cil_gen_user_astnull_neg(CuTest *);
 void test_cil_gen_user_nouser_neg(CuTest *);
 void test_cil_gen_user_xsinfo_neg(CuTest *);
 
+void test_cil_gen_userlevel(CuTest *);
+void test_cil_gen_userlevel_anon_level(CuTest *);
+void test_cil_gen_userlevel_anon_level_neg(CuTest *);
+void test_cil_gen_userlevel_usernull_neg(CuTest *);
+void test_cil_gen_userlevel_userrange_neg(CuTest *);
+void test_cil_gen_userlevel_levelnull_neg(CuTest *);
+void test_cil_gen_userlevel_levelrangeempty_neg(CuTest *);
+void test_cil_gen_userlevel_extra_neg(CuTest *);
+void test_cil_gen_userlevel_dbnull_neg(CuTest *);
+void test_cil_gen_userlevel_currnull_neg(CuTest *);
+void test_cil_gen_userlevel_astnull_neg(CuTest *);
+
 void test_cil_gen_sensitivity(CuTest *);
 void test_cil_gen_sensitivity_dbnull_neg(CuTest *);
 void test_cil_gen_sensitivity_currnull_neg(CuTest *);
@@ -892,6 +904,9 @@ void test_cil_build_ast_node_helper_sidcontext_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_user(CuTest *);
 void test_cil_build_ast_node_helper_user_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_userlevel(CuTest *);
+void test_cil_build_ast_node_helper_userlevel_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_type(CuTest *);
 void test_cil_build_ast_node_helper_type_neg(CuTest *);
