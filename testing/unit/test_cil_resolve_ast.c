@@ -1992,6 +1992,112 @@ void test_cil_resolve_rangetransition(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_rangetransition_namedrange_anon(CuTest *tc) {
+	char *line[] = {"(", "class", "class_", "(", "read", ")", ")",
+			"(", "type", "type_a", ")",
+			"(", "type", "type_b", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "macro", "mm", "(", "(", "levelrange", "l", ")", ")",
+				"(", "rangetransition", "type_a", "type_b", "class_", "l", ")", ")",
+			"(", "call", "mm", "(", "(", "low", "high", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	int rc2 = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, NULL);
+	int rc3 = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_rangetransition(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, (struct cil_call*)test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->data);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
+	CuAssertIntEquals(tc, SEPOL_OK, rc3);
+}
+
+void test_cil_resolve_rangetransition_namedrange_anon_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "class_", "(", "read", ")", ")",
+			"(", "type", "type_a", ")",
+			"(", "type", "type_b", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "macro", "mm", "(", "(", "levelrange", "l", ")", ")",
+				"(", "rangetransition", "type_a", "type_b", "class_", "l", ")", ")",
+			"(", "call", "mm", "(", "(", "DNE", "high", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	int rc2 = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, NULL);
+	int rc3 = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_rangetransition(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, (struct cil_call*)test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->data);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
+	CuAssertIntEquals(tc, SEPOL_OK, rc3);
+}
+
+void test_cil_resolve_rangetransition_namedrange(CuTest *tc) {
+	char *line[] = {"(", "class", "class_", "(", "read", ")", ")",
+			"(", "type", "type_a", ")",
+			"(", "type", "type_b", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c0", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "levelrange", "foo_range", "(", "low", "high", ")", ")",
+			"(", "rangetransition", "type_a", "type_b", "class_", "foo_range", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_rangetransition(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_rangetransition_namedrange_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "class_", "(", "read", ")", ")",
+			"(", "type", "type_a", ")",
+			"(", "type", "type_b", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "category", "c0", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "levelrange", "foo_range", "(", "low", "high", ")", ")",
+			"(", "rangetransition", "type_a", "type_b", "class_", "DNE", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_rangetransition(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 void test_cil_resolve_rangetransition_type1_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "class_", "(", "read", ")", ")",
 			"(", "type", "type_a", ")",

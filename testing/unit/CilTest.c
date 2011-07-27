@@ -198,6 +198,10 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_filetransition_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition);
+	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_namedrange);
+	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_namedrange_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_namedrange_anon_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_namedrange_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_type1_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_type2_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rangetransition_class_neg);

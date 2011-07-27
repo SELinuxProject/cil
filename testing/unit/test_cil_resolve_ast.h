@@ -155,6 +155,10 @@ void test_cil_resolve_filetransition_class_neg(CuTest *);
 void test_cil_resolve_filetransition_type3_neg(CuTest *);
 
 void test_cil_resolve_rangetransition(CuTest *);
+void test_cil_resolve_rangetransition_namedrange(CuTest *);
+void test_cil_resolve_rangetransition_namedrange_anon(CuTest *);
+void test_cil_resolve_rangetransition_namedrange_anon_neg(CuTest *);
+void test_cil_resolve_rangetransition_namedrange_neg(CuTest *);
 void test_cil_resolve_rangetransition_type1_neg(CuTest *);
 void test_cil_resolve_rangetransition_type2_neg(CuTest *);
 void test_cil_resolve_rangetransition_class_neg(CuTest *);
