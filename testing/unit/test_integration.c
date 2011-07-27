@@ -43,6 +43,7 @@ void test_min_policy(CuTest *tc) {
 	int fd;
 	
 	pid = fork();
+	int rc = 0;
 
 	if (pid == 0) {
 		fd = open("/dev/null", O_RDWR);
@@ -53,17 +54,17 @@ void test_min_policy(CuTest *tc) {
 		ex = execl("./secilc", "./secilc", "testing/integration_testing/small.cil", (char*)NULL);
 		if (ex == -1) {
 			printf("Execl error\n");
-			exit(EXIT_FAILURE);
+			rc = -1;
 		}
 	} else {
 		wait(&status);
 
 		if (!WIFEXITED(status)) {
 			printf("Exec terminated abruptly.\n");
-			exit(EXIT_FAILURE);
+			rc = -1;
 		} else if (WEXITSTATUS(status)) {
 			printf("Exec failed.\n");
-			exit(EXIT_FAILURE);
+			rc = -1;
 		}
 	}
 
