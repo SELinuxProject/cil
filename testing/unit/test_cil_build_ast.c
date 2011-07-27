@@ -2182,7 +2182,7 @@ void test_cil_gen_filetransition_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "low_l", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "low_l", "high_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2201,7 +2201,7 @@ void test_cil_gen_rangetransition(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_anon_low_l(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "s0", "(", "c0", ")", ")", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "(", "s0", "(", "c0", ")", ")", "high_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2220,7 +2220,7 @@ void test_cil_gen_rangetransition_anon_low_l(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_anon_low_l_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "s0", "(", ")", ")", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "(", "s0", "(", ")", ")", "high_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2239,7 +2239,7 @@ void test_cil_gen_rangetransition_anon_low_l_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_anon_high_l(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "low_l", "(", "s0", "(", "c0", ")",  ")", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "low_l", "(", "s0", "(", "c0", ")",  ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2258,7 +2258,7 @@ void test_cil_gen_rangetransition_anon_high_l(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_anon_high_l_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "low_l", "(", "s0", "(", ")",  ")", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "low_l", "(", "s0", "(", ")",  ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2277,7 +2277,7 @@ void test_cil_gen_rangetransition_anon_high_l_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "low_l", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "low_l", "high_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2311,7 +2311,7 @@ void test_cil_gen_rangetransition_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "low_l", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "low_l", "high_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2345,7 +2345,7 @@ void test_cil_gen_rangetransition_nofirsttype_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_firsttype_inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "(", "type_a_t", ")", "type_b_t", "class", "low_l", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "(", "type_a_t", ")", "type_b_t", "class", "(", "low_l", "high_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2383,7 +2383,7 @@ void test_cil_gen_rangetransition_nosecondtype_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_secondtype_inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "(", "type_b_t", ")", "class", "low_l", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "(", "type_b_t", ")", "class", "(", "low_l", "high_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2421,7 +2421,7 @@ void test_cil_gen_rangetransition_noclass_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_class_inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "(", "class", ")", "low_l", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "(", "class", ")", "(", "low_l", "high_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2459,7 +2459,7 @@ void test_cil_gen_rangetransition_nolevel_l_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_nolevel_h_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "low_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "low_l", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2478,7 +2478,7 @@ void test_cil_gen_rangetransition_nolevel_h_neg(CuTest *tc) {
 }
 
 void test_cil_gen_rangetransition_extra_neg(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "low_l", "high_l", "extra", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "low_l", "high_l", ")", "extra", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -15663,7 +15663,7 @@ void test_cil_build_ast_node_helper_filetransition_neg(CuTest *tc) {
 }	
 
 void test_cil_build_ast_node_helper_rangetransition(CuTest *tc) {
-	char *line[] = {"(", "rangetransition", "type_a", "type_b", "class", "low_l", "high_l", ")", NULL};
+	char *line[] = {"(", "rangetransition", "type_a", "type_b", "class", "(", "low_l", "high_l", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
