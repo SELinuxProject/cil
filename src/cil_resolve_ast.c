@@ -447,8 +447,7 @@ int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current
 	struct cil_tree_node *src_node = NULL;
 	struct cil_tree_node *exec_node = NULL;
 	struct cil_tree_node *obj_node = NULL;
-	struct cil_tree_node *low_node = NULL;
-	struct cil_tree_node *high_node = NULL;
+	struct cil_tree_node *range_node = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(db, current, rangetrans->src_str, CIL_SYM_TYPES, call, &src_node);
@@ -472,50 +471,26 @@ int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current
 	}
 	rangetrans->obj = (struct cil_class*)obj_node->data;
 
-	if (rangetrans->low_str != NULL) {
-		rc = cil_resolve_name(db, current, rangetrans->low_str, CIL_SYM_LEVELS, call, &low_node);
+	if (rangetrans->range_str != NULL) {
+		rc = cil_resolve_name(db, current, rangetrans->range_str, CIL_SYM_LEVELRANGES, call, &range_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve low level, rc: %d\n", rc);
+			printf("Failed to resolve levelrange, rc: %d\n", rc);
 			goto resolve_rangetransition_out;
 		}
-		rangetrans->low = (struct cil_level*)low_node->data;
+		rangetrans->range = (struct cil_levelrange*)range_node->data;
 
-		/* This could still be an anonymous level even if low_str is set, if low_str is a param_str*/
-		if (rangetrans->low->datum.name == NULL) {
-			rc = cil_resolve_level(db, current, rangetrans->low, call);
+		/* This could still be an anonymous levelrange even if range_str is set, if range_str is a param_str*/
+		if (rangetrans->range->datum.name == NULL) {
+			rc = cil_resolve_levelrange(db, current, rangetrans->range, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve low level, rc: %d\n", rc);
+				printf("Failed to resolve levelrange, rc: %d\n", rc);
 				goto resolve_rangetransition_out;
 			}
 		}
 	} else {
-		rc = cil_resolve_level(db, current, rangetrans->low, call);
+		rc = cil_resolve_levelrange(db, current, rangetrans->range, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve low level, rc: %d\n", rc);
-			goto resolve_rangetransition_out;
-		}
-	}
-
-	if (rangetrans->high_str != NULL) {
-		rc = cil_resolve_name(db, current, rangetrans->high_str, CIL_SYM_LEVELS, call, &high_node);
-		if (rc != SEPOL_OK) {
-			printf("Failed to resolve high level, rc: %d\n", rc);
-			goto resolve_rangetransition_out;
-		}
-		rangetrans->high = (struct cil_level*)high_node->data;
-
-		/* This could still be an anonymous level even if high_str is set, if high_str is a param_str*/
-		if (rangetrans->high->datum.name == NULL) {
-			rc = cil_resolve_level(db, current, rangetrans->high, call);
-			if (rc != SEPOL_OK) {
-				printf("Failed to resolve high level, rc: %d\n", rc);
-				goto resolve_rangetransition_out;
-			}
-		}
-	} else {
-		rc = cil_resolve_level(db, current, rangetrans->high, call);
-		if (rc != SEPOL_OK) {
-			printf("Failed to resolve high level, rc: %d\n", rc);
+			printf("Failed to resolve levelrange, rc: %d\n", rc);
 			goto resolve_rangetransition_out;
 		}
 	}
@@ -731,13 +706,13 @@ int cil_resolve_userrange(struct cil_db *db, struct cil_tree_node *current, stru
 	}
 	user = user_node->data;
 
-	if (userrange->lvlrange_str != NULL) {
-		rc = cil_resolve_name(db, current, userrange->lvlrange_str, CIL_SYM_LEVELRANGES, call, &range_node);
+	if (userrange->range_str != NULL) {
+		rc = cil_resolve_name(db, current, userrange->range_str, CIL_SYM_LEVELRANGES, call, &range_node);
 		if (rc != SEPOL_OK) {
 			goto resolve_userrange_out;
 		}
-		userrange->lvlrange = (struct cil_levelrange*)range_node->data;
-		user->range = userrange->lvlrange;
+		userrange->range = (struct cil_levelrange*)range_node->data;
+		user->range = userrange->range;
 
 		/* This could still be an anonymous levelrange even if levelrange_str is set, if levelrange_str is a param_str*/
 		if (user->range->datum.name == NULL) {
@@ -747,13 +722,13 @@ int cil_resolve_userrange(struct cil_db *db, struct cil_tree_node *current, stru
 				goto resolve_userrange_out;
 			}
 		}
-	} else if (userrange->lvlrange != NULL) {
-		rc = cil_resolve_levelrange(db, current, userrange->lvlrange, call);
+	} else if (userrange->range != NULL) {
+		rc = cil_resolve_levelrange(db, current, userrange->range, call);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve levelrange, rc: %d\n", rc);
 			goto resolve_userrange_out;
 		}
-		user->range = userrange->lvlrange;
+		user->range = userrange->range;
 	} else {
 		printf("Invalid userrange, levelrange not found\n");
 		rc = SEPOL_ERR;
@@ -1951,24 +1926,24 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 	}
 	context->type = (struct cil_type*)type_node->data;
 
-	if (context->levelrange_str != NULL) {
-		rc = cil_resolve_name(db, current, context->levelrange_str, CIL_SYM_LEVELRANGES, call, &lvlrange_node);
+	if (context->range_str != NULL) {
+		rc = cil_resolve_name(db, current, context->range_str, CIL_SYM_LEVELRANGES, call, &lvlrange_node);
 		if (rc != SEPOL_OK) {
-			error = context->levelrange_str;
+			error = context->range_str;
 			goto resolve_context_out;
 		}
-		context->levelrange = (struct cil_levelrange*)lvlrange_node->data;
+		context->range = (struct cil_levelrange*)lvlrange_node->data;
 
 		/* This could still be an anonymous levelrange even if levelrange_str is set, if levelrange_str is a param_str*/
-		if (context->levelrange->datum.name == NULL) {
-			rc = cil_resolve_levelrange(db, current, context->levelrange, call);
+		if (context->range->datum.name == NULL) {
+			rc = cil_resolve_levelrange(db, current, context->range, call);
 			if (rc != SEPOL_OK) {
 				printf("Failed to resolve levelrange, rc: %d\n", rc);
 				goto resolve_context_out;
 			}
 		}
-	} else if (context->levelrange != NULL) {
-		rc = cil_resolve_levelrange(db, current, context->levelrange, call);
+	} else if (context->range != NULL) {
+		rc = cil_resolve_levelrange(db, current, context->range, call);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve levelrange, rc: %d\n", rc);
 			goto resolve_context_out;
@@ -2453,6 +2428,28 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 
 				break;
 			}
+			case CIL_LEVELRANGE: {
+				if (pc->cl_head != NULL) {
+					struct cil_levelrange *range = NULL;
+					struct cil_tree_node *range_node =NULL;
+					cil_levelrange_init(&range);
+
+					rc = cil_fill_levelrange(pc->cl_head, range);
+					if (rc != SEPOL_OK) {
+						printf("Failed to create anonymous levelrange, rc: %d\n", rc);
+						cil_destroy_levelrange(range);
+						goto resolve_call1_out;
+					}
+					cil_tree_node_init(&range_node);
+					range_node->flavor = CIL_LEVELRANGE;
+					range_node->data = range;
+					new_arg->arg = range_node;
+				} else {
+					new_arg->arg_str = cil_strdup(pc->data);
+				}
+
+				break;
+			}
 			case CIL_IPADDR: {
 				if (pc->cl_head != NULL) {
 					struct cil_ipaddr *ipaddr = NULL;
@@ -2582,6 +2579,13 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 				continue; // anonymous, no need to resolve
 			} else {
 				sym_index = CIL_SYM_LEVELS;
+			}
+			break;
+		case CIL_LEVELRANGE:
+			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+				continue; // anonymous, no need to resolve
+			} else {
+				sym_index = CIL_SYM_LEVELRANGES;
 			}
 			break;
 		case CIL_CATSET:
@@ -3381,7 +3385,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 #endif
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_first_child_helper, __cil_resolve_ast_last_child_helper, &extra_args);
 		if (rc != SEPOL_OK) {
-			printf("Pass %i fo resolution failed\n", pass);
+			printf("Pass %i of resolution failed\n", pass);
 			goto resolve_ast_out;
 		}
 

@@ -354,6 +354,9 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 	case CIL_LEVEL:
 		*sym_index = CIL_SYM_LEVELS;
 		break;
+	case CIL_LEVELRANGE:
+		*sym_index = CIL_SYM_LEVELRANGES;
+		break;
 	case CIL_SENS:
 	case CIL_SENSALIAS:
 		*sym_index = CIL_SYM_SENS;
@@ -377,6 +380,7 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		break;
 	default:
 		*sym_index = CIL_SYM_UNKNOWN;
+		printf("cil_flavor_to_symtab_index: Failed to find flavor: %d\n", flavor);
 		return SEPOL_ERR;
 	}
 
@@ -597,8 +601,8 @@ int cil_context_init(struct cil_context **context)
 	new_context->role = NULL;
 	new_context->type_str = NULL;
 	new_context->type = NULL;
-	new_context->levelrange_str = NULL;
-	new_context->levelrange = NULL;
+	new_context->range_str = NULL;
+	new_context->range = NULL;
 
 	*context = new_context;	
 
@@ -1032,10 +1036,8 @@ int cil_rangetransition_init(struct cil_rangetransition **rangetrans)
         new_rangetrans->exec = NULL;
         new_rangetrans->obj_str = NULL;
         new_rangetrans->obj = NULL;
-        new_rangetrans->low_str = NULL;
-        new_rangetrans->low = NULL;
-        new_rangetrans->high_str = NULL;
-        new_rangetrans->high = NULL;
+        new_rangetrans->range_str = NULL;
+        new_rangetrans->range = NULL;
 
         *rangetrans = new_rangetrans;
 
@@ -1610,8 +1612,8 @@ int cil_userrange_init(struct cil_userrange **userrange)
 	new_userrange = cil_malloc(sizeof(*new_userrange));
 
 	new_userrange->user_str = NULL;
-	new_userrange->lvlrange_str = NULL;
-	new_userrange->lvlrange = NULL;
+	new_userrange->range_str = NULL;
+	new_userrange->range = NULL;
 
 	*userrange = new_userrange;
 

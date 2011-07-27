@@ -393,8 +393,8 @@ struct cil_userlevel {
 
 struct cil_userrange {
 	char *user_str;
-	char *lvlrange_str;
-	struct cil_levelrange *lvlrange;
+	char *range_str;
+	struct cil_levelrange *range;
 };
 
 struct cil_userbounds {
@@ -480,10 +480,8 @@ struct cil_rangetransition {
 	struct cil_type *exec;
 	char *obj_str;
 	struct cil_class *obj;
-	char *low_str;
-	struct cil_level *low;
-	char *high_str;
-	struct cil_level *high;
+	char *range_str;
+	struct cil_levelrange *range;
 };
 
 struct cil_bool {
@@ -646,8 +644,8 @@ struct cil_context {
 	struct cil_role *role;
 	char *type_str;
 	struct cil_type *type;
-	char *levelrange_str;
-	struct cil_levelrange *levelrange;
+	char *range_str;
+	struct cil_levelrange *range;
 };
 
 enum cil_filecon_types {

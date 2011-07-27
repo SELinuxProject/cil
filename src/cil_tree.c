@@ -311,10 +311,10 @@ void cil_tree_print_context(struct cil_context *context)
 		printf(" %s", context->type_str);
 	}
 
-	if (context->levelrange != NULL) {
-		cil_tree_print_levelrange(context->levelrange);
-	} else if (context->levelrange_str != NULL) {
-		printf(" %s", context->levelrange_str);
+	if (context->range != NULL) {
+		cil_tree_print_levelrange(context->range);
+	} else if (context->range_str != NULL) {
+		printf(" %s", context->range_str);
 	}
 
 	printf(" )");
@@ -516,12 +516,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf(" %s", userrange->user_str);
 				}
 
-				if (userrange->lvlrange != NULL) {
+				if (userrange->range != NULL) {
 					printf(" (");
-					cil_tree_print_levelrange(userrange->lvlrange);
+					cil_tree_print_levelrange(userrange->range);
 					printf(" )");
-				} else if (userrange->lvlrange_str != NULL) {
-					printf(" %s", userrange->lvlrange_str);
+				} else if (userrange->range_str != NULL) {
+					printf(" %s", userrange->range_str);
 				}
 
 				printf("\n");
@@ -812,20 +812,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf(" %s", rangetrans->obj_str);
 				}
 
-				if (rangetrans->low != NULL) {
+				if (rangetrans->range != NULL) {
 					printf(" (");
-					cil_tree_print_level(rangetrans->low);
+					cil_tree_print_levelrange(rangetrans->range);
 					printf(" )");
 				} else {
-					printf(" %s", rangetrans->low_str);
-				}
-
-				if (rangetrans->high != NULL) {
-					printf(" (");
-					cil_tree_print_level(rangetrans->high);
-					printf(" )");
-				} else {
-					printf(" %s", rangetrans->high_str);
+					printf(" %s", rangetrans->range_str);
 				}
 
 				printf("\n");

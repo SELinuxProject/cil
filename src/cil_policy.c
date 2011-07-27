@@ -745,7 +745,7 @@ void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_cont
 	struct cil_user *user = context->user;
 	struct cil_role *role = context->role;
 	struct cil_type *type = context->type;
-	struct cil_levelrange *lvlrange = context->levelrange;
+	struct cil_levelrange *lvlrange = context->range;
 
 	fprintf(file_arr[file_index], "%s:%s:%s:", user->datum.name, role->datum.name, type->datum.name);
 	cil_levelrange_to_policy(file_arr, file_index, lvlrange);

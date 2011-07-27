@@ -393,15 +393,15 @@ void cil_copy_userrange(struct cil_userrange *orig, struct cil_userrange **copy)
 	}
 
 	new->user_str = cil_strdup(orig->user_str);
-	new->lvlrange_str = cil_strdup(orig->lvlrange_str);
+	new->range_str = cil_strdup(orig->range_str);
 
-	if (orig->lvlrange != NULL) {
-		rc = cil_levelrange_init(&new->lvlrange);
+	if (orig->range != NULL) {
+		rc = cil_levelrange_init(&new->range);
 		if (rc != SEPOL_OK) {
 			goto copy_userrange_out;
 		}
 
-		cil_copy_fill_levelrange(orig->lvlrange, new->lvlrange);
+		cil_copy_fill_levelrange(orig->range, new->range);
 	}
 
 	*copy = new;
@@ -517,25 +517,15 @@ void cil_copy_rangetransition(struct cil_rangetransition *orig, struct cil_range
 	new->src_str = cil_strdup(orig->src_str);
 	new->exec_str = cil_strdup(orig->exec_str);
 	new->obj_str = cil_strdup(orig->obj_str);
-	new->low_str = cil_strdup(orig->low_str);
-	new->high_str = cil_strdup(orig->high_str);
+	new->range_str = cil_strdup(orig->range_str);
 
-	if (orig->low != NULL) {
-		rc = cil_level_init(&new->low);
+	if (orig->range != NULL) {
+		rc = cil_levelrange_init(&new->range);
 		if (rc != SEPOL_OK) {
 			goto copy_rangetransition_out;
 		}
 
-		cil_copy_fill_level(orig->low, new->low);
-	}
-
-	if (orig->high != NULL) {
-		rc = cil_level_init(&new->high);
-		if (rc != SEPOL_OK) {
-			goto copy_rangetransition_out;
-		}
-
-		cil_copy_fill_level(orig->high, new->high);
+		cil_copy_fill_levelrange(orig->range, new->range);
 	}
 
 	*copy = new;
@@ -875,15 +865,15 @@ void cil_copy_fill_context(struct cil_context *orig, struct cil_context *new)
 	new->user_str = cil_strdup(orig->user_str);
 	new->role_str = cil_strdup(orig->role_str);
 	new->type_str = cil_strdup(orig->type_str);
-	new->levelrange_str = cil_strdup(orig->levelrange_str);
+	new->range_str = cil_strdup(orig->range_str);
 
-	if (orig->levelrange != NULL) {
-		rc = cil_levelrange_init(&new->levelrange);
+	if (orig->range != NULL) {
+		rc = cil_levelrange_init(&new->range);
 		if (rc != SEPOL_OK) {
 			goto copy_fill_context_out;
 		}
 
-		cil_copy_fill_levelrange(orig->levelrange, new->levelrange);
+		cil_copy_fill_levelrange(orig->range, new->range);
 	}
 
 copy_fill_context_out:

@@ -824,15 +824,15 @@ int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, st
 	userrange->user_str = cil_strdup(parse_current->next->data);
 
 	if (parse_current->next->next->cl_head == NULL) {
-		userrange->lvlrange_str = cil_strdup(parse_current->next->next->data);
+		userrange->range_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_levelrange_init(&userrange->lvlrange);
+		rc = cil_levelrange_init(&userrange->range);
 		if (rc != SEPOL_OK) {
 			printf("Failed to initialize range\n");
 			goto gen_userrange_cleanup;
 		}
 
-		rc = cil_fill_levelrange(parse_current->next->next->cl_head, userrange->lvlrange);
+		rc = cil_fill_levelrange(parse_current->next->next->cl_head, userrange->range);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_userrange: Failed to fill levelrange, rc: %d\n", rc);
 			goto gen_userrange_cleanup;
@@ -857,10 +857,10 @@ void cil_destroy_userrange(struct cil_userrange *userrange)
 		free(userrange->user_str);
 	}
 
-	if (userrange->lvlrange_str != NULL) {
-		free(userrange->lvlrange_str);
-	} else if (userrange->lvlrange != NULL) {
-		cil_destroy_levelrange(userrange->lvlrange);
+	if (userrange->range_str != NULL) {
+		free(userrange->range_str);
+	} else if (userrange->range != NULL) {
+		cil_destroy_levelrange(userrange->range);
 	}
 
 	free(userrange);
@@ -2584,7 +2584,6 @@ int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_curre
 		SYM_STRING,
 		SYM_STRING,
 		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -2610,34 +2609,20 @@ int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_curre
 	rangetrans->exec_str = cil_strdup(parse_current->next->next->data);
 	rangetrans->obj_str = cil_strdup(parse_current->next->next->next->data);
 
+	rangetrans->range_str = NULL;
+
 	if (parse_current->next->next->next->next->cl_head == NULL) {
-		rangetrans->low_str = cil_strdup(parse_current->next->next->next->next->data);
+		rangetrans->range_str = cil_strdup(parse_current->next->next->next->next->data);
 	} else {
-		rc = cil_level_init(&rangetrans->low);
+		rc = cil_levelrange_init(&rangetrans->range);
 		if (rc != SEPOL_OK) {
-			printf("Couldn't initialize low level\n");
+			printf("Couldn't initialize levelrange\n");
 			goto gen_rangetransition_cleanup;
 		}
 
-		rc = cil_fill_level(parse_current->next->next->next->next->cl_head, rangetrans->low);
+		rc = cil_fill_levelrange(parse_current->next->next->next->next->cl_head, rangetrans->range);
 		if (rc != SEPOL_OK) {
-			printf("cil_gen_rangetransition: Failed to fill low level, rc: %d\n", rc);
-			goto gen_rangetransition_cleanup;
-		}
-	}
-
-	if (parse_current->next->next->next->next->next->cl_head == NULL) {
-		rangetrans->high_str = cil_strdup(parse_current->next->next->next->next->next->data);
-	} else {
-		rc = cil_level_init(&rangetrans->high);
-		if (rc != SEPOL_OK) {
-			printf("Couldn't initialize high level\n");
-			goto gen_rangetransition_cleanup;
-		}
-
-		rc = cil_fill_level(parse_current->next->next->next->next->next->cl_head, rangetrans->high);
-		if (rc != SEPOL_OK) {
-			printf("cil_gen_rangetransition: Failed to fill high level, rc: %d\n", rc);
+			printf("cil_gen_rangetransition: Failed to fill levelrange, rc: %d\n", rc);
 			goto gen_rangetransition_cleanup;
 		}
 	}
@@ -2665,11 +2650,8 @@ void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans)
 	if (rangetrans->obj_str != NULL) {
 		free(rangetrans->obj_str);
 	}
-	if (rangetrans->low_str != NULL) {
-		free(rangetrans->low_str);
-	}
-	if (rangetrans->high_str != NULL) {
-		free(rangetrans->high_str);
+	if (rangetrans->range_str != NULL) {
+		free(rangetrans->range_str);
 	}
 }
 
@@ -3569,18 +3551,18 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	context->role_str = cil_strdup(user_node->next->data);
 	context->type_str = cil_strdup(user_node->next->next->data);
 
-	context->levelrange_str = NULL;
+	context->range_str = NULL;
 
 	if (user_node->next->next->next->cl_head == NULL) {
-		context->levelrange_str = cil_strdup(user_node->next->next->next->data);
+		context->range_str = cil_strdup(user_node->next->next->next->data);
 	} else {
-		rc = cil_levelrange_init(&context->levelrange);
+		rc = cil_levelrange_init(&context->range);
 		if (rc != SEPOL_OK) {
 			printf("Couldn't initialize levelrange\n");
 			goto cil_fill_context_cleanup;
 		}
 
-		rc = cil_fill_levelrange(user_node->next->next->next->cl_head, context->levelrange);
+		rc = cil_fill_levelrange(user_node->next->next->next->cl_head, context->range);
 		if (rc != SEPOL_OK) {
 			printf("cil_fill_context: Failed to fill levelrange, rc: %d\n", rc);
 			goto cil_fill_context_cleanup;
@@ -3657,10 +3639,10 @@ void cil_destroy_context(struct cil_context *context)
 		free(context->type_str);
 	}
 
-	if (context->levelrange_str != NULL) {
-		free(context->levelrange_str);
-	} else if (context->levelrange != NULL) {
-		cil_destroy_levelrange(context->levelrange);
+	if (context->range_str != NULL) {
+		free(context->range_str);
+	} else if (context->range != NULL) {
+		cil_destroy_levelrange(context->range);
 	}
 }
 
@@ -4652,6 +4634,8 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			param->flavor = CIL_CATSET;
 		} else if (!strcmp(kind, CIL_KEY_LEVEL)) {
 			param->flavor = CIL_LEVEL;
+		} else if (!strcmp(kind, CIL_KEY_LEVELRANGE)) {
+			param->flavor = CIL_LEVELRANGE;
 		} else if (!strcmp(kind, CIL_KEY_CLASS)) {
 			param->flavor = CIL_CLASS;
 		} else if (!strcmp(kind, CIL_KEY_IPADDR)) {

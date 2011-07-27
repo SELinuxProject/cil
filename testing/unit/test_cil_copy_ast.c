@@ -963,8 +963,8 @@ void test_cil_copy_netifcon_nested(CuTest *tc) {
 		((struct cil_netifcon *)test_ast_node->data)->packet_context->role_str);
 	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->type_str,
 		((struct cil_netifcon *)test_ast_node->data)->packet_context->type_str);
-	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->levelrange_str,
-		((struct cil_netifcon *)test_ast_node->data)->packet_context->levelrange_str);
+	CuAssertStrEquals(tc, ((struct cil_netifcon *)test_copy->data)->packet_context->range_str,
+		((struct cil_netifcon *)test_ast_node->data)->packet_context->range_str);
 }
 
 void test_cil_copy_fill_context(CuTest *tc) {
@@ -998,8 +998,8 @@ void test_cil_copy_fill_context(CuTest *tc) {
 		((struct cil_context *)test_ast_node->data)->role_str);
 	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->type_str,
 		((struct cil_context *)test_ast_node->data)->type_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->levelrange_str,
-		((struct cil_context *)test_ast_node->data)->levelrange_str);
+	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->range_str,
+		((struct cil_context *)test_ast_node->data)->range_str);
 }
 
 void test_cil_copy_fill_context_anonlow(CuTest *tc) {
@@ -1033,8 +1033,8 @@ void test_cil_copy_fill_context_anonlow(CuTest *tc) {
 		((struct cil_context *)test_ast_node->data)->role_str);
 	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->type_str,
 		((struct cil_context *)test_ast_node->data)->type_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->levelrange_str,
-		((struct cil_context *)test_ast_node->data)->levelrange_str);
+	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->range_str,
+		((struct cil_context *)test_ast_node->data)->range_str);
 }
 
 void test_cil_copy_fill_context_anonhigh(CuTest *tc) {
@@ -1068,8 +1068,8 @@ void test_cil_copy_fill_context_anonhigh(CuTest *tc) {
 		((struct cil_context *)test_ast_node->data)->role_str);
 	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->type_str,
 		((struct cil_context *)test_ast_node->data)->type_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->levelrange_str,
-		((struct cil_context *)test_ast_node->data)->levelrange_str);
+	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->range_str,
+		((struct cil_context *)test_ast_node->data)->range_str);
 }
 
 void test_cil_copy_call(CuTest *tc) {
