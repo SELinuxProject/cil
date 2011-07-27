@@ -2200,6 +2200,25 @@ void test_cil_gen_rangetransition(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_gen_rangetransition_namedtransition(CuTest *tc) {
+	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "namedtrans", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_rangetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_gen_rangetransition_anon_low_l(CuTest *tc) {
 	char *line[] = {"(", "rangetransition", "type_a_t", "type_b_t", "class", "(", "(", "s0", "(", "c0", ")", ")", "high_l", ")", ")", NULL};
 

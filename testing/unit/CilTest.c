@@ -762,6 +762,7 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_filetransition_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition);
+	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_namedtransition);
 	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_anon_low_l);
 	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_anon_low_l_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_rangetransition_anon_high_l);

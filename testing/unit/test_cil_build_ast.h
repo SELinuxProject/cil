@@ -172,6 +172,7 @@ void test_cil_gen_filetransition_currnull_neg(CuTest *);
 void test_cil_gen_filetransition_astnull_neg(CuTest *);
 
 void test_cil_gen_rangetransition(CuTest *);
+void test_cil_gen_rangetransition_namedtransition(CuTest *);
 void test_cil_gen_rangetransition_anon_low_l(CuTest *);
 void test_cil_gen_rangetransition_anon_low_l_neg(CuTest *);
 void test_cil_gen_rangetransition_anon_high_l(CuTest *);
