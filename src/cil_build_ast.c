@@ -71,7 +71,7 @@ verify_name_out:
 int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[], int len)
 {
 	int rc = SEPOL_ERR;
-	int num_lists = 0;
+	int num_extras = 0;
 	struct cil_tree_node *c = parse_current;
 	int i = 0;
 	while (i < len) {
@@ -79,16 +79,20 @@ int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[]
 			break;
 		}
 
-		if (s[i] & SYM_N_LISTS) {
+		if (s[i] & SYM_N_LISTS || s[i] & SYM_N_STRINGS) {
 			if (c == NULL) {
-				if (num_lists > 0) {
+				if (num_extras > 0) {
 					break;
 				} else {
 					goto verify_syntax_out;
 				}
-			} else if (c->data == NULL && c->cl_head != NULL) {
+			} else if ((s[i] & SYM_N_LISTS) && (c->data == NULL && c->cl_head != NULL)) {
 				c = c->next;
-				num_lists++;
+				num_extras++;
+				continue;
+			} else if ((s[i] & SYM_N_STRINGS) && (c->data != NULL && c->cl_head == NULL)) {
+				c = c->next;
+				num_extras++;
 				continue;
 			}
 		}
