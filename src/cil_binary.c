@@ -762,6 +762,45 @@ roletrans_to_policydb_out:
 
 }
 
+int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_role_allow *cil_roleallow = node->data;
+	role_datum_t *sepol_role = NULL;
+	role_datum_t *sepol_new_role = NULL;
+	role_allow_t *sepol_roleallow = cil_malloc(sizeof(*sepol_roleallow));
+	memset(sepol_roleallow, 0, sizeof(role_allow_t));
+
+	key = ((struct cil_symtab_datum *)cil_roleallow->src)->name;
+	sepol_role = hashtab_search(pdb->p_roles.table, key);
+	if (sepol_role == NULL) {
+		rc = SEPOL_ERR;
+		goto roleallow_to_policydb_out;
+	}
+	sepol_roleallow->role = sepol_role->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_roleallow->tgt)->name;
+	sepol_new_role = hashtab_search(pdb->p_roles.table, key);
+	if (sepol_new_role == NULL) {
+		rc = SEPOL_ERR;
+		goto roleallow_to_policydb_out;
+	}
+	sepol_roleallow->new_role = sepol_new_role->s.value;
+
+	if (pdb->role_allow == NULL) {
+		pdb->role_allow = sepol_roleallow;
+	} else {
+		pdb->role_allow->next = sepol_roleallow;
+	}
+
+	return SEPOL_OK;
+
+roleallow_to_policydb_out:
+	free(sepol_roleallow);
+	return rc;
+}
+
 int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
@@ -821,6 +860,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_ROLETRANS:
 			rc = cil_roletrans_to_policydb(pdb, node);
+			break;
+		case CIL_ROLEALLOW:
+			rc = cil_roleallow_to_policydb(pdb, node);
 			break;
 		default:
 			break;
