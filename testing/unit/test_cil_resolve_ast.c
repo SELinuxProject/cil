@@ -5353,7 +5353,7 @@ void test_cil_resolve_boolif(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5372,7 +5372,7 @@ void test_cil_resolve_boolif_neg(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "&&", "dne", "N/A", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5391,7 +5391,7 @@ void test_cil_evaluate_expr_stack_and(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5623,7 +5623,7 @@ void test_cil_resolve_tunif_false(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5642,7 +5642,7 @@ void test_cil_resolve_tunif_true(CuTest *tc) {
 			"(", "tunable", "bar", "true", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6599,7 +6599,7 @@ void test_cil_resolve_ast_node_helper_tunif(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "&&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7266,7 +7266,7 @@ void test_cil_resolve_ast_node_helper_context_neg(CuTest *tc) {
 			"(", "role", "object_r", ")",
 			"(", "type", "netif_t", ")",
 			"(", "context", "con",
-                        "(", "system_u", "object_r", "netif_t", "llow", "high", NULL};
+                        "(", "system_u", "object_r", "netif_t", "DNE", "high", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7293,7 +7293,7 @@ void test_cil_resolve_ast_node_helper_context_neg(CuTest *tc) {
 	pass = 7;
 
 	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next, &finished, extra_args);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertIntEquals(tc, finished, 0);
 }
 
@@ -8941,7 +8941,7 @@ void test_cil_resolve_ast_node_helper_sidcontext_neg(CuTest *tc) {
                         "(", "type", "blah_t", ")",
                         "(", "role", "blah_r", ")",
                         "(", "user", "blah_u", ")",
-                        "(", "sidcontext", "test", "(", "", "blah_r", "blah_t", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+                        "(", "sidcontext", "test", "(", "", "blah_r", "blah_t", "(", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")", ")", NULL};
  
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
