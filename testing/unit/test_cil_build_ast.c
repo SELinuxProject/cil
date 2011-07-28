@@ -4381,7 +4381,7 @@ void test_cil_gen_constrain_expr_stack_eq2_t1type(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4411,7 +4411,7 @@ void test_cil_gen_constrain_expr_stack_eq2_t1t1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -4441,7 +4441,7 @@ void test_cil_gen_constrain_expr_stack_eq2_t2type(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4471,7 +4471,7 @@ void test_cil_gen_constrain_expr_stack_eq2_t2t2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -4501,7 +4501,7 @@ void test_cil_gen_constrain_expr_stack_eq2_r1role(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4531,7 +4531,7 @@ void test_cil_gen_constrain_expr_stack_eq_constrain_r1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_CONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_CONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -4561,7 +4561,7 @@ void test_cil_gen_constrain_expr_stack_eq2_r1r1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -4591,7 +4591,7 @@ void test_cil_gen_constrain_expr_stack_eq2_r2role(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4621,7 +4621,7 @@ void test_cil_gen_constrain_expr_stack_eq2_r2r2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -4651,7 +4651,7 @@ void test_cil_gen_constrain_expr_stack_eq2_t1t2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4681,7 +4681,7 @@ void test_cil_gen_constrain_expr_stack_eq_r1r2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4711,7 +4711,7 @@ void test_cil_gen_constrain_expr_stack_eq2_r1r2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4741,7 +4741,7 @@ void test_cil_gen_constrain_expr_stack_eq2_u1u2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4771,7 +4771,7 @@ void test_cil_gen_constrain_expr_stack_eq2_u1user(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4801,7 +4801,7 @@ void test_cil_gen_constrain_expr_stack_eq2_u1u1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -4831,7 +4831,7 @@ void test_cil_gen_constrain_expr_stack_eq2_u2user(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4861,7 +4861,7 @@ void test_cil_gen_constrain_expr_stack_eq2_u2u2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -4891,7 +4891,7 @@ void test_cil_gen_constrain_expr_stack_eq_l2h2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4921,7 +4921,7 @@ void test_cil_gen_constrain_expr_stack_eq_l2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -4951,7 +4951,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1l2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -4981,7 +4981,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1h1(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5011,7 +5011,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1h2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5041,7 +5041,7 @@ void test_cil_gen_constrain_expr_stack_eq_h1l2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5071,7 +5071,7 @@ void test_cil_gen_constrain_expr_stack_eq_h1h2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5101,7 +5101,7 @@ void test_cil_gen_constrain_expr_stack_eq_h1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5131,7 +5131,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1l1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5161,7 +5161,7 @@ void test_cil_gen_constrain_expr_stack_eq2_l1l2_constrain_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_CONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_CONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5191,7 +5191,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1l2_constrain_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_CONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_CONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5221,7 +5221,7 @@ void test_cil_gen_constrain_expr_stack_eq_leftkeyword_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5251,7 +5251,7 @@ void test_cil_gen_constrain_expr_stack_eq_noexpr1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5281,7 +5281,7 @@ void test_cil_gen_constrain_expr_stack_eq_expr1inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5311,7 +5311,7 @@ void test_cil_gen_constrain_expr_stack_eq_noexpr2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5341,7 +5341,7 @@ void test_cil_gen_constrain_expr_stack_eq_expr2inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5371,7 +5371,7 @@ void test_cil_gen_constrain_expr_stack_eq_extraexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5401,7 +5401,7 @@ void test_cil_gen_constrain_expr_stack_eq2(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5431,7 +5431,7 @@ void test_cil_gen_constrain_expr_stack_eq2_noexpr1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5461,7 +5461,7 @@ void test_cil_gen_constrain_expr_stack_eq2_expr1inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5491,7 +5491,7 @@ void test_cil_gen_constrain_expr_stack_eq2_noexpr2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5521,7 +5521,7 @@ void test_cil_gen_constrain_expr_stack_eq2_expr2inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5551,7 +5551,7 @@ void test_cil_gen_constrain_expr_stack_eq2_extraexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5581,7 +5581,7 @@ void test_cil_gen_constrain_expr_stack_noteq(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5611,7 +5611,7 @@ void test_cil_gen_constrain_expr_stack_noteq_noexpr1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5641,7 +5641,7 @@ void test_cil_gen_constrain_expr_stack_noteq_expr1inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5671,7 +5671,7 @@ void test_cil_gen_constrain_expr_stack_noteq_noexpr2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5701,7 +5701,7 @@ void test_cil_gen_constrain_expr_stack_noteq_expr2inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5731,12 +5731,12 @@ void test_cil_gen_constrain_expr_stack_noteq_extraexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_not(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "not", "(", "!=", "l2", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "!", "(", "!=", "l2", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5761,7 +5761,7 @@ void test_cil_gen_constrain_expr_stack_not(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5791,7 +5791,7 @@ void test_cil_gen_constrain_expr_stack_not_noexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5821,7 +5821,7 @@ void test_cil_gen_constrain_expr_stack_not_emptyparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5851,12 +5851,12 @@ void test_cil_gen_constrain_expr_stack_not_extraparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_or(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", 
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "||", 
 			"(", "!=", "l1", "l2", ")", "(", "!=", "l1", "h1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5882,7 +5882,7 @@ void test_cil_gen_constrain_expr_stack_or(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -5913,7 +5913,7 @@ void test_cil_gen_constrain_expr_stack_or_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5943,7 +5943,7 @@ void test_cil_gen_constrain_expr_stack_or_noexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -5973,7 +5973,7 @@ void test_cil_gen_constrain_expr_stack_or_emptyfirstparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6003,7 +6003,7 @@ void test_cil_gen_constrain_expr_stack_or_missingsecondexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6033,7 +6033,7 @@ void test_cil_gen_constrain_expr_stack_or_emptysecondparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6063,12 +6063,12 @@ void test_cil_gen_constrain_expr_stack_or_extraexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_and(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", 
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "&&", 
 			"(", "!=", "l1", "l2", ")", "(", "!=", "l1", "h1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6094,7 +6094,7 @@ void test_cil_gen_constrain_expr_stack_and(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -6125,7 +6125,7 @@ void test_cil_gen_constrain_expr_stack_and_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6155,7 +6155,7 @@ void test_cil_gen_constrain_expr_stack_and_noexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6185,7 +6185,7 @@ void test_cil_gen_constrain_expr_stack_and_emptyfirstparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6215,7 +6215,7 @@ void test_cil_gen_constrain_expr_stack_and_missingsecondexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6245,7 +6245,7 @@ void test_cil_gen_constrain_expr_stack_and_emptysecondparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6275,7 +6275,7 @@ void test_cil_gen_constrain_expr_stack_and_extraexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6305,7 +6305,7 @@ void test_cil_gen_constrain_expr_stack_dom(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -6335,7 +6335,7 @@ void test_cil_gen_constrain_expr_stack_dom_noexpr1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6365,7 +6365,7 @@ void test_cil_gen_constrain_expr_stack_dom_expr1inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6395,7 +6395,7 @@ void test_cil_gen_constrain_expr_stack_dom_noexpr2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6425,7 +6425,7 @@ void test_cil_gen_constrain_expr_stack_dom_expr2inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6455,7 +6455,7 @@ void test_cil_gen_constrain_expr_stack_dom_extraexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6485,7 +6485,7 @@ void test_cil_gen_constrain_expr_stack_domby(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -6515,7 +6515,7 @@ void test_cil_gen_constrain_expr_stack_domby_noexpr1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6545,7 +6545,7 @@ void test_cil_gen_constrain_expr_stack_domby_expr1inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6575,7 +6575,7 @@ void test_cil_gen_constrain_expr_stack_domby_noexpr2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6605,7 +6605,7 @@ void test_cil_gen_constrain_expr_stack_domby_expr2inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6635,7 +6635,7 @@ void test_cil_gen_constrain_expr_stack_domby_extraexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6665,7 +6665,7 @@ void test_cil_gen_constrain_expr_stack_incomp(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -6695,7 +6695,7 @@ void test_cil_gen_constrain_expr_stack_incomp_noexpr1_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6725,7 +6725,7 @@ void test_cil_gen_constrain_expr_stack_incomp_expr1inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6755,7 +6755,7 @@ void test_cil_gen_constrain_expr_stack_incomp_noexpr2_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6785,7 +6785,7 @@ void test_cil_gen_constrain_expr_stack_incomp_expr2inparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6815,7 +6815,7 @@ void test_cil_gen_constrain_expr_stack_incomp_extraexpr_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6845,7 +6845,7 @@ void test_cil_gen_constrain_expr_stack_currnull_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6875,7 +6875,7 @@ void test_cil_gen_constrain_expr_stack_stacknull_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, NULL);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6905,7 +6905,7 @@ void test_cil_gen_constrain_expr_stack_operatorinparens_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6935,7 +6935,7 @@ void test_cil_gen_constrain_expr_stack_incorrectcall_neg(CuTest *tc) {
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 	
-	int rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->next->cl_head->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 

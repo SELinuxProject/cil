@@ -1680,10 +1680,10 @@ void cil_destroy_bool(struct cil_bool *boolean)
 	free(boolean);
 }
 
-int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **stack)
+int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_conditional *cond, struct cil_list *stack)
 {
 	int rc = SEPOL_ERR;
-	struct cil_conditional *opcond = NULL;
+	struct cil_conditional *opcond = cond;
 	struct cil_conditional *lcond = NULL;
 	struct cil_conditional *rcond = NULL;
 	struct cil_list_item *opnode = NULL;
@@ -1693,104 +1693,16 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	char * rstr = NULL;
 	int riskeyword = 0;
 
-	if (current == NULL || stack == NULL) {
-		goto not_valid;
-	}
-
-	if (current->cl_head != NULL) {
-		goto not_valid;
-	}
-
-	if (current->parent->cl_head != current) {
-		goto not_valid;
-	}
+	opcond->str = cil_strdup(current->data);
 
 	cil_list_item_init(&opnode);
-
-	rc = cil_conditional_init(&opcond);
-	if (rc != SEPOL_OK) {
-		goto not_valid;
-	}
-
-	if (!strcmp((char*)current->data, CIL_KEY_EQ)) {
-		opcond->flavor = CIL_EQ;
-	} else if (!strcmp((char*)current->data, CIL_KEY_NEQ)) {
-		opcond->flavor = CIL_NEQ;
-	} else if (!strcmp((char*)current->data, CIL_KEY_CONS_NOT)) {
-		opcond->flavor = CIL_CONS_NOT;
-	} else if (!strcmp((char*)current->data, CIL_KEY_CONS_OR)) {
-		opcond->flavor = CIL_CONS_OR;
-	} else if (!strcmp((char*)current->data, CIL_KEY_CONS_AND)) {
-		opcond->flavor = CIL_CONS_AND;
-	} else if (!strcmp((char*)current->data, CIL_KEY_CONS_EQ)) {
-		opcond->flavor = CIL_CONS_EQ;
-	} else if (!strcmp((char*)current->data, CIL_KEY_CONS_DOM)) {
-		opcond->flavor = CIL_CONS_DOM;
-	} else if (!strcmp((char*)current->data, CIL_KEY_CONS_DOMBY)) {
-		opcond->flavor = CIL_CONS_DOMBY;
-	} else if (!strcmp((char*)current->data, CIL_KEY_CONS_INCOMP)) {
-		opcond->flavor = CIL_CONS_INCOMP;
-	} else {
-		rc = SEPOL_ERR;
-		goto not_valid;
-	}
-
-	if (opcond->flavor == CIL_CONS_NOT) {
-		enum cil_syntax not_syntax[] = {
-			SYM_STRING,
-			SYM_LIST,
-			SYM_END
-
-		};
-		int not_syntax_len = sizeof(not_syntax)/sizeof(*not_syntax);
-		rc = __cil_verify_syntax(current, not_syntax, not_syntax_len);
-		if (rc != SEPOL_OK) {
-			goto not_valid;
-		}
-	} else if (opcond->flavor == CIL_CONS_AND || opcond->flavor == CIL_CONS_OR) {
-		enum cil_syntax andor_syntax[] = {
-			SYM_STRING,
-			SYM_LIST,
-			SYM_LIST,
-			SYM_END
-		};
-		int andor_syntax_len = sizeof(andor_syntax)/sizeof(*andor_syntax);
-		rc = __cil_verify_syntax(current, andor_syntax, andor_syntax_len);
-		if (rc != SEPOL_OK) {
-			goto not_valid;
-		}
-	} else {
-		enum cil_syntax other_syntax[] = {
-			SYM_STRING,
-			SYM_STRING,
-			SYM_STRING,
-			SYM_END
-		};
-		int other_syntax_len = sizeof(other_syntax)/sizeof(*other_syntax);
-		rc = __cil_verify_syntax(current, other_syntax, other_syntax_len);
-		if (rc != SEPOL_OK) {
-			goto not_valid;
-		}
-	}
-
-	opcond->str = cil_strdup(current->data);
 
 	opnode->data = opcond;
 	opnode->flavor = CIL_COND;
 
-	rc = cil_list_prepend_item(*stack, opnode);
+	rc = cil_list_prepend_item(stack, opnode);
 	if (rc != SEPOL_OK) {
 		goto not_valid;
-	}
-
-	if (opcond->flavor == CIL_CONS_NOT) {
-		return cil_gen_constrain_expr_stack(current->next->cl_head, flavor, stack);
-	} else if (opcond->flavor == CIL_CONS_OR || opcond->flavor == CIL_CONS_AND) {
-		rc = cil_gen_constrain_expr_stack(current->next->cl_head, flavor, stack);
-		if (rc != SEPOL_OK) {
-			goto not_valid;
-		}
-		return cil_gen_constrain_expr_stack(current->next->next->cl_head, flavor, stack);
 	}
 
 	cil_list_item_init(&lnode);
@@ -1815,11 +1727,11 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	lnode->flavor = CIL_COND;
 	rnode->flavor = CIL_COND;
 
-	rc = cil_list_prepend_item(*stack, rnode);
+	rc = cil_list_prepend_item(stack, rnode);
 	if (rc != SEPOL_OK) {
 		goto not_valid;
 	}
-	rc = cil_list_prepend_item(*stack, lnode);
+	rc = cil_list_prepend_item(stack, lnode);
 	if (rc != SEPOL_OK) {
 		goto not_valid;
 	}
@@ -1835,10 +1747,10 @@ int cil_gen_constrain_expr_stack(struct cil_tree_node *current, enum cil_flavor 
 	}
 
 	if (!strcmp(rstr, CIL_KEY_CONS_T1) || !strcmp(rstr, CIL_KEY_CONS_T2) ||
-        !strcmp(rstr, CIL_KEY_CONS_R1) || !strcmp(rstr, CIL_KEY_CONS_R2) ||
-		!strcmp(rstr, CIL_KEY_CONS_U1) || !strcmp(rstr, CIL_KEY_CONS_U2) ||
-		!strcmp(rstr, CIL_KEY_CONS_L1) || !strcmp(rstr, CIL_KEY_CONS_L2) ||
-		!strcmp(rstr, CIL_KEY_CONS_H1) || !strcmp(rstr, CIL_KEY_CONS_H2)) {
+            !strcmp(rstr, CIL_KEY_CONS_R1) || !strcmp(rstr, CIL_KEY_CONS_R2) ||
+	    !strcmp(rstr, CIL_KEY_CONS_U1) || !strcmp(rstr, CIL_KEY_CONS_U2) ||
+	    !strcmp(rstr, CIL_KEY_CONS_L1) || !strcmp(rstr, CIL_KEY_CONS_L2) ||
+	    !strcmp(rstr, CIL_KEY_CONS_H1) || !strcmp(rstr, CIL_KEY_CONS_H2)) {
 		riskeyword = 1;
 	}
 
@@ -1983,6 +1895,124 @@ not_valid:
 	return rc;
 }
 
+int __cil_verify_expr_oper_flavor(const char *key, struct cil_conditional *cond)
+{
+	int rc = SEPOL_ERR;
+
+	if (!strcmp(key, CIL_KEY_AND)) {
+		cond->flavor = CIL_AND;
+	} else if (!strcmp(key, CIL_KEY_OR)) {
+		cond->flavor = CIL_OR;
+	} else if (!strcmp(key, CIL_KEY_XOR)) {
+		cond->flavor = CIL_XOR;
+	} else if (!strcmp(key, CIL_KEY_NOT)) {
+		cond->flavor = CIL_NOT;
+	} else if (!strcmp(key, CIL_KEY_EQ)) {
+		cond->flavor = CIL_EQ;
+	} else if (!strcmp(key, CIL_KEY_NEQ)) {
+		cond->flavor = CIL_NEQ;
+	} else if (!strcmp(key, CIL_KEY_EQ)) {
+		cond->flavor = CIL_EQ;
+	} else if (!strcmp(key, CIL_KEY_NEQ)) {
+		cond->flavor = CIL_NEQ;
+	} else if (!strcmp(key, CIL_KEY_CONS_EQ)) {
+		cond->flavor = CIL_CONS_EQ;
+	} else if (!strcmp(key, CIL_KEY_CONS_DOM)) {
+		cond->flavor = CIL_CONS_DOM;
+	} else if (!strcmp(key, CIL_KEY_CONS_DOMBY)) {
+		cond->flavor = CIL_CONS_DOMBY;
+	} else if (!strcmp(key, CIL_KEY_CONS_INCOMP)) {
+		cond->flavor = CIL_CONS_INCOMP;
+	} else 	{
+		rc = SEPOL_ERR;
+		goto not_valid;
+	}
+
+	return SEPOL_OK;
+
+not_valid:
+	return rc;
+}
+
+/* Parameters:
+ * node:	current node in tree
+ * nflavor:	current node flavor
+ * eflavor:	current expression item flavor
+ * */
+int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor, enum cil_flavor eflavor)
+{
+	int rc = SEPOL_ERR;
+
+	if (nflavor == CIL_CONSTRAIN || nflavor == CIL_MLSCONSTRAIN) {
+		if (eflavor == CIL_NOT) {
+			enum cil_syntax syntax[] = {
+				SYM_STRING,
+				SYM_LIST,
+				SYM_END
+			};
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
+			if (rc != SEPOL_OK) {
+				goto not_valid;
+			}
+		} else if (eflavor == CIL_AND || eflavor == CIL_OR) {
+			enum cil_syntax syntax[] = {
+				SYM_STRING,
+				SYM_LIST,
+				SYM_LIST,
+				SYM_END
+			};
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
+			if (rc != SEPOL_OK) {
+				goto not_valid;
+			}
+		} else {
+			enum cil_syntax syntax[] = {
+				SYM_STRING,
+				SYM_STRING,
+				SYM_STRING,
+				SYM_END
+			};
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
+			if (rc != SEPOL_OK) {
+				goto not_valid;
+			}
+		}
+	} else {
+		if (eflavor == CIL_NOT) {
+			enum cil_syntax syntax[] = {
+				SYM_STRING,
+				SYM_STRING | SYM_LIST,
+				SYM_END
+			};
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
+			if (rc != SEPOL_OK) {
+				goto not_valid;
+			}
+		} else {
+			enum cil_syntax syntax[] = {
+				SYM_STRING,
+				SYM_STRING | SYM_LIST,
+				SYM_STRING | SYM_LIST,
+				SYM_END
+			};
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
+			if (rc != SEPOL_OK) {
+				goto not_valid;
+			}
+		}
+	}
+
+	return SEPOL_OK;
+
+not_valid:
+	return rc;
+}
+
 int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -1993,6 +2023,11 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 	struct cil_conditional *cond = NULL;
 
 	if (node->data == NULL) {
+		if (node == node->parent->cl_head &&
+			    node->parent->data == NULL) {
+			rc = SEPOL_ERR;
+			goto gen_expr_stack_helper_out;
+		}
 		rc = SEPOL_OK;
 		goto gen_expr_stack_helper_out;
 	}
@@ -2002,74 +2037,46 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 		goto gen_expr_stack_helper_out;
 	}
 
-	cil_list_item_init(&new);
 	if (node == node->parent->cl_head) {
-
-		if (!strcmp((char*)node->data, CIL_KEY_AND)) {
-			cond->flavor = CIL_AND;
-		} else if (!strcmp((char*)node->data, CIL_KEY_OR)) {
-			cond->flavor = CIL_OR;
-		} else if (!strcmp((char*)node->data, CIL_KEY_XOR)) {
-			cond->flavor = CIL_XOR;
-		} else if (!strcmp((char*)node->data, CIL_KEY_NOT)) {
-			cond->flavor = CIL_NOT;
-		} else if (!strcmp((char*)node->data, CIL_KEY_EQ)) {
-			cond->flavor = CIL_EQ;
-		} else if (!strcmp((char*)node->data, CIL_KEY_NEQ)) {
-			cond->flavor = CIL_NEQ;
-		} else {
-			rc = SEPOL_ERR;
+		rc = __cil_verify_expr_oper_flavor(node->data, cond);
+		if (rc != SEPOL_OK) {
 			goto gen_expr_stack_helper_out;
 		}
 
-		if (cond->flavor == CIL_NOT) {
-			enum cil_syntax syntax[] = {
-				SYM_STRING,
-				SYM_STRING | SYM_LIST,
-				SYM_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
-				rc = SEPOL_ERR;
-				goto gen_expr_stack_helper_out;
-			}
-		} else {
-			enum cil_syntax syntax[] = {
-				SYM_STRING,
-				SYM_STRING | SYM_LIST,
-				SYM_STRING | SYM_LIST,
-				SYM_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
-				goto gen_expr_stack_helper_out;
-			}
+		rc = __cil_verify_expr_syntax(node, flavor, cond->flavor);
+		if (rc != SEPOL_OK) {
+			goto gen_expr_stack_helper_out;
 		}
 	} else {
 		cond->flavor = flavor;
 	}
 
-	cond->str = cil_strdup(node->data);
+	if (cond->flavor != CIL_AND && cond->flavor != CIL_OR && cond->flavor != CIL_NOT &&
+		(flavor == CIL_MLSCONSTRAIN  || flavor == CIL_CONSTRAIN)) {
+		rc = __cil_verify_constrain_expr(node, flavor, cond, stack);
+		if (rc != SEPOL_OK) {
+			goto gen_expr_stack_helper_out;
+		}
+		*finished = CIL_TREE_SKIP_ALL;
+	} else {
+		cond->str = cil_strdup(node->data);
 
-	new->data = cond;
-	new->flavor = CIL_COND;
+		cil_list_item_init(&new);
 
-	rc = cil_list_prepend_item(stack, new);
-	if (rc != SEPOL_OK) {
-		goto gen_expr_stack_helper_out;
+		new->data = cond;
+		new->flavor = CIL_COND;
+
+		rc = cil_list_prepend_item(stack, new);
+		if (rc != SEPOL_OK) {
+			goto gen_expr_stack_helper_out;
+		}
 	}
 
 	return SEPOL_OK;
 
 gen_expr_stack_helper_out:
-	if (cond != NULL) {
-		free(cond);
-	}
-	if (new != NULL) {
-		free(new);
-	}
+	free(cond);
+	free(new);
 	return rc;
 }
 
@@ -2087,7 +2094,8 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 	if (current->cl_head == NULL) {
 		struct cil_conditional *cond = NULL;
 		struct cil_list_item *stack_item = NULL;
-		if (current->data == NULL) {
+		if (current->data == NULL || flavor == CIL_CONSTRAIN 
+					  || flavor == CIL_MLSCONSTRAIN) {
 			printf("Invalid expression (line: %d)\n", current->line);
 			rc = SEPOL_ERR;
 			goto gen_expr_stack_out;
@@ -3661,7 +3669,7 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 	cil_list_init(&cons->perm_list_str);
 	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
 
-	rc = cil_gen_constrain_expr_stack(parse_current->next->next->next->cl_head, flavor, &cons->expr);
+	rc = cil_gen_expr_stack(parse_current->next->next->next, flavor, &cons->expr);
 	if (rc != SEPOL_OK) {
 		printf("Failed to build constrain expression tree\n");
 		goto gen_constrain_cleanup;
