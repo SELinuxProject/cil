@@ -54,7 +54,7 @@ void test_min_policy(CuTest *tc) {
 		ex = execl("./secilc", "./secilc", "testing/integration_testing/small.cil", (char*)NULL);
 		if (ex == -1) {
 			printf("Execl error\n");
-			rc = -1;
+			exit(EXIT_FAILURE);	
 		}
 	} else {
 		wait(&status);
@@ -67,6 +67,7 @@ void test_min_policy(CuTest *tc) {
 			rc = -1;
 		}
 	}
-
-	CuAssertIntEquals(tc, 0, 0);
+	
+	CuAssertIntEquals(tc, WIFEXITED(status), 1);
+	CuAssertIntEquals(tc, WEXITSTATUS(status), 0);
 }
