@@ -306,15 +306,14 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_mlsconstrain_neg); 
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_context);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_macro);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_macro_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_namedrange);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_namedrange_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_user_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_role_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_context_type_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_context_low_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_context_high_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_context_low_unnamed_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_context_high_unnamed_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_context_anon_level_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_context);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_context_neg);
 	

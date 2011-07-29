@@ -10,15 +10,7 @@
  *    2. Redistributions in binary form must reproduce the above copyright notice,
  *       this list of conditions and the following disclaimer in the documentation
  *       and/or other materials provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY TRESYS TECHNOLOGY, LLC ``AS IS'' AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL TRESYS TECHNOLOGY, LLC OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
@@ -110,16 +102,15 @@ void test_cil_resolve_constrain_perm_neg(CuTest *);
 void test_cil_resolve_constrain_perm_resolve_neg(CuTest *);
 
 void test_cil_resolve_context(CuTest *);
+void test_cil_resolve_context_macro(CuTest *);
+void test_cil_resolve_context_macro_neg(CuTest *);
 void test_cil_resolve_context_namedrange(CuTest *);
 void test_cil_resolve_context_namedrange_neg(CuTest *);
 void test_cil_resolve_context_macro_namedrange_anon(CuTest *);
 void test_cil_resolve_context_user_neg(CuTest *);
 void test_cil_resolve_context_role_neg(CuTest *);
 void test_cil_resolve_context_type_neg(CuTest *);
-void test_cil_resolve_context_low_neg(CuTest *);
-void test_cil_resolve_context_high_neg(CuTest *);
-void test_cil_resolve_context_low_unnamed_neg(CuTest *);
-void test_cil_resolve_context_high_unnamed_neg(CuTest *);
+void test_cil_resolve_context_anon_level_neg(CuTest *);
 
 void test_cil_resolve_roletrans(CuTest *);
 void test_cil_resolve_roletrans_srcdecl_neg(CuTest *);
