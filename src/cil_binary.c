@@ -801,6 +801,66 @@ roleallow_to_policydb_out:
 	return rc;
 }
 
+int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_filetransition *cil_filetrans = node->data;
+	type_datum_t *sepol_src = NULL;
+	type_datum_t *sepol_exec = NULL;
+	class_datum_t *sepol_proc = NULL;
+	type_datum_t *sepol_dest = NULL;
+	filename_trans_t *sepol_filetrans = cil_malloc(sizeof(*sepol_filetrans));
+	memset(sepol_filetrans, 0, sizeof(filename_trans_t));
+
+	key = ((struct cil_symtab_datum *)cil_filetrans->src)->name;
+	sepol_src = hashtab_search(pdb->p_types.table, key);
+	if (sepol_src == NULL) {
+		rc = SEPOL_ERR;
+		goto filetrans_to_policydb_out;
+	}
+	sepol_filetrans->stype = sepol_src->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_filetrans->exec)->name;
+	sepol_exec = hashtab_search(pdb->p_types.table, key);
+	if (sepol_exec == NULL) {
+		rc = SEPOL_ERR;
+		goto filetrans_to_policydb_out;
+	}
+	sepol_filetrans->ttype = sepol_exec->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_filetrans->proc)->name;
+	sepol_proc = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_proc == NULL) {
+		rc = SEPOL_ERR;
+		goto filetrans_to_policydb_out;
+	}
+	sepol_filetrans->tclass = sepol_proc->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_filetrans->dest)->name;
+	sepol_dest = hashtab_search(pdb->p_types.table, key);
+	if (sepol_dest == NULL) {
+		rc = SEPOL_ERR;
+		goto filetrans_to_policydb_out;
+	}
+	sepol_filetrans->otype = sepol_dest->s.value;
+
+	sepol_filetrans->name = cil_filetrans->path_str;
+
+	if (pdb->filename_trans == NULL) {
+		pdb->filename_trans = sepol_filetrans;
+	} else {
+		pdb->filename_trans->next = sepol_filetrans;
+	}
+
+	return SEPOL_OK;
+
+filetrans_to_policydb_out:
+	free(sepol_filetrans);
+	return rc;
+
+}
+
 int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
@@ -864,6 +924,8 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_ROLEALLOW:
 			rc = cil_roleallow_to_policydb(pdb, node);
 			break;
+		case CIL_FILETRANSITION:
+			rc = cil_filetransition_to_policydb(pdb, node);
 		default:
 			break;
 		}
