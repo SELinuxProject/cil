@@ -2291,16 +2291,18 @@ int cil_gen_condtrue(struct cil_db *db, struct cil_tree_node *parse_current, str
 	ast_node->flavor = CIL_CONDTRUE;
 
 	if (ast_node->parent->flavor == CIL_TUNABLEIF) {
-		if (((struct cil_tunableif*)ast_node->parent->data)->condtrue == NULL) {
-			((struct cil_tunableif*)ast_node->parent->data)->condtrue = ast_node;
+		struct cil_tunableif *tif = ast_node->parent->data;
+		if (tif->condtrue == NULL) {
+			tif->condtrue = ast_node;
 		} else {
 			printf("Duplicate true condition declaration (line: %d)\n", parse_current->line);
 			rc = SEPOL_ERR;
 			goto gen_condtrue_cleanup;
 		}
 	} else if (ast_node->parent->flavor == CIL_BOOLEANIF) {
-		if (((struct cil_booleanif*)ast_node->parent->data)->condtrue == NULL) {
-			((struct cil_booleanif*)ast_node->parent->data)->condtrue = ast_node;
+		struct cil_booleanif *bif = ast_node->parent->data;
+		if (bif->condtrue == NULL) {
+			bif->condtrue = ast_node;
 		} else {
 			printf("Duplicate true condition declaration (line: %d)\n", parse_current->line);
 			rc = SEPOL_ERR;
@@ -2336,16 +2338,18 @@ int cil_gen_condfalse(struct cil_db *db, struct cil_tree_node *parse_current, st
 	ast_node->flavor = CIL_CONDFALSE;
 
 	if (ast_node->parent->flavor == CIL_TUNABLEIF) {
-		if (((struct cil_tunableif*)ast_node->parent->data)->condfalse == NULL) {
-			((struct cil_tunableif*)ast_node->parent->data)->condfalse = ast_node;
+		struct cil_tunableif *tif = ast_node->parent->data;
+		if (tif->condfalse == NULL) {
+			tif->condfalse = ast_node;
 		} else {
 			printf("Duplicate false condition declaration (line: %d)\n", parse_current->line);
 			rc = SEPOL_ERR;
 			goto gen_condfalse_cleanup;
 		}
 	} else if (ast_node->parent->flavor == CIL_BOOLEANIF) {
-		if (((struct cil_booleanif*)ast_node->parent->data)->condfalse == NULL) {
-			((struct cil_booleanif*)ast_node->parent->data)->condfalse = ast_node;
+		struct cil_booleanif *bif = ast_node->parent->data;
+		if (bif->condfalse == NULL) {
+			bif->condfalse = ast_node;
 		} else {
 			printf("Duplicate false condition declaration (line: %d)\n", parse_current->line);
 			rc = SEPOL_ERR;
