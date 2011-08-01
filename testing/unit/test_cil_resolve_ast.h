@@ -96,6 +96,13 @@ void test_cil_resolve_level_sens_neg(CuTest *);
 void test_cil_resolve_level_cat_neg(CuTest *);
 void test_cil_resolve_level_senscat_neg(CuTest *);
 
+void test_cil_resolve_levelrange_namedlvl(CuTest *);
+void test_cil_resolve_levelrange_namedlvl_low_neg(CuTest *);
+void test_cil_resolve_levelrange_namedlvl_high_neg(CuTest *);
+void test_cil_resolve_levelrange_anonlvl(CuTest *);
+void test_cil_resolve_levelrange_anonlvl_low_neg(CuTest *);
+void test_cil_resolve_levelrange_anonlvl_high_neg(CuTest *);
+
 void test_cil_resolve_constrain(CuTest *);
 void test_cil_resolve_constrain_class_neg(CuTest *);
 void test_cil_resolve_constrain_perm_neg(CuTest *);
@@ -459,6 +466,9 @@ void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_level(CuTest *);
 void test_cil_resolve_ast_node_helper_level_neg(CuTest *);
 
+void test_cil_resolve_ast_node_helper_levelrange(CuTest *);
+void test_cil_resolve_ast_node_helper_levelrange_neg(CuTest *);
+
 void test_cil_resolve_ast_node_helper_constrain(CuTest *);
 void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *);
@@ -524,6 +534,9 @@ void test_cil_resolve_ast_node_helper_roletype_type_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_userrole(CuTest *tc);
 void test_cil_resolve_ast_node_helper_userrole_user_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc);
+
+void test_cil_resolve_ast_node_helper_userlevel(CuTest *tc);
+void test_cil_resolve_ast_node_helper_userlevel_neg(CuTest *tc);
 
 void test_cil_resolve_ast_node_helper_userlevel(CuTest *tc);
 void test_cil_resolve_ast_node_helper_userlevel_neg(CuTest *tc);

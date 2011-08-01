@@ -296,6 +296,15 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_level_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_levelrange_namedlvl);
+	SUITE_ADD_TEST(suite, test_cil_resolve_levelrange_namedlvl_low_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_levelrange_namedlvl_high_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_levelrange_anonlvl);
+	SUITE_ADD_TEST(suite, test_cil_resolve_levelrange_anonlvl_low_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_levelrange_anonlvl_high_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_levelrange);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_levelrange_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_constrain);
 	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_class_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_constrain_perm_neg);
