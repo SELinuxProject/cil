@@ -1901,7 +1901,7 @@ void test_cil_copy_node_helper_bool(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_bool_neg(CuTest *tc) {
-	char *line[] = {"(", "bool", "foo", "true", ")", NULL};
+	char *line[] = {"(", "boolean", "foo", "true", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
