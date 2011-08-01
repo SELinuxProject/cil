@@ -1297,12 +1297,6 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_level_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_level);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_level_neg);
-
-	/*SUITE_ADD_TEST(suite, test__cil_build_constrain_tree);
-	SUITE_ADD_TEST(suite, test__cil_build_constrain_tree_unknown_neg);
-	SUITE_ADD_TEST(suite, test__cil_build_constrain_tree_multi_constrain);
-	SUITE_ADD_TEST(suite, test__cil_build_constrain_tree_currnull_neg);
-	SUITE_ADD_TEST(suite, test__cil_build_constrain_tree_exprnull_neg);*/
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain);
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain_neg);
