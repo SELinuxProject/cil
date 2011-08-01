@@ -1931,6 +1931,27 @@ void test_cil_resolve_typebounds(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_typebounds_repeatbind_neg(CuTest *tc) {
+	char *line[] = {"(", "type", "type_a", ")",
+			"(", "type", "type_b", ")",
+			"(", "typebounds", "type_a", "type_b", ")",
+			"(", "typebounds", "type_a", "type_b", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_typebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
+	int rc2 = cil_resolve_typebounds(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc2);
+}
+
 void test_cil_resolve_typebounds_type1_neg(CuTest *tc) {
 	char *line[] = {"(", "type", "type_b", ")",
 			"(", "typebounds", "type_a", "type_b", ")", NULL};

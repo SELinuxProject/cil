@@ -141,6 +141,7 @@ void test_cil_resolve_typealias(CuTest *);
 void test_cil_resolve_typealias_neg(CuTest *);
 
 void test_cil_resolve_typebounds(CuTest *);
+void test_cil_resolve_typebounds_repeatbind_neg(CuTest *);
 void test_cil_resolve_typebounds_type1_neg(CuTest *);
 void test_cil_resolve_typebounds_type2_neg(CuTest *);
 

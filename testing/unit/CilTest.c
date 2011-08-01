@@ -179,6 +179,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typealias_notype_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_typebounds);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typebounds_repeatbind_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typebounds_type1_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typebounds_type2_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typebounds);
