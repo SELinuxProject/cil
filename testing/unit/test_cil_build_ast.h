@@ -620,6 +620,16 @@ void test_cil_gen_level_dbnull_neg(CuTest *tc);
 void test_cil_gen_level_currnull_neg(CuTest *tc);
 void test_cil_gen_level_astnull_neg(CuTest *tc);
 
+void test_cil_gen_levelrange(CuTest *tc);
+void test_cil_gen_levelrange_rangeinvalid_neg(CuTest *tc);
+void test_cil_gen_levelrange_namenull_neg(CuTest *tc);
+void test_cil_gen_levelrange_rangenull_neg(CuTest *tc);
+void test_cil_gen_levelrange_rangeempty_neg(CuTest *tc);
+void test_cil_gen_levelrange_extra_neg(CuTest *tc);
+void test_cil_gen_levelrange_dbnull_neg(CuTest *tc);
+void test_cil_gen_levelrange_currnull_neg(CuTest *tc);
+void test_cil_gen_levelrange_astnull_neg(CuTest *tc);
+
 void test_cil_gen_constrain(CuTest *tc);
 void test_cil_gen_constrain_neg(CuTest *tc);
 void test_cil_gen_constrain_classset_neg(CuTest *tc);
@@ -1036,6 +1046,9 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_level(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc);
+
+void test_cil_build_ast_node_helper_gen_levelrange(CuTest *tc); 
+void test_cil_build_ast_node_helper_gen_levelrange_neg(CuTest *tc);
 
 void test_cil_build_ast_node_helper_gen_constrain(CuTest *tc); 
 void test_cil_build_ast_node_helper_gen_constrain_neg(CuTest *tc);
