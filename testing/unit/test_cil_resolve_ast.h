@@ -384,6 +384,14 @@ void test_cil_resolve_userlevel_level_anon_neg(CuTest *tc);
 void test_cil_resolve_userlevel_user_neg(CuTest *tc);
 void test_cil_resolve_userlevel_level_neg(CuTest *tc);
 
+void test_cil_resolve_userrange(CuTest *tc);
+void test_cil_resolve_userrange_macro(CuTest *tc);
+void test_cil_resolve_userrange_macro_neg(CuTest *tc);
+void test_cil_resolve_userrange_range_anon(CuTest *tc);
+void test_cil_resolve_userrange_range_anon_neg(CuTest *tc);
+void test_cil_resolve_userrange_user_neg(CuTest *tc);
+void test_cil_resolve_userrange_range_neg(CuTest *tc);
+
 void test_cil_disable_children_helper_optional_enabled(CuTest *tc);
 void test_cil_disable_children_helper_optional_disabled(CuTest *tc);
 void test_cil_disable_children_helper_block(CuTest *tc);
@@ -519,6 +527,9 @@ void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc);
 
 void test_cil_resolve_ast_node_helper_userlevel(CuTest *tc);
 void test_cil_resolve_ast_node_helper_userlevel_neg(CuTest *tc);
+
+void test_cil_resolve_ast_node_helper_userrange(CuTest *tc);
+void test_cil_resolve_ast_node_helper_userrange_neg(CuTest *tc);
 
 void test_cil_resolve_ast_node_helper_classcommon(CuTest *tc);
 void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc);

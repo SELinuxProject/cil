@@ -6022,6 +6022,169 @@ void test_cil_resolve_userlevel_level_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
+void test_cil_resolve_userrange(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "levelrange", "range", "(", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
+			"(", "userrange", "foo_u", "range", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_userrange(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_userrange_macro(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "macro", "mm", "(", "(", "levelrange", "range", ")", ")",
+				"(", "userrange", "foo_u", "range", ")", ")",
+			"(", "call", "mm", "(", "(", "low", "high", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc2 = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
+	int rc3 = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_userrange(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->cl_head, (struct cil_call*)test_db->ast->root->cl_head->next->next->next->next->next->next->next->data);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
+	CuAssertIntEquals(tc, SEPOL_OK, rc3);
+}
+
+void test_cil_resolve_userrange_macro_neg(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "macro", "mm", "(", "(", "levelrange", "range", ")", ")",
+				"(", "userrange", "foo_u", "range", ")", ")",
+			"(", "call", "mm", "(", "(", "DNE", "high", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc2 = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
+	int rc3 = cil_resolve_call2(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->next, NULL);
+	int rc = cil_resolve_userrange(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next->cl_head, (struct cil_call*)test_db->ast->root->cl_head->next->next->next->next->next->next->next->data);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
+	CuAssertIntEquals(tc, SEPOL_OK, rc3);
+}
+
+void test_cil_resolve_userrange_range_anon(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "userrange", "foo_u", "(", "low", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_userrange(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_userrange_range_anon_neg(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
+			"(", "userrange", "foo_u", "(", "DNE", "high", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_userrange(test_db, test_db->ast->root->cl_head->next->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_userrange_user_neg(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "levelrange", "range", "(", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
+			"(", "userrange", "DNE", "range", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_userrange(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_userrange_range_neg(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "levelrange", "range", "(", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
+			"(", "userrange", "foo_u", "DNE", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_senscat(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_userrange(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 void test_cil_disable_children_helper_optional_enabled(CuTest *tc) {
 	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
 
@@ -8309,6 +8472,66 @@ void test_cil_resolve_ast_node_helper_userlevel_neg(CuTest *tc) {
 			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "userlevel", "DNE", "low", ")", NULL};
+		
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	uint32_t finished = 0;
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_ast_node_helper_userrange(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "levelrange", "range", "(", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
+			"(", "userrange", "foo_u", "range", ")", NULL};
+		
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+	
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	uint32_t finished = 0;
+
+	uint32_t pass = 7;
+	uint32_t changed = 0;
+	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next, &finished, extra_args);
+	CuAssertIntEquals(tc, 0, finished);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_ast_node_helper_userrange_neg(CuTest *tc) {
+	char *line[] = {"(", "user",  "foo_u", ")",
+			"(", "category", "c0", ")",
+			"(", "sensitivity", "s0", ")",
+			"(", "sensitivitycategory", "s0", "(", "c0", ")", ")",
+			"(", "levelrange", "range", "(", "(", "s0", "(", "c0", ")", ")", "(", "s0", "(", "c0", ")", ")", ")", ")",
+			"(", "userrange", "DNE", "range", ")", NULL};
 		
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

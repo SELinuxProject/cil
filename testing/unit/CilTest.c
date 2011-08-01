@@ -579,6 +579,16 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userlevel);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userlevel_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrange);	
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrange_macro);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrange_macro_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrange_range_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrange_range_anon_neg);	
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrange_user_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_userrange_range_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userrange);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_userrange_neg); 
+	
 	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_optional_enabled);
 	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_optional_disabled);
 	SUITE_ADD_TEST(suite, test_cil_disable_children_helper_block);
