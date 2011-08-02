@@ -691,7 +691,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 			rc = SEPOL_ERR;
 			goto avrule_to_avtab_out;
 		}
-		new_avtab_datum->data ^= 1 << (sepol_perm->s.value - 1);
+		new_avtab_datum->data |= 1 << (sepol_perm->s.value - 1);
 
 		curr_perm = curr_perm->next;
 	}
