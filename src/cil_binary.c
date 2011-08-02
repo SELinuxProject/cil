@@ -34,6 +34,7 @@
 #include <sepol/policydb/policydb.h>
 #include <sepol/policydb/polcaps.h>
 #include <sepol/policydb/conditional.h>
+#include <sepol/policydb/constraint.h>
 
 #include "cil.h"
 #include "cil_mem.h"
@@ -1073,6 +1074,257 @@ filetrans_to_policydb_out:
 
 }
 
+int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
+					const struct cil_list *cil_expr,
+					constraint_expr_t **sepol_expr)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	uint32_t value = 0;
+	struct cil_list_item *curr = cil_expr->head;
+	struct cil_conditional *rnode = NULL;
+	struct cil_conditional *lnode = NULL;
+	struct cil_user *cil_user = NULL;
+	struct cil_user *cil_role = NULL;
+	struct cil_type *cil_type = NULL;
+	constraint_expr_t *new_expr = NULL;
+	constraint_expr_t *new_expr_node = NULL;
+	constraint_expr_t *curr_expr = NULL;
+	user_datum_t *sepol_user = NULL;
+	role_datum_t *sepol_role = NULL;
+	type_datum_t *sepol_type = NULL;
+
+	while (curr != NULL) {
+		struct cil_conditional *cond = curr->data;
+
+		if (cond->flavor == CIL_NOT || cond->flavor == CIL_AND
+		|| cond->flavor == CIL_OR || cond->flavor == CIL_EQ
+		|| cond->flavor == CIL_NEQ || cond->flavor == CIL_CONS_DOM
+		|| cond->flavor == CIL_CONS_DOMBY || cond->flavor == CIL_CONS_INCOMP) {
+
+			new_expr_node = cil_malloc(sizeof(*new_expr_node));
+			rc = constraint_expr_init(new_expr_node);
+			if (rc != SEPOL_OK) {
+				goto cleanup;
+			}
+
+			if (new_expr == NULL) {
+				new_expr = new_expr_node;
+			} else {
+				curr_expr->next = new_expr_node;
+			}
+			curr_expr = new_expr_node;
+
+			switch (cond->flavor) {
+			case CIL_NOT:
+				curr_expr->expr_type = CEXPR_NOT;
+				break;
+			case CIL_AND:
+				curr_expr->expr_type = CEXPR_AND;
+				break;
+			case CIL_OR:
+				curr_expr->expr_type = CEXPR_OR;
+				break;
+			case CIL_EQ:
+				curr_expr->op = CEXPR_EQ;
+				break;
+			case CIL_NEQ:
+				curr_expr->op = CEXPR_NEQ;
+				break;
+			case CIL_CONS_DOM:
+				curr_expr->op = CEXPR_DOM;
+				break;
+			case CIL_CONS_DOMBY:
+				curr_expr->op = CEXPR_DOMBY;
+				break;
+			case CIL_CONS_INCOMP:
+				curr_expr->op = CEXPR_INCOMP;
+				break;
+			default:
+				break;
+			}
+
+			switch (lnode->flavor) {
+			case CIL_CONS_U1:
+				curr_expr->attr = CEXPR_USER;
+				break;
+			case CIL_CONS_U2:
+				curr_expr->attr = CEXPR_USER | CEXPR_TARGET;
+				break;
+			case CIL_CONS_R1:
+				curr_expr->attr = CEXPR_ROLE;
+				break;
+			case CIL_CONS_R2:
+				curr_expr->attr = CEXPR_ROLE | CEXPR_TARGET;
+				break;
+			case CIL_CONS_T1:
+				curr_expr->attr = CEXPR_TYPE;
+				break;
+			case CIL_CONS_T2:
+				curr_expr->attr = CEXPR_TYPE | CEXPR_TARGET;
+				break;
+			case CIL_CONS_L1:
+				if (rnode->flavor == CIL_CONS_L2) {
+					curr_expr->attr = CEXPR_L1L2;
+				} else if (rnode->flavor == CIL_CONS_H1) {
+					curr_expr->attr = CEXPR_L1H1;
+				} else if (rnode->flavor == CIL_CONS_H2) {
+					curr_expr->attr = CEXPR_L1H2;
+				}
+				break;
+			case CIL_CONS_L2:
+				if (rnode->flavor == CIL_CONS_H2) {
+					curr_expr->attr = CEXPR_L2H2;
+				}
+				break;
+			case CIL_CONS_H1:
+				if (rnode->flavor == CIL_CONS_L2) {
+					curr_expr->attr = CEXPR_H1L2;
+				} else if (rnode->flavor == CIL_CONS_H2) {
+					curr_expr->attr = CEXPR_H1H2;
+				}
+				break;
+			default:
+				break;
+			}
+
+			switch (rnode->flavor) {
+			case CIL_USER:
+				cil_user = rnode->data;
+				key = cil_user->datum.name;
+				sepol_user = hashtab_search(pdb->p_users.table, key);
+				if (sepol_user == NULL) {
+					rc = SEPOL_ERR;
+					goto cleanup;
+				}
+				value = sepol_user->s.value;
+				if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
+					rc = SEPOL_ERR;
+					goto cleanup;
+				}
+				break;
+			case CIL_ROLE:
+				cil_role = rnode->data;
+				key = cil_role->datum.name;
+				sepol_role = hashtab_search(pdb->p_roles.table, key);
+				if (sepol_role == NULL) {
+					rc = SEPOL_ERR;
+					goto cleanup;
+				}
+				value = sepol_role->s.value;
+				if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
+					rc = SEPOL_ERR;
+					goto cleanup;
+				}
+				break;
+			case CIL_TYPE:
+				cil_type = rnode->data;
+				key = cil_type->datum.name;
+				sepol_type = hashtab_search(pdb->p_types.table, key);
+				if (sepol_type == NULL) {
+				rc = SEPOL_ERR;
+					goto cleanup;
+				}
+				value = sepol_type->s.value;
+				type_set_t *type_set = curr_expr->type_names;
+				if (ebitmap_set_bit(&type_set->negset, value - 1, 1)) {
+					rc = SEPOL_ERR;
+					goto cleanup;
+				}
+				if (ebitmap_set_bit(&type_set->types, value - 1, 1)) {
+					rc = SEPOL_ERR;
+					goto cleanup;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (rnode != NULL) {
+			lnode = rnode;
+		}
+		rnode = cond;
+
+		curr = curr->next;
+	}
+
+	*sepol_expr = new_expr;
+
+	return SEPOL_OK;
+
+cleanup:
+	while (new_expr != NULL) {
+		curr_expr = new_expr->next;
+		constraint_expr_destroy(new_expr);
+		new_expr = curr_expr;
+	}
+	return rc;
+}
+
+int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_constrain *cil_constrain = node->data;
+	struct cil_list *classes = cil_constrain->class_list;
+	struct cil_list *perms = cil_constrain->perm_list;
+	struct cil_list *expr = cil_constrain->expr;
+	struct cil_list_item *curr_class = classes->head;
+	struct cil_list_item *curr_perm = perms->head;
+	class_datum_t *sepol_class = NULL;
+	perm_datum_t *sepol_perm = NULL;
+	constraint_node_t *sepol_constrain = NULL;
+	constraint_expr_t *sepol_expr = NULL;
+
+	while (curr_class != NULL) {
+		struct cil_class *class = curr_class->data;
+		key = class->datum.name;
+		sepol_class = hashtab_search(pdb->p_classes.table, key);
+		if (sepol_class == NULL) {
+			rc = SEPOL_ERR;
+			goto constrain_to_policydb_out;
+		}
+
+		sepol_constrain = cil_malloc(sizeof(*sepol_constrain));
+		memset(sepol_constrain, 0, sizeof(constraint_node_t));
+
+		while (curr_perm != NULL) {
+			struct cil_perm *perm = curr_perm->data;
+			key = perm->datum.name;
+			sepol_perm = hashtab_search(sepol_class->permissions.table, key);
+			if (sepol_perm == NULL) {
+				rc = SEPOL_ERR;
+				goto constrain_to_policydb_out;
+			}
+			sepol_constrain->permissions |= 1 << (sepol_perm->s.value - 1);
+
+			curr_perm = curr_perm->next;
+		}
+
+		rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
+		if (rc != SEPOL_OK) {
+			goto constrain_to_policydb_out;
+		}
+		sepol_constrain->expr = sepol_expr;
+
+		if (sepol_class->constraints == NULL) {
+			sepol_class->constraints = sepol_constrain;
+		} else {
+			sepol_class->constraints->next = sepol_constrain;
+		}
+
+		sepol_expr = NULL;
+		curr_perm = perms->head;
+		curr_class = curr_class->next;
+	}
+
+	return SEPOL_OK;
+
+constrain_to_policydb_out:
+	return rc;
+}
+
 int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
@@ -1141,6 +1393,10 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_BOOLEANIF:
 			rc = cil_booleanif_to_policydb(pdb, node);
+			break;
+		case CIL_CONSTRAIN:
+		case CIL_MLSCONSTRAIN:
+			rc = cil_constrain_to_policydb(pdb, node);
 			break;
 		default:
 			break;
