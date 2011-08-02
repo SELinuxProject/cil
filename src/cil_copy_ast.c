@@ -167,14 +167,17 @@ int cil_copy_permset(struct cil_tree_node *orig, struct cil_tree_node *copy, sym
 {
 	struct cil_permset *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = ((struct cil_symtab_datum*)orig->data)->name;
+	char *key = NULL;
 
 	cil_permset_init(&new);
 
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_permset: cil_symtab_insert failed, rc: %d\n", rc);
-		goto exit;
+	if (((struct cil_symtab_datum*)orig->data)->name != NULL) {
+		key = ((struct cil_symtab_datum*)orig->data)->name;
+		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+		if (rc != SEPOL_OK) {
+			printf("cil_copy_permset: cil_symtab_insert failed, rc: %d\n", rc);
+			goto exit;
+		}
 	}
 
 	if (((struct cil_permset*)orig->data)->perms_list_str != NULL) {
@@ -221,9 +224,58 @@ exit:
 	return rc;
 }
 
+void cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new)
+{
+	int rc = SEPOL_ERR;
+
+	new->class_str = cil_strdup(orig->class_str);
+	new->permset_str = cil_strdup(orig->permset_str);
+
+	if (orig->permset != NULL) {
+		cil_permset_init(&new->permset);
+
+		rc = cil_copy_list(orig->permset->perms_list_str, &new->permset->perms_list_str);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		
+	}
+
+exit:
+	return;
+}
+
+int cil_copy_classpermset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_classpermset *new = NULL;
+	char *key = NULL;
+	int rc = SEPOL_ERR;
+
+	cil_classpermset_init(&new);
+
+	if (((struct cil_symtab_datum*)orig->data)->name != NULL) {
+		key = ((struct cil_symtab_datum*)orig->data)->name;
+		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+		if (rc != SEPOL_OK) {
+			printf("cil_copy_classpermset: cil_symtab_insert failed, rc: %d\n", rc);
+			goto copy_classpermset_out;
+		}
+	}
+
+	cil_copy_fill_classpermset((struct cil_classpermset*)orig->data, new);
+
+	copy->data = new;
+
+	return SEPOL_OK;
+
+copy_classpermset_out:
+	cil_destroy_classpermset(new);
+	return rc;
+}
+
 int cil_copy_common(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
 {
-	struct cil_common *new;
+	struct cil_common *new = NULL;
 	int rc = SEPOL_ERR;
 
 	cil_common_init(&new);
@@ -1789,6 +1841,9 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_CLASS:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CLASSES, &cil_copy_class);
+		break;
+	case CIL_CLASSPERMSET:
+		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CLASSPERMSETS, &cil_copy_classpermset);
 		break;
 	case CIL_COMMON:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_COMMONS, &cil_copy_common);

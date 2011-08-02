@@ -270,6 +270,53 @@ void cil_tree_print_catset(struct cil_catset *catset)
 	printf(" )");
 }
 
+void cil_tree_print_permset(struct cil_permset *permset)
+{
+	struct cil_list_item *curr = NULL;
+
+	if (permset == NULL) {
+		return;
+	}
+
+	if (permset->perms_list_str != NULL) {
+		curr = permset->perms_list_str->head;
+
+		printf(" (");
+
+		while (curr != NULL) {
+			printf(" %s", (char*)curr->data);
+			curr = curr->next;
+		}
+
+		printf(" )\n");
+	}
+}
+
+void cil_tree_print_classpermset(struct cil_classpermset *csp)
+{
+	if (csp == NULL) {
+		return;
+	}
+
+	if (csp->class == NULL) {
+		printf(" class: %s", csp->class_str);
+	} else {
+		if (csp->flavor == CIL_CLASS) {
+			printf(" class: %s", ((struct cil_class*)csp->class)->datum.name);
+		}
+		// else check for classmap
+	}
+
+	printf(", permset:");
+	if (csp->permset != NULL) {
+		cil_tree_print_permset(csp->permset);
+	} else {
+		printf(" %s", csp->permset_str);
+	}
+
+	printf("\n");
+}
+
 void cil_tree_print_level(struct cil_level *level)
 {
 	if (level->sens != NULL) {
@@ -666,15 +713,15 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_permset *permset = node->data;
 				printf("PERMSET: %s", permset->datum.name);
 
-				if (permset->perms_list_str != NULL) {
-					printf(" (");
-					struct cil_list_item *item = permset->perms_list_str->head;
-					while(item != NULL) {
-						printf(" %s", (char*)item->data);
-						item = item->next;
-					}
-					printf(" )\n");
-				}
+				cil_tree_print_permset(permset);
+
+				return;
+			}
+			case CIL_CLASSPERMSET: {
+				struct cil_classpermset *csp = node->data;
+				printf("CLASSPERMSET: %s", csp->datum.name);
+
+				cil_tree_print_classpermset(csp);
 
 				return;
 			}

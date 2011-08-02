@@ -115,6 +115,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_PERMSET:
 		cil_destroy_permset(*data);
 		break;
+	case CIL_CLASSPERMSET:
+		cil_destroy_classpermset(*data);
+		break;
 	case CIL_COMMON:
 		cil_destroy_common(*data);
 		break;
@@ -1027,6 +1030,18 @@ void cil_permset_init(struct cil_permset **permset)
 
 	cil_symtab_datum_init(&(*permset)->datum);
 	(*permset)->perms_list_str = NULL;
+}
+
+void cil_classpermset_init(struct cil_classpermset **cps)
+{
+	*cps = cil_malloc(sizeof(**cps));
+
+	cil_symtab_datum_init(&(*cps)->datum);
+	(*cps)->class_str = NULL;
+	(*cps)->class = NULL;
+	(*cps)->flavor = CIL_AST_STR;
+	(*cps)->permset_str = NULL;
+	(*cps)->permset = NULL;
 }
 
 void cil_user_init(struct cil_user **user)

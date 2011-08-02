@@ -65,6 +65,8 @@ void cil_tree_node_destroy(struct cil_tree_node **node);
 int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args), int (*first_child)(struct cil_tree_node *node, void *extra_args), int (*last_child)(struct cil_tree_node *node, void *extra_args), void *extra_args);
 
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
+void cil_tree_print_permset(struct cil_permset *permset);
+void cil_tree_print_classpermset(struct cil_classpermset *csp);
 void cil_tree_print_level(struct cil_level *level);
 void cil_tree_print_levelrange(struct cil_levelrange *lvlrange);
 void cil_tree_print_context(struct cil_context *context);

@@ -392,6 +392,37 @@ exit:
 	return rc;
 }
 
+int cil_fill_permset(struct cil_tree_node *start_perm, struct cil_permset *permset)
+{
+	enum cil_syntax syntax[] = {
+		SYM_N_STRINGS
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	if (start_perm == NULL || permset == NULL) {
+		goto fill_permset_cleanup;
+	}
+
+	rc = __cil_verify_syntax(start_perm, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid permissionset declaration (line: %d)\n", start_perm->line);
+		goto fill_permset_cleanup;
+	}
+
+	cil_list_init(&permset->perms_list_str);
+	rc = cil_parse_to_list(start_perm, permset->perms_list_str, CIL_AST_STR);
+	if (rc != SEPOL_OK) {
+		printf("Failed to parse perms\n");
+		goto fill_permset_cleanup;
+	}
+
+	return SEPOL_OK;
+
+fill_permset_cleanup:
+	return rc;
+}
+
 int cil_gen_permset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -425,10 +456,9 @@ int cil_gen_permset(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	cil_list_init(&permset->perms_list_str);
-	rc = cil_parse_to_list(parse_current->next->next->cl_head, permset->perms_list_str, CIL_AST_STR);
+	rc = cil_fill_permset(parse_current->next->next->cl_head, permset);
 	if (rc != SEPOL_OK) {
-		printf("Failed to parse perms\n");
+		printf("Failed to fill permissionset, rc: %d\n", rc);
 		goto exit;
 	}
 
@@ -448,8 +478,124 @@ void cil_destroy_permset(struct cil_permset *permset)
 	}
 
 	cil_symtab_datum_destroy(permset->datum);
-	cil_list_destroy(&permset->perms_list_str, 1);
+
+	if (permset->perms_list_str != NULL) {
+		cil_list_destroy(&permset->perms_list_str, 1);
+	}
+
+	if (permset->perms_list != NULL) {
+		cil_list_destroy(&permset->perms_list, 0);
+	}
 	free(permset);
+}
+
+/* fills in classpermset starting with class */
+int cil_fill_classpermset(struct cil_tree_node *class_node, struct cil_classpermset *cps)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+
+	if (class_node == NULL || cps == NULL) {
+		goto fill_classpermset_cleanup;
+	}
+
+	rc = __cil_verify_syntax(class_node, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid classpermissionset (line: %d)\n", class_node->line);
+		goto fill_classpermset_cleanup;
+	}
+
+	cps->class_str = cil_strdup(class_node->data);
+
+	if (class_node->next->cl_head == NULL) {
+		cps->permset_str = cil_strdup(class_node->next->data);
+	} else {
+		cil_permset_init(&cps->permset);
+
+		rc = cil_fill_permset(class_node->next->cl_head, cps->permset);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill permissionset\n");
+			goto fill_classpermset_cleanup;
+		}
+	}
+
+	return SEPOL_OK;
+
+fill_classpermset_cleanup:
+	return rc;
+}
+
+int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key = NULL;
+	struct cil_classpermset *cps = NULL;
+	int rc = SEPOL_OK;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_classpermset_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid classpermissionset declaration (Line: %d)\n", parse_current->line);
+		goto gen_classpermset_cleanup;
+	}
+
+	cil_classpermset_init(&cps);
+
+	key = parse_current->next->data;
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cps, (hashtab_key_t)key, CIL_SYM_CLASSPERMSETS, CIL_CLASSPERMSET);
+	if (rc != SEPOL_OK) {
+		goto gen_classpermset_cleanup;
+	}
+
+	rc = cil_fill_classpermset(parse_current->next->next->cl_head, cps);
+	if (rc != SEPOL_OK) {
+		printf("Failed to fill classpermissionset, rc: %d\n", rc);
+		goto gen_classpermset_cleanup;
+	}
+
+	return SEPOL_OK;
+
+gen_classpermset_cleanup:
+	if (cps != NULL) {
+		cil_destroy_classpermset(cps);
+	}
+	return rc;
+}
+
+void cil_destroy_classpermset(struct cil_classpermset *cps)
+{
+	if (cps == NULL) {
+		return;
+	}
+
+	cil_symtab_datum_destroy(cps->datum);
+
+	if (cps->class_str != NULL) {
+		free(cps->class_str);
+	}
+
+	if (cps->permset_str != NULL) {
+		free(cps->permset_str);
+	}
+
+	if (cps->permset != NULL) {
+		cil_destroy_permset(cps->permset);
+	}
 }
 
 // TODO try to merge some of this with cil_gen_class (helper function for both)
@@ -4735,6 +4881,8 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			param->flavor = CIL_IPADDR;
 		} else if (!strcmp(kind, CIL_KEY_PERMSET)) {
 			param->flavor = CIL_PERMSET;
+		} else if (!strcmp(kind, CIL_KEY_CLASSPERMSET)) {
+			param->flavor = CIL_CLASSPERMSET;
 		} else {
 			printf("Invalid macro declaration (line: %d)\n", parse_current->line);
 			cil_destroy_param(param);
@@ -5350,6 +5498,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_permset(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_permset failed, rc: %d\n", rc);
+			goto exit;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSPERMSET)) {
+		rc = cil_gen_classpermset(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_classpermset failed, rc: %d\n", rc);
 			goto exit;
 		}
 		*finished = CIL_TREE_SKIP_NEXT;
