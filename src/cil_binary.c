@@ -1322,6 +1322,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	return SEPOL_OK;
 
 constrain_to_policydb_out:
+	free(sepol_constrain);
 	return rc;
 }
 
