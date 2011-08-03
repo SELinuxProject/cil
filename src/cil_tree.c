@@ -210,13 +210,66 @@ void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 	}
 }
 
+void cil_tree_print_catrange(struct cil_catrange *catrange)
+{
+	printf(" (");
+
+	if (catrange->cat_low != NULL) {
+		printf(" %s", catrange->cat_low->datum.name);
+	} else {
+		printf(" %s", catrange->cat_low_str);
+	}
+	
+	if (catrange->cat_high != NULL) {
+		printf(" %s", catrange->cat_high->datum.name);
+	} else {
+		printf(" %s", catrange->cat_high_str);
+	}
+
+	printf(" )");
+
+}
+
+void cil_tree_print_catset(struct cil_catset *catset)
+{
+	struct cil_list_item *cat_item;
+
+	printf(" (");
+	if (catset->cat_list != NULL) {
+		for (cat_item = catset->cat_list->head; cat_item != NULL; cat_item = cat_item->next) {
+			switch (cat_item->flavor) {
+			case CIL_CATRANGE:
+				cil_tree_print_catrange(cat_item->data);
+				break;
+			case CIL_CAT: {
+				struct cil_cat *cat = cat_item->data;
+				printf(" %s", cat->datum.name);
+				break;
+			}
+			default:
+				break;
+			}
+		}
+	} else {
+		for (cat_item = catset->cat_list_str->head; cat_item != NULL; cat_item = cat_item->next) {
+			switch (cat_item->flavor) {
+			case CIL_CATRANGE:
+				cil_tree_print_catrange(cat_item->data);
+				break;
+			case CIL_AST_STR: {
+				printf(" %s", (char *)cat_item->data);
+				break;
+			}
+			default:
+				break;
+			}
+		}
+	}
+	printf(" )");
+}
+
 void cil_tree_print_level(struct cil_level *level)
 {
-	struct cil_list_item *cat = NULL;
-	struct cil_list_item *parent = NULL;
-	struct cil_list *tmp = NULL;
-	uint16_t str_list = CIL_FALSE;
-
 	if (level->sens != NULL) {
 		printf(" %s", level->sens->datum.name);
 	} else if (level->sens_str != NULL) {
@@ -224,46 +277,9 @@ void cil_tree_print_level(struct cil_level *level)
 	}
 
 	if (level->catset != NULL) {
-		tmp = level->catset->cat_list;	
-	} else if (level->catset_str != NULL) {
-		printf(" %s", level->catset_str);
+		cil_tree_print_catset(level->catset);
 	} else {
-		if (level->cat_list != NULL) {
-			tmp = level->cat_list;
-		} else if (level->cat_list_str != NULL) {
-			tmp = level->cat_list_str;
-			str_list = CIL_TRUE;
-		}
-	}
-
-	if (tmp != NULL) {
-		printf(" (");
-			cat = tmp->head;
-			while (cat != NULL) {
-				if (cat->flavor == CIL_LIST) {
-					parent = cat;
-					cat = ((struct cil_list *)cat->data)->head;
-					printf(" (");
-					while (cat != NULL) {
-						if (str_list == CIL_TRUE) {
-							printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-						} else {
-							printf(" %s", (char*)cat->data);
-						}
-						cat = cat->next;
-					}
-					printf(" )");
-					cat = parent;
-				} else {
-					if (str_list != CIL_TRUE) {
-						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
-					} else {
-						printf(" %s", (char*)cat->data);
-					}
-				}
-				cat = cat->next;
-			}
-			printf(" )");
+		printf(" %s", level->catset_str);
 	}
 
 	return;
@@ -1017,8 +1033,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_SENSCAT: {
 				struct cil_senscat *senscat = node->data;
-				struct cil_list_item *cat = NULL;
-				struct cil_list_item *parent = NULL;
 
 				printf("SENSCAT: sens:");
 
@@ -1028,37 +1042,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf(" [processed]");
 				}
 
-				printf( "(");
-
-				if (senscat->cat_list_str != NULL) {
-					cat = senscat->cat_list_str->head;
-					while (cat != NULL) {
-						if (cat->flavor == CIL_LIST) {
-							parent = cat;
-							cat = ((struct cil_list*)cat->data)->head;
-							printf(" (");
-							while (cat != NULL) {
-								printf(" %s", (char*)cat->data);
-								cat = cat->next;
-							}
-							printf(" )");
-							cat = parent;
-						} else {
-							printf(" %s", (char*)cat->data);
-						}
-						cat = cat->next;
-					}
-				} else if (senscat->catset != NULL) {
-					cat = senscat->catset->cat_list->head;
-					while (cat != NULL) {
-						printf(" %s", ((struct cil_catset*)cat->data)->datum.name);
-						cat = cat->next;
-					}
-				} else if (senscat->catset_str != NULL) {
-					printf (" %s", senscat->catset_str);
+				if (senscat->catset != NULL) {
+					cil_tree_print_catset(senscat->catset);
 				} else {
-					printf("\n");
-					return;
+					printf(" %s", senscat->catset_str);
 				}
 
 				printf(" )\n");

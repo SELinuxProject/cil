@@ -691,43 +691,41 @@ int cil_sens_to_policy(FILE **file_arr, struct cil_list *sens)
 	return SEPOL_OK;
 }
 
-void cil_level_to_policy(FILE **file_arr, uint32_t file_index, struct cil_level *level)
+void cil_catrange_to_policy(FILE **file_arr, uint32_t file_index, struct cil_catrange *catrange)
 {
-	struct cil_list_item *cat = NULL;
-	struct cil_list_item *curr = NULL;
-	struct cil_list_item *start_range = NULL;
-	struct cil_list_item *end_range = NULL;
-	char *sens_str = level->sens->datum.name;
+	fprintf(file_arr[file_index], "%s.%s", catrange->cat_low->datum.name, catrange->cat_high->datum.name);
+}
 
-	if (level->catset != NULL) {
-		cat = ((struct cil_catset*)level->catset)->cat_list->head;
-	} else {
-		cat = level->cat_list->head;
-	}
+void cil_catset_to_policy(FILE **file_arr, uint32_t file_index, struct cil_catset *catset)
+{
+	struct cil_list_item *cat_item;
 
-	fprintf(file_arr[file_index], "%s:", sens_str);
-	while (cat != NULL) {
-		if (cat->flavor == CIL_LIST) {
-			curr = ((struct cil_list*)cat->data)->head;
-			start_range = curr;
-			while (curr != NULL) {
-				if (curr->next == NULL) {
-					end_range = curr;
-					break;
-				}
-				curr = curr->next;
-			}
-			fprintf(file_arr[file_index], "%s.%s", ((struct cil_cat*)start_range->data)->datum.name, ((struct cil_cat*)end_range->data)->datum.name);
-		} else {
-			fprintf(file_arr[file_index], "%s", ((struct cil_cat*)cat->data)->datum.name);
+	for (cat_item = catset->cat_list->head; cat_item != NULL; cat_item = cat_item->next) {
+		switch (cat_item->flavor) {
+		case CIL_CATRANGE: {
+			cil_catrange_to_policy(file_arr, file_index, cat_item->data);
+			break;
+		}
+		case CIL_CAT: {
+			struct cil_cat *cat = cat_item->data;
+			fprintf(file_arr[file_index], "%s", cat->datum.name);
+		}
+		default:
+			break;
 		}
 
-		if (cat->next != NULL) {
+		if (cat_item->next != NULL) {
 			fprintf(file_arr[file_index], ",");
 		}
-
-		cat = cat->next;
 	}
+}
+
+void cil_level_to_policy(FILE **file_arr, uint32_t file_index, struct cil_level *level)
+{
+	char *sens_str = level->sens->datum.name;
+
+	fprintf(file_arr[file_index], "%s:", sens_str);
+	cil_catset_to_policy(file_arr, file_index, level->catset);
 }
 
 void cil_levelrange_to_policy(FILE **file_arr, uint32_t file_index, struct cil_levelrange *lvlrange)
