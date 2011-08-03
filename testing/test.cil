@@ -42,8 +42,8 @@
 	(allow process log file (read open))
 
 )
-(bool foo true)
-(bool bar false)
+(boolean foo true)
+(boolean bar false)
 
 (type my_t)
 

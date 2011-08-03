@@ -81,11 +81,11 @@
 
 (mlsconstrain (file)
 	(ioctl read write create getattr setattr lock)
-	(or (or (dom l1 l2)(and (== t1 mlsfilereadtoclr)(dom h1 l2)))(or (== t1 mlsfileread)(== t2 mlstrustedobject))))
+	(|| (|| (dom l1 l2)(&& (== t1 mlsfilereadtoclr)(dom h1 l2)))(|| (== t1 mlsfileread)(== t2 mlstrustedobject))))
 
 ;(mlsconstrain (file)
 ;	(read write open)
-;	(or (domby l1 l2) (== t1 t2)))
+;	(|| (domby l1 l2) (== t1 t2)))
 
 (block apache
 	(type process)
@@ -116,8 +116,8 @@
 	(allow process log file (read open))
 
 )
-(bool foo true)
-(bool bar false)
+(boolean foo true)
+(boolean bar false)
 
 (type my_t)
 

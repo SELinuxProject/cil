@@ -24,14 +24,14 @@
 (sensitivitycategory s0 (c0 c1 c2))
 (sensitivitycategory s1 (c0 c1))
 (level high (s0 (c0)))
-(context sid_con (adm_u adm_r bar_t high high)) 
-(context blah_con (adm_u adm_r bar_t (s0 (c0)) (s1 (c0))))
+(context sid_con (adm_u adm_r bar_t (high high))) 
+(context blah_con (adm_u adm_r bar_t ((s0 (c0)) (s1 (c0)))))
 (netifcon eth0 sid_con blah_con)
-(netifcon eth1 (adm_u adm_r bar_t (s0 (c0)) (s1 (c1))) (adm_u adm_r bar_t (s0 (c1)) (s1 (c1))))
+(netifcon eth1 (adm_u adm_r bar_t ((s0 (c0)) (s1 (c1)))) (adm_u adm_r bar_t ((s0 (c1)) (s1 (c1)))))
 (sid asid)
 (sid init_sid)
 (sidcontext asid sid_con)
-(sidcontext init_sid (adm_u adm_r bar_t (s0 (c0)) high))
+(sidcontext init_sid (adm_u adm_r bar_t ((s0 (c0)) high)))
 
 (typetransition foo_t bar_t file result_t) 
 
@@ -51,7 +51,7 @@
 
 (mlsconstrain (file)
 	(ioctl read write create getattr setattr lock)
-	(or (or (dom l1 l2)(and (== t1 mlsfilereadtoclr)(dom h1 l2)))(or (== t1 mlsfileread)(== t2 mlstrustedobject))))
+	(|| (|| (dom l1 l2)(&& (== t1 mlsfilereadtoclr)(dom h1 l2)))(|| (== t1 mlsfileread)(== t2 mlstrustedobject))))
 
 (macro my_macro ((type baz)(type boz))
 	(allow baz boz file (read)))

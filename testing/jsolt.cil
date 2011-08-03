@@ -62,12 +62,12 @@
 
 (type netif_t)
 
-(context def1 (system_u object_r etc_t low (s1 ((c0 c255)))))
-(context def2 (system_u object_r etc_t low high))
-(context etc_default (system_u object_r etc_t (s0 (c0)) (s1 ((c0 c255)))))
+(context def1 (system_u object_r etc_t (low (s1 ((c0 c255))))))
+(context def2 (system_u object_r etc_t (low high)))
+(context etc_default (system_u object_r etc_t ((s0 (c0)) (s1 ((c0 c255))))))
 
-(context if_default (system_u object_r etc_t low (s1 ((c0 c255)))))
-(context packet_default (system_u object_r etc_t low high))
+(context if_default (system_u object_r etc_t (low (s1 ((c0 c255))))))
+(context packet_default (system_u object_r etc_t (low high)))
 
 (netifcon eth0 if_default packet_default)
-(netifcon eth1 (system_u object_r netif_t low high) (system_u object_r netif_t low high))
+(netifcon eth1 (system_u object_r netif_t (low high)) (system_u object_r netif_t (low high)))

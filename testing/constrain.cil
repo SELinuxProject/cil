@@ -6,4 +6,4 @@
 (mlsconstrain (file) (read) (== t1 t2))
 (mlsconstrain (file) (read) (== t1 foo))
 (mlsconstrain (file) (read) (dom r1 r2))
-(mlsconstrain (file) (read) (or (== u1 u) (not (!= r1 r2))))
+(mlsconstrain (file) (read) (|| (== u1 u) (! (!= r1 r2))))

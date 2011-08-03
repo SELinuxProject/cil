@@ -19,7 +19,7 @@
 (level high (s1 ((c0 c255))))
 
 
-(context con (system_u object_r type_t low high))
+(context con (system_u object_r type_t (low high)))
 
 (pirqcon 1 con)
 (iomemcon 2 con)

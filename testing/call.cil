@@ -37,7 +37,7 @@
 (userrole adm_u adm_r)
 
 (macro lvl_test ((level low)(level high))
-	(context new_lvl (adm_u adm_r adm_t low high)))
+	(context new_lvl (adm_u adm_r adm_t (low high))))
 
 (sensitivity s0)
 (sensitivity s1)
