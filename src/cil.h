@@ -545,7 +545,7 @@ struct cil_role_allow {
 
 struct cil_sens {
 	struct cil_symtab_datum datum;
-	symtab_t cats;
+	struct cil_list *catsets;
 };
 
 struct cil_sensalias {
@@ -588,7 +588,6 @@ struct cil_catorder {
 
 struct cil_senscat {
 	char *sens_str;
-	struct cil_list *cat_list_str;
 	char *catset_str;
 	struct cil_catset *catset;
 };
@@ -597,8 +596,6 @@ struct cil_level {
 	struct cil_symtab_datum datum;
 	char *sens_str;
 	struct cil_sens *sens;
-	struct cil_list *cat_list_str;
-	struct cil_list *cat_list;
 	char *catset_str;
 	struct cil_catset *catset;
 };

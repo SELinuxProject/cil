@@ -60,6 +60,7 @@ int cil_copy_sensalias(struct cil_tree_node *orig, struct cil_tree_node *copy, s
 int cil_copy_cat(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 int cil_copy_catalias(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 int cil_copy_catrange(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
+int cil_copy_catset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 void cil_copy_senscat(struct cil_senscat *orig, struct cil_senscat **copy);
 void cil_copy_catorder(struct cil_catorder *orig, struct cil_catorder **copy);
 void cil_copy_dominance(struct cil_sens_dominates *orig, struct cil_sens_dominates **copy);

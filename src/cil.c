@@ -622,8 +622,6 @@ int cil_level_init(struct cil_level **level)
 	cil_symtab_datum_init(&new_level->datum);
 	new_level->sens_str = NULL;
 	new_level->sens = NULL;
-	new_level->cat_list_str = NULL;
-	new_level->cat_list = NULL;
 	new_level->catset_str = NULL;
 	new_level->catset = NULL;
 	
@@ -654,21 +652,14 @@ int cil_levelrange_init(struct cil_levelrange **range)
 int cil_sens_init(struct cil_sens **sens)
 {
 	struct cil_sens *new_sens = NULL;
-	int rc = SEPOL_ERR;
 
 	if (sens == NULL) {
 		return SEPOL_ERR;
 	}
 
 	new_sens = cil_malloc(sizeof(*new_sens));
-
 	cil_symtab_datum_init(&new_sens->datum);
-
-	rc = symtab_init(&new_sens->cats, CIL_SYM_SIZE);
-	if (rc != SEPOL_OK) {
-		free(new_sens);
-		return rc;
-	}
+	cil_list_init(&new_sens->catsets);
 
 	*sens = new_sens;
 
@@ -1308,7 +1299,8 @@ int cil_senscat_init(struct cil_senscat **senscat)
 	new_senscat = cil_malloc(sizeof(*new_senscat));
 
 	new_senscat->sens_str = NULL;
-	new_senscat->cat_list_str = NULL;
+	new_senscat->catset_str = NULL;
+	new_senscat->catset = NULL;
 
 	*senscat = new_senscat;
 

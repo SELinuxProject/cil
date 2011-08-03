@@ -754,6 +754,71 @@ copy_catrange_out:
 	return rc;
 }
 
+void cil_copy_fill_catset(struct cil_catset *orig, struct cil_catset *new)
+{
+	struct cil_list_item *orig_item;
+	struct cil_list_item *new_item;
+
+	cil_list_init(&new->cat_list_str);
+
+	for (orig_item = orig->cat_list_str->head; orig_item != NULL; orig_item = orig_item->next) {
+		cil_list_item_init(&new_item);
+
+		switch (orig_item->flavor) {
+		case CIL_CATRANGE: {
+			struct cil_catrange *catrange = NULL;
+			cil_catrange_init(&catrange);
+			cil_copy_fill_catrange(orig_item->data, catrange);
+			new_item->flavor = CIL_CATRANGE;
+			new_item->data = catrange;
+			break;
+		}
+		case CIL_AST_STR: {
+			new_item->flavor = CIL_AST_STR;
+			new_item->data = cil_strdup(orig_item->data);
+			break;
+		}
+		default:
+			break;
+		}
+
+		cil_list_append_item(new->cat_list_str, new_item);
+	}
+}
+
+int cil_copy_catset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_catset *new = NULL;
+	struct cil_catset *old = NULL;
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+
+	rc = cil_catset_init(&new);
+	if (rc != SEPOL_OK) {
+		goto copy_catset_out;
+	}
+
+	old = orig->data;
+	key = old->datum.name;
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_catset: cil_symtab_insert failed, rc: %d\n", rc);
+		cil_destroy_catset(new);
+		goto copy_catset_out;
+	}
+
+	cil_copy_fill_catset(old, new);
+
+	copy->data = new;
+
+	return SEPOL_OK;
+
+copy_catset_out:
+	return rc;
+
+}
+
 void cil_copy_senscat(struct cil_senscat *orig, struct cil_senscat **copy)
 {
 	struct cil_senscat *new = NULL;
@@ -765,7 +830,12 @@ void cil_copy_senscat(struct cil_senscat *orig, struct cil_senscat **copy)
 	}
 
 	new->sens_str = cil_strdup(orig->sens_str);
-	cil_copy_list(orig->cat_list_str, &new->cat_list_str);
+	new->catset_str = cil_strdup(orig->catset_str);
+
+	if (orig->catset != NULL) {
+		cil_catset_init(&new->catset);
+		cil_copy_fill_catset(orig->catset, new->catset);
+	}
 
 	*copy = new;
 }
@@ -804,7 +874,11 @@ void cil_copy_fill_level(struct cil_level *orig, struct cil_level *new)
 {
 	new->sens_str = cil_strdup(orig->sens_str);
 	new->catset_str = cil_strdup(orig->catset_str);
-	cil_copy_list(orig->cat_list_str, &new->cat_list_str);
+
+	if (orig->catset != NULL) {
+		cil_catset_init(&new->catset);
+		cil_copy_fill_catset(orig->catset, new->catset);
+	}
 }
 
 int cil_copy_level(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
@@ -1414,6 +1488,12 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_CATRANGE:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CATS, &cil_copy_catrange);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto copy_node_helper_out;
+		}
+	case CIL_CATSET:
+		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CATS, &cil_copy_catset);
 		if (rc != SEPOL_OK) {
 			free(new);
 			goto copy_node_helper_out;

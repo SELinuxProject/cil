@@ -178,7 +178,7 @@ void cil_destroy_policycap(struct cil_policycap *polcap);
 int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr);
 
-int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list);
+int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset);
 int cil_fill_catrange(struct cil_tree_node *cats, struct cil_catrange *catrange);
 int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context);
 int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer);

@@ -2849,6 +2849,7 @@ void cil_destroy_sensitivity(struct cil_sens *sens)
 	}
 
 	cil_symtab_datum_destroy(sens->datum);
+	cil_list_destroy(&sens->catsets, CIL_FALSE);
 	free(sens);
 }
 
@@ -3213,8 +3214,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto gen_catset_cleanup;
 	}
 
-	cil_list_init(&catset->cat_list_str);
-	rc = cil_fill_cat_list(parse_current->next->next, catset->cat_list_str);
+	rc = cil_fill_catset(parse_current->next->next->cl_head, catset);
 	if (rc != SEPOL_OK) {
 		printf("Failed to fill categoryset\n");
 		goto gen_catset_cleanup;
@@ -3391,11 +3391,15 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	senscat->sens_str = cil_strdup(parse_current->next->data);
 
-	if (parse_current->next->next->cl_head == NULL && parse_current->next->next->data != NULL) {
+	if (parse_current->next->next->cl_head == NULL) {
 		senscat->catset_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		cil_list_init(&senscat->cat_list_str);
-		rc = cil_fill_cat_list(parse_current->next->next, senscat->cat_list_str);
+		rc = cil_catset_init(&senscat->catset);
+		if (rc != SEPOL_OK) {
+			goto gen_senscat_cleanup;
+		}
+
+		rc = cil_fill_catset(parse_current->next->next->cl_head, senscat->catset);
 		if (rc != SEPOL_OK) {
 			printf("Failed to fill category list\n");
 			goto gen_senscat_cleanup;
@@ -3424,8 +3428,12 @@ void cil_destroy_senscat(struct cil_senscat *senscat)
 		free(senscat->sens_str);
 	}
 
-	if (senscat->cat_list_str != NULL) {
-		cil_list_destroy(&senscat->cat_list_str, 1);
+	if (senscat->catset_str == NULL) {
+		cil_destroy_catset(senscat->catset);
+	}
+	
+	if (senscat->catset_str != NULL) {
+		free(senscat->catset_str);
 	}
 
 	free(senscat);
@@ -3493,12 +3501,8 @@ void cil_destroy_level(struct cil_level *level)
 		free(level->sens_str);
 	}
 
-	if (level->cat_list_str != NULL) {
-		cil_list_destroy(&level->cat_list_str, 1);
-	}
-
-	if (level->cat_list != NULL) {
-		cil_list_destroy(&level->cat_list, 0);
+	if (level->catset_str == NULL) {
+		cil_destroy_catset(level->catset);
 	}
 
 	if (level->catset_str != NULL) {
@@ -5307,32 +5311,39 @@ fill_ipaddr_cleanup:
 
 int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 {
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING | SYM_LIST | SYM_END,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
 
 	if (sens == NULL || level == NULL) {
 		goto cil_fill_level_cleanup;
 	}
-
-	level->sens_str = cil_strdup(sens->data);
-
-	if (sens->next == NULL) {
-		rc = SEPOL_OK;
+	
+	rc = __cil_verify_syntax(sens, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid categoryrange declaration (line: %d)\n", sens->line);
 		goto cil_fill_level_cleanup;
 	}
 
-	if (sens->next->cl_head == NULL) {
-		if (sens->next->data != NULL) {
+	level->sens_str = cil_strdup(sens->data);
+
+	if (sens->next != NULL) {
+		if (sens->next->cl_head == NULL) {
 			level->catset_str = cil_strdup(sens->next->data);
 		} else {
-			rc = SEPOL_ERR;
-			goto cil_fill_level_cleanup;
-		}
-	} else {
-		cil_list_init(&level->cat_list_str);
-		rc = cil_fill_cat_list(sens->next, level->cat_list_str);
-		if (rc != SEPOL_OK) {
-			printf("Failed to create level category list\n");
-			goto cil_fill_level_cleanup;
+			rc = cil_catset_init(&level->catset);
+			if (rc != SEPOL_OK) {
+				goto cil_fill_level_cleanup;
+			}
+
+			rc = cil_fill_catset(sens->next->cl_head, level->catset);
+			if (rc != SEPOL_OK) {
+				goto cil_fill_level_cleanup;
+			}
 		}
 	}
 
@@ -5368,6 +5379,69 @@ int cil_fill_catrange(struct cil_tree_node *cats, struct cil_catrange *catrange)
 	return SEPOL_OK;
 
 cil_fill_catrange_cleanup:
+	return rc;
+}
+
+int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset)
+{
+	enum cil_syntax syntax[] = {
+		SYM_N_STRINGS | SYM_N_LISTS
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+
+	struct cil_tree_node *curr = NULL;
+	struct cil_list *cat_list = NULL;
+	struct cil_list_item *cat_item = NULL;
+	struct cil_catrange *catrange = NULL;
+	int rc = SEPOL_ERR;
+
+	if (cats == NULL || catset == NULL) {
+		rc = SEPOL_ERR;
+		goto cil_fill_catset_cleanup;
+	}
+
+	rc = __cil_verify_syntax(cats, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid category set (line %d)\n", cats->line);
+		goto cil_fill_catset_cleanup;
+	}
+
+	cil_list_init(&cat_list);
+
+	for (curr = cats; curr != NULL; curr = curr->next) {
+		cil_list_item_init(&cat_item);
+
+		if (curr->data != NULL) {
+			/* named category or categoryrange */
+			cat_item->flavor = CIL_AST_STR;
+			cat_item->data = cil_strdup(curr->data);
+		} else {
+			/* anonymous category range */
+			rc = cil_catrange_init(&catrange);
+			if (rc != SEPOL_OK) {
+				goto cil_fill_catset_cleanup;
+			}
+
+			rc = cil_fill_catrange(curr->cl_head, catrange);
+			if (rc != SEPOL_OK) {
+				goto cil_fill_catset_cleanup;
+			}
+			
+			cat_item->flavor = CIL_CATRANGE;
+			cat_item->data = catrange;		
+		}
+		
+		rc = cil_list_append_item(cat_list, cat_item);
+		if (rc != SEPOL_OK) {
+			goto cil_fill_catset_cleanup;
+		}
+	}
+
+	catset->cat_list_str = cat_list;
+
+	return SEPOL_OK;
+
+cil_fill_catset_cleanup:
 	return rc;
 }
 
