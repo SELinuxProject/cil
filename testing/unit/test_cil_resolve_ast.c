@@ -1859,7 +1859,7 @@ void test_cil_resolve_typebounds_repeatbind_neg(CuTest *tc) {
 	int rc = cil_resolve_typebounds(test_db, test_db->ast->root->cl_head->next->next, NULL);
 	int rc2 = cil_resolve_typebounds(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc2);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc2);
 }
 
 void test_cil_resolve_typebounds_type1_neg(CuTest *tc) {
