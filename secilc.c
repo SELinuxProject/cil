@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 	}
 
 	printf("Qualifying Names...\n");
-	if (cil_qualify_name(db->ast->root)) {
+	if (cil_fqn_qualify(db->ast->root)) {
 		printf("Failed to qualify names, exiting\n");
 		goto main_out;
 	}

@@ -54,7 +54,7 @@ void test_cil_qualify_name(CuTest *tc) {
 
 	cil_build_ast(test_db, tree->root, test_db->ast->root);
 
-	int rc = cil_qualify_name(test_db->ast->root);
+	int rc = cil_fqn_qualify(test_db->ast->root);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -70,6 +70,6 @@ void test_cil_qualify_name_cil_flavor(CuTest *tc) {
 
 	cil_build_ast(test_db, tree->root, test_db->ast->root);
 
-	int rc = cil_qualify_name(test_db->ast->root);
+	int rc = cil_fqn_qualify(test_db->ast->root);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }

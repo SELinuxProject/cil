@@ -36,56 +36,137 @@
 #include "cil_tree.h"
 
 #define MAX_CIL_NAME_LENGTH 2048
-int cil_qualify_name(struct cil_tree_node *root)
+
+struct cil_args_qualify {
+	char fqparent[MAX_CIL_NAME_LENGTH];
+	int len;
+};
+
+int __cil_fqn_qualify_last_child_helper(struct cil_tree_node *node, void *extra_args)
 {
-	struct cil_tree_node *curr = root;
-	uint16_t reverse = 0;
-	uint32_t length;
-	char fqp[MAX_CIL_NAME_LENGTH];
-	char *fqn, *uqn;
+	struct cil_args_qualify *args = NULL;
+	struct cil_symtab_datum *datum = NULL;
+	int rc = SEPOL_ERR;
 
-	*fqp = '\0';
+	if (node == NULL || extra_args == NULL) {
+		rc = SEPOL_ERR;
+		goto fqn_qualify_last_child_helper_out;
+	}
 
-	do {
-		if (curr->cl_head != NULL &&
-			(curr->flavor != CIL_MACRO &&
-			 curr->flavor != CIL_CALL &&
-			 curr->flavor != CIL_BOOLEANIF &&
-			 curr->flavor != CIL_CONDTRUE &&
-			 curr->flavor != CIL_CONDFALSE &&
-			 curr->flavor != CIL_OPTIONAL)) {
-			if (!reverse) {
-				if (curr->flavor >= CIL_MIN_DECLARATIVE) { // append name
-					strcat(fqp, ((struct cil_symtab_datum*)curr->data)->name);
-					strcat(fqp, ".");
-				}
-			} else {
-				length = strlen(fqp) - (strlen(((struct cil_symtab_datum*)curr->data)->name) + 1);
-				fqp[length] = '\0';
-			}
-		} else if (curr->flavor >= CIL_MIN_DECLARATIVE){
-			uqn = ((struct cil_symtab_datum*)curr->data)->name; 
-			length = strlen(fqp) + strlen(uqn) + 1;
-			fqn = cil_malloc(length + 1);
+	if (node->parent->flavor != CIL_BLOCK) {
+		rc = SEPOL_OK;
+		goto fqn_qualify_last_child_helper_out;
+	}
 
-			strcpy(fqn, fqp);
-			strcat(fqn, uqn);
-
-			((struct cil_symtab_datum*)curr->data)->name = fqn;	// Replace with new, fully qualified string
-			free(uqn);
-		}
-
-		if (curr->cl_head != NULL && !reverse) {
-			curr = curr->cl_head;
-		} else if (curr->next != NULL) {
-			curr = curr->next;
-			reverse = 0;
-		} else {
-			curr = curr->parent;
-			reverse = 1;
-		}
-	} while (curr->flavor != CIL_ROOT);
+	datum = node->parent->data;
+	args = extra_args;
+	args->len -= (strlen(datum->name) + 1);
+	args->fqparent[args->len] = '\0';
 
 	return SEPOL_OK;
+
+fqn_qualify_last_child_helper_out:
+	return rc;
+}
+
+int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
+{
+	struct cil_args_qualify *args = NULL;
+	struct cil_symtab_datum *datum = NULL;
+	char *fqn = NULL;
+	int newlen = 0;
+	int rc = SEPOL_ERR;
+
+	if (node == NULL || finished == NULL || extra_args == NULL) {
+		goto fqn_qualify_helper_out;
+	}
+
+	if (node->flavor < CIL_MIN_DECLARATIVE) {
+		rc = SEPOL_OK;
+		goto fqn_qualify_helper_out;
+	}
+
+	args = extra_args;
+	datum = node->data;
+
+	switch (node->flavor) {
+	case CIL_OPTIONAL:
+		if (datum->state == CIL_STATE_DISABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	case CIL_MACRO:
+		*finished = CIL_TREE_SKIP_HEAD;
+		break;
+	case CIL_BLOCK:
+		strncat(args->fqparent, datum->name, MAX_CIL_NAME_LENGTH);
+		strncat(args->fqparent, ".",  MAX_CIL_NAME_LENGTH);
+		args->len += (strlen(datum->name) + 1);
+		break;
+
+	case CIL_ATTR:
+	case CIL_BOOL:
+	case CIL_CAT:
+	case CIL_CATALIAS:
+	case CIL_CATRANGE:
+	case CIL_CATSET:
+	case CIL_CLASS:
+	case CIL_COMMON:
+	case CIL_CONTEXT:
+	case CIL_IPADDR:
+	case CIL_LEVEL:
+	case CIL_LEVELRANGE:
+	case CIL_PERMSET:
+	case CIL_POLICYCAP:
+	case CIL_ROLE:
+	case CIL_SENS:
+	case CIL_SENSALIAS:
+	case CIL_SID:
+	case CIL_TUNABLE:
+	case CIL_TYPE:
+	case CIL_TYPEALIAS:
+	case CIL_USER:
+		if (args->len == 0) {
+			rc = SEPOL_OK;
+			goto fqn_qualify_helper_out;
+		}
+
+		newlen = args->len + strlen(datum->name);
+
+		fqn = cil_malloc(newlen + 1);
+		strncpy(fqn, args->fqparent, newlen);
+		strncat(fqn, datum->name, newlen);
+
+		free(datum->name);
+		datum->name = fqn;
+		break;
+	default:
+		rc = SEPOL_ERR;
+		goto fqn_qualify_helper_out;
+	}
+
+	return SEPOL_OK;
+
+fqn_qualify_helper_out:
+	return rc;
+}
+
+int cil_fqn_qualify(struct cil_tree_node *root)
+{
+	struct cil_args_qualify extra_args;
+	int rc = SEPOL_ERR;
+
+	extra_args.fqparent[0] = '\0';
+	extra_args.len = 0;
+
+	rc = cil_tree_walk(root, __cil_fqn_qualify_node_helper, NULL, __cil_fqn_qualify_last_child_helper, &extra_args);
+	if (rc != SEPOL_OK) {
+		goto fqn_qualify_out;
+	}
+
+	return SEPOL_OK;
+
+fqn_qualify_out:
+	return rc;
 }
 
