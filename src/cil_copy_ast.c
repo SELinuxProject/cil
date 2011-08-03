@@ -716,6 +716,44 @@ copy_catalias_out:
 	return rc;
 }
 
+void cil_copy_fill_catrange(struct cil_catrange *orig, struct cil_catrange *new)
+{
+	new->cat_low_str = cil_strdup(orig->cat_low_str);
+	new->cat_high_str = cil_strdup(orig->cat_high_str);
+}
+
+int cil_copy_catrange(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_catrange *new = NULL;
+	struct cil_catrange *old = NULL;
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+
+	rc = cil_catrange_init(&new);
+	if (rc != SEPOL_OK) {
+		goto copy_catrange_out;
+	}
+
+	old = orig->data;
+	key = old->datum.name;
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_catrange: cil_symtab_insert failed, rc: %d\n", rc);
+		cil_destroy_catrange(new);
+		goto copy_catrange_out;
+	}
+
+	new->cat_low_str = cil_strdup(old->cat_low_str);
+	new->cat_high_str = cil_strdup(old->cat_high_str);
+	copy->data = new;
+
+	return SEPOL_OK;
+
+copy_catrange_out:
+	return rc;
+}
+
 void cil_copy_senscat(struct cil_senscat *orig, struct cil_senscat **copy)
 {
 	struct cil_senscat *new = NULL;
@@ -1374,6 +1412,12 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 			goto copy_node_helper_out;
 		}
 		break;
+	case CIL_CATRANGE:
+		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CATS, &cil_copy_catrange);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto copy_node_helper_out;
+		}
 	case CIL_SENSCAT:
 		cil_copy_senscat((struct cil_senscat*)orig->data, (struct cil_senscat**)&new->data);
 		break;
