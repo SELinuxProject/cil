@@ -689,8 +689,12 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 		key = cil_perm->datum.name;
 		sepol_perm = hashtab_search(sepol_obj->permissions.table, key);
 		if (sepol_perm == NULL) {
-			rc = SEPOL_ERR;
-			goto avrule_to_avtab_out;
+			common_datum_t *sepol_common = sepol_obj->comdatum;
+			sepol_perm = hashtab_search(sepol_common->permissions.table, key);
+			if (sepol_perm == NULL) {
+				rc = SEPOL_ERR;
+				goto avrule_to_avtab_out;
+			}
 		}
 		new_avtab_datum->data |= 1 << (sepol_perm->s.value - 1);
 
