@@ -1241,9 +1241,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 			}
 		}
 
-		if (rnode != NULL) {
-			lnode = rnode;
-		}
+		lnode = rnode;
 		rnode = cond;
 
 		curr = curr->next;
