@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 		}
 		file_size = filedata.st_size;	
 
-		buffer = malloc(file_size + 2);
+		buffer = cil_malloc(file_size + 2);
 		rc = fread(buffer, file_size, 1, file);
 		if (rc != 1) {
 			fprintf(stderr, "Failure reading file: %s\n", argv[i]);
@@ -98,6 +98,10 @@ int main(int argc, char *argv[])
 			printf("Failed to parse CIL policy, exiting\n");
 			goto main_out;
 		}
+
+		free(buffer);
+		buffer = NULL;
+
 #ifdef DEBUG
 	cil_tree_print(parse_tree->root, 0);
 #endif
@@ -169,5 +173,6 @@ main_out:
 	if (file != NULL) {
 		fclose(file);
 	}
+	free(buffer);
 	return SEPOL_ERR;
 }

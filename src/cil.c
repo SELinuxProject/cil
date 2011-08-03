@@ -76,6 +76,8 @@ void cil_db_destroy(struct cil_db **db)
 {
 	cil_tree_destroy(&(*db)->ast);
 	cil_symtab_array_destroy((*db)->symtab);
+	cil_list_destroy(&(*db)->catorder, CIL_FALSE);
+	cil_list_destroy(&(*db)->dominance, CIL_FALSE);
 	cil_sort_destroy(&(*db)->netifcon);
 	cil_sort_destroy(&(*db)->genfscon);
 	cil_sort_destroy(&(*db)->filecon);
@@ -87,6 +89,7 @@ void cil_db_destroy(struct cil_db **db)
 	cil_sort_destroy(&(*db)->pcidevicecon);
 	cil_sort_destroy(&(*db)->fsuse);
 
+	free(*db);
 	*db = NULL;	
 
 }
@@ -560,6 +563,7 @@ void cil_sort_destroy(struct cil_sort **sort)
 	}
 	(*sort)->array = NULL;
 
+	free(*sort);
 	*sort = NULL;
 }
 

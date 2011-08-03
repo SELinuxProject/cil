@@ -70,6 +70,11 @@ int cil_lexer_setup(char *buffer, uint32_t size)
 	return SEPOL_OK;
 }
 
+void cil_lexer_destroy(void)
+{
+	yylex_destroy();
+}
+
 int cil_lexer_next(struct token *tok)
 {
 	tok->type = yylex();

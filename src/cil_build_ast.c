@@ -3832,6 +3832,8 @@ void cil_destroy_context(struct cil_context *context)
 	if (context == NULL) {
 		return;
 	}
+	
+	cil_symtab_datum_destroy(context->datum);;
 
 	if (context->user_str != NULL) {
 		free(context->user_str);
@@ -5038,6 +5040,8 @@ void cil_destroy_call(struct cil_call *call)
 	if (call->args != NULL) {
 		cil_list_destroy(&call->args, 1);
 	}
+
+	free(call);
 }
 
 void cil_destroy_args(struct cil_args *args)
@@ -5067,6 +5071,8 @@ void cil_destroy_args(struct cil_args *args)
 	if (args->arg_str != NULL) {
 		free(args->arg_str);
 	}
+
+	free(args);
 }
 
 int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)

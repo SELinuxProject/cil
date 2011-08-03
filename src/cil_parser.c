@@ -110,6 +110,8 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 	}
 	while (tok.type != 0);
 
+	cil_lexer_destroy();
+
 	*parse_tree = tree;
 
 	return SEPOL_OK;

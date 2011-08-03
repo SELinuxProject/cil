@@ -60,6 +60,7 @@ void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
 		cil_list_item_destroy(&item, destroy_data);
 		item = next;
 	}
+	free(*list);
 	*list = NULL;	
 }
 

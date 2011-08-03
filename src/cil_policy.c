@@ -1515,6 +1515,10 @@ int cil_gen_policy(struct cil_db *db)
 		return SEPOL_ERR;
 	}
 	free(file_arr);
-
+	
+	cil_list_destroy(&users, CIL_FALSE);
+	cil_list_destroy(&cats, CIL_FALSE);
+	cil_list_destroy(&sens, CIL_FALSE);
+	
 	return SEPOL_OK;
 }

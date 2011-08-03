@@ -47,6 +47,7 @@ int cil_tree_init(struct cil_tree **tree)
 void cil_tree_destroy(struct cil_tree **tree)
 {
 	cil_tree_subtree_destroy((*tree)->root);
+	free(*tree);
 	*tree = NULL;
 }
 
