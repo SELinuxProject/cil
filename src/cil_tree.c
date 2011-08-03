@@ -1223,6 +1223,58 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
+			case CIL_PIRQCON: {
+				struct cil_pirqcon *pirqcon = node->data;
+
+				printf("PIRQCON %d", pirqcon->pirq);
+				if (pirqcon->context != NULL) {
+					cil_tree_print_context(pirqcon->context);
+				} else {
+					printf(" %s", pirqcon->context_str);
+				}
+
+				printf("\n");
+				return;
+			}
+			case CIL_IOMEMCON: {
+				struct cil_iomemcon *iomemcon = node->data;
+
+				printf("IOMEMCON ( %d %d )", iomemcon->iomem_low, iomemcon->iomem_high);
+				if (iomemcon->context != NULL) {
+					cil_tree_print_context(iomemcon->context);
+				} else {
+					printf(" %s", iomemcon->context_str);
+				}
+
+				printf("\n");
+				return;
+			}
+			case CIL_IOPORTCON: {
+				struct cil_ioportcon *ioportcon = node->data;
+
+				printf("IOPORTCON ( %d %d )", ioportcon->ioport_low, ioportcon->ioport_high);
+				if (ioportcon->context != NULL) {
+					cil_tree_print_context(ioportcon->context);
+				} else {
+					printf(" %s", ioportcon->context_str);
+				}
+
+				printf("\n");
+				return;
+			}
+			case CIL_PCIDEVICECON: {
+				struct cil_pcidevicecon *pcidevicecon = node->data;
+
+				printf("PCIDEVICECON %d", pcidevicecon->dev);
+				if (pcidevicecon->context != NULL) {
+					cil_tree_print_context(pcidevicecon->context);
+				} else {
+					printf(" %s", pcidevicecon->context_str);
+				}
+
+				printf("\n");
+				return;
+			}
 			case CIL_FSUSE: {
 				struct cil_fsuse *fsuse = node->data;
 				printf("FSUSE: ");
