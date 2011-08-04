@@ -56,6 +56,13 @@ int __cil_verify_name(const char *name)
 	int rc = SEPOL_ERR;
 	int len = strlen(name);
 	int i = 0;
+
+	if (len >= CIL_MAX_NAME_LENGTH) {
+		printf("Name length greater than max name length of %d", CIL_MAX_NAME_LENGTH);
+		rc = SEPOL_ERR;
+		goto verify_name_out;
+	}
+
 	for (i = 0; i < len; i++) {
 		if (!isalnum(name[i]) && name[i] != '_') {
 			printf("Invalid character %c in %s\n", name[i], name);

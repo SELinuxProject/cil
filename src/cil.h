@@ -38,6 +38,8 @@
 #include "cil_symtab.h"
 #include "cil_mem.h"
 
+#define CIL_MAX_NAME_LENGTH 2048
+
 /*
 	Tree/list node types
 */

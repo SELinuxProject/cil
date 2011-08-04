@@ -35,10 +35,8 @@
 #include "cil_mem.h"
 #include "cil_tree.h"
 
-#define MAX_CIL_NAME_LENGTH 2048
-
 struct cil_args_qualify {
-	char fqparent[MAX_CIL_NAME_LENGTH];
+	char fqparent[CIL_MAX_NAME_LENGTH];
 	int len;
 };
 
@@ -99,8 +97,13 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		*finished = CIL_TREE_SKIP_HEAD;
 		break;
 	case CIL_BLOCK:
-		strncat(args->fqparent, datum->name, MAX_CIL_NAME_LENGTH);
-		strncat(args->fqparent, ".",  MAX_CIL_NAME_LENGTH);
+		if (args->len + strlen(datum->name) + 1 >= CIL_MAX_NAME_LENGTH) {
+			printf("Fully qualified name too long\n");
+			rc = SEPOL_ERR;
+			goto fqn_qualify_helper_out;
+		}
+		strcat(args->fqparent, datum->name);
+		strcat(args->fqparent, ".");
 		args->len += (strlen(datum->name) + 1);
 		break;
 
@@ -132,10 +135,14 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		}
 
 		newlen = args->len + strlen(datum->name);
-
+		if (newlen >= CIL_MAX_NAME_LENGTH) {
+			printf("Fully qualified name too long\n");
+			rc = SEPOL_ERR;
+			goto fqn_qualify_helper_out;
+		}
 		fqn = cil_malloc(newlen + 1);
-		strncpy(fqn, args->fqparent, newlen);
-		strncat(fqn, datum->name, newlen);
+		strcpy(fqn, args->fqparent);
+		strcat(fqn, datum->name);
 
 		free(datum->name);
 		datum->name = fqn;
