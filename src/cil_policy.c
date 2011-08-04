@@ -1028,20 +1028,19 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 
 int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current) 
 {
-	char *name = ((struct cil_symtab_datum*)current->data)->name;
 	uint32_t flavor = current->flavor;
 	int rc = SEPOL_ERR;
 
 	switch(flavor) {
 	case CIL_ATTRIBUTE:
-		fprintf(file_arr[ATTRTYPES], "attribute %s;\n", name);
+		fprintf(file_arr[ATTRTYPES], "attribute %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	case CIL_TYPE:
-		fprintf(file_arr[ATTRTYPES], "type %s;\n", name);
+		fprintf(file_arr[ATTRTYPES], "type %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	case CIL_TYPEALIAS: {
 		struct cil_typealias *alias = (struct cil_typealias*)current->data;
-		fprintf(file_arr[ALIASES], "typealias %s alias %s;\n", ((struct cil_symtab_datum*)alias->type)->name, name);
+		fprintf(file_arr[ALIASES], "typealias %s alias %s;\n", ((struct cil_symtab_datum*)alias->type)->name, ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	}
 	case CIL_TYPEBOUNDS: {
@@ -1054,17 +1053,17 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		break;
 	}
 	case CIL_ROLE:
-		fprintf(file_arr[ATTRTYPES], "role %s;\n", name);
+		fprintf(file_arr[ATTRTYPES], "role %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	case CIL_BOOL: {
 		char *boolean = ((struct cil_bool*)current->data)->value ? "true" : "false";
-		fprintf(file_arr[ATTRTYPES], "bool %s %s;\n", name, boolean);
+		fprintf(file_arr[ATTRTYPES], "bool %s %s;\n", ((struct cil_symtab_datum*)current->data)->name, boolean);
 		break;
 	}
 	case CIL_COMMON:
 		if (current->cl_head != NULL) {
 			current = current->cl_head;
-			fprintf(file_arr[COMMONS], "common %s { ", name);
+			fprintf(file_arr[COMMONS], "common %s { ", ((struct cil_symtab_datum*)current->data)->name);
 		} else {
 			printf("No permissions given\n");
 			return SEPOL_ERR;
@@ -1187,7 +1186,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		cil_constrain_to_policy(file_arr, CONSTRAINS, (struct cil_constrain*)current->data);
 		break;
 	case CIL_SID:
-		fprintf(file_arr[ISIDS], "sid %s\n", name);
+		fprintf(file_arr[ISIDS], "sid %s\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	case CIL_SIDCONTEXT: {
 		struct cil_sidcontext *sidcon = (struct cil_sidcontext*)current->data;
@@ -1197,7 +1196,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		break;
 	}
 	case CIL_POLICYCAP:
-		fprintf(file_arr[ATTRTYPES], "policycap %s;\n", name);
+		fprintf(file_arr[ATTRTYPES], "policycap %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	default:
 		break;
