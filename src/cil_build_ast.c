@@ -1554,7 +1554,7 @@ void cil_destroy_type_rule(struct cil_type_rule *rule)
 	free(rule);
 }
 
-int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
+int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -1582,22 +1582,10 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	}
 
 	key = parse_current->next->data;
-
-	if (flavor == CIL_TYPE || flavor == CIL_ATTR) {
-		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)type, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPE);
-	} else {
-		printf("Error: cil_gen_type called on invalid node\n");
-		rc = SEPOL_ERR;
-		goto gen_type_cleanup;
-	}
-
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)type, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPE);
 	if (rc != SEPOL_OK) {
-		printf("Failed to insert %s (line: %d), rc:%d\n", key, parse_current->line, rc);
 		goto gen_type_cleanup;
 	}
-
-	ast_node->data = type;
-	ast_node->flavor = flavor;
 
 	return SEPOL_OK;
 
@@ -1616,6 +1604,67 @@ void cil_destroy_type(struct cil_type *type)
 
 	cil_symtab_datum_destroy(type->datum);
 	free(type);
+}
+
+int cil_gen_attribute(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key = NULL;
+	struct cil_attribute *attr = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_attribute_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid %s declaration (line: %d)\n", (char*)parse_current->data, parse_current->line);
+		goto gen_attribute_cleanup;
+	}
+
+	rc = cil_attribute_init(&attr);
+	if (rc != SEPOL_OK) {
+		goto gen_attribute_cleanup;
+	}
+
+	key = parse_current->next->data;
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)attr, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_ATTRIBUTE);
+	if (rc != SEPOL_OK) {
+		goto gen_attribute_cleanup;
+	}
+
+	return SEPOL_OK;
+
+gen_attribute_cleanup:
+	if (attr != NULL) {
+		cil_destroy_attribute(attr);
+	}
+	return rc;
+}
+
+void cil_destroy_attribute(struct cil_attribute *attr)
+{
+	if (attr == NULL) {
+		return;
+	}
+
+	cil_symtab_datum_destroy(attr->datum);
+
+	if (attr->types_list != NULL) {
+		cil_list_destroy(&attr->types_list, CIL_FALSE);
+	}
+	
+	if (attr->neg_list) {
+		cil_list_destroy(&attr->neg_list, CIL_FALSE);
+	}
+
+	free(attr);
 }
 
 int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
@@ -5582,15 +5631,15 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto build_ast_node_helper_out;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
-		rc = cil_gen_type(db, parse_current, ast_node, CIL_TYPE);
+		rc = cil_gen_type(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_type failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
-	} else if (!strcmp(parse_current->data, CIL_KEY_ATTR)) {
-		rc = cil_gen_type(db, parse_current, ast_node, CIL_ATTR);
+	} else if (!strcmp(parse_current->data, CIL_KEY_ATTRIBUTE)) {
+		rc = cil_gen_attribute(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_gen_type (attr) failed, rc: %d\n", rc);
+			printf("cil_gen_attribute failed, rc: %d\n", rc);
 			goto build_ast_node_helper_out;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_ATTRTYPES)) {

@@ -438,6 +438,34 @@ copy_type_out:
 	return rc;
 }
 
+int cil_copy_attribute(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_attribute *new = NULL;
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+
+	rc = cil_attribute_init(&new);
+	if (rc != SEPOL_OK) {
+		goto copy_attribute_out;
+	}
+
+	key = ((struct cil_symtab_datum *)orig->data)->name;
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_attribute: cil_symtab_insert failed, rc: %d\n", rc);
+		free(new);
+		goto copy_attribute_out;
+	}
+
+	copy->data = new;
+
+	return SEPOL_OK;
+
+copy_attribute_out:
+	return rc;
+}
+
 void cil_copy_attrtypes(struct cil_attrtypes *orig, struct cil_attrtypes **copy)
 {
 	struct cil_attrtypes *new = NULL;
@@ -1422,8 +1450,8 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 			goto copy_node_helper_out;
 		}
 		break;
-	case CIL_ATTR:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_type);
+	case CIL_ATTRIBUTE:
+		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_attribute);
 		if (rc != SEPOL_OK) {
 			free(new);
 			goto copy_node_helper_out;

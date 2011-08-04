@@ -1033,7 +1033,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	int rc = SEPOL_ERR;
 
 	switch(flavor) {
-	case CIL_ATTR:
+	case CIL_ATTRIBUTE:
 		fprintf(file_arr[ATTRTYPES], "attribute %s;\n", name);
 		break;
 	case CIL_TYPE:

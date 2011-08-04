@@ -107,7 +107,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		args->len += (strlen(datum->name) + 1);
 		break;
 
-	case CIL_ATTR:
+	case CIL_ATTRIBUTE:
 	case CIL_BOOL:
 	case CIL_CAT:
 	case CIL_CATALIAS:

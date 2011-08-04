@@ -269,6 +269,12 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 	}
 	attr = attr_node->data;
 
+	if (attr_node->flavor != CIL_ATTRIBUTE) {
+		rc = SEPOL_ERR;
+		printf("Attribute type not an attribute\n");
+		goto resolve_attrtypes_out;
+	}
+
 	if (attrtypes->types_list_str != NULL) {
 		cil_list_init(&res_list);
 		rc = cil_resolve_list(db, attrtypes->types_list_str, res_list, current, CIL_SYM_TYPES, call);
@@ -285,7 +291,7 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 					cil_list_init(&((struct cil_type*)curr->data)->attrs_list);
 				}
 				cil_list_item_init(&new_attr);
-				new_attr->flavor = CIL_ATTR;
+				new_attr->flavor = CIL_ATTRIBUTE;
 				new_attr->data = attr;
 				((struct cil_type*)curr->data)->attrs_list->head = new_attr;
 				new_attr->next = tmp;
@@ -2971,7 +2977,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_USER:
 			rc = cil_reset_user(db, node, call);
 			break;
-		case CIL_ATTR:
+		case CIL_ATTRIBUTE:
 			rc = cil_reset_attr(db, node, call);
 			break;
 		case CIL_SENS:

@@ -457,7 +457,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
-			case CIL_ATTR: {
+			case CIL_ATTRIBUTE: {
 				struct cil_attribute *attr = node->data;
 				struct cil_list_item *curr = NULL;
 				printf("ATTRIBUTE: %s", attr->datum.name);

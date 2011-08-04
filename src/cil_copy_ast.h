@@ -48,6 +48,7 @@ void cil_copy_userrole(struct cil_userrole *orig, struct cil_userrole **copy);
 void cil_copy_userlevel(struct cil_userlevel *orig, struct cil_userlevel **copy);
 void cil_copy_userrange(struct cil_userrange *orig, struct cil_userrange **copy);
 int cil_copy_type(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
+int cil_copy_attribute(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 void cil_copy_attrtypes(struct cil_attrtypes *orig, struct cil_attrtypes **copy);
 int cil_copy_typealias(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 void cil_copy_filetransition(struct cil_filetransition *orig, struct cil_filetransition **copy);

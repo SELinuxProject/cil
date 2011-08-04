@@ -145,8 +145,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPE:
 		cil_destroy_type(*data);
 		break;
-	case CIL_ATTR:
-		cil_destroy_type(*data);
+	case CIL_ATTRIBUTE:
+		cil_destroy_attribute(*data);
 		break;
 	case CIL_USER:
 		cil_destroy_user(*data);
@@ -342,7 +342,7 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		break;
 	case CIL_TYPE:
 	case CIL_TYPEALIAS:
-	case CIL_ATTR:
+	case CIL_ATTRIBUTE:
 		*sym_index = CIL_SYM_TYPES;
 		break;
 	case CIL_BOOL:

@@ -137,7 +137,7 @@ enum cil_flavor {
 	CIL_USER,
 	CIL_ROLE,
 	CIL_TYPE,
-	CIL_ATTR,
+	CIL_ATTRIBUTE,
 	CIL_BOOL,
 	CIL_PERMSET,
 	CIL_TUNABLE,
@@ -180,7 +180,7 @@ enum cil_flavor {
 #define CIL_KEY_ROLEDOMINANCE	"roledominance"
 #define CIL_KEY_ROLEBOUNDS	"rolebounds"
 #define CIL_KEY_TYPE 		"type"
-#define CIL_KEY_ATTR		"attribute"
+#define CIL_KEY_ATTRIBUTE	"attribute"
 #define CIL_KEY_BOOL		"boolean"
 #define CIL_KEY_ALLOW		"allow"
 #define CIL_KEY_AUDITALLOW	"auditallow"
