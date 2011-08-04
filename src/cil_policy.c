@@ -859,15 +859,14 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 
 	while (curr != NULL) {
 		cond = curr->data;
-		if ((cond->flavor == CIL_AND) || (cond->flavor == CIL_OR) || (cond->flavor == CIL_XOR) ||
-			(cond->flavor == CIL_NOT) || (cond->flavor == CIL_EQ) || (cond->flavor == CIL_NEQ) ||
-			(cond->flavor == CIL_CONS_AND) || (cond->flavor == CIL_CONS_DOM) ||
-			(cond->flavor == CIL_CONS_DOMBY) || (cond->flavor == CIL_CONS_EQ) ||
-			(cond->flavor == CIL_CONS_INCOMP) || (cond->flavor == CIL_CONS_NOT) ||
-			(cond->flavor == CIL_CONS_OR)) {
+		if ((cond->flavor == CIL_AND) || (cond->flavor == CIL_OR)
+		|| (cond->flavor == CIL_XOR) || (cond->flavor == CIL_NOT)
+		|| (cond->flavor == CIL_EQ) || (cond->flavor == CIL_NEQ)
+		|| (cond->flavor == CIL_CONS_DOM) || (cond->flavor == CIL_CONS_DOMBY)
+		|| (cond->flavor == CIL_CONS_INCOMP)) {
 
 			oper_str = cond->str;
-			if (cond->flavor != CIL_NOT && cond->flavor != CIL_CONS_NOT) {
+			if (cond->flavor != CIL_NOT) {
 				if (pos <= 1) {
 					rc = SEPOL_ERR;
 					goto expr_stack_cleanup;

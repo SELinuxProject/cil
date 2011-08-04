@@ -1902,7 +1902,7 @@ not_valid:
 	return rc;
 }
 
-int __cil_verify_expr_oper_flavor(const char *key, struct cil_conditional *cond)
+int __cil_verify_expr_oper_flavor(const char *key, struct cil_conditional *cond, enum cil_flavor flavor)
 {
 	int rc = SEPOL_ERR;
 
@@ -1910,27 +1910,26 @@ int __cil_verify_expr_oper_flavor(const char *key, struct cil_conditional *cond)
 		cond->flavor = CIL_AND;
 	} else if (!strcmp(key, CIL_KEY_OR)) {
 		cond->flavor = CIL_OR;
-	} else if (!strcmp(key, CIL_KEY_XOR)) {
-		cond->flavor = CIL_XOR;
 	} else if (!strcmp(key, CIL_KEY_NOT)) {
 		cond->flavor = CIL_NOT;
 	} else if (!strcmp(key, CIL_KEY_EQ)) {
 		cond->flavor = CIL_EQ;
 	} else if (!strcmp(key, CIL_KEY_NEQ)) {
 		cond->flavor = CIL_NEQ;
-	} else if (!strcmp(key, CIL_KEY_EQ)) {
-		cond->flavor = CIL_EQ;
-	} else if (!strcmp(key, CIL_KEY_NEQ)) {
-		cond->flavor = CIL_NEQ;
-	} else if (!strcmp(key, CIL_KEY_CONS_EQ)) {
-		cond->flavor = CIL_CONS_EQ;
-	} else if (!strcmp(key, CIL_KEY_CONS_DOM)) {
-		cond->flavor = CIL_CONS_DOM;
-	} else if (!strcmp(key, CIL_KEY_CONS_DOMBY)) {
-		cond->flavor = CIL_CONS_DOMBY;
-	} else if (!strcmp(key, CIL_KEY_CONS_INCOMP)) {
-		cond->flavor = CIL_CONS_INCOMP;
-	} else 	{
+	} else if (flavor != CIL_CONSTRAIN && flavor != CIL_MLSCONSTRAIN && !strcmp(key, CIL_KEY_XOR)) {
+		cond->flavor = CIL_XOR;
+	} else if (flavor == CIL_CONSTRAIN || flavor == CIL_MLSCONSTRAIN) {
+		if (!strcmp(key, CIL_KEY_CONS_DOM)) {
+			cond->flavor = CIL_CONS_DOM;
+		} else if (!strcmp(key, CIL_KEY_CONS_DOMBY)) {
+			cond->flavor = CIL_CONS_DOMBY;
+		} else if (!strcmp(key, CIL_KEY_CONS_INCOMP)) {
+			cond->flavor = CIL_CONS_INCOMP;
+		} else 	{
+			rc = SEPOL_ERR;
+			goto not_valid;
+		}
+	} else {
 		rc = SEPOL_ERR;
 		goto not_valid;
 	}
@@ -2045,7 +2044,7 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 	}
 
 	if (node == node->parent->cl_head) {
-		rc = __cil_verify_expr_oper_flavor(node->data, cond);
+		rc = __cil_verify_expr_oper_flavor(node->data, cond, flavor);
 		if (rc != SEPOL_OK) {
 			goto gen_expr_stack_helper_out;
 		}
