@@ -1251,7 +1251,7 @@ void test_cil_resolve_constrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1271,7 +1271,7 @@ void test_cil_resolve_constrain_class_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1292,7 +1292,7 @@ void test_cil_resolve_constrain_perm_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1311,7 +1311,7 @@ void test_cil_resolve_constrain_perm_resolve_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "foo", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "foo", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6634,7 +6634,7 @@ void test_cil_disable_children_helper_tunable(CuTest *tc) {
 }
 
 void test_cil_disable_children_helper_unknown(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7409,7 +7409,7 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "role", "r1", ")",
 			"(", "role", "r2", ")",
-			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7437,7 +7437,7 @@ void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "role", "r1", ")",
 			"(", "role", "r2", ")",
-			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7465,7 +7465,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7493,7 +7493,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

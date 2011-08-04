@@ -4686,7 +4686,7 @@ void test_cil_gen_constrain_expr_stack_eq_r1r2(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_r1r2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "r1", "r2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4866,7 +4866,7 @@ void test_cil_gen_constrain_expr_stack_eq2_u2u2_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l2h2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4896,7 +4896,7 @@ void test_cil_gen_constrain_expr_stack_eq_l2h2(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4926,7 +4926,7 @@ void test_cil_gen_constrain_expr_stack_eq_l2_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1l2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l1", "l2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4956,7 +4956,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1l2(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1h1(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "h1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l1", "h1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4986,7 +4986,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1h1(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1h2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l1", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5016,7 +5016,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1h2(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_h1l2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "h1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "h1", "l2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5046,7 +5046,7 @@ void test_cil_gen_constrain_expr_stack_eq_h1l2(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_h1h2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "h1", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "h1", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5076,7 +5076,7 @@ void test_cil_gen_constrain_expr_stack_eq_h1h2(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_h1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "h1", "l1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "h1", "l1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5106,7 +5106,7 @@ void test_cil_gen_constrain_expr_stack_eq_h1_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1l1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "l1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l1", "l1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5136,7 +5136,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1l1_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_l1l2_constrain_neg(CuTest *tc) {
-	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l1", "l2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5196,7 +5196,7 @@ void test_cil_gen_constrain_expr_stack_eq_l1l2_constrain_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_leftkeyword_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "h2", "h1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "h2", "h1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5226,7 +5226,7 @@ void test_cil_gen_constrain_expr_stack_eq_leftkeyword_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_noexpr1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5256,7 +5256,7 @@ void test_cil_gen_constrain_expr_stack_eq_noexpr1_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_expr1inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "(", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "(", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5286,7 +5286,7 @@ void test_cil_gen_constrain_expr_stack_eq_expr1inparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_noexpr2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5316,7 +5316,7 @@ void test_cil_gen_constrain_expr_stack_eq_noexpr2_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_expr2inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "(", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l1", "(", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5346,7 +5346,7 @@ void test_cil_gen_constrain_expr_stack_eq_expr2inparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "foo", "foo", "extra", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "foo", "foo", "extra", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5766,7 +5766,7 @@ void test_cil_gen_constrain_expr_stack_not(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_not_noexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "not", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "!", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5796,7 +5796,7 @@ void test_cil_gen_constrain_expr_stack_not_noexpr_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_not_emptyparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "not", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "!", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5826,7 +5826,7 @@ void test_cil_gen_constrain_expr_stack_not_emptyparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_not_extraparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "not", "(", "!=", "l2", "h2", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "!", "(", "!=", "l2", "h2", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5887,7 +5887,7 @@ void test_cil_gen_constrain_expr_stack_or(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_or_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", 
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "||", 
 			"(", "foo", ")", "(", "!=", "l1", "h1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5918,7 +5918,7 @@ void test_cil_gen_constrain_expr_stack_or_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_or_noexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "||", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5948,7 +5948,7 @@ void test_cil_gen_constrain_expr_stack_or_noexpr_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_or_emptyfirstparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "||", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5978,7 +5978,7 @@ void test_cil_gen_constrain_expr_stack_or_emptyfirstparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_or_missingsecondexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", "(", "foo", ")", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "||", "(", "foo", ")", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6008,7 +6008,7 @@ void test_cil_gen_constrain_expr_stack_or_missingsecondexpr_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_or_emptysecondparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", "(", "foo", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "||", "(", "foo", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6038,7 +6038,7 @@ void test_cil_gen_constrain_expr_stack_or_emptysecondparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_or_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", "(", "foo", ")", "(", "foo", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "||", "(", "foo", ")", "(", "foo", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6099,7 +6099,7 @@ void test_cil_gen_constrain_expr_stack_and(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_and_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", 
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "&&", 
 			"(", "foo", ")", "(", "!=", "l1", "h1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6130,7 +6130,7 @@ void test_cil_gen_constrain_expr_stack_and_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_and_noexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "&&", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6160,7 +6160,7 @@ void test_cil_gen_constrain_expr_stack_and_noexpr_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_and_emptyfirstparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "&&", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6190,7 +6190,7 @@ void test_cil_gen_constrain_expr_stack_and_emptyfirstparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_and_missingsecondexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", "(", "foo", ")", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "&&", "(", "foo", ")", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6220,7 +6220,7 @@ void test_cil_gen_constrain_expr_stack_and_missingsecondexpr_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_and_emptysecondparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", "(", "foo", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "&&", "(", "foo", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6250,7 +6250,7 @@ void test_cil_gen_constrain_expr_stack_and_emptysecondparens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_and_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", "(", "foo", ")", "(", "foo", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "&&", "(", "foo", ")", "(", "foo", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -10916,7 +10916,7 @@ void test_cil_gen_levelrange_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -11087,7 +11087,7 @@ void test_cil_gen_constrain_expression_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "12", "h2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -11121,7 +11121,7 @@ void test_cil_gen_constrain_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "12", "h2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -17346,7 +17346,7 @@ void test_cil_build_ast_node_helper_gen_levelrange_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_constrain(CuTest *tc) {
-	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -17382,7 +17382,7 @@ void test_cil_build_ast_node_helper_gen_constrain_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_mlsconstrain(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
