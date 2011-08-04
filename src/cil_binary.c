@@ -358,7 +358,7 @@ int cil_user_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	user_datum_t *sepol_user = cil_malloc(sizeof(*sepol_user));
 	user_datum_init(sepol_user);
 
-	key = cil_user->datum.name;
+	key = cil_strdup(cil_user->datum.name);
 	rc = symtab_insert(pdb, SYM_USERS, key, sepol_user, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
 		goto user_to_policydb_out;
