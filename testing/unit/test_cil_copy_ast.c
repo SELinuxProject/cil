@@ -464,7 +464,7 @@ void test_cil_copy_type(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	cil_gen_type(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_TYPE);
+	cil_gen_type(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 
 	struct cil_tree_node *test_copy;
 	cil_tree_node_init(&test_copy);

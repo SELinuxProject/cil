@@ -118,15 +118,12 @@ void test_cil_gen_type_dbnull_neg(CuTest *tc);
 void test_cil_gen_type_currnull_neg(CuTest *tc);
 void test_cil_gen_type_astnull_neg(CuTest *tc);
 void test_cil_gen_type_extra_neg(CuTest *tc);
-void test_cil_gen_type_invalid_node_neg(CuTest *tc);
-void test_cil_gen_type_extratype_nottypeorattr_neg(CuTest *tc);
 
-void test_cil_gen_type_attribute(CuTest *);
-void test_cil_gen_type_attribute_dbnull_neg(CuTest *tc);
-void test_cil_gen_type_attribute_currnull_neg(CuTest *tc);
-void test_cil_gen_type_attribute_astnull_neg(CuTest *tc);
-void test_cil_gen_type_attribute_extra_neg(CuTest *tc);
-//TODO: cil_gen_type negative test case for when flavor isn't type or attribute
+void test_cil_gen_attribute(CuTest *);
+void test_cil_gen_attribute_dbnull_neg(CuTest *tc);
+void test_cil_gen_attribute_currnull_neg(CuTest *tc);
+void test_cil_gen_attribute_astnull_neg(CuTest *tc);
+void test_cil_gen_attribute_extra_neg(CuTest *tc);
 
 void test_cil_gen_typeattr(CuTest *);
 void test_cil_gen_typeattr_dbnull_neg(CuTest *);
@@ -925,8 +922,8 @@ void test_cil_build_ast_node_helper_userrange_neg(CuTest *);
 void test_cil_build_ast_node_helper_type(CuTest *);
 void test_cil_build_ast_node_helper_type_neg(CuTest *);
 
-void test_cil_build_ast_node_helper_type_attribute(CuTest *);
-void test_cil_build_ast_node_helper_type_attribute_neg(CuTest *);
+void test_cil_build_ast_node_helper_attribute(CuTest *);
+void test_cil_build_ast_node_helper_attribute_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_typeattr(CuTest *);
 void test_cil_build_ast_node_helper_typeattr_neg(CuTest *);

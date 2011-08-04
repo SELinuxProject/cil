@@ -731,18 +731,16 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_type_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_type_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_type_invalid_node_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_type_extratype_nottypeorattr_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute);
-	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_type_attribute_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type_attribute);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type_attribute_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attribute);
+	SUITE_ADD_TEST(suite, test_cil_gen_attribute_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attribute_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attribute_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_attribute_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attribute);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attribute_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_typebounds);
 	SUITE_ADD_TEST(suite, test_cil_gen_typebounds_notype1_neg);
