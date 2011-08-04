@@ -138,8 +138,7 @@ void test_cil_copy_node_helper_netifcon(CuTest *tc);
 void test_cil_copy_node_helper_netifcon_neg(CuTest *tc); 
 
 void test_cil_copy_fill_context(CuTest *);
-void test_cil_copy_fill_context_anonlow(CuTest *);
-void test_cil_copy_fill_context_anonhigh(CuTest *);
+void test_cil_copy_fill_context_anonrange(CuTest *);
 
 void test_cil_copy_call(CuTest *);
 void test_cil_copy_node_helper_call(CuTest *tc); 

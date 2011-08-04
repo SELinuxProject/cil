@@ -865,7 +865,7 @@ void test_cil_copy_fill_level(CuTest *tc) {
 }
 
 void test_cil_copy_context(CuTest *tc) {
-	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "(", "low", "high", ")", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -970,7 +970,7 @@ void test_cil_copy_netifcon_nested(CuTest *tc) {
 }
 
 void test_cil_copy_fill_context(CuTest *tc) {
-	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "range", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -1004,43 +1004,8 @@ void test_cil_copy_fill_context(CuTest *tc) {
 		((struct cil_context *)test_ast_node->data)->range_str);
 }
 
-void test_cil_copy_fill_context_anonlow(CuTest *tc) {
-	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "(", "s0", "(", "c0", ")", ")", "high", ")", ")", NULL};
-	
-        struct cil_tree *test_tree;
-        gen_test_tree(&test_tree, line);
-
-        struct cil_tree_node *test_ast_node;
-        cil_tree_node_init(&test_ast_node);
-
-        struct cil_db *test_db;
-        cil_db_init(&test_db);
-
-        test_ast_node->parent = test_db->ast->root;
-        test_ast_node->line = 1;
-
-	cil_gen_context(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-	
-	struct cil_tree_node *test_copy;
-	cil_tree_node_init(&test_copy);
-	cil_context_init((struct cil_context**)&test_copy->data);
-
-	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
-
-	cil_copy_fill_context((struct cil_context*)test_ast_node->data, (struct cil_context*)test_copy->data);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->user_str,
-		((struct cil_context *)test_ast_node->data)->user_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->role_str,
-		((struct cil_context *)test_ast_node->data)->role_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->type_str,
-		((struct cil_context *)test_ast_node->data)->type_str);
-	CuAssertStrEquals(tc, ((struct cil_context *)test_copy->data)->range_str,
-		((struct cil_context *)test_ast_node->data)->range_str);
-}
-
-void test_cil_copy_fill_context_anonhigh(CuTest *tc) {
-	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "(", "s0", "(", "c0", ")", ")", ")", ")", NULL};
+void test_cil_copy_fill_context_anonrange(CuTest *tc) {
+	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "(", "low", "high", ")", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -2288,7 +2253,7 @@ void test_cil_copy_node_helper_level_neg(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_context(CuTest *tc) {
-	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "(", "low", "high", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2311,7 +2276,7 @@ void test_cil_copy_node_helper_context(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_context_neg(CuTest *tc) {
-	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "(", "low", "high", ")",  ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
