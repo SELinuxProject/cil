@@ -109,6 +109,12 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_CLASS:
 		cil_destroy_class(*data);
 		break;
+	case CIL_CLASSMAPPERM:
+		cil_destroy_classmap_perm(*data);
+		break;
+	case CIL_CLASSMAP:
+		cil_destroy_classmap(*data);
+		break;
 	case CIL_PERM:
 		cil_destroy_perm(*data);
 		break;
@@ -407,6 +413,7 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 {
 	struct cil_tree_node *current = root;
 	uint16_t reverse = 0;
+	int rc = SEPOL_ERR;
 	
 	do {
 		if (current->cl_head != NULL && !reverse) {
@@ -418,6 +425,9 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 				break;
 			case CIL_CLASS:
 				cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
+				break;
+			case CIL_CLASSMAP:
+				cil_symtab_destroy(&((struct cil_classmap*)current->data)->perms);
 				break;
 			case CIL_COMMON:
 				cil_symtab_destroy(&((struct cil_common*)current->data)->perms);
@@ -445,6 +455,8 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 				break;
 			default:
 				printf("destroy symtab error, wrong flavor node: %d\n", current->flavor);
+				rc = SEPOL_ERR;
+				goto destroy_ast_symtabs_out;
 			}
 			current = current->cl_head;
 		} else if (current->next != NULL) {
@@ -458,6 +470,9 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 	while (current->flavor != CIL_ROOT);
 
 	return SEPOL_OK;
+
+destroy_ast_symtabs_out:
+	return rc;
 }
 
 int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index)
@@ -479,7 +494,7 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 				printf("cil_get_parent_symtab: cil_call failed, rc: %d\n", rc);
 				goto exit;
 			}
-		} else if (ast_node->parent->flavor == CIL_CLASS) {
+		} else if (ast_node->parent->flavor == CIL_CLASS || ast_node->parent->flavor == CIL_CLASSMAP) {
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
 		} else if (ast_node->parent->flavor == CIL_COMMON) {
 			*symtab = &((struct cil_common*)ast_node->parent->data)->perms;
@@ -1042,6 +1057,22 @@ void cil_classpermset_init(struct cil_classpermset **cps)
 	(*cps)->flavor = CIL_AST_STR;
 	(*cps)->permset_str = NULL;
 	(*cps)->permset = NULL;
+}
+
+void cil_classmap_perm_init(struct cil_classmap_perm **cmp)
+{
+	*cmp = cil_malloc(sizeof(**cmp));
+
+	cil_symtab_datum_init(&(*cmp)->datum);
+	(*cmp)->classperms = NULL;
+}
+
+void cil_classmap_init(struct cil_classmap **map)
+{
+	*map = cil_malloc(sizeof(**map));
+
+	cil_symtab_datum_init(&(*map)->datum);
+	cil_symtab_init(&(*map)->perms, CIL_SYM_SIZE);
 }
 
 void cil_user_init(struct cil_user **user)

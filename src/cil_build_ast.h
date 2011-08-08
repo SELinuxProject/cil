@@ -54,13 +54,17 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 void cil_destroy_class(struct cil_class *class);
 int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_perm(struct cil_perm *perm);
-int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node);
+int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 int cil_fill_permset(struct cil_tree_node *start_perm, struct cil_permset *permset);
 int cil_gen_permset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_permset(struct cil_permset *permset);
 int cil_fill_classpermset(struct cil_tree_node *class_node, struct cil_classpermset *cps);
 int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_classpermset(struct cil_classpermset *cps);
+int cil_gen_classmap_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_classmap_perm(struct cil_classmap_perm *cmp);
+int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_classmap(struct cil_classmap *map);
 int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_common(struct cil_common *common);
 int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

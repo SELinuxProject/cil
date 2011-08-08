@@ -204,6 +204,8 @@ void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 	while (current_perm != NULL) {
 		if (current_perm->flavor == CIL_PERM) {
 			printf(" %s", ((struct cil_perm *)current_perm->data)->datum.name);
+		} else if (current_perm->flavor == CIL_CLASSMAPPERM) {
+			printf(" %s", ((struct cil_classmap_perm*)current_perm->data)->datum.name);
 		} else {
 			printf("\n\n perms list contained unexpected data type: %d\n", current_perm->flavor);
 			break;
@@ -722,6 +724,16 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("CLASSPERMSET: %s", csp->datum.name);
 
 				cil_tree_print_classpermset(csp);
+
+				return;
+			}
+			case CIL_CLASSMAP: {
+				struct cil_classmap *cm = node->data;
+				printf("CLASSMAP: %s", cm->datum.name);
+
+				printf(" (");
+				cil_tree_print_perms_list(node->cl_head);
+				printf(" )");
 
 				return;
 			}
@@ -1448,7 +1460,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 				} else {
 					printf(" %s", (char*)current->data);
 				}
-			} else if (current->flavor != CIL_PERM) {
+			} else if (current->flavor != CIL_PERM && current->flavor != CIL_CLASSMAPPERM) {
 				for (x = 0; x<depth; x++) {
 					printf("\t");
 				}

@@ -38,6 +38,8 @@ int cil_copy_list(struct cil_list *orig, struct cil_list **copy);
 int cil_copy_block(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 int cil_copy_perm(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 int cil_copy_class(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
+int cil_copy_classmap_perm(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
+int cil_copy_classmap(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 int cil_copy_permset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);
 void cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new);
 int cil_copy_classpermset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab);

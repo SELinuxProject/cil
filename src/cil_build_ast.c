@@ -290,7 +290,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	perms = parse_current->next->next->cl_head;
 
-	rc = cil_gen_perm_nodes(db, perms, ast_node);
+	rc = cil_gen_perm_nodes(db, perms, ast_node, CIL_PERM);
 	if (rc != SEPOL_OK) {
 		printf("Class: failed to parse perms\n");
 		goto exit;
@@ -355,7 +355,7 @@ void cil_destroy_perm(struct cil_perm *perm)
 	free(perm);
 }
 
-int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node)
+int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *new_ast = NULL;
@@ -370,9 +370,13 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 		new_ast->parent = ast_node;
 		new_ast->line = current_perm->line;
 		new_ast->path = current_perm->path;
-		rc = cil_gen_perm(db, current_perm, new_ast);
+		if (flavor == CIL_PERM) {
+			rc = cil_gen_perm(db, current_perm, new_ast);
+		} else if (flavor == CIL_CLASSMAPPERM) {
+			rc = cil_gen_classmap_perm(db, current_perm, new_ast);
+		}
 		if (rc != SEPOL_OK) {
-			printf("CLASS: Failed to gen perm\n");
+			printf("Failed to gen perm\n");
 			goto exit;
 		}
 
@@ -598,6 +602,102 @@ void cil_destroy_classpermset(struct cil_classpermset *cps)
 	}
 }
 
+int cil_gen_classmap_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_classmap_perm *cmp = NULL;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	cil_classmap_perm_init(&cmp);
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cmp, (hashtab_key_t)parse_current->data, CIL_SYM_UNKNOWN, CIL_CLASSMAPPERM);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	if (cmp != NULL) {
+		cil_destroy_classmap_perm(cmp);
+	}
+	return rc;
+}
+
+void cil_destroy_classmap_perm(struct cil_classmap_perm *cmp)
+{
+	if (cmp == NULL) {
+		return;
+	}
+
+	cil_symtab_datum_destroy(cmp->datum);
+	if (cmp->classperms != NULL) {
+		cil_list_destroy(&cmp->classperms, 0);
+	}
+}
+
+int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key = NULL;
+	struct cil_classmap *map = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_classmap_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid classmap declaration (line: %d)\n", parse_current->line);
+		goto gen_classmap_cleanup;
+	}
+
+	cil_classmap_init(&map);
+
+	key = parse_current->next->data;
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)map, (hashtab_key_t)key, CIL_SYM_CLASSES, CIL_CLASSMAP);
+	if (rc != SEPOL_OK) {
+		goto gen_classmap_cleanup;
+	}
+
+	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_CLASSMAPPERM);
+	if (rc != SEPOL_OK) {
+		printf("Failed to gen perm nodes\n");
+		goto gen_classmap_cleanup;
+	}
+
+	return SEPOL_OK;
+
+gen_classmap_cleanup:
+	if (map != NULL) {
+		cil_destroy_classmap(map);
+	}
+	return rc;
+}
+
+void cil_destroy_classmap(struct cil_classmap *map)
+{
+	if (map == NULL) {
+		return;
+	}
+
+	cil_symtab_datum_destroy(map->datum);
+	cil_symtab_destroy(&map->perms);
+
+	free(map);
+}
+
 // TODO try to merge some of this with cil_gen_class (helper function for both)
 int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
@@ -631,7 +731,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto exit;
 	}
 
-	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node);
+	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_PERM);
 	if (rc != SEPOL_OK) {
 		printf("Common: failed to parse perms\n");
 		goto exit;
@@ -4879,6 +4979,8 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			param->flavor = CIL_CLASS;
 		} else if (!strcmp(kind, CIL_KEY_IPADDR)) {
 			param->flavor = CIL_IPADDR;
+		} else if (!strcmp(kind, CIL_KEY_CLASSMAP)) {
+			param->flavor = CIL_CLASSMAP;
 		} else if (!strcmp(kind, CIL_KEY_PERMSET)) {
 			param->flavor = CIL_PERMSET;
 		} else if (!strcmp(kind, CIL_KEY_CLASSPERMSET)) {
@@ -5493,6 +5595,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto exit;
 		}
 		// To avoid parsing list of perms again
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSMAP)) {
+		rc = cil_gen_classmap(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_classmap failed, rc: %d\n", rc);
+			goto exit;
+		}
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_PERMSET)) {
 		rc = cil_gen_permset(db, parse_current, ast_node);

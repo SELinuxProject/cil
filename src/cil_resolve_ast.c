@@ -2611,6 +2611,9 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 			case CIL_CLASS:
 				new_arg->arg_str = cil_strdup(pc->data);
 				break;
+			case CIL_CLASSMAP:
+				new_arg->arg_str = cil_strdup(pc->data);
+				break;
 			case CIL_PERMSET: {
 				if (pc->cl_head != NULL) {
 					struct cil_permset *permset = NULL;
@@ -2784,6 +2787,9 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 			sym_index = CIL_SYM_CATS;
 			break;
 		case CIL_CLASS:
+			sym_index = CIL_SYM_CLASSES;
+			break;
+		case CIL_CLASSMAP:
 			sym_index = CIL_SYM_CLASSES;
 			break;
 		default:

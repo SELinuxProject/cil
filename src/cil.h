@@ -72,6 +72,7 @@ enum cil_flavor {
 	CIL_CONSTRAIN,
 	CIL_MLSCONSTRAIN,
 	CIL_PERM,
+	CIL_CLASSMAPPERM,
 	CIL_USERROLE,
 	CIL_USERLEVEL,
 	CIL_USERRANGE,
@@ -125,6 +126,7 @@ enum cil_flavor {
 
 	CIL_BLOCK = CIL_MIN_DECLARATIVE,
 	CIL_CLASS,
+	CIL_CLASSMAP,
 	CIL_COMMON,
 	CIL_SID,
 	CIL_USER,
@@ -159,6 +161,7 @@ enum cil_flavor {
 #define CIL_KEY_PERM		"perm"
 #define CIL_KEY_PERMSET		"permissionset"
 #define CIL_KEY_CLASSPERMSET	"classpermissionset"
+#define CIL_KEY_CLASSMAP	"classmap"
 #define CIL_KEY_COMMON		"common"
 #define CIL_KEY_CLASSCOMMON	"classcommon"
 #define CIL_KEY_SID		"sid"
@@ -345,6 +348,16 @@ struct cil_classpermset {
 	enum cil_flavor flavor;
 	char *permset_str;
 	struct cil_permset *permset;
+};
+
+struct cil_classmap_perm {
+	struct cil_symtab_datum datum;
+	struct cil_list *classperms;
+};
+
+struct cil_classmap {
+	struct cil_symtab_datum datum;
+	symtab_t perms;
 };
 
 struct cil_common {
@@ -846,6 +859,8 @@ void cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 void cil_perm_init(struct cil_perm **perm);
 void cil_permset_init(struct cil_permset **permset);
 void cil_classpermset_init(struct cil_classpermset **cps);
+void cil_classmap_perm_init(struct cil_classmap_perm **cmp);
+void cil_classmap_init(struct cil_classmap **map);
 void cil_user_init(struct cil_user **user);
 void cil_userlevel_init(struct cil_userlevel **usrlvl);
 void cil_userrange_init(struct cil_userrange **userrange);

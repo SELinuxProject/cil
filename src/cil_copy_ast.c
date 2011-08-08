@@ -163,6 +163,63 @@ exit:
 	return rc;
 }
 
+int cil_copy_classmap_perm(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_classmap_perm *new = NULL;
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+
+	cil_classmap_perm_init(&new);
+
+	key = ((struct cil_symtab_datum*)orig->data)->name;
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_classmap_perm: cil_symtab_insert failed, rc: %d\n", rc);
+		free(new);
+		goto copy_classmap_perm_out;
+	}
+
+	copy->data = new;
+
+	return SEPOL_OK;
+
+copy_classmap_perm_out:
+	return rc;
+}
+
+int cil_copy_classmap(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+{
+	struct cil_classmap *new = NULL;
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+
+	cil_classmap_init(&new);
+
+	key = ((struct cil_symtab_datum*)orig->data)->name;
+
+	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_classmap: cil_symtab_insert failed, rc: %d\n", rc);
+		cil_destroy_classmap(new);
+		goto copy_classmap_out;
+	}
+
+	rc = symtab_init(&new->perms, CIL_SYM_SIZE);
+	if (rc != SEPOL_OK) {
+		printf("cil_copy_classmap: symtab_init failed, rc: %d\n", rc);
+		cil_destroy_classmap(new);
+		goto copy_classmap_out;
+	}
+
+	copy->data = new;
+
+	return SEPOL_OK;
+
+copy_classmap_out:
+	return rc;
+}
+
 int cil_copy_permset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
 {
 	struct cil_permset *new = NULL;
@@ -1835,6 +1892,12 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_PERM:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_UNKNOWN, &cil_copy_perm);
+		break;
+	case CIL_CLASSMAPPERM:
+		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_UNKNOWN, &cil_copy_classmap_perm);
+		break;
+	case CIL_CLASSMAP:
+		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CLASSES, &cil_copy_classmap);
 		break;
 	case CIL_PERMSET:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_PERMSETS, &cil_copy_permset);
