@@ -1645,8 +1645,6 @@ int cil_type_init(struct cil_type **type)
 
 	cil_symtab_datum_init(&new_type->datum);
 
-	new_type->attrs_list = NULL;
-
 	*type = new_type;
 
 	return SEPOL_OK;

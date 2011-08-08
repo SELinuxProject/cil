@@ -1421,6 +1421,19 @@ int __cil_binary_create_helper(struct cil_tree_node *node, __attribute__((unused
 	pdb = args->pdb;
 	pass = args->pass;
 
+	if (node->flavor == CIL_OPTIONAL) {
+		struct cil_optional *opt = node->data;
+		if (opt->datum.state != CIL_STATE_ENABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+			rc = SEPOL_OK;
+			goto binary_create_helper_out;
+		}
+	} else if (node->flavor == CIL_MACRO) {
+		*finished = CIL_TREE_SKIP_HEAD;
+		rc = SEPOL_OK;
+		goto binary_create_helper_out;
+	}	
+
 	rc = __cil_node_to_policydb(pdb, node, pass);
 	if (rc != SEPOL_OK) {
 		goto binary_create_helper_out;

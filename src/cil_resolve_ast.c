@@ -117,16 +117,14 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		printf("Name resolution failed for %s\n", rule->src_str);
 		goto resolve_avrule_out;
 	}
-	rule->src = (struct cil_type*)(src_node->data);
-	rule->src_flavor = src_node->flavor;
+	rule->src = src_node->data;
 
 	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->tgt_str);
 		goto resolve_avrule_out;
 	}
-	rule->tgt = (struct cil_type*)(tgt_node->data);
-	rule->tgt_flavor = tgt_node->flavor;
+	rule->tgt = tgt_node->data;
 
 	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {
@@ -179,14 +177,14 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current, stru
 		printf("Name resolution failed for %s\n", rule->src_str);
 		goto resolve_type_rule_out;
 	}
-	rule->src = (struct cil_type*)(src_node->data);
+	rule->src = src_node->data;
 
 	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rule->tgt_str);
 		goto resolve_type_rule_out;
 	}
-	rule->tgt = (struct cil_type*)(tgt_node->data);
+	rule->tgt = tgt_node->data;
 
 	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {
@@ -200,7 +198,12 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current, stru
 		printf("Name resolution failed for %s\n", rule->result_str);
 		goto resolve_type_rule_out;
 	}
-	rule->result = (struct cil_type*)(result_node->data);
+	if (result_node->flavor != CIL_TYPE && result_node->flavor != CIL_TYPEALIAS) {
+		printf("Type rule result must be a type or type alias\n");
+		rc = SEPOL_ERR;
+		goto resolve_type_rule_out;
+	}
+	rule->result = result_node->data;
 
 	return SEPOL_OK;
 
@@ -258,8 +261,6 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 	struct cil_attribute *attr = NULL;
 	struct cil_list_item *curr = NULL;
 	struct cil_list *res_list = NULL;
-	struct cil_list_item *tmp = NULL;
-	struct cil_list_item *new_attr = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(db, current, attrtypes->attr_str, CIL_SYM_TYPES, call, &attr_node);
@@ -267,13 +268,13 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 		printf("Name resolution failed for %s\n", attrtypes->attr_str);
 		goto resolve_attrtypes_out;
 	}
-	attr = attr_node->data;
-
 	if (attr_node->flavor != CIL_ATTRIBUTE) {
 		rc = SEPOL_ERR;
 		printf("Attribute type not an attribute\n");
 		goto resolve_attrtypes_out;
 	}
+	attr = attr_node->data;
+
 
 	if (attrtypes->types_list_str != NULL) {
 		cil_list_init(&res_list);
@@ -282,54 +283,36 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 			goto resolve_attrtypes_out;
 		}
 
-		curr = res_list->head;
-		while (curr != NULL) {
-			if (curr->flavor == CIL_TYPE) {
-				if (((struct cil_type*)curr->data)->attrs_list != NULL) {
-					tmp = ((struct cil_type*)curr->data)->attrs_list->head;
-				} else {
-					cil_list_init(&((struct cil_type*)curr->data)->attrs_list);
-				}
-				cil_list_item_init(&new_attr);
-				new_attr->flavor = CIL_ATTRIBUTE;
-				new_attr->data = attr;
-				((struct cil_type*)curr->data)->attrs_list->head = new_attr;
-				new_attr->next = tmp;
-			}
+		for (curr = res_list->head; curr != NULL; curr = curr->next) {
 			if (attr->types_list == NULL) {
 				cil_list_init(&attr->types_list);
 			}
-			tmp = attr->types_list->head;
-			attr->types_list->head = curr;
-			curr = curr->next;
-			attr->types_list->head->next = tmp;
+			cil_list_prepend_item(attr->types_list, curr);
 		}
+
+		free(res_list);
 	}
 
-	res_list->head = NULL;
-
 	if (attrtypes->neg_list_str != NULL) {
+		cil_list_init(&res_list);
 		rc = cil_resolve_list(db, attrtypes->neg_list_str, res_list, current, CIL_SYM_TYPES, call);
 		if (rc != SEPOL_OK) {
 			goto resolve_attrtypes_out;
 		}
 
-		curr = res_list->head;
-		while (curr != NULL) {
+		for (curr = res_list->head; curr != NULL; curr = curr->next) {
 			if (attr->neg_list == NULL) {
 				cil_list_init(&attr->neg_list);
 			}
-			tmp = attr->neg_list->head;
-			attr->neg_list->head = curr;
-			curr = curr->next;
-			attr->neg_list->head->next = tmp;
+			cil_list_prepend_item(attr->neg_list, curr);
 		}
+
+		free(res_list);
 	}
 
 	return SEPOL_OK;
 
 resolve_attrtypes_out:
-	printf("Failed to resolve attributetypes\n");
 	return rc;
 }
 
@@ -344,7 +327,12 @@ int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current, stru
 		printf("Name resolution failed for %s\n", alias->type_str);
 		goto resolve_typealias_out;
 	}
-	alias->type = (struct cil_type*)(type_node->data);
+	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
+		printf("Typealias must resolve to a type or type alias\n");
+		rc = SEPOL_ERR;
+		goto resolve_typealias_out;
+	}
+	alias->type = type_node->data;
 
 	return SEPOL_OK;
 
@@ -356,6 +344,7 @@ int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, str
 {
 	struct cil_typebounds *typebnds = (struct cil_typebounds*)current->data;
 	struct cil_tree_node *type_node = NULL;
+	struct cil_type *type = NULL;
 	struct cil_tree_node *bounds_node = NULL;
 	int rc = SEPOL_ERR;
 
@@ -364,20 +353,31 @@ int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, str
 		printf("Name resolution failed for %s\n", typebnds->type_str);
 		goto resolve_typebounds_out;
 	}
-
+	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
+		printf("Typebounds must be a type or type alias\n");
+		rc = SEPOL_ERR;
+		goto resolve_typebounds_out;
+	}
+	
 	rc = cil_resolve_name(db, current, typebnds->bounds_str, CIL_SYM_TYPES, call, &bounds_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", typebnds->bounds_str);
 		goto resolve_typebounds_out;
 	}
-
-	if (((struct cil_type*)type_node->data)->bounds != NULL) {
-		printf("type cannot bind more than one type\n");
+	if (bounds_node->flavor != CIL_TYPE && bounds_node->flavor != CIL_TYPEALIAS) {
+		printf("Typebounds must be a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto resolve_typebounds_out;
 	}
 
-	((struct cil_type*)type_node->data)->bounds = bounds_node->data;
+	type = type_node->data;
+	if (type->bounds != NULL) {
+		printf("Type cannot bind more than one type\n");
+		rc = SEPOL_ERR;
+		goto resolve_typebounds_out;
+	}
+
+	type->bounds = bounds_node->data;
 
 	return SEPOL_OK;
 
@@ -396,7 +396,14 @@ int cil_resolve_typepermissive(struct cil_db *db, struct cil_tree_node *current,
 		printf("Name resolution failed for %s\n", typeperm->type_str);
 		goto resolve_typepermissive_out;
 	}
-	typeperm->type = (struct cil_type*)(type_node->data);
+
+	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
+		printf("Typepermissive must be a type or type alias\n");
+		rc = SEPOL_ERR;
+		goto resolve_typepermissive_out;
+	}
+
+	typeperm->type = type_node->data;
 
 	return SEPOL_OK;
 
@@ -418,28 +425,33 @@ int cil_resolve_filetransition(struct cil_db *db, struct cil_tree_node *current,
 		printf("Name resolution failed for %s\n", filetrans->src_str);
 		goto resolve_filetransition_out;
 	}
-	filetrans->src = (struct cil_type*)(src_node->data);
+	filetrans->src = src_node->data;
 
 	rc = cil_resolve_name(db, current, filetrans->exec_str, CIL_SYM_TYPES, call, &exec_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", filetrans->exec_str);
 		goto resolve_filetransition_out;
 	}
-	filetrans->exec = (struct cil_type*)(exec_node->data);
+	filetrans->exec = exec_node->data;
 
 	rc = cil_resolve_name(db, current, filetrans->proc_str, CIL_SYM_CLASSES, call, &proc_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", filetrans->proc_str);
 		goto resolve_filetransition_out;
 	}
-	filetrans->proc = (struct cil_class*)(proc_node->data);
+	filetrans->proc = proc_node->data;
 
 	rc = cil_resolve_name(db, current, filetrans->dest_str, CIL_SYM_TYPES, call, &dest_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", filetrans->dest_str);
 		goto resolve_filetransition_out;
 	}
-	filetrans->dest = (struct cil_type*)(dest_node->data);
+	if (dest_node->flavor != CIL_TYPE && dest_node->flavor != CIL_TYPEALIAS) {
+		printf("File transition result is not a type or type alias\n");
+		rc = SEPOL_ERR;
+		goto resolve_filetransition_out;
+	}
+	filetrans->dest = dest_node->data;
 
 	return SEPOL_OK;
 
@@ -461,14 +473,14 @@ int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current
 		printf("Name resolution failed for %s\n", rangetrans->src_str);
 		goto resolve_rangetransition_out;
 	}
-	rangetrans->src = (struct cil_type*)src_node->data;
+	rangetrans->src = src_node->data;
 
 	rc = cil_resolve_name(db, current, rangetrans->exec_str, CIL_SYM_TYPES, call, &exec_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", rangetrans->exec_str);
 		goto resolve_rangetransition_out;
 	}
-	rangetrans->exec = (struct cil_type*)exec_node->data;
+	rangetrans->exec = exec_node->data;
 
 	rc = cil_resolve_name(db, current, rangetrans->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {
@@ -581,11 +593,6 @@ int cil_reset_attr(__attribute__((unused)) struct cil_db *db, struct cil_tree_no
 int cil_reset_type(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
 {
 	struct cil_type *type = (struct cil_type*)current->data;
-
-	/* during a re-resolve, we need toreset the list of attributes associated with this type from a attributetypes statement */
-	if (type->attrs_list != NULL) {
-		cil_list_destroy(&type->attrs_list, 0);
-	}
 
 	/* reset the bounds to NULL during a re-resolve */
 	type->bounds = NULL;
@@ -792,7 +799,7 @@ int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struc
 		printf("Name resolution failed for %s\n", roletype->type_str);
 		goto resolve_roletype_out;
 	}
-	roletype->type = (struct cil_type*)(type_node->data);
+	roletype->type = type_node->data;
 
 	return SEPOL_OK;
 
@@ -821,7 +828,7 @@ int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, stru
 		printf("Name resolution failed for %s\n", roletrans->tgt_str);
 		goto resolve_roletrans_out;
 	}
-	roletrans->tgt = (struct cil_type*)(tgt_node->data);
+	roletrans->tgt = tgt_node->data;
 
 	rc = cil_resolve_name(db, current, roletrans->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {
@@ -2000,7 +2007,12 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		error = context->type_str;
 		goto resolve_context_out;
 	}
-	context->type = (struct cil_type*)type_node->data;
+	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
+		rc = SEPOL_ERR;
+		printf("Type not a type or type alias\n");
+		goto resolve_context_out;
+	}
+	context->type = type_node->data;
 
 	if (context->range_str != NULL) {
 		rc = cil_resolve_name(db, current, context->range_str, CIL_SYM_LEVELRANGES, call, &lvlrange_node);
@@ -2772,17 +2784,23 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_list *expr_stack, struc
 		enum cil_flavor flavor = cond->flavor;
 		enum cil_sym_index sym_index =  CIL_SYM_UNKNOWN;
 
-		if (flavor == CIL_BOOL) {
+		switch (flavor) {
+		case CIL_BOOL:
 			sym_index = CIL_SYM_BOOLS;
-		} else if (flavor == CIL_TUNABLE) {
+			break;
+		case CIL_TUNABLE:
 			sym_index = CIL_SYM_TUNABLES;
-		} else if (flavor == CIL_TYPE) {
+			break;
+		case CIL_TYPE:
 			sym_index = CIL_SYM_TYPES;
-		} else if (flavor == CIL_ROLE) {
+			break;
+		case CIL_ROLE:
 			sym_index = CIL_SYM_ROLES;
-		} else if (flavor == CIL_USER) {
+			break;
+		case CIL_USER:
 			sym_index = CIL_SYM_USERS;
-		} else {
+			break;
+		default:
 			curr_expr = curr_expr->next;
 			continue;
 		}

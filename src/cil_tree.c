@@ -323,7 +323,7 @@ void cil_tree_print_context(struct cil_context *context)
 	}
 
 	if (context->type != NULL) {
-		printf(" %s", context->type->datum.name);
+		printf(" %s", ((struct cil_symtab_datum *)context->type)->name);
 	} else if (context->type_str != NULL) {
 		printf(" %s", context->type_str);
 	}
@@ -416,18 +416,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_TYPE: {
 				struct cil_type *type = node->data;
-				struct cil_list_item *curr = NULL;
-				printf("TYPE: %s", type->datum.name);
-				if (type->attrs_list != NULL) {
-					curr = type->attrs_list->head;
-					printf(" attrs: (");
-					while (curr != NULL) {
-						printf(" %s ", ((struct cil_attribute*)curr->data)->datum.name);
-						curr = curr->next;
-					}
-					printf(")");
-				}
-				printf("\n");
+				printf("TYPE: %s\n", type->datum.name);
 				return;
 			}
 			case CIL_ATTRTYPES: {
@@ -561,7 +550,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 
 				if (roletype->type != NULL) {
-					printf(" %s", roletype->type->datum.name);
+					printf(" %s", ((struct cil_symtab_datum *)roletype->type)->name);
 				} else if (roletype->type_str != NULL) {
 					printf(" %s", roletype->type_str);
 				}
@@ -580,7 +569,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 
 				if (roletrans->tgt != NULL) {
-					printf(" %s", roletrans->tgt->datum.name);
+					printf(" %s", ((struct cil_symtab_datum *)roletrans->tgt)->name);
 				} else {
 					printf(" %s", roletrans->tgt_str);
 				}
@@ -759,7 +748,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_typealias *alias = node->data;
 
 				if (alias->type != NULL) {
-					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type->datum.name);
+					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, ((struct cil_symtab_datum *)alias->type)->name);
 				} else {
 					printf("TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type_str);
 				}
@@ -775,7 +764,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_typepermissive *typeperm = node->data;
 
 				if (typeperm->type != NULL) {
-					printf("TYPEPERMISSIVE: %s\n", typeperm->type->datum.name);
+					printf("TYPEPERMISSIVE: %s\n", ((struct cil_symtab_datum *)typeperm->type)->name);
 				} else {
 					printf("TYPEPERMISSIVE: %s\n", typeperm->type_str);
 				}
@@ -787,13 +776,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("FILETRANSITION:");
 
 				if (filetrans->src != NULL) {
-					printf(" %s", filetrans->src->datum.name);
+					printf(" %s", ((struct cil_symtab_datum *)filetrans->src)->name);
 				} else {
 					printf(" %s", filetrans->src_str);
 				}
 
 				if (filetrans->exec != NULL) {
-					printf(" %s", filetrans->exec->datum.name);
+					printf(" %s", ((struct cil_symtab_datum *)filetrans->exec)->name);
 				} else {
 					printf(" %s", filetrans->exec_str);
 				}
@@ -812,13 +801,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("RANGETRANSITION:");
 
 				if (rangetrans->src != NULL) {
-					printf(" %s", rangetrans->src->datum.name);
+					printf(" %s", ((struct cil_symtab_datum *)rangetrans->src)->name);
 				} else {
 					printf(" %s", rangetrans->src_str);
 				}
 
 				if (rangetrans->exec != NULL) {
-					printf(" %s", rangetrans->exec->datum.name);
+					printf(" %s", ((struct cil_symtab_datum *)rangetrans->exec)->name);
 				} else {
 					printf(" %s", rangetrans->exec_str);
 				}
@@ -923,13 +912,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 
 				if (rule->src != NULL) {
-					printf(" %s", rule->src->datum.name);
+					printf(" %s", ((struct cil_symtab_datum *)rule->src)->name);
 				} else {
 					printf(" %s", rule->src_str);
 				}
 
 				if (rule->tgt != NULL) {
-					printf(" %s", rule->tgt->datum.name);
+					printf(" %s", ((struct cil_symtab_datum *)rule->tgt)->name);
 				} else {
 					printf(" %s", rule->tgt_str);
 				}
@@ -941,7 +930,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 
 				if (rule->result != NULL) {
-					printf(" %s\n", rule->result->datum.name);
+					printf(" %s\n", ((struct cil_symtab_datum *)rule->result)->name);
 				} else {
 					printf(" %s\n", rule->result_str);
 				}

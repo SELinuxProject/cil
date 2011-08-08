@@ -416,7 +416,7 @@ struct cil_roletype {
 	char *role_str;
 	struct cil_role *role;
 	char *type_str;
-	struct cil_type *type;
+	void *type; /* type, alias, or attribute */
 };
 
 struct cil_rolebounds {
@@ -426,8 +426,7 @@ struct cil_rolebounds {
 
 struct cil_type	{
 	struct cil_symtab_datum datum;
-	struct cil_list *attrs_list;
-	struct cil_type *bounds;
+	void *bounds; /* type or alias */
 };
 
 struct cil_attribute {
@@ -438,14 +437,14 @@ struct cil_attribute {
 
 struct cil_attrtypes {
 	char *attr_str;
-	struct cil_list *types_list_str;
-	struct cil_list *neg_list_str;
+	struct cil_list *types_list_str; /* list of types, aliases, and attributes */
+	struct cil_list *neg_list_str; /* list of types, aliases, and attributes */
 };
 
 struct cil_typealias {
 	struct cil_symtab_datum datum;
 	char *type_str;
-	struct cil_type *type;
+	void *type; /* type or alias */
 };
 
 struct cil_typebounds {
@@ -455,26 +454,26 @@ struct cil_typebounds {
 
 struct cil_typepermissive {
 	char *type_str;
-	struct cil_type *type;
+	void *type; /* type or alias */
 };
 
 struct cil_filetransition {
 	char *src_str;
-	struct cil_type *src;
+	void *src; /* type, alias, or attribute */
 	char *exec_str;
-	struct cil_type *exec;
+	void *exec; /* type, alias, or attribute */
 	char *proc_str;
 	struct cil_class *proc;
 	char *dest_str;
-	struct cil_type *dest;
+	void *dest; /* type or alias */
 	char *path_str;
 };
 
 struct cil_rangetransition {
 	char *src_str;
-	struct cil_type *src;
+	void *src; /* type, alias, or attribute */
 	char *exec_str;
-	struct cil_type *exec;
+	void *exec; /* type, alias, or attribute */
 	char *obj_str;
 	struct cil_class *obj;
 	char *range_str;
@@ -494,11 +493,9 @@ struct cil_bool {
 struct cil_avrule {
 	uint32_t rule_kind;
 	char *src_str;
-	void *src;
-	uint32_t src_flavor;
+	void *src; /* type, alias, or attribute */
 	char *tgt_str;	
-	void *tgt;
-	uint32_t tgt_flavor;
+	void *tgt; /* type, alias, or attribute */
 	char *obj_str;
 	struct cil_class *obj;
 	struct cil_list *perms_list_str;
@@ -513,20 +510,20 @@ struct cil_avrule {
 struct cil_type_rule {
 	uint32_t rule_kind;
 	char *src_str;
-	struct cil_type *src;
+	void *src; /* type, alias, or attribute */
 	char *tgt_str;
-	struct cil_type *tgt;
+	void *tgt; /* type, alias, or attribute */
 	char *obj_str;
 	struct cil_class *obj;
 	char *result_str;
-	struct cil_type *result;
+	void *result; /* type or alias */
 };
 
 struct cil_role_trans {
 	char *src_str;
 	struct cil_role *src;
 	char *tgt_str;	
-	struct cil_type *tgt;
+	void *tgt; /* type, alias, or attribute */
 	char *obj_str;
 	struct cil_class *obj;
 	char *result_str;
@@ -637,7 +634,7 @@ struct cil_context {
 	char *role_str;
 	struct cil_role *role;
 	char *type_str;
-	struct cil_type *type;
+	void *type; /* type or alias */
 	char *range_str;
 	struct cil_levelrange *range;
 };
@@ -810,7 +807,7 @@ void cil_db_destroy(struct cil_db **db);
 
 void cil_destroy_data(void **data, enum cil_flavor flavor);
 
-int cil_flavor_to_symtab_index(uint32_t flavor, uint32_t *index);
+int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *index);
 
 int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
 void cil_symtab_array_destroy(symtab_t symtab[]);
