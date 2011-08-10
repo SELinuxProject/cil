@@ -285,19 +285,23 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	type_datum_t *sepol_type = cil_malloc(sizeof(*sepol_type));
 	type_datum_init(sepol_type);
 
-	sepol_type->primary = 1;
 	sepol_type->flavor = TYPE_TYPE;
 
 	key = cil_strdup(cil_type->datum.name);
 	rc = symtab_insert(pdb, SYM_TYPES, key, sepol_type, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
-		goto type_to_binary_out;
+		goto type_to_policydb_out;
 	}
 	sepol_type->s.value = value;
+	sepol_type->primary = value;
 
 	return SEPOL_OK;
 
-type_to_binary_out:
+type_to_policydb_out:
+	free(key);
+	free(sepol_type);
+	return rc;
+}
 	return rc;
 }
 
