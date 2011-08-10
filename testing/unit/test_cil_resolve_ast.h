@@ -122,18 +122,14 @@ void test_cil_resolve_roletrans_srcdecl_neg(CuTest *);
 void test_cil_resolve_roletrans_tgtdecl_neg(CuTest *);
 void test_cil_resolve_roletrans_resultdecl_neg(CuTest *);
 
-void test_cil_resolve_typeattr(CuTest *);
-void test_cil_resolve_typeattr_typedecl_neg(CuTest *);
-void test_cil_resolve_typeattr_attrdecl_neg(CuTest *);
-
-void test_cil_resolve_attrtypes_type_in_multiple_attrs(CuTest *);
-void test_cil_resolve_attrtypes_multiple_excludes(CuTest *);
-void test_cil_resolve_attrtypes_multiple_types(CuTest *);
-void test_cil_resolve_attrtypes_list_of_attrs(CuTest *);
-void test_cil_resolve_attrtypes_name_neg(CuTest *);
-void test_cil_resolve_attrtypes_list_neg(CuTest *);
-void test_cil_resolve_attrtypes_exclude(CuTest *);
-void test_cil_resolve_attrtypes_exclude_neg(CuTest *);
+void test_cil_resolve_typeattributetypes_type_in_multiple_attrs(CuTest *);
+void test_cil_resolve_typeattributetypes_multiple_excludes(CuTest *);
+void test_cil_resolve_typeattributetypes_multiple_types(CuTest *);
+void test_cil_resolve_typeattributetypes_list_of_attrs(CuTest *);
+void test_cil_resolve_typeattributetypes_name_neg(CuTest *);
+void test_cil_resolve_typeattributetypes_list_neg(CuTest *);
+void test_cil_resolve_typeattributetypes_exclude(CuTest *);
+void test_cil_resolve_typeattributetypes_exclude_neg(CuTest *);
 
 void test_cil_resolve_typealias(CuTest *);
 void test_cil_resolve_typealias_neg(CuTest *);
@@ -487,11 +483,8 @@ void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_roletrans_resultdecl_neg(CuTest *);
 
-void test_cil_resolve_ast_node_helper_typeattr(CuTest *);
-void test_cil_resolve_ast_node_helper_typeattr_neg(CuTest *);
-
-void test_cil_resolve_ast_node_helper_attrtypes(CuTest *);
-void test_cil_resolve_ast_node_helper_attrtypes_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_typeattributetypes(CuTest *);
+void test_cil_resolve_ast_node_helper_typeattributetypes_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_typealias(CuTest *);
 void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *);

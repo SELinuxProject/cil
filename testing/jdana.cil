@@ -75,9 +75,9 @@
 
 (level SystemHigh (s0 ((c0 c2) c3 c4 c5 (c6 c10))))
 
-(attribute mlsfilereadtoclr)
-(attribute mlsfileread)
-(attribute mlstrustedobject)
+(typeattribute mlsfilereadtoclr)
+(typeattribute mlsfileread)
+(typeattribute mlstrustedobject)
 
 (mlsconstrain (file)
 	(ioctl read write create getattr setattr lock)

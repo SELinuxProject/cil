@@ -162,16 +162,16 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_type_in_multiple_attrs);
-	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_multiple_excludes);
-	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_multiple_types);
-	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_list_of_attrs);
-	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_name_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_list_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_exclude);
-	SUITE_ADD_TEST(suite, test_cil_resolve_attrtypes_exclude_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_attrtypes);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_attrtypes_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_type_in_multiple_attrs);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_multiple_excludes);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_multiple_types);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_list_of_attrs);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_name_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_list_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_exclude);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_exclude_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typeattributetypes);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typeattributetypes_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias_neg);
@@ -734,13 +734,13 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_type_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_gen_attribute);
-	SUITE_ADD_TEST(suite, test_cil_gen_attribute_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attribute_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attribute_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attribute_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attribute);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attribute_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattribute);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattribute_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattribute_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattribute_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattribute_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattribute);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattribute_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_typebounds);
 	SUITE_ADD_TEST(suite, test_cil_gen_typebounds_notype1_neg);
@@ -862,21 +862,21 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_astnull_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_list_of_multi_items);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_exclude);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_exclude_multi_items);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_exclude_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_noname_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_nameinparens_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_emptylists_neg);
-//	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_listinparens_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_attrtypes_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attrtypes);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_attrtypes_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_list_of_multi_items);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_exclude);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_exclude_multi_items);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_exclude_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_nameinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_emptylists_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_listinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattributetypes);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattributetypes_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_userbounds);
 	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_notype1_neg);
@@ -1714,8 +1714,9 @@ CuSuite* CilTreeGetSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_attr);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_attr_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_typeattribute);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typeattribute);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typeattribute_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_typealias);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typealias);

@@ -1487,8 +1487,8 @@ void test_cil_gen_type_extra_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attribute(CuTest *tc) {
-	char *line[] = {"(", "attribute", "test", NULL};
+void test_cil_gen_typeattribute(CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "test", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1502,14 +1502,14 @@ void test_cil_gen_attribute(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
-	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ATTRIBUTE);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_TYPEATTRIBUTE);
 }
 
-void test_cil_gen_attribute_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "attribute", "test", ")", NULL};
+void test_cil_gen_typeattribute_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "test", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1519,12 +1519,12 @@ void test_cil_gen_attribute_dbnull_neg(CuTest *tc) {
 
 	struct cil_db *test_db = NULL;
 
-	int rc = cil_gen_attribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 
-void test_cil_gen_attribute_currnull_neg(CuTest *tc) {
+void test_cil_gen_typeattribute_currnull_neg(CuTest *tc) {
 	char *line[] = {"(", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1539,13 +1539,13 @@ void test_cil_gen_attribute_currnull_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 	
-	int rc = cil_gen_attribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 
-void test_cil_gen_attribute_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "attribute", "test", ")", NULL};
+void test_cil_gen_typeattribute_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "test", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1555,12 +1555,12 @@ void test_cil_gen_attribute_astnull_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	int rc = cil_gen_attribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attribute_extra_neg(CuTest *tc) {
-	char *line[] = {"(", "attribute", "foo", "bar," ")", NULL};
+void test_cil_gen_typeattribute_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "foo", "bar," ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1574,7 +1574,7 @@ void test_cil_gen_attribute_extra_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -3470,8 +3470,8 @@ void test_cil_gen_typealias_astnull_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", ")", ")", NULL};
+void test_cil_gen_typeattributetypes(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3485,13 +3485,13 @@ void test_cil_gen_attrtypes(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 }
 
-void test_cil_gen_attrtypes_list_of_multi_items(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "test2_t", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_list_of_multi_items(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", "test2_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3505,13 +3505,13 @@ void test_cil_gen_attrtypes_list_of_multi_items(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 }
 
-void test_cil_gen_attrtypes_exclude(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-notypes_t", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_exclude(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", "-notypes_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3525,13 +3525,13 @@ void test_cil_gen_attrtypes_exclude(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 }
 
-void test_cil_gen_attrtypes_exclude_multi_items(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-notypes_t", "-types_t", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_exclude_multi_items(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", "-notypes_t", "-types_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3545,13 +3545,13 @@ void test_cil_gen_attrtypes_exclude_multi_items(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 }
 
-void test_cil_gen_attrtypes_exclude_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_exclude_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", "-", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3565,12 +3565,12 @@ void test_cil_gen_attrtypes_exclude_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-type_t", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", "-type_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3580,11 +3580,11 @@ void test_cil_gen_attrtypes_dbnull_neg(CuTest *tc) {
 
 	struct cil_db *test_db = NULL;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes_currnull_neg(CuTest *tc) {
+void test_cil_gen_typeattributetypes_currnull_neg(CuTest *tc) {
 	char *line[] = {"(", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -3599,12 +3599,12 @@ void test_cil_gen_attrtypes_currnull_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "-", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", "-", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3614,12 +3614,12 @@ void test_cil_gen_attrtypes_astnull_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes_noname_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", ")", NULL};
+void test_cil_gen_typeattributetypes_noname_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3633,12 +3633,12 @@ void test_cil_gen_attrtypes_noname_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes_nameinparens_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "(", "filetypes", ")", "(", "test_t", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_nameinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "(", "filetypes", ")", "(", "test_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3652,12 +3652,12 @@ void test_cil_gen_attrtypes_nameinparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes_emptylists_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_emptylists_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3671,12 +3671,12 @@ void test_cil_gen_attrtypes_emptylists_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes_listinparens_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "(", "test_t", ")", ")", ")", NULL};
+void test_cil_gen_typeattributetypes_listinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "(", "test_t", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3690,12 +3690,12 @@ void test_cil_gen_attrtypes_listinparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_attrtypes_extra_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", ")", "extra", ")", NULL};
+void test_cil_gen_typeattributetypes_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", ")", "extra", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3709,7 +3709,7 @@ void test_cil_gen_attrtypes_extra_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_attrtypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_typeattributetypes(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -15880,7 +15880,7 @@ void test_cil_build_ast_node_helper_type_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_attribute(CuTest *tc) {
-	char *line[] = {"(", "attribute", "test", ")", NULL};
+	char *line[] = {"(", "typeattribute", "test", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -15898,7 +15898,7 @@ void test_cil_build_ast_node_helper_attribute(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_attribute_neg(CuTest *tc) {
-	char *line[] = {"(", "attribute", ")", NULL};
+	char *line[] = {"(", "typeattribute", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -15914,41 +15914,6 @@ void test_cil_build_ast_node_helper_attribute_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 	CuAssertIntEquals(tc, 0, finished);
 }
-
-void test_cil_build_ast_node_helper_typeattr(CuTest *tc) {
-	char *line[] = {"(", "typeattribute", "foo", "bar", ")", NULL};
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-	
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	uint32_t finished = 0;
-
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
-
-	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertIntEquals(tc, 0, finished);
-}
-
-void test_cil_build_ast_node_helper_typeattr_neg(CuTest *tc) {
-	char *line[] = {"(", "typeattribute", "bar", ")", NULL};
-	
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-	
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	uint32_t finished = 0;
-
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
-
-	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
-	CuAssertIntEquals(tc, 0, finished);
-}	
 
 void test_cil_build_ast_node_helper_typebounds(CuTest *tc) {
 	char *line[] = {"(", "typebounds", "foo", "bar", ")", NULL};
@@ -16204,8 +16169,46 @@ void test_cil_build_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_build_ast_node_helper_attrtypes(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "filetypes", "(", "test_t", "test2_t", ")", ")", NULL};
+void test_cil_build_ast_node_helper_typeattribute(CuTest *tc)
+{
+	char *line[] = {"(", "typeattribute", "type", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_typeattribute_neg(CuTest *tc)
+{
+	char *line[] = {"(", "typeattribute", ".fail.type", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_typeattributetypes(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "filetypes", "(", "test_t", "test2_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16222,8 +16225,8 @@ void test_cil_build_ast_node_helper_attrtypes(CuTest *tc) {
 	CuAssertIntEquals(tc, 1, finished);
 }
 
-void test_cil_build_ast_node_helper_attrtypes_neg(CuTest *tc) {
-	char *line[] = {"(", "attributetypes", "files", "(", ")", ")", NULL};
+void test_cil_build_ast_node_helper_typeattributetypes_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattributetypes", "files", "(", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

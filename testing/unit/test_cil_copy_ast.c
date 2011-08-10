@@ -507,6 +507,35 @@ void test_cil_copy_typealias(CuTest *tc) {
 		((struct cil_typealias *)test_ast_node->data)->type_str);
 }
 
+void test_cil_copy_typeattribute(CuTest *tc) {
+	char *line[] = {"(", "typettribute", "type_t", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_typeattribute(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_tree_node *test_copy;
+	cil_tree_node_init(&test_copy);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_typeattribute(test_ast_node, test_copy, &sym);
+	CuAssertIntEquals(tc, rc, SEPOL_OK);
+	CuAssertStrEquals(tc, ((struct cil_symtab_datum *)test_copy->data)->name, 
+		((struct cil_symtab_datum *)test_ast_node->data)->name);
+}
+
 void test_cil_copy_bool(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")", NULL};
 
@@ -1758,8 +1787,8 @@ void test_cil_copy_node_helper_type_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
 }
 
-void test_cil_copy_node_helper_attr(CuTest *tc) {
-	char *line[] = {"(", "attribute", "bar", ")", NULL};
+void test_cil_copy_node_helper_typeattribute(CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "bar", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1781,8 +1810,8 @@ void test_cil_copy_node_helper_attr(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_attr_neg(CuTest *tc) {
-	char *line[] = {"(", "attribute", "bar", ")", NULL};
+void test_cil_copy_node_helper_typeattribute_neg(CuTest *tc) {
+	char *line[] = {"(", "typeattribute", "bar", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

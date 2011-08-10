@@ -78,10 +78,9 @@ void test_cil_copy_type(CuTest *);
 void test_cil_copy_node_helper_type(CuTest *tc); 
 void test_cil_copy_node_helper_type_neg(CuTest *tc); 
 
-void test_cil_copy_typeattr(CuTest *);
-void test_cil_copy_node_helper_typeattr(CuTest *tc); 
-void test_cil_copy_node_helper_attr(CuTest *tc); 
-void test_cil_copy_node_helper_attr_neg(CuTest *tc); 
+void test_cil_copy_typeattribute(CuTest *);
+void test_cil_copy_node_helper_typeattribute(CuTest *tc); 
+void test_cil_copy_node_helper_typeattribute_neg(CuTest *tc); 
 
 void test_cil_copy_typealias(CuTest *);
 void test_cil_copy_node_helper_typealias(CuTest *tc); 
