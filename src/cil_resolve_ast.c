@@ -217,16 +217,13 @@ int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_li
 	struct cil_list_item *curr_str = NULL;
 	struct cil_tree_node *res_node = NULL;
 	struct cil_list_item *new_item = NULL;
-	struct cil_list_item *list_tail = NULL;
 
-	if (str_list == NULL || res_list == NULL || current == NULL || res_list->head != NULL) {
+	if (str_list == NULL || res_list == NULL || current == NULL) {
 		printf("Invalid call to cil_resolve_list\n");
 		goto resolve_list_out;
 	}
 
-	curr_str = str_list->head;
-
-	while (curr_str != NULL) {
+	for (curr_str = str_list->head; curr_str != NULL; curr_str = curr_str->next) {
 		rc = cil_resolve_name(db, current, (char*)curr_str->data, sym_index, call, &res_node);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve list\n");
@@ -237,14 +234,7 @@ int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_li
 		new_item->data = res_node->data;
 		new_item->flavor = res_node->flavor;
 
-		if (res_list->head == NULL) {
-			res_list->head = new_item;
-		} else {
-			list_tail->next = new_item;
-		}
-
-		list_tail = new_item;
-		curr_str = curr_str->next;
+		cil_list_append_item(res_list, new_item);
 	}
 
 	return SEPOL_OK;
@@ -259,8 +249,6 @@ int cil_resolve_typeattributetypes(struct cil_db *db, struct cil_tree_node *curr
 	struct cil_typeattributetypes *attrtypes = (struct cil_typeattributetypes*)current->data;
 	struct cil_tree_node *attr_node = NULL;
 	struct cil_typeattribute *attr = NULL;
-	struct cil_list_item *curr = NULL;
-	struct cil_list *res_list = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(db, current, attrtypes->attr_str, CIL_SYM_TYPES, call, &attr_node);
@@ -277,37 +265,25 @@ int cil_resolve_typeattributetypes(struct cil_db *db, struct cil_tree_node *curr
 
 
 	if (attrtypes->types_list_str != NULL) {
-		cil_list_init(&res_list);
-		rc = cil_resolve_list(db, attrtypes->types_list_str, res_list, current, CIL_SYM_TYPES, call);
+		if (attr->types_list == NULL) {
+			cil_list_init(&attr->types_list);
+		}
+
+		rc = cil_resolve_list(db, attrtypes->types_list_str, attr->types_list, current, CIL_SYM_TYPES, call);
 		if (rc != SEPOL_OK) {
 			goto resolve_typeattributetypes_out;
 		}
-
-		for (curr = res_list->head; curr != NULL; curr = curr->next) {
-			if (attr->types_list == NULL) {
-				cil_list_init(&attr->types_list);
-			}
-			cil_list_prepend_item(attr->types_list, curr);
-		}
-
-		free(res_list);
 	}
 
 	if (attrtypes->neg_list_str != NULL) {
-		cil_list_init(&res_list);
-		rc = cil_resolve_list(db, attrtypes->neg_list_str, res_list, current, CIL_SYM_TYPES, call);
+		if (attr->neg_list == NULL) {
+			cil_list_init(&attr->neg_list);
+		}
+
+		rc = cil_resolve_list(db, attrtypes->neg_list_str, attr->neg_list, current, CIL_SYM_TYPES, call);
 		if (rc != SEPOL_OK) {
 			goto resolve_typeattributetypes_out;
 		}
-
-		for (curr = res_list->head; curr != NULL; curr = curr->next) {
-			if (attr->neg_list == NULL) {
-				cil_list_init(&attr->neg_list);
-			}
-			cil_list_prepend_item(attr->neg_list, curr);
-		}
-
-		free(res_list);
 	}
 
 	return SEPOL_OK;
