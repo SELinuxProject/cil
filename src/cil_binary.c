@@ -490,6 +490,27 @@ exit:
 	return rc;
 }
 
+int __cil_typeattr_bitmap_init(policydb_t *pdb)
+{
+	int rc = SEPOL_ERR;
+
+	pdb->type_attr_map = cil_malloc(pdb->p_types.nprim * sizeof(ebitmap_t));
+
+	uint32_t i = 0;
+	for (i = 0; i < pdb->p_types.nprim; i++) {
+		ebitmap_init(&pdb->type_attr_map[i]);
+		if (ebitmap_set_bit(&pdb->type_attr_map[i], i, 1)) {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -499,15 +520,9 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
 	type_datum_t *sepol_type = NULL;
 
 	if (pdb->type_attr_map == NULL) {
-		pdb->type_attr_map = cil_malloc(pdb->p_types.nprim * sizeof(ebitmap_t));
-
-		uint32_t i = 0;
-		for (i = 0; i < pdb->p_types.nprim; i++) {
-			ebitmap_init(&pdb->type_attr_map[i]);
-			if (ebitmap_set_bit(&pdb->type_attr_map[i], i, 1)) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
+		rc = __cil_typeattr_bitmap_init(pdb);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
 	}
 
@@ -602,8 +617,8 @@ int cil_userrole_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	if (sepol_role == NULL) {
 		goto exit;
 	}
-
 	value = sepol_role->s.value;
+
 	if (ebitmap_set_bit(&sepol_user->roles.roles, value - 1, 1)) {
 		goto exit;
 	}
@@ -1724,6 +1739,13 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	for (i = 1; i <= 2; i++) {
 		extra_args.pass = i;
 		rc = cil_tree_walk(db->ast->root, __cil_binary_create_helper, NULL, NULL, &extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	}
+
+	if (pdb->type_attr_map == NULL) {
+		rc = __cil_typeattr_bitmap_init(pdb);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
