@@ -133,7 +133,7 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_attribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
  * Insert cil attribute structure into sepol type->attribute bitmap.
@@ -147,7 +147,7 @@ int cil_attribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_attribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node);
+int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
  * Insert cil policycap structure into sepol policydb.
