@@ -126,6 +126,18 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
+ * Insert cil typepermissive structure into sepol policydb.
+ * The function looks up the perviously inserted type and flips the bit
+ * in the permssive types bitmap that corresponds to that type's value.
+ *
+ * @param[in] pdb The policy database to insert the typepermissive into.
+ * @param[in] node The tree node that contains the cil_typepermissive.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_typepermissive_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
  * Insert cil attribute structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the attribute into.

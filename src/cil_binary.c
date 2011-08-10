@@ -347,6 +347,35 @@ typealias_to_policydb_out:
 	return rc;
 }
 
+int cil_typepermissive_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_typepermissive *cil_typeperm = node->data;
+	type_datum_t *sepol_type = NULL;
+
+	key = ((struct cil_symtab_datum *)cil_typeperm->type)->name;
+	sepol_type = hashtab_search(pdb->p_types.table, key);
+	if (sepol_type == NULL) {
+		rc = SEPOL_ERR;
+		goto typeperm_to_policydb_out;
+	}
+	value = sepol_type->s.value;
+
+	if (ebitmap_set_bit(&pdb->permissive_map, value, 1)) {
+		goto typeperm_to_policydb_out;
+	}
+
+	return SEPOL_OK;
+
+typeperm_to_policydb_out:
+	type_datum_destroy(sepol_type);
+	free(sepol_type);
+	return rc;
+
+}
+
 int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -1550,6 +1579,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		switch (node->flavor) {
 		case CIL_TYPEALIAS:
 			rc = cil_typealias_to_policydb(pdb, node);
+			break;
+		case CIL_TYPEPERMISSIVE:
+			rc = cil_typepermissive_to_policydb(pdb, node);
 			break;
 		case CIL_TYPEATTRIBUTE:
 			rc = cil_typeattribute_to_bitmap(pdb, node);
