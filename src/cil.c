@@ -145,8 +145,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPE:
 		cil_destroy_type(*data);
 		break;
-	case CIL_ATTRIBUTE:
-		cil_destroy_attribute(*data);
+	case CIL_TYPEATTRIBUTE:
+		cil_destroy_typeattribute(*data);
 		break;
 	case CIL_USER:
 		cil_destroy_user(*data);
@@ -186,8 +186,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPEALIAS:
 		cil_destroy_typealias(*data);
 		break;
-	case CIL_ATTRTYPES:
-		cil_destroy_attrtypes(*data);
+	case CIL_TYPEATTRIBUTETYPES:
+		cil_destroy_typeattributetypes(*data);
 		break;
 	case CIL_TYPEBOUNDS:
 		cil_destroy_typebounds(*data);
@@ -342,7 +342,7 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		break;
 	case CIL_TYPE:
 	case CIL_TYPEALIAS:
-	case CIL_ATTRIBUTE:
+	case CIL_TYPEATTRIBUTE:
 		*sym_index = CIL_SYM_TYPES;
 		break;
 	case CIL_BOOL:
@@ -897,9 +897,9 @@ int cil_rolebounds_init(struct cil_rolebounds **rolebounds)
 	return SEPOL_OK;
 }
 
-int cil_attribute_init(struct cil_attribute **attr)
+int cil_typeattribute_init(struct cil_typeattribute **attr)
 {
-	struct cil_attribute *new_attr = NULL;
+	struct cil_typeattribute *new_attr = NULL;
 
 	if (attr == NULL) {
 		return SEPOL_OK;
@@ -917,9 +917,9 @@ int cil_attribute_init(struct cil_attribute **attr)
 	return SEPOL_OK;
 }
 
-int cil_attrtypes_init(struct cil_attrtypes **attrtypes)
+int cil_typeattributetypes_init(struct cil_typeattributetypes **attrtypes)
 {
-	struct cil_attrtypes *new_attrtypes = NULL;
+	struct cil_typeattributetypes *new_attrtypes = NULL;
 
 	if (attrtypes == NULL) {
 		return SEPOL_ERR;

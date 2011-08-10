@@ -438,40 +438,40 @@ copy_type_out:
 	return rc;
 }
 
-int cil_copy_attribute(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_typeattribute(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
 {
-	struct cil_attribute *new = NULL;
+	struct cil_typeattribute *new = NULL;
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 
-	rc = cil_attribute_init(&new);
+	rc = cil_typeattribute_init(&new);
 	if (rc != SEPOL_OK) {
-		goto copy_attribute_out;
+		goto copy_typeattribute_out;
 	}
 
 	key = ((struct cil_symtab_datum *)orig->data)->name;
 
 	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
 	if (rc != SEPOL_OK) {
-		printf("cil_copy_attribute: cil_symtab_insert failed, rc: %d\n", rc);
+		printf("cil_copy_typeattribute: cil_symtab_insert failed, rc: %d\n", rc);
 		free(new);
-		goto copy_attribute_out;
+		goto copy_typeattribute_out;
 	}
 
 	copy->data = new;
 
 	return SEPOL_OK;
 
-copy_attribute_out:
+copy_typeattribute_out:
 	return rc;
 }
 
-void cil_copy_attrtypes(struct cil_attrtypes *orig, struct cil_attrtypes **copy)
+void cil_copy_typeattributetypes(struct cil_typeattributetypes *orig, struct cil_typeattributetypes **copy)
 {
-	struct cil_attrtypes *new = NULL;
+	struct cil_typeattributetypes *new = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_attrtypes_init(&new);
+	rc = cil_typeattributetypes_init(&new);
 	if (rc != SEPOL_OK) {
 		return;
 	}
@@ -1450,15 +1450,15 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 			goto copy_node_helper_out;
 		}
 		break;
-	case CIL_ATTRIBUTE:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_attribute);
+	case CIL_TYPEATTRIBUTE:
+		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_typeattribute);
 		if (rc != SEPOL_OK) {
 			free(new);
 			goto copy_node_helper_out;
 		}
 		break;
-	case CIL_ATTRTYPES:
-		cil_copy_attrtypes((struct cil_attrtypes*)orig->data, (struct cil_attrtypes**)&new->data);
+	case CIL_TYPEATTRIBUTETYPES:
+		cil_copy_typeattributetypes((struct cil_typeattributetypes*)orig->data, (struct cil_typeattributetypes**)&new->data);
 		break;
 	case CIL_TYPEALIAS:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_typealias);

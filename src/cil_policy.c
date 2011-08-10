@@ -53,7 +53,7 @@
 #define CATS				6
 #define LEVELS				7
 #define CONSTRAINS			8
-#define ATTRTYPES			9
+#define TYPEATTRTYPES			9
 #define ALIASES				10
 #define ALLOWS				11
 #define CONDS				12
@@ -1032,11 +1032,11 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	int rc = SEPOL_ERR;
 
 	switch(flavor) {
-	case CIL_ATTRIBUTE:
-		fprintf(file_arr[ATTRTYPES], "attribute %s;\n", ((struct cil_symtab_datum*)current->data)->name);
+	case CIL_TYPEATTRIBUTE:
+		fprintf(file_arr[TYPEATTRTYPES], "attribute %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	case CIL_TYPE:
-		fprintf(file_arr[ATTRTYPES], "type %s;\n", ((struct cil_symtab_datum*)current->data)->name);
+		fprintf(file_arr[TYPEATTRTYPES], "type %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	case CIL_TYPEALIAS: {
 		struct cil_typealias *alias = (struct cil_typealias*)current->data;
@@ -1049,15 +1049,15 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	}
 	case CIL_TYPEPERMISSIVE: {
 		struct cil_typepermissive *typeperm = (struct cil_typepermissive*)current->data;
-		fprintf(file_arr[ATTRTYPES], "permissive %s;\n", ((struct cil_symtab_datum*)typeperm->type)->name);
+		fprintf(file_arr[TYPEATTRTYPES], "permissive %s;\n", ((struct cil_symtab_datum*)typeperm->type)->name);
 		break;
 	}
 	case CIL_ROLE:
-		fprintf(file_arr[ATTRTYPES], "role %s;\n", ((struct cil_symtab_datum*)current->data)->name);
+		fprintf(file_arr[TYPEATTRTYPES], "role %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	case CIL_BOOL: {
 		char *boolean = ((struct cil_bool*)current->data)->value ? "true" : "false";
-		fprintf(file_arr[ATTRTYPES], "bool %s %s;\n", ((struct cil_symtab_datum*)current->data)->name, boolean);
+		fprintf(file_arr[TYPEATTRTYPES], "bool %s %s;\n", ((struct cil_symtab_datum*)current->data)->name, boolean);
 		break;
 	}
 	case CIL_COMMON:
@@ -1169,7 +1169,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		struct cil_roledominance *roledom = (struct cil_roledominance*)current->data;
 		char *role_str = ((struct cil_symtab_datum*)(struct cil_role*)roledom->role)->name;
 		char *domed_str = ((struct cil_symtab_datum*)(struct cil_role*)roledom->domed)->name;
-		fprintf(file_arr[ATTRTYPES], "dominance { role %s { role %s; } }\n", role_str, domed_str);
+		fprintf(file_arr[TYPEATTRTYPES], "dominance { role %s { role %s; } }\n", role_str, domed_str);
 		break;
 	}
 	case CIL_LEVEL:
@@ -1196,7 +1196,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		break;
 	}
 	case CIL_POLICYCAP:
-		fprintf(file_arr[ATTRTYPES], "policycap %s;\n", ((struct cil_symtab_datum*)current->data)->name);
+		fprintf(file_arr[TYPEATTRTYPES], "policycap %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	default:
 		break;
@@ -1340,8 +1340,8 @@ int cil_gen_policy(struct cil_db *db)
 	file_path_arr[CONSTRAINS] = cil_strdup(temp);
 
 	strcpy(temp, "/tmp/cil_attrtypes-XXXXXX");
-	file_arr[ATTRTYPES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[ATTRTYPES] = cil_strdup(temp);
+	file_arr[TYPEATTRTYPES] = fdopen(mkstemp(temp), "w+");
+	file_path_arr[TYPEATTRTYPES] = cil_strdup(temp);
 	
 	strcpy(temp, "/tmp/cil_aliases-XXXXXX");
 	file_arr[ALIASES] = fdopen(mkstemp(temp), "w+");

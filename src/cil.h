@@ -83,7 +83,7 @@ enum cil_flavor {
 	CIL_USERLEVEL,
 	CIL_USERRANGE,
 	CIL_USERBOUNDS,
-	CIL_ATTRTYPES,
+	CIL_TYPEATTRIBUTETYPES,
 	CIL_TYPE_RULE,
 	CIL_TYPEBOUNDS,
 	CIL_FILETRANSITION,
@@ -137,7 +137,7 @@ enum cil_flavor {
 	CIL_USER,
 	CIL_ROLE,
 	CIL_TYPE,
-	CIL_ATTRIBUTE,
+	CIL_TYPEATTRIBUTE,
 	CIL_BOOL,
 	CIL_PERMSET,
 	CIL_TUNABLE,
@@ -180,7 +180,7 @@ enum cil_flavor {
 #define CIL_KEY_ROLEDOMINANCE	"roledominance"
 #define CIL_KEY_ROLEBOUNDS	"rolebounds"
 #define CIL_KEY_TYPE 		"type"
-#define CIL_KEY_ATTRIBUTE	"attribute"
+#define CIL_KEY_TYPEATTRIBUTE	"typeattribute"
 #define CIL_KEY_BOOL		"boolean"
 #define CIL_KEY_ALLOW		"allow"
 #define CIL_KEY_AUDITALLOW	"auditallow"
@@ -191,7 +191,7 @@ enum cil_flavor {
 #define CIL_KEY_FILETRANSITION	"filetransition"
 #define CIL_KEY_TYPECHANGE	"typechange"
 #define CIL_KEY_TYPEMEMBER	"typemember"
-#define CIL_KEY_ATTRTYPES	"attributetypes"
+#define CIL_KEY_TYPEATTRIBUTETYPES	"typeattributetypes"
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_TYPEBOUNDS	"typebounds"
 #define CIL_KEY_TYPEPERMISSIVE	"typepermissive"
@@ -429,13 +429,13 @@ struct cil_type	{
 	void *bounds; /* type or alias */
 };
 
-struct cil_attribute {
+struct cil_typeattribute {
 	struct cil_symtab_datum datum;
 	struct cil_list *types_list;
 	struct cil_list *neg_list;
 };
 
-struct cil_attrtypes {
+struct cil_typeattributetypes {
 	char *attr_str;
 	struct cil_list *types_list_str; /* list of types, aliases, and attributes */
 	struct cil_list *neg_list_str; /* list of types, aliases, and attributes */
@@ -832,8 +832,8 @@ int cil_userbounds_init(struct cil_userbounds **userbounds);
 int cil_roledominance_init(struct cil_roledominance **roledominance);
 int cil_rolebounds_init(struct cil_rolebounds **rolebounds);
 int cil_roletype_init(struct cil_roletype **roletype);
-int cil_attribute_init(struct cil_attribute **attribute);
-int cil_attrtypes_init(struct cil_attrtypes **attrtypes);
+int cil_typeattribute_init(struct cil_typeattribute **attribute);
+int cil_typeattributetypes_init(struct cil_typeattributetypes **attrtypes);
 int cil_typealias_init(struct cil_typealias **typealias);
 int cil_typebounds_init(struct cil_typebounds **typebnds);
 int cil_typepermissive_init(struct cil_typepermissive **typeperm);

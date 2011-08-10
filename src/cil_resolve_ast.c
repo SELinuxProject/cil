@@ -254,11 +254,11 @@ resolve_list_out:
 
 }
 
-int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+int cil_resolve_typeattributetypes(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
-	struct cil_attrtypes *attrtypes = (struct cil_attrtypes*)current->data;
+	struct cil_typeattributetypes *attrtypes = (struct cil_typeattributetypes*)current->data;
 	struct cil_tree_node *attr_node = NULL;
-	struct cil_attribute *attr = NULL;
+	struct cil_typeattribute *attr = NULL;
 	struct cil_list_item *curr = NULL;
 	struct cil_list *res_list = NULL;
 	int rc = SEPOL_ERR;
@@ -266,12 +266,12 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 	rc = cil_resolve_name(db, current, attrtypes->attr_str, CIL_SYM_TYPES, call, &attr_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", attrtypes->attr_str);
-		goto resolve_attrtypes_out;
+		goto resolve_typeattributetypes_out;
 	}
-	if (attr_node->flavor != CIL_ATTRIBUTE) {
+	if (attr_node->flavor != CIL_TYPEATTRIBUTE) {
 		rc = SEPOL_ERR;
 		printf("Attribute type not an attribute\n");
-		goto resolve_attrtypes_out;
+		goto resolve_typeattributetypes_out;
 	}
 	attr = attr_node->data;
 
@@ -280,7 +280,7 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 		cil_list_init(&res_list);
 		rc = cil_resolve_list(db, attrtypes->types_list_str, res_list, current, CIL_SYM_TYPES, call);
 		if (rc != SEPOL_OK) {
-			goto resolve_attrtypes_out;
+			goto resolve_typeattributetypes_out;
 		}
 
 		for (curr = res_list->head; curr != NULL; curr = curr->next) {
@@ -297,7 +297,7 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 		cil_list_init(&res_list);
 		rc = cil_resolve_list(db, attrtypes->neg_list_str, res_list, current, CIL_SYM_TYPES, call);
 		if (rc != SEPOL_OK) {
-			goto resolve_attrtypes_out;
+			goto resolve_typeattributetypes_out;
 		}
 
 		for (curr = res_list->head; curr != NULL; curr = curr->next) {
@@ -312,7 +312,7 @@ int cil_resolve_attrtypes(struct cil_db *db, struct cil_tree_node *current, stru
 
 	return SEPOL_OK;
 
-resolve_attrtypes_out:
+resolve_typeattributetypes_out:
 	return rc;
 }
 
@@ -574,9 +574,9 @@ int cil_reset_sens(__attribute__((unused)) struct cil_db *db, struct cil_tree_no
 	return SEPOL_OK;
 }
 
-int cil_reset_attr(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
+int cil_reset_typeattr(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
 {
-	struct cil_attribute *attr = (struct cil_attribute*)current->data;
+	struct cil_typeattribute *attr = (struct cil_typeattribute*)current->data;
 
 	/* during a re-resolve, we need to reset the lists of types (and negative types) associated with this attribute from a attributetypes statement */
 	if (attr->types_list != NULL) {
@@ -2995,8 +2995,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_USER:
 			rc = cil_reset_user(db, node, call);
 			break;
-		case CIL_ATTRIBUTE:
-			rc = cil_reset_attr(db, node, call);
+		case CIL_TYPEATTRIBUTE:
+			rc = cil_reset_typeattr(db, node, call);
 			break;
 		case CIL_SENS:
 			rc = cil_reset_sens(db, node, call);
@@ -3031,8 +3031,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		break;
 	case 7:
 		switch (node->flavor) {
-		case CIL_ATTRTYPES:
-			rc = cil_resolve_attrtypes(db, node, call);
+		case CIL_TYPEATTRIBUTETYPES:
+			rc = cil_resolve_typeattributetypes(db, node, call);
 			break;
 		case CIL_TYPEALIAS:
 			rc = cil_resolve_typealias(db, node, call);

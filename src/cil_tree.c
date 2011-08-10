@@ -419,10 +419,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("TYPE: %s\n", type->datum.name);
 				return;
 			}
-			case CIL_ATTRTYPES: {
-				struct cil_attrtypes *attrtypes = node->data;
+			case CIL_TYPEATTRIBUTETYPES: {
+				struct cil_typeattributetypes *attrtypes = node->data;
 				struct cil_list_item *curr = NULL;
-				printf("ATTRTYPES: attr: %s", attrtypes->attr_str);
+				printf("TYPEATTRIBUTETYPES: attr: %s", attrtypes->attr_str);
 				if (attrtypes->types_list_str != NULL) {
 					printf(" types list: (");
 					curr = attrtypes->types_list_str->head;
@@ -446,10 +446,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
-			case CIL_ATTRIBUTE: {
-				struct cil_attribute *attr = node->data;
+			case CIL_TYPEATTRIBUTE: {
+				struct cil_typeattribute *attr = node->data;
 				struct cil_list_item *curr = NULL;
-				printf("ATTRIBUTE: %s", attr->datum.name);
+				printf("TYPEATTRIBUTE: %s", attr->datum.name);
 				if (attr->types_list != NULL) {
 					curr = attr->types_list->head;
 					printf(" types: ( ");
