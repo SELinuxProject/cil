@@ -297,12 +297,23 @@ int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 /**
  * Insert cil constrain/mlsconstrain structure(s) into sepol policydb.
  *
- * @param[in] pdb The policy database to isnert the (mls)constrain into.
+ * @param[in] pdb The policy database to insert the (mls)constrain into.
  * @param[in] node The tree node that contains the cil_(mls)constrain.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
 int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
+ * Insert cil level structure into sepol policydb.
+ * Associates the sepol level (sensitivity) with categories.
+ *
+ * @param[in] pdb The policy database to insert the level into.
+ * @param[in] node The tree node that contains the cil_level.
+ *
+ * @return SEPOL_OK upon success or SEPOL_ERR upon error.
+ */
+int cil_level_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 
 #endif //_CIL_BINARY_INTERNAL_H_

@@ -674,6 +674,7 @@ int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 			goto exit;
 		}
 		sepol_cat->s.value = value;
+
 		curr_cat = curr_cat->next;
 	}
 
@@ -1553,6 +1554,99 @@ exit:
 	return rc;
 }
 
+int __cil_catrange_expand_to_bitmap(policydb_t *pdb, struct cil_cat *start, struct cil_cat *end, ebitmap_t *bitmap)
+{
+	int rc = SEPOL_ERR;
+	uint32_t svalue = 0;
+	uint32_t evalue = 0;
+	unsigned int bit = 0;
+	char *key = NULL;
+	cat_datum_t *sepol_start = NULL;
+	cat_datum_t *sepol_end = NULL;
+	ebitmap_node_t *cnode = NULL;
+
+	key = start->datum.name;
+	sepol_start = hashtab_search(pdb->p_cats.table, key);
+	if (sepol_start == NULL) {
+		goto exit;
+	}
+	svalue = sepol_start->s.value - 1;
+
+	key = end->datum.name;
+	sepol_end = hashtab_search(pdb->p_cats.table, key);
+	if (sepol_end == NULL) {
+		goto exit;
+	}
+	evalue = sepol_end->s.value - 1;
+
+	cnode = bitmap->node;
+	for (bit = svalue; bit < evalue; bit = ebitmap_next(&cnode, bit)) {
+		if (ebitmap_set_bit(bitmap, bit, 1)) {
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_level_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_level *cil_level = node->data;
+	struct cil_sens *cil_sens = cil_level->sens;
+	struct cil_catset *cil_catset = cil_level->catset;
+	level_datum_t *sepol_level = NULL;
+	mls_level_t *mls_level = NULL;
+
+	key = cil_sens->datum.name;
+	sepol_level = hashtab_search(pdb->p_levels.table, key);
+	if (sepol_level == NULL) {
+		goto exit;
+	}
+	mls_level = sepol_level->level;
+
+	if (cil_catset != NULL) {
+		struct cil_list *cil_cats = cil_catset->cat_list;
+		struct cil_list_item *curr = cil_cats->head;
+		cat_datum_t *sepol_cat = NULL;
+
+		ebitmap_init(&mls_level->cat);
+
+		while (curr != NULL) {
+			if (curr->flavor == CIL_CATRANGE) {
+				struct cil_catrange *cil_catrange = curr->data;
+				struct cil_cat *start_cat = cil_catrange->cat_low;
+				struct cil_cat *end_cat = cil_catrange->cat_high;
+				rc = __cil_catrange_expand_to_bitmap(pdb, start_cat, end_cat, &mls_level->cat);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+			} else {
+				struct cil_cat *cil_cat = curr->data;
+				key = cil_cat->datum.name;
+				sepol_cat = hashtab_search(pdb->p_cats.table, key);
+				if (sepol_cat == NULL) {
+					goto exit;
+				}
+
+				if (ebitmap_set_bit(&mls_level->cat, sepol_cat->s.value - 1, 1)) {
+					goto exit;
+				}
+			}
+			curr = curr->next;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
 {
 	int rc = SEPOL_OK;
@@ -1637,6 +1731,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_CONSTRAIN:
 		case CIL_MLSCONSTRAIN:
 			rc = cil_constrain_to_policydb(pdb, node);
+			break;
+		case CIL_LEVEL:
+			rc = cil_level_to_policydb(pdb, node);
 			break;
 		default:
 			break;
