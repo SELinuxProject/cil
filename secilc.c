@@ -75,11 +75,11 @@ int main(int argc, char *argv[])
 		file = fopen(argv[i], "r");
 		if (!file) {
 			fprintf(stderr, "Could not open file: %s\n", argv[i]);
-			goto main_out;
+			goto exit;
 		}
 		if (stat(argv[i], &filedata) == -1) {
 			printf("Could not stat file: %s\n", argv[i]);
-			goto main_out;
+			goto exit;
 		}
 		file_size = filedata.st_size;	
 
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 		rc = fread(buffer, file_size, 1, file);
 		if (rc != 1) {
 			fprintf(stderr, "Failure reading file: %s\n", argv[i]);
-			goto main_out;
+			goto exit;
 		}
 		memset(buffer+file_size, 0, 2);
 		fclose(file);
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 		printf("Building Parse Tree...\n");
 		if (cil_parser(buffer, file_size + 2, &parse_tree)) {
 			printf("Failed to parse CIL policy, exiting\n");
-			goto main_out;
+			goto exit;
 		}
 
 		free(buffer);
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 	printf("Building AST from Parse Tree...\n");
 	if (cil_build_ast(db, parse_tree->root, db->ast->root)) {
 		printf("Failed to build ast, exiting\n");
-		goto main_out;
+		goto exit;
 	}
 #ifdef DEBUG
 	cil_tree_print(db->ast->root, 0);
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	printf("Resolving AST...\n");
 	if (cil_resolve_ast(db, db->ast->root)) {
 		printf("Failed to resolve ast, exiting\n");
-		goto main_out;
+		goto exit;
 	}
 
 #ifdef DEBUG
@@ -130,20 +130,20 @@ int main(int argc, char *argv[])
 	printf("Destroying AST Symtabs...\n");
 	if (cil_destroy_ast_symtabs(db->ast->root)) {
 		printf("Failed to destroy ast symtabs, exiting\n");
-		goto main_out;
+		goto exit;
 	}
 
 	printf("Qualifying Names...\n");
 	if (cil_fqn_qualify(db->ast->root)) {
 		printf("Failed to qualify names, exiting\n");
-		goto main_out;
+		goto exit;
 	}
 
 #ifdef DEBUG
 	rc = cil_gen_policy(db);
 	if (rc != SEPOL_OK) {
 		printf("Failed to print to policy.conf file\n");
-		goto main_out;
+		goto exit;
 	}
 	cil_tree_print(db->ast->root, 0);
 #endif
@@ -156,11 +156,11 @@ int main(int argc, char *argv[])
 	rc = policydb_set_target_platform(&pdb, SEPOL_TARGET_SELINUX);
 	if (rc != 0) {
 		printf("Failed to set target platform: %d\n", rc);
-		goto main_out;
+		goto exit;
 	}
 	if (cil_binary_create(db, &pdb, "policy.24")) {
 		printf("Failed to generate binary, exiting\n");
-		goto main_out;
+		goto exit;
 	}
 
 	printf("Destroying DB...\n");
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 
 	return SEPOL_OK;
 
-main_out:
+exit:
 	if (file != NULL) {
 		fclose(file);
 	}

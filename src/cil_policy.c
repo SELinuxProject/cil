@@ -869,7 +869,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 			if (cond->flavor != CIL_NOT) {
 				if (pos <= 1) {
 					rc = SEPOL_ERR;
-					goto expr_stack_cleanup;
+					goto exit;
 				}
 
 				len = strlen(str_stack[pos - 1]) + strlen(str_stack[pos - 2]) + strlen(oper_str) + 5;
@@ -877,7 +877,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 				rc = snprintf(expr_str, len, "(%s %s %s)", str_stack[pos - 1], oper_str, str_stack[pos - 2]);
 				if (rc < 0) {
 					free(expr_str);
-					goto expr_stack_cleanup;
+					goto exit;
 				}
 				free(str_stack[pos - 2]);
 				free(str_stack[pos - 1]);
@@ -886,7 +886,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 			} else {
 				if (pos == 0) {
 					rc = SEPOL_ERR;
-					goto expr_stack_cleanup;
+					goto exit;
 				}
 
 				len = strlen(str_stack[pos - 1]) + strlen(oper_str) + 4;
@@ -894,7 +894,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 				rc = snprintf(expr_str, len, "(%s %s)", oper_str, str_stack[pos - 1]);
 				if (rc < 0) {
 					rc = SEPOL_ERR;
-					goto expr_stack_cleanup;
+					goto exit;
 				}
 				free(str_stack[pos - 1]);
 				str_stack[pos - 1] = expr_str;
@@ -903,7 +903,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 		} else {
 			if (pos >= COND_EXPR_MAXDEPTH) {
 				rc = SEPOL_ERR;
-				goto expr_stack_cleanup;
+				goto exit;
 			}
 
 			if (cond->flavor == CIL_BOOL || (cond->flavor == CIL_TYPE)
@@ -922,7 +922,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 
 	return SEPOL_OK;
 
-expr_stack_cleanup:
+exit:
 	for (i = 0; i < pos; i++) {
 		free(str_stack[i]);
 	}

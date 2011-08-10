@@ -60,13 +60,13 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	rc = symtab_insert(pdb, SYM_COMMONS, key, sepol_common, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
 		free(sepol_common);
-		goto common_to_binary_out;
+		goto exit;
 	}
 	sepol_common->s.value = value;
 
 	rc = symtab_init(&sepol_common->permissions, PERM_SYMTAB_SIZE);
 	if (rc != SEPOL_OK) {
-		goto common_to_binary_out;
+		goto exit;
 	}
 
 	while (cil_perm != NULL) {
@@ -78,7 +78,7 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		rc = hashtab_insert(sepol_common->permissions.table, key, sepol_perm);
 		if (rc != SEPOL_OK) {
 			free(sepol_perm);
-			goto common_to_binary_out;
+			goto exit;
 		}
 		sepol_perm->s.value = sepol_common->permissions.nprim + 1;
 		sepol_common->permissions.nprim++;
@@ -87,7 +87,7 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	return SEPOL_OK;
 
-common_to_binary_out:
+exit:
 	free(key);
 	return rc;
 }
@@ -106,13 +106,13 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	rc = symtab_insert(pdb, SYM_CLASSES, key, sepol_class, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
 		free(sepol_class);
-		goto class_to_policydb_out;
+		goto exit;
 	}
 	sepol_class->s.value = value;
 
 	rc = symtab_init(&sepol_class->permissions, PERM_SYMTAB_SIZE);
 	if (rc != SEPOL_OK) {
-		goto class_to_policydb_out;
+		goto exit;
 	}
 
 	while (cil_perm != NULL) {
@@ -124,7 +124,7 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		rc = hashtab_insert(sepol_class->permissions.table, key, sepol_perm);
 		if (rc != SEPOL_OK) {
 			free(sepol_perm);
-			goto class_to_policydb_out;
+			goto exit;
 		}
 		sepol_perm->s.value = sepol_class->permissions.nprim + 1;
 
@@ -134,7 +134,7 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	return SEPOL_OK;
 
-class_to_policydb_out:
+exit:
 	free(key);
 	return rc;
 }
@@ -148,19 +148,19 @@ int cil_classcommon_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	sepol_class = hashtab_search(pdb->p_classes.table, cil_classcom->class_str);
 	if (sepol_class == NULL) {
-		goto classcommon_to_policydb_out;
+		goto exit;
 	}
 
 	sepol_common = hashtab_search(pdb->p_commons.table, cil_classcom->common_str);
 	if (sepol_common == NULL) {
-		goto classcommon_to_policydb_out;
+		goto exit;
 	}
 
 	sepol_class->comdatum = sepol_common;
 
 	return SEPOL_OK;
 
-classcommon_to_policydb_out:
+exit:
 	return rc;
 }
 
@@ -178,17 +178,17 @@ int cil_role_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		/* special case
 		 * object_r defaults to 1 in libsepol symtab */
 		rc = SEPOL_OK;
-		goto role_to_policydb_out;
+		goto exit;
 	}
 
 	rc = symtab_insert(pdb, SYM_ROLES, (hashtab_key_t)key, sepol_role, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
-		goto role_to_policydb_out;
+		goto exit;
 	}
 	sepol_role->s.value = value;
 	return SEPOL_OK;
 
-role_to_policydb_out:
+exit:
 	free(key);
 	role_datum_destroy(sepol_role);
 	free(sepol_role);
@@ -210,21 +210,21 @@ int cil_roletype_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	sepol_role = hashtab_search(pdb->p_roles.table, cil_role->datum.name);
 	if (sepol_role == NULL) {
-		goto roletype_to_policydb_out;
+		goto exit;
 	}
 
 	sepol_type = hashtab_search(pdb->p_types.table, cil_type->datum.name);
 	if (sepol_type == NULL) {
-		goto roletype_to_policydb_out;
+		goto exit;
 	}
 
 	if (ebitmap_set_bit(&sepol_role->types.types, sepol_type->s.value - 1, 1)) {
-		goto roletype_to_policydb_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-roletype_to_policydb_out:
+exit:
 	return rc;
 }
 
@@ -243,21 +243,21 @@ int cil_roledominance_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	sepol_doming = hashtab_search(pdb->p_roles.table, cil_doming->datum.name);
 	if (sepol_doming == NULL) {
-		goto roledominance_to_policydb_out;
+		goto exit;
 	}
 
 	sepol_domed = hashtab_search(pdb->p_roles.table, cil_domed->datum.name);
 	if (sepol_domed == NULL) {
-		goto roledominance_to_policydb_out;
+		goto exit;
 	}
 
 	if (ebitmap_set_bit(&sepol_domed->dominates, sepol_doming->s.value - 1, 1)) {
-		goto roledominance_to_policydb_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-roledominance_to_policydb_out:
+exit:
         return rc;
 }
 
@@ -270,18 +270,18 @@ int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	sepol_role = hashtab_search(pdb->p_roles.table, cil_rolebnds->role_str);
 	if (sepol_role == NULL) {
-		goto rolebounds_to_policydb_out;
+		goto exit;
 	}
 
 	sepol_rolebnds = hashtab_search(pdb->p_roles.table, cil_rolebnds->bounds_str);
 	if (sepol_rolebnds == NULL) {
-		goto rolebounds_to_policydb_out;
+		goto exit;
 	}
 	sepol_role->bounds = sepol_rolebnds->s.value;
 
         return SEPOL_OK;
 
-rolebounds_to_policydb_out:
+exit:
 	return rc;
 }
 
@@ -299,14 +299,14 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	key = cil_strdup(cil_type->datum.name);
 	rc = symtab_insert(pdb, SYM_TYPES, key, sepol_type, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
-		goto type_to_policydb_out;
+		goto exit;
 	}
 	sepol_type->s.value = value;
 	sepol_type->primary = value;
 
 	return SEPOL_OK;
 
-type_to_policydb_out:
+exit:
 	free(key);
 	type_datum_destroy(sepol_type);
 	free(sepol_type);
@@ -326,7 +326,7 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_type = hashtab_search(pdb->p_types.table, key);
 	if (sepol_type == NULL) {
 		rc = SEPOL_ERR;
-		goto typealias_to_policydb_out;
+		goto exit;
 	}
 
 	sepol_alias->flavor = TYPE_ALIAS;
@@ -334,13 +334,13 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	key = cil_strdup(cil_alias->datum.name);
 	rc = symtab_insert(pdb, SYM_TYPES, key, sepol_alias, SCOPE_DECL, 0, NULL);
 	if (rc != SEPOL_OK) {
-		goto typealias_to_policydb_out;
+		goto exit;
 	}
 	sepol_alias->primary = sepol_type->s.value;
 
 	return SEPOL_OK;
 
-typealias_to_policydb_out:
+exit:
 	free(key);
 	type_datum_destroy(sepol_alias);
 	free(sepol_alias);
@@ -359,17 +359,17 @@ int cil_typepermissive_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_type = hashtab_search(pdb->p_types.table, key);
 	if (sepol_type == NULL) {
 		rc = SEPOL_ERR;
-		goto typeperm_to_policydb_out;
+		goto exit;
 	}
 	value = sepol_type->s.value;
 
 	if (ebitmap_set_bit(&pdb->permissive_map, value, 1)) {
-		goto typeperm_to_policydb_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-typeperm_to_policydb_out:
+exit:
 	type_datum_destroy(sepol_type);
 	free(sepol_type);
 	return rc;
@@ -390,14 +390,14 @@ int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	key = cil_strdup(cil_attr->datum.name);
 	rc = symtab_insert(pdb, SYM_TYPES, key, sepol_attr, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
-		goto attr_to_policydb_out;
+		goto exit;
 	}
 	sepol_attr->s.value = value;
 	sepol_attr->primary = value;
 
 	return SEPOL_OK;
 
-attr_to_policydb_out:
+exit:
 	type_datum_destroy(sepol_attr);
 	free(sepol_attr);
 	return rc;
@@ -420,7 +420,7 @@ int __cil_typeattr_expand_to_bitmap(policydb_t *pdb, struct cil_list *types, ebi
 		if (flavor == CIL_TYPEATTRIBUTE) {
 			rc = __cil_typeattr_expand_to_policydb(pdb, curr_type->data, out);
 			if (rc != SEPOL_OK) {
-				goto typeattr_expand_bitmap_out;
+				goto exit;
 			}
 			curr_type = curr_type->next;
 			continue;
@@ -429,12 +429,12 @@ int __cil_typeattr_expand_to_bitmap(policydb_t *pdb, struct cil_list *types, ebi
 		key = ((struct cil_symtab_datum *)curr_type->data)->name;
 		sepol_type = hashtab_search(pdb->p_types.table, key);
 		if (sepol_type == NULL) {
-			goto typeattr_expand_bitmap_out;
+			goto exit;
 		}
 		value = sepol_type->s.value;
 
 		if (ebitmap_set_bit(out, value - 1, 1)) {
-			goto typeattr_expand_bitmap_out;
+			goto exit;
 		}
 
 		curr_type = curr_type->next;
@@ -442,7 +442,7 @@ int __cil_typeattr_expand_to_bitmap(policydb_t *pdb, struct cil_list *types, ebi
 
 	return SEPOL_OK;
 
-typeattr_expand_bitmap_out:
+exit:
 	return rc;
 
 }
@@ -455,11 +455,11 @@ int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute 
 	if (attr->types_list != NULL) {
 		rc = __cil_typeattr_expand_to_bitmap(pdb, attr->types_list, types);
 		if (rc != SEPOL_OK) {
-			goto typeattr_expand_out;
+			goto exit;
 		}
 	} else {
 		rc = SEPOL_OK;
-		goto typeattr_expand_out;
+		goto exit;
 	}
 
 	if (attr->neg_list != NULL) {
@@ -468,7 +468,7 @@ int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute 
 
 		rc = __cil_typeattr_expand_to_bitmap(pdb, attr->neg_list, negtypes);
 		if (rc != SEPOL_OK) {
-			goto typeattr_expand_out;
+			goto exit;
 		}
 
 		unsigned int i;
@@ -476,7 +476,7 @@ int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute 
 		ebitmap_for_each_bit(types, tnode, i) {
 			if (ebitmap_get_bit(negtypes, i)) {
 				if (ebitmap_set_bit(types, i, 0)) {
-					goto typeattr_expand_out;
+					goto exit;
 				}
 			}
 		}
@@ -484,7 +484,7 @@ int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute 
 
 	rc = SEPOL_OK;
 
-typeattr_expand_out:
+exit:
 	ebitmap_destroy(negtypes);
 	free(negtypes);
 	return rc;
@@ -506,7 +506,7 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
 			ebitmap_init(&pdb->type_attr_map[i]);
 			if (ebitmap_set_bit(&pdb->type_attr_map[i], i, 1)) {
 				rc = SEPOL_ERR;
-				goto attr_to_bitmap_out;
+				goto exit;
 			}
 		}
 	}
@@ -515,18 +515,18 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_type = hashtab_search(pdb->p_types.table, key);
 	if (sepol_type == NULL) {
 		rc = SEPOL_ERR;
-		goto attr_to_bitmap_out;
+		goto exit;
 	}
 	value = sepol_type->s.value;
 
 	rc = __cil_typeattr_expand_to_policydb(pdb, cil_attr, &pdb->type_attr_map[value - 1]);
 	if (rc != SEPOL_OK) {
-		goto attr_to_bitmap_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-attr_to_bitmap_out:
+exit:
 	return rc;
 }
 
@@ -538,16 +538,16 @@ int cil_policycap_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	capnum = sepol_polcap_getnum(cil_polcap->datum.name);
 	if (capnum == -1) {
-		goto policycap_to_policydb_out;
+		goto exit;
 	}
 
 	if (ebitmap_set_bit(&pdb->policycaps, capnum, 1)) {
-		goto policycap_to_policydb_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-policycap_to_policydb_out:
+exit:
 	return rc;
 }
 
@@ -563,13 +563,13 @@ int cil_user_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	key = cil_strdup(cil_user->datum.name);
 	rc = symtab_insert(pdb, SYM_USERS, key, sepol_user, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
-		goto user_to_policydb_out;
+		goto exit;
 	}
 	sepol_user->s.value = value;
 
 	return SEPOL_OK;
 
-user_to_policydb_out:
+exit:
 	free(key);
 	user_datum_destroy(sepol_user);
 	free(sepol_user);
@@ -593,24 +593,24 @@ int cil_userrole_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	key = cil_user->datum.name;
 	sepol_user = hashtab_search(pdb->p_users.table, key);
 	if (sepol_user == NULL) {
-		goto userrole_to_policydb_out;
+		goto exit;
 	}
 	cil_role = cil_userrole->role;
 
 	key = cil_role->datum.name;
 	sepol_role = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_role == NULL) {
-		goto userrole_to_policydb_out;
+		goto exit;
 	}
 
 	value = sepol_role->s.value;
 	if (ebitmap_set_bit(&sepol_user->roles.roles, value - 1, 1)) {
-		goto userrole_to_policydb_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-userrole_to_policydb_out:
+exit:
 	return rc;
 }
 
@@ -626,14 +626,14 @@ int cil_bool_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	key = cil_strdup(cil_bool->datum.name);
 	rc = symtab_insert(pdb, SYM_BOOLS, key, sepol_bool, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
-		goto bool_to_policydb_out;
+		goto exit;
 	}
 	sepol_bool->s.value = value;
 	sepol_bool->state = cil_bool->value;
 
 	return SEPOL_OK;
 
-bool_to_policydb_out:
+exit:
 	free(key);
 	free(sepol_bool);
 	return rc;
@@ -656,7 +656,7 @@ int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 		key = cil_strdup(cil_cat->datum.name);
 		rc = symtab_insert(pdb, SYM_CATS, key, sepol_cat, SCOPE_DECL, 0, &value);
 		if (rc != SEPOL_OK) {
-			goto cat_to_binary_out;
+			goto exit;
 		}
 		sepol_cat->s.value = value;
 		curr_cat = curr_cat->next;
@@ -664,7 +664,7 @@ int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 
 	return SEPOL_OK;
 
-cat_to_binary_out:
+exit:
 	free(key);
 	cat_datum_destroy(sepol_cat);
 	free(sepol_cat);
@@ -683,21 +683,21 @@ int cil_catalias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	key = cil_alias->cat_str;
 	sepol_cat = hashtab_search(pdb->p_cats.table, key);
 	if (sepol_cat == NULL) {
-		goto catalias_to_policydb_out;
+		goto exit;
 	}
 
 	key = cil_strdup(cil_alias->datum.name);
 	rc = symtab_insert(pdb, SYM_CATS, key, sepol_alias, SCOPE_DECL, 0, &sepol_cat->s.value);
 	if (rc != SEPOL_OK) {
 		free(key);
-		goto catalias_to_policydb_out;
+		goto exit;
 	}
 	sepol_alias->s.value = sepol_cat->s.value;
 	sepol_alias->isalias = 1;
 
 	return SEPOL_OK;
 
-catalias_to_policydb_out:
+exit:
 	free(key);
 	cat_datum_destroy(sepol_alias);
 	free(sepol_alias);
@@ -724,7 +724,7 @@ int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db)
 		key = cil_strdup(cil_sens->datum.name);
 		rc = symtab_insert(pdb, SYM_LEVELS, key, sepol_level, SCOPE_DECL, 0, &value);
 		if (rc != SEPOL_OK) {
-			goto dominance_to_binary_out;
+			goto exit;
 		}
 		sepol_level->isalias = 0;
 		sepol_level->defined = 1;
@@ -736,7 +736,7 @@ int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db)
 
 	return SEPOL_OK;
 
-dominance_to_binary_out:
+exit:
 	level_datum_destroy(sepol_level);
 	mls_level_destroy(mls_level);
 	free(sepol_level);
@@ -767,7 +767,7 @@ int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule,
 	sepol_src = hashtab_search(pdb->p_types.table, key);
 	if (sepol_src == NULL) {
 		rc = SEPOL_ERR;
-		goto type_rule_to_avtab_out;
+		goto exit;
 	}
 	new_avtab_key->source_type = sepol_src->s.value;
 
@@ -775,7 +775,7 @@ int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule,
 	sepol_tgt = hashtab_search(pdb->p_types.table, key);
 	if (sepol_tgt == NULL) {
 		rc = SEPOL_ERR;
-		goto type_rule_to_avtab_out;
+		goto exit;
 	}
 	new_avtab_key->target_type = sepol_tgt->s.value;
 
@@ -783,7 +783,7 @@ int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule,
 	sepol_obj = hashtab_search(pdb->p_classes.table, key);
 	if (sepol_obj == NULL) {
 		rc = SEPOL_ERR;
-		goto type_rule_to_avtab_out;
+		goto exit;
 	}
 	new_avtab_key->target_class = sepol_obj->s.value;
 
@@ -791,7 +791,7 @@ int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule,
 	sepol_result = hashtab_search(pdb->p_types.table, key);
 	if (sepol_result == NULL) {
 		rc = SEPOL_ERR;
-		goto type_rule_to_avtab_out;
+		goto exit;
 	}
 	new_avtab_datum->data = sepol_result->s.value;
 
@@ -807,7 +807,7 @@ int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule,
 		break;
 	default:
 		rc = SEPOL_ERR;
-		goto type_rule_to_avtab_out;
+		goto exit;
 		break;
 	}
 
@@ -816,7 +816,7 @@ int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule,
 
 	return SEPOL_OK;
 
-type_rule_to_avtab_out:
+exit:
 	free(new_avtab_key);
 	free(new_avtab_datum);
 	return rc;
@@ -832,18 +832,18 @@ int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	rc = __cil_type_rule_to_avtab(pdb, cil_rule, &avtab_key, &avtab_datum);
 	if (rc != SEPOL_OK) {
-		goto type_rule_to_policydb_out;
+		goto exit;
 	}
 
 	avtab_ptr = avtab_insert_nonunique(&pdb->te_avtab, avtab_key, avtab_datum);
 	if (avtab_ptr == NULL) {
 		rc = SEPOL_ERR;
-		goto type_rule_to_policydb_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-type_rule_to_policydb_out:
+exit:
 	free(avtab_key);
 	free(avtab_datum);
 	return rc;
@@ -873,7 +873,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 	sepol_src = hashtab_search(pdb->p_types.table, key);
 	if (sepol_src == NULL) {
 		rc = SEPOL_ERR;
-		goto avrule_to_avtab_out;
+		goto exit;
 	}
 	new_avtab_key->source_type = sepol_src->s.value;
 
@@ -881,7 +881,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 	sepol_tgt = hashtab_search(pdb->p_types.table, key);
 	if (sepol_tgt == NULL) {
 		rc = SEPOL_ERR;
-		goto avrule_to_avtab_out;
+		goto exit;
 	}
 	new_avtab_key->target_type = sepol_tgt->s.value;
 
@@ -889,7 +889,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 	sepol_obj = hashtab_search(pdb->p_classes.table, key);
 	if (sepol_obj == NULL) {
 		rc = SEPOL_ERR;
-		goto avrule_to_avtab_out;
+		goto exit;
 	}
 	new_avtab_key->target_class = sepol_obj->s.value;
 
@@ -903,7 +903,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 			sepol_perm = hashtab_search(sepol_common->permissions.table, key);
 			if (sepol_perm == NULL) {
 				rc = SEPOL_ERR;
-				goto avrule_to_avtab_out;
+				goto exit;
 			}
 		}
 		new_avtab_datum->data |= 1 << (sepol_perm->s.value - 1);
@@ -927,7 +927,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 		break;
 	default:
 		rc = SEPOL_ERR;
-		goto avrule_to_avtab_out;
+		goto exit;
 		break;
 	}
 
@@ -936,7 +936,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 
 	return SEPOL_OK;
 
-avrule_to_avtab_out:
+exit:
 	free(new_avtab_key);
 	free(new_avtab_datum);
 	return rc;
@@ -952,18 +952,18 @@ int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	rc = __cil_avrule_to_avtab(pdb, cil_avrule, &avtab_key, &avtab_datum);
 	if (rc != SEPOL_OK) {
-		goto avrule_to_policydb_out;
+		goto exit;
 	}
 
 	avtab_ptr = avtab_insert_nonunique(&pdb->te_avtab, avtab_key, avtab_datum);
 	if (avtab_ptr == NULL) {
 		rc = SEPOL_ERR;
-		goto avrule_to_policydb_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-avrule_to_policydb_out:
+exit:
 	free(avtab_key);
 	free(avtab_datum);
 	return rc;
@@ -1001,13 +1001,13 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 			break;
 		}
 		if (rc != SEPOL_OK) {
-			goto cond_to_policydb_out;
+			goto exit;
 		}
 
 		avtab_ptr = avtab_insert_nonunique(&pdb->te_cond_avtab, avtab_key, avtab_datum);
 		if (avtab_ptr == NULL) {
 			rc = SEPOL_ERR;
-			goto cond_to_policydb_out;
+			goto exit;
 		}
 		cond_list->node = avtab_ptr;
 
@@ -1029,14 +1029,14 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 			break;
 		default:
 			rc = SEPOL_ERR;
-			goto cond_to_policydb_out;
+			goto exit;
 		}
 		curr_rule = curr_rule->next;
 	}
 
 	return SEPOL_OK;
 
-cond_to_policydb_out:
+exit:
 	free(avtab_key);
 	free(avtab_datum);
 	cond_av_list_destroy(cond_list);
@@ -1057,7 +1057,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	cond_node = cond_node_create(pdb, NULL);
 	if (cond_node == NULL) {
 		rc = SEPOL_ERR;
-		goto booleanif_to_policydb_out;
+		goto exit;
 	}
 
 	while (curr_expr != NULL) {
@@ -1073,7 +1073,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 			sepol_bool = hashtab_search(pdb->p_bools.table, cil_cond->str);
 			if (sepol_bool == NULL) {
 				rc = SEPOL_ERR;
-				goto booleanif_to_policydb_out;
+				goto exit;
 			}
 			cond_expr->bool = sepol_bool->s.value;
 			break;
@@ -1097,7 +1097,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 			break;
 		default:
 			rc = SEPOL_ERR;
-			goto booleanif_to_policydb_out;
+			goto exit;
 		}
 
 		if (cond_expr_tmp != NULL) {
@@ -1109,12 +1109,12 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	rc = __cil_cond_to_policydb(pdb, cil_boolif->condtrue, cond_node);
 	if (rc != SEPOL_OK) {
-		goto booleanif_to_policydb_out;
+		goto exit;
 	}
 
 	rc = __cil_cond_to_policydb(pdb, cil_boolif->condfalse, cond_node);
 	if (rc != SEPOL_OK) {
-		goto booleanif_to_policydb_out;
+		goto exit;
 	}
 
 	if (pdb->cond_list == NULL) {
@@ -1125,7 +1125,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	return SEPOL_OK;
 
-booleanif_to_policydb_out:
+exit:
 	cond_node_destroy(cond_node);
 	cond_expr_destroy(cond_expr);
 	return rc;
@@ -1147,7 +1147,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_src = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_src == NULL) {
 		rc = SEPOL_ERR;
-		goto roletrans_to_policydb_out;
+		goto exit;
 	}
 	sepol_roletrans->role = sepol_src->s.value;
 
@@ -1155,7 +1155,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_tgt = hashtab_search(pdb->p_types.table, key);
 	if (sepol_tgt == NULL) {
 		rc = SEPOL_ERR;
-		goto roletrans_to_policydb_out;
+		goto exit;
 	}
 	sepol_roletrans->type = sepol_tgt->s.value;
 
@@ -1163,7 +1163,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_obj = hashtab_search(pdb->p_classes.table, key);
 	if (sepol_obj == NULL) {
 		rc = SEPOL_ERR;
-		goto roletrans_to_policydb_out;
+		goto exit;
 	}
 	sepol_roletrans->tclass = sepol_obj->s.value;
 
@@ -1171,7 +1171,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_result = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_result == NULL) {
 		rc = SEPOL_ERR;
-		goto roletrans_to_policydb_out;
+		goto exit;
 	}
 	sepol_roletrans->new_role = sepol_result->s.value;
 
@@ -1183,7 +1183,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	return SEPOL_OK;
 
-roletrans_to_policydb_out:
+exit:
 	free(sepol_roletrans);
 	return rc;
 
@@ -1203,7 +1203,7 @@ int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_role = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_role == NULL) {
 		rc = SEPOL_ERR;
-		goto roleallow_to_policydb_out;
+		goto exit;
 	}
 	sepol_roleallow->role = sepol_role->s.value;
 
@@ -1211,7 +1211,7 @@ int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_new_role = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_new_role == NULL) {
 		rc = SEPOL_ERR;
-		goto roleallow_to_policydb_out;
+		goto exit;
 	}
 	sepol_roleallow->new_role = sepol_new_role->s.value;
 
@@ -1223,7 +1223,7 @@ int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	return SEPOL_OK;
 
-roleallow_to_policydb_out:
+exit:
 	free(sepol_roleallow);
 	return rc;
 }
@@ -1244,7 +1244,7 @@ int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_src = hashtab_search(pdb->p_types.table, key);
 	if (sepol_src == NULL) {
 		rc = SEPOL_ERR;
-		goto filetrans_to_policydb_out;
+		goto exit;
 	}
 	sepol_filetrans->stype = sepol_src->s.value;
 
@@ -1252,7 +1252,7 @@ int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_exec = hashtab_search(pdb->p_types.table, key);
 	if (sepol_exec == NULL) {
 		rc = SEPOL_ERR;
-		goto filetrans_to_policydb_out;
+		goto exit;
 	}
 	sepol_filetrans->ttype = sepol_exec->s.value;
 
@@ -1260,7 +1260,7 @@ int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_proc = hashtab_search(pdb->p_classes.table, key);
 	if (sepol_proc == NULL) {
 		rc = SEPOL_ERR;
-		goto filetrans_to_policydb_out;
+		goto exit;
 	}
 	sepol_filetrans->tclass = sepol_proc->s.value;
 
@@ -1268,7 +1268,7 @@ int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	sepol_dest = hashtab_search(pdb->p_types.table, key);
 	if (sepol_dest == NULL) {
 		rc = SEPOL_ERR;
-		goto filetrans_to_policydb_out;
+		goto exit;
 	}
 	sepol_filetrans->otype = sepol_dest->s.value;
 
@@ -1282,7 +1282,7 @@ int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	return SEPOL_OK;
 
-filetrans_to_policydb_out:
+exit:
 	free(sepol_filetrans);
 	return rc;
 
@@ -1319,7 +1319,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 			new_expr_node = cil_malloc(sizeof(*new_expr_node));
 			rc = constraint_expr_init(new_expr_node);
 			if (rc != SEPOL_OK) {
-				goto cleanup;
+				goto exit;
 			}
 
 			if (new_expr == NULL) {
@@ -1409,12 +1409,12 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				sepol_user = hashtab_search(pdb->p_users.table, key);
 				if (sepol_user == NULL) {
 					rc = SEPOL_ERR;
-					goto cleanup;
+					goto exit;
 				}
 				value = sepol_user->s.value;
 				if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
 					rc = SEPOL_ERR;
-					goto cleanup;
+					goto exit;
 				}
 				break;
 			case CIL_ROLE:
@@ -1423,12 +1423,12 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				sepol_role = hashtab_search(pdb->p_roles.table, key);
 				if (sepol_role == NULL) {
 					rc = SEPOL_ERR;
-					goto cleanup;
+					goto exit;
 				}
 				value = sepol_role->s.value;
 				if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
 					rc = SEPOL_ERR;
-					goto cleanup;
+					goto exit;
 				}
 				break;
 			case CIL_TYPE:
@@ -1437,17 +1437,17 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				sepol_type = hashtab_search(pdb->p_types.table, key);
 				if (sepol_type == NULL) {
 				rc = SEPOL_ERR;
-					goto cleanup;
+					goto exit;
 				}
 				value = sepol_type->s.value;
 				type_set_t *type_set = curr_expr->type_names;
 				if (ebitmap_set_bit(&type_set->negset, value - 1, 1)) {
 					rc = SEPOL_ERR;
-					goto cleanup;
+					goto exit;
 				}
 				if (ebitmap_set_bit(&type_set->types, value - 1, 1)) {
 					rc = SEPOL_ERR;
-					goto cleanup;
+					goto exit;
 				}
 				break;
 			default:
@@ -1465,7 +1465,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 
 	return SEPOL_OK;
 
-cleanup:
+exit:
 	while (new_expr != NULL) {
 		curr_expr = new_expr->next;
 		constraint_expr_destroy(new_expr);
@@ -1495,7 +1495,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		sepol_class = hashtab_search(pdb->p_classes.table, key);
 		if (sepol_class == NULL) {
 			rc = SEPOL_ERR;
-			goto constrain_to_policydb_out;
+			goto exit;
 		}
 
 		sepol_constrain = cil_malloc(sizeof(*sepol_constrain));
@@ -1507,7 +1507,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 			sepol_perm = hashtab_search(sepol_class->permissions.table, key);
 			if (sepol_perm == NULL) {
 				rc = SEPOL_ERR;
-				goto constrain_to_policydb_out;
+				goto exit;
 			}
 			sepol_constrain->permissions |= 1 << (sepol_perm->s.value - 1);
 
@@ -1516,7 +1516,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 		rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
 		if (rc != SEPOL_OK) {
-			goto constrain_to_policydb_out;
+			goto exit;
 		}
 		sepol_constrain->expr = sepol_expr;
 
@@ -1533,7 +1533,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	return SEPOL_OK;
 
-constrain_to_policydb_out:
+exit:
 	free(sepol_constrain);
 	return rc;
 }
@@ -1648,22 +1648,22 @@ int __cil_binary_create_helper(struct cil_tree_node *node, __attribute__((unused
 		if (opt->datum.state != CIL_STATE_ENABLED) {
 			*finished = CIL_TREE_SKIP_HEAD;
 			rc = SEPOL_OK;
-			goto binary_create_helper_out;
+			goto exit;
 		}
 	} else if (node->flavor == CIL_MACRO) {
 		*finished = CIL_TREE_SKIP_HEAD;
 		rc = SEPOL_OK;
-		goto binary_create_helper_out;
+		goto exit;
 	}	
 
 	rc = __cil_node_to_policydb(pdb, node, pass);
 	if (rc != SEPOL_OK) {
-		goto binary_create_helper_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-binary_create_helper_out:
+exit:
 	return rc;
 }
 
@@ -1673,32 +1673,32 @@ int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 
 	rc = cil_catorder_to_policydb(pdb, db);
 	if (rc != SEPOL_OK) {
-		goto policydb_init_out;
+		goto exit;
 	}
 
 	rc = cil_dominance_to_policydb(pdb, db);
 	if (rc != SEPOL_OK) {
-		goto policydb_init_out;
+		goto exit;
 	}
 
 	rc = avtab_alloc(&pdb->te_avtab, MAX_AVTAB_SIZE);
 	if (rc != SEPOL_OK) {
-		goto policydb_init_out;
+		goto exit;
 	}
 
 	rc = cond_policydb_init(pdb);
 	if (rc != SEPOL_OK) {
-		goto policydb_init_out;
+		goto exit;
 	}
 
 	rc = avtab_alloc(&pdb->te_cond_avtab, MAX_AVTAB_SIZE);
 	if (rc != SEPOL_OK) {
-		goto policydb_init_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-policydb_init_out:
+exit:
 	return rc;
 }
 
@@ -1711,12 +1711,12 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	struct cil_args_binary extra_args;
 
 	if (db == NULL || &pdb == NULL || fname == NULL) {
-		goto binary_create_out;
+		goto exit;
 	}
 
 	rc = __cil_policydb_init(pdb, db);
 	if (rc != SEPOL_OK) {
-		goto binary_create_out;
+		goto exit;
 	}
 
 	extra_args.db = db;
@@ -1725,7 +1725,7 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 		extra_args.pass = i;
 		rc = cil_tree_walk(db->ast->root, __cil_binary_create_helper, NULL, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
-			goto binary_create_out;
+			goto exit;
 		}
 	}
 
@@ -1733,7 +1733,7 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	if (binary == NULL) {
 		fprintf(stderr, "Failure creating binary file\n");
 		rc = SEPOL_ERR;
-		goto binary_create_out;
+		goto exit;
 	}
 
 	policy_file_init(&pf);
@@ -1743,13 +1743,13 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	rc = policydb_write(pdb, &pf);
 	if (rc != 0) {
 		fprintf(stderr, "Failed writing binary policy\n");
-		goto binary_create_out;
+		goto exit;
 	}
 
 	fclose(binary);
 
 	return SEPOL_OK;
 
-binary_create_out:
+exit:
 	return rc;
 }

@@ -398,13 +398,13 @@ int cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 		rc = symtab_init(&symtab[i], CIL_SYM_SIZE);
 		if (rc != SEPOL_OK) {
 			printf("Symtab init failed\n");
-			goto symtab_array_init_out;
+			goto exit;
 		}
 	}
 
 	return SEPOL_OK;
 
-symtab_array_init_out:
+exit:
 	return rc;
 }
 
@@ -478,7 +478,7 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || ast_node == NULL) {
-		goto get_parent_symtab_out;
+		goto exit;
 	}
 
 	if (ast_node->parent != NULL) {
@@ -490,7 +490,7 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_call failed, rc: %d\n", rc);
-				goto get_parent_symtab_out;
+				goto exit;
 			}
 		} else if (ast_node->parent->flavor == CIL_CLASS) {
 			*symtab = &((struct cil_class*)ast_node->parent->data)->perms;
@@ -502,34 +502,34 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_booleanif failed, rc: %d\n", rc);
-				goto get_parent_symtab_out;
+				goto exit;
 			}
 		} else if (ast_node->parent->flavor == CIL_OPTIONAL && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_optional failed, rc: %d\n", rc);
-				goto get_parent_symtab_out;
+				goto exit;
 			}
 		} else if (ast_node->parent->flavor == CIL_ROOT && sym_index < CIL_SYM_NUM) {
 			*symtab = &db->symtab[sym_index];
 		} else if (sym_index >= CIL_SYM_NUM) {
 			printf("Invalid index passed to cil_get_parent_symtab\n");
 			rc = SEPOL_ERR;
-			goto get_parent_symtab_out;
+			goto exit;
 		} else {
 			printf("Failed to get symtab from parent node\n");
 			rc = SEPOL_ERR;
-			goto get_parent_symtab_out;
+			goto exit;
 		}
 	} else {
 		printf("Failed to get symtab: no parent node\n");
 		rc = SEPOL_ERR;
-		goto get_parent_symtab_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-get_parent_symtab_out:
+exit:
 	return rc;
 }
 

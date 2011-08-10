@@ -48,12 +48,12 @@ int __cil_fqn_qualify_last_child_helper(struct cil_tree_node *node, void *extra_
 
 	if (node == NULL || extra_args == NULL) {
 		rc = SEPOL_ERR;
-		goto fqn_qualify_last_child_helper_out;
+		goto exit;
 	}
 
 	if (node->parent->flavor != CIL_BLOCK) {
 		rc = SEPOL_OK;
-		goto fqn_qualify_last_child_helper_out;
+		goto exit;
 	}
 
 	datum = node->parent->data;
@@ -63,7 +63,7 @@ int __cil_fqn_qualify_last_child_helper(struct cil_tree_node *node, void *extra_
 
 	return SEPOL_OK;
 
-fqn_qualify_last_child_helper_out:
+exit:
 	return rc;
 }
 
@@ -76,12 +76,12 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 	int rc = SEPOL_ERR;
 
 	if (node == NULL || finished == NULL || extra_args == NULL) {
-		goto fqn_qualify_helper_out;
+		goto exit;
 	}
 
 	if (node->flavor < CIL_MIN_DECLARATIVE) {
 		rc = SEPOL_OK;
-		goto fqn_qualify_helper_out;
+		goto exit;
 	}
 
 	args = extra_args;
@@ -100,7 +100,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		if (args->len + strlen(datum->name) + 1 >= CIL_MAX_NAME_LENGTH) {
 			printf("Fully qualified name too long\n");
 			rc = SEPOL_ERR;
-			goto fqn_qualify_helper_out;
+			goto exit;
 		}
 		strcat(args->fqparent, datum->name);
 		strcat(args->fqparent, ".");
@@ -131,14 +131,14 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 	case CIL_USER:
 		if (args->len == 0) {
 			rc = SEPOL_OK;
-			goto fqn_qualify_helper_out;
+			goto exit;
 		}
 
 		newlen = args->len + strlen(datum->name);
 		if (newlen >= CIL_MAX_NAME_LENGTH) {
 			printf("Fully qualified name too long\n");
 			rc = SEPOL_ERR;
-			goto fqn_qualify_helper_out;
+			goto exit;
 		}
 		fqn = cil_malloc(newlen + 1);
 		strcpy(fqn, args->fqparent);
@@ -149,12 +149,12 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		break;
 	default:
 		rc = SEPOL_ERR;
-		goto fqn_qualify_helper_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-fqn_qualify_helper_out:
+exit:
 	return rc;
 }
 
@@ -168,12 +168,12 @@ int cil_fqn_qualify(struct cil_tree_node *root)
 
 	rc = cil_tree_walk(root, __cil_fqn_qualify_node_helper, NULL, __cil_fqn_qualify_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {
-		goto fqn_qualify_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-fqn_qualify_out:
+exit:
 	return rc;
 }
 
