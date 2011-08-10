@@ -302,33 +302,190 @@ type_to_policydb_out:
 	free(sepol_type);
 	return rc;
 }
+
+int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_typealias *cil_alias = node->data;
+	type_datum_t *sepol_type = NULL;
+	type_datum_t *sepol_alias = cil_malloc(sizeof(*sepol_alias));
+	type_datum_init(sepol_alias);
+
+	key = ((struct cil_symtab_datum *)cil_alias->type)->name;
+	sepol_type = hashtab_search(pdb->p_types.table, key);
+	if (sepol_type == NULL) {
+		rc = SEPOL_ERR;
+		goto typealias_to_policydb_out;
+	}
+
+	sepol_alias->flavor = TYPE_ALIAS;
+
+	key = cil_strdup(cil_alias->datum.name);
+	rc = symtab_insert(pdb, SYM_TYPES, key, sepol_alias, SCOPE_DECL, 0, NULL);
+	if (rc != SEPOL_OK) {
+		goto typealias_to_policydb_out;
+	}
+	sepol_alias->primary = sepol_type->s.value;
+
+	return SEPOL_OK;
+
+typealias_to_policydb_out:
+	free(key);
+	free(sepol_alias);
 	return rc;
 }
 
-int policydb_type_ebitmap_init(policydb_t *pdb)
+int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
-	uint32_t i;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_typeattribute *cil_attr = node->data;
+	type_datum_t *sepol_attr = cil_malloc(sizeof(*sepol_attr));
+	type_datum_init(sepol_attr);
 
-	if (pdb->attr_type_map != NULL && pdb->type_attr_map != NULL) {
-		rc = SEPOL_OK;
-		goto type_ebitmap_out;
-        }
+	sepol_attr->flavor = TYPE_ATTRIB;
 
-	pdb->attr_type_map = cil_malloc(pdb->p_types.nprim * sizeof(ebitmap_t));
-	pdb->type_attr_map = cil_malloc(pdb->p_types.nprim * sizeof(ebitmap_t));
+	key = cil_strdup(cil_attr->datum.name);
+	rc = symtab_insert(pdb, SYM_TYPES, key, sepol_attr, SCOPE_DECL, 0, &value);
+	if (rc != SEPOL_OK) {
+		goto attr_to_policydb_out;
+	}
+	sepol_attr->s.value = value;
+	sepol_attr->primary = value;
 
-	for (i = 0; i < pdb->p_types.nprim; i++) {
-		ebitmap_init(&pdb->attr_type_map[i]);
-		ebitmap_init(&pdb->type_attr_map[i]);
-		if (ebitmap_set_bit(&pdb->type_attr_map[i], i, 1)) {
-			goto type_ebitmap_out;
+	return SEPOL_OK;
+
+attr_to_policydb_out:
+	free(sepol_attr);
+	return rc;
+}
+
+int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute *attr, ebitmap_t *out);
+
+int __cil_typeattr_expand_to_bitmap(policydb_t *pdb, struct cil_list *types, ebitmap_t *out)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_list_item *curr_type = types->head;
+	enum cil_flavor flavor;
+	type_datum_t *sepol_type = NULL;
+
+	while (curr_type != NULL) {
+		flavor = curr_type->flavor;
+
+		if (flavor == CIL_TYPEATTRIBUTE) {
+			rc = __cil_typeattr_expand_to_policydb(pdb, curr_type->data, out);
+			if (rc != SEPOL_OK) {
+				goto typeattr_expand_bitmap_out;
+			}
+			curr_type = curr_type->next;
+			continue;
 		}
+
+		key = ((struct cil_symtab_datum *)curr_type->data)->name;
+		sepol_type = hashtab_search(pdb->p_types.table, key);
+		if (sepol_type == NULL) {
+			goto typeattr_expand_bitmap_out;
+		}
+		value = sepol_type->s.value;
+
+		if (ebitmap_set_bit(out, value - 1, 1)) {
+			goto typeattr_expand_bitmap_out;
+		}
+
+		curr_type = curr_type->next;
 	}
 
 	return SEPOL_OK;
 
-type_ebitmap_out:
+typeattr_expand_bitmap_out:
+	return rc;
+
+}
+
+int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute *attr, ebitmap_t *types)
+{
+	int rc = SEPOL_ERR;
+	ebitmap_t *negtypes = NULL;
+
+	if (attr->types_list != NULL) {
+		rc = __cil_typeattr_expand_to_bitmap(pdb, attr->types_list, types);
+		if (rc != SEPOL_OK) {
+			goto typeattr_expand_out;
+		}
+	} else {
+		rc = SEPOL_OK;
+		goto typeattr_expand_out;
+	}
+
+	if (attr->neg_list != NULL) {
+		negtypes = cil_malloc(pdb->p_types.nprim * sizeof(ebitmap_t));
+		ebitmap_init(negtypes);
+
+		rc = __cil_typeattr_expand_to_bitmap(pdb, attr->neg_list, negtypes);
+		if (rc != SEPOL_OK) {
+			goto typeattr_expand_out;
+		}
+
+		unsigned int i;
+		ebitmap_node_t *tnode;
+		ebitmap_for_each_bit(types, tnode, i) {
+			if (ebitmap_get_bit(negtypes, i)) {
+				if (ebitmap_set_bit(types, i, 0)) {
+					goto typeattr_expand_out;
+				}
+			}
+		}
+	}
+
+	rc = SEPOL_OK;
+
+typeattr_expand_out:
+	ebitmap_destroy(negtypes);
+	free(negtypes);
+	return rc;
+}
+
+int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	uint32_t value = 0;
+	char *key = NULL;
+	struct cil_typeattribute *cil_attr = node->data;
+	type_datum_t *sepol_type = NULL;
+
+	if (pdb->type_attr_map == NULL) {
+		pdb->type_attr_map = cil_malloc(pdb->p_types.nprim * sizeof(ebitmap_t));
+
+		uint32_t i = 0;
+		for (i = 0; i < pdb->p_types.nprim; i++) {
+			ebitmap_init(&pdb->type_attr_map[i]);
+			if (ebitmap_set_bit(&pdb->type_attr_map[i], i, 1)) {
+				rc = SEPOL_ERR;
+				goto attr_to_bitmap_out;
+			}
+		}
+	}
+
+	key = cil_attr->datum.name;
+	sepol_type = hashtab_search(pdb->p_types.table, key);
+	if (sepol_type == NULL) {
+		rc = SEPOL_ERR;
+		goto attr_to_bitmap_out;
+	}
+	value = sepol_type->s.value;
+
+	rc = __cil_typeattr_expand_to_policydb(pdb, cil_attr, &pdb->type_attr_map[value - 1]);
+	if (rc != SEPOL_OK) {
+		goto attr_to_bitmap_out;
+	}
+
+	return SEPOL_OK;
+
+attr_to_bitmap_out:
 	return rc;
 }
 
@@ -1350,6 +1507,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_TYPE:
 			rc = cil_type_to_policydb(pdb, node);
 			break;
+		case CIL_TYPEATTRIBUTE:
+			rc = cil_typeattribute_to_policydb(pdb, node);
+			break;
 		case CIL_POLICYCAP:
 			rc = cil_policycap_to_policydb(pdb, node);
 			break;
@@ -1368,6 +1528,12 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		break;
 	case 2:
 		switch (node->flavor) {
+		case CIL_TYPEALIAS:
+			rc = cil_typealias_to_policydb(pdb, node);
+			break;
+		case CIL_TYPEATTRIBUTE:
+			rc = cil_typeattribute_to_bitmap(pdb, node);
+			break;
 		case CIL_CLASSCOMMON:
 			rc = cil_classcommon_to_policydb(pdb, node);
 			break;
@@ -1509,11 +1675,6 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 		if (rc != SEPOL_OK) {
 			goto binary_create_out;
 		}
-	}
-
-	rc = policydb_type_ebitmap_init(pdb);
-	if (rc != SEPOL_OK) {
-		goto binary_create_out;
 	}
 
 	binary = fopen(fname, "w");

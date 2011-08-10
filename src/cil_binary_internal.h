@@ -116,15 +116,38 @@ int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
- * Initialize type attribute and attribute type bitmaps within the
- * policy database.
+ * Insert cil typealias structure into sepol policydb.
  *
- * @param[in] pdb The policy database which contains the types, which
- * contain the bitmaps.
+ * @param[in] pdb The policy database to insert the typealias into.
+ * @param[in] node The tree node that contains the cil_typealias.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int policydb_type_ebitmap_init(policydb_t *pdb);
+int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
+ * Insert cil attribute structure into sepol policydb.
+ *
+ * @param[in] pdb The policy database to insert the attribute into.
+ * @param[in] node The tree node that contains the cil_attribute.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_attribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+
+/**
+ * Insert cil attribute structure into sepol type->attribute bitmap.
+ * The function calls helper functions to loop over the attributes lists
+ * of types and negative types. If either of the lists contain an attribute,
+ * the helper functions will recurse into the attribute and record the
+ * attribute's types and negative types. There is no minimum depth.
+ *
+ * @param[in] pdb The policy database that contains the type->attribute bitmap.
+ * @param[in] node The tree node that contains the cil_attribute.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_attribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
  * Insert cil policycap structure into sepol policydb.
