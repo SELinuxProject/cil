@@ -454,7 +454,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					curr = attr->types_list->head;
 					printf(" types: ( ");
 					while (curr != NULL) {
-						printf("%s ", ((struct cil_type*)curr->data)->datum.name);
+						printf("%s ", ((struct cil_symtab_datum *)curr->data)->name);
 						curr = curr->next;
 					}
 					printf(")");
@@ -463,7 +463,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					curr = attr->neg_list->head;
 					printf(" neg types: (");
 					while (curr != NULL) {
-						printf(" %s ", ((struct cil_type*)curr->data)->datum.name);
+						printf(" %s ", ((struct cil_symtab_datum *)curr->data)->name);
 						curr = curr->next;
 					}
 					printf(")");

@@ -740,12 +740,12 @@ void cil_levelrange_to_policy(FILE **file_arr, uint32_t file_index, struct cil_l
 
 void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_context *context)
 {
-	struct cil_user *user = context->user;
-	struct cil_role *role = context->role;
-	struct cil_type *type = context->type;
+	char *user_str = ((struct cil_symtab_datum*)context->user)->name;
+	char *role_str = ((struct cil_symtab_datum*)context->role)->name;
+	char *type_str = ((struct cil_symtab_datum*)context->type)->name;
 	struct cil_levelrange *lvlrange = context->range;
 
-	fprintf(file_arr[file_index], "%s:%s:%s:", user->datum.name, role->datum.name, type->datum.name);
+	fprintf(file_arr[file_index], "%s:%s:%s:", user_str, role_str, type_str);
 	cil_levelrange_to_policy(file_arr, file_index, lvlrange);
 }
 
@@ -777,9 +777,9 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 
 int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule *rule)
 {
-	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
-	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
-	char *obj_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->obj)->name;
+	char *src_str = ((struct cil_symtab_datum*)rule->src)->name;
+	char *tgt_str = ((struct cil_symtab_datum*)rule->tgt)->name;
+	char *obj_str = ((struct cil_symtab_datum*)rule->obj)->name;
 	struct cil_list_item *perm_item = rule->perms_list->head;
 
 	switch (rule->rule_kind) {
@@ -811,10 +811,10 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 
 int cil_typerule_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_type_rule *rule)
 {
-	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
-	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
-	char *obj_str = ((struct cil_symtab_datum*)(struct cil_class*)rule->obj)->name;
-	char *result_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->result)->name;
+	char *src_str = ((struct cil_symtab_datum*)rule->src)->name;
+	char *tgt_str = ((struct cil_symtab_datum*)rule->tgt)->name;
+	char *obj_str = ((struct cil_symtab_datum*)rule->obj)->name;
+	char *result_str = ((struct cil_symtab_datum*)rule->result)->name;
 		
 	switch (rule->rule_kind) {
 	case CIL_TYPE_TRANSITION:
@@ -836,10 +836,10 @@ int cil_typerule_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t fil
 
 int cil_filetransition_to_policy(FILE **file_arr, uint32_t file_index, struct cil_filetransition *filetrans)
 {
-	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)filetrans->src)->name;
-	char *exec_str = ((struct cil_symtab_datum*)(struct cil_type*)filetrans->exec)->name;
-	char *proc_str = ((struct cil_symtab_datum*)(struct cil_class*)filetrans->proc)->name;
-	char *dest_str = ((struct cil_symtab_datum*)(struct cil_type*)filetrans->dest)->name;
+	char *src_str = ((struct cil_symtab_datum*)filetrans->src)->name;
+	char *exec_str = ((struct cil_symtab_datum*)filetrans->exec)->name;
+	char *proc_str = ((struct cil_symtab_datum*)filetrans->proc)->name;
+	char *dest_str = ((struct cil_symtab_datum*)filetrans->dest)->name;
 
 	fprintf(file_arr[file_index], "type_transition %s %s : %s %s %s;\n", src_str, exec_str, proc_str, dest_str, filetrans->path_str);
 	return SEPOL_OK;
@@ -1141,34 +1141,34 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	}
 	case CIL_ROLETRANS: {
 		struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;
-		char *src_str = ((struct cil_symtab_datum*)(struct cil_role*)roletrans->src)->name;
-		char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)roletrans->tgt)->name;
-		char *obj_str = ((struct cil_symtab_datum*)(struct cil_class*)roletrans->obj)->name;
-		char *result_str = ((struct cil_symtab_datum*)(struct cil_role*)roletrans->result)->name;
+		char *src_str = ((struct cil_symtab_datum*)roletrans->src)->name;
+		char *tgt_str = ((struct cil_symtab_datum*)roletrans->tgt)->name;
+		char *obj_str = ((struct cil_symtab_datum*)roletrans->obj)->name;
+		char *result_str = ((struct cil_symtab_datum*)roletrans->result)->name;
 		
 		fprintf(file_arr[ALLOWS], "role_transition %s %s:%s %s;\n", src_str, tgt_str, obj_str, result_str);
 		break;
 	}
 	case CIL_ROLEALLOW: {
 		struct cil_role_allow *roleallow = (struct cil_role_allow*)current->data;
-		char *src_str = ((struct cil_symtab_datum*)(struct cil_role*)roleallow->src)->name;
-		char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)roleallow->tgt)->name;
+		char *src_str = ((struct cil_symtab_datum*)roleallow->src)->name;
+		char *tgt_str = ((struct cil_symtab_datum*)roleallow->tgt)->name;
 
 		fprintf(file_arr[ALLOWS], "roleallow %s %s;\n", src_str, tgt_str);
 		break;
 	}
 	case CIL_ROLETYPE: {
 		struct cil_roletype *roletype = (struct cil_roletype*)current->data;
-		char *role_str = ((struct cil_symtab_datum*)(struct cil_role*)roletype->role)->name;
-		char *type_str = ((struct cil_symtab_datum*)(struct cil_type*)roletype->type)->name;
+		char *role_str = ((struct cil_symtab_datum*)roletype->role)->name;
+		char *type_str = ((struct cil_symtab_datum*)roletype->type)->name;
 
 		fprintf(file_arr[ALIASES], "role %s types %s\n", role_str, type_str);
 		break;
 	}
 	case CIL_ROLEDOMINANCE: {
 		struct cil_roledominance *roledom = (struct cil_roledominance*)current->data;
-		char *role_str = ((struct cil_symtab_datum*)(struct cil_role*)roledom->role)->name;
-		char *domed_str = ((struct cil_symtab_datum*)(struct cil_role*)roledom->domed)->name;
+		char *role_str = ((struct cil_symtab_datum*)roledom->role)->name;
+		char *domed_str = ((struct cil_symtab_datum*)roledom->domed)->name;
 		fprintf(file_arr[TYPEATTRTYPES], "dominance { role %s { role %s; } }\n", role_str, domed_str);
 		break;
 	}
@@ -1190,7 +1190,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		break;
 	case CIL_SIDCONTEXT: {
 		struct cil_sidcontext *sidcon = (struct cil_sidcontext*)current->data;
-		fprintf(file_arr[SIDS], "sid %s ", ((struct cil_symtab_datum*)(struct sid*)sidcon->sid)->name);
+		fprintf(file_arr[SIDS], "sid %s ", ((struct cil_symtab_datum*)sidcon->sid)->name);
 		cil_context_to_policy(file_arr, SIDS, sidcon->context);
 		fprintf(file_arr[SIDS], "\n");
 		break;
