@@ -1576,6 +1576,12 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
+	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+		printf("The keyword '%s' is reserved and cannot be used for a type name\n", CIL_KEY_SELF);
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+	
 	rc = cil_type_init(&type);
 	if (rc != SEPOL_OK) {
 		goto exit;
@@ -1625,6 +1631,12 @@ int cil_gen_typeattribute(struct cil_db *db, struct cil_tree_node *parse_current
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		printf("Invalid %s declaration (line: %d)\n", (char*)parse_current->data, parse_current->line);
+		goto exit;
+	}
+	
+	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+		printf("The keyword '%s' is reserved and cannot be used for a typeattribute name\n", CIL_KEY_SELF);
+		rc = SEPOL_ERR;
 		goto exit;
 	}
 
@@ -2454,6 +2466,12 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		printf("Invalid typealias declaration (line: %d)\n", parse_current->line);
+		goto exit;
+	}
+
+	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+		printf("The keyword '%s' is reserved and cannot be used for a typealias name\n", CIL_KEY_SELF);
+		rc = SEPOL_ERR;
 		goto exit;
 	}
 

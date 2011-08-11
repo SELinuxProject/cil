@@ -180,6 +180,7 @@ enum cil_flavor {
 #define CIL_KEY_ROLEDOMINANCE	"roledominance"
 #define CIL_KEY_ROLEBOUNDS	"rolebounds"
 #define CIL_KEY_TYPE 		"type"
+#define CIL_KEY_SELF		"self"
 #define CIL_KEY_TYPEATTRIBUTE	"typeattribute"
 #define CIL_KEY_BOOL		"boolean"
 #define CIL_KEY_ALLOW		"allow"
