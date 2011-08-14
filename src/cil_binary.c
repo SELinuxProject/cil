@@ -865,6 +865,37 @@ exit:
 	return rc;
 }
 
+int __cil_perms_to_avtab(struct cil_list *perms, class_datum_t *sepol_class, uint32_t bitmap)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_list_item *curr_perm = perms->head;
+	struct cil_perm *cil_perm;
+
+	while (curr_perm != NULL) {
+		perm_datum_t *sepol_perm;
+		cil_perm = curr_perm->data;
+		key = cil_perm->datum.name;
+		sepol_perm = hashtab_search(sepol_class->permissions.table, key);
+		if (sepol_perm == NULL) {
+			common_datum_t *sepol_common = sepol_class->comdatum;
+			sepol_perm = hashtab_search(sepol_common->permissions.table, key);
+			if (sepol_perm == NULL) {
+				rc = SEPOL_ERR;
+				goto exit;
+			}
+		}
+		bitmap |= 1 << (sepol_perm->s.value - 1);
+
+		curr_perm = curr_perm->next;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 			avtab_key_t **avtab_key,
 			avtab_datum_t **avtab_datum)
@@ -876,8 +907,6 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 	type_datum_t *sepol_tgt = NULL;
 	class_datum_t *sepol_obj = NULL;
 	struct cil_list *cil_perms = cil_avrule->perms_list;
-	struct cil_list_item *curr_perm = cil_perms->head;
-	struct cil_perm *cil_perm;
 
 	avtab_key_t *new_avtab_key = cil_malloc(sizeof(*avtab_key));
 	memset(avtab_key, 0, sizeof(avtab_key_t));
@@ -909,22 +938,9 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 	}
 	new_avtab_key->target_class = sepol_obj->s.value;
 
-	while (curr_perm != NULL) {
-		perm_datum_t *sepol_perm;
-		cil_perm = curr_perm->data;
-		key = cil_perm->datum.name;
-		sepol_perm = hashtab_search(sepol_obj->permissions.table, key);
-		if (sepol_perm == NULL) {
-			common_datum_t *sepol_common = sepol_obj->comdatum;
-			sepol_perm = hashtab_search(sepol_common->permissions.table, key);
-			if (sepol_perm == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-		}
-		new_avtab_datum->data |= 1 << (sepol_perm->s.value - 1);
-
-		curr_perm = curr_perm->next;
+	rc = __cil_perms_to_avtab(cil_perms, sepol_obj, new_avtab_datum->data);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
 
 	switch (kind) {
@@ -944,7 +960,6 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
 	default:
 		rc = SEPOL_ERR;
 		goto exit;
-		break;
 	}
 
 	*avtab_key = new_avtab_key;
@@ -1501,7 +1516,6 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	struct cil_list_item *curr_class = classes->head;
 	struct cil_list_item *curr_perm = perms->head;
 	class_datum_t *sepol_class = NULL;
-	perm_datum_t *sepol_perm = NULL;
 	constraint_node_t *sepol_constrain = NULL;
 	constraint_expr_t *sepol_expr = NULL;
 
@@ -1517,17 +1531,9 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		sepol_constrain = cil_malloc(sizeof(*sepol_constrain));
 		memset(sepol_constrain, 0, sizeof(constraint_node_t));
 
-		while (curr_perm != NULL) {
-			struct cil_perm *perm = curr_perm->data;
-			key = perm->datum.name;
-			sepol_perm = hashtab_search(sepol_class->permissions.table, key);
-			if (sepol_perm == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			sepol_constrain->permissions |= 1 << (sepol_perm->s.value - 1);
-
-			curr_perm = curr_perm->next;
+		rc = __cil_perms_to_avtab(perms, sepol_class, sepol_constrain->permissions);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
 
 		rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
