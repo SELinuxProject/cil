@@ -1710,13 +1710,12 @@ exit:
 	return rc;
 }
 
-int cil_sidcontext_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_sidcontext *cil_sidcon = node->data;
-	struct cil_sid *cil_sid = cil_sidcon->sid;
-	struct cil_context *cil_context = cil_sidcon->context;
+	struct cil_sid *cil_sid = node->data;
+	struct cil_context *cil_context = cil_sid->context;
 	struct cil_levelrange *cil_lvlrange = cil_context->range;
 	ocontext_t *new_sepol_sidcon = NULL;
 	context_struct_t *sepol_context = NULL;
@@ -1887,8 +1886,8 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_MLSCONSTRAIN:
 			rc = cil_constrain_to_policydb(pdb, node);
 			break;
-		case CIL_SIDCONTEXT:
-			rc = cil_sidcontext_to_policydb(pdb, node);
+		case CIL_SID:
+			rc = cil_sid_to_policydb(pdb, node);
 			break;
 		default:
 			break;

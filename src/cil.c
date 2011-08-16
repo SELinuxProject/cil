@@ -780,6 +780,8 @@ int cil_sid_init(struct cil_sid **sid)
 	new_sid = cil_malloc(sizeof(*new_sid));
 
 	cil_symtab_datum_init(&new_sid->datum);
+	
+	new_sid->context = NULL;
 
 	*sid = new_sid;
 
@@ -797,7 +799,6 @@ int cil_sidcontext_init(struct cil_sidcontext **sidcontext)
 	new_sidcontext = cil_malloc(sizeof(*new_sidcontext));
 
 	new_sidcontext->sid_str = NULL;
-	new_sidcontext->sid = NULL;
 	new_sidcontext->context_str = NULL;
 	new_sidcontext->context = NULL;
 

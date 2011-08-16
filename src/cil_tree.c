@@ -1284,13 +1284,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_SIDCONTEXT: {
 				struct cil_sidcontext *sidcon = node->data;
-				printf("SIDCONTEXT:");
-
-				if (sidcon->sid != NULL) {
-					printf(" %s", (((struct cil_sid*)sidcon->sid)->datum.name));
-				} else {
-					printf(" %s", sidcon->sid_str);
-				}
+				printf("SIDCONTEXT: %s", sidcon->sid_str);
 
 				if (sidcon->context != NULL) {
 					cil_tree_print_context(sidcon->context);

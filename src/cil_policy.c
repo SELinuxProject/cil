@@ -1190,7 +1190,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		break;
 	case CIL_SIDCONTEXT: {
 		struct cil_sidcontext *sidcon = (struct cil_sidcontext*)current->data;
-		fprintf(file_arr[SIDS], "sid %s ", ((struct cil_symtab_datum*)sidcon->sid)->name);
+		fprintf(file_arr[SIDS], "sid %s ", sidcon->sid_str);
 		cil_context_to_policy(file_arr, SIDS, sidcon->context);
 		fprintf(file_arr[SIDS], "\n");
 		break;

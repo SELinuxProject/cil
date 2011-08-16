@@ -319,14 +319,14 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_sepol_level_define(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
- * Insert cil sidcontext structure into sepol policydb.
+ * Insert cil sid structure into sepol policydb.
  *
- * @param[in] pdb The policy database to insert the sidcontext into.
- * @param[in] node The tree node that contains the cil_sidcontext.
+ * @param[in] pdb The policy database to insert the sid into.
+ * @param[in] node The tree node that contains the cil_sid.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_sidcontext_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 
 #endif //_CIL_BINARY_INTERNAL_H_

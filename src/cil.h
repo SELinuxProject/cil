@@ -361,11 +361,11 @@ struct cil_classcommon {
 
 struct cil_sid {
 	struct cil_symtab_datum datum;
+	struct cil_context *context;
 };
 
 struct cil_sidcontext {
 	char *sid_str;
-	struct cil_sid *sid;
 	char *context_str;
 	struct cil_context *context;
 };

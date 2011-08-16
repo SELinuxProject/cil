@@ -600,6 +600,15 @@ int cil_reset_role(__attribute__((unused)) struct cil_db *db, struct cil_tree_no
 	return SEPOL_OK;
 }
 
+int cil_reset_sid(__attribute__((unused)) struct cil_db *db, struct cil_tree_node *current, __attribute__((unused)) struct cil_call *call)
+{
+	struct cil_sid *sid = (struct cil_sid *)current->data;
+	/* reset the context to NULL during a re-resolve */
+	sid->context = NULL;
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_userrole *userrole = (struct cil_userrole*)current->data;
@@ -2351,6 +2360,7 @@ exit:
 int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_sidcontext *sidcon = (struct cil_sidcontext*)current->data;
+	struct cil_sid *sid = NULL;
 	struct cil_tree_node *sid_node = NULL;
 	struct cil_tree_node *context_node = NULL;
 
@@ -2361,7 +2371,8 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 		printf("Failed to resolve sid, rc: %d : %s\n", rc, sidcon->sid_str);
 		goto exit;
 	}
-	sidcon->sid = (struct cil_sid*)sid_node->data;
+	sid = sid_node->data;
+
 
 	if (sidcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, sidcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
@@ -2377,6 +2388,14 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 			goto exit;
 		}
 	}
+
+	if (sid->context != NULL) {
+		printf("sid's cannot be associated with more than one context\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	sid->context = sidcon->context;
 
 	return SEPOL_OK;
 
@@ -2980,6 +2999,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		case CIL_SENS:
 			rc = cil_reset_sens(db, node, call);
+			break;
+		case CIL_SID:
+			rc = cil_reset_sid(db, node, call);
 			break;
 		case CIL_BOOLEANIF:
 			rc = cil_resolve_boolif(db, node, call);
