@@ -1809,22 +1809,12 @@ exit:
 	return rc;
 }
 
-int cil_sepol_level_define(policydb_t *pdb, struct cil_tree_node *node)
+int __cil_mls_level_build(policydb_t *pdb, struct cil_sens *cil_sens, mls_level_t *mls_level)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_sens *cil_sens = node->data;
 	struct cil_list *catsets = cil_sens->catsets;
 	struct cil_list_item *curr = NULL;
-	level_datum_t *sepol_level = NULL;
-	mls_level_t *mls_level = NULL;
-
-	key = cil_sens->datum.name;
-	sepol_level = hashtab_search(pdb->p_levels.table, key);
-	if (sepol_level == NULL) {
-		goto exit;
-	}
-	mls_level = sepol_level->level;
 
 	ebitmap_init(&mls_level->cat);
 
@@ -1859,7 +1849,56 @@ int cil_sepol_level_define(policydb_t *pdb, struct cil_tree_node *node)
 			}
 		}
 	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_sepol_level_define(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_sens *cil_sens = node->data;
+	level_datum_t *sepol_level = NULL;
+	mls_level_t *mls_level = NULL;
+
+	key = cil_sens->datum.name;
+	sepol_level = hashtab_search(pdb->p_levels.table, key);
+	if (sepol_level == NULL) {
+		goto exit;
+	}
+	mls_level = sepol_level->level;
+
+	rc = __cil_mls_level_build(pdb, cil_sens, mls_level);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
 	sepol_level->defined = 1;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int __cil_levelrange_to_mls_range(policydb_t *pdb, struct cil_levelrange *cil_lvlrange, mls_range_t *mls_range)
+{
+	int rc = SEPOL_ERR;
+	struct cil_sens *low = cil_lvlrange->low->sens;
+	struct cil_sens *high = cil_lvlrange->high->sens;
+
+	rc = __cil_mls_level_build(pdb, low, &mls_range->level[0]);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_mls_level_build(pdb, high, &mls_range->level[1]);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
 
 	return SEPOL_OK;
 
@@ -1943,6 +1982,59 @@ exit:
 	free(new_sepol_sidcon->u.name);
 	context_destroy(&new_sepol_sidcon->context[0]);
 	free(new_sepol_sidcon);
+	return rc;
+}
+
+int cil_rangetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_rangetransition *cil_rangetrans = node->data;
+	struct cil_levelrange *cil_lvlrange = cil_rangetrans->range;
+	type_datum_t *sepol_type = NULL;
+	class_datum_t *sepol_class = NULL;
+	mls_range_t *mls_range = NULL;
+	range_trans_t *sepol_rangetrans = cil_malloc(sizeof(*sepol_rangetrans));
+	memset(sepol_rangetrans, 0, sizeof(range_trans_t));
+
+	sepol_rangetrans->next = pdb->range_tr;
+	pdb->range_tr = sepol_rangetrans;
+
+	key = ((struct cil_symtab_datum *)cil_rangetrans->src)->name;
+	sepol_type = hashtab_search(pdb->p_types.table, key);
+	if (sepol_type == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+	sepol_rangetrans->source_type = sepol_type->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_rangetrans->exec)->name;
+	sepol_type = hashtab_search(pdb->p_types.table, key);
+	if (sepol_type == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+	sepol_rangetrans->target_type = sepol_type->s.value;
+
+	key = ((struct cil_symtab_datum *)cil_rangetrans->obj)->name;
+	sepol_class = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_class == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+	sepol_rangetrans->target_class = sepol_class->s.value;
+
+	mls_range = &sepol_rangetrans->target_range;
+
+	rc = __cil_levelrange_to_mls_range(pdb, cil_lvlrange, mls_range);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	free(sepol_rangetrans);
 	return rc;
 }
 
@@ -2042,6 +2134,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_SID:
 			rc = cil_sid_to_policydb(pdb, node);
+			break;
+		case CIL_RANGETRANSITION:
+			rc = cil_rangetransition_to_policydb(pdb, node);
 			break;
 		default:
 			break;
