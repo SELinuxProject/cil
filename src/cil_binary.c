@@ -336,6 +336,7 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+	sepol_alias->s.value = sepol_type->s.value;
 	sepol_alias->primary = sepol_type->s.value;
 
 	return SEPOL_OK;
