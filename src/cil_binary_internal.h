@@ -305,11 +305,14 @@ int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
- * Insert cil level structure into sepol policydb.
+ * Define sepol level.
  * Associates the sepol level (sensitivity) with categories.
+ * Looks at the cil_sens structure for a list of cil_catsets and
+ * cil_catranges to associate the sensitivity with.
+ * Sets the sepol level as defined in the sepol policy database.
  *
- * @param[in] pdb The policy database to insert the level into.
- * @param[in] node The tree node that contains the cil_level.
+ * @param[in] pdb The policy database that holds the sepol level.
+ * @param[in] node The tree node that contains the cil_sens.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */

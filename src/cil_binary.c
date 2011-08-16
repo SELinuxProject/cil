@@ -1597,13 +1597,13 @@ exit:
 	return rc;
 }
 
-int cil_level_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+int cil_sepol_level_define(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_level *cil_level = node->data;
-	struct cil_sens *cil_sens = cil_level->sens;
-	struct cil_catset *cil_catset = cil_level->catset;
+	struct cil_sens *cil_sens = node->data;
+	struct cil_list *catsets = cil_sens->catsets;
+	struct cil_list_item *curr = NULL;
 	level_datum_t *sepol_level = NULL;
 	mls_level_t *mls_level = NULL;
 
@@ -1614,24 +1614,27 @@ int cil_level_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	}
 	mls_level = sepol_level->level;
 
-	if (cil_catset != NULL) {
-		struct cil_list *cil_cats = cil_catset->cat_list;
-		struct cil_list_item *curr = cil_cats->head;
-		cat_datum_t *sepol_cat = NULL;
+	ebitmap_init(&mls_level->cat);
 
-		ebitmap_init(&mls_level->cat);
+	for (curr = catsets->head; curr != NULL; curr = curr->next) {
+		struct cil_catset *catset = curr->data;
+		struct cil_list *cats = catset->cat_list;
+		struct cil_list_item *curr_cat = NULL;
 
-		while (curr != NULL) {
-			if (curr->flavor == CIL_CATRANGE) {
-				struct cil_catrange *cil_catrange = curr->data;
-				struct cil_cat *start_cat = cil_catrange->cat_low;
-				struct cil_cat *end_cat = cil_catrange->cat_high;
+		for (curr_cat = cats->head; curr_cat != NULL; curr_cat = curr_cat->next)  {
+			if (curr_cat->flavor == CIL_CATRANGE) {
+				struct cil_catrange *catrange = curr_cat->data;
+				struct cil_cat *start_cat = catrange->cat_low;
+				struct cil_cat *end_cat = catrange->cat_high;
+
 				rc = __cil_catrange_expand_to_bitmap(pdb, start_cat, end_cat, &mls_level->cat);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
 			} else {
-				struct cil_cat *cil_cat = curr->data;
+				struct cil_cat *cil_cat = curr_cat->data;
+				cat_datum_t *sepol_cat = NULL;
+
 				key = cil_cat->datum.name;
 				sepol_cat = hashtab_search(pdb->p_cats.table, key);
 				if (sepol_cat == NULL) {
@@ -1642,9 +1645,9 @@ int cil_level_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 					goto exit;
 				}
 			}
-			curr = curr->next;
 		}
 	}
+	sepol_level->defined = 1;
 
 	return SEPOL_OK;
 
@@ -1773,6 +1776,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_CATALIAS:
 			rc = cil_catalias_to_policydb(pdb, node);
+			break;
+		case CIL_SENS:
+			rc = cil_sepol_level_define(pdb, node);
 			break;
 		default:
 			break;
