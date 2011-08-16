@@ -1918,7 +1918,6 @@ int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	user_datum_t *sepol_user = NULL;
 	role_datum_t *sepol_role = NULL;
 	type_datum_t *sepol_type = NULL;
-	level_datum_t *sepol_level = NULL;
 
 	new_sepol_sidcon = cil_malloc(sizeof(*new_sepol_sidcon));
 	memset(new_sepol_sidcon, 0, sizeof(ocontext_t));
@@ -1954,24 +1953,7 @@ int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	mls_context_init(sepol_context);
 
-	key = ((struct cil_symtab_datum *)cil_lvlrange->low->sens)->name;
-	sepol_level = hashtab_search(pdb->p_levels.table, key);
-	if (sepol_level == NULL) {
-		goto exit;
-	}
-
-	rc = mls_level_cpy(&sepol_context->range.level[0], sepol_level->level);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	key = ((struct cil_symtab_datum *)cil_lvlrange->high->sens)->name;
-	sepol_level = hashtab_search(pdb->p_levels.table, key);
-	if (sepol_level == NULL) {
-		goto exit;
-	}
-
-	rc = mls_level_cpy(&sepol_context->range.level[1], sepol_level->level);
+	rc = __cil_levelrange_to_mls_range(pdb, cil_lvlrange, &sepol_context->range);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
