@@ -119,12 +119,16 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	}
 	rule->src = src_node->data;
 
-	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
-	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rule->tgt_str);
-		goto exit;
+	if (!strcmp(rule->tgt_str, CIL_KEY_SELF)) {
+		rule->tgt = db->selftype;
+	} else {
+		rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
+		if (rc != SEPOL_OK) {
+			printf("Name resolution failed for %s\n", rule->tgt_str);
+			goto exit;
+		}
+		rule->tgt = tgt_node->data;
 	}
-	rule->tgt = tgt_node->data;
 
 	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {

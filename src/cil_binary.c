@@ -760,98 +760,41 @@ exit:
 	return rc;
 }
 
-int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule,
-			avtab_key_t **avtab_key,
-			avtab_datum_t **avtab_datum)
+int __cil_insert_type_rule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t res, avtab_t *avtab, avtab_ptr_t *avtab_ptr)
 {
 	int rc = SEPOL_ERR;
-	char *key = NULL;
-	uint16_t kind = cil_rule->rule_kind;
-	type_datum_t *sepol_src = NULL;
-	type_datum_t *sepol_tgt = NULL;
-	type_datum_t *sepol_result = NULL;
-	class_datum_t *sepol_obj = NULL;
-
-	avtab_key_t *new_avtab_key = cil_malloc(sizeof(*new_avtab_key));
+	avtab_key_t *avtab_key = NULL;
+	avtab_datum_t *avtab_datum = NULL;
+	
+	avtab_key = cil_malloc(sizeof(*avtab_key));
 	memset(avtab_key, 0, sizeof(avtab_key_t));
 
-	avtab_datum_t *new_avtab_datum = cil_malloc(sizeof(*new_avtab_datum));
-	memset(avtab_datum, 0, sizeof(avtab_datum_t));
-
-	key = ((struct cil_symtab_datum *)cil_rule->src)->name;
-	sepol_src = hashtab_search(pdb->p_types.table, key);
-	if (sepol_src == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	new_avtab_key->source_type = sepol_src->s.value;
-
-	key = ((struct cil_symtab_datum *)cil_rule->tgt)->name;
-	sepol_tgt = hashtab_search(pdb->p_types.table, key);
-	if (sepol_tgt == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	new_avtab_key->target_type = sepol_tgt->s.value;
-
-	key = ((struct cil_symtab_datum *)cil_rule->obj)->name;
-	sepol_obj = hashtab_search(pdb->p_classes.table, key);
-	if (sepol_obj == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	new_avtab_key->target_class = sepol_obj->s.value;
-
-	key = ((struct cil_symtab_datum *)cil_rule->result)->name;
-	sepol_result = hashtab_search(pdb->p_types.table, key);
-	if (sepol_result == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	new_avtab_datum->data = sepol_result->s.value;
+	avtab_key->source_type = src;
+	avtab_key->target_type = tgt;
+	avtab_key->target_class = obj;
 
 	switch (kind) {
 	case CIL_TYPE_TRANSITION:
-		new_avtab_key->specified = AVTAB_TRANSITION;
+		avtab_key->specified = AVTAB_TRANSITION;
 		break;
 	case CIL_TYPE_CHANGE:
-		new_avtab_key->specified = AVTAB_CHANGE;
+		avtab_key->specified = AVTAB_CHANGE;
 		break;
 	case CIL_TYPE_MEMBER:
-		new_avtab_key->specified = AVTAB_MEMBER;
+		avtab_key->specified = AVTAB_MEMBER;
 		break;
 	default:
 		rc = SEPOL_ERR;
 		goto exit;
-		break;
 	}
 
-	*avtab_key = new_avtab_key;
-	*avtab_datum = new_avtab_datum;
+	avtab_datum = cil_malloc(sizeof(*avtab_datum));
+	memset(avtab_datum, 0, sizeof(*avtab_datum));
+		
+	avtab_datum->data = res;
 
-	return SEPOL_OK;
-
-exit:
-	free(new_avtab_key);
-	free(new_avtab_datum);
-	return rc;
-}
-
-int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
-{
-	int rc = SEPOL_ERR;
-	struct cil_type_rule *cil_rule = node->data;
-	avtab_ptr_t avtab_ptr = NULL;
-	avtab_datum_t *avtab_datum = NULL;
-	avtab_key_t *avtab_key = NULL;
-
-	rc = __cil_type_rule_to_avtab(pdb, cil_rule, &avtab_key, &avtab_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	avtab_ptr = avtab_insert_nonunique(&pdb->te_avtab, avtab_key, avtab_datum);
-	if (avtab_ptr == NULL) {
+	*avtab_ptr = avtab_insert_nonunique(avtab, avtab_key, avtab_datum);
+	if (*avtab_ptr == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -864,12 +807,80 @@ exit:
 	return rc;
 }
 
-int __cil_perms_to_avtab(struct cil_list *perms, class_datum_t *sepol_class, uint32_t bitmap)
+int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule, avtab_t *avtab, avtab_ptr_t *avtab_ptr)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	uint16_t kind = cil_rule->rule_kind;
+	type_datum_t *sepol_src = NULL;
+	type_datum_t *sepol_tgt = NULL;
+	type_datum_t *sepol_result = NULL;
+	class_datum_t *sepol_obj = NULL;
+
+	
+	key = ((struct cil_symtab_datum *)cil_rule->src)->name;
+	sepol_src = hashtab_search(pdb->p_types.table, key);
+	if (sepol_src == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+	
+	key = ((struct cil_symtab_datum *)cil_rule->tgt)->name;
+	sepol_tgt = hashtab_search(pdb->p_types.table, key);
+	if (sepol_tgt == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	key = ((struct cil_symtab_datum *)cil_rule->obj)->name;
+	sepol_obj = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_obj == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	key = ((struct cil_symtab_datum *)cil_rule->result)->name;
+	sepol_result = hashtab_search(pdb->p_types.table, key);
+	if (sepol_result == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = __cil_insert_type_rule(kind, sepol_src->s.value, sepol_tgt->s.value, sepol_obj->s.value, sepol_result->s.value, avtab, avtab_ptr);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_type_rule *cil_rule = node->data;
+	avtab_ptr_t avtab_ptr = NULL;
+
+	rc = __cil_type_rule_to_avtab(pdb, cil_rule, &pdb->te_avtab, &avtab_ptr);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int __cil_perms_to_datum(struct cil_list *perms, class_datum_t *sepol_class, uint32_t *datum)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 	struct cil_list_item *curr_perm = perms->head;
 	struct cil_perm *cil_perm;
+	uint32_t data = 0;
 
 	while (curr_perm != NULL) {
 		perm_datum_t *sepol_perm;
@@ -884,109 +895,58 @@ int __cil_perms_to_avtab(struct cil_list *perms, class_datum_t *sepol_class, uin
 				goto exit;
 			}
 		}
-		bitmap |= 1 << (sepol_perm->s.value - 1);
+		data |= 1 << (sepol_perm->s.value - 1);
 
 		curr_perm = curr_perm->next;
 	}
 
+	*datum = data;
+
 	return SEPOL_OK;
 
 exit:
 	return rc;
 }
 
-int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule,
-			avtab_key_t **avtab_key,
-			avtab_datum_t **avtab_datum)
+int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, avtab_t *avtab, avtab_ptr_t *avtab_ptr)
 {
 	int rc = SEPOL_ERR;
-	char *key = NULL;
-	uint16_t kind = cil_avrule->rule_kind;
-	type_datum_t *sepol_src = NULL;
-	type_datum_t *sepol_tgt = NULL;
-	class_datum_t *sepol_obj = NULL;
-	struct cil_list *cil_perms = cil_avrule->perms_list;
-
-	avtab_key_t *new_avtab_key = cil_malloc(sizeof(*avtab_key));
+	avtab_key_t *avtab_key = NULL;
+	avtab_datum_t *avtab_datum = NULL;
+	
+	avtab_key = cil_malloc(sizeof(*avtab_key));
 	memset(avtab_key, 0, sizeof(avtab_key_t));
 
-	avtab_datum_t *new_avtab_datum = cil_malloc(sizeof(*avtab_datum));
-	memset(avtab_datum, 0, sizeof(avtab_datum_t));
-
-	key = ((struct cil_symtab_datum *)cil_avrule->src)->name;
-	sepol_src = hashtab_search(pdb->p_types.table, key);
-	if (sepol_src == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	new_avtab_key->source_type = sepol_src->s.value;
-
-	key = ((struct cil_symtab_datum *)cil_avrule->tgt)->name;
-	sepol_tgt = hashtab_search(pdb->p_types.table, key);
-	if (sepol_tgt == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	new_avtab_key->target_type = sepol_tgt->s.value;
-
-	key = ((struct cil_symtab_datum *)cil_avrule->obj)->name;
-	sepol_obj = hashtab_search(pdb->p_classes.table, key);
-	if (sepol_obj == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	new_avtab_key->target_class = sepol_obj->s.value;
-
-	rc = __cil_perms_to_avtab(cil_perms, sepol_obj, new_avtab_datum->data);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
+	avtab_key->source_type = src;
+	avtab_key->target_type = tgt;
+	avtab_key->target_class = obj;
+	
 	switch (kind) {
 	case CIL_AVRULE_ALLOWED:
-		new_avtab_key->specified = AVTAB_ALLOWED;
+		avtab_key->specified = AVTAB_ALLOWED;
 		break;
 	case CIL_AVRULE_AUDITALLOW:
-		new_avtab_key->specified = AVTAB_AUDITALLOW;
+		avtab_key->specified = AVTAB_AUDITALLOW;
 		break;
 	case CIL_AVRULE_NEVERALLOW:
-		new_avtab_key->specified = AVTAB_NEVERALLOW;
+		avtab_key->specified = AVTAB_NEVERALLOW;
 		break;
 	case CIL_AVRULE_DONTAUDIT:
-		new_avtab_key->specified = AVTAB_AUDITDENY;
-		new_avtab_datum->data = ~(new_avtab_datum->data);
+		avtab_key->specified = AVTAB_AUDITDENY;
 		break;
 	default:
 		rc = SEPOL_ERR;
 		goto exit;
+		break;
 	}
+		
+	avtab_datum = cil_malloc(sizeof(*avtab_datum));
+	memset(avtab_datum, 0, sizeof(avtab_datum_t));
 
-	*avtab_key = new_avtab_key;
-	*avtab_datum = new_avtab_datum;
+	avtab_datum->data = data;
 
-	return SEPOL_OK;
-
-exit:
-	free(new_avtab_key);
-	free(new_avtab_datum);
-	return rc;
-}
-
-int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
-{
-	int rc = SEPOL_ERR;
-	struct cil_avrule *cil_avrule = node->data;
-	avtab_ptr_t avtab_ptr;
-	avtab_key_t *avtab_key = NULL;
-	avtab_datum_t *avtab_datum = NULL;
-
-	rc = __cil_avrule_to_avtab(pdb, cil_avrule, &avtab_key, &avtab_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	avtab_ptr = avtab_insert_nonunique(&pdb->te_avtab, avtab_key, avtab_datum);
-	if (avtab_ptr == NULL) {
+	*avtab_ptr = avtab_insert_nonunique(avtab, avtab_key, avtab_datum);
+	if (*avtab_ptr == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -999,6 +959,110 @@ exit:
 	return rc;
 }
 
+int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr)
+{
+	int rc = SEPOL_ERR;
+	char *src = NULL;
+	char *tgt = NULL;
+	char *obj = NULL;
+	type_datum_t *sepol_src = NULL;
+	type_datum_t *sepol_tgt = NULL;
+	class_datum_t *sepol_obj = NULL;
+	uint32_t data;
+	uint16_t kind = cil_avrule->rule_kind;
+	struct cil_list *cil_perms = cil_avrule->perms_list;
+
+	obj = ((struct cil_symtab_datum *)cil_avrule->obj)->name;
+	sepol_obj = hashtab_search(pdb->p_classes.table, obj);
+	if (sepol_obj == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = __cil_perms_to_datum(cil_perms, sepol_obj, &data);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	if (kind == CIL_AVRULE_DONTAUDIT) {
+		data = ~data;
+	}
+
+	src = ((struct cil_symtab_datum *)cil_avrule->src)->name;
+	tgt = ((struct cil_symtab_datum *)cil_avrule->tgt)->name;
+
+	sepol_src = hashtab_search(pdb->p_types.table, src);
+	if (sepol_src == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	if (!strcmp(tgt, CIL_KEY_SELF)) {
+		struct cil_symtab_datum *srcdatum = cil_avrule->src;
+		if (srcdatum->node->flavor == CIL_TYPEATTRIBUTE) {
+			unsigned int i;
+			ebitmap_node_t *tnode;
+			ebitmap_t types;
+
+			ebitmap_init(&types);
+			rc = __cil_typeattr_expand_to_policydb(pdb, srcdatum->node->data, &types);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			ebitmap_for_each_bit(&types, tnode, i) {
+				if (!ebitmap_get_bit(&types, i)) {
+					continue;
+				}
+
+				rc = __cil_insert_avrule(kind, i, i, sepol_obj->s.value, data, avtab, avtab_ptr);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+			}
+
+		} else {
+			rc = __cil_insert_avrule(kind, sepol_src->s.value, sepol_src->s.value, sepol_obj->s.value, data, avtab, avtab_ptr);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+	} else {
+		sepol_tgt = hashtab_search(pdb->p_types.table, tgt);
+		if (sepol_tgt == NULL) {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		rc = __cil_insert_avrule(kind, sepol_src->s.value, sepol_tgt->s.value, sepol_obj->s.value, data, avtab, avtab_ptr);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_avrule *cil_avrule = node->data;
+	avtab_ptr_t avtab_ptr;
+
+	rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_avtab, &avtab_ptr);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_node_t *cond_node)
 {
 	int rc = SEPOL_ERR;
@@ -1007,8 +1071,6 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 	struct cil_avrule *cil_avrule = NULL;
 	struct cil_tree_node *curr_rule = NULL;
 	cond_av_list_t *cond_list = NULL;
-	avtab_key_t *avtab_key = NULL;
-	avtab_datum_t *avtab_datum = NULL;
 	avtab_ptr_t avtab_ptr = NULL;
 
 	curr_rule = node->cl_head;
@@ -1020,11 +1082,11 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 		switch (flavor) {
 		case CIL_TYPE_RULE:
 			cil_type_rule = curr_rule->data;
-			rc = __cil_type_rule_to_avtab(pdb, cil_type_rule, &avtab_key, &avtab_datum);
+			rc = __cil_type_rule_to_avtab(pdb, cil_type_rule, &pdb->te_cond_avtab, &avtab_ptr);
 			break;
 		case CIL_AVRULE:
 			cil_avrule = curr_rule->data;
-			rc = __cil_avrule_to_avtab(pdb, cil_avrule, &avtab_key, &avtab_datum);
+			rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_cond_avtab, &avtab_ptr);
 			break;
 		default:
 			rc = SEPOL_ERR;
@@ -1034,11 +1096,6 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 			goto exit;
 		}
 
-		avtab_ptr = avtab_insert_nonunique(&pdb->te_cond_avtab, avtab_key, avtab_datum);
-		if (avtab_ptr == NULL) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
 		cond_list->node = avtab_ptr;
 
 		flavor = node->flavor;
@@ -1067,8 +1124,6 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 	return SEPOL_OK;
 
 exit:
-	free(avtab_key);
-	free(avtab_datum);
 	cond_av_list_destroy(cond_list);
 	return rc;
 }
@@ -1530,7 +1585,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		sepol_constrain = cil_malloc(sizeof(*sepol_constrain));
 		memset(sepol_constrain, 0, sizeof(constraint_node_t));
 
-		rc = __cil_perms_to_avtab(perms, sepol_class, sepol_constrain->permissions);
+		rc = __cil_perms_to_datum(perms, sepol_class, &sepol_constrain->permissions);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}

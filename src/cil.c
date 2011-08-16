@@ -67,6 +67,9 @@ int cil_db_init(struct cil_db **db)
 	cil_sort_init(&new_db->pcidevicecon);
 	cil_sort_init(&new_db->fsuse);
 
+	cil_type_init(&new_db->selftype);
+	new_db->selftype->datum.name = cil_strdup(CIL_KEY_SELF);
+
 	*db = new_db;
 
 	return SEPOL_OK;
@@ -88,6 +91,8 @@ void cil_db_destroy(struct cil_db **db)
 	cil_sort_destroy(&(*db)->ioportcon);
 	cil_sort_destroy(&(*db)->pcidevicecon);
 	cil_sort_destroy(&(*db)->fsuse);
+	
+	cil_destroy_type((*db)->selftype);
 
 	free(*db);
 	*db = NULL;	
