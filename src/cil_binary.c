@@ -1884,19 +1884,10 @@ int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	new_sepol_sidcon = cil_malloc(sizeof(*new_sepol_sidcon));
 	memset(new_sepol_sidcon, 0, sizeof(ocontext_t));
 
-	if (pdb->ocontexts[OCON_ISID] == NULL) {
-		pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
-	} else {
-		ocontext_t *sepol_sidcons = pdb->ocontexts[OCON_ISID];
-		ocontext_t *curr_sid;
-		for (curr_sid = sepol_sidcons; curr_sid != NULL; curr_sid = curr_sid->next) {
-			if (curr_sid->next == NULL) {
-				curr_sid->next = new_sepol_sidcon;
-				break;
-			}
-		}
-	}
+	new_sepol_sidcon->next = pdb->ocontexts[OCON_ISID];
+	pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
 
+	new_sepol_sidcon->sid[0] = pdb->ocontexts[OCON_ISID]->sid[0] + 1;
 	new_sepol_sidcon->u.name = cil_strdup(cil_sid->datum.name);
 
 	sepol_context = &new_sepol_sidcon->context[0];
