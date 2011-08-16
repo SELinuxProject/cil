@@ -743,8 +743,6 @@ int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db)
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		sepol_level->isalias = 0;
-		sepol_level->defined = 1;
 		mls_level->sens = value;
 		sepol_level->level = mls_level;
 
