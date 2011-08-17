@@ -2078,15 +2078,17 @@ int cil_portcon_to_policydb(policydb_t *pdb, struct cil_sort *portcons)
 		sepol_portcon->next = pdb->ocontexts[OCON_PORT];
 		pdb->ocontexts[OCON_PORT] = sepol_portcon;
 
-		if (!strcmp(cil_portcon->type_str, "UDP")
-		|| !strcmp(cil_portcon->type_str, "udp")) {
+		switch (cil_portcon->proto) {
+		case CIL_PROTOCOL_UDP:
 			sepol_portcon->u.port.protocol = IPPROTO_UDP;
-		} else if (!strcmp(cil_portcon->type_str, "TCP")
-		|| !strcmp(cil_portcon->type_str, "tcp")) {
+			break;
+		case CIL_PROTOCOL_TCP:
 			sepol_portcon->u.port.protocol = IPPROTO_TCP;
-		} else {
+			break;
+		default:
 			/* should not get here */
-			sepol_portcon->u.port.protocol = -1;
+			rc = SEPOL_ERR;
+			goto exit;
 		}
 
 		sepol_portcon->u.port.low_port = cil_portcon->port_low;
