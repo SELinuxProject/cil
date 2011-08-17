@@ -338,5 +338,113 @@ int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  */
 int cil_rangetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
+/**
+ * Insert cil portcon structure into sepol policydb.
+ * The function is given a structure containing the sorted portcons and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the portcon into.
+ * @param[in] node The cil_sort structure that contains the sorted portcons.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_portcon_to_policydb(policydb_t *pdb, struct cil_sort *portcons);
+
+/**
+ * Insert cil netifcon structure into sepol policydb.
+ * The function is given a structure containing the sorted netifcons and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the netifcon into.
+ * @param[in] node The cil_sort structure that contains the sorted netifcons.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_netifcon_to_policydb(policydb_t *pdb, struct cil_sort *netifcons);
+
+/**
+ * Insert cil nodecon structure into sepol policydb.
+ * The function is given a structure containing the sorted nodecons and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the nodecon into.
+ * @param[in] node The cil_sort structure that contains the sorted nodecons.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_nodecon_to_policydb(policydb_t *pdb, struct cil_sort *nodecons);
+
+/**
+ * Insert cil fsuse structure into sepol policydb.
+ * The function is given a structure containing the sorted fsuses and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the fsuse into.
+ * @param[in] node The cil_sort structure that contains the sorted fsuses.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_fsuse_to_policydb(policydb_t *pdb, struct cil_sort *fsuses);
+
+/**
+ * Insert cil genfscon structure into sepol policydb.
+ * The function is given a structure containing the sorted genfscons and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the genfscon into.
+ * @param[in] node The cil_sort structure that contains the sorted genfscons.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_genfscon_to_policydb(policydb_t *pdb, struct cil_sort *genfscons);
+
+/**
+ * Insert cil pirqcon structure into sepol policydb.
+ * The function is given a structure containing the sorted pirqcons and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the pirqcon into.
+ * @param[in] node The cil_sort structure that contains the sorted pirqcons.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_pirqcon_to_policydb(policydb_t *pdb, struct cil_sort *pirqcons);
+
+/**
+ * Insert cil iomemcon structure into sepol policydb.
+ * The function is given a structure containing the sorted iomemcons and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the iomemcon into.
+ * @param[in] node The cil_sort structure that contains the sorted iomemcons.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_iomemcon_to_policydb(policydb_t *pdb, struct cil_sort *iomemcons);
+
+/**
+ * Insert cil ioportcon structure into sepol policydb.
+ * The function is given a structure containing the sorted ioportcons and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the ioportcon into.
+ * @param[in] node The cil_sort structure that contains the sorted ioportcons.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_ioportcon_to_policydb(policydb_t *pdb, struct cil_sort *ioportcons);
+
+/**
+ * Insert cil pcidevicecon structure into sepol policydb.
+ * The function is given a structure containing the sorted pcidevicecons and
+ * loops over this structure inserting them into the policy database.
+ *
+ * @param[in] pdb The policy database to insert the pcidevicecon into.
+ * @param[in] node The cil_sort structure that contains the sorted pcidevicecons.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_pcidevicecon_to_policydb(policydb_t *pdb, struct cil_sort *pcidevicecons);
+
 
 #endif //_CIL_BINARY_INTERNAL_H_
