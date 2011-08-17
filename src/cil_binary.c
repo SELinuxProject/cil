@@ -198,22 +198,19 @@ exit:
 int cil_roletype_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
-	char *role;
-	char *type;
-	struct cil_roletype *cil_roletype;
-	role_datum_t *sepol_role;
-	type_datum_t *sepol_type;
+	char *key = NULL;
+	struct cil_roletype *cil_roletype = node->data;
+	role_datum_t *sepol_role = NULL;
+	type_datum_t *sepol_type = NULL;
 
-	cil_roletype = node->data;
-	role = ((struct cil_symtab_datum *)cil_roletype->role)->name;
-	type = ((struct cil_symtab_datum *)cil_roletype->type)->name;
-
-	sepol_role = hashtab_search(pdb->p_roles.table, role);
+	key = ((struct cil_symtab_datum *)cil_roletype->role)->name;
+	sepol_role = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_role == NULL) {
 		goto exit;
 	}
 
-	sepol_type = hashtab_search(pdb->p_types.table, type);
+	key = ((struct cil_symtab_datum *)cil_roletype->type)->name;
+	sepol_type = hashtab_search(pdb->p_types.table, key);
 	if (sepol_type == NULL) {
 		goto exit;
 	}
