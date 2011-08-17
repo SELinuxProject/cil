@@ -198,22 +198,22 @@ exit:
 int cil_roletype_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
-	struct cil_role *cil_role;
-	struct cil_type *cil_type;
+	char *role;
+	char *type;
 	struct cil_roletype *cil_roletype;
 	role_datum_t *sepol_role;
 	type_datum_t *sepol_type;
 
 	cil_roletype = node->data;
-	cil_role = cil_roletype->role;
-	cil_type = cil_roletype->type;
+	role = ((struct cil_symtab_datum *)cil_roletype->role)->name;
+	type = ((struct cil_symtab_datum *)cil_roletype->type)->name;
 
-	sepol_role = hashtab_search(pdb->p_roles.table, cil_role->datum.name);
+	sepol_role = hashtab_search(pdb->p_roles.table, role);
 	if (sepol_role == NULL) {
 		goto exit;
 	}
 
-	sepol_type = hashtab_search(pdb->p_types.table, cil_type->datum.name);
+	sepol_type = hashtab_search(pdb->p_types.table, type);
 	if (sepol_type == NULL) {
 		goto exit;
 	}
@@ -1550,9 +1550,6 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 	struct cil_list_item *curr = cil_expr->head;
 	struct cil_conditional *rnode = NULL;
 	struct cil_conditional *lnode = NULL;
-	struct cil_user *cil_user = NULL;
-	struct cil_user *cil_role = NULL;
-	struct cil_type *cil_type = NULL;
 	constraint_expr_t *new_expr = NULL;
 	constraint_expr_t *new_expr_node = NULL;
 	constraint_expr_t *curr_expr = NULL;
@@ -1656,8 +1653,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 
 			switch (rnode->flavor) {
 			case CIL_USER:
-				cil_user = rnode->data;
-				key = cil_user->datum.name;
+				key = ((struct cil_symtab_datum *)rnode->data)->name;
 				sepol_user = hashtab_search(pdb->p_users.table, key);
 				if (sepol_user == NULL) {
 					rc = SEPOL_ERR;
@@ -1670,8 +1666,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				}
 				break;
 			case CIL_ROLE:
-				cil_role = rnode->data;
-				key = cil_role->datum.name;
+				key = ((struct cil_symtab_datum *)rnode->data)->name;
 				sepol_role = hashtab_search(pdb->p_roles.table, key);
 				if (sepol_role == NULL) {
 					rc = SEPOL_ERR;
@@ -1684,8 +1679,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				}
 				break;
 			case CIL_TYPE:
-				cil_type = rnode->data;
-				key = cil_type->datum.name;
+				key = ((struct cil_symtab_datum *)rnode->data)->name;
 				sepol_type = hashtab_search(pdb->p_types.table, key);
 				if (sepol_type == NULL) {
 				rc = SEPOL_ERR;
