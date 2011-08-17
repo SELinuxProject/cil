@@ -12042,7 +12042,7 @@ void test_cil_gen_filecon_extra_neg(CuTest *tc) {
 }
 
 void test_cil_gen_portcon(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "80", "con", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "80", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12061,7 +12061,7 @@ void test_cil_gen_portcon(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_anon_context(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "80", "(", "system_u", "object_r", "etc_t", "(", "low", "high", ")", ")", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "80", "(", "system_u", "object_r", "etc_t", "(", "low", "high", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12080,7 +12080,7 @@ void test_cil_gen_portcon_anon_context(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_portrange(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "(", "25", "75", ")", "con", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "(", "25", "75", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12099,7 +12099,7 @@ void test_cil_gen_portcon_portrange(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_portrange_one_neg(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "(", "0", ")", "con", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "(", "0", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12118,7 +12118,7 @@ void test_cil_gen_portcon_portrange_one_neg(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_portrange_morethanone_neg(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "(", "0", "1", "2", ")", "con", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "(", "0", "1", "2", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12137,7 +12137,7 @@ void test_cil_gen_portcon_portrange_morethanone_neg(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "(", "0", "1", ")", "con", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "(", "0", "1", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12171,7 +12171,7 @@ void test_cil_gen_portcon_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "(", "0", "1", ")", "con", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "(", "0", "1", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12224,7 +12224,7 @@ void test_cil_gen_portcon_str1parens_neg(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_portnull_neg(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12243,7 +12243,7 @@ void test_cil_gen_portcon_portnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_contextnull_neg(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "port", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "port", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12262,7 +12262,7 @@ void test_cil_gen_portcon_contextnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_context_neg(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "80", "(", "system_u", "object_r", "(", "low", "high", ")", ")", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "80", "(", "system_u", "object_r", "(", "low", "high", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -12281,7 +12281,7 @@ void test_cil_gen_portcon_context_neg(CuTest *tc) {
 }
 
 void test_cil_gen_portcon_extra_neg(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "80", "con", "extra", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "80", "con", "extra", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -17455,7 +17455,7 @@ void test_cil_build_ast_node_helper_gen_filecon_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_portcon(CuTest *tc) {
-	char *line[] = {"(", "portcon", "type", "25", "con", ")", NULL};
+	char *line[] = {"(", "portcon", "udp", "25", "con", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

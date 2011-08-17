@@ -3021,7 +3021,7 @@ void test_cil_resolve_portcon(CuTest *tc) {
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "(", "low", "high", ")", ")", ")",
-			"(", "portcon", "type", "25", "con", ")", NULL};
+			"(", "portcon", "udp", "25", "con", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3044,7 +3044,7 @@ void test_cil_resolve_portcon_neg(CuTest *tc) {
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "(", "low", "high", ")", ")", ")",
-			"(", "portcon", "type", "25", "conn", ")", NULL};
+			"(", "portcon", "udp", "25", "conn", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3066,7 +3066,7 @@ void test_cil_resolve_portcon_anon_context(CuTest *tc) {
 			"(", "sensitivity", "s0", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "portcon", "type", "25", "(", "user_u", "role_r", "type_t", "(", "low", "high", ")", ")", ")", NULL};
+			"(", "portcon", "udp", "25", "(", "user_u", "role_r", "type_t", "(", "low", "high", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3087,7 +3087,7 @@ void test_cil_resolve_portcon_anon_context_neg(CuTest *tc) {
 			"(", "sensitivity", "s0", ")",
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
-			"(", "portcon", "type", "25", "(", "user_u", "role_r", "type_t", "(", "low", "high", ")", ")", ")", NULL};
+			"(", "portcon", "udp", "25", "(", "user_u", "role_r", "type_t", "(", "low", "high", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8723,7 +8723,7 @@ void test_cil_resolve_ast_node_helper_portcon(CuTest *tc) {
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "(", "low", "high", ")", ")", ")",
-			"(", "portcon", "type", "25", "con", ")", NULL};
+			"(", "portcon", "udp", "25", "con", ")", NULL};
         
 	struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -8753,7 +8753,7 @@ void test_cil_resolve_ast_node_helper_portcon_neg(CuTest *tc) {
 			"(", "level", "low", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "level", "high", "(", "s0", "(", "c0", ")", ")", ")",
 			"(", "context", "con", "(", "user_u", "role_r", "type_t", "(", "low", "high", ")", ")", ")",
-			"(", "portcon", "type", "25", "foo", ")", NULL};
+			"(", "portcon", "udp", "25", "foo", ")", NULL};
  
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
