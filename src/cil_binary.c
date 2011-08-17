@@ -1172,7 +1172,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 					continue;
 				}
 
-				rc = __cil_insert_avrule(kind, i, i, sepol_obj->s.value, data, avtab, avtab_ptr);
+				rc = __cil_insert_avrule(kind, i + 1, i + 1, sepol_obj->s.value, data, avtab, avtab_ptr);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
