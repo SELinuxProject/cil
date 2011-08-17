@@ -541,34 +541,83 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 
 int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule *rule)
 {
-	char *src_str = ((struct cil_symtab_datum*)rule->src)->name;
-	char *tgt_str = ((struct cil_symtab_datum*)rule->tgt)->name;
-	char *obj_str = ((struct cil_symtab_datum*)rule->obj)->name;
-	struct cil_list_item *perm_item = rule->perms_list->head;
+	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
+	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
+	char *obj_str = NULL;
+	struct cil_list *classperms = NULL;
+	struct cil_list_item *new = NULL;
+	struct cil_list_item *curr_cmp = NULL;
+	struct cil_list_item *curr_cps = NULL;
+	struct cil_list_item *tail = NULL;
+	struct cil_list_item *perm = NULL;
 
-	switch (rule->rule_kind) {
-	case CIL_AVRULE_ALLOWED:
-		fprintf(file_arr[file_index], "allow %s %s:%s { ", src_str, tgt_str, obj_str);
-		break;
-	case CIL_AVRULE_AUDITALLOW:
-		fprintf(file_arr[file_index], "auditallow %s %s:%s { ", src_str, tgt_str, obj_str);
-		break;
-	case CIL_AVRULE_DONTAUDIT:
-		fprintf(file_arr[file_index], "dontaudit %s %s:%s { ", src_str, tgt_str, obj_str);
-		break;
-	case CIL_AVRULE_NEVERALLOW:
-		fprintf(file_arr[file_index], "neverallow %s %s:%s { ", src_str, tgt_str, obj_str);
-		break;
-	default :
-		printf("Unknown avrule kind: %d\n", rule->rule_kind);
-		return SEPOL_ERR;
+	cil_list_init(&classperms);
+
+	if (rule->classpermset->flavor == CIL_CLASS) {
+		cil_list_item_init(&new);
+		new->data = rule->classpermset;
+		new->flavor = CIL_CLASSPERMSET;
+		classperms->head = new;
+	} else if (rule->classpermset->flavor == CIL_CLASSMAP) {
+		curr_cmp = rule->classpermset->perms->head;
+		while (curr_cmp != NULL) {
+			curr_cps = ((struct cil_classmap_perm*)curr_cmp->data)->classperms->head;
+			while(curr_cps != NULL) {
+				cil_list_item_init(&new);
+				new->data = curr_cps->data;
+				new->flavor = curr_cps->flavor;
+
+				if (classperms->head == NULL) {
+					classperms->head = new;
+				} else {
+					tail->next = new;
+				}
+				tail = new;
+
+				curr_cps = curr_cps->next;
+			}
+
+			curr_cmp = curr_cmp->next;
+		}
 	}
 
-	while (perm_item != NULL) {
-		fprintf(file_arr[file_index], "%s ", ((struct cil_perm*)(perm_item->data))->datum.name);
-		perm_item = perm_item->next;
+	curr_cps = classperms->head;
+
+	while (curr_cps != NULL) {
+
+		switch (rule->rule_kind) {
+		case CIL_AVRULE_ALLOWED:
+			fprintf(file_arr[file_index], "allow");
+			break;
+		case CIL_AVRULE_AUDITALLOW:
+			fprintf(file_arr[file_index], "auditallow");
+			break;
+		case CIL_AVRULE_DONTAUDIT:
+			fprintf(file_arr[file_index], "dontaudit");
+			break;
+		case CIL_AVRULE_NEVERALLOW:
+			fprintf(file_arr[file_index], "neverallow");
+			break;
+		default :
+			printf("Unknown avrule kind: %d\n", rule->rule_kind);
+			return SEPOL_ERR;
+		}
+
+		fprintf(file_arr[file_index], " %s %s:", src_str, tgt_str);
+
+		obj_str = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
+		fprintf(file_arr[file_index], " %s {", obj_str);
+
+		perm = ((struct cil_classpermset*)curr_cps->data)->perms->head;
+
+		while (perm != NULL) {
+			fprintf(file_arr[file_index], " %s", ((struct cil_perm*)(perm->data))->datum.name);
+			perm = perm->next;
+		}
+		fprintf(file_arr[file_index], " };\n");
+
+		curr_cps = curr_cps->next;
 	}
-	fprintf(file_arr[file_index], "};\n");
 
 	return SEPOL_OK;
 }

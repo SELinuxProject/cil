@@ -73,6 +73,7 @@ enum cil_flavor {
 	CIL_MLSCONSTRAIN,
 	CIL_PERM,
 	CIL_CLASSMAPPERM,
+	CIL_CLASSMAPPING,
 	CIL_USERROLE,
 	CIL_USERLEVEL,
 	CIL_USERRANGE,
@@ -162,6 +163,7 @@ enum cil_flavor {
 #define CIL_KEY_PERMSET		"permissionset"
 #define CIL_KEY_CLASSPERMSET	"classpermissionset"
 #define CIL_KEY_CLASSMAP	"classmap"
+#define CIL_KEY_CLASSMAPPING	"classmapping"
 #define CIL_KEY_COMMON		"common"
 #define CIL_KEY_CLASSCOMMON	"classcommon"
 #define CIL_KEY_SID		"sid"
@@ -338,7 +340,6 @@ struct cil_perm {
 struct cil_permset {
 	struct cil_symtab_datum datum;
 	struct cil_list *perms_list_str;
-	struct cil_list *perms_list;
 };
 
 struct cil_classpermset {
@@ -348,6 +349,7 @@ struct cil_classpermset {
 	enum cil_flavor flavor;
 	char *permset_str;
 	struct cil_permset *permset;
+	struct cil_list *perms;
 };
 
 struct cil_classmap_perm {
@@ -358,6 +360,12 @@ struct cil_classmap_perm {
 struct cil_classmap {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
+};
+
+struct cil_classmapping {
+	char *classmap_str;
+	char *classmap_perm_str;
+	struct cil_list *classpermsets_str;
 };
 
 struct cil_common {
@@ -509,11 +517,8 @@ struct cil_avrule {
 	void *src; /* type, alias, or attribute */
 	char *tgt_str;	
 	void *tgt; /* type, alias, or attribute */
-	char *obj_str;
-	struct cil_class *obj;
-	struct cil_list *perms_list_str;
-	struct cil_list *perms_list;
-	char *permset_str;
+	char *classpermset_str;
+	struct cil_classpermset *classpermset;
 };
 
 #define CIL_TYPE_TRANSITION 16
@@ -861,6 +866,7 @@ void cil_permset_init(struct cil_permset **permset);
 void cil_classpermset_init(struct cil_classpermset **cps);
 void cil_classmap_perm_init(struct cil_classmap_perm **cmp);
 void cil_classmap_init(struct cil_classmap **map);
+void cil_classmapping_init(struct cil_classmapping **mapping);
 void cil_user_init(struct cil_user **user);
 void cil_userlevel_init(struct cil_userlevel **usrlvl);
 void cil_userrange_init(struct cil_userrange **userrange);

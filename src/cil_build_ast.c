@@ -487,9 +487,6 @@ void cil_destroy_permset(struct cil_permset *permset)
 		cil_list_destroy(&permset->perms_list_str, 1);
 	}
 
-	if (permset->perms_list != NULL) {
-		cil_list_destroy(&permset->perms_list, 0);
-	}
 	free(permset);
 }
 
@@ -696,6 +693,91 @@ void cil_destroy_classmap(struct cil_classmap *map)
 	cil_symtab_destroy(&map->perms);
 
 	free(map);
+}
+
+int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_N_STRINGS | SYM_N_LISTS,
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_classmapping *mapping = NULL;
+	int rc = SEPOL_ERR;
+	struct cil_tree_node *curr_cps = NULL;
+	struct cil_list_item *new_item = NULL;
+	struct cil_list_item *cps_tail = NULL;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto gen_classmapping_cleanup;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid classmapping declaration (line: %d)\n", parse_current->line);
+		goto gen_classmapping_cleanup;
+	}
+
+	cil_classmapping_init(&mapping);
+
+	mapping->classmap_str = cil_strdup(parse_current->next->data);
+	mapping->classmap_perm_str = cil_strdup(parse_current->next->next->data);
+
+	cil_list_init(&mapping->classpermsets_str);
+
+	curr_cps = parse_current->next->next->next;
+
+	while (curr_cps != NULL) {
+		struct cil_classpermset *new_cps = NULL;
+		cil_classpermset_init(&new_cps);
+		cil_list_item_init(&new_item);
+
+		if (curr_cps->cl_head == NULL) {
+			new_item->data = cil_strdup(curr_cps->data);
+			new_item->flavor = CIL_AST_STR;
+		} else {
+			rc = cil_fill_classpermset(curr_cps->cl_head, new_cps);
+			if (rc != SEPOL_OK) {
+				printf("cil_gen_classmapping: Failed to fill classpermissionset\n");
+				goto gen_classmapping_cleanup;
+			}
+			new_item->data = new_cps;
+			new_item->flavor = CIL_CLASSPERMSET;
+		}
+
+		if (mapping->classpermsets_str->head == NULL) {
+			mapping->classpermsets_str->head = new_item;
+			cps_tail = new_item;
+		} else {
+			cps_tail->next = new_item;
+			cps_tail = cps_tail->next;
+		}
+
+		curr_cps = curr_cps->next;
+	}
+
+	ast_node->data = mapping;
+	ast_node->flavor = CIL_CLASSMAPPING;
+
+	return SEPOL_OK;
+
+gen_classmapping_cleanup:
+	return rc;
+}
+
+void cil_destroy_classmapping(struct cil_classmapping *mapping)
+{
+	if (mapping == NULL) {
+		return;
+	}
+
+	free(mapping->classmap_str);
+	free(mapping->classmap_perm_str);
+	cil_list_destroy(&mapping->classpermsets_str, 1);
+
+	free(mapping);
 }
 
 // TODO try to merge some of this with cil_gen_class (helper function for both)
@@ -1582,7 +1664,6 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 		SYM_STRING,
 		SYM_STRING,
 		SYM_STRING,
-		SYM_STRING,
 		SYM_STRING | SYM_LIST,
 		SYM_END
 	};
@@ -1606,15 +1687,17 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 
 	rule->src_str = cil_strdup(parse_current->next->data);
 	rule->tgt_str = cil_strdup(parse_current->next->next->data);
-	rule->obj_str = cil_strdup(parse_current->next->next->next->data);
+	if (parse_current->next->next->next->cl_head == NULL) {
+		rule->classpermset_str = cil_strdup(parse_current->next->next->next->data);
+	} else {
+		cil_classpermset_init(&rule->classpermset);
 
-	if (parse_current->next->next->next->next->cl_head != NULL) {
-		cil_list_init(&rule->perms_list_str);
-		cil_parse_to_list(parse_current->next->next->next->next->cl_head, rule->perms_list_str, CIL_AST_STR);
-	} else if (parse_current->next->next->next->next->cl_head == NULL && parse_current->next->next->next->next->data != NULL) {
-		rule->permset_str = cil_strdup(parse_current->next->next->next->next->data);
+		rc = cil_fill_classpermset(parse_current->next->next->next->cl_head, rule->classpermset);
+		if (rc != SEPOL_OK) {
+			printf("Failed to fill classpermset\n");
+			goto exit;
+		}
 	}
-
 	ast_node->data = rule;
 	ast_node->flavor = CIL_AVRULE;
 
@@ -1641,20 +1724,12 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 		free(rule->tgt_str);
 	}
 
-	if (rule->obj_str != NULL) {
-		free(rule->obj_str);
+	if (rule->classpermset_str != NULL) {
+		free(rule->classpermset_str);
 	}
 
-	if (rule->perms_list_str != NULL) {
-		cil_list_destroy(&rule->perms_list_str, 1);
-	}
-
-	if (rule->perms_list != NULL) {
-		cil_list_destroy(&rule->perms_list, 0);
-	}
-
-	if (rule->permset_str != NULL) {
-		free(rule->permset_str);
+	if (rule->classpermset != NULL) {
+		cil_destroy_classpermset(rule->classpermset);
 	}
 
 	free(rule);
@@ -5600,6 +5675,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_classmap(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_classmap failed, rc: %d\n", rc);
+			goto exit;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSMAPPING)) {
+		rc = cil_gen_classmapping(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_classmapping failed, rc: %d\n", rc);
 			goto exit;
 		}
 		*finished = CIL_TREE_SKIP_NEXT;

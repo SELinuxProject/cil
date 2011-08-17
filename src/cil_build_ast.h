@@ -65,6 +65,8 @@ int cil_gen_classmap_perm(struct cil_db *db, struct cil_tree_node *parse_current
 void cil_destroy_classmap_perm(struct cil_classmap_perm *cmp);
 int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_classmap(struct cil_classmap *map);
+int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_classmapping(struct cil_classmapping *mapping);
 int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_common(struct cil_common *common);
 int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

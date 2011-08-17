@@ -31,14 +31,18 @@
 #include "CilTest.h"
 
 #include "../../src/cil.h"
+#include "../../src/cil_build_ast.h"
 
 void test_cil_list_init(CuTest *tc) {
 	struct cil_avrule *test_avrule = malloc(sizeof(*test_avrule));
 
-	cil_list_init(&test_avrule->perms_list_str);
-	CuAssertPtrNotNull(tc, test_avrule->perms_list_str);
+	cil_classpermset_init(&test_avrule->classpermset);
+	cil_permset_init(&test_avrule->classpermset->permset);
 
-	free(test_avrule);   
+	cil_list_init(&test_avrule->classpermset->permset->perms_list_str);
+	CuAssertPtrNotNull(tc, test_avrule->classpermset->permset->perms_list_str);
+
+	cil_destroy_avrule(test_avrule);
 }
 
 void test_cil_list_append_item(CuTest *tc) {

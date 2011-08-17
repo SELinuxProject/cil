@@ -199,6 +199,7 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 	return SEPOL_OK;
 }
 
+
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 {
 	while (current_perm != NULL) {
@@ -290,33 +291,32 @@ void cil_tree_print_permset(struct cil_permset *permset)
 			curr = curr->next;
 		}
 
-		printf(" )\n");
+		printf(" )");
 	}
 }
 
-void cil_tree_print_classpermset(struct cil_classpermset *csp)
+void cil_tree_print_classpermset(struct cil_classpermset *cps)
 {
-	if (csp == NULL) {
+	if (cps == NULL) {
 		return;
 	}
 
-	if (csp->class == NULL) {
-		printf(" class: %s", csp->class_str);
+	if (cps->class == NULL) {
+		printf(" class: %s", cps->class_str);
 	} else {
-		if (csp->flavor == CIL_CLASS) {
-			printf(" class: %s", ((struct cil_class*)csp->class)->datum.name);
+		if (cps->flavor == CIL_CLASS) {
+			printf(" class: %s", ((struct cil_class*)cps->class)->datum.name);
+		} else {
+			printf(" classmap: %s", ((struct cil_classmap*)cps->class)->datum.name);
 		}
-		// else check for classmap
 	}
 
 	printf(", permset:");
-	if (csp->permset != NULL) {
-		cil_tree_print_permset(csp->permset);
+	if (cps->permset != NULL) {
+		cil_tree_print_permset(cps->permset);
 	} else {
-		printf(" %s", csp->permset_str);
+		printf(" %s", cps->permset_str);
 	}
-
-	printf("\n");
 }
 
 void cil_tree_print_level(struct cil_level *level)
@@ -717,6 +717,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 				cil_tree_print_permset(permset);
 
+				printf("\n");
+
 				return;
 			}
 			case CIL_CLASSPERMSET: {
@@ -724,6 +726,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("CLASSPERMSET: %s", csp->datum.name);
 
 				cil_tree_print_classpermset(csp);
+
+				printf("\n");
 
 				return;
 			}
@@ -733,8 +737,50 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 				printf(" (");
 				cil_tree_print_perms_list(node->cl_head);
-				printf(" )");
+				printf(" )\n");
 
+				return;
+			}
+			case CIL_CLASSMAPPERM: {
+				struct cil_classmap_perm *cmp = node->data;
+				struct cil_list_item *curr = NULL;
+
+				printf("CLASSMAPPERM: %s", cmp->datum.name);
+
+				if (cmp->classperms != NULL) {
+					curr = cmp->classperms->head;
+				}
+
+				printf(" perms: (");
+
+				while (curr != NULL) {
+					cil_tree_print_classpermset(curr->data);
+					curr = curr->next;
+				}
+
+				printf(" )\n");
+
+				return;
+			}
+			case CIL_CLASSMAPPING: {
+				struct cil_classmapping *mapping = node->data;
+				struct cil_list_item *curr = mapping->classpermsets_str->head;
+
+				printf("CLASSMAPPING: classmap: %s, classmap_perm: %s,", mapping->classmap_str, mapping->classmap_perm_str);
+
+				printf(" (");
+				while (curr != NULL) {
+					if (curr->flavor == CIL_AST_STR) {
+						printf(" %s", (char*)curr->data);
+					} else if (curr->flavor == CIL_CLASSPERMSET) {
+						printf(" (");
+						cil_tree_print_classpermset((struct cil_classpermset*)curr->data);
+						printf(" )");
+					}
+					curr = curr->next;
+				}
+
+				printf(" )\n");
 				return;
 			}
 			case CIL_BOOL: {
@@ -891,7 +937,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_AVRULE: {
 				struct cil_avrule *rule = node->data;
-				struct cil_list_item *item = NULL;
 				switch (rule->rule_kind) {
 					case CIL_AVRULE_ALLOWED:
 						printf("ALLOW:");
@@ -919,41 +964,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					printf(" %s", rule->tgt_str);
 				}
 
-				if (rule->obj != NULL) {
-					printf(" %s", rule->obj->datum.name);
+				if (rule->classpermset != NULL) {
+					cil_tree_print_classpermset(rule->classpermset);
 				} else {
-					printf(" %s", rule->obj_str);
+					printf(" %s", rule->classpermset_str);
 				}
 
-				if (rule->perms_list != NULL) {
-					printf(" (");
-					item = rule->perms_list->head;
-					while(item != NULL) {
-						if (item->flavor == CIL_PERM) {
-							printf(" %s", ((struct cil_perm*)item->data)->datum.name);
-						} else {
-							printf("\n\n perms list contained unexpected data type\n");
-							break;
-						}
-						item = item->next;
-					}
-					printf(" )\n");
-				} else if (rule->perms_list_str != NULL) {
-					printf(" (");
-					item = rule->perms_list_str->head;
-					while(item != NULL) {
-						if (item->flavor == CIL_AST_STR) {
-							printf(" %s", (char*)item->data);
-						} else {
-							printf("\n\n perms list contained unexpected data type\n");
-							break;
-						}
-						item = item->next;
-					}
-					printf(" )\n");
-				} else if (rule->permset_str != NULL) {
-					printf(" permset: %s", rule->permset_str);
-				}
+				printf("\n");
 
 				return;
 			}
@@ -1460,7 +1477,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 				} else {
 					printf(" %s", (char*)current->data);
 				}
-			} else if (current->flavor != CIL_PERM && current->flavor != CIL_CLASSMAPPERM) {
+			} else if (current->flavor != CIL_PERM) {
 				for (x = 0; x<depth; x++) {
 					printf("\t");
 				}

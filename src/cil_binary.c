@@ -1045,11 +1045,11 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 	class_datum_t *sepol_obj = NULL;
 	uint32_t data;
 	uint16_t kind = cil_avrule->rule_kind;
-	struct cil_list *cil_perms = cil_avrule->perms_list;
+	struct cil_list *cil_perms = cil_avrule->classpermset->perms;
 	ebitmap_t types;
 	ebitmap_init(&types);
 
-	obj = ((struct cil_symtab_datum *)cil_avrule->obj)->name;
+	obj = ((struct cil_symtab_datum *)cil_avrule->classpermset->class)->name;
 	sepol_obj = hashtab_search(pdb->p_classes.table, obj);
 	if (sepol_obj == NULL) {
 		rc = SEPOL_ERR;

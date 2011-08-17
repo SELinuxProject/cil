@@ -115,6 +115,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_CLASSMAP:
 		cil_destroy_classmap(*data);
 		break;
+	case CIL_CLASSMAPPING:
+		cil_destroy_classmapping(*data);
+		break;
 	case CIL_PERM:
 		cil_destroy_perm(*data);
 		break;
@@ -329,6 +332,9 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		*sym_index = CIL_SYM_BLOCKS;
 		break;
 	case CIL_CLASS:
+		*sym_index = CIL_SYM_CLASSES;
+		break;
+	case CIL_CLASSMAP:
 		*sym_index = CIL_SYM_CLASSES;
 		break;
 	case CIL_COMMON:
@@ -837,11 +843,8 @@ void cil_avrule_init(struct cil_avrule **avrule)
 	(*avrule)->src = NULL;
 	(*avrule)->tgt_str = NULL;
 	(*avrule)->tgt = NULL;
-	(*avrule)->obj_str = NULL;
-	(*avrule)->obj = NULL;
-	(*avrule)->perms_list_str = NULL;
-	(*avrule)->perms_list = NULL;
-	(*avrule)->permset_str = NULL;
+	(*avrule)->classpermset_str = NULL;
+	(*avrule)->classpermset = NULL;
 }
 
 void cil_type_rule_init(struct cil_type_rule **type_rule)
@@ -1073,6 +1076,15 @@ void cil_classmap_init(struct cil_classmap **map)
 
 	cil_symtab_datum_init(&(*map)->datum);
 	cil_symtab_init(&(*map)->perms, CIL_SYM_SIZE);
+}
+
+void cil_classmapping_init(struct cil_classmapping **mapping)
+{
+	*mapping = cil_malloc(sizeof(**mapping));
+
+	(*mapping)->classmap_str = NULL;
+	(*mapping)->classmap_perm_str = NULL;
+	(*mapping)->classpermsets_str = NULL;
 }
 
 void cil_user_init(struct cil_user **user)

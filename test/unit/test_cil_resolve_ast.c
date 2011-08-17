@@ -2526,7 +2526,7 @@ void test_cil_resolve_avrule(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")", 
-	                "(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	                "(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2545,7 +2545,7 @@ void test_cil_resolve_avrule_permset(CuTest *tc) {
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")",
 			"(", "permissionset", "baz", "(", "open", "write", ")", ")",
-	                "(", "allow", "test", "foo", "bar", "baz", ")", NULL};
+	                "(", "allow", "test", "foo", "(", "bar", "baz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2564,7 +2564,7 @@ void test_cil_resolve_avrule_permset_neg(CuTest *tc) {
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")",
 			"(", "permissionset", "baz", "(", "open", "close", ")", ")",
-	                "(", "allow", "test", "foo", "bar", "dne", ")", NULL};
+	                "(", "allow", "test", "foo", "(", "bar", "dne", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2582,7 +2582,7 @@ void test_cil_resolve_avrule_firsttype_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")", 
-	                "(", "allow", "fail1", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	                "(", "allow", "fail1", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2600,7 +2600,7 @@ void test_cil_resolve_avrule_secondtype_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")", 
-	                "(", "allow", "test", "fail2", "bar", "(", "read", "write", ")", ")", NULL};
+	                "(", "allow", "test", "fail2", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2618,7 +2618,7 @@ void test_cil_resolve_avrule_class_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")", 
-	                "(", "allow", "test", "foo", "fail3", "(", "read", "write", ")", ")", NULL};
+	                "(", "allow", "test", "foo", "(", "fail3", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2636,7 +2636,7 @@ void test_cil_resolve_avrule_perm_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")", 
-	                "(", "allow", "test", "foo", "bar", "(", "execute", ")", ")", NULL};
+	                "(", "allow", "test", "foo", "(", "bar", "(", "execute", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -4178,7 +4178,7 @@ void test_cil_resolve_call1_type(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4198,7 +4198,7 @@ void test_cil_resolve_call1_role(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "role", "a", ")", ")",
 				"(", "role", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "role_r", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4218,7 +4218,7 @@ void test_cil_resolve_call1_user(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "user", "a", ")", ")",
 				"(", "user", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "user_u", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4238,7 +4238,7 @@ void test_cil_resolve_call1_sens(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "sensitivity", "a", ")", ")",
 				"(", "sensitivity", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "sens", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4258,7 +4258,7 @@ void test_cil_resolve_call1_cat(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "category", "a", ")", ")",
 				"(", "category", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "c0", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4490,7 +4490,7 @@ void test_cil_resolve_call1_class(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
 				"(", "class", "b", "(", "read", ")", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "foo", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4511,7 +4511,7 @@ void test_cil_resolve_call1_permset(CuTest *tc) {
 			"(", "type", "bar", ")",
 			"(", "class", "baz", "(", "close", "read", "open", ")", ")",
 			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
-				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
+				"(", "allow", "dead", "bar", "(", "baz", "a", ")", ")", ")",
 			"(", "call", "mm", "(", "foo", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4531,7 +4531,7 @@ void test_cil_resolve_call1_permset_anon(CuTest *tc) {
 			"(", "type", "bar", ")",
 			"(", "class", "baz", "(", "close", "read", "open", ")", ")",
 			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
-				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
+				"(", "allow", "dead", "bar", "(", "baz", "a", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "read", "open", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4552,7 +4552,7 @@ void test_cil_resolve_call1_unknown_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
 				"(", "class", "b", "(", "read", ")", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "foo", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4580,7 +4580,7 @@ void test_cil_resolve_call1_unknowncall_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
 				"(", "class", "b", "(", "read", ")", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "m", "(", "foo", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4600,7 +4600,7 @@ void test_cil_resolve_call1_extraargs_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
 				"(", "class", "b", "(", "read", ")", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "foo", "bar", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4620,7 +4620,7 @@ void test_cil_resolve_call1_copy_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "qaz", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4664,7 +4664,7 @@ void test_cil_resolve_call1_paramsflavor_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4692,7 +4692,7 @@ void test_cil_resolve_call1_unknownflavor_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4720,7 +4720,7 @@ void test_cil_resolve_call2_type(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4741,7 +4741,7 @@ void test_cil_resolve_call2_role(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "role", "a", ")", ")",
 				"(", "role", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "role_r", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4762,7 +4762,7 @@ void test_cil_resolve_call2_user(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "user", "a", ")", ")",
 				"(", "user", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "user_u", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4783,7 +4783,7 @@ void test_cil_resolve_call2_sens(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "sensitivity", "a", ")", ")",
 				"(", "sensitivity", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "sens", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4804,7 +4804,7 @@ void test_cil_resolve_call2_cat(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "category", "a", ")", ")",
 				"(", "category", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "c0", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4869,7 +4869,7 @@ void test_cil_resolve_call2_permset(CuTest *tc) {
 			"(", "class", "bar", "(", "close", ")", ")",
 			"(", "class", "baz", "(", "close", ")", ")",
 			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
-				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
+				"(", "allow", "dead", "bar", "(", "baz", "a", ")", ")", ")",
 			"(", "call", "mm", "(", "foo", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4890,7 +4890,7 @@ void test_cil_resolve_call2_permset_anon(CuTest *tc) {
 			"(", "class", "bar", "(", "close", ")", ")",
 			"(", "class", "baz", "(", "close", ")", ")",
 			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
-				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
+				"(", "allow", "dead", "bar", "(", "baz", "a", ")", ")", ")",
 			"(", "call", "mm", "(", "(", "read", "open", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -4911,7 +4911,7 @@ void test_cil_resolve_call2_class(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
 				"(", "class", "b", "(", "read", ")", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "foo", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5063,7 +5063,7 @@ void test_cil_resolve_call2_name_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "class", "a", ")", ")",
 				"(", "class", "b", "(", "read", ")", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5084,7 +5084,7 @@ void test_cil_resolve_name_call_args(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5138,7 +5138,7 @@ void test_cil_resolve_name_call_args_diffflavor(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5163,7 +5163,7 @@ void test_cil_resolve_name_call_args_callnull_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5188,7 +5188,7 @@ void test_cil_resolve_name_call_args_namenull_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5213,7 +5213,7 @@ void test_cil_resolve_name_call_args_callargsnull_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5238,7 +5238,7 @@ void test_cil_resolve_name_call_args_name_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "baz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5263,7 +5263,7 @@ void test_cil_resolve_expr_stack_bools(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5284,7 +5284,7 @@ void test_cil_resolve_expr_stack_tunables(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5368,7 +5368,7 @@ void test_cil_resolve_expr_stack_neg(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "and", "beef", "baf", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5389,7 +5389,7 @@ void test_cil_resolve_expr_stack_emptystr_neg(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5411,7 +5411,7 @@ void test_cil_resolve_boolif(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "and", "foo", "bar", ")",
-			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5430,7 +5430,7 @@ void test_cil_resolve_boolif_neg(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "and", "dne", "N/A", ")",
-			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5449,7 +5449,7 @@ void test_cil_evaluate_expr_stack_and(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5473,7 +5473,7 @@ void test_cil_evaluate_expr_stack_not(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "not", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5497,7 +5497,7 @@ void test_cil_evaluate_expr_stack_or(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "or", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5521,7 +5521,7 @@ void test_cil_evaluate_expr_stack_xor(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "xor", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5545,7 +5545,7 @@ void test_cil_evaluate_expr_stack_eq(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "eq", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5569,7 +5569,7 @@ void test_cil_evaluate_expr_stack_neq(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "neq", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5594,7 +5594,7 @@ void test_cil_evaluate_expr_stack_oper1(CuTest *tc) {
 			"(", "tunable", "baz", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "(", "or", "foo", "bar", ")", "baz", ")",
-			"(", "allow", "foo", "bar", "jaz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "jaz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5619,7 +5619,7 @@ void test_cil_evaluate_expr_stack_oper2(CuTest *tc) {
 			"(", "tunable", "baz", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "baz", "(", "or", "foo", "bar", ")", ")",
-			"(", "allow", "foo", "bar", "jaz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "jaz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5643,7 +5643,7 @@ void test_cil_evaluate_expr_stack_neg(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "neq", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5681,7 +5681,7 @@ void test_cil_resolve_tunif_false(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5700,7 +5700,7 @@ void test_cil_resolve_tunif_true(CuTest *tc) {
 			"(", "tunable", "bar", "true", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5719,7 +5719,7 @@ void test_cil_resolve_tunif_resolveexpr_neg(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "dne", "N/A", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5738,7 +5738,7 @@ void test_cil_resolve_tunif_evaluateexpr_neg(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6254,7 +6254,7 @@ void test_cil_resolve_userrange_range_neg(CuTest *tc) {
 }
 
 void test_cil_disable_children_helper_optional_enabled(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "baz", "file", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6271,7 +6271,7 @@ void test_cil_disable_children_helper_optional_enabled(CuTest *tc) {
 }
 
 void test_cil_disable_children_helper_optional_disabled(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "baz", "file", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6496,7 +6496,7 @@ void test_cil_disable_children_helper_sid(CuTest *tc) {
 void test_cil_disable_children_helper_macro(CuTest *tc) {
 	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")", NULL};
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6659,7 +6659,7 @@ void test_cil_resolve_ast_node_helper_call1(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -6686,7 +6686,7 @@ void test_cil_resolve_ast_node_helper_call1_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "m", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -6713,7 +6713,7 @@ void test_cil_resolve_ast_node_helper_call2(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -6741,7 +6741,7 @@ void test_cil_resolve_ast_node_helper_call2_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "foo", "extra", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -6768,7 +6768,7 @@ void test_cil_resolve_ast_node_helper_boolif(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6794,7 +6794,7 @@ void test_cil_resolve_ast_node_helper_boolif_neg(CuTest *tc) {
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "booleanif", "(", "and", "dne", "N/A", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6820,7 +6820,7 @@ void test_cil_resolve_ast_node_helper_tunif(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6846,7 +6846,7 @@ void test_cil_resolve_ast_node_helper_tunif_neg(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "dne", "N/A", ")",
-			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8055,7 +8055,7 @@ void test_cil_resolve_ast_node_helper_avrule(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", 
 	                "(", "type", "test", ")", 
 			"(", "type", "foo", ")", 
-	                "(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	                "(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8077,7 +8077,7 @@ void test_cil_resolve_ast_node_helper_avrule(CuTest *tc) {
 }
 
 void test_cil_resolve_ast_node_helper_avrule_src_nores_neg(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8100,7 +8100,7 @@ void test_cil_resolve_ast_node_helper_avrule_src_nores_neg(CuTest *tc) {
 
 void test_cil_resolve_ast_node_helper_avrule_tgt_nores_neg(CuTest *tc) {
 	char *line[] = {"(", "type", "test", ")", 
-			"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+			"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8124,7 +8124,7 @@ void test_cil_resolve_ast_node_helper_avrule_tgt_nores_neg(CuTest *tc) {
 void test_cil_resolve_ast_node_helper_avrule_class_nores_neg(CuTest *tc) {
 	char *line[] = {"(", "type", "test", ")", 
 			"(", "type", "foo", ")", 
-			"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+			"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8148,7 +8148,7 @@ void test_cil_resolve_ast_node_helper_avrule_class_nores_neg(CuTest *tc) {
 void test_cil_resolve_ast_node_helper_avrule_datum_null_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", \
 	                "(", "type", "test", ")", "(", "type", "foo", ")", \
-	                "(", "allow", "test", "foo", "bar", "(","fake", ")", ")", NULL};
+	                "(", "allow", "test", "(", "foo", "bar", "(","fake", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -9432,7 +9432,7 @@ void test_cil_resolve_ast_node_helper_call(CuTest *tc) {
 }
 
 void test_cil_resolve_ast_node_helper_optional(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 		
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -9465,7 +9465,7 @@ void test_cil_resolve_ast_node_helper_optional(CuTest *tc) {
 void test_cil_resolve_ast_node_helper_macro(CuTest *tc) {
 	char *line[] = {"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")", NULL};
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 		
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -9492,7 +9492,7 @@ void test_cil_resolve_ast_node_helper_optstack(CuTest *tc) {
 	char *line[] = {"(", "class", "baz", "(", "read", ")", ")",
 			"(", "type", "foo", ")",
 			"(", "type", "bar", ")",
-			"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+			"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
 		
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -9550,7 +9550,7 @@ void test_cil_resolve_ast_node_helper_optstack_macro_neg(CuTest *tc) {
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
 				"(", "type", "b", ")",
-				"(", "allow", "a", "b", "file", "(", "read", ")", ")", ")",
+				"(", "allow", "a", "b", "(", "file", "(", "read", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "qaz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;

@@ -59,7 +59,7 @@ struct cil_args_build *gen_build_args(struct cil_tree_node *node, struct cil_db 
 
 // First seen in cil_gen_common
 void test_cil_parse_to_list(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -71,22 +71,25 @@ void test_cil_parse_to_list(CuTest *tc) {
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = cil_strdup(test_current->next->data);
 	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
-	test_avrule->obj_str = cil_strdup(test_current->next->next->next->data);
 
-	cil_list_init(&test_avrule->perms_list_str);
+	cil_classpermset_init(&test_avrule->classpermset);
 
-	test_current = test_current->next->next->next->next->cl_head;
+	test_avrule->classpermset->class_str = cil_strdup(test_current->next->next->next->cl_head->data);
 
-	int rc = cil_parse_to_list(test_current, test_avrule->perms_list_str, CIL_AST_STR);
+	cil_permset_init(&test_avrule->classpermset->permset);
+
+	cil_list_init(&test_avrule->classpermset->permset->perms_list_str);
+
+	test_current = test_current->next->next->next->cl_head->next->cl_head;
+
+	int rc = cil_parse_to_list(test_current, test_avrule->classpermset->permset->perms_list_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 
-	free(test_avrule->perms_list_str);
-	test_avrule->perms_list_str = NULL;
-	free(test_avrule);
+	cil_destroy_avrule(test_avrule);
 }
 
 void test_cil_parse_to_list_currnull_neg(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -98,22 +101,25 @@ void test_cil_parse_to_list_currnull_neg(CuTest *tc) {
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = cil_strdup(test_current->next->data);
 	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
-	test_avrule->obj_str = cil_strdup(test_current->next->next->next->data);
 
-	cil_list_init(&test_avrule->perms_list_str);
+	cil_classpermset_init(&test_avrule->classpermset);
+
+	test_avrule->classpermset->class_str = cil_strdup(test_current->next->next->next->cl_head->data);
+
+	cil_permset_init(&test_avrule->classpermset->permset);
+
+	cil_list_init(&test_avrule->classpermset->permset->perms_list_str);
 
 	test_current = NULL;
 
-	int rc = cil_parse_to_list(test_current, test_avrule->perms_list_str, CIL_AST_STR);
+	int rc = cil_parse_to_list(test_current, test_avrule->classpermset->permset->perms_list_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 
-	free(test_avrule->perms_list_str);
-	test_avrule->perms_list_str = NULL;
-	free(test_avrule);
+	cil_destroy_avrule(test_avrule);
 }
 
 void test_cil_parse_to_list_listnull_neg(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -125,14 +131,19 @@ void test_cil_parse_to_list_listnull_neg(CuTest *tc) {
 	test_avrule->rule_kind = CIL_AVRULE_ALLOWED;
 	test_avrule->src_str = cil_strdup(test_current->next->data);
 	test_avrule->tgt_str = cil_strdup(test_current->next->next->data);
-	test_avrule->obj_str = cil_strdup(test_current->next->next->next->data);
 
-	test_current = test_current->next->next->next->next->cl_head;
+	cil_classpermset_init(&test_avrule->classpermset);
 
-	int rc = cil_parse_to_list(test_current, test_avrule->perms_list_str, CIL_AST_STR);
+	test_avrule->classpermset->class_str = cil_strdup(test_current->next->next->next->cl_head->data);
+
+	cil_permset_init(&test_avrule->classpermset->permset);
+
+	test_current = test_current->next->next->next->cl_head->next->cl_head;
+
+	int rc = cil_parse_to_list(test_current, test_avrule->classpermset->permset->perms_list_str, CIL_AST_STR);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 
-	free(test_avrule);
+	cil_destroy_avrule(test_avrule);
 }
 
 void test_cil_set_to_list(CuTest *tc) {
@@ -655,7 +666,7 @@ void test_cil_gen_perm_nodes(CuTest *tc) {
 	test_ast_node->data = test_cls;
 	test_ast_node->flavor = CIL_CLASS;
 
-	int rc = cil_gen_perm_nodes(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
+	int rc = cil_gen_perm_nodes(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node, CIL_PERM);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
@@ -683,7 +694,7 @@ void test_cil_gen_perm_nodes_failgen_neg(CuTest *tc) {
 	test_ast_node->data = test_cls;
 	test_ast_node->flavor = CIL_CLASS;
 
-	int rc = cil_gen_perm_nodes(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
+	int rc = cil_gen_perm_nodes(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node, CIL_PERM);
 	CuAssertIntEquals(tc, SEPOL_ENOMEM, rc);
 }
 
@@ -711,7 +722,7 @@ void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *tc) {
 	test_ast_node->data = test_cls;
 	test_ast_node->flavor = CIL_CLASS;
 
-	int rc = cil_gen_perm_nodes(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
+	int rc = cil_gen_perm_nodes(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node, CIL_PERM);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -7062,7 +7073,7 @@ void test_cil_gen_rolebounds_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_avrule(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7084,12 +7095,12 @@ void test_cil_gen_avrule(CuTest *tc) {
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->src_str, test_current->next->data);
 	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->tgt_str, test_current->next->next->data);
-	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->obj_str, test_current->next->next->next->data);
+	CuAssertStrEquals(tc, ((struct cil_avrule*)test_ast_node->data)->classpermset->class_str, test_current->next->next->next->cl_head->data);
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_AVRULE);
-	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->perms_list_str);
+	CuAssertPtrNotNull(tc, ((struct cil_avrule*)test_ast_node->data)->classpermset->permset->perms_list_str);
 
-	struct cil_list_item *test_list = ((struct cil_avrule*)test_ast_node->data)->perms_list_str->head;
-	test_current = test_current->next->next->next->next->cl_head;
+	struct cil_list_item *test_list = ((struct cil_avrule*)test_ast_node->data)->classpermset->permset->perms_list_str->head;
+	test_current = test_current->next->next->next->cl_head->next->cl_head;
 
 	while(test_list != NULL) {
 	    CuAssertIntEquals(tc, test_list->flavor, CIL_AST_STR);
@@ -7100,7 +7111,7 @@ void test_cil_gen_avrule(CuTest *tc) {
 }
 
 void test_cil_gen_avrule_permset(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "permset", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "permset", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7122,7 +7133,7 @@ void test_cil_gen_avrule_permset(CuTest *tc) {
 }
 
 void test_cil_gen_avrule_permset_anon(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7144,7 +7155,7 @@ void test_cil_gen_avrule_permset_anon(CuTest *tc) {
 }
 
 void test_cil_gen_avrule_extra_neg(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "permset", "extra", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "permset", ")", "extra", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7166,7 +7177,7 @@ void test_cil_gen_avrule_extra_neg(CuTest *tc) {
 }
 
 void test_cil_gen_avrule_sourceparens(CuTest *tc) {
-	char *line[] = {"(", "allow", "(", "test", ")", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "(", "test", ")", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7357,7 +7368,7 @@ void test_cil_gen_avrule_objectclassnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_avrule_permsnull_neg(CuTest *tc) {
-	char *line[] = {"(", "allow", "foo", "bar", "baz", ")", NULL};
+	char *line[] = {"(", "allow", "foo", "bar", "(", "baz", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16148,7 +16159,7 @@ void test_cil_build_ast_node_helper_rolebounds_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_avrule_allow(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16166,7 +16177,7 @@ void test_cil_build_ast_node_helper_avrule_allow(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_avrule_allow_neg(CuTest *tc) {
-	char *line[] = {"(", "allow", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "foo", "bar", "(", "read", "write", ")", "blah", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16184,7 +16195,7 @@ void test_cil_build_ast_node_helper_avrule_allow_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_avrule_auditallow(CuTest *tc) {
-	char *line[] = {"(", "auditallow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "auditallow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16202,7 +16213,7 @@ void test_cil_build_ast_node_helper_avrule_auditallow(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_avrule_auditallow_neg(CuTest *tc) {
-	char *line[] = {"(", "auditallow", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "auditallow", "foo", "bar", "(", "read", "write", ")", "blah", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16220,7 +16231,7 @@ void test_cil_build_ast_node_helper_avrule_auditallow_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_avrule_dontaudit(CuTest *tc) {
-	char *line[] = {"(", "dontaudit", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "dontaudit", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16238,7 +16249,7 @@ void test_cil_build_ast_node_helper_avrule_dontaudit(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_avrule_dontaudit_neg(CuTest *tc) {
-	char *line[] = {"(", "dontaudit", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "dontaudit", "foo", "bar", "(", "read", "write", ")", "blah", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16256,7 +16267,7 @@ void test_cil_build_ast_node_helper_avrule_dontaudit_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_avrule_neverallow(CuTest *tc) {
-	char *line[] = {"(", "neverallow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "neverallow", "test", "foo", "(", "bar", "(", "read", "write", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -16274,7 +16285,7 @@ void test_cil_build_ast_node_helper_avrule_neverallow(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_avrule_neverallow_neg(CuTest *tc) {
-	char *line[] = {"(", "neverallow", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "neverallow", "foo", "bar", "(", "read", "write", ")", "blah", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

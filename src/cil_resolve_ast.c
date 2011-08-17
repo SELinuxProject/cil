@@ -75,7 +75,7 @@ static int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *per
 					goto exit;
 				}
 			} else {
-				printf("Failed to find perm in class symtab\n");
+				printf("Failed to find perm '%s' in class symtab\n", (char*)perm->data);
 				goto exit;
 			}
 		} else if (rc != SEPOL_OK) {
@@ -102,9 +102,8 @@ exit:
 	return rc;
 }
 
-int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, struct cil_classpermset *cps, struct cil_call *call)
 {
-	struct cil_classpermset *cps = (struct cil_classpermset*)current->data;
 	struct cil_tree_node *class_node = NULL;
 	struct cil_tree_node *permset_node = NULL;
 	int rc = SEPOL_ERR;
@@ -125,16 +124,21 @@ int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, s
 		}
 		cps->permset = (struct cil_permset*)permset_node->data;
 
-		/* This could still be an anonymous permset even if permset_str is set, if permset_str is a param_str*/
-		if (cps->permset->datum.name == NULL) {
-			rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->permset->perms_list);
-			if (rc != SEPOL_OK) {
-				printf("Failed to resolve permissionset, rc: %d\n", rc);
-				goto resolve_classpermset_out;
-			}
+		if (cps->perms == NULL) {
+			cil_list_init(&cps->perms);
+		}
+
+		rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->perms);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve permissionset, rc: %d\n", rc);
+			goto resolve_classpermset_out;
 		}
 	} else if (cps->permset != NULL) {
-		rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->permset->perms_list);
+		if (cps->perms == NULL) {
+			cil_list_init(&cps->perms);
+		}
+
+		rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->perms);
 		if (rc != SEPOL_OK) {
 			printf("Failed to resolve permset, rc: %d\n", rc);
 			goto resolve_classpermset_out;
@@ -152,9 +156,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	struct cil_avrule *rule = (struct cil_avrule*)current->data;
 	struct cil_tree_node *src_node = NULL;
 	struct cil_tree_node *tgt_node = NULL;
-	struct cil_tree_node *obj_node = NULL;
-	struct cil_tree_node *permset_node = NULL;
-	struct cil_list *perms_list = NULL;
+	struct cil_tree_node *cps_node = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, call, &src_node);
@@ -175,36 +177,29 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		rule->tgt = tgt_node->data;
 	}
 
-	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, call, &obj_node);
-	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rule->obj_str);
-		goto exit;
-	}
-	rule->obj = (struct cil_class*)(obj_node->data);
-
-	cil_list_init(&perms_list);
-
-	if (rule->permset_str != NULL) {
-		rc = cil_resolve_name(db, current, rule->permset_str, CIL_SYM_PERMSETS, call, &permset_node);
+	if (rule->classpermset_str != NULL) {
+		rc = cil_resolve_name(db, current, rule->classpermset_str, CIL_SYM_CLASSPERMSETS, call, &cps_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve permissionset name\n");
+			printf("Failed to resolve classpermset %s\n", rule->classpermset_str);
 			goto exit;
 		}
-		rc = __cil_resolve_perm_list(rule->obj, ((struct cil_permset*)permset_node->data)->perms_list_str, perms_list);
-	} else {
-		rc = __cil_resolve_perm_list(rule->obj, rule->perms_list_str, perms_list);
-	}
+		rule->classpermset = (struct cil_classpermset*)cps_node->data;
 
-	if (rc != SEPOL_OK) {
-		printf("Failed to resolve perm list\n");
-		goto exit;
+		/* This could still be an anonymous classpermset even if classpermset_str is set, if classpermset_str is a param_str*/
+		if (rule->classpermset->datum.name == NULL) {
+			rc = cil_resolve_classpermset(db, current, rule->classpermset, call);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve classpermset, rc: %d\n", rc);
+				goto exit;
+			}
+		}
+	} else if (rule->classpermset != NULL) {
+		rc = cil_resolve_classpermset(db, current, rule->classpermset, call);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve classpermset, rc: %d\n", rc);
+			goto exit;
+		}
 	}
-
-	if (rule->perms_list != NULL) {
-		/* clean up because of re-resolve */
-		cil_list_destroy(&rule->perms_list, 0);
-	}
-	rule->perms_list = perms_list;
 
 	return SEPOL_OK;
 
@@ -574,6 +569,78 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 	return SEPOL_OK;
 
 exit:
+	return rc;
+}
+
+int cil_resolve_classmapping(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_classmapping *mapping = (struct cil_classmapping*)current->data;
+	struct cil_classmap *map = NULL;
+	struct cil_classmap_perm *cmp = NULL;
+	struct cil_tree_node *tmp = NULL;
+	struct cil_list_item *curr_cps = NULL;
+	struct cil_list_item *new_item = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(db, current, mapping->classmap_str, CIL_SYM_CLASSES, call, &tmp);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", mapping->classmap_str);
+		goto resolve_classmapping_out;
+	}
+	map = tmp->data;
+
+	rc = cil_symtab_get_node(&map->perms, mapping->classmap_perm_str, &tmp);
+	if (rc != SEPOL_OK) {
+		printf("Name resolution failed for %s\n", mapping->classmap_perm_str);
+		goto resolve_classmapping_out;
+	}
+	cmp = tmp->data;
+
+	curr_cps = mapping->classpermsets_str->head;
+
+	while (curr_cps != NULL) {
+		if (cmp->classperms == NULL) {
+			cil_list_init(&cmp->classperms);
+		}
+
+		cil_list_item_init(&new_item);
+		new_item->flavor = CIL_CLASSPERMSET;
+
+		if (curr_cps->flavor == CIL_AST_STR) {
+			rc = cil_resolve_name(db, current, (char*)curr_cps->data, CIL_SYM_CLASSPERMSETS, call, &tmp);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve named classpermissionset %s\n", (char*)curr_cps->data);
+				goto resolve_classmapping_out;
+			}
+
+			/* This could still be an anonymous classpermset even if the flavor is CIL_AST_STR, if it is a param_str*/
+			if (((struct cil_classpermset*)tmp->data)->datum.name == NULL) {
+				rc = cil_resolve_classpermset(db, current, (struct cil_classpermset*)tmp->data, call);
+				if (rc != SEPOL_OK) {
+					printf("Failed to resolve classpermset, rc: %d\n", rc);
+					goto resolve_classmapping_out;
+				}
+			}
+
+			new_item->data = tmp->data;
+
+		} else if (curr_cps->flavor == CIL_CLASSPERMSET) {
+			rc = cil_resolve_classpermset(db, current, (struct cil_classpermset*)curr_cps->data, call);
+			if (rc != SEPOL_OK) {
+				printf("Failed to resolve anonymous classpermissionset\n");
+				goto resolve_classmapping_out;
+			}
+			new_item->data = curr_cps->data;
+		}
+
+		cil_list_prepend_item(cmp->classperms, new_item);
+
+		curr_cps = curr_cps->next;
+	}
+
+	return SEPOL_OK;
+
+resolve_classmapping_out:
 	return rc;
 }
 
@@ -3127,7 +3194,10 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			rc = cil_resolve_rangetransition(db, node, call);
 			break;
 		case CIL_CLASSPERMSET:
-			rc = cil_resolve_classpermset(db, node, call);
+			rc = cil_resolve_classpermset(db, node, (struct cil_classpermset*)node->data, call);
+			break;
+		case CIL_CLASSMAPPING:
+			rc = cil_resolve_classmapping(db, node, call);
 			break;
 		case CIL_AVRULE:
 			rc = cil_resolve_avrule(db, node, call);

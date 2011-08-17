@@ -177,14 +177,14 @@ int cil_copy_classmap_perm(struct cil_tree_node *orig, struct cil_tree_node *cop
 	if (rc != SEPOL_OK) {
 		printf("cil_copy_classmap_perm: cil_symtab_insert failed, rc: %d\n", rc);
 		free(new);
-		goto copy_classmap_perm_out;
+		goto exit;
 	}
 
 	copy->data = new;
 
 	return SEPOL_OK;
 
-copy_classmap_perm_out:
+exit:
 	return rc;
 }
 
@@ -202,21 +202,66 @@ int cil_copy_classmap(struct cil_tree_node *orig, struct cil_tree_node *copy, sy
 	if (rc != SEPOL_OK) {
 		printf("cil_copy_classmap: cil_symtab_insert failed, rc: %d\n", rc);
 		cil_destroy_classmap(new);
-		goto copy_classmap_out;
+		goto exit;
 	}
 
 	rc = symtab_init(&new->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
 		printf("cil_copy_classmap: symtab_init failed, rc: %d\n", rc);
 		cil_destroy_classmap(new);
-		goto copy_classmap_out;
+		goto exit;
 	}
 
 	copy->data = new;
 
 	return SEPOL_OK;
 
-copy_classmap_out:
+exit:
+	return rc;
+}
+
+int cil_copy_classmapping(struct cil_classmapping *orig, struct cil_classmapping **copy)
+{
+	struct cil_classmapping *new = NULL;
+	struct cil_list_item *curr = NULL;
+	struct cil_list_item *new_item = NULL;
+	int rc = SEPOL_ERR;
+
+	cil_classmapping_init(&new);
+
+	new->classmap_str = cil_strdup(orig->classmap_str);
+	new->classmap_perm_str = cil_strdup(orig->classmap_perm_str);
+
+	curr = orig->classpermsets_str->head;
+
+	cil_list_init(&new->classpermsets_str);
+
+	while (curr != NULL) {
+		cil_list_item_init(&new_item);
+		new_item->flavor = curr->flavor;
+		if (curr->flavor == CIL_AST_STR) {
+			new_item->data = cil_strdup(curr->data);
+		} else if (curr->flavor == CIL_CLASSPERMSET) {
+			cil_classpermset_init((struct cil_classpermset**)&new_item->data);
+			rc = cil_copy_fill_classpermset((struct cil_classpermset*)curr->data, (struct cil_classpermset*)new_item->data);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+
+		rc = cil_list_prepend_item(new->classpermsets_str, new_item);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+
+		curr = curr->next;
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
 	return rc;
 }
 
@@ -281,7 +326,7 @@ exit:
 	return rc;
 }
 
-void cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new)
+int cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new)
 {
 	int rc = SEPOL_ERR;
 
@@ -298,8 +343,10 @@ void cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classp
 		
 	}
 
+	return SEPOL_OK;
+
 exit:
-	return;
+	return rc;
 }
 
 int cil_copy_classpermset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
@@ -315,17 +362,20 @@ int cil_copy_classpermset(struct cil_tree_node *orig, struct cil_tree_node *copy
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
 		if (rc != SEPOL_OK) {
 			printf("cil_copy_classpermset: cil_symtab_insert failed, rc: %d\n", rc);
-			goto copy_classpermset_out;
+			goto exit;
 		}
 	}
 
-	cil_copy_fill_classpermset((struct cil_classpermset*)orig->data, new);
+	rc = cil_copy_fill_classpermset((struct cil_classpermset*)orig->data, new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
 
 	copy->data = new;
 
 	return SEPOL_OK;
 
-copy_classpermset_out:
+exit:
 	cil_destroy_classpermset(new);
 	return rc;
 }
@@ -839,15 +889,13 @@ int cil_copy_avrule(struct cil_avrule *orig, struct cil_avrule **copy)
 	new->rule_kind = orig->rule_kind;
 	new->src_str = cil_strdup(orig->src_str);
 	new->tgt_str = cil_strdup(orig->tgt_str);
-	new->obj_str = cil_strdup(orig->obj_str);
-	new->permset_str = cil_strdup(orig->permset_str);
-	if (orig->perms_list_str != NULL) {
-		rc = cil_copy_list(orig->perms_list_str, &new->perms_list_str);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+	new->classpermset_str = cil_strdup(orig->classpermset_str);
+	cil_classpermset_init(&new->classpermset);
+	rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
-
+	
 	*copy = new;
 
 	return SEPOL_OK;
@@ -1898,6 +1946,9 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_CLASSMAP:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CLASSES, &cil_copy_classmap);
+		break;
+	case CIL_CLASSMAPPING:
+		cil_copy_classmapping((struct cil_classmapping*)orig->data, (struct cil_classmapping**)&new->data);
 		break;
 	case CIL_PERMSET:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_PERMSETS, &cil_copy_permset);

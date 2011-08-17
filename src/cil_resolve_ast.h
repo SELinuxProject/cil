@@ -35,7 +35,7 @@
 #include "cil.h"
 #include "cil_tree.h"
 
-int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, struct cil_classpermset *cps, struct cil_call *call);
 int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_list *res_list, struct cil_tree_node *current, enum cil_sym_index sym_index, struct cil_call *call);
