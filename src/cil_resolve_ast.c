@@ -2058,7 +2058,6 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 			return rc;
 		}
 	}
-	db->filecon->count++;
 
 	return SEPOL_OK;
 }
@@ -2083,7 +2082,6 @@ int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct
 			goto exit;
 		}
 	}
-	db->portcon->count++;
 
 	return SEPOL_OK;
 
@@ -2111,7 +2109,6 @@ int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struc
 			goto exit;
 		}
 	}
-	db->genfscon->count++;
 
 	return SEPOL_OK;
 
@@ -2166,7 +2163,6 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 		goto exit;
 	}
 
-	db->nodecon->count++;
 
 	return SEPOL_OK;
 
@@ -2211,7 +2207,6 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 			goto exit;
 		}
 	}
-	db->netifcon->count++;
 	return SEPOL_OK;
 
 exit:
@@ -2238,7 +2233,6 @@ int cil_resolve_pirqcon(struct cil_db *db, struct cil_tree_node *current, struct
 			goto exit;
 		}
 	}
-	db->pirqcon->count++;
 
 	return SEPOL_OK;
 
@@ -2266,7 +2260,6 @@ int cil_resolve_iomemcon(struct cil_db *db, struct cil_tree_node *current, struc
 			goto exit;
 		}
 	}
-	db->iomemcon->count++;
 
 	return SEPOL_OK;
 
@@ -2294,7 +2287,6 @@ int cil_resolve_ioportcon(struct cil_db *db, struct cil_tree_node *current, stru
 			goto exit;
 		}
 	}
-	db->ioportcon->count++;
 
 	return SEPOL_OK;
 
@@ -2322,7 +2314,6 @@ int cil_resolve_pcidevicecon(struct cil_db *db, struct cil_tree_node *current, s
 			goto exit;
 		}
 	}
-	db->pcidevicecon->count++;
 
 	return SEPOL_OK;
 
@@ -2350,7 +2341,7 @@ int cil_resolve_fsuse(struct cil_db *db, struct cil_tree_node *current, struct c
 			goto exit;
 		}
 	}
-	db->fsuse->count++;
+
 	return SEPOL_OK;
 
 exit:
@@ -3139,121 +3130,6 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		}
 		break;
-	case 8:
-		switch (node->flavor) {
-		case CIL_NETIFCON: {
-			struct cil_sort *sort = db->netifcon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_FSUSE: {
-			struct cil_sort *sort = db->fsuse;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_GENFSCON: {
-			struct cil_sort *sort = db->genfscon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_FILECON: {
-			struct cil_sort *sort = db->filecon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_NODECON: {
-			struct cil_sort *sort = db->nodecon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_PORTCON: {
-			struct cil_sort *sort = db->portcon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_PIRQCON: {
-			struct cil_sort *sort = db->pirqcon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_IOMEMCON: {
-			struct cil_sort *sort = db->iomemcon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_IOPORTCON: {
-			struct cil_sort *sort = db->ioportcon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		case CIL_PCIDEVICECON: {
-			struct cil_sort *sort = db->pcidevicecon;
-			uint32_t count = sort->count;
-			uint32_t i = sort->index;
-			if (sort->array == NULL) {
-				sort->array = cil_malloc(sizeof(*sort->array)*count);
-			}
-			sort->array[i] = node->data;
-			sort->index++;
-			break;
-		}
-		default:
-			break;
-		}
 	default:
 		break;
 	}

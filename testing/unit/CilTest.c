@@ -49,7 +49,7 @@
 #include "test_cil_resolve_ast.h"
 #include "test_cil_fqn.h"
 #include "test_cil_copy_ast.h"
-#include "test_cil_policy.h"
+#include "test_cil_post.h"
 #include "test_integration.h"
 
 void set_cil_file_data(struct cil_file_data **data) {
@@ -1808,43 +1808,43 @@ CuSuite* CilTreeGetSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_getparentsymtab_neg);
 	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_duplicatedb_neg);
 	
-	/* test_policy.c */
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_meta_a_not_b);
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_meta_b_not_a);
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_meta_a_and_b_strlen_a_greater_b);
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_meta_a_and_b_strlen_b_greater_a);
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_type_atype_greater_btype);
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_type_btype_greater_atype);
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_stemlen_a_greater_b);
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_stemlen_b_greater_a);
-	SUITE_ADD_TEST(suite, test_cil_filecon_compare_equal);
+	/* test_post.c */
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_meta_a_not_b);
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_meta_b_not_a);
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_meta_a_and_b_strlen_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_meta_a_and_b_strlen_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_type_atype_greater_btype);
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_type_btype_greater_atype);
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_stemlen_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_stemlen_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_equal);
 	
-	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_atypestr_greater_btypestr);
-	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_btypestr_greater_atypestr);
-	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_apathstr_greater_bpathstr);
-	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_bpathstr_greater_apathstr);
-	SUITE_ADD_TEST(suite, test_cil_genfscon_compare_equal);
+	SUITE_ADD_TEST(suite, test_cil_post_genfscon_compare_atypestr_greater_btypestr);
+	SUITE_ADD_TEST(suite, test_cil_post_genfscon_compare_btypestr_greater_atypestr);
+	SUITE_ADD_TEST(suite, test_cil_post_genfscon_compare_apathstr_greater_bpathstr);
+	SUITE_ADD_TEST(suite, test_cil_post_genfscon_compare_bpathstr_greater_apathstr);
+	SUITE_ADD_TEST(suite, test_cil_post_genfscon_compare_equal);
 	
-	SUITE_ADD_TEST(suite, test_cil_netifcon_compare_a_greater_b);
-	SUITE_ADD_TEST(suite, test_cil_netifcon_compare_b_greater_a);
-	SUITE_ADD_TEST(suite, test_cil_netifcon_compare_equal);
+	SUITE_ADD_TEST(suite, test_cil_post_netifcon_compare_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_post_netifcon_compare_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_post_netifcon_compare_equal);
 	
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_bipv6);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_bipv4);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_greaterthan_bipv4);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv4_lessthan_bipv4);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv4_greaterthan_bmaskipv4);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv4_lessthan_bmaskipv4);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_greaterthan_bipv6);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_aipv6_lessthan_bipv6);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv6_greaterthan_bmaskipv6);
-	SUITE_ADD_TEST(suite, test_cil_nodecon_compare_amaskipv6_lessthan_bmaskipv6);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_aipv4_bipv6);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_aipv6_bipv4);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_aipv4_greaterthan_bipv4);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_aipv4_lessthan_bipv4);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_amaskipv4_greaterthan_bmaskipv4);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_amaskipv4_lessthan_bmaskipv4);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_aipv6_greaterthan_bipv6);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_aipv6_lessthan_bipv6);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_amaskipv6_greaterthan_bmaskipv6);
+	SUITE_ADD_TEST(suite, test_cil_post_nodecon_compare_amaskipv6_lessthan_bmaskipv6);
 	
-	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_type_a_greater_b);
-	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_type_b_greater_a);
-	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_fsstr_a_greater_b);
-	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_fsstr_b_greater_a);
-	SUITE_ADD_TEST(suite, test_cil_fsuse_compare_equal);
+	SUITE_ADD_TEST(suite, test_cil_post_fsuse_compare_type_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_post_fsuse_compare_type_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_post_fsuse_compare_fsstr_a_greater_b);
+	SUITE_ADD_TEST(suite, test_cil_post_fsuse_compare_fsstr_b_greater_a);
+	SUITE_ADD_TEST(suite, test_cil_post_fsuse_compare_equal);
 	
 	return suite;
 }

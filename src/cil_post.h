@@ -27,21 +27,25 @@
  * either expressed or implied, of Tresys Technology, LLC.
  */
 
-#ifndef CIL_POLICY_H_
-#define CIL_POLICY_H_
+#ifndef CIL_POST_H_
+#define CIL_POST_H_
 
-#include "cil_tree.h"
-#include "cil_list.h"
-#include "cil.h"
-
-struct cil_multimap_item {
-	struct cil_symtab_datum *key;
-	struct cil_list *values;
+struct fc_data {
+	int meta;
+	int stem_len;
+	int str_len;
 };
 
-int cil_combine_policy(FILE **file_arr, FILE *policy_file);
-void cil_context_to_policy(FILE **, uint32_t, struct cil_context *);
-int cil_name_to_policy(FILE **, struct cil_tree_node *);
-int cil_gen_policy(struct cil_db *);
+void cil_post_fc_fill_data(struct fc_data *fc, char *path);
+int cil_post_filecon_compare(const void *a, const void *b);
+int cil_post_portcon_compare(const void *a, const void *b);
+int cil_post_genfscon_compare(const void *a, const void *b);
+int cil_post_netifcon_compare(const void *a, const void *b);
+int cil_post_nodecon_compare(const void *a, const void *b);
+int cil_post_fsuse_compare(const void *a, const void *b);
+
+int cil_post_context_sort(struct cil_db *db);
+
+int cil_post_process(struct cil_db *db);
 
 #endif

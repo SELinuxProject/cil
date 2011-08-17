@@ -42,6 +42,7 @@
 #include "src/cil_fqn.h"
 #include "src/cil_binary.h"
 #include "src/cil_policy.h"
+#include "src/cil_post.h"
 
 #include "src/cil_copy_ast.h"
 
@@ -136,6 +137,12 @@ int main(int argc, char *argv[])
 	printf("Qualifying Names...\n");
 	if (cil_fqn_qualify(db->ast->root)) {
 		printf("Failed to qualify names, exiting\n");
+		goto exit;
+	}
+
+	printf("Post process...\n");
+	if (cil_post_process(db)) {
+		printf("Post process failed, exiting\n");
 		goto exit;
 	}
 
