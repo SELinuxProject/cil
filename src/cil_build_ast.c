@@ -4057,6 +4057,7 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
 	struct cil_portcon *portcon = NULL;
+	char *proto;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
 		goto exit;
@@ -4073,7 +4074,16 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	portcon->type_str = cil_strdup(parse_current->next->data);
+	proto = parse_current->next->data;
+	if (!strcmp(proto, CIL_KEY_UDP)) {
+		portcon->proto = CIL_PROTOCOL_UDP;
+	} else if (!strcmp(proto, CIL_KEY_TCP)) {
+		portcon->proto = CIL_PROTOCOL_TCP;
+	} else {
+		printf("Invalid protocol in portcon\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
 
 	if (parse_current->next->next->cl_head != NULL) {
 		if (parse_current->next->next->cl_head->next != NULL
@@ -4134,10 +4144,6 @@ void cil_destroy_portcon(struct cil_portcon *portcon)
 {
 	if (portcon == NULL) {
 		return;
-	}
-
-	if (portcon->type_str != NULL) {
-		free(portcon->type_str);
 	}
 
 	if (portcon->context_str != NULL) {

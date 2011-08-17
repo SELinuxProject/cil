@@ -238,6 +238,8 @@ enum cil_flavor {
 #define CIL_KEY_NEQ		"!="
 #define CIL_KEY_OPTIONAL	"optional"
 #define CIL_KEY_IPADDR		"ipaddr"
+#define CIL_KEY_UDP		"udp"
+#define CIL_KEY_TCP		"tcp"
 
 #define CIL_KEY_CONS_AND	"and"
 #define CIL_KEY_CONS_OR		"or"
@@ -660,8 +662,13 @@ struct cil_filecon {
 	struct cil_context *context;
 };
 
+enum cil_protocol {
+	CIL_PROTOCOL_UDP = 1,
+	CIL_PROTOCOL_TCP	
+};
+
 struct cil_portcon {
-	char *type_str;
+	enum cil_protocol proto;
 	uint32_t port_low;
 	uint32_t port_high;
 	char *context_str;

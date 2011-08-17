@@ -249,7 +249,12 @@ int cil_portcon_to_policy(FILE **file_arr, struct cil_sort *sort)
 
 	for (i=0; i<sort->count; i++) {
 		struct cil_portcon *portcon = (struct cil_portcon*)sort->array[i];
-		fprintf(file_arr[NETIFCONS], "portcon %s ", portcon->type_str);
+		fprintf(file_arr[NETIFCONS], "portcon ");
+		if (portcon->proto == CIL_PROTOCOL_UDP) {
+			printf("udp ");
+		} else if (portcon->proto == CIL_PROTOCOL_TCP) {
+			printf("tcp ");
+		}
 		fprintf(file_arr[NETIFCONS], "%d ", portcon->port_low);
 		fprintf(file_arr[NETIFCONS], "%d ", portcon->port_high);
 		cil_context_to_policy(file_arr, NETIFCONS, portcon->context);

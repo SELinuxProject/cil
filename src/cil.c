@@ -1348,7 +1348,6 @@ int cil_portcon_init(struct cil_portcon **portcon)
 
 	new_portcon = cil_malloc(sizeof(*new_portcon));
 
-	new_portcon->type_str = NULL;
 	new_portcon->context_str = NULL;
 	new_portcon->context = NULL;
 

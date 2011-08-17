@@ -1127,7 +1127,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_PORTCON: {
 				struct cil_portcon *portcon = node->data;
 				printf("PORTCON:");
-				printf(" %s (%d %d)", portcon->type_str, portcon->port_low, portcon->port_high);
+				if (portcon->proto == CIL_PROTOCOL_UDP) {
+					printf(" udp");
+				} else if (portcon->proto == CIL_PROTOCOL_TCP) {
+					printf(" tcp");
+				}
+				printf(" (%d %d)", portcon->port_low, portcon->port_high);
 
 				if (portcon->context != NULL) {
 					cil_tree_print_context(portcon->context);
