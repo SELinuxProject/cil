@@ -1065,11 +1065,12 @@ exit:
 	return rc;
 }
 
-int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, avtab_t *avtab, avtab_ptr_t *avtab_ptr)
+int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, avtab_t *avtab, avtab_ptr_t *avtab_ptr, uint32_t merge)
 {
 	int rc = SEPOL_ERR;
 	avtab_key_t *avtab_key = NULL;
 	avtab_datum_t *avtab_datum = NULL;
+	avtab_datum_t *avtab_dup = NULL;
 	
 	avtab_key = cil_malloc(sizeof(*avtab_key));
 	memset(avtab_key, 0, sizeof(avtab_key_t));
@@ -1096,16 +1097,25 @@ int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj,
 		goto exit;
 		break;
 	}
-		
-	avtab_datum = cil_malloc(sizeof(*avtab_datum));
-	memset(avtab_datum, 0, sizeof(avtab_datum_t));
 
-	avtab_datum->data = data;
+	if (merge) {
+		avtab_dup = avtab_search(avtab, avtab_key);
+		if (avtab_dup != NULL) {
+			avtab_dup->data |= data;
+		}
+	}
 
-	*avtab_ptr = avtab_insert_nonunique(avtab, avtab_key, avtab_datum);
-	if (*avtab_ptr == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
+	if (avtab_dup == NULL) {
+		avtab_datum = cil_malloc(sizeof(*avtab_datum));
+		memset(avtab_datum, 0, sizeof(avtab_datum_t));
+
+		avtab_datum->data = data;
+
+		*avtab_ptr = avtab_insert_nonunique(avtab, avtab_key, avtab_datum);
+		if (*avtab_ptr == NULL) {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
 	}
 
 	return SEPOL_OK;
@@ -1116,7 +1126,7 @@ exit:
 	return rc;
 }
 
-int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr)
+int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr, uint32_t merge)
 {
 	int rc = SEPOL_ERR;
 	char *src = NULL;
@@ -1172,14 +1182,14 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 					continue;
 				}
 
-				rc = __cil_insert_avrule(kind, i + 1, i + 1, sepol_obj->s.value, data, avtab, avtab_ptr);
+				rc = __cil_insert_avrule(kind, i + 1, i + 1, sepol_obj->s.value, data, avtab, avtab_ptr, merge);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
 			}
 
 		} else {
-			rc = __cil_insert_avrule(kind, sepol_src->s.value, sepol_src->s.value, sepol_obj->s.value, data, avtab, avtab_ptr);
+			rc = __cil_insert_avrule(kind, sepol_src->s.value, sepol_src->s.value, sepol_obj->s.value, data, avtab, avtab_ptr, merge);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1191,7 +1201,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 			goto exit;
 		}
 
-		rc = __cil_insert_avrule(kind, sepol_src->s.value, sepol_tgt->s.value, sepol_obj->s.value, data, avtab, avtab_ptr);
+		rc = __cil_insert_avrule(kind, sepol_src->s.value, sepol_tgt->s.value, sepol_obj->s.value, data, avtab, avtab_ptr, merge);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1209,7 +1219,7 @@ int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	struct cil_avrule *cil_avrule = node->data;
 	avtab_ptr_t avtab_ptr;
 
-	rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_avtab, &avtab_ptr);
+	rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_avtab, &avtab_ptr, 1);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1243,7 +1253,7 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 			break;
 		case CIL_AVRULE:
 			cil_avrule = curr_rule->data;
-			rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_cond_avtab, &avtab_ptr);
+			rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_cond_avtab, &avtab_ptr, 0);
 			break;
 		default:
 			rc = SEPOL_ERR;
