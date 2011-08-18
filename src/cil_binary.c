@@ -537,6 +537,7 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
 	}
 	value = sepol_type->s.value;
 
+	ebitmap_init(&types);
 	rc = __cil_typeattr_expand_to_policydb(pdb, cil_attr, &types);
 	if (rc != SEPOL_OK) {
 		goto exit;
