@@ -518,6 +518,9 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
 	char *key = NULL;
 	struct cil_typeattribute *cil_attr = node->data;
 	type_datum_t *sepol_type = NULL;
+	ebitmap_t types;
+	ebitmap_node_t *tnode;
+	unsigned int i;
 
 	if (pdb->type_attr_map == NULL) {
 		rc = __cil_typeattr_bitmap_init(pdb);
@@ -534,9 +537,17 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
 	}
 	value = sepol_type->s.value;
 
-	rc = __cil_typeattr_expand_to_policydb(pdb, cil_attr, &pdb->type_attr_map[value - 1]);
+	rc = __cil_typeattr_expand_to_policydb(pdb, cil_attr, &types);
 	if (rc != SEPOL_OK) {
 		goto exit;
+	}
+
+	ebitmap_for_each_bit(&types, tnode, i) {
+		if (!ebitmap_get_bit(&types, i)) {
+			continue;
+		}
+
+		ebitmap_set_bit(&pdb->type_attr_map[i], value - 1, 1);
 	}
 
 	return SEPOL_OK;
