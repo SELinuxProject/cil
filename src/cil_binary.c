@@ -301,7 +301,7 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		goto exit;
 	}
 	sepol_type->s.value = value;
-	sepol_type->primary = value;
+	sepol_type->primary = 1;
 
 	return SEPOL_OK;
 
@@ -328,7 +328,7 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		goto exit;
 	}
 
-	sepol_alias->flavor = TYPE_ALIAS;
+	sepol_alias->flavor = TYPE_TYPE;
 
 	key = cil_strdup(cil_alias->datum.name);
 	rc = symtab_insert(pdb, SYM_TYPES, key, sepol_alias, SCOPE_DECL, 0, NULL);
@@ -336,7 +336,7 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		goto exit;
 	}
 	sepol_alias->s.value = sepol_type->s.value;
-	sepol_alias->primary = sepol_type->s.value;
+	sepol_alias->primary = 0;
 
 	return SEPOL_OK;
 
@@ -393,7 +393,7 @@ int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		goto exit;
 	}
 	sepol_attr->s.value = value;
-	sepol_attr->primary = value;
+	sepol_attr->primary = 1;
 
 	return SEPOL_OK;
 
