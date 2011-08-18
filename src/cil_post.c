@@ -322,7 +322,7 @@ int cil_post_fsuse_compare(const void *a, const void *b)
 	return rc;
 }
 
-int __cil_post_context_sort_count_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+int __cil_post_context_sort_count_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_db *db = NULL;
@@ -334,6 +334,16 @@ int __cil_post_context_sort_count_helper(struct cil_tree_node *node, __attribute
 	db = (struct cil_db*)extra_args;
 
 	switch(node->flavor) {
+	case CIL_OPTIONAL: {
+                struct cil_optional *opt = node->data;
+                if (opt->datum.state != CIL_STATE_ENABLED) {
+                        *finished = CIL_TREE_SKIP_HEAD;
+                }
+		break;
+	}
+        case CIL_MACRO:
+                *finished = CIL_TREE_SKIP_HEAD;
+		break;
 	case CIL_NETIFCON:
 		db->netifcon->count++;
 		break;
@@ -387,6 +397,16 @@ int __cil_post_context_sort_array_helper(struct cil_tree_node *node, __attribute
 	db = extra_args;
 
 	switch(node->flavor) {
+	case CIL_OPTIONAL: {
+                struct cil_optional *opt = node->data;
+                if (opt->datum.state != CIL_STATE_ENABLED) {
+                        *finished = CIL_TREE_SKIP_HEAD;
+                }
+		break;
+	}
+        case CIL_MACRO:
+                *finished = CIL_TREE_SKIP_HEAD;
+		break;
 	case CIL_NETIFCON: {
 		struct cil_sort *sort = db->netifcon;
 		uint32_t count = sort->count;

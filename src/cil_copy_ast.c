@@ -1050,7 +1050,7 @@ exit:
 	return rc;
 }
 
-int cil_copy_netifcon(struct cil_tree_node *orig, struct cil_tree_node *copy, __attribute__((unused)) symtab_t *symtab)
+int cil_copy_netifcon(struct cil_netifcon *orig, struct cil_netifcon **copy)
 {
 	struct cil_netifcon *new = NULL;
 	int rc = SEPOL_ERR;
@@ -1060,31 +1060,341 @@ int cil_copy_netifcon(struct cil_tree_node *orig, struct cil_tree_node *copy, __
 		goto exit;
 	}
 
-	new->interface_str = cil_strdup(((struct cil_netifcon*)orig->data)->interface_str);
-	new->if_context_str = cil_strdup(((struct cil_netifcon*)orig->data)->if_context_str);
-	new->packet_context_str = cil_strdup(((struct cil_netifcon*)orig->data)->packet_context_str);
+	new->interface_str = cil_strdup(orig->interface_str);
+	new->if_context_str = cil_strdup(orig->if_context_str);
+	new->packet_context_str = cil_strdup(orig->packet_context_str);
 
-	if (((struct cil_netifcon*)orig->data)->if_context != NULL) {
+	if (orig->if_context != NULL) {
 		rc = cil_context_init(&new->if_context);
 		if (rc != SEPOL_OK) {
 			cil_destroy_netifcon(new);
 			goto exit;
 		}
 		
-		cil_copy_fill_context(((struct cil_netifcon*)orig->data)->if_context, new->if_context);
+		cil_copy_fill_context(orig->if_context, new->if_context);
 	}
 	
-	if (((struct cil_netifcon*)orig->data)->packet_context != NULL) {
+	if (orig->packet_context != NULL) {
 		rc = cil_context_init(&new->packet_context);
 		if (rc != SEPOL_OK) {
 			cil_destroy_netifcon(new);
 			goto exit;
 		}
 
-		cil_copy_fill_context(((struct cil_netifcon*)orig->data)->packet_context, new->packet_context);
+		cil_copy_fill_context(orig->packet_context, new->packet_context);
 	}
 
-	copy->data = new;
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_copy_genfscon(struct cil_genfscon *orig, struct cil_genfscon **copy)
+{
+	struct cil_genfscon *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_genfscon_init(&new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->type_str = cil_strdup(orig->type_str);
+	new->path_str = cil_strdup(orig->path_str);
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_genfscon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_copy_filecon(struct cil_filecon *orig, struct cil_filecon **copy)
+{
+	struct cil_filecon *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_filecon_init(&new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->root_str = cil_strdup(orig->root_str);
+	new->path_str = cil_strdup(orig->path_str);
+	new->type = orig->type;
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_filecon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+	
+}
+
+int cil_copy_nodecon(struct cil_nodecon *orig, struct cil_nodecon **copy)
+{
+	struct cil_nodecon *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_nodecon_init(&new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->addr_str = cil_strdup(orig->addr_str);
+	new->mask_str = cil_strdup(orig->mask_str);
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->addr != NULL) {
+		rc = cil_ipaddr_init(&new->addr);
+		if (rc != SEPOL_OK) {
+			cil_destroy_nodecon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_ipaddr(orig->addr, new->addr);
+	}
+
+	if (orig->mask != NULL) {
+		rc = cil_ipaddr_init(&new->mask);
+		if (rc != SEPOL_OK) {
+			cil_destroy_nodecon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_ipaddr(orig->mask, new->mask);
+	}
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_nodecon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_copy_portcon(struct cil_portcon *orig, struct cil_portcon **copy)
+{
+	struct cil_portcon *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_portcon_init(&new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->proto = orig->proto;
+	new->port_low = orig->port_low;
+	new->port_high = orig->port_high;
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_portcon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_copy_pirqcon(struct cil_pirqcon *orig, struct cil_pirqcon **copy)
+{
+	struct cil_pirqcon *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_pirqcon_init(&new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->pirq = new->pirq;
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_pirqcon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+
+}
+
+int cil_copy_iomemcon(struct cil_iomemcon *orig, struct cil_iomemcon **copy)
+{
+	struct cil_iomemcon *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_iomemcon_init(&new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->iomem_low = orig->iomem_low;
+	new->iomem_high = orig->iomem_high;
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_iomemcon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_copy_ioportcon(struct cil_ioportcon *orig, struct cil_ioportcon **copy)
+{
+	struct cil_ioportcon *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_ioportcon_init(&new);
+	if (rc != SEPOL_OK){
+		goto exit;
+	}
+
+	new->ioport_low = orig->ioport_low;
+	new->ioport_high = orig->ioport_high;
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_ioportcon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_copy_pcidevicecon(struct cil_pcidevicecon *orig, struct cil_pcidevicecon **copy)
+{
+	struct cil_pcidevicecon *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_pcidevicecon_init(&new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->dev = orig->dev;
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_pcidevicecon(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_copy_fsuse(struct cil_fsuse *orig, struct cil_fsuse **copy)
+{
+	struct cil_fsuse *new = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_fsuse_init(&new);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->type = orig->type;
+	new->fs_str = cil_strdup(orig->fs_str);
+	new->context_str = cil_strdup(orig->context_str);
+
+	if (orig->context != NULL) {
+		rc = cil_context_init(&new->context);
+		if (rc != SEPOL_OK) {
+			cil_destroy_fsuse(new);
+			goto exit;
+		}
+
+		cil_copy_fill_context(orig->context, new->context);
+	}
+
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1169,58 +1479,6 @@ int cil_copy_optional(struct cil_tree_node *orig, struct cil_tree_node *copy, sy
 	}
 
 	copy->data = new;
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int cil_copy_nodecon(struct cil_nodecon *orig, struct cil_nodecon **copy)
-{
-	struct cil_nodecon *new = NULL;
-	int rc = SEPOL_ERR;
-
-	rc = cil_nodecon_init(&new);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	new->addr_str = cil_strdup(orig->addr_str);
-	new->mask_str = cil_strdup(orig->mask_str);
-	new->context_str = cil_strdup(orig->context_str);
-
-	if (orig->addr != NULL) {
-		rc = cil_ipaddr_init(&new->addr);
-		if (rc != SEPOL_OK) {
-			cil_destroy_nodecon(new);
-			goto exit;
-		}
-
-		cil_copy_fill_ipaddr(orig->addr, new->addr);
-	}
-
-	if (orig->mask != NULL) {
-		rc = cil_ipaddr_init(&new->mask);
-		if (rc != SEPOL_OK) {
-			cil_destroy_nodecon(new);
-			goto exit;
-		}
-
-		cil_copy_fill_ipaddr(orig->mask, new->mask);
-	}
-
-	if (orig->context != NULL) {
-		rc = cil_context_init(&new->context);
-		if (rc != SEPOL_OK) {
-			cil_destroy_nodecon(new);
-			goto exit;
-		}
-
-		cil_copy_fill_context(orig->context, new->context);
-	}
-
-	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1557,7 +1815,70 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		}
 		break;
 	case CIL_NETIFCON:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_NETIFCONS, &cil_copy_netifcon);
+		rc = cil_copy_netifcon((struct cil_netifcon*)orig->data, (struct cil_netifcon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_GENFSCON:
+		rc = cil_copy_genfscon((struct cil_genfscon*)orig->data, (struct cil_genfscon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_FILECON:
+		rc = cil_copy_filecon((struct cil_filecon*)orig->data, (struct cil_filecon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_NODECON:
+		rc = cil_copy_nodecon((struct cil_nodecon*)orig->data, (struct cil_nodecon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_PORTCON:
+		rc = cil_copy_portcon((struct cil_portcon*)orig->data, (struct cil_portcon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_PIRQCON:
+		rc = cil_copy_pirqcon((struct cil_pirqcon*)orig->data, (struct cil_pirqcon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_IOMEMCON:
+		rc = cil_copy_iomemcon((struct cil_iomemcon*)orig->data, (struct cil_iomemcon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_IOPORTCON:
+		rc = cil_copy_ioportcon((struct cil_ioportcon*)orig->data, (struct cil_ioportcon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_PCIDEVICECON:
+		rc = cil_copy_pcidevicecon((struct cil_pcidevicecon*)orig->data, (struct cil_pcidevicecon**)&new->data);
+		if (rc != SEPOL_OK) {
+			free(new);
+			goto exit;
+		}
+		break;
+	case CIL_FSUSE:
+		rc = cil_copy_fsuse((struct cil_fsuse*)orig->data, (struct cil_fsuse**)&new->data);
 		if (rc != SEPOL_OK) {
 			free(new);
 			goto exit;
@@ -1578,9 +1899,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 			free(new);
 			goto exit;
 		}
-		break;
-	case CIL_NODECON:
-		cil_copy_nodecon((struct cil_nodecon*)orig->data, (struct cil_nodecon**)&new->data);
 		break;
 	case CIL_IPADDR:
 		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_IPADDRS, &cil_copy_ipaddr);

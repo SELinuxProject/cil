@@ -2042,7 +2042,7 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 {
 	struct cil_filecon *filecon = (struct cil_filecon*)current->data;
 	struct cil_tree_node *context_node = NULL;
-	int rc=  SEPOL_ERR;
+	int rc = SEPOL_ERR;
 
 	if (filecon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, filecon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
