@@ -277,13 +277,13 @@ void test_cil_gen_role_astnull_neg(CuTest *tc);
 void test_cil_gen_role_extrarole_neg(CuTest *tc);
 void test_cil_gen_role_noname_neg(CuTest *tc);
 
-void test_cil_gen_roletrans(CuTest *);
-void test_cil_gen_roletrans_currnull_neg(CuTest *);
-void test_cil_gen_roletrans_astnull_neg(CuTest *);
-void test_cil_gen_roletrans_srcnull_neg(CuTest *);
-void test_cil_gen_roletrans_tgtnull_neg(CuTest *);
-void test_cil_gen_roletrans_resultnull_neg(CuTest *);
-void test_cil_gen_roletrans_extra_neg(CuTest *);
+void test_cil_gen_roletransition(CuTest *);
+void test_cil_gen_roletransition_currnull_neg(CuTest *);
+void test_cil_gen_roletransition_astnull_neg(CuTest *);
+void test_cil_gen_roletransition_srcnull_neg(CuTest *);
+void test_cil_gen_roletransition_tgtnull_neg(CuTest *);
+void test_cil_gen_roletransition_resultnull_neg(CuTest *);
+void test_cil_gen_roletransition_extra_neg(CuTest *);
 
 void test_cil_gen_bool_true(CuTest *);
 void test_cil_gen_bool_tunable_true(CuTest *);
@@ -955,8 +955,8 @@ void test_cil_build_ast_node_helper_userbounds_neg(CuTest *);
 void test_cil_build_ast_node_helper_role(CuTest *);
 void test_cil_build_ast_node_helper_role_neg(CuTest *);
 
-void test_cil_build_ast_node_helper_roletrans(CuTest *);
-void test_cil_build_ast_node_helper_roletrans_neg(CuTest *);
+void test_cil_build_ast_node_helper_roletransition(CuTest *);
+void test_cil_build_ast_node_helper_roletransition_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_roleallow(CuTest *);
 void test_cil_build_ast_node_helper_roleallow_neg(CuTest *);

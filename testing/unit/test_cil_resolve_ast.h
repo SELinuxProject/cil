@@ -117,10 +117,10 @@ void test_cil_resolve_context_role_neg(CuTest *);
 void test_cil_resolve_context_type_neg(CuTest *);
 void test_cil_resolve_context_anon_level_neg(CuTest *);
 
-void test_cil_resolve_roletrans(CuTest *);
-void test_cil_resolve_roletrans_srcdecl_neg(CuTest *);
-void test_cil_resolve_roletrans_tgtdecl_neg(CuTest *);
-void test_cil_resolve_roletrans_resultdecl_neg(CuTest *);
+void test_cil_resolve_roletransition(CuTest *);
+void test_cil_resolve_roletransition_srcdecl_neg(CuTest *);
+void test_cil_resolve_roletransition_tgtdecl_neg(CuTest *);
+void test_cil_resolve_roletransition_resultdecl_neg(CuTest *);
 
 void test_cil_resolve_typeattributetypes_type_in_multiple_attrs(CuTest *);
 void test_cil_resolve_typeattributetypes_multiple_excludes(CuTest *);
@@ -478,10 +478,10 @@ void test_cil_resolve_ast_node_helper_catrange_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_senscat(CuTest *tc);
 void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc);
 
-void test_cil_resolve_ast_node_helper_roletrans(CuTest *);
-void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *);
-void test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg(CuTest *);
-void test_cil_resolve_ast_node_helper_roletrans_resultdecl_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_roletransition(CuTest *);
+void test_cil_resolve_ast_node_helper_roletransition_srcdecl_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_roletransition_tgtdecl_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_roletransition_resultdecl_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_typeattributetypes(CuTest *);
 void test_cil_resolve_ast_node_helper_typeattributetypes_neg(CuTest *);

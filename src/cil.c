@@ -159,8 +159,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_ROLE:
 		cil_destroy_role(*data);
 		break;
-	case CIL_ROLETRANS:
-		cil_destroy_roletrans(*data);
+	case CIL_ROLETRANSITION:
+		cil_destroy_roletransition(*data);
 		break;
 	case CIL_ROLEALLOW:
 		cil_destroy_roleallow(*data);
@@ -1176,9 +1176,9 @@ int cil_type_rule_init(struct cil_type_rule **type_rule)
 	return SEPOL_OK;
 }
 
-int cil_role_trans_init(struct cil_role_trans **role_trans)
+int cil_roletransition_init(struct cil_roletransition **role_trans)
 {
-	struct cil_role_trans *new_role_trans = NULL;
+	struct cil_roletransition *new_role_trans = NULL;
 
 	if (role_trans == NULL) {
 		return SEPOL_ERR;
@@ -1200,22 +1200,22 @@ int cil_role_trans_init(struct cil_role_trans **role_trans)
 	return SEPOL_OK;
 }
 
-int cil_role_allow_init(struct cil_role_allow **role_allow)
+int cil_roleallow_init(struct cil_roleallow **roleallow)
 {
-	struct cil_role_allow *new_role_allow = NULL;
+	struct cil_roleallow *new_roleallow = NULL;
 
-	if (role_allow == NULL) {
+	if (roleallow == NULL) {
 		return SEPOL_ERR;
 	}
 
-	new_role_allow = cil_malloc(sizeof(*new_role_allow));
+	new_roleallow = cil_malloc(sizeof(*new_roleallow));
 
-	new_role_allow->src_str = NULL;
-	new_role_allow->src = NULL;
-	new_role_allow->tgt_str = NULL;
-	new_role_allow->tgt = NULL;
+	new_roleallow->src_str = NULL;
+	new_roleallow->src = NULL;
+	new_roleallow->tgt_str = NULL;
+	new_roleallow->tgt = NULL;
 
-	*role_allow = new_role_allow;
+	*roleallow = new_roleallow;
 
 	return SEPOL_OK;
 }

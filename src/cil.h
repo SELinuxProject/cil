@@ -89,7 +89,7 @@ enum cil_flavor {
 	CIL_FILETRANSITION,
 	CIL_RANGETRANSITION,
 	CIL_TYPEPERMISSIVE,
-	CIL_ROLETRANS,
+	CIL_ROLETRANSITION,
 	CIL_ROLEALLOW,
 	CIL_ROLETYPE,
 	CIL_ROLEDOMINANCE,
@@ -175,7 +175,7 @@ enum cil_flavor {
 #define CIL_KEY_USERLEVEL	"userlevel"
 #define CIL_KEY_USERRANGE	"userrange"
 #define CIL_KEY_ROLETYPE	"roletype"
-#define CIL_KEY_ROLETRANS	"roletransition"
+#define CIL_KEY_ROLETRANSITION	"roletransition"
 #define CIL_KEY_ROLEALLOW	"roleallow"
 #define CIL_KEY_ROLEDOMINANCE	"roledominance"
 #define CIL_KEY_ROLEBOUNDS	"rolebounds"
@@ -523,7 +523,7 @@ struct cil_type_rule {
 	void *result; /* type or alias */
 };
 
-struct cil_role_trans {
+struct cil_roletransition {
 	char *src_str;
 	struct cil_role *src;
 	char *tgt_str;	
@@ -534,7 +534,7 @@ struct cil_role_trans {
 	struct cil_role *result;
 };
 
-struct cil_role_allow {
+struct cil_roleallow {
 	char *src_str;
 	struct cil_role *src;
 	char *tgt_str;
@@ -854,8 +854,8 @@ int cil_conditional_init(struct cil_conditional **cond);
 int cil_tunif_init(struct cil_tunableif **tif);
 int cil_avrule_init(struct cil_avrule **avrule);
 int cil_type_rule_init(struct cil_type_rule **type_rule);
-int cil_role_trans_init(struct cil_role_trans **role_trans);
-int cil_role_allow_init(struct cil_role_allow **role_allow);
+int cil_roletransition_init(struct cil_roletransition **roletrans);
+int cil_roleallow_init(struct cil_roleallow **role_allow);
 int cil_sensalias_init(struct cil_sensalias **sensalias);
 int cil_catalias_init(struct cil_catalias **catalias);
 int cil_catrange_init(struct cil_catrange **catrange);

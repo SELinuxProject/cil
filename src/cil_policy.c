@@ -865,8 +865,8 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			return rc;
 		}
 	}
-	case CIL_ROLETRANS: {
-		struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;
+	case CIL_ROLETRANSITION: {
+		struct cil_roletransition *roletrans = (struct cil_roletransition*)current->data;
 		char *src_str = ((struct cil_symtab_datum*)roletrans->src)->name;
 		char *tgt_str = ((struct cil_symtab_datum*)roletrans->tgt)->name;
 		char *obj_str = ((struct cil_symtab_datum*)roletrans->obj)->name;
@@ -876,7 +876,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		break;
 	}
 	case CIL_ROLEALLOW: {
-		struct cil_role_allow *roleallow = (struct cil_role_allow*)current->data;
+		struct cil_roleallow *roleallow = (struct cil_roleallow*)current->data;
 		char *src_str = ((struct cil_symtab_datum*)roleallow->src)->name;
 		char *tgt_str = ((struct cil_symtab_datum*)roleallow->tgt)->name;
 

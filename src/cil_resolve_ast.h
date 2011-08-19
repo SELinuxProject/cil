@@ -50,7 +50,7 @@ int cil_resolve_userlevel(struct cil_db *db, struct cil_tree_node *current, stru
 int cil_resolve_userrange(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_userbounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
-int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_roletransition(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_roledominance(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_rolebounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);

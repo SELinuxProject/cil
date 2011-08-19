@@ -558,8 +558,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				printf("\n");
 				return;
 			}
-			case CIL_ROLETRANS: {
-				struct cil_role_trans *roletrans = node->data;
+			case CIL_ROLETRANSITION: {
+				struct cil_roletransition *roletrans = node->data;
 				printf("ROLETRANSITION:");
 
 				if (roletrans->src != NULL) {
@@ -589,7 +589,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				return;
 			}
 			case CIL_ROLEALLOW: {
-				struct cil_role_allow *roleallow = node->data;
+				struct cil_roleallow *roleallow = node->data;
 				printf("ROLEALLOW:");
 
 				if (roleallow->src != NULL) {

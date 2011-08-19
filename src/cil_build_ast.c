@@ -1151,7 +1151,7 @@ void cil_destroy_userrole(struct cil_userrole *userrole)
 	free(userrole);
 }
 
-int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_roletransition(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -1162,7 +1162,7 @@ int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node 
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_role_trans *roletrans = NULL;
+	struct cil_roletransition *roletrans = NULL;
 	int rc = SEPOL_ERR;
 
 	if (parse_current == NULL || ast_node == NULL) {
@@ -1175,7 +1175,7 @@ int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node 
 		goto exit;
 	}
 
-	rc = cil_role_trans_init(&roletrans);
+	rc = cil_roletransition_init(&roletrans);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1186,18 +1186,18 @@ int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node 
 	roletrans->result_str = cil_strdup(parse_current->next->next->next->next->data);
 
 	ast_node->data = roletrans;
-	ast_node->flavor = CIL_ROLETRANS;
+	ast_node->flavor = CIL_ROLETRANSITION;
 
 	return SEPOL_OK;
 
 exit:
 	if (roletrans != NULL) {
-		cil_destroy_roletrans(roletrans);
+		cil_destroy_roletransition(roletrans);
 	}
 	return rc;
 }
 
-void cil_destroy_roletrans(struct cil_role_trans *roletrans)
+void cil_destroy_roletransition(struct cil_roletransition *roletrans)
 {
 	if (roletrans == NULL) {
 		return;
@@ -1231,7 +1231,7 @@ int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, st
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_role_allow *roleallow = NULL;
+	struct cil_roleallow *roleallow = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -1244,7 +1244,7 @@ int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_role_allow_init(&roleallow);
+	rc = cil_roleallow_init(&roleallow);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1264,7 +1264,7 @@ exit:
 	return rc;
 }
 
-void cil_destroy_roleallow(struct cil_role_allow *roleallow)
+void cil_destroy_roleallow(struct cil_roleallow *roleallow)
 {
 	if (roleallow == NULL) {
 		return;
@@ -5739,10 +5739,10 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto exit;
 		}
 	}
-	else if (!strcmp(parse_current->data, CIL_KEY_ROLETRANS)) {
-		rc = cil_gen_roletrans(parse_current, ast_node);
+	else if (!strcmp(parse_current->data, CIL_KEY_ROLETRANSITION)) {
+		rc = cil_gen_roletransition(parse_current, ast_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_gen_roletrans failed, rc: %d\n", rc);
+			printf("cil_gen_roletransition failed, rc: %d\n", rc);
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEALLOW)) {

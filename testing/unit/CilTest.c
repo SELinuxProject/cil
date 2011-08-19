@@ -317,14 +317,14 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_context);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_context_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans);
-	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_srcdecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_tgtdecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_roletrans_resultdecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletrans);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletrans_resultdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletransition);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletransition_srcdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletransition_tgtdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_roletransition_resultdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletransition);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletransition_srcdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletransition_tgtdecl_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roletransition_resultdecl_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow);
 	SUITE_ADD_TEST(suite, test_cil_resolve_roleallow_srcdecl_neg);
@@ -899,15 +899,15 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_role);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_role_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_gen_roletrans);	
-	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_srcnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_tgtnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_resultnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_roletrans_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roletrans);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roletrans_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletransition);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletransition_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletransition_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletransition_srcnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletransition_tgtnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletransition_resultnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_roletransition_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roletransition);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_roletransition_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_true);
 	SUITE_ADD_TEST(suite, test_cil_gen_bool_tunable_true);

@@ -796,9 +796,9 @@ exit:
 	return rc;
 }
 
-int cil_resolve_roletrans(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+int cil_resolve_roletransition(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
-	struct cil_role_trans *roletrans = (struct cil_role_trans*)current->data;
+	struct cil_roletransition *roletrans = (struct cil_roletransition*)current->data;
 	struct cil_tree_node *src_node = NULL;
 	struct cil_tree_node *tgt_node = NULL;
 	struct cil_tree_node *obj_node = NULL;
@@ -841,7 +841,7 @@ exit:
 
 int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
-	struct cil_role_allow *roleallow = (struct cil_role_allow*)current->data;
+	struct cil_roleallow *roleallow = (struct cil_roleallow*)current->data;
 	struct cil_tree_node *src_node = NULL;
 	struct cil_tree_node *tgt_node = NULL;
 	int rc = SEPOL_ERR;
@@ -3063,8 +3063,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_ROLETYPE:
 			rc = cil_resolve_roletype(db, node, call);
 			break;
-		case CIL_ROLETRANS:
-			rc = cil_resolve_roletrans(db, node, call);
+		case CIL_ROLETRANSITION:
+			rc = cil_resolve_roletransition(db, node, call);
 			break;
 		case CIL_ROLEALLOW:
 			rc = cil_resolve_roleallow(db, node, call);

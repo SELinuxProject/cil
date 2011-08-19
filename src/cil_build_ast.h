@@ -79,10 +79,10 @@ int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, str
 void cil_destroy_roletype(struct cil_roletype *roletype);
 int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_userrole(struct cil_userrole *userrole);
-int cil_gen_roletrans(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_roletrans(struct cil_role_trans *roletrans);
+int cil_gen_roletransition(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_roletransition(struct cil_roletransition *roletrans);
 int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_roleallow(struct cil_role_allow *roleallow);
+void cil_destroy_roleallow(struct cil_roleallow *roleallow);
 int cil_gen_roledominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_roledominance(struct cil_roledominance *roledom);
 int cil_gen_rolebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

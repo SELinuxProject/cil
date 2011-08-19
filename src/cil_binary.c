@@ -1398,7 +1398,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_role_trans *cil_roletrans = node->data;
+	struct cil_roletransition *cil_roletrans = node->data;
 	role_datum_t *sepol_src = NULL;
 	type_datum_t *sepol_tgt = NULL;
 	class_datum_t *sepol_obj = NULL;
@@ -1456,7 +1456,7 @@ int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_role_allow *cil_roleallow = node->data;
+	struct cil_roleallow *cil_roleallow = node->data;
 	role_datum_t *sepol_role = NULL;
 	role_datum_t *sepol_new_role = NULL;
 	role_allow_t *sepol_roleallow = cil_malloc(sizeof(*sepol_roleallow));
@@ -2573,7 +2573,7 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_AVRULE:
 			rc = cil_avrule_to_policydb(pdb, node);
 			break;
-		case CIL_ROLETRANS:
+		case CIL_ROLETRANSITION:
 			rc = cil_roletrans_to_policydb(pdb, node);
 			break;
 		case CIL_ROLEALLOW:

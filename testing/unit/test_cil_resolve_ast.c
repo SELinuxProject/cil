@@ -1574,7 +1574,7 @@ void test_cil_resolve_context_anon_level_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
-void test_cil_resolve_roletrans(CuTest *tc) {
+void test_cil_resolve_roletransition(CuTest *tc) {
 	char *line[] = {"(", "role", "foo_r", ")",
 			"(", "type", "bar_t", ")",
 			"(", "role", "foobar_r", ")",
@@ -1589,11 +1589,11 @@ void test_cil_resolve_roletrans(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_roletrans(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
+	int rc = cil_resolve_roletransition(test_db, test_db->ast->root->cl_head->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_resolve_roletrans_srcdecl_neg(CuTest *tc) {
+void test_cil_resolve_roletransition_srcdecl_neg(CuTest *tc) {
 	char *line[] = {"(", "type", "bar_t", ")",
 			"(", "role", "foobar_r", ")", 
 			"(", "class", "process", "(", "transition", ")", ")",
@@ -1607,11 +1607,11 @@ void test_cil_resolve_roletrans_srcdecl_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_roletrans(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_roletransition(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
-void test_cil_resolve_roletrans_tgtdecl_neg(CuTest *tc) {
+void test_cil_resolve_roletransition_tgtdecl_neg(CuTest *tc) {
 	char *line[] = {"(", "role", "foo_r", ")",
 			"(", "role", "foobar_r", ")", 
 			"(", "class", "process", "(", "transition", ")", ")",
@@ -1625,11 +1625,11 @@ void test_cil_resolve_roletrans_tgtdecl_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_roletrans(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_roletransition(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
-void test_cil_resolve_roletrans_resultdecl_neg(CuTest *tc) {
+void test_cil_resolve_roletransition_resultdecl_neg(CuTest *tc) {
 	char *line[] = {"(", "role", "foo_r", ")",
 			"(", "type", "bar_t", ")", 
 			"(", "class", "process", "(", "transition", ")", ")",
@@ -1643,7 +1643,7 @@ void test_cil_resolve_roletrans_resultdecl_neg(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_roletrans(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
+	int rc = cil_resolve_roletransition(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
@@ -7652,7 +7652,7 @@ void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_resolve_ast_node_helper_roletrans(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_roletransition(CuTest *tc) {
 	char *line[] = {"(", "role", "foo_r", ")",
 			"(", "type", "bar_t", ")",
 			"(", "role", "foobar_r", ")", 
@@ -7678,7 +7678,7 @@ void test_cil_resolve_ast_node_helper_roletrans(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_roletransition_srcdecl_neg(CuTest *tc) {
 	char *line[] = {"(", "type", "bar_t", ")",
 			"(", "role", "foobar_r", ")", 
 			"(", "class", "process", "(", "transition", ")", ")",
@@ -7703,7 +7703,7 @@ void test_cil_resolve_ast_node_helper_roletrans_srcdecl_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_roletransition_tgtdecl_neg(CuTest *tc) {
 	char *line[] = {"(", "role", "foo_r", ")",
 			"(", "role", "foobar_r", ")", 
 			"(", "class", "process", "(", "transition", ")", ")",
@@ -7728,7 +7728,7 @@ void test_cil_resolve_ast_node_helper_roletrans_tgtdecl_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_resolve_ast_node_helper_roletrans_resultdecl_neg(CuTest *tc) {
+void test_cil_resolve_ast_node_helper_roletransition_resultdecl_neg(CuTest *tc) {
 	char *line[] = {"(", "role", "foo_r", ")",
 			"(", "type", "bar_t", ")",
 			"(", "class", "process", "(", "transition", ")", ")",

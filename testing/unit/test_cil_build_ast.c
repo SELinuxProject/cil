@@ -3986,7 +3986,7 @@ void test_cil_gen_role_noname_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_roletrans(CuTest *tc) {
+void test_cil_gen_roletransition(CuTest *tc) {
 	char *line[] = {"(", "roletransition", "foo_r",  "bar_t", "process",  "foobar_r", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -4001,21 +4001,21 @@ void test_cil_gen_roletrans(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_roletrans(test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_roletransition(test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
-	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLETRANS);
+	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLETRANSITION);
 }
 
-void test_cil_gen_roletrans_currnull_neg(CuTest *tc) {
+void test_cil_gen_roletransition_currnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	int rc = cil_gen_roletrans(NULL, test_ast_node);
+	int rc = cil_gen_roletransition(NULL, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc); 	
 }
 
-void test_cil_gen_roletrans_astnull_neg (CuTest *tc) {
+void test_cil_gen_roletransition_astnull_neg (CuTest *tc) {
 	char *line[] = {"(", "roletransition" "foo_r", "bar_t", "process", "foobar_r", ")", NULL};
 
 	struct  cil_tree *test_tree;
@@ -4023,11 +4023,11 @@ void test_cil_gen_roletrans_astnull_neg (CuTest *tc) {
 	
 	struct cil_tree_node *test_ast_node = NULL;
 
-	int rc = cil_gen_roletrans(test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_roletransition(test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_roletrans_srcnull_neg(CuTest *tc) {
+void test_cil_gen_roletransition_srcnull_neg(CuTest *tc) {
 	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "process", "foobar_r", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -4038,11 +4038,11 @@ void test_cil_gen_roletrans_srcnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	int rc = cil_gen_roletrans(test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_roletransition(test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_roletrans_tgtnull_neg(CuTest *tc) {
+void test_cil_gen_roletransition_tgtnull_neg(CuTest *tc) {
 	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "process", "foobar_r", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -4053,11 +4053,11 @@ void test_cil_gen_roletrans_tgtnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	int rc = cil_gen_roletrans(test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_roletransition(test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_roletrans_resultnull_neg(CuTest *tc) {
+void test_cil_gen_roletransition_resultnull_neg(CuTest *tc) {
 	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "process", "foobar_r", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -4068,11 +4068,11 @@ void test_cil_gen_roletrans_resultnull_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	int rc = cil_gen_roletrans(test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_roletransition(test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_roletrans_extra_neg(CuTest *tc) {
+void test_cil_gen_roletransition_extra_neg(CuTest *tc) {
 	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "process", "foobar_r", "extra", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -4081,7 +4081,7 @@ void test_cil_gen_roletrans_extra_neg(CuTest *tc) {
 	struct cil_tree_node *test_ast_node;
 	cil_tree_node_init(&test_ast_node);
 
-	int rc = cil_gen_roletrans(test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_roletransition(test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -6921,8 +6921,8 @@ void test_cil_gen_roleallow(CuTest *tc) {
 	
 	int rc = cil_gen_roleallow(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
-	CuAssertStrEquals(tc, ((struct cil_role_allow*)test_ast_node->data)->src_str, test_current->next->data);
-	CuAssertStrEquals(tc, ((struct cil_role_allow*)test_ast_node->data)->tgt_str, test_current->next->next->data);
+	CuAssertStrEquals(tc, ((struct cil_roleallow*)test_ast_node->data)->src_str, test_current->next->data);
+	CuAssertStrEquals(tc, ((struct cil_roleallow*)test_ast_node->data)->tgt_str, test_current->next->next->data);
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_ROLEALLOW);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -16315,7 +16315,7 @@ void test_cil_build_ast_node_helper_role_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_build_ast_node_helper_roletrans(CuTest *tc) {
+void test_cil_build_ast_node_helper_roletransition(CuTest *tc) {
 	char *line[] = {"(", "roletransition", "foo_r", "bar_t", "process", "foobar_r", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -16333,7 +16333,7 @@ void test_cil_build_ast_node_helper_roletrans(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_build_ast_node_helper_roletrans_neg(CuTest *tc) {
+void test_cil_build_ast_node_helper_roletransition_neg(CuTest *tc) {
 	char *line[] = {"(", "roletransition", "foo_r", "bar_t", ")", NULL};
 
 	struct cil_tree *test_tree;
