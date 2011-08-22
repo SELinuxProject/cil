@@ -115,9 +115,9 @@ int cil_portcon_to_policy(FILE **file_arr, struct cil_sort *sort)
 		struct cil_portcon *portcon = (struct cil_portcon*)sort->array[i];
 		fprintf(file_arr[NETIFCONS], "portcon ");
 		if (portcon->proto == CIL_PROTOCOL_UDP) {
-			printf("udp ");
+			fprintf(file_arr[NETIFCONS], "udp ");
 		} else if (portcon->proto == CIL_PROTOCOL_TCP) {
-			printf("tcp ");
+			fprintf(file_arr[NETIFCONS], "tcp ");
 		}
 		fprintf(file_arr[NETIFCONS], "%d ", portcon->port_low);
 		fprintf(file_arr[NETIFCONS], "%d ", portcon->port_high);
@@ -162,16 +162,54 @@ int cil_netifcon_to_policy(FILE **file_arr, struct cil_sort *sort)
 int cil_nodecon_to_policy(FILE **file_arr, struct cil_sort *sort)
 {
 	uint32_t i = 0;
+	int rc = SEPOL_ERR;
 
 	for (i=0; i<sort->count; i++) {
 		struct cil_nodecon *nodecon = (struct cil_nodecon*)sort->array[i];
-		fprintf(file_arr[NETIFCONS], "nodecon %s ", nodecon->addr_str);
-		fprintf(file_arr[NETIFCONS], "%s ", nodecon->mask_str);
+		char *buf = NULL;
+		errno = 0;
+		if (nodecon->addr->family == AF_INET) {
+			buf = cil_malloc(INET_ADDRSTRLEN);
+			inet_ntop(nodecon->addr->family, &nodecon->addr->ip.v4, buf, INET_ADDRSTRLEN);
+		} else if (nodecon->addr->family == AF_INET6) {
+			buf = cil_malloc(INET6_ADDRSTRLEN);
+			inet_ntop(nodecon->addr->family, &nodecon->addr->ip.v6, buf, INET6_ADDRSTRLEN);
+		}
+
+		if (errno != 0) {
+			printf("Failed to convert ip address to string\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		fprintf(file_arr[NETIFCONS], "nodecon %s ", buf);
+		free(buf);
+
+		if (nodecon->mask->family == AF_INET) {
+			buf = cil_malloc(INET_ADDRSTRLEN);
+			inet_ntop(nodecon->mask->family, &nodecon->mask->ip.v4, buf, INET_ADDRSTRLEN);
+		} else if (nodecon->mask->family == AF_INET6) {
+			buf = cil_malloc(INET6_ADDRSTRLEN);
+			inet_ntop(nodecon->mask->family, &nodecon->mask->ip.v6, buf, INET6_ADDRSTRLEN);
+		}
+
+		if (errno != 0) {
+			printf("Failed to convert mask to string\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		fprintf(file_arr[NETIFCONS], "%s ", buf);
+		free(buf);
+
 		cil_context_to_policy(file_arr, NETIFCONS, nodecon->context);
 		fprintf(file_arr[NETIFCONS], ";\n");
 	}
 
 	return SEPOL_OK;
+
+exit:
+	return rc;
 }
 
 
