@@ -37,7 +37,7 @@ __attribute__((noreturn)) void cil_default_malloc_error_handler(void)
 	exit(1);
 }
 
-static void (*cil_malloc_error_handler)(void) = &cil_default_malloc_error_handler;
+void (*cil_malloc_error_handler)(void) = &cil_default_malloc_error_handler;
 
 void cil_set_malloc_error_handler(void (*handler)(void))
 {

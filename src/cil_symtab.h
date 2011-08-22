@@ -42,6 +42,7 @@ struct cil_symtab_datum {
 	int state;
 };
 
+void cil_symtab_init(symtab_t *symtab, unsigned int size);
 void cil_symtab_datum_init(struct cil_symtab_datum *datum);
 void cil_symtab_datum_destroy(struct cil_symtab_datum datum);
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node);

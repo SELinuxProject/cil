@@ -2441,10 +2441,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				goto exit;
 			}
 
-			rc = cil_args_init(&new_arg);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
+			cil_args_init(&new_arg);
 
 			switch (((struct cil_param*)item->data)->flavor) {
 			case CIL_TYPE:
@@ -2532,10 +2529,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 					struct cil_ipaddr *ipaddr = NULL;
 					struct cil_tree_node *addr_node = NULL;
 
-					rc = cil_ipaddr_init(&ipaddr);
-					if (rc != SEPOL_OK) {
-						goto exit;
-					}
+					cil_ipaddr_init(&ipaddr);
 
 					rc = cil_fill_ipaddr(pc->cl_head, ipaddr);
 					if (rc != SEPOL_OK) {
@@ -2561,10 +2555,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				if (pc->cl_head != NULL) {
 					struct cil_permset *permset = NULL;
 					struct cil_tree_node *permset_node = NULL;
-					rc = cil_permset_init(&permset);
-					if (rc != SEPOL_OK) {
-						goto exit;
-					}
+					cil_permset_init(&permset);
 					cil_list_init(&permset->perms_list_str);
 					rc = cil_parse_to_list(pc->cl_head, permset->perms_list_str, CIL_AST_STR);
 					if (rc != SEPOL_OK) {

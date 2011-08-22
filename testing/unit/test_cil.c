@@ -39,27 +39,17 @@ void test_cil_symtab_array_init(CuTest *tc) {
 	struct cil_db *test_new_db;
 	test_new_db = malloc(sizeof(*test_new_db));
 
-	int rc = cil_symtab_array_init(test_new_db->symtab, CIL_SYM_NUM);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	cil_symtab_array_init(test_new_db->symtab, CIL_SYM_NUM);
 	CuAssertPtrNotNull(tc, test_new_db->symtab);
 
 	free(test_new_db);
 }
 
-// TODO: Reach SEPOL_ERR return in cil_symtab_array_init ( currently can't produce a method to do so )
-void test_cil_symtab_array_init_null_symtab_neg(CuTest *tc) {
-	symtab_t *test_symtab = NULL;
-
-	int rc = cil_symtab_array_init(test_symtab, 1);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
-
 void test_cil_db_init(CuTest *tc) {
 	struct cil_db *test_db;
 
-	int rc = cil_db_init(&test_db);
+	cil_db_init(&test_db);
 
-	CuAssertIntEquals(tc, 0, rc);
 	CuAssertPtrNotNull(tc, test_db->ast);
 	CuAssertPtrNotNull(tc, test_db->symtab);
 	CuAssertPtrNotNull(tc, test_db->symtab);

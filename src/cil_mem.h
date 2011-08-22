@@ -34,6 +34,7 @@
 void cil_set_malloc_error_handler(void (*handler)(void));
 void *cil_malloc(size_t size);
 char *cil_strdup(char *str);
+void (*cil_malloc_error_handler)(void);
 
 #endif /* CIL_MEM_H_ */
 

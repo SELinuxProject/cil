@@ -4507,9 +4507,9 @@ void test_cil_resolve_call1_class(CuTest *tc) {
 
 void test_cil_resolve_call1_permset(CuTest *tc) {
 	char *line[] = {"(", "permissionset", "foo", "(", "read", "open", ")", ")",
-			"(", "class", "dead", "(", "close", ")", ")",
-			"(", "class", "bar", "(", "close", ")", ")",
-			"(", "class", "baz", "(", "close", ")", ")",
+			"(", "type", "dead", ")",
+			"(", "type", "bar", ")",
+			"(", "class", "baz", "(", "close", "read", "open", ")", ")",
 			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
 				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
 			"(", "call", "mm", "(", "foo", ")", ")", NULL};
@@ -4520,17 +4520,16 @@ void test_cil_resolve_call1_permset(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	int rc1 = cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-	rc1 = rc1;
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next->next->next, NULL);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_resolve_call1_permset_anon(CuTest *tc) {
-	char *line[] = {"(", "class", "dead", "(", "close", ")", ")",
-			"(", "class", "bar", "(", "close", ")", ")",
-			"(", "class", "baz", "(", "close", ")", ")",
+	char *line[] = {"(", "type", "dead", ")",
+			"(", "type", "bar", ")",
+			"(", "class", "baz", "(", "close", "read", "open", ")", ")",
 			"(", "macro", "mm", "(", "(", "permissionset", "a", ")", ")", 
 				"(", "allow", "dead", "bar", "baz", "a", ")", ")",
 			"(", "call", "mm", "(", "(", "read", "open", ")", ")", ")", NULL};

@@ -32,10 +32,19 @@
 
 #include <sepol/errcodes.h>
 #include <sepol/policydb/hashtab.h>
+#include <sepol/policydb/symtab.h>
 
 #include "cil_tree.h"
 #include "cil_symtab.h"
 #include "cil_mem.h"
+
+void cil_symtab_init(symtab_t *symtab, unsigned int size)
+{
+	int rc = symtab_init(symtab, size);
+	if (rc != SEPOL_OK) {
+		(*cil_malloc_error_handler)();
+	}
+}
 
 void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 {

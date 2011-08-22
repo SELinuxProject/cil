@@ -223,10 +223,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	rc = cil_block_init(&block);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_block_init(&block);
 
 	block->is_abstract = is_abstract;
 	block->condition = condition;
@@ -282,10 +279,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	rc = cil_class_init(&class);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_class_init(&class);
 
 	key = parse_current->next->data;
 
@@ -333,10 +327,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
-	rc = cil_perm_init(&perm);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_perm_init(&perm);
 
 	key = parse_current->data;
 
@@ -423,11 +414,7 @@ int cil_gen_permset(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	rc = cil_permset_init(&permset);
-	if (rc != SEPOL_OK) {
-		printf("Failed to init permissionset\n");
-		goto exit;
-	}
+	cil_permset_init(&permset);
 
 	key = parse_current->next->data;
 
@@ -488,10 +475,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto exit;
 	}
 
-	rc = cil_common_init(&common);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_common_init(&common);
 
 	key = parse_current->next->data;
 
@@ -549,10 +533,7 @@ int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, 
 		goto exit;
 	}
 
-	rc = cil_classcommon_init(&clscom);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_classcommon_init(&clscom);
 
 	clscom->class_str = cil_strdup(parse_current->next->data);
 	clscom->common_str = cil_strdup(parse_current->next->next->data);
@@ -609,10 +590,7 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 		goto exit;
 	}
 
-	rc = cil_sid_init(&sid);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_sid_init(&sid);
 
 	key = parse_current->next->data;
 
@@ -662,21 +640,14 @@ int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, s
 		goto exit;
 	}
 
-	rc = cil_sidcontext_init(&sidcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_sidcontext_init(&sidcon);
 
 	sidcon->sid_str = cil_strdup(parse_current->next->data);
 
 	if (parse_current->next->next->cl_head == NULL) {
 		sidcon->context_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_context_init(&sidcon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init context\n");
-			goto exit;
-		}
+		cil_context_init(&sidcon->context);
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, sidcon->context);
 		if (rc != SEPOL_OK) {
@@ -738,10 +709,7 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
-	rc = cil_user_init(&user);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_user_init(&user);
 
 	key = parse_current->next->data;
 
@@ -791,21 +759,14 @@ int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_userlevel_init(&usrlvl);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_userlevel_init(&usrlvl);
 
 	usrlvl->user_str = cil_strdup(parse_current->next->data);
 
 	if (parse_current->next->next->cl_head == NULL) {
 		usrlvl->level_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_level_init(&usrlvl->level);
-		if (rc != SEPOL_OK) {
-			printf("Failed to initialize level\n");
-			goto exit;
-		}
+		cil_level_init(&usrlvl->level);
 
 		rc = cil_fill_level(parse_current->next->next->cl_head, usrlvl->level);
 		if (rc != SEPOL_OK) {
@@ -867,21 +828,14 @@ int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_userrange_init(&userrange);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_userrange_init(&userrange);
 
 	userrange->user_str = cil_strdup(parse_current->next->data);
 
 	if (parse_current->next->next->cl_head == NULL) {
 		userrange->range_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_levelrange_init(&userrange->range);
-		if (rc != SEPOL_OK) {
-			printf("Failed to initialize range\n");
-			goto exit;
-		}
+		cil_levelrange_init(&userrange->range);
 
 		rc = cil_fill_levelrange(parse_current->next->next->cl_head, userrange->range);
 		if (rc != SEPOL_OK) {
@@ -943,10 +897,7 @@ int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 		goto exit;
 	}
 
-	rc = cil_userbounds_init(&userbnds);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_userbounds_init(&userbnds);
 
 	userbnds->user_str = cil_strdup(parse_current->next->data);
 	userbnds->bounds_str = cil_strdup(parse_current->next->next->data);
@@ -1002,10 +953,7 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
-	rc = cil_role_init(&role);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_role_init(&role);
 
 	key = parse_current->next->data;
 
@@ -1055,10 +1003,7 @@ int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_roletype_init(&roletype);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_roletype_init(&roletype);
 
 	roletype->role_str = cil_strdup(parse_current->next->data);
 	roletype->type_str = cil_strdup(parse_current->next->next->data);
@@ -1114,10 +1059,7 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_userrole_init(&userrole);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_userrole_init(&userrole);
 
 	userrole->user_str = cil_strdup(parse_current->next->data);
 	userrole->role_str = cil_strdup(parse_current->next->next->data);
@@ -1175,10 +1117,7 @@ int cil_gen_roletransition(struct cil_tree_node *parse_current, struct cil_tree_
 		goto exit;
 	}
 
-	rc = cil_roletransition_init(&roletrans);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_roletransition_init(&roletrans);
 
 	roletrans->src_str = cil_strdup(parse_current->next->data);
 	roletrans->tgt_str = cil_strdup(parse_current->next->next->data);
@@ -1244,10 +1183,7 @@ int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_roleallow_init(&roleallow);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_roleallow_init(&roleallow);
 
 	roleallow->src_str = cil_strdup(parse_current->next->data);
 	roleallow->tgt_str = cil_strdup(parse_current->next->next->data);
@@ -1303,10 +1239,7 @@ int cil_gen_roledominance(struct cil_db *db, struct cil_tree_node *parse_current
 		goto exit;
 	}
 
-	rc = cil_roledominance_init(&roledom);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_roledominance_init(&roledom);
 
 	roledom->role_str = cil_strdup(parse_current->next->data);
 	roledom->domed_str = cil_strdup(parse_current->next->next->data);
@@ -1362,10 +1295,7 @@ int cil_gen_rolebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 		goto exit;
 	}
 
-	rc = cil_rolebounds_init(&rolebnds);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_rolebounds_init(&rolebnds);
 
 	rolebnds->role_str = cil_strdup(parse_current->next->data);
 	rolebnds->bounds_str = cil_strdup(parse_current->next->next->data);
@@ -1423,10 +1353,7 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 		goto exit;
 	}
 
-	rc = cil_avrule_init(&rule);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_avrule_init(&rule);
 
 	rule->rule_kind = rule_kind;
 
@@ -1506,10 +1433,7 @@ int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node 
 		goto exit;
 	}
 
-	rc = cil_type_rule_init(&rule);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_type_rule_init(&rule);
 
 	rule->rule_kind = rule_kind;
 	rule->src_str = cil_strdup(parse_current->next->data);
@@ -1582,10 +1506,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 	
-	rc = cil_type_init(&type);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_type_init(&type);
 
 	key = parse_current->next->data;
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)type, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPE);
@@ -1640,10 +1561,7 @@ int cil_gen_typeattribute(struct cil_db *db, struct cil_tree_node *parse_current
 		goto exit;
 	}
 
-	rc = cil_typeattribute_init(&attr);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_typeattribute_init(&attr);
 
 	key = parse_current->next->data;
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)attr, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPEATTRIBUTE);
@@ -1702,10 +1620,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
-	rc = cil_bool_init(&boolean);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_bool_init(&boolean);
 
 	key = parse_current->next->data;
 
@@ -1775,17 +1690,11 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 
 	cil_list_item_init(&lnode);
 
-	rc = cil_conditional_init(&lcond);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_conditional_init(&lcond);
 
 	cil_list_item_init(&rnode);
 
-	rc = cil_conditional_init(&rcond);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_conditional_init(&rcond);
 
 	lstr = current->next->data;
 	rstr = current->next->next->data;
@@ -2115,10 +2024,7 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 		goto exit;
 	}
 
-	rc = cil_conditional_init(&cond);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_conditional_init(&cond);
 
 	if (node == node->parent->cl_head) {
 		rc = __cil_verify_expr_oper_flavor(node->data, cond, flavor);
@@ -2184,10 +2090,7 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 			goto exit;
 		}
 		cil_list_item_init(&stack_item);
-		rc = cil_conditional_init(&cond);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+		cil_conditional_init(&cond);
 		cond->str = cil_strdup(current->data);
 		cond->flavor = CIL_BOOL;
 		stack_item->data = cond;
@@ -2234,10 +2137,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto exit;
 	}
 
-	rc = cil_boolif_init(&bif);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_boolif_init(&bif);
 
 	rc = cil_gen_expr_stack(parse_current->next, CIL_BOOL, &bif->expr_stack);
 	if (rc != SEPOL_OK) {
@@ -2311,10 +2211,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	rc = cil_tunif_init(&tif);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_tunif_init(&tif);
 
 	rc = cil_gen_expr_stack(parse_current->next, CIL_TUNABLE, &tif->expr_stack);
 	if (rc != SEPOL_OK) {
@@ -2475,10 +2372,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_typealias_init(&alias);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_typealias_init(&alias);
 
 	key = parse_current->next->next->data;
 
@@ -2538,10 +2432,7 @@ int cil_gen_typeattributetypes(struct cil_db *db, struct cil_tree_node *parse_cu
 		goto exit;
 	}
 
-	rc = cil_typeattributetypes_init(&attrtypes);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_typeattributetypes_init(&attrtypes);
 
 	attrtypes->attr_str = cil_strdup(parse_current->next->data);
 
@@ -2644,10 +2535,7 @@ int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 		goto exit;
 	}
 
-	rc = cil_typebounds_init(&typebnds);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_typebounds_init(&typebnds);
 
 	typebnds->type_str = cil_strdup(parse_current->next->data);
 	typebnds->bounds_str = cil_strdup(parse_current->next->next->data);
@@ -2702,10 +2590,7 @@ int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_curren
 		goto exit;
 	}
 
-	rc = cil_typepermissive_init(&typeperm);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_typepermissive_init(&typeperm);
 
 	typeperm->type_str = cil_strdup(parse_current->next->data);
 
@@ -2759,10 +2644,7 @@ int cil_gen_filetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 		goto exit;
 	}
 
-	rc = cil_filetransition_init(&filetrans);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_filetransition_init(&filetrans);
 
 	filetrans->src_str = cil_strdup(parse_current->next->data);
 	filetrans->exec_str = cil_strdup(parse_current->next->next->data);
@@ -2829,10 +2711,7 @@ int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_curre
 		goto exit;
 	}
 
-	rc = cil_rangetransition_init(&rangetrans);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_rangetransition_init(&rangetrans);
 
 	rangetrans->src_str = cil_strdup(parse_current->next->data);
 	rangetrans->exec_str = cil_strdup(parse_current->next->next->data);
@@ -2843,11 +2722,7 @@ int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_curre
 	if (parse_current->next->next->next->next->cl_head == NULL) {
 		rangetrans->range_str = cil_strdup(parse_current->next->next->next->next->data);
 	} else {
-		rc = cil_levelrange_init(&rangetrans->range);
-		if (rc != SEPOL_OK) {
-			printf("Couldn't initialize levelrange\n");
-			goto exit;
-		}
+		cil_levelrange_init(&rangetrans->range);
 
 		rc = cil_fill_levelrange(parse_current->next->next->next->next->cl_head, rangetrans->range);
 		if (rc != SEPOL_OK) {
@@ -2910,10 +2785,7 @@ int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, 
 		goto exit;
 	}
 
-	rc = cil_sens_init(&sens);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_sens_init(&sens);
 
 	key = parse_current->next->data;
 
@@ -2965,10 +2837,7 @@ int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_sensalias_init(&alias);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_sensalias_init(&alias);
 
 	key = parse_current->next->next->data;
 
@@ -3025,10 +2894,7 @@ int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_cat_init(&cat);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_cat_init(&cat);
 
 	key = parse_current->next->data;
 
@@ -3079,10 +2945,7 @@ int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_catalias_init(&alias);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_catalias_init(&alias);
 
 	key = parse_current->next->next->data;
 
@@ -3222,10 +3085,7 @@ int cil_gen_catrange(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_catrange_init(&catrange);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_catrange_init(&catrange);
 
 	key = parse_current->next->data;
 
@@ -3291,10 +3151,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto exit;
 	}
 
-	rc = cil_catset_init(&catset);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_catset_init(&catset);
 
 	key = parse_current->next->data;
 
@@ -3358,10 +3215,8 @@ int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_catorder_init(&catorder);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_catorder_init(&catorder);
+
 	cil_list_init(&catorder->cat_list_str);
 
 	rc = cil_set_to_list(parse_current->next, catorder->cat_list_str, 0);
@@ -3415,10 +3270,8 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_sens_dominates_init(&dom);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_sens_dominates_init(&dom);
+
 	cil_list_init(&dom->sens_list_str);
 
 	rc = cil_set_to_list(parse_current->next, dom->sens_list_str, 0);
@@ -3473,20 +3326,14 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	rc = cil_senscat_init(&senscat);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_senscat_init(&senscat);
 
 	senscat->sens_str = cil_strdup(parse_current->next->data);
 
 	if (parse_current->next->next->cl_head == NULL) {
 		senscat->catset_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_catset_init(&senscat->catset);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+		cil_catset_init(&senscat->catset);
 
 		rc = cil_fill_catset(parse_current->next->next->cl_head, senscat->catset);
 		if (rc != SEPOL_OK) {
@@ -3551,10 +3398,7 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	rc = cil_level_init(&level);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_level_init(&level);
 
 	key = parse_current->next->data;
 
@@ -3625,11 +3469,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 	if (low->cl_head == NULL) {
 		lvlrange->low_str = cil_strdup(low->data);
 	} else {
-		rc = cil_level_init(&lvlrange->low);
-		if (rc != SEPOL_OK) {
-			printf("Failed to initialize low level\n");
-			goto exit;
-		}
+		cil_level_init(&lvlrange->low);
 
 		rc = cil_fill_level(low->cl_head, lvlrange->low);
 		if (rc != SEPOL_OK) {
@@ -3641,11 +3481,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 	if (low->next->cl_head == NULL) {
 		lvlrange->high_str = cil_strdup(low->next->data);
 	} else {
-		rc = cil_level_init(&lvlrange->high);
-		if (rc != SEPOL_OK) {
-			printf("Failed to initialize high level\n");
-			goto exit;
-		}
+		cil_level_init(&lvlrange->high);
 
 		rc = cil_fill_level(low->next->cl_head, lvlrange->high);
 		if (rc != SEPOL_OK) {
@@ -3683,10 +3519,7 @@ int cil_gen_levelrange(struct cil_db *db, struct cil_tree_node *parse_current, s
 		goto exit;
 	}
 
-	rc = cil_levelrange_init(&lvlrange);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_levelrange_init(&lvlrange);
 
 	key = parse_current->next->data;
 
@@ -3756,10 +3589,7 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_constrain_init(&cons);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_constrain_init(&cons);
 
 	cil_list_init(&cons->class_list_str);
 	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
@@ -3841,11 +3671,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	if (user_node->next->next->next->cl_head == NULL) {
 		context->range_str = cil_strdup(user_node->next->next->next->data);
 	} else {
-		rc = cil_levelrange_init(&context->range);
-		if (rc != SEPOL_OK) {
-			printf("Couldn't initialize levelrange\n");
-			goto exit;
-		}
+		cil_levelrange_init(&context->range);
 
 		rc = cil_fill_levelrange(user_node->next->next->next->cl_head, context->range);
 		if (rc != SEPOL_OK) {
@@ -3883,10 +3709,7 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	rc = cil_context_init(&context);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_context_init(&context);
 
 	key = parse_current->next->data;
 
@@ -3963,10 +3786,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	type = parse_current->next->next->next->data;
-	rc = cil_filecon_init(&filecon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_filecon_init(&filecon);
 
 	filecon->root_str = cil_strdup(parse_current->next->data);
 	filecon->path_str = cil_strdup(parse_current->next->next->data);
@@ -3996,11 +3816,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (parse_current->next->next->next->next->cl_head == NULL) {
 		filecon->context_str = cil_strdup(parse_current->next->next->next->next->data);
 	} else {
-		rc = cil_context_init(&filecon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init file context\n");
-			goto exit;
-		}
+		cil_context_init(&filecon->context);
 
 		rc = cil_fill_context(parse_current->next->next->next->next->cl_head, filecon->context);
 		if (rc != SEPOL_OK) {
@@ -4069,10 +3885,7 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	rc = cil_portcon_init(&portcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_portcon_init(&portcon);
 
 	proto = parse_current->next->data;
 	if (!strcmp(proto, CIL_KEY_UDP)) {
@@ -4115,11 +3928,7 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (parse_current->next->next->next->cl_head == NULL ) {
 		portcon->context_str = cil_strdup(parse_current->next->next->next->data);
 	} else {
-		rc = cil_context_init(&portcon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init port context\n");
-			goto exit;
-		}
+		cil_context_init(&portcon->context);
 
 		rc = cil_fill_context(parse_current->next->next->next->cl_head, portcon->context);
 		if (rc != SEPOL_OK) {
@@ -4178,19 +3987,12 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	rc = cil_nodecon_init(&nodecon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_nodecon_init(&nodecon);
 
 	if (parse_current->next->cl_head == NULL ) {
 		nodecon->addr_str = cil_strdup(parse_current->next->data);
 	} else {
-		rc = cil_ipaddr_init(&nodecon->addr);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init node address\n");
-			goto exit;
-		}
+		cil_ipaddr_init(&nodecon->addr);
 
 		rc = cil_fill_ipaddr(parse_current->next->cl_head, nodecon->addr);
 		if (rc != SEPOL_OK) {
@@ -4202,11 +4004,7 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (parse_current->next->next->cl_head == NULL ) {
 		nodecon->mask_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_ipaddr_init(&nodecon->mask);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init node netmask\n");
-			goto exit;
-		}
+		cil_ipaddr_init(&nodecon->mask);
 
 		rc = cil_fill_ipaddr(parse_current->next->next->cl_head, nodecon->mask);
 		if (rc != SEPOL_OK) {
@@ -4218,11 +4016,7 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (parse_current->next->next->next->cl_head == NULL ) {
 		nodecon->context_str = cil_strdup(parse_current->next->next->next->data);
 	} else {
-		rc = cil_context_init(&nodecon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init node context\n");
-			goto exit;
-		}
+		cil_context_init(&nodecon->context);
 
 		rc = cil_fill_context(parse_current->next->next->next->cl_head, nodecon->context);
 		if (rc != SEPOL_OK) {
@@ -4293,10 +4087,7 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_genfscon_init(&genfscon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_genfscon_init(&genfscon);
 
 	genfscon->type_str = cil_strdup(parse_current->next->data);
 	genfscon->path_str = cil_strdup(parse_current->next->next->data);
@@ -4304,11 +4095,7 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (parse_current->next->next->next->cl_head == NULL ) {
 		genfscon->context_str = cil_strdup(parse_current->next->next->next->data);
 	} else {
-		rc = cil_context_init(&genfscon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init genfs context\n");
-			goto exit;
-		}
+		cil_context_init(&genfscon->context);
 
 		rc = cil_fill_context(parse_current->next->next->next->cl_head, genfscon->context);
 		if (rc != SEPOL_OK) {
@@ -4376,10 +4163,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_netifcon_init(&netifcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_netifcon_init(&netifcon);
 
 	netifcon->interface_str = cil_strdup(parse_current->next->data);
 
@@ -4391,11 +4175,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 			goto exit;
 		}
 	} else {
-		rc = cil_context_init(&netifcon->if_context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init if_context\n");
-			goto exit;
-		}
+		cil_context_init(&netifcon->if_context);
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, netifcon->if_context);
 		if (rc != SEPOL_OK) {
@@ -4412,11 +4192,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 			goto exit;
 		}
 	} else {
-		rc = cil_context_init(&netifcon->packet_context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init packet_context\n");
-			goto exit;
-		}
+		cil_context_init(&netifcon->packet_context);
 
 		rc = cil_fill_context(parse_current->next->next->next->cl_head, netifcon->packet_context);
 		if (rc != SEPOL_OK) {
@@ -4484,10 +4260,7 @@ int cil_gen_pirqcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	rc = cil_pirqcon_init(&pirqcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_pirqcon_init(&pirqcon);
 
 	rc = cil_fill_integer(parse_current->next, &pirqcon->pirq);
 	if (rc != SEPOL_OK) {
@@ -4498,11 +4271,7 @@ int cil_gen_pirqcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (parse_current->next->next->cl_head == NULL) {
 		pirqcon->context_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_context_init(&pirqcon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init pirq context\n");
-			goto exit;
-		}
+		cil_context_init(&pirqcon->context);
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, pirqcon->context);
 		if (rc != SEPOL_OK) {
@@ -4560,10 +4329,7 @@ int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_iomemcon_init(&iomemcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_iomemcon_init(&iomemcon);
 
 	if (parse_current->next->cl_head != NULL) {
 		if (parse_current->next->cl_head->next != NULL &&
@@ -4595,11 +4361,7 @@ int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (parse_current->next->next->cl_head == NULL ) {
 		iomemcon->context_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_context_init(&iomemcon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init iomem context\n");
-			goto exit;
-		}
+		cil_context_init(&iomemcon->context);
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, iomemcon->context);
 		if (rc != SEPOL_OK) {
@@ -4657,10 +4419,7 @@ int cil_gen_ioportcon(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_ioportcon_init(&ioportcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_ioportcon_init(&ioportcon);
 
 	if (parse_current->next->cl_head != NULL) {
 		if (parse_current->next->cl_head->next != NULL &&
@@ -4692,11 +4451,7 @@ int cil_gen_ioportcon(struct cil_db *db, struct cil_tree_node *parse_current, st
 	if (parse_current->next->next->cl_head == NULL ) {
 		ioportcon->context_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_context_init(&ioportcon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init ioport context\n");
-			goto exit;
-		}
+		cil_context_init(&ioportcon->context);
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, ioportcon->context);
 		if (rc != SEPOL_OK) {
@@ -4754,10 +4509,7 @@ int cil_gen_pcidevicecon(struct cil_db *db, struct cil_tree_node *parse_current,
 		goto exit;
 	}
 
-	rc = cil_pcidevicecon_init(&pcidevicecon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_pcidevicecon_init(&pcidevicecon);
 
 	rc = cil_fill_integer(parse_current->next, &pcidevicecon->dev);
 	if (rc != SEPOL_OK) {
@@ -4768,11 +4520,7 @@ int cil_gen_pcidevicecon(struct cil_db *db, struct cil_tree_node *parse_current,
 	if (parse_current->next->next->cl_head == NULL) {
 		pcidevicecon->context_str = cil_strdup(parse_current->next->next->data);
 	} else {
-		rc = cil_context_init(&pcidevicecon->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init pcidevice context\n");
-			goto exit;
-		}
+		cil_context_init(&pcidevicecon->context);
 
 		rc = cil_fill_context(parse_current->next->next->cl_head, pcidevicecon->context);
 		if (rc != SEPOL_OK) {
@@ -4834,10 +4582,7 @@ int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	type = parse_current->next->data;
 
-	rc = cil_fsuse_init(&fsuse);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_fsuse_init(&fsuse);
 
 	if (!strcmp(type, "xattr")) {
 		fsuse->type = CIL_FSUSE_XATTR;
@@ -4855,11 +4600,7 @@ int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (parse_current->next->next->next->cl_head == NULL) {
 		fsuse->context_str = cil_strdup(parse_current->next->next->next->data);
 	} else {
-		rc = cil_context_init(&fsuse->context);
-		if (rc != SEPOL_OK) {
-			printf("Failed to init fsuse context\n");
-			goto exit;
-		}
+		cil_context_init(&fsuse->context);
 
 		rc = cil_fill_context(parse_current->next->next->next->cl_head, fsuse->context);
 		if (rc != SEPOL_OK) {
@@ -4936,10 +4677,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	rc = cil_macro_init(&macro);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_macro_init(&macro);
 
 	key = parse_current->next->data;
 
@@ -5085,10 +4823,7 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
-	rc = cil_call_init(&call);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_call_init(&call);
 
 	call->macro_str = cil_strdup(parse_current->next->data);
 
@@ -5186,10 +4921,7 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	rc = cil_optional_init(&optional);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_optional_init(&optional);
 
 	key = parse_current->next->data;
 
@@ -5238,10 +4970,7 @@ int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_policycap_init(&polcap);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_policycap_init(&polcap);
 
 	key = parse_current->next->data;
 
@@ -5291,10 +5020,7 @@ int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto exit;
 	}
 
-	rc = cil_ipaddr_init(&ipaddr);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_ipaddr_init(&ipaddr);
 
 	key  = parse_current->next->data;
 
@@ -5436,10 +5162,7 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 		if (sens->next->cl_head == NULL) {
 			level->catset_str = cil_strdup(sens->next->data);
 		} else {
-			rc = cil_catset_init(&level->catset);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
+			cil_catset_init(&level->catset);
 
 			rc = cil_fill_catset(sens->next->cl_head, level->catset);
 			if (rc != SEPOL_OK) {
@@ -5518,10 +5241,7 @@ int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset)
 			cat_item->data = cil_strdup(curr->data);
 		} else {
 			/* anonymous category range */
-			rc = cil_catrange_init(&catrange);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
+			cil_catrange_init(&catrange);
 
 			rc = cil_fill_catrange(curr->cl_head, catrange);
 			if (rc != SEPOL_OK) {
