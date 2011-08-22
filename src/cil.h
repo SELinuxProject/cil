@@ -58,13 +58,6 @@ enum cil_flavor {
 	CIL_AVRULE,
 	CIL_SENS_DOM,
 	CIL_SEARCH,
-	CIL_TRANS_IF,
-	CIL_TRANS_CALL,
-	CIL_TRANS_INH_BLK,
-	CIL_TRANS_INH_TYPE,
-	CIL_TRANS_INH_ROLE,
-	CIL_TRANS_DEL,
-	CIL_TRANS_TRANS,
 	CIL_IN,
 	CIL_FILECON,
 	CIL_PORTCON,
@@ -315,11 +308,6 @@ struct cil_sort {
 	uint32_t count;
 	uint32_t index;
 	void **array;
-};
-
-struct cil_search {
-	//Waiting on design
-	int x; //temporary while attempting to get this to compile
 };
 
 struct cil_block {
@@ -604,31 +592,6 @@ struct cil_levelrange {
 	struct cil_level *low;
 	char *high_str;
 	struct cil_level *high;
-};
-
-#define CIL_INHERIT_BLOCK 1
-#define CIL_INHERIT_ROLE  2
-#define CIL_INHERIT_TYPE  3
-struct cil_transform_inherit {
-	struct cil_symtab_datum datum;
-	char *inherit_from_str;
-	void *inherit_from;
-	struct cil_list_item *except;
-	enum cil_flavor flavor;	
-};
-
-struct cil_transform_del {
-	struct cil_search target;
-};
-
-// This is the transform that modifies things in-place
-struct cil_transform_transform {
-	struct cil_search target;
-	// TODO: Transform contents when we figure out what this will look like
-};
-
-struct cil_in {
-	struct cil_search target;
 };
 
 struct cil_context {
