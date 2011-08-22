@@ -4729,8 +4729,9 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 		param->str =  cil_strdup(current_item->cl_head->next->data);
 
-		if (strchr(param->str, '.')) {
-			printf("Invalid macro declaration: parameter names cannot contain a '.' (line: %d)\n", parse_current->line);
+		rc = __cil_verify_name(param->str);
+		if (rc != SEPOL_OK) {
+			printf("Invalid macro declaration: parameter name contains invalid characters (line: %d)\n", parse_current->line);
 			cil_destroy_param(param);
 			goto exit;
 		}
