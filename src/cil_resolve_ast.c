@@ -1804,6 +1804,11 @@ int cil_resolve_levelrange(struct cil_db *db, struct cil_tree_node *current, str
 		}
 	}
 
+	rc = __cil_verify_levelrange(db, lvlrange);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
 	return SEPOL_OK;
 
 exit:

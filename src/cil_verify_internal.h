@@ -70,6 +70,10 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, en
 int __cil_verify_catrange(struct cil_db *db, struct cil_catrange *catrange, struct cil_cat *cat);
 int __cil_verify_senscat(struct cil_db *db, struct cil_sens *sens, struct cil_cat *cat);
 int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil_catset *catset);
+int __cil_verify_levelrange_dominance(struct cil_db *db, struct cil_sens *low, struct cil_sens *high);
+int __cil_verify_cat_in_catset(struct cil_db *db, struct cil_cat *cat, struct cil_catset *set);
+int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, struct cil_catset *high);
+int __cil_verify_levelrange(struct cil_db *db, struct cil_levelrange *lr);
 int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args);
 
 #endif
