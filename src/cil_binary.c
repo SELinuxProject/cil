@@ -641,163 +641,6 @@ exit:
 	return rc;
 }
 
-int __cil_catset_to_semantic_level(policydb_t *pdb, struct cil_catset *cil_catset, mls_semantic_level_t *sem_level)
-{
-	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_list *cil_cats = cil_catset->cat_list;
-	struct cil_list_item *curr = NULL;
-	mls_semantic_cat_t *sem_cat = NULL;
-
-	for (curr = cil_cats->head; curr != NULL; curr = curr->next) {
-		cat_datum_t *sepol_cat = NULL;
-
-		sem_cat = cil_malloc(sizeof(*sem_cat));
-		mls_semantic_cat_init(sem_cat);
-
-		if (curr->flavor == CIL_CATRANGE) {
-			struct cil_catrange *catrange = curr->data;
-
-			key = catrange->cat_low->datum.name;
-			sepol_cat = hashtab_search(pdb->p_cats.table, key);
-			if (sepol_cat == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			sem_cat->low = sepol_cat->s.value;
-
-			key = catrange->cat_high->datum.name;
-			sepol_cat = hashtab_search(pdb->p_cats.table, key);
-			if (sepol_cat == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			sem_cat->high = sepol_cat->s.value;
-
-		} else {
-			struct cil_cat *cil_cat = curr->data;
-
-			key = cil_cat->datum.name;
-			sepol_cat = hashtab_search(pdb->p_cats.table, key);
-			if (sepol_cat == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			sem_cat->low = sepol_cat->s.value;
-			sem_cat->high = sepol_cat->s.value;
-		}
-
-		sem_cat->next = sem_level->cat;
-		sem_level->cat = sem_cat;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	free(sem_cat);
-	return rc;
-}
-
-int __cil_level_to_semantic_level(policydb_t *pdb, struct cil_level *cil_level, mls_semantic_level_t *sem_level)
-{
-	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_sens *cil_sens = cil_level->sens;
-	struct cil_catset *cil_catset = cil_level->catset;
-	level_datum_t *sepol_level = NULL;
-
-	key = cil_sens->datum.name;
-	sepol_level = hashtab_search(pdb->p_levels.table, key);
-	if (sepol_level == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	sem_level->sens = sepol_level->level->sens;
-
-	if (cil_catset != NULL) {
-		rc = __cil_catset_to_semantic_level(pdb, cil_catset, sem_level);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int cil_userlevel_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
-{
-	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_userlevel *cil_userlevel = node->data;
-	struct cil_level *cil_level = cil_userlevel->level;
-	mls_semantic_level_t *sem_level = NULL;
-	user_datum_t *sepol_user = NULL;
-
-	key = cil_userlevel->user_str;
-	sepol_user = hashtab_search(pdb->p_users.table, key);
-	if (sepol_user == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	sem_level = &sepol_user->dfltlevel;
-
-	rc = __cil_level_to_semantic_level(pdb, cil_level, sem_level);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int cil_userrange_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
-{
-	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_userrange *cil_userrange = node->data;
-	struct cil_levelrange *cil_levelrange = cil_userrange->range;
-	struct cil_level *cil_level = NULL;
-	mls_semantic_range_t *sem_range = NULL;
-	mls_semantic_level_t *sem_level = NULL;
-	user_datum_t *sepol_user = NULL;
-
-	key = cil_userrange->user_str;
-	sepol_user = hashtab_search(pdb->p_users.table, key);
-	if (sepol_user == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	sem_range = &sepol_user->range;
-
-	sem_level = &sem_range->level[0];
-
-	cil_level = cil_levelrange->low;
-
-	rc = __cil_level_to_semantic_level(pdb, cil_level, sem_level);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	sem_level = &sem_range->level[1];
-
-	cil_level = cil_levelrange->high;
-
-	rc = __cil_level_to_semantic_level(pdb, cil_level, sem_level);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int cil_bool_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -1830,6 +1673,14 @@ int __cil_mls_level_build(policydb_t *pdb, struct cil_sens *cil_sens, mls_level_
 	char *key = NULL;
 	struct cil_list *catsets = cil_sens->catsets;
 	struct cil_list_item *curr = NULL;
+	level_datum_t *sepol_level = NULL;
+
+	key = cil_sens->datum.name;
+	sepol_level = hashtab_search(pdb->p_levels.table, key);
+	if (sepol_level == NULL) {
+		goto exit;
+	}
+	mls_level->sens = sepol_level->level->sens;
 
 	ebitmap_init(&mls_level->cat);
 
@@ -1902,20 +1753,11 @@ exit:
 int __cil_levelrange_to_mls_range(policydb_t *pdb, struct cil_levelrange *cil_lvlrange, mls_range_t *mls_range)
 {
 	int rc = SEPOL_ERR;
-	char *key = NULL;
 	struct cil_sens *low = cil_lvlrange->low->sens;
 	struct cil_sens *high = cil_lvlrange->high->sens;
-	level_datum_t *sepol_level = NULL;
 	mls_level_t *mls_level = NULL;
 
 	mls_level = &mls_range->level[0];
-
-	key = low->datum.name;
-	sepol_level = hashtab_search(pdb->p_levels.table, key);
-	if (sepol_level == NULL) {
-		goto exit;
-	}
-	mls_level->sens = sepol_level->level->sens;
 
 	rc = __cil_mls_level_build(pdb, low, mls_level);
 	if (rc != SEPOL_OK) {
@@ -1924,14 +1766,59 @@ int __cil_levelrange_to_mls_range(policydb_t *pdb, struct cil_levelrange *cil_lv
 
 	mls_level = &mls_range->level[1];
 
-	key = high->datum.name;
-	sepol_level = hashtab_search(pdb->p_levels.table, key);
-	if (sepol_level == NULL) {
+	rc = __cil_mls_level_build(pdb, high, mls_level);
+	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	mls_level->sens = sepol_level->level->sens;
 
-	rc = __cil_mls_level_build(pdb, high, mls_level);
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_userlevel_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_userlevel *cil_userlevel = node->data;
+	struct cil_level *cil_level = cil_userlevel->level;
+	user_datum_t *sepol_user = NULL;
+
+	key = cil_userlevel->user_str;
+	sepol_user = hashtab_search(pdb->p_users.table, key);
+	if (sepol_user == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = __cil_mls_level_build(pdb, cil_level->sens, &sepol_user->exp_dfltlevel);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_userrange_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_userrange *cil_userrange = node->data;
+	struct cil_levelrange *cil_levelrange = cil_userrange->range;
+	user_datum_t *sepol_user = NULL;
+
+	key = cil_userrange->user_str;
+	sepol_user = hashtab_search(pdb->p_users.table, key);
+	if (sepol_user == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = __cil_levelrange_to_mls_range(pdb, cil_levelrange, &sepol_user->exp_range);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
