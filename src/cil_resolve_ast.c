@@ -1509,7 +1509,7 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current, struct 
 		case CIL_AST_STR: {
 			rc = cil_resolve_name(db, current, (char*)cat_item->data, CIL_SYM_CATS, call, &cat_node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve category name: %s\n", (char*)current->data);
+				printf("Failed to resolve category name: %s\n", (char*)cat_item->data);
 				goto exit;
 			}
 			res_cat_item->flavor = cat_node->flavor;
