@@ -1638,7 +1638,6 @@ int __cil_catrange_expand_to_bitmap(policydb_t *pdb, struct cil_cat *start, stru
 	char *key = NULL;
 	cat_datum_t *sepol_start = NULL;
 	cat_datum_t *sepol_end = NULL;
-	ebitmap_node_t *cnode = NULL;
 
 	key = start->datum.name;
 	sepol_start = hashtab_search(pdb->p_cats.table, key);
@@ -1654,8 +1653,7 @@ int __cil_catrange_expand_to_bitmap(policydb_t *pdb, struct cil_cat *start, stru
 	}
 	evalue = sepol_end->s.value - 1;
 
-	cnode = bitmap->node;
-	for (bit = svalue; bit < evalue; bit = ebitmap_next(&cnode, bit)) {
+	for (bit = svalue; bit <= evalue; bit++) {
 		if (ebitmap_set_bit(bitmap, bit, 1)) {
 			goto exit;
 		}
