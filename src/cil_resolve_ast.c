@@ -1163,7 +1163,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_order_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	struct cil_args_verify_order *args;
 	struct cil_list *order = NULL;
@@ -1183,6 +1183,19 @@ int __cil_verify_order_node_helper(struct cil_tree_node *node, __attribute__((un
 	found = args->found;
 	empty = args->empty;
 	flavor = args->flavor;
+
+        if (node->flavor == CIL_OPTIONAL) {
+                struct cil_optional *opt = node->data;
+                if (opt->datum.state != CIL_STATE_ENABLED) {
+                        *finished = CIL_TREE_SKIP_HEAD;
+                        rc = SEPOL_OK;
+                        goto exit;
+                }
+        } else if (node->flavor == CIL_MACRO) {
+                *finished = CIL_TREE_SKIP_HEAD;
+                rc = SEPOL_OK;
+                goto exit;
+        }
 
 	if (node->flavor == *flavor) {
 		if (*empty) {
