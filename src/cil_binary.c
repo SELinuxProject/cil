@@ -1922,9 +1922,11 @@ int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	sepol_context = &new_sepol_sidcon->context[0];
 
-	rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	if (cil_context != NULL) {
+		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	return SEPOL_OK;
