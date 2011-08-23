@@ -2199,9 +2199,9 @@ int cil_genfscon_to_policydb(policydb_t *pdb, struct cil_sort *genfscons)
 			memset(sepol_genfs, 0, sizeof(genfs_t));
 
 			pdb->genfs = sepol_genfs;
-			sepol_genfs->fstype = cil_strdup(cil_genfscon->type_str);
+			sepol_genfs->fstype = cil_strdup(cil_genfscon->fs_str);
 			sepol_genfs->head = sepol_genfscon;
-		} else if (strcmp(pdb->genfs->fstype, cil_genfscon->type_str)) {
+		} else if (strcmp(pdb->genfs->fstype, cil_genfscon->fs_str)) {
 			genfs_t *new_sepol_genfs = NULL;
 			new_sepol_genfs = cil_malloc(sizeof(*new_sepol_genfs));
 			memset(new_sepol_genfs, 0, sizeof(genfs_t));
@@ -2210,7 +2210,7 @@ int cil_genfscon_to_policydb(policydb_t *pdb, struct cil_sort *genfscons)
 			sepol_genfs = new_sepol_genfs;
 			pdb->genfs = sepol_genfs;
 
-			sepol_genfs->fstype = cil_strdup(cil_genfscon->type_str);
+			sepol_genfs->fstype = cil_strdup(cil_genfscon->fs_str);
 			sepol_genfs->head = sepol_genfscon;
 		} else {
 			sepol_genfscon->next = sepol_genfs->head;
@@ -2218,35 +2218,6 @@ int cil_genfscon_to_policydb(policydb_t *pdb, struct cil_sort *genfscons)
 		}
 
 		sepol_genfscon->u.name = cil_strdup(cil_genfscon->path_str);
-
-		switch(cil_genfscon->type_str[0]) {
-		case 'b':
-			sepol_genfscon->v.sclass = SECCLASS_BLK_FILE;
-			break;
-		case 'c':
-			sepol_genfscon->v.sclass = SECCLASS_CHR_FILE;
-			break;
-		case 'd':
-                        sepol_genfscon->v.sclass = SECCLASS_DIR;
-			break;
-		case 'p':
-			sepol_genfscon->v.sclass = SECCLASS_FIFO_FILE;
-			break;
-		case 'l':
-			sepol_genfscon->v.sclass = SECCLASS_LNK_FILE;
-			break;
-		case 's':
-			sepol_genfscon->v.sclass = SECCLASS_SOCK_FILE;
-			break;
-		case '-':
-			sepol_genfscon->v.sclass = SECCLASS_FILE;
-			break;
-		default:
-			/* should not get here */
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-
 		sepol_context = &sepol_genfscon->context[0];
 
 		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);

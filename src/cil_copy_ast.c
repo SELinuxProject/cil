@@ -1263,7 +1263,7 @@ int cil_copy_genfscon(struct cil_genfscon *orig, struct cil_genfscon **copy)
 
 	cil_genfscon_init(&new);
 
-	new->type_str = cil_strdup(orig->type_str);
+	new->fs_str = cil_strdup(orig->fs_str);
 	new->path_str = cil_strdup(orig->path_str);
 	new->context_str = cil_strdup(orig->context_str);
 

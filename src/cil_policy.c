@@ -134,7 +134,7 @@ int cil_genfscon_to_policy(FILE **file_arr, struct cil_sort *sort)
 
 	for (i=0; i<sort->count; i++) {
 		struct cil_genfscon *genfscon = (struct cil_genfscon*)sort->array[i];
-		fprintf(file_arr[NETIFCONS], "genfscon %s ", genfscon->type_str);
+		fprintf(file_arr[NETIFCONS], "genfscon %s ", genfscon->fs_str);
 		fprintf(file_arr[NETIFCONS], "%s ", genfscon->path_str);
 		cil_context_to_policy(file_arr, NETIFCONS, genfscon->context);
 		fprintf(file_arr[NETIFCONS], ";\n");

@@ -1175,7 +1175,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_GENFSCON: {
 				struct cil_genfscon *genfscon = node->data;
 				printf("GENFSCON:");
-				printf(" %s %s", genfscon->type_str, genfscon->path_str);
+				printf(" %s %s", genfscon->fs_str, genfscon->path_str);
 
 				if (genfscon->context != NULL) {
 					cil_tree_print_context(genfscon->context);

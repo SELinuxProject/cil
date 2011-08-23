@@ -4102,7 +4102,7 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	cil_genfscon_init(&genfscon);
 
-	genfscon->type_str = cil_strdup(parse_current->next->data);
+	genfscon->fs_str = cil_strdup(parse_current->next->data);
 	genfscon->path_str = cil_strdup(parse_current->next->next->data);
 
 	if (parse_current->next->next->next->cl_head == NULL ) {
@@ -4135,8 +4135,8 @@ void cil_destroy_genfscon(struct cil_genfscon *genfscon)
 		return;
 	}
 
-	if (genfscon->type_str != NULL) {
-		free(genfscon->type_str);
+	if (genfscon->fs_str != NULL) {
+		free(genfscon->fs_str);
 	}
 
 	if (genfscon->path_str != NULL) {

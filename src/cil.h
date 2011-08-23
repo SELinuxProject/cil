@@ -657,7 +657,7 @@ struct cil_ipaddr {
 };
 
 struct cil_genfscon {
-	char *type_str;
+	char *fs_str;
 	char *path_str;
 	char *context_str;
 	struct cil_context *context;

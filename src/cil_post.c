@@ -185,7 +185,7 @@ int cil_post_genfscon_compare(const void *a, const void *b)
 	struct cil_genfscon *agenfscon = *(struct cil_genfscon**)a;
 	struct cil_genfscon *bgenfscon = *(struct cil_genfscon**)b;
 
-	rc = strcmp(agenfscon->type_str, bgenfscon->type_str);
+	rc = strcmp(agenfscon->fs_str, bgenfscon->fs_str);
 	if (rc == 0) {
 		rc = strcmp(agenfscon->path_str, bgenfscon->path_str);
 	}

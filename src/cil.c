@@ -947,7 +947,8 @@ void cil_genfscon_init(struct cil_genfscon **genfscon)
 {
 	*genfscon = cil_malloc(sizeof(**genfscon));
 
-	(*genfscon)->type_str = NULL;
+	(*genfscon)->fs_str = NULL;
+	(*genfscon)->path_str = NULL;
 	(*genfscon)->context_str = NULL;
 	(*genfscon)->context = NULL;
 }
