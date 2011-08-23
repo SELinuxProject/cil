@@ -1220,6 +1220,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	}
 
 	while (curr_expr != NULL) {
+		char *key = NULL;
 		struct cil_conditional *cil_cond = curr_expr->data;
 		cond_bool_datum_t *sepol_bool = NULL;
 		cond_expr = cil_malloc(sizeof(*cond_expr));
@@ -1229,7 +1230,8 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		switch (flavor) {
 		case CIL_BOOL:
 			cond_expr->expr_type = COND_BOOL;
-			sepol_bool = hashtab_search(pdb->p_bools.table, cil_cond->str);
+			key = ((struct cil_symtab_datum *)cil_cond->data)->name;
+			sepol_bool = hashtab_search(pdb->p_bools.table, key);
 			if (sepol_bool == NULL) {
 				rc = SEPOL_ERR;
 				goto exit;
@@ -1266,14 +1268,18 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		curr_expr = curr_expr->next;
 	}
 
-	rc = __cil_cond_to_policydb(pdb, cil_boolif->condtrue, cond_node);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	if (cil_boolif->condtrue != NULL) {
+		rc = __cil_cond_to_policydb(pdb, cil_boolif->condtrue, cond_node);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
-	rc = __cil_cond_to_policydb(pdb, cil_boolif->condfalse, cond_node);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	if (cil_boolif->condfalse != NULL) {
+		rc = __cil_cond_to_policydb(pdb, cil_boolif->condfalse, cond_node);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	if (pdb->cond_list == NULL) {
