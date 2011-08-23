@@ -810,6 +810,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 	case CIL_TYPEBOUNDS: {
 		struct cil_typebounds *typebnds = (struct cil_typebounds*)current->data;
 		fprintf(file_arr[ALLOWS], "typebounds %s %s;\n", typebnds->type_str, typebnds->bounds_str);
+		break;
 	}
 	case CIL_TYPEPERMISSIVE: {
 		struct cil_typepermissive *typeperm = (struct cil_typepermissive*)current->data;

@@ -741,6 +741,7 @@ void cil_typepermissive_init(struct cil_typepermissive **typeperm)
 	*typeperm = cil_malloc(sizeof(**typeperm));
 
 	(*typeperm)->type_str = NULL;
+	(*typeperm)->type = NULL;
 }
 
 void cil_filetransition_init(struct cil_filetransition **filetrans)
