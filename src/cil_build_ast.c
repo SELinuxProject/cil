@@ -2096,7 +2096,7 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 		cil_list_item_init(&stack_item);
 		cil_conditional_init(&cond);
 		cond->str = cil_strdup(current->data);
-		cond->flavor = CIL_BOOL;
+		cond->flavor = flavor;
 		stack_item->data = cond;
 		stack_item->flavor = CIL_COND;
 		new_stack->head = stack_item;
