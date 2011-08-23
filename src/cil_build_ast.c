@@ -1406,6 +1406,10 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 		cil_list_destroy(&rule->perms_list, 0);
 	}
 
+	if (rule->permset_str != NULL) {
+		free(rule->permset_str);
+	}
+
 	free(rule);
 }
 
@@ -2685,6 +2689,8 @@ void cil_destroy_filetransition(struct cil_filetransition *filetrans)
 	if (filetrans->path_str != NULL) {
 		free(filetrans->path_str);
 	}
+
+	free(filetrans);
 }
 
 int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -2752,15 +2758,20 @@ void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans)
 	if (rangetrans->src_str != NULL) {
 		free(rangetrans->src_str);
 	}
+
 	if (rangetrans->exec_str != NULL) {
 		free(rangetrans->exec_str);
 	}
+
 	if (rangetrans->obj_str != NULL) {
 		free(rangetrans->obj_str);
 	}
+
 	if (rangetrans->range_str != NULL) {
 		free(rangetrans->range_str);
 	}
+
+	free(rangetrans);
 }
 
 int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -3758,6 +3769,8 @@ void cil_destroy_context(struct cil_context *context)
 	} else if (context->range != NULL) {
 		cil_destroy_levelrange(context->range);
 	}
+
+	free(context);
 }
 
 int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
