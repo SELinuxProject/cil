@@ -144,16 +144,19 @@ exit:
 int cil_classcommon_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
-	struct cil_classcommon *cil_classcom = node->data;
+	char *key = NULL;
+	struct cil_class *cil_class = node->data;
 	class_datum_t *sepol_class;
 	common_datum_t *sepol_common;
 
-	sepol_class = hashtab_search(pdb->p_classes.table, cil_classcom->class_str);
+	key = cil_class->datum.name;
+	sepol_class = hashtab_search(pdb->p_classes.table, key);
 	if (sepol_class == NULL) {
 		goto exit;
 	}
 
-	sepol_common = hashtab_search(pdb->p_commons.table, cil_classcom->common_str);
+	key = cil_class->common->datum.name;
+	sepol_common = hashtab_search(pdb->p_commons.table, key);
 	if (sepol_common == NULL) {
 		goto exit;
 	}
@@ -263,16 +266,19 @@ exit:
 int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
-	struct cil_rolebounds *cil_rolebnds = node->data;
+	char *key = NULL;
+	struct cil_role *cil_role = node->data;
 	role_datum_t *sepol_role;
 	role_datum_t *sepol_rolebnds;
 
-	sepol_role = hashtab_search(pdb->p_roles.table, cil_rolebnds->role_str);
+	key = cil_role->datum.name;
+	sepol_role = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_role == NULL) {
 		goto exit;
 	}
 
-	sepol_rolebnds = hashtab_search(pdb->p_roles.table, cil_rolebnds->bounds_str);
+	key = cil_role->bounds->datum.name;
+	sepol_rolebnds = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_rolebnds == NULL) {
 		goto exit;
 	}
@@ -708,14 +714,14 @@ int cil_catalias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	cat_datum_t *sepol_alias = cil_malloc(sizeof(*sepol_cat));
 	cat_datum_init(sepol_alias);
 
-	key = cil_alias->cat_str;
+	key = cil_alias->cat->datum.name;
 	sepol_cat = hashtab_search(pdb->p_cats.table, key);
 	if (sepol_cat == NULL) {
 		goto exit;
 	}
 
 	key = cil_strdup(cil_alias->datum.name);
-	rc = symtab_insert(pdb, SYM_CATS, key, sepol_alias, SCOPE_DECL, 0, &sepol_cat->s.value);
+	rc = symtab_insert(pdb, SYM_CATS, key, sepol_alias, SCOPE_DECL, 0, NULL);
 	if (rc != SEPOL_OK) {
 		free(key);
 		goto exit;
@@ -1775,15 +1781,16 @@ exit:
 	return rc;
 }
 
-int cil_userlevel_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+int cil_userlevel_userrange_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_userlevel *cil_userlevel = node->data;
-	struct cil_level *cil_level = cil_userlevel->level;
+	struct cil_user *cil_user = node->data;
+	struct cil_level *cil_level = cil_user->dftlevel;
+	struct cil_levelrange *cil_levelrange = cil_user->range;
 	user_datum_t *sepol_user = NULL;
 
-	key = cil_userlevel->user_str;
+	key = cil_user->datum.name;
 	sepol_user = hashtab_search(pdb->p_users.table, key);
 	if (sepol_user == NULL) {
 		rc = SEPOL_ERR;
@@ -1792,27 +1799,6 @@ int cil_userlevel_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 	rc = __cil_mls_level_build(pdb, cil_level->sens, &sepol_user->exp_dfltlevel);
 	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int cil_userrange_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
-{
-	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_userrange *cil_userrange = node->data;
-	struct cil_levelrange *cil_levelrange = cil_userrange->range;
-	user_datum_t *sepol_user = NULL;
-
-	key = cil_userrange->user_str;
-	sepol_user = hashtab_search(pdb->p_users.table, key);
-	if (sepol_user == NULL) {
-		rc = SEPOL_ERR;
 		goto exit;
 	}
 
@@ -2431,7 +2417,7 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_TYPEATTRIBUTE:
 			rc = cil_typeattribute_to_bitmap(pdb, node);
 			break;
-		case CIL_CLASSCOMMON:
+		case CIL_CLASS:
 			rc = cil_classcommon_to_policydb(pdb, node);
 			break;
 		case CIL_ROLETYPE:
@@ -2440,17 +2426,14 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_ROLEDOMINANCE:
 			rc = cil_roledominance_to_policydb(pdb, node);
 			break;
-		case CIL_ROLEBOUNDS:
+		case CIL_ROLE:
 			rc = cil_rolebounds_to_policydb(pdb, node);
+			break;
+		case CIL_USER:
+			rc = cil_userlevel_userrange_to_policydb(pdb, node);
 			break;
 		case CIL_USERROLE:
 			rc = cil_userrole_to_policydb(pdb, node);
-			break;
-		case CIL_USERLEVEL:
-			rc = cil_userlevel_to_policydb(pdb, node);
-			break;
-		case CIL_USERRANGE:
-			rc = cil_userrange_to_policydb(pdb, node);
 			break;
 		case CIL_TYPE_RULE:
 			rc = cil_type_rule_to_policydb(pdb, node);
