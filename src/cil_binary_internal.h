@@ -56,10 +56,12 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
- * Insert cil classcommon structure into sepol policydb.
+ * Insert cil class common structure into sepol policydb.
+ * Each cil_class has a common property which, if defined, contains the
+ * common associated with that class.
  *
  * @param[in] pdb The policy database to insert the classcommon into.
- * @param[in] node The tree node that contains the cil_classcommon.
+ * @param[in] node The tree node that contains the cil_class.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
@@ -96,10 +98,12 @@ int cil_roletype_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 int cil_roledominance_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
- * Insert cil rolebounds structure into sepol policydb.
+ * Insert cil role bounds structure into sepol policydb.
+ * Each cil_role contains a bounds property which, if defined, contains
+ * the role bounds associated with that role.
  *
  * @param[in] pdb The policy database to insert the rolebounds into.
- * @param[in] node The tree node that contains the cil_rolebounds.
+ * @param[in] node The tree node that contains the cil_role.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
