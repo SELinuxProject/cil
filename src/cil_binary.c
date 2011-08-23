@@ -1378,7 +1378,7 @@ int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	}
 	sepol_filetrans->otype = sepol_dest->s.value;
 
-	sepol_filetrans->name = cil_filetrans->path_str;
+	sepol_filetrans->name = cil_strdup(cil_filetrans->path_str);
 
 	if (pdb->filename_trans == NULL) {
 		pdb->filename_trans = sepol_filetrans;
