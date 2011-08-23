@@ -149,19 +149,20 @@ int cil_classcommon_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	class_datum_t *sepol_class;
 	common_datum_t *sepol_common;
 
-	key = cil_class->datum.name;
-	sepol_class = hashtab_search(pdb->p_classes.table, key);
-	if (sepol_class == NULL) {
-		goto exit;
-	}
+	if (cil_class->common != NULL) {
+		key = cil_class->datum.name;
+		sepol_class = hashtab_search(pdb->p_classes.table, key);
+		if (sepol_class == NULL) {
+			goto exit;
+		}
 
-	key = cil_class->common->datum.name;
-	sepol_common = hashtab_search(pdb->p_commons.table, key);
-	if (sepol_common == NULL) {
-		goto exit;
+		key = cil_class->common->datum.name;
+		sepol_common = hashtab_search(pdb->p_commons.table, key);
+		if (sepol_common == NULL) {
+			goto exit;
+		}
+		sepol_class->comdatum = sepol_common;
 	}
-
-	sepol_class->comdatum = sepol_common;
 
 	return SEPOL_OK;
 
@@ -271,18 +272,20 @@ int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	role_datum_t *sepol_role;
 	role_datum_t *sepol_rolebnds;
 
-	key = cil_role->datum.name;
-	sepol_role = hashtab_search(pdb->p_roles.table, key);
-	if (sepol_role == NULL) {
-		goto exit;
-	}
+	if (cil_role->bounds != NULL) {
+		key = cil_role->datum.name;
+		sepol_role = hashtab_search(pdb->p_roles.table, key);
+		if (sepol_role == NULL) {
+			goto exit;
+		}
 
-	key = cil_role->bounds->datum.name;
-	sepol_rolebnds = hashtab_search(pdb->p_roles.table, key);
-	if (sepol_rolebnds == NULL) {
-		goto exit;
+		key = cil_role->bounds->datum.name;
+		sepol_rolebnds = hashtab_search(pdb->p_roles.table, key);
+		if (sepol_rolebnds == NULL) {
+			goto exit;
+		}
+		sepol_role->bounds = sepol_rolebnds->s.value;
 	}
-	sepol_role->bounds = sepol_rolebnds->s.value;
 
         return SEPOL_OK;
 
