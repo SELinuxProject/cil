@@ -777,6 +777,48 @@ exit:
 	return rc;
 }
 
+int cil_sensalias_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_sensalias *cil_alias = node->data;
+	mls_level_t *mls_level = NULL;
+	level_datum_t *sepol_level = NULL;
+	level_datum_t *sepol_alias = cil_malloc(sizeof(*sepol_alias));
+	level_datum_init(sepol_alias);
+
+	key = ((struct cil_symtab_datum *)cil_alias->sens)->name;
+	sepol_level = hashtab_search(pdb->p_levels.table, key);
+	if (sepol_level == NULL) {
+		goto exit;
+	}
+
+	key = cil_strdup(cil_alias->datum.name);
+	rc = symtab_insert(pdb, SYM_LEVELS, key, sepol_alias, SCOPE_DECL, 0, NULL);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	mls_level = cil_malloc(sizeof(*mls_level));
+	mls_level_init(mls_level);
+
+	rc = mls_level_cpy(mls_level, sepol_level->level);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	sepol_alias->level = mls_level;
+	sepol_alias->defined = 1;
+	sepol_alias->isalias = 1;
+
+	return SEPOL_OK;
+
+exit:
+	level_datum_destroy(sepol_alias);
+	free(sepol_level);
+	free(key);
+	return rc;
+}
+
 int __cil_insert_type_rule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t res, avtab_t *avtab, avtab_ptr_t *avtab_ptr)
 {
 	int rc = SEPOL_ERR;
@@ -2416,6 +2458,9 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_TYPEATTRIBUTE:
 			rc = cil_typeattribute_to_bitmap(pdb, node);
+			break;
+		case CIL_SENSALIAS:
+			rc = cil_sensalias_to_policydb(pdb, node);
 			break;
 		case CIL_CLASS:
 			rc = cil_classcommon_to_policydb(pdb, node);
