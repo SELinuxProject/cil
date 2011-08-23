@@ -583,7 +583,9 @@ void cil_levelrange_init(struct cil_levelrange **range)
 	*range = cil_malloc(sizeof(**range));
 
 	cil_symtab_datum_init(&(*range)->datum);
+	(*range)->low_str = NULL;
 	(*range)->low = NULL;
+	(*range)->high_str = NULL;
 	(*range)->high = NULL;
 }
 
