@@ -993,7 +993,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 						printf(" )");
 						cat = parent;
 					} else {
-						printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+						if (cat->flavor == CIL_CAT) {
+							printf(" %s", ((struct cil_cat*)cat->data)->datum.name);
+						} else {
+							printf(" %s", (char*)cat->data);
+						}
 					}
 					cat = cat->next;
 				}
