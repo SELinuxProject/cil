@@ -1210,7 +1210,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	struct cil_list *expr_stack = cil_boolif->expr_stack;
 	struct cil_list_item *curr_expr = expr_stack->head;
 	cond_expr_t *cond_expr = NULL;
-	cond_expr_t *cond_expr_tmp = NULL;
+	cond_expr_t *cond_expr_tail = NULL;
 	cond_node_t *cond_node = NULL;
 
 	cond_node = cond_node_create(pdb, NULL);
@@ -1261,13 +1261,15 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 			goto exit;
 		}
 
-		if (cond_expr_tmp != NULL) {
-			cond_expr_tmp->next = cond_expr;
+		if (cond_expr_tail == NULL) {
+			cond_node->expr = cond_expr;
+		} else {
+			cond_expr_tail->next = cond_expr;
 		}
-		cond_expr_tmp = cond_expr;
+		cond_expr_tail = cond_expr;
+
 		curr_expr = curr_expr->next;
 	}
-	cond_node->expr = cond_expr;
 
 	if (cil_boolif->condtrue != NULL) {
 		rc = __cil_cond_to_policydb(pdb, cil_boolif->condtrue, cond_node);
@@ -1521,97 +1523,103 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				break;
 			}
 
-			switch (lnode->flavor) {
-			case CIL_CONS_U1:
-				curr_expr->attr = CEXPR_USER;
-				break;
-			case CIL_CONS_U2:
-				curr_expr->attr = CEXPR_USER | CEXPR_TARGET;
-				break;
-			case CIL_CONS_R1:
-				curr_expr->attr = CEXPR_ROLE;
-				break;
-			case CIL_CONS_R2:
-				curr_expr->attr = CEXPR_ROLE | CEXPR_TARGET;
-				break;
-			case CIL_CONS_T1:
-				curr_expr->attr = CEXPR_TYPE;
-				break;
-			case CIL_CONS_T2:
-				curr_expr->attr = CEXPR_TYPE | CEXPR_TARGET;
-				break;
-			case CIL_CONS_L1:
-				if (rnode->flavor == CIL_CONS_L2) {
-					curr_expr->attr = CEXPR_L1L2;
-				} else if (rnode->flavor == CIL_CONS_H1) {
-					curr_expr->attr = CEXPR_L1H1;
-				} else if (rnode->flavor == CIL_CONS_H2) {
-					curr_expr->attr = CEXPR_L1H2;
+			if ( cond->flavor != CIL_NOT && cond->flavor != CIL_AND && cond->flavor != CIL_OR) {
+				switch (lnode->flavor) {
+				case CIL_CONS_U1:
+					curr_expr->attr = CEXPR_USER;
+					break;
+				case CIL_CONS_U2:
+					curr_expr->attr = CEXPR_USER | CEXPR_TARGET;
+					break;
+				case CIL_CONS_R1:
+					curr_expr->attr = CEXPR_ROLE;
+					break;
+				case CIL_CONS_R2:
+					curr_expr->attr = CEXPR_ROLE | CEXPR_TARGET;
+					break;
+				case CIL_CONS_T1:
+					curr_expr->attr = CEXPR_TYPE;
+					break;
+				case CIL_CONS_T2:
+					curr_expr->attr = CEXPR_TYPE | CEXPR_TARGET;
+					break;
+				case CIL_CONS_L1:
+					if (rnode->flavor == CIL_CONS_L2) {
+						curr_expr->attr = CEXPR_L1L2;
+					} else if (rnode->flavor == CIL_CONS_H1) {
+						curr_expr->attr = CEXPR_L1H1;
+					} else if (rnode->flavor == CIL_CONS_H2) {
+						curr_expr->attr = CEXPR_L1H2;
+					}
+					break;
+				case CIL_CONS_L2:
+					if (rnode->flavor == CIL_CONS_H2) {
+						curr_expr->attr = CEXPR_L2H2;
+					}
+					break;
+				case CIL_CONS_H1:
+					if (rnode->flavor == CIL_CONS_L2) {
+						curr_expr->attr = CEXPR_H1L2;
+					} else if (rnode->flavor == CIL_CONS_H2) {
+						curr_expr->attr = CEXPR_H1H2;
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			case CIL_CONS_L2:
-				if (rnode->flavor == CIL_CONS_H2) {
-					curr_expr->attr = CEXPR_L2H2;
-				}
-				break;
-			case CIL_CONS_H1:
-				if (rnode->flavor == CIL_CONS_L2) {
-					curr_expr->attr = CEXPR_H1L2;
-				} else if (rnode->flavor == CIL_CONS_H2) {
-					curr_expr->attr = CEXPR_H1H2;
-				}
-				break;
-			default:
-				break;
-			}
 
-			switch (rnode->flavor) {
-			case CIL_USER:
-				key = ((struct cil_symtab_datum *)rnode->data)->name;
-				sepol_user = hashtab_search(pdb->p_users.table, key);
-				if (sepol_user == NULL) {
-					rc = SEPOL_ERR;
-					goto exit;
+				switch (rnode->flavor) {
+				case CIL_USER:
+					curr_expr->expr_type = CEXPR_NAMES;
+					key = ((struct cil_symtab_datum *)rnode->data)->name;
+					sepol_user = hashtab_search(pdb->p_users.table, key);
+					if (sepol_user == NULL) {
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+					value = sepol_user->s.value;
+					if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+					break;
+				case CIL_ROLE:
+					curr_expr->expr_type = CEXPR_NAMES;
+					key = ((struct cil_symtab_datum *)rnode->data)->name;
+					sepol_role = hashtab_search(pdb->p_roles.table, key);
+					if (sepol_role == NULL) {
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+					value = sepol_role->s.value;
+					if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+					break;
+				case CIL_TYPE:
+					curr_expr->expr_type = CEXPR_NAMES;
+					key = ((struct cil_symtab_datum *)rnode->data)->name;
+					sepol_type = hashtab_search(pdb->p_types.table, key);
+					if (sepol_type == NULL) {
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+					value = sepol_type->s.value;
+					type_set_t *type_set = curr_expr->type_names;
+					if (ebitmap_set_bit(&type_set->negset, value - 1, 1)) {
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+					if (ebitmap_set_bit(&type_set->types, value - 1, 1)) {
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+					break;
+				default:
+					curr_expr->expr_type = CEXPR_ATTR;
+					break;
 				}
-				value = sepol_user->s.value;
-				if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-				break;
-			case CIL_ROLE:
-				key = ((struct cil_symtab_datum *)rnode->data)->name;
-				sepol_role = hashtab_search(pdb->p_roles.table, key);
-				if (sepol_role == NULL) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-				value = sepol_role->s.value;
-				if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-				break;
-			case CIL_TYPE:
-				key = ((struct cil_symtab_datum *)rnode->data)->name;
-				sepol_type = hashtab_search(pdb->p_types.table, key);
-				if (sepol_type == NULL) {
-				rc = SEPOL_ERR;
-					goto exit;
-				}
-				value = sepol_type->s.value;
-				type_set_t *type_set = curr_expr->type_names;
-				if (ebitmap_set_bit(&type_set->negset, value - 1, 1)) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-				if (ebitmap_set_bit(&type_set->types, value - 1, 1)) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-				break;
-			default:
-				break;
 			}
 		}
 
