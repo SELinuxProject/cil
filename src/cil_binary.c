@@ -1267,6 +1267,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		cond_expr_tmp = cond_expr;
 		curr_expr = curr_expr->next;
 	}
+	cond_node->expr = cond_expr;
 
 	if (cil_boolif->condtrue != NULL) {
 		rc = __cil_cond_to_policydb(pdb, cil_boolif->condtrue, cond_node);
