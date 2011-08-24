@@ -1251,7 +1251,7 @@ void test_cil_resolve_constrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1271,7 +1271,7 @@ void test_cil_resolve_constrain_class_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1292,7 +1292,7 @@ void test_cil_resolve_constrain_perm_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1311,7 +1311,7 @@ void test_cil_resolve_constrain_perm_resolve_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "foo", ")", "(", "==", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "foo", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5262,7 +5262,7 @@ void test_cil_resolve_expr_stack_bools(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")",
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5283,7 +5283,7 @@ void test_cil_resolve_expr_stack_tunables(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "tunableif", "(", "and", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5305,7 +5305,7 @@ void test_cil_resolve_expr_stack_type(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "type", "t1", ")",
 			"(", "type", "type_t", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "t1", "type_t", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5326,7 +5326,7 @@ void test_cil_resolve_expr_stack_role(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "role", "r1", ")",
 			"(", "role", "role_r", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "r1", "role_r", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "role_r", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5347,7 +5347,7 @@ void test_cil_resolve_expr_stack_user(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "user", "u1", ")",
 			"(", "user", "user_u", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "u1", "user_u", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "u1", "user_u", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5367,7 +5367,7 @@ void test_cil_resolve_expr_stack_neg(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")",
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "booleanif", "(", "&&", "beef", "baf", ")",
+			"(", "booleanif", "(", "and", "beef", "baf", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5388,7 +5388,7 @@ void test_cil_resolve_expr_stack_emptystr_neg(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")",
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5410,7 +5410,7 @@ void test_cil_resolve_boolif(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")",
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5429,7 +5429,7 @@ void test_cil_resolve_boolif_neg(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")",
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "booleanif", "(", "&&", "dne", "N/A", ")",
+			"(", "booleanif", "(", "and", "dne", "N/A", ")",
 			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5448,7 +5448,7 @@ void test_cil_evaluate_expr_stack_and(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "tunableif", "(", "and", "foo", "bar", ")",
 			"(", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5472,7 +5472,7 @@ void test_cil_evaluate_expr_stack_not(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "!", "bar", ")",
+			"(", "tunableif", "(", "not", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5496,7 +5496,7 @@ void test_cil_evaluate_expr_stack_or(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "||", "foo", "bar", ")",
+			"(", "tunableif", "(", "or", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5520,7 +5520,7 @@ void test_cil_evaluate_expr_stack_xor(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "^", "foo", "bar", ")",
+			"(", "tunableif", "(", "xor", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5544,7 +5544,7 @@ void test_cil_evaluate_expr_stack_eq(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "==", "foo", "bar", ")",
+			"(", "tunableif", "(", "eq", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5568,7 +5568,7 @@ void test_cil_evaluate_expr_stack_neq(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "!=", "foo", "bar", ")",
+			"(", "tunableif", "(", "neq", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5593,7 +5593,7 @@ void test_cil_evaluate_expr_stack_oper1(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "tunable", "baz", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "(", "||", "foo", "bar", ")", "baz", ")",
+			"(", "tunableif", "(", "and", "(", "or", "foo", "bar", ")", "baz", ")",
 			"(", "allow", "foo", "bar", "jaz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5618,7 +5618,7 @@ void test_cil_evaluate_expr_stack_oper2(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "tunable", "baz", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "baz", "(", "||", "foo", "bar", ")", ")",
+			"(", "tunableif", "(", "and", "baz", "(", "or", "foo", "bar", ")", ")",
 			"(", "allow", "foo", "bar", "jaz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5642,7 +5642,7 @@ void test_cil_evaluate_expr_stack_neg(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "!=", "foo", "bar", ")",
+			"(", "tunableif", "(", "neq", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5680,7 +5680,7 @@ void test_cil_resolve_tunif_false(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "tunableif", "(", "and", "foo", "bar", ")",
 			"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5699,7 +5699,7 @@ void test_cil_resolve_tunif_true(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "true", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "tunableif", "(", "and", "foo", "bar", ")",
 			"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5718,7 +5718,7 @@ void test_cil_resolve_tunif_resolveexpr_neg(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "dne", "N/A", ")",
+			"(", "tunableif", "(", "and", "dne", "N/A", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -5737,7 +5737,7 @@ void test_cil_resolve_tunif_evaluateexpr_neg(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "tunableif", "(", "and", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -6633,7 +6633,7 @@ void test_cil_disable_children_helper_tunable(CuTest *tc) {
 }
 
 void test_cil_disable_children_helper_unknown(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6767,7 +6767,7 @@ void test_cil_resolve_ast_node_helper_boolif(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")",
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "booleanif", "(", "&&", "foo", "bar", ")",
+			"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -6793,7 +6793,7 @@ void test_cil_resolve_ast_node_helper_boolif_neg(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")",
 			"(", "boolean", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "booleanif", "(", "&&", "dne", "N/A", ")",
+			"(", "booleanif", "(", "and", "dne", "N/A", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -6819,7 +6819,7 @@ void test_cil_resolve_ast_node_helper_tunif(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "foo", "bar", ")",
+			"(", "tunableif", "(", "and", "foo", "bar", ")",
 			"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -6845,7 +6845,7 @@ void test_cil_resolve_ast_node_helper_tunif_neg(CuTest *tc) {
 	char *line[] = {"(", "tunable", "foo", "true", ")",
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
-			"(", "tunableif", "(", "&&", "dne", "N/A", ")",
+			"(", "tunableif", "(", "and", "dne", "N/A", ")",
 			"(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -7408,7 +7408,7 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "role", "r1", ")",
 			"(", "role", "r2", ")",
-			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "r1", "r2", ")", ")", NULL};
+			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7436,7 +7436,7 @@ void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "role", "r1", ")",
 			"(", "role", "r2", ")",
-			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "r1", "r2", ")", ")", NULL};
+			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7464,7 +7464,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7492,7 +7492,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "==", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

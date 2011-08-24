@@ -1248,7 +1248,7 @@ void test_cil_copy_ipaddr(CuTest *tc) {
 }
 
 void test_cil_copy_conditional(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1278,7 +1278,7 @@ void test_cil_copy_conditional(CuTest *tc) {
 }
 
 void test_cil_copy_boolif(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -2479,7 +2479,7 @@ void test_cil_copy_node_helper_ipaddr_neg(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_boolif(CuTest *tc) {
-	char *line[] = {"(", "booleanif", "(", "&&", "foo", "bar", ")",
+	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;

@@ -931,7 +931,6 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain_expr_stack_eq2_t2type);
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain_expr_stack_eq2_t2t2_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain_expr_stack_eq2_r1role);
-	SUITE_ADD_TEST(suite, test_cil_gen_constrain_expr_stack_eq_constrain_r1_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain_expr_stack_eq2_r1r1_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain_expr_stack_eq2_r2role);
 	SUITE_ADD_TEST(suite, test_cil_gen_constrain_expr_stack_eq2_r2r2_neg);
