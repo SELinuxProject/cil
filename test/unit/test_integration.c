@@ -51,7 +51,7 @@ void test_min_policy(CuTest *tc) {
 		dup2(fd, STDOUT_FILENO);
 		dup2(fd, STDERR_FILENO);
 
-		ex = execl("./secilc", "./secilc", "testing/integration_testing/small.cil", (char*)NULL);
+		ex = execl("./secilc", "./secilc", "test/policy.cil", (char*)NULL);
 		if (ex == -1) {
 			printf("Execl error\n");
 			exit(EXIT_FAILURE);	

@@ -1,0 +1,162 @@
+(type bin_t)
+(policycap open_perms)
+
+(block policy
+	(permissionset file_perms (execute_no_trans entrypoint execmod open
+					audit_access))
+	(class file (execute_no_trans entrypoint execmod open audit_access))
+	(common file (ioctl read write create getattr setattr lock relabelfrom
+			relabelto append unlink link rename execute swapon
+			quotaon mounton))
+	(classcommon file file)
+
+	(type auditadm_t)
+	(type console_t)
+	(type console_device_t)
+	(type user_tty_device_t)		
+	(type device_t)
+	(type getty_t)
+	(type exec_t)
+
+	(boolean secure_mode false)
+	(boolean console_login true)
+	
+	(sensitivity s0)
+	(sensitivity s1)
+	(sensitivityalias s0 sens0)
+	(dominance (s0 s1))
+
+	(category c0)
+	(category c1)
+	(category c2)
+	(categoryalias c0 cat0)
+	(categoryset cats01 (c0 c1))
+	(categoryorder (c0 c1 c2))
+	(categoryrange catrng02 (c0 c2))
+
+	(sensitivitycategory s0 (catrng02))
+	(sensitivitycategory s1 cats01)
+	(sensitivitycategory s1 (c2))
+
+	(context system_u_bin_t_l2h (system_u system_r bin_t (low high)))
+
+	(level low (s0 (c0)))
+	(level high (s1 (c0 c1)))
+	(levelrange low_high (low high))
+
+	(sid kernel)
+		
+	(typeattribute exec_type)
+	(typeattributetypes exec_type (bin_t))
+	(typealias bin_t sbin_t)
+	(typepermissive device_t) 
+	(typebounds device_t bin_t)
+	(typemember device_t bin_t file exec_t)
+	(typetransition device_t console_t file console_device_t)
+
+	(rangetransition device_t console_t file low_high)
+
+	(filetransition device_t console_t file getty_t some_file)  
+	
+	(allow bin_t device_t file (execute))
+			
+	(booleanif secure_mode
+		(true
+			(auditallow device_t exec_t file (read write))
+		)
+	)
+
+	(booleanif console_login
+		(true
+			(typechange auditadm_t console_device_t file user_tty_device_t)
+			(allow getty_t console_device_t file (getattr open read write append))
+		)
+		(false
+			(dontaudit getty_t console_device_t file (getattr open read write append))
+		)
+	)
+
+	(booleanif (not (xor (eq secure_mode console_login) 
+				(and (or secure_mode console_login) 
+					(and secure_mode console_login) ) ) )
+		(true
+			(allow bin_t exec_t file (execute))
+		)
+	)
+
+	(tunable allow_execfile true)
+	(tunable allow_userexec false)
+
+	(tunableif (not (xor (eq allow_execfile allow_userexec)
+				(and (or allow_execfile allow_userexec)
+					(and allow_execfile allow_userexec) ) ) )
+		(true
+			(allow bin_t exec_t file (execute))
+		)
+	)
+
+	(optional allow_rules 
+		(allow user_t exec_t bins (execute))
+	)
+
+	(dontaudit device_t auditadm_t file (read))
+	(auditallow device_t auditadm_t file (open))
+
+	(user system_u)
+	(user user_u)
+
+	(role system_r)
+	(role user_r)
+
+	(roletype system_r bin_t)
+	(roleallow system_r user_r)
+	(rolebounds system_r user_r)
+	(roletransition system_r bin_t file user_r)
+
+	(userrole system_u system_r)
+	(userlevel system_u low)
+	(userrange system_u low_high)
+	(userbounds system_u user_u)
+	(userrole user_u user_r)
+	(userlevel user_u low)
+	(userrange user_u (low low))
+
+	(sidcontext kernel system_u_bin_t_l2h)
+
+	(ipaddr ip_v4 192.25.35.200)
+	(ipaddr netmask 192.168.1.1)
+	(ipaddr ip_v6 2001:0DB8:AC10:FE01::)
+	(ipaddr netmask_v6 2001:0DE0:DA88:2222::)
+
+	(filecon "/usr/bin/" "sh" file system_u_bin_t_l2h)
+	(nodecon ip_v4 netmask system_u_bin_t_l2h)
+	(nodecon ip_v6 netmask_v6 system_u_bin_t_l2h)
+	(portcon udp 25 system_u_bin_t_l2h)
+	(portcon tcp 22 system_u_bin_t_l2h)
+	(genfscon - "/usr/bin" system_u_bin_t_l2h)
+	(netifcon eth0 system_u_bin_t_l2h system_u_bin_t_l2h) ;different contexts?
+	(fsuse xattr ext3 system_u_bin_t_l2h)
+	
+	; XEN
+	;(pirqcon 256 system_u_bin_t_l2h)
+	;(iomemcon (0 255) system_u_bin_t_l2h)
+	;(ioportcon (22 22) system_u_bin_t_l2h)
+	;(pcidevicecon 345 system_u_bin_t_l2h)
+
+	(constrain (file) (read) (not (or (and (eq t1 exec_t) (eq t2 bin_t)) (eq r1 r2))))
+	(constrain (file) (read) (or (and (eq t1 exec_t) (neq t2 bin_t) ) (eq u1 u2) ) )
+	(constrain (file) (open) (dom r1 r2))
+	(constrain (file) (open) (domby r1 r2))
+	(constrain (file) (open) (incomp r1 r2))
+
+	(mlsconstrain (file) (open) (not (or (and (eq l1 l2) (eq u1 u2)) (eq r1 r2))))
+	(mlsconstrain (file) (open) (or (and (eq l1 l2) (eq u1 u2)) (neq r1 r2)))
+	(mlsconstrain (file) (open) (dom h1 l2))
+	(mlsconstrain (file) (open) (domby l1 h2))
+	(mlsconstrain (file) (open) (incomp l1 l2))
+)
+
+(macro all ((type x))
+	(allow x bin_t policy.file (execute))
+)
+(call all (bin_t))

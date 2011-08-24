@@ -59,12 +59,12 @@ void set_cil_file_data(struct cil_file_data **data) {
 	uint32_t file_size;
 	char *buffer;
 
-	file = fopen("testing/test.cil", "r");
+	file = fopen("test/policy.cil", "r");
 	if (!file) {
 	    fprintf(stderr, "Could not open file\n");
 	    exit(1);
 	}
-	if (stat("testing/test.cil", &filedata) == -1) {
+	if (stat("test/policy.cil", &filedata) == -1) {
 	    printf("Could not stat file\n");
 	    exit(1);
 	}

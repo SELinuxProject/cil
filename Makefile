@@ -3,7 +3,7 @@ LIBDIR ?= $(PREFIX)/lib
 SHLIBDIR ?= $(DESTDIR)/lib
 INCLUDEDIR ?= $(PREFIX)/include
 SRCDIR ?= ./src
-TESTDIR ?= ./testing
+TESTDIR ?= ./test
 UNITDIR ?= $(TESTDIR)/unit
 
 LEX = flex
@@ -69,11 +69,11 @@ coverage: clean unit
 	test -d cov || mkdir cov
 	export GCOV_PREFIX_STRIP=1
 	lcov --directory . --capture --output-file cov/app.info --ignore-errors source
-	lcov --remove cov/app.info 'testing/unit/*' --output-file cov/app.info
+	lcov --remove cov/app.info 'test/unit/*' --output-file cov/app.info
 	genhtml -o ./cov/html ./cov/app.info
 
 test: $(SECILC)
-	./$(SECILC) testing/test.cil
+	./$(SECILC) test/policy.cil
 
 install:
 
