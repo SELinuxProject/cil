@@ -4328,9 +4328,6 @@ void test_cil_gen_constrain_expr_stack_eq2_t1type(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4357,9 +4354,6 @@ void test_cil_gen_constrain_expr_stack_eq2_t1t1_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4388,9 +4382,6 @@ void test_cil_gen_constrain_expr_stack_eq2_t2type(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4417,9 +4408,6 @@ void test_cil_gen_constrain_expr_stack_eq2_t2t2_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4448,9 +4436,6 @@ void test_cil_gen_constrain_expr_stack_eq2_r1role(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4477,9 +4462,6 @@ void test_cil_gen_constrain_expr_stack_eq2_r1r1_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4508,9 +4490,6 @@ void test_cil_gen_constrain_expr_stack_eq2_r2role(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4537,9 +4516,6 @@ void test_cil_gen_constrain_expr_stack_eq2_r2r2_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4568,9 +4544,6 @@ void test_cil_gen_constrain_expr_stack_eq2_t1t2(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4597,9 +4570,6 @@ void test_cil_gen_constrain_expr_stack_eq_r1r2(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4628,9 +4598,6 @@ void test_cil_gen_constrain_expr_stack_eq2_r1r2(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4657,9 +4624,6 @@ void test_cil_gen_constrain_expr_stack_eq2_u1u2(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4688,9 +4652,6 @@ void test_cil_gen_constrain_expr_stack_eq2_u1user(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4717,9 +4678,6 @@ void test_cil_gen_constrain_expr_stack_eq2_u1u1_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4748,9 +4706,6 @@ void test_cil_gen_constrain_expr_stack_eq2_u2user(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4777,9 +4732,6 @@ void test_cil_gen_constrain_expr_stack_eq2_u2u2_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4808,9 +4760,6 @@ void test_cil_gen_constrain_expr_stack_eq_l2h2(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4837,9 +4786,6 @@ void test_cil_gen_constrain_expr_stack_eq_l2_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4868,9 +4814,6 @@ void test_cil_gen_constrain_expr_stack_eq_l1l2(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4897,9 +4840,6 @@ void test_cil_gen_constrain_expr_stack_eq_l1h1(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4928,9 +4868,6 @@ void test_cil_gen_constrain_expr_stack_eq_l1h2(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -4957,9 +4894,6 @@ void test_cil_gen_constrain_expr_stack_eq_h1l2(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -4988,9 +4922,6 @@ void test_cil_gen_constrain_expr_stack_eq_h1h2(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5017,9 +4948,6 @@ void test_cil_gen_constrain_expr_stack_eq_h1_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5048,9 +4976,6 @@ void test_cil_gen_constrain_expr_stack_eq_l1l1_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5077,9 +5002,6 @@ void test_cil_gen_constrain_expr_stack_eq2_l1l2_constrain_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5108,9 +5030,6 @@ void test_cil_gen_constrain_expr_stack_eq_l1l2_constrain_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5137,9 +5056,6 @@ void test_cil_gen_constrain_expr_stack_eq_leftkeyword_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5168,9 +5084,6 @@ void test_cil_gen_constrain_expr_stack_eq_noexpr1_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5197,9 +5110,6 @@ void test_cil_gen_constrain_expr_stack_eq_expr1inparens_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5228,9 +5138,6 @@ void test_cil_gen_constrain_expr_stack_eq_noexpr2_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5257,9 +5164,6 @@ void test_cil_gen_constrain_expr_stack_eq_expr2inparens_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5288,9 +5192,6 @@ void test_cil_gen_constrain_expr_stack_eq_extraexpr_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5317,9 +5218,6 @@ void test_cil_gen_constrain_expr_stack_eq2(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5348,9 +5246,6 @@ void test_cil_gen_constrain_expr_stack_eq2_noexpr1_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5377,9 +5272,6 @@ void test_cil_gen_constrain_expr_stack_eq2_expr1inparens_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5408,9 +5300,6 @@ void test_cil_gen_constrain_expr_stack_eq2_noexpr2_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5437,9 +5326,6 @@ void test_cil_gen_constrain_expr_stack_eq2_expr2inparens_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5468,9 +5354,6 @@ void test_cil_gen_constrain_expr_stack_eq2_extraexpr_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5497,9 +5380,6 @@ void test_cil_gen_constrain_expr_stack_noteq(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5528,9 +5408,6 @@ void test_cil_gen_constrain_expr_stack_noteq_noexpr1_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5557,9 +5434,6 @@ void test_cil_gen_constrain_expr_stack_noteq_expr1inparens_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5588,9 +5462,6 @@ void test_cil_gen_constrain_expr_stack_noteq_noexpr2_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5617,9 +5488,6 @@ void test_cil_gen_constrain_expr_stack_noteq_expr2inparens_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5648,9 +5516,6 @@ void test_cil_gen_constrain_expr_stack_noteq_extraexpr_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5677,9 +5542,6 @@ void test_cil_gen_constrain_expr_stack_not(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5708,9 +5570,6 @@ void test_cil_gen_constrain_expr_stack_not_noexpr_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5738,9 +5597,6 @@ void test_cil_gen_constrain_expr_stack_not_emptyparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5767,9 +5623,6 @@ void test_cil_gen_constrain_expr_stack_not_extraparens_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5799,9 +5652,6 @@ void test_cil_gen_constrain_expr_stack_or(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5830,9 +5680,6 @@ void test_cil_gen_constrain_expr_stack_or_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5859,9 +5706,6 @@ void test_cil_gen_constrain_expr_stack_or_noexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5890,9 +5734,6 @@ void test_cil_gen_constrain_expr_stack_or_emptyfirstparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5919,9 +5760,6 @@ void test_cil_gen_constrain_expr_stack_or_missingsecondexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -5950,9 +5788,6 @@ void test_cil_gen_constrain_expr_stack_or_emptysecondparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -5979,9 +5814,6 @@ void test_cil_gen_constrain_expr_stack_or_extraexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6011,9 +5843,6 @@ void test_cil_gen_constrain_expr_stack_and(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6042,9 +5871,6 @@ void test_cil_gen_constrain_expr_stack_and_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6071,9 +5897,6 @@ void test_cil_gen_constrain_expr_stack_and_noexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6102,9 +5925,6 @@ void test_cil_gen_constrain_expr_stack_and_emptyfirstparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6131,9 +5951,6 @@ void test_cil_gen_constrain_expr_stack_and_missingsecondexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6162,9 +5979,6 @@ void test_cil_gen_constrain_expr_stack_and_emptysecondparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6191,9 +6005,6 @@ void test_cil_gen_constrain_expr_stack_and_extraexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6222,9 +6033,6 @@ void test_cil_gen_constrain_expr_stack_dom(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6251,9 +6059,6 @@ void test_cil_gen_constrain_expr_stack_dom_noexpr1_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6282,9 +6087,6 @@ void test_cil_gen_constrain_expr_stack_dom_expr1inparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6311,9 +6113,6 @@ void test_cil_gen_constrain_expr_stack_dom_noexpr2_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6342,9 +6141,6 @@ void test_cil_gen_constrain_expr_stack_dom_expr2inparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6371,9 +6167,6 @@ void test_cil_gen_constrain_expr_stack_dom_extraexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6402,9 +6195,6 @@ void test_cil_gen_constrain_expr_stack_domby(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6431,9 +6221,6 @@ void test_cil_gen_constrain_expr_stack_domby_noexpr1_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6462,9 +6249,6 @@ void test_cil_gen_constrain_expr_stack_domby_expr1inparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6491,9 +6275,6 @@ void test_cil_gen_constrain_expr_stack_domby_noexpr2_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6522,9 +6303,6 @@ void test_cil_gen_constrain_expr_stack_domby_expr2inparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6551,9 +6329,6 @@ void test_cil_gen_constrain_expr_stack_domby_extraexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6582,9 +6357,6 @@ void test_cil_gen_constrain_expr_stack_incomp(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6611,9 +6383,6 @@ void test_cil_gen_constrain_expr_stack_incomp_noexpr1_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6642,9 +6411,6 @@ void test_cil_gen_constrain_expr_stack_incomp_expr1inparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6671,9 +6437,6 @@ void test_cil_gen_constrain_expr_stack_incomp_noexpr2_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6702,9 +6465,6 @@ void test_cil_gen_constrain_expr_stack_incomp_expr2inparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6731,9 +6491,6 @@ void test_cil_gen_constrain_expr_stack_incomp_extraexpr_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6762,9 +6519,6 @@ void test_cil_gen_constrain_expr_stack_currnull_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6791,9 +6545,6 @@ void test_cil_gen_constrain_expr_stack_stacknull_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -6822,9 +6573,6 @@ void test_cil_gen_constrain_expr_stack_operatorinparens_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
@@ -6851,9 +6599,6 @@ void test_cil_gen_constrain_expr_stack_incorrectcall_neg(CuTest *tc) {
 	
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
@@ -7005,9 +6750,6 @@ void test_cil_gen_roledominance(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
@@ -7026,9 +6768,6 @@ void test_cil_gen_roledominance_norole1_neg(CuTest *tc) {
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -7049,9 +6788,6 @@ void test_cil_gen_roledominance_role1inparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
@@ -7070,9 +6806,6 @@ void test_cil_gen_roledominance_norole2_neg(CuTest *tc) {
 
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -7093,9 +6826,6 @@ void test_cil_gen_roledominance_role2inparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
@@ -7115,9 +6845,6 @@ void test_cil_gen_roledominance_extra_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
@@ -7132,9 +6859,6 @@ void test_cil_gen_roledominance_dbnull_neg(CuTest *tc) {
 	cil_tree_node_init(&test_ast_node);
 
 	struct cil_db *test_db = NULL;
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -7155,9 +6879,6 @@ void test_cil_gen_roledominance_currnull_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
-
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
@@ -7172,9 +6893,6 @@ void test_cil_gen_roledominance_astnull_neg(CuTest *tc) {
 
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	int rc = cil_gen_roledominance(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);

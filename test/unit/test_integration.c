@@ -43,7 +43,6 @@ void test_min_policy(CuTest *tc) {
 	int fd;
 	
 	pid = fork();
-	int rc = 0;
 
 	if (pid == 0) {
 		fd = open("/dev/null", O_RDWR);
@@ -61,10 +60,8 @@ void test_min_policy(CuTest *tc) {
 
 		if (!WIFEXITED(status)) {
 			printf("Exec terminated abruptly.\n");
-			rc = -1;
 		} else if (WEXITSTATUS(status)) {
 			printf("Exec failed.\n");
-			rc = -1;
 		}
 	}
 	

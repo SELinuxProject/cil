@@ -79,13 +79,11 @@ void test_cil_copy_list_sublist(CuTest *tc) {
 
 	struct cil_tree *test_tree;
 	struct cil_list *cil_l;
-	struct cil_list *sub_list = NULL;
 
 	gen_test_tree(&test_tree, line);
 	cil_list_init(&cil_l);
 
 	cil_set_to_list(test_tree->root->cl_head, cil_l, 1);
-	sub_list = (struct cil_list *)cil_l->head->next->next->data;
 
 	struct cil_list *copy_list;
 	cil_list_init(&copy_list);
@@ -105,13 +103,11 @@ void test_cil_copy_list_sublist_extra(CuTest *tc) {
 
 	struct cil_tree *test_tree;
 	struct cil_list *cil_l;
-	struct cil_list *sub_list = NULL;
 
 	gen_test_tree(&test_tree, line);
 	cil_list_init(&cil_l);
 
 	cil_set_to_list(test_tree->root->cl_head, cil_l, 1);
-	sub_list = (struct cil_list *)cil_l->head->next->next->data;
 
 	struct cil_list *copy_list;
 	cil_list_init(&copy_list);
@@ -1318,9 +1314,6 @@ void test_cil_copy_constrain(CuTest *tc) {
         test_ast_node->line = 1;
 
         cil_gen_constrain(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_MLSCONSTRAIN);
-
-	struct cil_tree_node *test_current;
-	test_current = test_tree->root->cl_head->cl_head;
 
 	struct cil_constrain *test_copy;
 	cil_constrain_init(&test_copy);
