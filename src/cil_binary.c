@@ -1651,7 +1651,6 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	struct cil_list *perms = cil_constrain->perm_list;
 	struct cil_list *expr = cil_constrain->expr;
 	struct cil_list_item *curr_class = classes->head;
-	struct cil_list_item *curr_perm = perms->head;
 	class_datum_t *sepol_class = NULL;
 	constraint_node_t *sepol_constrain = NULL;
 	constraint_expr_t *sepol_expr = NULL;
@@ -1686,7 +1685,6 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		}
 
 		sepol_expr = NULL;
-		curr_perm = perms->head;
 		curr_class = curr_class->next;
 	}
 
