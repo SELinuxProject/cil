@@ -18,12 +18,14 @@ DEPENDENCIES
 BUILD STEPS
 
 	Open a terminal client and execute the following command to download the source code:
- 			git clone http://oss.tresys.com/git/cil.git
+
+			git clone http://oss.tresys.com/git/cil.git
+
 	Change directory into the "cil" directory.
 	Run "make" with one of the following targets:
 
 	make
-		Build the CIL compiler (cilc)
+		Build the CIL compiler (secilc)
 
 	make unit
 		Build the unit_test application to run unit tests
@@ -33,21 +35,24 @@ BUILD STEPS
 
 	make clean
 		Remove temporary build files
-	
+
 	make bare
 		Remove temporary build files and compile binaries
 
 
 USAGE
 
-	Execute 'cilc' with any number of CIL files as arguments. A policy.conf and
+	Execute 'secilc' with any number of CIL files as arguments. A binary policy and
 	file_contexts file will be created.
+
+	Use the '--help' option for more details.
 
 
 KNOWN ISSUES
 
-	- In some cases, empty anonymous statements are not properly detected as
-	  errors and will causes unexpected behavoir.  For example, the following
-	  error will fail to be detected:
-	  
-	  (genfscon msdos / ())
+	- Blocks inside of macros causes undefined behavior
+
+	- Policy must be well formed. For example, invalid usage of
+	  sensitivities/categories/levels may create an unloaded binary
+
+	- Recursive limits are not handled
