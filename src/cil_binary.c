@@ -2641,7 +2641,7 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	struct policy_file pf;
 	struct cil_args_binary extra_args;
 
-	if (db == NULL || &pdb == NULL || fname == NULL) {
+	if (db == NULL || pdb == NULL || fname == NULL) {
 		goto exit;
 	}
 
