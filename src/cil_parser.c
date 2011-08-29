@@ -37,7 +37,7 @@
 #include "cil.h"
 #include "cil_mem.h"
 
-int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
+int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_tree)
 {
 
 	int paren_count = 0;
@@ -67,6 +67,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 			node->parent = current;
 			node->flavor = CIL_PARSE_NODE;
 			node->line = tok.line;
+			node->path = path;
 			if (current->cl_head == NULL) {
 				current->cl_head = node;
 			} else {
@@ -96,6 +97,7 @@ int cil_parser(char *buffer, uint32_t size, struct cil_tree **parse_tree)
 			}
 			item->flavor = CIL_PARSE_NODE;
 			item->line = tok.line;
+			item->path = path;
 			if (current->cl_head == NULL) {
 				current->cl_head = item;
 			} else {

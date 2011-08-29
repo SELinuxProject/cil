@@ -369,6 +369,7 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 		cil_tree_node_init(&new_ast);
 		new_ast->parent = ast_node;
 		new_ast->line = current_perm->line;
+		new_ast->path = current_perm->path;
 		rc = cil_gen_perm(db, current_perm, new_ast);
 		if (rc != SEPOL_OK) {
 			printf("CLASS: Failed to gen perm\n");
@@ -5321,6 +5322,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 
 	ast_node->parent = ast_current;
 	ast_node->line = parse_current->line;
+	ast_node->path = parse_current->path;
 	if (ast_current->cl_head == NULL) {
 		ast_current->cl_head = ast_node;
 	} else {

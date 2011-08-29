@@ -153,9 +153,9 @@ int main(int argc, char *argv[])
 		fclose(file);
 		file = NULL;
 
-		printf("Building Parse Tree...\n");
-		if (cil_parser(buffer, file_size + 2, &parse_tree)) {
-			fprintf(stderr, "Failed to parse CIL policy, exiting\n");
+		printf("Parsing %s...\n", argv[i]);
+		if (cil_parser(argv[i], buffer, file_size + 2, &parse_tree)) {
+			fprintf(stderr, "Failed to parse %s, exiting\n", argv[i]);
 			goto exit;
 		}
 
