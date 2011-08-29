@@ -58,21 +58,21 @@
 
 	(filetransition device_t console_t file getty_t some_file)  
 	
-	(allow bin_t device_t file (execute))
+	(allow bin_t device_t (file (execute)))
 			
 	(booleanif secure_mode
 		(true
-			(auditallow device_t exec_t file (read write))
+			(auditallow device_t exec_t (file (read write)))
 		)
 	)
 
 	(booleanif console_login
 		(true
 			(typechange auditadm_t console_device_t file user_tty_device_t)
-			(allow getty_t console_device_t file (getattr open read write append))
+			(allow getty_t console_device_t (file (getattr open read write append)))
 		)
 		(false
-			(dontaudit getty_t console_device_t file (getattr open read write append))
+			(dontaudit getty_t console_device_t (file (getattr open read write append)))
 		)
 	)
 
@@ -80,7 +80,7 @@
 				(and (or secure_mode console_login) 
 					(and secure_mode console_login) ) ) )
 		(true
-			(allow bin_t exec_t file (execute))
+			(allow bin_t exec_t (file (execute)))
 		)
 	)
 
@@ -91,16 +91,16 @@
 				(and (or allow_execfile allow_userexec)
 					(and allow_execfile allow_userexec) ) ) )
 		(true
-			(allow bin_t exec_t file (execute))
+			(allow bin_t exec_t (file (execute)))
 		)
 	)
 
 	(optional allow_rules 
-		(allow user_t exec_t bins (execute))
+		(allow user_t exec_t (bins (execute)))
 	)
 
-	(dontaudit device_t auditadm_t file (read))
-	(auditallow device_t auditadm_t file (open))
+	(dontaudit device_t auditadm_t (file (read)))
+	(auditallow device_t auditadm_t (file (open)))
 
 	(user system_u)
 	(user user_u)
@@ -157,6 +157,6 @@
 )
 
 (macro all ((type x))
-	(allow x bin_t policy.file (execute))
+	(allow x bin_t (policy.file (execute)))
 )
 (call all (bin_t))

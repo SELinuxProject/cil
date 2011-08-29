@@ -5681,7 +5681,8 @@ void test_cil_resolve_tunif_false(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "false",
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5700,7 +5701,8 @@ void test_cil_resolve_tunif_true(CuTest *tc) {
 			"(", "tunable", "bar", "true", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "true",
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6820,7 +6822,8 @@ void test_cil_resolve_ast_node_helper_tunif(CuTest *tc) {
 			"(", "tunable", "bar", "false", ")",
 			"(", "class", "baz", "(", "read", ")", ")",
 			"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", NULL};
+			"(", "false",
+			"(", "allow", "foo", "bar", "(", "baz", "(", "read", ")", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8146,9 +8149,9 @@ void test_cil_resolve_ast_node_helper_avrule_class_nores_neg(CuTest *tc) {
 }
 
 void test_cil_resolve_ast_node_helper_avrule_datum_null_neg(CuTest *tc) {
-	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")", \
-	                "(", "type", "test", ")", "(", "type", "foo", ")", \
-	                "(", "allow", "test", "(", "foo", "bar", "(","fake", ")", ")", ")", NULL};
+	char *line[] = {"(", "class", "bar", "(", "read", "write", "open", ")", ")",
+	                "(", "type", "test", ")", "(", "type", "foo", ")",
+	                "(", "allow", "test", "foo", "(", "bar", "(","fake", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

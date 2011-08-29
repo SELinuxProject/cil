@@ -117,6 +117,11 @@ int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, s
 	cps->class = class_node->data;
 	cps->flavor = class_node->flavor;
 
+	/* Reset for re-resolve */
+	if (cps->perms != NULL) {
+		cil_list_destroy(&cps->perms, 0);
+	}
+
 	if (cps->permset_str != NULL) {
 		rc = cil_resolve_name(db, current, cps->permset_str, CIL_SYM_PERMSETS, call, &permset_node);
 		if (rc != SEPOL_OK) {
@@ -3071,14 +3076,18 @@ int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct c
 	}
 
 	if (result == CIL_TRUE) {
-		rc = cil_copy_ast(db, tif->condtrue, current->parent);
-		if (rc != SEPOL_OK) {
-			goto exit;
+		if (tif->condtrue != NULL) {
+			rc = cil_copy_ast(db, tif->condtrue, current->parent);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
 		}
 	} else {
-		rc = cil_copy_ast(db, tif->condfalse, current->parent);
-		if (rc  != SEPOL_OK) {
-			goto exit;
+		if (tif->condfalse != NULL) {
+			rc = cil_copy_ast(db, tif->condfalse, current->parent);
+			if (rc  != SEPOL_OK) {
+				goto exit;
+			}
 		}
 	}
 
