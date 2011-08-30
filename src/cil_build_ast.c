@@ -2453,6 +2453,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_booleanif *bif = NULL;
 	struct cil_tree_node *next = NULL;
+	struct cil_tree_node *cond = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -2472,6 +2473,28 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		printf("cil_gen_boolif (line %d): failed to create expr tree, rc: %d\n", parse_current->line, rc);
 		goto exit;
 	}
+
+	cond = parse_current->next->next;
+
+	/* Destroying expr tree after stack is created*/
+	if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
+	    (strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+		rc = SEPOL_ERR;
+		printf("cil_gen_tunif: invalid tunableif statement\n");
+		goto exit;
+	}
+
+	if (cond->next != NULL) {
+		cond = cond->next;
+
+		if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
+		    (strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+			rc = SEPOL_ERR;
+			printf("cil_gen_tunif: invalid tunableif statement\n");
+			goto exit;
+		}
+	}
+
 
 	next = parse_current->next->next;
 	cil_tree_subtree_destroy(parse_current->next);
@@ -2527,6 +2550,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_tunableif *tif = NULL;
 	struct cil_tree_node *next = NULL;
+	struct cil_tree_node *cond = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -2547,6 +2571,27 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
+	cond = parse_current->next->next;
+
+	if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
+	    (strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+		rc = SEPOL_ERR;
+		printf("cil_gen_tunif: invalid tunableif statement\n");
+		goto exit;
+	}
+
+	if (cond->next != NULL) {
+		cond = cond->next;
+
+		if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
+		    (strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+			rc = SEPOL_ERR;
+			printf("cil_gen_tunif: invalid tunableif statement\n");
+			goto exit;
+		}
+	}
+
+	/* Destroying expr tree after stack is created*/
 	next = parse_current->next->next;
 	cil_tree_subtree_destroy(parse_current->next);
 	parse_current->next = next;
