@@ -10,6 +10,18 @@
 			quotaon mounton))
 	(classcommon file file)
 
+	(classpermissionset file_rw (file (read write getattr setattr lock append)))
+
+	(class char (foo))
+	(classcommon char file)
+
+	(classpermissionset char_w (char (write setattr)))
+
+	(classmap files (read))
+	(classmapping files read
+		(file (open read getattr))
+		char_w)
+
 	(type auditadm_t)
 	(type console_t)
 	(type console_device_t)
@@ -17,6 +29,9 @@
 	(type device_t)
 	(type getty_t)
 	(type exec_t)
+
+	(allow console_t console_device_t file_rw)
+	; (allow console_t console_device_t (files (read)))
 
 	(boolean secure_mode false)
 	(boolean console_login true)
