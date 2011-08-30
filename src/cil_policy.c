@@ -875,9 +875,11 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		break;
 	}
 	case CIL_COMMON:
+		fprintf(file_arr[COMMONS], "common %s", ((struct cil_symtab_datum*)current->data)->name);
+
 		if (current->cl_head != NULL) {
 			current = current->cl_head;
-			fprintf(file_arr[COMMONS], "common %s { ", ((struct cil_symtab_datum*)current->data)->name);
+			fprintf(file_arr[COMMONS], " {");
 		} else {
 			printf("No permissions given\n");
 			return SEPOL_ERR;
@@ -892,39 +894,35 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			}
 			current = current->next;
 		}
-		fprintf(file_arr[COMMONS], "};\n");
+		fprintf(file_arr[COMMONS], "}\n");
 
 		return SEPOL_DONE;
 	case CIL_CLASS:
 		fprintf(file_arr[CLASS_DECL], "class %s\n", ((struct cil_class*)current->data)->datum.name);
 
-		if (current->cl_head != NULL) {
-			fprintf(file_arr[CLASSES], "class %s ", ((struct cil_class*)(current->data))->datum.name);
-		} else if (((struct cil_class*)current->data)->common == NULL) {
-			printf("No permissions given\n");
-			return SEPOL_ERR;
-		}
+		fprintf(file_arr[CLASSES], "class %s ", ((struct cil_class*)(current->data))->datum.name);
 
 		if (((struct cil_class*)current->data)->common != NULL) {
 			fprintf(file_arr[CLASSES], "inherits %s ", ((struct cil_class*)current->data)->common->datum.name);
 		}
 
-		fprintf(file_arr[CLASSES], "{ ");
 
 		if (current->cl_head != NULL) {
+			fprintf(file_arr[CLASSES], "{ ");
 			current = current->cl_head;
+			while (current != NULL) {
+				if (current->flavor == CIL_PERM) {
+					fprintf(file_arr[CLASSES], "%s ", ((struct cil_symtab_datum*)current->data)->name);
+				} else {
+					printf("Improper data type found in class permissions: %d\n", current->flavor);
+					return SEPOL_ERR;
+				}
+				current = current->next;
+			}
+			fprintf(file_arr[CLASSES], "}");
 		}
 
-		while (current != NULL) {
-			if (current->flavor == CIL_PERM) {
-				fprintf(file_arr[CLASSES], "%s ", ((struct cil_symtab_datum*)current->data)->name);
-			} else {
-				printf("Improper data type found in class permissions: %d\n", current->flavor);
-				return SEPOL_ERR;
-			}
-			current = current->next;
-		}
-		fprintf(file_arr[CLASSES], "};\n");
+		fprintf(file_arr[CLASSES], "\n");
 
 		return SEPOL_DONE;
 	case CIL_AVRULE: {

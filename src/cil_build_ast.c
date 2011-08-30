@@ -260,7 +260,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING,
-		SYM_LIST,
+		SYM_LIST | SYM_END,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -288,12 +288,14 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	perms = parse_current->next->next->cl_head;
+	if (parse_current->next->next != NULL) {
+		perms = parse_current->next->next->cl_head;
 
-	rc = cil_gen_perm_nodes(db, perms, ast_node, CIL_PERM);
-	if (rc != SEPOL_OK) {
-		printf("Class: failed to parse perms\n");
-		goto exit;
+		rc = cil_gen_perm_nodes(db, perms, ast_node, CIL_PERM);
+		if (rc != SEPOL_OK) {
+			printf("Class: failed to parse perms\n");
+			goto exit;
+		}
 	}
 
 	return SEPOL_OK;
