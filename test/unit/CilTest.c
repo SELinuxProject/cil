@@ -684,7 +684,7 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_class_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_noclassname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_namesublist_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_class_noperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_class_noperms);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_permsnotinlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_extrapermlist_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_listinlist_neg);

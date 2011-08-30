@@ -872,7 +872,7 @@ void test_cil_gen_class_namesublist_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_class_noperms_neg(CuTest *tc) { 
+void test_cil_gen_class_noperms(CuTest *tc) { 
 	char *line[] = {"(", "class", "foo", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -888,7 +888,7 @@ void test_cil_gen_class_noperms_neg(CuTest *tc) {
 	test_ast_node->line = 1;
 
 	int rc = cil_gen_class(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_class_permsnotinlist_neg(CuTest *tc) { 
