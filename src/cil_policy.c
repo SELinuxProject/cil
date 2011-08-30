@@ -696,6 +696,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 				free(str_stack[pos - 1]);
 				str_stack[pos - 2] = expr_str;
 				str_stack[pos - 1] = 0;
+				pos--;
 			} else {
 				if (pos == 0) {
 					rc = SEPOL_ERR;
@@ -712,7 +713,6 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 				free(str_stack[pos - 1]);
 				str_stack[pos - 1] = expr_str;
 			}
-			pos--;
 		} else {
 			if (pos >= COND_EXPR_MAXDEPTH) {
 				rc = SEPOL_ERR;
