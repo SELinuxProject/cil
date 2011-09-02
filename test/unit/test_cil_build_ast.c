@@ -15758,7 +15758,8 @@ void test_cil_build_ast_node_helper_rangetransition_neg(CuTest *tc) {
 
 void test_cil_build_ast_node_helper_boolif(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "read", ")", ")", NULL};
+			"(", "true",
+			"(", "allow", "foo", "bar", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -15777,7 +15778,8 @@ void test_cil_build_ast_node_helper_boolif(CuTest *tc) {
 
 void test_cil_build_ast_node_helper_boolif_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "*&", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "read", ")", ")", NULL};
+			"(", "true",
+			"(", "allow", "foo", "bar", "read", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -15796,7 +15798,8 @@ void test_cil_build_ast_node_helper_boolif_neg(CuTest *tc) {
 
 void test_cil_build_ast_node_helper_tunif(CuTest *tc) {
 	char *line[] = {"(", "tunableif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "read", ")", ")", NULL};
+			"(", "true",
+			"(", "allow", "foo", "bar", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

@@ -1245,6 +1245,7 @@ void test_cil_copy_ipaddr(CuTest *tc) {
 
 void test_cil_copy_conditional(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
+			"(", "true",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1275,6 +1276,7 @@ void test_cil_copy_conditional(CuTest *tc) {
 
 void test_cil_copy_boolif(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
+			"(", "true",
 			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
