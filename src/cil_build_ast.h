@@ -36,15 +36,6 @@
 #include "cil_tree.h"
 #include "cil_list.h"
 
-enum cil_syntax {
-	SYM_STRING = 1,
-	SYM_LIST = 2,
-	SYM_EMPTY_LIST = 4,
-	SYM_N_LISTS = 8,
-	SYM_N_STRINGS = 16,
-	SYM_END = 32
-};
-
 int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, enum cil_sym_index sflavor, enum cil_flavor nflavor);
 int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_cl, enum cil_flavor flavor);
 

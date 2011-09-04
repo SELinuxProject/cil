@@ -36,12 +36,14 @@
 #include <sepol/policydb/conditional.h>
 #include <sepol/errcodes.h>
 
-#include "cil_tree.h"
-#include "cil_list.h"
 #include "cil.h"
 #include "cil_mem.h"
-#include "cil_policy.h"
+#include "cil_tree.h"
+#include "cil_list.h"
 #include "cil_post.h"
+#include "cil_policy.h"
+
+#include "cil_verify_internal.h"
 
 void cil_post_fc_fill_data(struct fc_data *fc, char *path)
 {
@@ -445,7 +447,7 @@ int __cil_post_context_sort_array_helper(struct cil_tree_node *node, __attribute
 		uint32_t count = sort->count;
 		uint32_t i = sort->index;
 		if (sort->array == NULL) {
-			sort->array = cil_malloc(sizeof(*sort->array)*count);
+		sort->array = cil_malloc(sizeof(*sort->array)*count);
 		}
 		sort->array[i] = node->data;
 		sort->index++;
@@ -559,9 +561,29 @@ exit:
 	return rc;
 }
 
+int cil_post_verify(struct cil_db *db)
+{
+	int rc = SEPOL_ERR;
+
+	rc = cil_tree_walk(db->ast->root, __cil_verify_helper, NULL, NULL, db);
+	if (rc != SEPOL_OK) {
+		printf("Failed to verify cil database\n");
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
 int cil_post_process(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
+
+	rc = cil_post_verify(db);
+	if (rc != SEPOL_OK) {
+		printf("Failed to verify cil database\n");
+		goto exit;
+	}
 
 	rc = cil_post_context_sort(db);
 	if (rc != SEPOL_OK) {

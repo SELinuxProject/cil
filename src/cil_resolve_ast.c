@@ -41,20 +41,14 @@
 #include "cil_resolve_ast.h"
 #include "cil_copy_ast.h"
 
+#include "cil_verify_internal.h"
+
 struct cil_args_resolve {
 	struct cil_db *db;
 	uint32_t *pass;
 	uint32_t *changed;
 	struct cil_tree_node *callstack;
 	struct cil_tree_node *optstack;
-};
-
-struct cil_args_verify_order {
-	struct cil_list *order;
-	struct cil_list_item *ordered;
-	uint32_t *found;
-	uint32_t *empty;
-	uint32_t *flavor;
 };
 
 static int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *perm_list_str, struct cil_list *res_list_perms)
@@ -1282,111 +1276,6 @@ exit:
 	return rc;
 }
 
-int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
-{
-	struct cil_args_verify_order *args;
-	struct cil_list *order = NULL;
-	struct cil_list_item *ordered = NULL;
-	uint32_t *found = NULL;
-	uint32_t *empty = NULL;
-	uint32_t *flavor = NULL;
-	int rc = SEPOL_ERR;
-
-	if (node == NULL || extra_args == NULL) {
-		goto exit;
-	}
-
-	args = extra_args;
-	order = args->order;
-	ordered = args->ordered;
-	found = args->found;
-	empty = args->empty;
-	flavor = args->flavor;
-
-        if (node->flavor == CIL_OPTIONAL) {
-                struct cil_optional *opt = node->data;
-                if (opt->datum.state != CIL_STATE_ENABLED) {
-                        *finished = CIL_TREE_SKIP_HEAD;
-                        rc = SEPOL_OK;
-                        goto exit;
-                }
-        } else if (node->flavor == CIL_MACRO) {
-                *finished = CIL_TREE_SKIP_HEAD;
-                rc = SEPOL_OK;
-                goto exit;
-        }
-
-	if (node->flavor == *flavor) {
-		if (*empty) {
-			printf("Error: ordering is empty\n");
-			goto exit;
-		}
-		ordered = order->head;
-		while (ordered != NULL) {
-			if (ordered->data == node->data) {
-				*found = 1;
-				break;
-			}
-			ordered = ordered->next;
-		}
-		if (!(*found)) {
-			printf("Item not ordered: %s\n", ((struct cil_symtab_datum*)node->data)->name);
-			goto exit;
-		}
-		*found = 0;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, enum cil_flavor flavor)
-{
-
-	struct cil_list_item *ordered = NULL;
-	struct cil_args_verify_order extra_args;
-	uint32_t found = 0;
-	uint32_t empty = 0;
-	int rc = SEPOL_ERR;
-
-	if (order == NULL || current == NULL) {
-		goto exit;
-	}
-
-	if (order->head == NULL) {
-		empty = 1;
-	} else {
-		ordered = order->head;
-		if (ordered->next != NULL) {
-			printf("Disjoint category ordering exists\n");
-			goto exit;
-		}
-
-		if (ordered->data != NULL) {
-			order->head = ((struct cil_list*)ordered->data)->head;
-		}
-	}
-
-	extra_args.order = order;
-	extra_args.ordered = ordered;
-	extra_args.found = &found;
-	extra_args.empty = &empty;
-	extra_args.flavor = &flavor;
-
-	rc = cil_tree_walk(current, __cil_verify_order_node_helper, NULL, NULL, &extra_args);
-	if (rc != SEPOL_OK) {
-		printf("Failed to verify category order\n");
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int __cil_create_edge_list(struct cil_db *db, struct cil_tree_node *current, struct cil_list *order, uint32_t sym_flavor, struct cil_list *edge_list, struct cil_call *call)
 {
 
@@ -1786,143 +1675,6 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct
 
 exit:
 	cil_list_item_destroy(&catset_item, CIL_FALSE);
-	return rc;
-}
-
-
-int __cil_verify_catrange(struct cil_db *db, struct cil_catrange *catrange, struct cil_cat *cat) {
-	struct cil_list_item *cat_item = NULL;
-	int rc = SEPOL_ERR;
-
-	if (catrange->cat_low == cat || catrange->cat_high == cat) {
-		rc = SEPOL_OK;
-		goto exit;
-	}
-
-	for (cat_item = db->catorder->head; cat_item != NULL; cat_item = cat_item->next) {
-		if (cat_item->data == catrange->cat_low) {
-			break;
-		}
-	}
-
-	if (cat_item == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	for (cat_item = cat_item->next; cat_item != NULL; cat_item = cat_item->next) {
-		if (cat_item->data == catrange->cat_high) {
-			break;
-		}
-		
-		if (cat_item->data == cat) {
-			rc = SEPOL_OK;
-			goto exit;
-		}
-	}
-
-	return SEPOL_ERR;
-
-exit:
-	return rc;
-}
-
-int __cil_verify_senscat(struct cil_db *db, struct cil_sens *sens, struct cil_cat *cat)
-{
-	struct cil_list_item *cat_item = NULL;
-	struct cil_list_item *catset_item = NULL;
-	int rc = SEPOL_ERR;
-
-	for (catset_item = sens->catsets->head; catset_item != NULL; catset_item = catset_item->next) {
-		struct cil_catset *catset = catset_item->data;
-		for (cat_item = catset->cat_list->head; cat_item != NULL; cat_item = cat_item->next) {
-			switch (cat_item->flavor) {
-			case CIL_CAT: {
-				if (cat_item->data == cat) {
-					rc = SEPOL_OK;
-					goto exit;
-				}
-				break;
-			}
-			case CIL_CATRANGE: {
-				rc = __cil_verify_catrange(db, cat_item->data, cat);
-				if (rc == SEPOL_OK) {
-					goto exit;
-				}
-				break;
-			}
-			default:
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-		}
-	}
-
-	return SEPOL_ERR;
-
-exit:
-	return rc;
-}
-
-int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil_catset *catset)
-{
-	struct cil_list_item *catset_item = NULL;
-	int rc = SEPOL_OK;
-
-	for (catset_item = catset->cat_list->head; catset_item != NULL; catset_item = catset_item->next) {
-		switch (catset_item->flavor) {
-		case CIL_CAT: {
-			struct cil_cat *cat = catset_item->data;
-			rc = __cil_verify_senscat(db, sens, cat);
-			if (rc != SEPOL_OK) {
-				printf("Category %s can't be used with sensitivity %s\n", cat->datum.name, sens->datum.name);
-				goto exit;
-			}
-			break;
-		}
-		case CIL_CATRANGE: {
-			struct cil_catrange *catrange = catset_item->data;
-			struct cil_list_item *catorder = NULL;
-
-			for (catorder = db->catorder->head; catorder != NULL; catorder = catorder->next) {
-				if (catorder->data == catrange->cat_low) {
-					break;
-				}
-			}
-
-			if (catorder == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-			for (; catorder != NULL; catorder = catorder->next) {
-				struct cil_cat *cat = catorder->data;
-				rc = __cil_verify_senscat(db, sens, cat);
-				if (rc != SEPOL_OK) {
-					printf("Category %s can't be used with sensitivity %s\n", cat->datum.name, sens->datum.name);
-					goto exit;
-				}
-				if (catorder->data == catrange->cat_high) {
-					break;
-				}
-			}
-
-			if (catorder == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-			break;
-		}
-		default:
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-	}
-
-	return SEPOL_OK;
-
-exit:
 	return rc;
 }
 

@@ -34,9 +34,9 @@
 
 #include "../../src/cil_build_ast.h"
 #include "../../src/cil_resolve_ast.h"
+#include "../../src/cil_verify_internal.h"
 
 /* this all needs to be moved to a private header file */
-int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, uint32_t flavor);
 int __cil_resolve_ast_node_helper(struct cil_tree_node *, uint32_t *, void *);
 int __cil_disable_children_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *);
 
