@@ -750,7 +750,13 @@ int __cil_verify_user(struct cil_tree_node *node)
 	int rc = SEPOL_ERR;
 	struct cil_user *user = node->data;
 
-	if (user->bounds != NULL) {
+	if (user->dftlevel == NULL) {
+		printf("user does not have a default level: %s", user->datum.name);
+		goto exit;
+	} else if (user->range == NULL) {
+		printf("user does not have a level range: %s", user->datum.name);
+		goto exit;
+	} else if (user->bounds != NULL) {
 		struct cil_user *bnds = user->bounds;
 		if (user == bnds) {
 			printf("user cannot bound self: %s", user->datum.name);
@@ -763,7 +769,7 @@ int __cil_verify_user(struct cil_tree_node *node)
 			}
 		}
 	}
-	
+
 	rc = SEPOL_OK;
 exit:
 	return rc;
