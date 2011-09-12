@@ -3030,6 +3030,7 @@ int cil_evaluate_expr_stack(struct cil_list *expr_stack, uint16_t *result)
 				} else if (cond->flavor == CIL_NEQ) {
 					eval_stack[pos - 2] = (value1 != value2);
 				}
+				pos--;
 			} else {
 				if (pos == 0) {
 					rc = SEPOL_ERR;
@@ -3037,7 +3038,6 @@ int cil_evaluate_expr_stack(struct cil_list *expr_stack, uint16_t *result)
 				}
 				eval_stack[pos - 1] = !eval_stack[pos - 1];
 			}
-			pos--;
 		} else {
 			struct cil_bool *bool = cond->data;
 			if (pos >= COND_EXPR_MAXDEPTH) {
