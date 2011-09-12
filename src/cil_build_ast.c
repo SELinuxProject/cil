@@ -599,6 +599,10 @@ void cil_destroy_classpermset(struct cil_classpermset *cps)
 	if (cps->permset != NULL) {
 		cil_destroy_permset(cps->permset);
 	}
+
+	if (cps->perms != NULL) {
+		cil_list_destroy(&cps->perms, 0);
+	}
 }
 
 int cil_gen_classmap_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -1725,13 +1729,13 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 	if (rule->tgt_str != NULL) {
 		free(rule->tgt_str);
 	}
+	
+	if (rule->classpermset != NULL && rule->classpermset_str == NULL) {
+		cil_destroy_classpermset(rule->classpermset);
+	}
 
 	if (rule->classpermset_str != NULL) {
 		free(rule->classpermset_str);
-	}
-
-	if (rule->classpermset != NULL) {
-		cil_destroy_classpermset(rule->classpermset);
 	}
 
 	free(rule);

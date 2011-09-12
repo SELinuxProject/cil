@@ -1060,6 +1060,7 @@ void cil_classpermset_init(struct cil_classpermset **cps)
 	(*cps)->flavor = CIL_AST_STR;
 	(*cps)->permset_str = NULL;
 	(*cps)->permset = NULL;
+	(*cps)->perms = NULL;
 }
 
 void cil_classmap_perm_init(struct cil_classmap_perm **cmp)
