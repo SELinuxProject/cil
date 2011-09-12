@@ -603,6 +603,8 @@ void cil_destroy_classpermset(struct cil_classpermset *cps)
 	if (cps->perms != NULL) {
 		cil_list_destroy(&cps->perms, 0);
 	}
+
+	free(cps);
 }
 
 int cil_gen_classmap_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -640,6 +642,8 @@ void cil_destroy_classmap_perm(struct cil_classmap_perm *cmp)
 	if (cmp->classperms != NULL) {
 		cil_list_destroy(&cmp->classperms, 0);
 	}
+
+	free(cmp);
 }
 
 int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -736,14 +740,14 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 	curr_cps = parse_current->next->next->next;
 
 	while (curr_cps != NULL) {
-		struct cil_classpermset *new_cps = NULL;
-		cil_classpermset_init(&new_cps);
 		cil_list_item_init(&new_item);
 
 		if (curr_cps->cl_head == NULL) {
 			new_item->data = cil_strdup(curr_cps->data);
 			new_item->flavor = CIL_AST_STR;
 		} else {
+			struct cil_classpermset *new_cps = NULL;
+			cil_classpermset_init(&new_cps);
 			rc = cil_fill_classpermset(curr_cps->cl_head, new_cps);
 			if (rc != SEPOL_OK) {
 				printf("cil_gen_classmapping: Failed to fill classpermissionset\n");
@@ -4017,7 +4021,7 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 		cil_list_destroy(&cons->perm_list, 0);
 	}
 	if (cons->expr != NULL) {
-		cil_list_destroy(&cons->expr, CIL_FALSE);
+		cil_list_destroy(&cons->expr, CIL_TRUE);
 	}
 
 	free(cons);
@@ -5220,7 +5224,6 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	if (parse_current->next->next != NULL) {
 		cil_tree_init(&call->args_tree);
-		cil_tree_node_init(&call->args_tree->root);
 		cil_copy_ast(db, parse_current->next->next, call->args_tree->root);
 	}
 

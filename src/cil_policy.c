@@ -619,6 +619,8 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 		curr_cps = curr_cps->next;
 	}
 
+	cil_list_destroy(&classperms, 0);
+
 	return SEPOL_OK;
 }
 
@@ -732,6 +734,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 		curr = curr->next;
 	}
 	fprintf(file_arr[file_index], "%s", str_stack[0]);
+	free(str_stack[0]);
 
 	return SEPOL_OK;
 
