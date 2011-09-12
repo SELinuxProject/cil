@@ -4558,12 +4558,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	netifcon->interface_str = cil_strdup(parse_current->next->data);
 
 	if (parse_current->next->next->cl_head == NULL) {
-		if (parse_current->next->next->data != NULL) {
-			netifcon->if_context_str = cil_strdup(parse_current->next->next->data);
-		} else {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
+		netifcon->if_context_str = cil_strdup(parse_current->next->next->data);
 	} else {
 		cil_context_init(&netifcon->if_context);
 
@@ -4575,12 +4570,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	}
 
 	if (parse_current->next->next->next->cl_head == NULL) {
-		if (parse_current->next->next->next->data != NULL) {
-			netifcon->packet_context_str = cil_strdup(parse_current->next->next->next->data);
-		} else {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
+		netifcon->packet_context_str = cil_strdup(parse_current->next->next->next->data);
 	} else {
 		cil_context_init(&netifcon->packet_context);
 
