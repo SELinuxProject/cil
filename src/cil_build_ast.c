@@ -174,6 +174,56 @@ void cil_destroy_block(struct cil_block *block)
 	free(block);
 }
 
+int cil_gen_blockinherit(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_blockinherit *inherit = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid blockinherit declaration (line: %d)\n", parse_current->line);
+		goto exit;
+	}
+
+	cil_blockinherit_init(&inherit);
+
+	inherit->block_str = cil_strdup(parse_current->next->data);
+
+	ast_node->data = inherit;
+	ast_node->flavor = CIL_BLOCKINHERIT;
+
+	return SEPOL_OK;
+
+exit:
+	if (inherit != NULL) {
+		cil_destroy_blockinherit(inherit);
+	}
+	return rc;
+}
+
+void cil_destroy_blockinherit(struct cil_blockinherit *inherit)
+{
+	if (inherit == NULL) {
+		return;
+	}
+
+	if (inherit->block_str != NULL) {
+		free(inherit->block_str);
+	}
+
+	free(inherit);
+}
+
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -1762,7 +1812,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	
+
 	cil_type_init(&type);
 
 	key = parse_current->next->data;
@@ -1811,7 +1861,7 @@ int cil_gen_typeattribute(struct cil_db *db, struct cil_tree_node *parse_current
 		printf("Invalid %s declaration (line: %d)\n", (char*)parse_current->data, parse_current->line);
 		goto exit;
 	}
-	
+
 	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
 		printf("The keyword '%s' is reserved and cannot be used for a typeattribute name\n", CIL_KEY_SELF);
 		rc = SEPOL_ERR;
@@ -1846,7 +1896,7 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 	if (attr->types_list != NULL) {
 		cil_list_destroy(&attr->types_list, CIL_FALSE);
 	}
-	
+
 	if (attr->neg_list) {
 		cil_list_destroy(&attr->neg_list, CIL_FALSE);
 	}
@@ -2276,7 +2326,7 @@ int cil_gen_condtrue(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	return rc;	
+	return rc;
 }
 
 int cil_gen_condfalse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -3077,7 +3127,7 @@ void cil_destroy_catrange(struct cil_catrange *catrange)
 	}
 
 	cil_symtab_datum_destroy(catrange->datum);
-	
+
 	if (catrange->cat_low_str != NULL) {
 		free(catrange->cat_low_str);
 	}
@@ -3328,7 +3378,7 @@ void cil_destroy_senscat(struct cil_senscat *senscat)
 	if (senscat->catset_str == NULL) {
 		cil_destroy_catset(senscat->catset);
 	}
-	
+
 	if (senscat->catset_str != NULL) {
 		free(senscat->catset_str);
 	}
@@ -3699,7 +3749,7 @@ void cil_destroy_context(struct cil_context *context)
 	if (context == NULL) {
 		return;
 	}
-	
+
 	cil_symtab_datum_destroy(context->datum);;
 
 	if (context->user_str != NULL) {
@@ -5049,7 +5099,7 @@ int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer)
 	int val;
 
 	if (int_node == NULL || integer == NULL) {
-		goto exit;	
+		goto exit;
 	}
 
 	errno = 0;
@@ -5060,7 +5110,7 @@ int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer)
 	}
 
 	*integer = val;
-	
+
 	return SEPOL_OK;
 
 exit:
@@ -5112,7 +5162,7 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 	if (sens == NULL || level == NULL) {
 		goto exit;
 	}
-	
+
 	rc = __cil_verify_syntax(sens, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		printf("Invalid categoryrange declaration (line: %d)\n", sens->line);
@@ -5139,7 +5189,7 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 exit:
 	return rc;
 }
-	
+
 int cil_fill_catrange(struct cil_tree_node *cats, struct cil_catrange *catrange)
 {
 	enum cil_syntax syntax[] = {
@@ -5210,11 +5260,11 @@ int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset)
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-			
+
 			cat_item->flavor = CIL_CATRANGE;
-			cat_item->data = catrange;		
+			cat_item->data = catrange;
 		}
-		
+
 		rc = cil_list_append_item(cat_list, cat_item);
 		if (rc != SEPOL_OK) {
 			goto exit;
@@ -5284,6 +5334,12 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_block(db, parse_current, ast_node, 0, NULL);
 		if (rc != SEPOL_OK) {
 			printf("cil_gen_block failed, rc: %d\n", rc);
+			goto exit;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_BLOCKINHERIT)) {
+		rc = cil_gen_blockinherit(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_blockinherit failed, rc: %d\n", rc);
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {

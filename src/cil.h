@@ -57,7 +57,7 @@ enum cil_flavor {
 	CIL_FILES,
 	CIL_AVRULE,
 	CIL_SENS_DOM,
-	CIL_SEARCH,
+	CIL_BLOCKINHERIT,
 	CIL_IN,
 	CIL_FILECON,
 	CIL_PORTCON,
@@ -158,6 +158,7 @@ enum cil_flavor {
 	Keywords
 */
 #define CIL_KEY_BLOCK 		"block"
+#define CIL_KEY_BLOCKINHERIT	"blockinherit"
 #define CIL_KEY_CLASS		"class"
 #define CIL_KEY_PERM		"perm"
 #define CIL_KEY_PERMSET		"permissionset"
@@ -321,6 +322,10 @@ struct cil_block {
 	uint16_t is_abstract;
 	/* TODO CDS we need to figure out how to handle conditionals */
 	char *condition;
+};
+
+struct cil_blockinherit {
+	char *block_str;
 };
 
 struct cil_optional {
@@ -822,6 +827,7 @@ void cil_level_init(struct cil_level **level);
 void cil_levelrange_init(struct cil_levelrange **lvlrange);
 void cil_sens_init(struct cil_sens **sens);
 void cil_block_init(struct cil_block **block);
+void cil_blockinherit_init(struct cil_blockinherit **inherit);
 void cil_class_init(struct cil_class **class);
 void cil_common_init(struct cil_common **common);
 void cil_classcommon_init(struct cil_classcommon **classcommon);

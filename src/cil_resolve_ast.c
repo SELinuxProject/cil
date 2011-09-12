@@ -2347,6 +2347,36 @@ exit:
 	return rc;
 }
 
+int cil_resolve_blockinherit(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_blockinherit *inherit = (struct cil_blockinherit*)current->data;
+	struct cil_tree_node *block_node = NULL;
+	int rc = SEPOL_ERR;
+
+	if (inherit->block_str != NULL) {
+		rc = cil_resolve_name(db, current, inherit->block_str, CIL_SYM_BLOCKS, call, &block_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve inherited block, rc: %d\n", rc);
+			goto exit;
+		}
+	} else {
+		printf("block strings is null\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = cil_copy_ast(db, block_node, current);
+	if (rc != SEPOL_OK) {
+		printf("Failed to copy block, rc: %d\n", rc);
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_call *new_call = (struct cil_call*)current->data;
@@ -2937,16 +2967,21 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		}
 		break;
 	case 2:
-		if (node->flavor == CIL_CALL) {
-			rc = cil_resolve_call1(db, node, call);
+		if (node->flavor == CIL_BLOCKINHERIT) {
+			rc = cil_resolve_blockinherit(db, node, call);
 		}
 		break;
 	case 3:
 		if (node->flavor == CIL_CALL) {
-			rc = cil_resolve_call2(db, node, call);
+			rc = cil_resolve_call1(db, node, call);
 		}
 		break;
 	case 4:
+		if (node->flavor == CIL_CALL) {
+			rc = cil_resolve_call2(db, node, call);
+		}
+		break;
+	case 5:
 		switch (node->flavor) {
 		case CIL_CATORDER:
 			rc = cil_resolve_catorder(db, node, call);
@@ -2980,7 +3015,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		}
 		break;
-	case 5:
+	case 6:
 		switch (node->flavor) {
 		case CIL_CATRANGE:
 			rc = cil_resolve_catrange(db, node, (struct cil_catrange*)node->data, call);
@@ -2993,7 +3028,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		}
 		break;
-	case 6:
+	case 7:
 		switch (node->flavor) {
 		case CIL_SENSCAT:
 			rc = cil_resolve_senscat(db, node, call);
@@ -3006,7 +3041,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		}
 		break;
-	case 7:
+	case 8:
 		switch (node->flavor) {
 		case CIL_TYPEATTRIBUTETYPES:
 			rc = cil_resolve_typeattributetypes(db, node, call);

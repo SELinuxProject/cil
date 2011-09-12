@@ -106,6 +106,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_BLOCK:
 		cil_destroy_block(*data);
 		break;
+	case CIL_BLOCKINHERIT:
+		cil_destroy_blockinherit(*data);
+		break;
 	case CIL_CLASS:
 		cil_destroy_class(*data);
 		break;
@@ -450,6 +453,8 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 			case CIL_CALL:
 				/* do nothing */
 				break;
+			case CIL_BLOCKINHERIT:
+				break;
 			case CIL_OPTIONAL:
 				/* do nothing */
 				break;
@@ -498,6 +503,12 @@ int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, sym
 			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
 				printf("cil_get_parent_symtab: cil_call failed, rc: %d\n", rc);
+				goto exit;
+			}
+		} else if (ast_node->parent->flavor == CIL_BLOCKINHERIT && sym_index < CIL_SYM_NUM) {
+			rc = cil_get_parent_symtab(db, ast_node->parent, symtab, sym_index);
+			if (rc != SEPOL_OK) {
+				printf("cil_get_parent_symtab: cil_blockinherit failed, rc: %d\n", rc);
 				goto exit;
 			}
 		} else if (ast_node->parent->flavor == CIL_CLASS || ast_node->parent->flavor == CIL_CLASSMAP) {
@@ -631,6 +642,12 @@ void cil_block_init(struct cil_block **block)
 
 	(*block)->is_abstract = 0;
 	(*block)->condition = NULL;
+}
+
+void cil_blockinherit_init(struct cil_blockinherit **inherit)
+{
+	*inherit = cil_malloc(sizeof(**inherit));
+	(*inherit)->block_str = NULL;
 }
 
 void cil_class_init(struct cil_class **class)
