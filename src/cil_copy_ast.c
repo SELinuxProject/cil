@@ -1901,9 +1901,10 @@ exit:
 	return rc;
 }
 
-int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, enum cil_sym_index sym_index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym))
+int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, enum cil_sym_index sym_index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym))
 {
 	int rc = SEPOL_ERR;
+	symtab_t *symtab = NULL;
 
 	rc = cil_get_symtab(db, new->parent, &symtab, sym_index);
 	if (rc != SEPOL_OK) {
@@ -1957,49 +1958,48 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		parent->cl_tail = new;
 	}
 
-	symtab_t *symtab = NULL;
 	switch (orig->flavor) {
 	case CIL_BLOCK:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_BLOCKS, &cil_copy_block);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_BLOCKS, &cil_copy_block);
 		break;
 	case CIL_POLICYCAP:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_POLICYCAPS, &cil_copy_policycap);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_POLICYCAPS, &cil_copy_policycap);
 		break;
 	case CIL_PERM:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_UNKNOWN, &cil_copy_perm);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_UNKNOWN, &cil_copy_perm);
 		break;
 	case CIL_CLASSMAPPERM:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_UNKNOWN, &cil_copy_classmap_perm);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_UNKNOWN, &cil_copy_classmap_perm);
 		break;
 	case CIL_CLASSMAP:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CLASSES, &cil_copy_classmap);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CLASSES, &cil_copy_classmap);
 		break;
 	case CIL_CLASSMAPPING:
 		cil_copy_classmapping((struct cil_classmapping*)orig->data, (struct cil_classmapping**)&new->data);
 		break;
 	case CIL_PERMSET:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_PERMSETS, &cil_copy_permset);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_PERMSETS, &cil_copy_permset);
 		break;
 	case CIL_CLASS:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CLASSES, &cil_copy_class);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CLASSES, &cil_copy_class);
 		break;
 	case CIL_CLASSPERMSET:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CLASSPERMSETS, &cil_copy_classpermset);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CLASSPERMSETS, &cil_copy_classpermset);
 		break;
 	case CIL_COMMON:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_COMMONS, &cil_copy_common);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_COMMONS, &cil_copy_common);
 		break;
 	case CIL_CLASSCOMMON:
 		rc = cil_copy_classcommon((struct cil_classcommon*)orig->data, (struct cil_classcommon**)&new->data); 
 		break;
 	case CIL_SID:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_SIDS, &cil_copy_sid);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_SIDS, &cil_copy_sid);
 		break;
 	case CIL_SIDCONTEXT:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_SIDS, &cil_copy_sidcontext);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_SIDS, &cil_copy_sidcontext);
 		break;
 	case CIL_USER:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_USERS, &cil_copy_user);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_USERS, &cil_copy_user);
 		break;
 	case CIL_USERROLE:
 		rc = cil_copy_userrole((struct cil_userrole*)orig->data, (struct cil_userrole**)&new->data);
@@ -2014,7 +2014,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		rc = cil_copy_userbounds((struct cil_userbounds*)orig->data, (struct cil_userbounds**)&new->data);
 		break;
 	case CIL_ROLE:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_ROLES, &cil_copy_role);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_ROLES, &cil_copy_role);
 		break;
 	case CIL_ROLETYPE:
 		rc = cil_copy_roletype((struct cil_roletype*)orig->data, (struct cil_roletype**)&new->data);
@@ -2029,7 +2029,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		rc = cil_copy_roleallow((struct cil_roleallow*)orig->data, (struct cil_roleallow**)&new->data);
 		break;
 	case CIL_TYPE:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_type);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_TYPES, &cil_copy_type);
 		break;
 	case CIL_TYPEBOUNDS:
 		rc = cil_copy_typebounds((struct cil_typebounds*)orig->data, (struct cil_typebounds**)&new->data);
@@ -2038,13 +2038,13 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		rc = cil_copy_typepermissive((struct cil_typepermissive*)orig->data, (struct cil_typepermissive**)&new->data);
 		break;
 	case CIL_TYPEATTRIBUTE:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_typeattribute);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_TYPES, &cil_copy_typeattribute);
 		break;
 	case CIL_TYPEATTRIBUTETYPES:
 		rc = cil_copy_typeattributetypes((struct cil_typeattributetypes*)orig->data, (struct cil_typeattributetypes**)&new->data);
 		break;
 	case CIL_TYPEALIAS:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TYPES, &cil_copy_typealias);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_TYPES, &cil_copy_typealias);
 		break;
 	case CIL_ROLETRANSITION:
 		rc = cil_copy_roletransition((struct cil_roletransition*)orig->data, (struct cil_roletransition**)&new->data);
@@ -2056,10 +2056,10 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		rc = cil_copy_rangetransition((struct cil_rangetransition*)orig->data, (struct cil_rangetransition**)&new->data);
 		break;
 	case CIL_TUNABLE:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_TUNABLES, &cil_copy_bool);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_TUNABLES, &cil_copy_bool);
 		break;
 	case CIL_BOOL:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_BOOLS, &cil_copy_bool);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_BOOLS, &cil_copy_bool);
 		break;
 	case CIL_AVRULE:
 		rc = cil_copy_avrule((struct cil_avrule*)orig->data, (struct cil_avrule**)&new->data);
@@ -2068,22 +2068,22 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		rc = cil_copy_type_rule((struct cil_type_rule*)orig->data, (struct cil_type_rule**)&new->data);
 		break;
 	case CIL_SENS:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_SENS, &cil_copy_sens);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_SENS, &cil_copy_sens);
 		break;
 	case CIL_SENSALIAS:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_SENS, &cil_copy_sensalias);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_SENS, &cil_copy_sensalias);
 		break;
 	case CIL_CAT:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CATS, &cil_copy_cat);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CATS, &cil_copy_cat);
 		break;
 	case CIL_CATALIAS:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CATS, &cil_copy_catalias);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CATS, &cil_copy_catalias);
 		break;
 	case CIL_CATRANGE:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CATS, &cil_copy_catrange);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CATS, &cil_copy_catrange);
 		break;
 	case CIL_CATSET:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CATS, &cil_copy_catset);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CATS, &cil_copy_catset);
 		break;
 	case CIL_SENSCAT:
 		rc = cil_copy_senscat((struct cil_senscat*)orig->data, (struct cil_senscat**)&new->data);
@@ -2095,13 +2095,13 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		rc = cil_copy_dominance((struct cil_sens_dominates*)orig->data, (struct cil_sens_dominates**)&new->data);
 		break;
 	case CIL_LEVEL:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_LEVELS, &cil_copy_level);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_LEVELS, &cil_copy_level);
 		break;
 	case CIL_LEVELRANGE:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_LEVELRANGES, &cil_copy_levelrange);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_LEVELRANGES, &cil_copy_levelrange);
 		break;
 	case CIL_CONTEXT:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_CONTEXTS, &cil_copy_context);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CONTEXTS, &cil_copy_context);
 		break;
 	case CIL_NETIFCON:
 		rc = cil_copy_netifcon((struct cil_netifcon*)orig->data, (struct cil_netifcon**)&new->data);
@@ -2140,17 +2140,17 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		rc = cil_copy_call(db, (struct cil_call*)orig->data, (struct cil_call**)&new->data);
 		break;
 	case CIL_MACRO:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_MACROS, &cil_copy_macro);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_MACROS, &cil_copy_macro);
 		break;
 	case CIL_PARSE_NODE:
 		new->data = cil_strdup(((char*)orig->data));
 		rc = SEPOL_OK;
 		break;
 	case CIL_OPTIONAL:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_OPTIONALS, &cil_copy_optional);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_OPTIONALS, &cil_copy_optional);
 		break;
 	case CIL_IPADDR:
-		rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_IPADDRS, &cil_copy_ipaddr);
+		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_IPADDRS, &cil_copy_ipaddr);
 		break;
 	case CIL_BOOLEANIF:
 		rc = cil_copy_boolif((struct cil_booleanif*)orig->data, (struct cil_booleanif**)&new->data);
