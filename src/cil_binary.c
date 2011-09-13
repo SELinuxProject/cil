@@ -824,49 +824,39 @@ exit:
 int __cil_insert_type_rule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t res, avtab_t *avtab, avtab_ptr_t *avtab_ptr)
 {
 	int rc = SEPOL_ERR;
-	avtab_key_t *avtab_key = NULL;
-	avtab_datum_t *avtab_datum = NULL;
+	avtab_key_t avtab_key;
+	avtab_datum_t avtab_datum;
 	
-	avtab_key = cil_malloc(sizeof(*avtab_key));
-	memset(avtab_key, 0, sizeof(avtab_key_t));
-
-	avtab_key->source_type = src;
-	avtab_key->target_type = tgt;
-	avtab_key->target_class = obj;
+	avtab_key.source_type = src;
+	avtab_key.target_type = tgt;
+	avtab_key.target_class = obj;
 
 	switch (kind) {
 	case CIL_TYPE_TRANSITION:
-		avtab_key->specified = AVTAB_TRANSITION;
+		avtab_key.specified = AVTAB_TRANSITION;
 		break;
 	case CIL_TYPE_CHANGE:
-		avtab_key->specified = AVTAB_CHANGE;
+		avtab_key.specified = AVTAB_CHANGE;
 		break;
 	case CIL_TYPE_MEMBER:
-		avtab_key->specified = AVTAB_MEMBER;
+		avtab_key.specified = AVTAB_MEMBER;
 		break;
 	default:
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	avtab_datum = cil_malloc(sizeof(*avtab_datum));
-	memset(avtab_datum, 0, sizeof(*avtab_datum));
-		
-	avtab_datum->data = res;
+	avtab_datum.data = res;
 
-	*avtab_ptr = avtab_insert_nonunique(avtab, avtab_key, avtab_datum);
+	*avtab_ptr = avtab_insert_nonunique(avtab, &avtab_key, &avtab_datum);
 	if (*avtab_ptr == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	free(avtab_datum);
-
 	return SEPOL_OK;
 
 exit:
-	free(avtab_key);
-	free(avtab_datum);
 	return rc;
 }
 
@@ -974,29 +964,26 @@ exit:
 int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, avtab_t *avtab, avtab_ptr_t *avtab_ptr, uint32_t merge)
 {
 	int rc = SEPOL_ERR;
-	avtab_key_t *avtab_key = NULL;
-	avtab_datum_t *avtab_datum = NULL;
+	avtab_key_t avtab_key;
+	avtab_datum_t avtab_datum;
 	avtab_datum_t *avtab_dup = NULL;
 	
-	avtab_key = cil_malloc(sizeof(*avtab_key));
-	memset(avtab_key, 0, sizeof(avtab_key_t));
-
-	avtab_key->source_type = src;
-	avtab_key->target_type = tgt;
-	avtab_key->target_class = obj;
+	avtab_key.source_type = src;
+	avtab_key.target_type = tgt;
+	avtab_key.target_class = obj;
 	
 	switch (kind) {
 	case CIL_AVRULE_ALLOWED:
-		avtab_key->specified = AVTAB_ALLOWED;
+		avtab_key.specified = AVTAB_ALLOWED;
 		break;
 	case CIL_AVRULE_AUDITALLOW:
-		avtab_key->specified = AVTAB_AUDITALLOW;
+		avtab_key.specified = AVTAB_AUDITALLOW;
 		break;
 	case CIL_AVRULE_NEVERALLOW:
-		avtab_key->specified = AVTAB_NEVERALLOW;
+		avtab_key.specified = AVTAB_NEVERALLOW;
 		break;
 	case CIL_AVRULE_DONTAUDIT:
-		avtab_key->specified = AVTAB_AUDITDENY;
+		avtab_key.specified = AVTAB_AUDITDENY;
 		break;
 	default:
 		rc = SEPOL_ERR;
@@ -1005,32 +992,25 @@ int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj,
 	}
 
 	if (merge) {
-		avtab_dup = avtab_search(avtab, avtab_key);
+		avtab_dup = avtab_search(avtab, &avtab_key);
 		if (avtab_dup != NULL) {
 			avtab_dup->data |= data;
 		}
 	}
 
 	if (avtab_dup == NULL) {
-		avtab_datum = cil_malloc(sizeof(*avtab_datum));
-		memset(avtab_datum, 0, sizeof(avtab_datum_t));
+		avtab_datum.data = data;
 
-		avtab_datum->data = data;
-
-		*avtab_ptr = avtab_insert_nonunique(avtab, avtab_key, avtab_datum);
+		*avtab_ptr = avtab_insert_nonunique(avtab, &avtab_key, &avtab_datum);
 		if (*avtab_ptr == NULL) {
 			rc = SEPOL_ERR;
 			goto exit;
 		}
-
-		free(avtab_datum);
 	}
 
 	return SEPOL_OK;
 
 exit:
-	free(avtab_key);
-	free(avtab_datum);
 	return rc;
 }
 
