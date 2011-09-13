@@ -1268,7 +1268,8 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	if (pdb->cond_list == NULL) {
 		pdb->cond_list = cond_node;
 	} else {
-		pdb->cond_list->next = cond_node;
+		cond_node->next = pdb->cond_list;
+		pdb->cond_list = cond_node;
 	}
 
 	return SEPOL_OK;
@@ -1661,7 +1662,8 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		if (sepol_class->constraints == NULL) {
 			sepol_class->constraints = sepol_constrain;
 		} else {
-			sepol_class->constraints->next = sepol_constrain;
+			sepol_constrain->next = sepol_class->constraints;
+			sepol_class->constraints = sepol_constrain;
 		}
 
 		sepol_expr = NULL;
