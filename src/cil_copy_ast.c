@@ -1905,7 +1905,7 @@ int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct
 {
 	int rc = SEPOL_ERR;
 
-	rc = cil_get_parent_symtab(db, new, &symtab, sym_index);
+	rc = cil_get_symtab(db, new->parent, &symtab, sym_index);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}

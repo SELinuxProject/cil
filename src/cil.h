@@ -817,7 +817,7 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *index
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
 void cil_symtab_array_destroy(symtab_t symtab[]);
 int cil_destroy_ast_symtabs(struct cil_tree_node *root);
-int cil_get_parent_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index);
+int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index);
 
 void cil_sort_init(struct cil_sort **sort);
 void cil_sort_destroy(struct cil_sort **sort);

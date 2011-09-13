@@ -3418,7 +3418,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		cil_tree_print(db->ast->root, 0);
 #endif
 
-		if (pass == 4) {
+		if (pass == 5) {
 #ifdef DEBUG
 			printf("----- Verify Catorder ------\n");
 #endif
@@ -3493,7 +3493,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			rc = cil_symtab_get_node(symtab, tok_current, node);
 			if (rc == SEPOL_OK) {
 				// if in macro, check call parent to verify successful copy to call
-				rc = cil_get_parent_symtab(db, ast_node->parent, &symtab, CIL_SYM_BLOCKS);
+				rc = cil_get_symtab(db, ast_node->parent->parent, &symtab, CIL_SYM_BLOCKS);
 				if (rc == SEPOL_OK) {
 					rc = cil_symtab_get_node(symtab, tok_current, node);
 					if (rc != SEPOL_OK) {
@@ -3505,7 +3505,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 					goto exit;
 				}
 			} else if (rc == SEPOL_ENOENT) {
-				rc = cil_get_parent_symtab(db, call->macro->datum.node, &symtab, CIL_SYM_BLOCKS);
+				rc = cil_get_symtab(db, call->macro->datum.node->parent, &symtab, CIL_SYM_BLOCKS);
 				if (rc != SEPOL_OK) {
 					printf("Failed to get node from parent symtab of macro\n");
 					goto exit;
@@ -3517,7 +3517,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			}
 
 		} else {
-			rc = cil_get_parent_symtab(db, ast_node, &symtab, CIL_SYM_BLOCKS);
+			rc = cil_get_symtab(db, ast_node->parent, &symtab, CIL_SYM_BLOCKS);
 			if (rc != SEPOL_OK) {
 				printf("Failed to get parent symtab, rc: %d\n", rc);
 				goto exit;
@@ -3581,7 +3581,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 				symtab = &call->macro->symtab[sym_index];
 				rc = cil_symtab_get_node(symtab, name, node);
 				if (rc == SEPOL_OK) {
-					rc = cil_get_parent_symtab(db, ast_node->parent, &symtab, sym_index);
+					rc = cil_get_symtab(db, ast_node->parent->parent, &symtab, sym_index);
 					if (rc == SEPOL_OK) {
 						rc = cil_symtab_get_node(symtab, name, node);
 						if (rc != SEPOL_OK) {
@@ -3599,7 +3599,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 						goto exit;
 					}
 
-					rc = cil_get_parent_symtab(db, call->macro->datum.node, &symtab, sym_index);
+					rc = cil_get_symtab(db, call->macro->datum.node->parent, &symtab, sym_index);
 					if (rc != SEPOL_OK) {
 						goto exit;
 					}
@@ -3614,7 +3614,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 					strncat(global_symtab_name, name, strlen(name));
 				}
 			} else {
-				rc = cil_get_parent_symtab(db, ast_node, &symtab, sym_index);
+				rc = cil_get_symtab(db, ast_node->parent, &symtab, sym_index);
 				if (rc != SEPOL_OK) {
 					printf("Failed to get parent symtab, rc: %d\n", rc);
 					goto exit;

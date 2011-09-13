@@ -68,7 +68,7 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 		goto exit;
 	}
 
-	rc = cil_get_parent_symtab(db, ast_node, &symtab, sflavor);
+	rc = cil_get_symtab(db, ast_node->parent, &symtab, sflavor);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}

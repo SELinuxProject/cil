@@ -55,7 +55,7 @@ void test_cil_symtab_insert(CuTest *tc) {
 	test_block->is_abstract = 0;
 	test_block->condition = NULL;
 
-	cil_get_parent_symtab(test_db, test_ast_node, &test_symtab, CIL_SYM_BLOCKS);
+	cil_get_symtab(test_db, test_ast_node->parent, &test_symtab, CIL_SYM_BLOCKS);
 
 	int rc = cil_symtab_insert(test_symtab, (hashtab_key_t)test_name, (struct cil_symtab_datum*)test_block, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);

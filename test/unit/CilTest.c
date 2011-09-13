@@ -1623,13 +1623,13 @@ CuSuite* CilTreeGetSuite(void) {
 
 	SUITE_ADD_TEST(suite, test_cil_db_init);
 
-	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_block);
-	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_class);
-	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_root);
-	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_flavor_neg);
-	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_node_null_neg);
-	SUITE_ADD_TEST(suite, test_cil_get_parent_symtab_parent_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_get_symtab_block);
+	SUITE_ADD_TEST(suite, test_cil_get_symtab_class);
+	SUITE_ADD_TEST(suite, test_cil_get_symtab_root);
+	SUITE_ADD_TEST(suite, test_cil_get_symtab_flavor_neg);
+	SUITE_ADD_TEST(suite, test_cil_get_symtab_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_get_symtab_node_null_neg);
+	SUITE_ADD_TEST(suite, test_cil_get_symtab_parent_null_neg);
 
 
 	/* test_cil_list.c */
