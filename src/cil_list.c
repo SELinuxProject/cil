@@ -49,6 +49,10 @@ void cil_list_init(struct cil_list **list)
 
 void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
 {
+	if (*list == NULL) {
+		return;
+	}
+
 	struct cil_list_item *item = (*list)->head;
 	struct cil_list_item *next = NULL;
 	while (item != NULL)
