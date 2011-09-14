@@ -45,6 +45,11 @@ enum cil_syntax {
 	SYM_END = 32
 };
 
+struct cil_args_verify {
+	struct cil_db *db;
+	symtab_t *senstab;
+};
+
 struct cil_args_verify_order {
 	struct cil_list *order;
 	struct cil_list_item *ordered;

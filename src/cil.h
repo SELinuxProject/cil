@@ -392,6 +392,7 @@ struct cil_sidcontext {
 struct cil_user {
 	struct cil_symtab_datum datum;
 	struct cil_user *bounds;
+	struct cil_list *roles;
 	struct cil_level *dftlevel;
 	struct cil_levelrange *range;
 };
@@ -422,6 +423,7 @@ struct cil_userbounds {
 
 struct cil_role {
 	struct cil_symtab_datum datum;
+	struct cil_list *types;
 	struct cil_role *bounds;
 };
 

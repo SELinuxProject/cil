@@ -1094,6 +1094,7 @@ void cil_user_init(struct cil_user **user)
 
 	cil_symtab_datum_init(&(*user)->datum);
 	(*user)->bounds = NULL;
+	(*user)->roles = NULL;
 	(*user)->dftlevel = NULL;
 	(*user)->range = NULL;
 }
@@ -1121,6 +1122,7 @@ void cil_role_init(struct cil_role **role)
 	*role = cil_malloc(sizeof(**role));
 
 	cil_symtab_datum_init(&(*role)->datum);
+	(*role)->types = NULL;
 }
 
 void cil_type_init(struct cil_type **type)

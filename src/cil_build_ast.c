@@ -987,6 +987,7 @@ void cil_destroy_user(struct cil_user *user)
 	}
 
 	cil_symtab_datum_destroy(user->datum);
+	cil_list_destroy(&user->roles, CIL_FALSE);
 	free(user);
 }
 
@@ -1231,6 +1232,7 @@ void cil_destroy_role(struct cil_role *role)
 	}
 
 	cil_symtab_datum_destroy(role->datum);
+	cil_list_destroy(&role->types, CIL_FALSE);
 	free(role);
 }
 

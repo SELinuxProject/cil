@@ -727,6 +727,7 @@ int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struc
 	struct cil_userrole *userrole = (struct cil_userrole*)current->data;
 	struct cil_tree_node *user_node = NULL;
 	struct cil_tree_node *role_node = NULL;
+	struct cil_list_item *role = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(db, current, userrole->user_str, CIL_SYM_USERS, call, &user_node);
@@ -734,14 +735,25 @@ int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struc
 		printf("Name resolution failed for %s\n", userrole->user_str);
 		goto exit;
 	}
-	userrole->user = (struct cil_user*)(user_node->data);
+	userrole->user = user_node->data;
 
 	rc = cil_resolve_name(db, current, userrole->role_str, CIL_SYM_ROLES, call, &role_node);
 	if (rc != SEPOL_OK) {
 		printf("Name resolution failed for %s\n", userrole->role_str);
 		goto exit;
 	}
-	userrole->role = (struct cil_role*)(role_node->data);
+	userrole->role = role_node->data;
+
+	cil_list_item_init(&role);
+	role->flavor = CIL_ROLE;
+	role->data = userrole->role;
+
+	if (userrole->user->roles == NULL) {
+		cil_list_init(&userrole->user->roles);
+		userrole->user->roles->head = role;
+	} else {
+		cil_list_append_item(userrole->user->roles, role);
+	}
 
 	return SEPOL_OK;
 
@@ -887,6 +899,7 @@ int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struc
 	struct cil_roletype *roletype = (struct cil_roletype*)current->data;
 	struct cil_tree_node *role_node = NULL;
 	struct cil_tree_node *type_node = NULL;
+	struct cil_list_item *type = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(db, current, roletype->role_str, CIL_SYM_ROLES, call, &role_node);
@@ -894,7 +907,7 @@ int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struc
 		printf("Name resolution failed for %s\n", roletype->role_str);
 		goto exit;
 	}
-	roletype->role = (struct cil_role*)(role_node->data);
+	roletype->role = role_node->data;
 
 	rc = cil_resolve_name(db, current, roletype->type_str, CIL_SYM_TYPES, call, &type_node);
 	if (rc != SEPOL_OK) {
@@ -902,6 +915,17 @@ int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struc
 		goto exit;
 	}
 	roletype->type = type_node->data;
+
+	cil_list_item_init(&type);
+	type->flavor = CIL_TYPE;
+	type->data = roletype->type;
+
+	if (roletype->role->types == NULL) {
+		cil_list_init(&roletype->role->types);
+		roletype->role->types->head = type;
+	} else {
+		cil_list_append_item(roletype->role->types, type);
+	}
 
 	return SEPOL_OK;
 

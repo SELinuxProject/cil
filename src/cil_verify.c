@@ -745,29 +745,93 @@ exit:
 	return rc;
 }
 
-int __cil_verify_user(struct cil_tree_node *node)
+int __cil_add_levelrange_sens_to_symtab(struct cil_levelrange *lvlrange, symtab_t *senstab)
 {
 	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_level *low = lvlrange->low;
+	struct cil_level *high = lvlrange->high;
+	struct cil_symtab_datum *sensdatum = NULL;
+
+	sensdatum = cil_malloc(sizeof(*sensdatum));
+	cil_symtab_datum_init(sensdatum);
+
+	key = low->sens->datum.name;
+	rc = cil_symtab_insert(senstab, key, sensdatum, NULL);
+	if (rc != SEPOL_OK) {
+		if ( rc == SEPOL_EEXIST) {
+			cil_symtab_datum_destroy(*sensdatum);
+			free(sensdatum);
+		} else {
+			printf("Failed to insert low level sensitivity into symtab\n");
+			goto exit;
+		}
+	}
+
+	sensdatum = cil_malloc(sizeof(*sensdatum));
+	cil_symtab_datum_init(sensdatum);
+
+	key = high->sens->datum.name;
+	rc = cil_symtab_insert(senstab, key, sensdatum, NULL);
+	if (rc != SEPOL_OK) {
+		if (rc == SEPOL_EEXIST) {
+			cil_symtab_datum_destroy(*sensdatum);
+			free(sensdatum);
+		} else {
+			printf("Failed to insert high level sensitivity into symtab\n");
+			goto exit;
+		}
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
+int __cil_verify_user(struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_symtab_datum *sensdatum = NULL;
 	struct cil_user *user = node->data;
 
 	if (user->dftlevel == NULL) {
-		printf("user does not have a default level: %s", user->datum.name);
+		printf("User does not have a default level: %s", user->datum.name);
 		goto exit;
 	} else if (user->range == NULL) {
-		printf("user does not have a level range: %s", user->datum.name);
+		printf("User does not have a level range: %s", user->datum.name);
 		goto exit;
 	} else if (user->bounds != NULL) {
 		struct cil_user *bnds = user->bounds;
 		if (user == bnds) {
-			printf("user cannot bound self: %s", user->datum.name);
+			printf("User cannot bound self: %s", user->datum.name);
 			goto exit;
 		} else if (bnds->bounds != NULL) {
 			bnds = bnds->bounds;
 			if (user == bnds) {
-				printf("circular userbounds found: %s\n", user->datum.name);
+				printf("Circular userbounds found: %s\n", user->datum.name);
 				goto exit;
 			}
 		}
+	}
+
+	sensdatum = cil_malloc(sizeof(*sensdatum));
+	cil_symtab_datum_init(sensdatum);
+
+	key = user->dftlevel->sens->datum.name;
+	rc = cil_symtab_insert(senstab, key, sensdatum, NULL);
+	if (rc != SEPOL_OK) {
+		if (rc == SEPOL_EEXIST) {
+			cil_symtab_datum_destroy(*sensdatum);
+			free(sensdatum);
+		} else {
+			goto exit;
+		}
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(user->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
 
 	rc = SEPOL_OK;
@@ -783,12 +847,12 @@ int __cil_verify_role(struct cil_tree_node *node)
 	if (role->bounds != NULL) {
 		struct cil_role *bnds = role->bounds;
 		if (role == bnds) {
-			printf("role cannot bound self: %s\n", role->datum.name);
+			printf("Role cannot bound self: %s\n", role->datum.name);
 			goto exit;
 		} else if (bnds->bounds != NULL) {
 			bnds = bnds->bounds;
 			if (role == bnds) {
-				printf("circular rolebounds found: %s\n", role->datum.name);
+				printf("Circular rolebounds found: %s\n", role->datum.name);
 				goto exit;
 			}
 		}
@@ -816,15 +880,121 @@ int __cil_verify_type(struct cil_tree_node *node)
 		}
 
 		if (type == bnds) {
-			printf("type cannot bound self: %s\n", type->datum.name);
+			printf("Type cannot bound self: %s\n", type->datum.name);
 			goto exit;
 		} else if (bnds->bounds != NULL) {
 			bnds = bnds->bounds;
 			if (type == bnds) {
-				printf("circular typebounds found: %s\n", type->datum.name);
+				printf("Circular typebounds found: %s\n", type->datum.name);
 				goto exit;
 			}
 		}
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
+int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
+{
+	int rc = SEPOL_ERR;
+	struct cil_user *user = ctx->user;
+	struct cil_role *role = ctx->role;
+	struct cil_type *type = ctx->type;
+	struct cil_level *user_low = user->range->low;
+	struct cil_level *user_high = user->range->high;
+	struct cil_level *ctx_low = ctx->range->low;
+	struct cil_level *ctx_high = ctx->range->high;
+	struct cil_list *dominance = db->dominance;
+	struct cil_list_item *curr = NULL;
+	int found = CIL_FALSE;
+
+	if (user->roles != NULL) {
+		for (curr = user->roles->head; curr != NULL; curr = curr->next) {
+			struct cil_role *userrole = curr->data;
+			if (userrole == role) {
+				found = CIL_TRUE;
+				break;
+			}
+		}
+
+		if (found != CIL_TRUE) {
+			printf("Invalid role for specified user\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	} else {
+		printf("No roles given to the specified user\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	if (role->types != NULL) {
+		found = CIL_FALSE;
+		for (curr = role->types->head; curr != NULL; curr = curr->next) {
+			struct cil_type *roletype = curr->data;
+			if (roletype == type) {
+				found = CIL_TRUE;
+				break;
+			}
+		}
+
+		if (found != CIL_TRUE) {
+			printf("Invalid type for specified role\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	} else {
+		printf("No types given to the specified role\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	found = CIL_FALSE;
+	for (curr = dominance->head; curr != NULL; curr = curr->next) {
+		struct cil_sens *sens = curr->data;
+
+		if (found == CIL_FALSE) {
+			if (sens == user_low->sens) {
+				found = CIL_TRUE;
+			} else if (sens == ctx_low->sens) {
+				printf("Invalid context level range for specified user\n");
+				rc = SEPOL_ERR;
+				goto exit;
+			}
+		}
+
+		if (found == CIL_TRUE) {
+			if (sens == ctx_high->sens) {
+				break;
+			} else if (sens == user_high->sens) {
+				printf("Invalid context level range for specified user\n");
+				rc = SEPOL_ERR;
+				goto exit;
+			}
+		}
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
+int __cil_verify_named_context(struct cil_db *db, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_context *ctx = node->data;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
 int __cil_verify_booleanif(struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
@@ -861,20 +1031,251 @@ exit:
 	return rc;
 }
 
+int __cil_verify_netifcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_netifcon *netif = node->data;
+	struct cil_context *if_ctx = netif->if_context;
+	struct cil_context *pkt_ctx = netif->packet_context;
+
+	rc = __cil_verify_context(db, if_ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_verify_context(db, pkt_ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(if_ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(pkt_ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_genfscon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_genfscon *genfs = node->data;
+	struct cil_context *ctx = genfs->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_filecon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_filecon *file = node->data;
+	struct cil_context *ctx = file->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_nodecon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_nodecon *nodecon = node->data;
+	struct cil_context *ctx = nodecon->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_portcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_portcon *port = node->data;
+	struct cil_context *ctx = port->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_pirqcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_genfscon *pirq = node->data;
+	struct cil_context *ctx = pirq->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_iomemcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_iomemcon *iomem = node->data;
+	struct cil_context *ctx = iomem->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_ioportcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_ioportcon *ioport = node->data;
+	struct cil_context *ctx = ioport->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_pcidevicecon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_pcidevicecon *pcidev = node->data;
+	struct cil_context *ctx = pcidev->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_fsuse(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_fsuse *fsuse = node->data;
+	struct cil_context *ctx = fsuse->context;
+
+	rc = __cil_verify_context(db, ctx);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
+int __cil_verify_rangetransition(struct cil_tree_node *node, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+	struct cil_rangetransition *rangetrans = node->data;
+	struct cil_levelrange *range = rangetrans->range;
+
+	rc = __cil_add_levelrange_sens_to_symtab(range, senstab);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
 int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	int *avrule_cnt = 0;
+	struct cil_args_verify *args = extra_args;
 	struct cil_db *db = NULL;
+	symtab_t *senstab = NULL;
 
 	if (node == NULL || extra_args == NULL) {
 		goto exit;
 	}
 
-	db = extra_args;
+	db = args->db;
+	senstab = args->senstab;
+	avrule_cnt = args->avrule_cnt;
 
 	switch (node->flavor) {
 	case CIL_USER:
-		rc = __cil_verify_user(node);
+		rc = __cil_verify_user(node, senstab);
 		break;
 	case CIL_ROLE:
 		rc = __cil_verify_role(node);
@@ -882,9 +1283,49 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	case CIL_TYPE:
 		rc = __cil_verify_type(node);
 		break;
+	case CIL_AVRULE:
+		(*avrule_cnt)++;
+		rc = SEPOL_OK;
+		break;
 	case CIL_BOOLEANIF:
 		rc = __cil_verify_booleanif(node);
 		*finished = CIL_TREE_SKIP_HEAD;
+		break;
+	case CIL_CONTEXT:
+		rc = __cil_verify_named_context(db, node);
+		break;
+	case CIL_NETIFCON:
+		rc = __cil_verify_netifcon(db, node, senstab);
+		break;
+	case CIL_GENFSCON:
+		rc = __cil_verify_genfscon(db, node, senstab);
+		break;
+	case CIL_FILECON:
+		rc = __cil_verify_filecon(db, node, senstab);
+		break;
+	case CIL_NODECON:
+		rc = __cil_verify_nodecon(db, node, senstab);
+		break;
+	case CIL_PORTCON:
+		rc = __cil_verify_portcon(db, node, senstab);
+		break;
+	case CIL_PIRQCON:
+		rc = __cil_verify_pirqcon(db, node, senstab);
+		break;
+	case CIL_IOMEMCON:
+		rc = __cil_verify_iomemcon(db, node, senstab);
+		break;
+	case CIL_IOPORTCON:
+		rc = __cil_verify_ioportcon(db, node, senstab);
+		break;
+	case CIL_PCIDEVICECON:
+		rc = __cil_verify_pcidevicecon(db, node, senstab);
+		break;
+	case CIL_FSUSE:
+		rc = __cil_verify_fsuse(db, node, senstab);
+		break;
+	case CIL_RANGETRANSITION:
+		rc = __cil_verify_rangetransition(node, senstab);
 		break;
 	default:
 		rc = SEPOL_OK;

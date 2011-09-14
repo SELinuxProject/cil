@@ -564,14 +564,37 @@ exit:
 int cil_post_verify(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
+	struct cil_list_item *curr = NULL;
+	struct cil_args_verify extra_args;
+	symtab_t senstab;
+	cil_symtab_init(&senstab, CIL_SYM_SIZE);
 
-	rc = cil_tree_walk(db->ast->root, __cil_verify_helper, NULL, NULL, db);
+	extra_args.db = db;
+	extra_args.senstab = &senstab;
+	rc = cil_tree_walk(db->ast->root, __cil_verify_helper, NULL, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
 		printf("Failed to verify cil database\n");
 		goto exit;
 	}
 
+	for (curr = db->dominance->head; curr != NULL; curr = curr->next) {
+		struct cil_symtab_datum *datum = NULL;
+		struct cil_sens *sens = curr->data;
+		char *key = NULL;
+
+		key = sens->datum.name;
+		datum = (struct cil_symtab_datum *)hashtab_search(senstab.table, key);
+		if (datum == NULL) {
+			printf("Sensitivity not used in a level: %s\n", key);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		cil_symtab_datum_destroy(*datum);
+		free(datum);
+	}
+
 exit:
+	cil_symtab_destroy(&senstab);
 	return rc;
 }
 
