@@ -825,6 +825,35 @@ int __cil_verify_type(struct cil_tree_node *node)
 				goto exit;
 			}
 		}
+int __cil_verify_booleanif(struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_tree_node *cond_block = node->cl_head;
+	struct cil_tree_node *rule_node = NULL;
+	struct cil_avrule *avrule = NULL;
+
+	while (cond_block != NULL) {
+		for (rule_node = cond_block->cl_head;
+			rule_node != NULL;
+			rule_node = rule_node->next) {
+
+			switch (rule_node->flavor) {
+				case CIL_AVRULE:
+					avrule = rule_node->data;
+					if (avrule->rule_kind == CIL_AVRULE_NEVERALLOW) {
+						printf("Neverallow within booleanif block (line: %d)\n", node->line);
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+				case CIL_TYPE_RULE:
+					break;
+				default:
+					printf("Invalid statement within booleanif (line: %d)\n", node->line);
+					goto exit;
+			}
+		}
+
+		cond_block = cond_block->next;
 	}
 
 	rc = SEPOL_OK;
@@ -852,6 +881,10 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 		break;
 	case CIL_TYPE:
 		rc = __cil_verify_type(node);
+		break;
+	case CIL_BOOLEANIF:
+		rc = __cil_verify_booleanif(node);
+		*finished = CIL_TREE_SKIP_HEAD;
 		break;
 	default:
 		rc = SEPOL_OK;
