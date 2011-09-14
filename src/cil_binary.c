@@ -1587,12 +1587,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 						goto exit;
 					}
 					value = sepol_type->s.value;
-					type_set_t *type_set = curr_expr->type_names;
-					if (ebitmap_set_bit(&type_set->negset, value - 1, 1)) {
-						rc = SEPOL_ERR;
-						goto exit;
-					}
-					if (ebitmap_set_bit(&type_set->types, value - 1, 1)) {
+					if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
 						rc = SEPOL_ERR;
 						goto exit;
 					}
