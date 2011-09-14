@@ -92,8 +92,7 @@
 	)
 
 	(booleanif (not (xor (eq secure_mode console_login) 
-				(and (or secure_mode console_login) 
-					(and secure_mode console_login) ) ) )
+				(and (or secure_mode console_login) ) ) )
 		(true
 			(allow bin_t exec_t (file (execute)))
 		)
