@@ -2512,14 +2512,14 @@ int __cil_binary_create_helper(struct cil_tree_node *node, __attribute__((unused
 		*finished = CIL_TREE_SKIP_HEAD;
 		rc = SEPOL_OK;
 		goto exit;
-	}	
+	} else if (node->flavor == CIL_BOOLEANIF) {
+		*finished = CIL_TREE_SKIP_HEAD;
+	}
 
 	rc = __cil_node_to_policydb(pdb, node, pass);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-
-	return SEPOL_OK;
 
 exit:
 	return rc;
