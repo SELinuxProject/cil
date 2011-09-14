@@ -78,6 +78,24 @@ exit:
 	return rc;
 }
 
+void cil_symtab_remove_datum_destroy(__attribute__((unused))hashtab_key_t key, hashtab_datum_t datum, __attribute__((unused))void *args)
+{
+	cil_symtab_datum_destroy(*(struct cil_symtab_datum *)datum);
+	free(datum);
+}
+
+int cil_symtab_remove(symtab_t *symtab, hashtab_key_t key)
+{
+	int rc = hashtab_remove(symtab->table, key, &cil_symtab_remove_datum_destroy, NULL);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node)
 {
 	struct cil_symtab_datum *datum = NULL;
