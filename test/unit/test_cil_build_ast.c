@@ -14776,7 +14776,7 @@ void test_cil_gen_optional_norule_neg(CuTest *tc) {
 }
 
 void test_cil_gen_policycap(CuTest *tc) {
-	char *line[] = {"(", "policycap", "pol", ")", NULL};
+	char *line[] = {"(", "policycap", "open_perms", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -17650,7 +17650,7 @@ void test_cil_build_ast_node_helper_gen_optional_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_policycap(CuTest *tc) {
-	char *line[] = {"(", "policycap", "pol", ")", NULL};
+	char *line[] = {"(", "policycap", "open_perms", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
