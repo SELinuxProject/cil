@@ -33,6 +33,7 @@
 #include <ctype.h>
 
 #include <sepol/policydb/conditional.h>
+#include <sepol/policydb/polcaps.h>
 
 #include "cil.h"
 #include "cil_mem.h"
@@ -4929,6 +4930,12 @@ int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, st
 	cil_policycap_init(&polcap);
 
 	key = parse_current->next->data;
+
+	rc = sepol_polcap_getnum((const char*)key);
+	if (rc < 0) {
+		printf("Invalid policycap: %s (line: %d)\n", key, parse_current->line);
+		goto exit;
+	}
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)polcap, (hashtab_key_t)key, CIL_SYM_POLICYCAPS, CIL_POLICYCAP);
 	if (rc != SEPOL_OK)
