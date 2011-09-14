@@ -32,6 +32,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <sepol/policydb/conditional.h>
+
 #include "cil.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
@@ -51,6 +53,8 @@ struct cil_args_build {
 struct cil_args_stack {
 	struct cil_list *expr_stack;
 	enum cil_flavor flavor;
+	int depth;
+	int nbools; // Number of bools in an expression stack
 };
 
 int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, enum cil_sym_index sflavor, enum cil_flavor nflavor)
@@ -1919,6 +1923,8 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 {
 	int rc = SEPOL_ERR;
 	struct cil_args_stack *args = extra_args;
+	int *depth = &args->depth;
+	int *nbools = &args->nbools;
 	struct cil_list *stack = args->expr_stack;
 	enum cil_flavor flavor = args->flavor;
 	struct cil_list_item *new = NULL;
@@ -1946,6 +1952,16 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+
+		if (cond->flavor == CIL_AND || cond->flavor == CIL_OR
+		 || cond->flavor == CIL_NOT || cond->flavor == CIL_XOR) {
+			(*depth)++;
+			if (*depth > COND_EXPR_MAXDEPTH) {
+				printf("Expression exceeds max depth (%d)\n", COND_EXPR_MAXDEPTH);
+				rc = SEPOL_ERR;
+				goto exit;
+			}
+		}
 	} else {
 		cond->flavor = flavor;
 	}
@@ -1958,6 +1974,15 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 		}
 		*finished = CIL_TREE_SKIP_ALL;
 	} else {
+		if (cond->flavor == CIL_BOOL) {
+			(*nbools)++;
+			if (*nbools > COND_MAX_BOOLS) {
+				printf("Expression exceeds max number of bools (%d)\n", COND_MAX_BOOLS);
+				rc = SEPOL_ERR;
+				goto exit;
+			}
+		}
+
 		cond->str = cil_strdup(node->data);
 
 		cil_list_item_init(&new);
@@ -2009,6 +2034,8 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 	} else {
 		extra_args.expr_stack = new_stack;
 		extra_args.flavor = flavor;
+		extra_args.depth = 0;
+		extra_args.nbools = 0;
 		rc = cil_tree_walk(current, __cil_gen_expr_stack_helper, NULL, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
