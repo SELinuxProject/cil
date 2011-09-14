@@ -1158,14 +1158,16 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 			if (cond_node->true_list == NULL) {
 				cond_node->true_list = cond_list;
 			} else {
-				cond_node->true_list->next = cond_list;
+				cond_list->next = cond_node->true_list;
+				cond_node->true_list = cond_list;
 			}
 			break;
 		case CIL_CONDFALSE:
 			if (cond_node->false_list == NULL) {
 				cond_node->false_list = cond_list;
 			} else {
-				cond_node->false_list->next = cond_list;
+				cond_list->next = cond_node->false_list;
+				cond_node->false_list = cond_list;
 			}
 			break;
 		default:
