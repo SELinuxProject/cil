@@ -53,8 +53,6 @@
 	(sensitivitycategory s1 cats01)
 	(sensitivitycategory s1 (c2))
 
-	(context system_u_bin_t_l2h (system_u system_r bin_t (low high)))
-
 	(level low (s0 (c0)))
 	(level high (s1 (c0 c1)))
 	(levelrange low_high (low high))
@@ -92,7 +90,7 @@
 	)
 
 	(booleanif (not (xor (eq secure_mode console_login) 
-				(and (or secure_mode console_login) ) ) )
+				(and (or secure_mode console_login) secure_mode ) ) )
 		(true
 			(allow bin_t exec_t (file (execute)))
 		)
@@ -136,6 +134,7 @@
 	(userrange user_u (low low))
 
 	(sidcontext kernel system_u_bin_t_l2h)
+	(context system_u_bin_t_l2h (system_u system_r bin_t (low high)))
 
 	(ipaddr ip_v4 192.25.35.200)
 	(ipaddr netmask 192.168.1.1)

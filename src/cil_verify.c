@@ -880,6 +880,21 @@ exit:
 	return rc;
 }
 
+int __cil_verify_named_levelrange(struct cil_db *db, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_levelrange *lr = node->data;
+
+	rc = __cil_verify_levelrange(db, lr);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 int __cil_add_levelrange_sens_to_symtab(struct cil_levelrange *lvlrange, symtab_t *senstab)
 {
 	int rc = SEPOL_ERR;
@@ -923,7 +938,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_user(struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
@@ -948,6 +963,11 @@ int __cil_verify_user(struct cil_tree_node *node, symtab_t *senstab)
 				goto exit;
 			}
 		}
+	}
+
+	rc = __cil_verify_levelrange(db, user->range);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
 
 	sensdatum = cil_malloc(sizeof(*sensdatum));
@@ -1083,6 +1103,11 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 	} else {
 		printf("No types given to the specified role\n");
 		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = __cil_verify_levelrange(db, ctx->range);
+	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
@@ -1410,7 +1435,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 
 	switch (node->flavor) {
 	case CIL_USER:
-		rc = __cil_verify_user(node, senstab);
+		rc = __cil_verify_user(db, node, senstab);
 		break;
 	case CIL_ROLE:
 		rc = __cil_verify_role(node);
@@ -1428,6 +1453,9 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 		break;
 	case CIL_CONTEXT:
 		rc = __cil_verify_named_context(db, node);
+		break;
+	case CIL_LEVELRANGE:
+		rc = __cil_verify_named_levelrange(db, node);
 		break;
 	case CIL_NETIFCON:
 		rc = __cil_verify_netifcon(db, node, senstab);
