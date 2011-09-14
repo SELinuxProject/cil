@@ -564,6 +564,7 @@ exit:
 int cil_post_verify(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
+	int avrule_cnt = 0;
 	struct cil_list_item *curr = NULL;
 	struct cil_args_verify extra_args;
 	symtab_t senstab;
@@ -571,9 +572,17 @@ int cil_post_verify(struct cil_db *db)
 
 	extra_args.db = db;
 	extra_args.senstab = &senstab;
+	extra_args.avrule_cnt = &avrule_cnt;
+
 	rc = cil_tree_walk(db->ast->root, __cil_verify_helper, NULL, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
 		printf("Failed to verify cil database\n");
+		goto exit;
+	}
+
+	if (avrule_cnt == 0) {
+		printf("Policy must include at least one avrule\n");
+		rc = SEPOL_ERR;
 		goto exit;
 	}
 

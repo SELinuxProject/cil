@@ -48,6 +48,7 @@ enum cil_syntax {
 struct cil_args_verify {
 	struct cil_db *db;
 	symtab_t *senstab;
+	int *avrule_cnt;
 };
 
 struct cil_args_verify_order {
