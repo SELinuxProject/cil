@@ -129,7 +129,6 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 			goto exit;
 		}
 		sepol_perm->s.value = sepol_class->permissions.nprim + 1;
-
 		sepol_class->permissions.nprim++;
 		cil_perm = cil_perm->next;
 	}
@@ -162,6 +161,8 @@ int cil_classcommon_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 			goto exit;
 		}
 		sepol_class->comdatum = sepol_common;
+		sepol_class->comkey = cil_strdup(cil_class->common->datum.name);
+		sepol_class->permissions.nprim += sepol_class->comdatum->permissions.nprim;
 	}
 
 	return SEPOL_OK;
