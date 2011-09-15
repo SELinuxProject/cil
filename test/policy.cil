@@ -1,4 +1,8 @@
 (type bin_t)
+(type kernel_t)
+(type security_t)
+(type unlabeled_t)
+
 (policycap open_perms)
 
 (block policy
@@ -58,6 +62,8 @@
 	(levelrange low_high (low high))
 
 	(sid kernel)
+	(sid security)
+	(sid unlabeled)
 		
 	(typeattribute exec_type)
 	(typeattributetypes exec_type (bin_t))
@@ -121,6 +127,9 @@
 	(role user_r)
 
 	(roletype system_r bin_t)
+	(roletype system_r kernel_t)
+	(roletype system_r security_t)
+	(roletype system_r unlabeled_t)
 	(roleallow system_r user_r)
 	(rolebounds system_r user_r)
 	(roletransition system_r bin_t file user_r)
@@ -133,7 +142,10 @@
 	(userlevel user_u low)
 	(userrange user_u (low low))
 
-	(sidcontext kernel system_u_bin_t_l2h)
+	(sidcontext kernel (system_u system_r kernel_t (low high)))
+	(sidcontext security (system_u system_r security_t (low high)))
+	(sidcontext unlabeled (system_u system_r unlabeled_t (low high)))
+
 	(context system_u_bin_t_l2h (system_u system_r bin_t (low high)))
 
 	(ipaddr ip_v4 192.25.35.200)

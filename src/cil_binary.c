@@ -1960,10 +1960,11 @@ int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	new_sepol_sidcon = cil_malloc(sizeof(*new_sepol_sidcon));
 	memset(new_sepol_sidcon, 0, sizeof(ocontext_t));
 
-	new_sepol_sidcon->next = pdb->ocontexts[OCON_ISID];
-	pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
-
-	new_sepol_sidcon->sid[0] = pdb->ocontexts[OCON_ISID]->sid[0] + 1;
+	if (pdb->ocontexts[OCON_ISID] == NULL) {
+		new_sepol_sidcon->sid[0] = 1;
+	} else {
+		new_sepol_sidcon->sid[0] = pdb->ocontexts[OCON_ISID]->sid[0] + 1;
+	}
 	new_sepol_sidcon->u.name = cil_strdup(cil_sid->datum.name);
 
 	sepol_context = &new_sepol_sidcon->context[0];
@@ -1974,6 +1975,9 @@ int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 			goto exit;
 		}
 	}
+
+	new_sepol_sidcon->next = pdb->ocontexts[OCON_ISID];
+	pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
 
 	return SEPOL_OK;
 
