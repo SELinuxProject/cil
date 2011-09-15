@@ -31,7 +31,7 @@
 	(type exec_t)
 
 	(allow console_t console_device_t file_rw)
-	; (allow console_t console_device_t (files (read)))
+	(allow console_t console_device_t (files (read)))
 
 	(boolean secure_mode false)
 	(boolean console_login true)

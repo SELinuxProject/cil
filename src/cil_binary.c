@@ -1015,36 +1015,89 @@ exit:
 	return rc;
 }
 
+/* Before inserting, expand out avrule classpermset if it is a classmap */
+int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr, uint32_t merge)
+{
+	int rc = SEPOL_ERR;
+	uint32_t data = 0;
+	char *obj = NULL;
+	uint16_t kind = cil_avrule->rule_kind;
+	class_datum_t *sepol_obj = NULL;
+	struct cil_classpermset *classpermset = cil_avrule->classpermset;
+	struct cil_list *cil_perms = classpermset->perms;
+
+	if (classpermset->flavor == CIL_CLASS) {
+		obj = ((struct cil_symtab_datum *)cil_avrule->classpermset->class)->name;
+		sepol_obj = hashtab_search(pdb->p_classes.table, obj);
+		if (sepol_obj == NULL) {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		rc = __cil_perms_to_datum(cil_perms, sepol_obj, &data);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+
+		if (kind == CIL_AVRULE_DONTAUDIT) {
+			data = ~data;
+		}
+
+		rc = __cil_insert_avrule(kind, src, tgt, sepol_obj->s.value, data, avtab, avtab_ptr, merge);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	} else if (classpermset->flavor == CIL_CLASSMAP) {
+		struct cil_list_item *i = NULL;
+
+		for (i = cil_perms->head; i != NULL; i = i->next) {
+			struct cil_classmap_perm *cmp = i->data;
+			struct cil_list_item *j = NULL;
+
+			for (j = cmp->classperms->head; j != NULL; j = j->next) {
+				struct cil_classpermset *cps = j->data;
+				struct cil_list *perms = cps->perms;
+
+				obj = ((struct cil_symtab_datum *)cps->class)->name;
+				sepol_obj = hashtab_search(pdb->p_classes.table, obj);
+				if (sepol_obj == NULL) {
+					rc = SEPOL_ERR;
+					goto exit;
+				}
+
+				rc = __cil_perms_to_datum(perms, sepol_obj, &data);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				if (kind == CIL_AVRULE_DONTAUDIT) {
+					data = ~data;
+				}
+
+				rc = __cil_insert_avrule(kind, src, tgt, sepol_obj->s.value, data, avtab, avtab_ptr, merge);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				data = 0;
+			}
+		}
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr, uint32_t merge)
 {
 	int rc = SEPOL_ERR;
 	char *src = NULL;
 	char *tgt = NULL;
-	char *obj = NULL;
 	type_datum_t *sepol_src = NULL;
 	type_datum_t *sepol_tgt = NULL;
-	class_datum_t *sepol_obj = NULL;
-	uint32_t data;
-	uint16_t kind = cil_avrule->rule_kind;
-	struct cil_list *cil_perms = cil_avrule->classpermset->perms;
 	ebitmap_t types;
 	ebitmap_init(&types);
-
-	obj = ((struct cil_symtab_datum *)cil_avrule->classpermset->class)->name;
-	sepol_obj = hashtab_search(pdb->p_classes.table, obj);
-	if (sepol_obj == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	rc = __cil_perms_to_datum(cil_perms, sepol_obj, &data);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	if (kind == CIL_AVRULE_DONTAUDIT) {
-		data = ~data;
-	}
 
 	src = ((struct cil_symtab_datum *)cil_avrule->src)->name;
 	tgt = ((struct cil_symtab_datum *)cil_avrule->tgt)->name;
@@ -1070,13 +1123,13 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 					continue;
 				}
 
-				rc = __cil_insert_avrule(kind, i + 1, i + 1, sepol_obj->s.value, data, avtab, avtab_ptr, merge);
+				rc = __cil_avrule_expand(pdb, i + 1, i + 1, cil_avrule, avtab, avtab_ptr, merge);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
 			}
 		} else {
-			rc = __cil_insert_avrule(kind, sepol_src->s.value, sepol_src->s.value, sepol_obj->s.value, data, avtab, avtab_ptr, merge);
+			rc = __cil_avrule_expand(pdb, sepol_src->s.value, sepol_src->s.value, cil_avrule, avtab, avtab_ptr, merge);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1088,7 +1141,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 			goto exit;
 		}
 
-		rc = __cil_insert_avrule(kind, sepol_src->s.value, sepol_tgt->s.value, sepol_obj->s.value, data, avtab, avtab_ptr, merge);
+		rc = __cil_avrule_expand(pdb, sepol_src->s.value, sepol_tgt->s.value, cil_avrule, avtab, avtab_ptr, merge);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
