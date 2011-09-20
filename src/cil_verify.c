@@ -966,9 +966,12 @@ int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *s
 		}
 	}
 
-	rc = __cil_verify_levelrange(db, user->range);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify user range only if anonymous */
+	if (user->range->datum.name == NULL) {
+		rc = __cil_verify_levelrange(db, user->range);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_level_sens_to_symtab(user->dftlevel, senstab);
@@ -1096,9 +1099,12 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 		goto exit;
 	}
 
-	rc = __cil_verify_levelrange(db, ctx->range);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify range only when anonymous */
+	if (ctx->range->datum.name == NULL) {
+		rc = __cil_verify_levelrange(db, ctx->range);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	for (curr = dominance->head; curr != NULL; curr = curr->next) {
@@ -1187,14 +1193,20 @@ int __cil_verify_netifcon(struct cil_db *db, struct cil_tree_node *node, symtab_
 	struct cil_context *if_ctx = netif->if_context;
 	struct cil_context *pkt_ctx = netif->packet_context;
 
-	rc = __cil_verify_context(db, if_ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (if_ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, if_ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
-	rc = __cil_verify_context(db, pkt_ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (pkt_ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, pkt_ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(if_ctx->range, senstab);
@@ -1217,9 +1229,12 @@ int __cil_verify_genfscon(struct cil_db *db, struct cil_tree_node *node, symtab_
 	struct cil_genfscon *genfs = node->data;
 	struct cil_context *ctx = genfs->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
@@ -1237,9 +1252,12 @@ int __cil_verify_filecon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 	struct cil_filecon *file = node->data;
 	struct cil_context *ctx = file->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
@@ -1257,9 +1275,12 @@ int __cil_verify_nodecon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 	struct cil_nodecon *nodecon = node->data;
 	struct cil_context *ctx = nodecon->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
@@ -1277,9 +1298,12 @@ int __cil_verify_portcon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 	struct cil_portcon *port = node->data;
 	struct cil_context *ctx = port->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
@@ -1297,9 +1321,12 @@ int __cil_verify_pirqcon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 	struct cil_genfscon *pirq = node->data;
 	struct cil_context *ctx = pirq->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
@@ -1317,9 +1344,12 @@ int __cil_verify_iomemcon(struct cil_db *db, struct cil_tree_node *node, symtab_
 	struct cil_iomemcon *iomem = node->data;
 	struct cil_context *ctx = iomem->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
@@ -1337,9 +1367,12 @@ int __cil_verify_ioportcon(struct cil_db *db, struct cil_tree_node *node, symtab
 	struct cil_ioportcon *ioport = node->data;
 	struct cil_context *ctx = ioport->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
@@ -1357,9 +1390,12 @@ int __cil_verify_pcidevicecon(struct cil_db *db, struct cil_tree_node *node, sym
 	struct cil_pcidevicecon *pcidev = node->data;
 	struct cil_context *ctx = pcidev->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
@@ -1377,9 +1413,12 @@ int __cil_verify_fsuse(struct cil_db *db, struct cil_tree_node *node, symtab_t *
 	struct cil_fsuse *fsuse = node->data;
 	struct cil_context *ctx = fsuse->context;
 
-	rc = __cil_verify_context(db, ctx);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	/* Verify only when anonymous */
+	if (ctx->datum.name == NULL) {
+		rc = __cil_verify_context(db, ctx);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
