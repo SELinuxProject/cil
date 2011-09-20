@@ -44,7 +44,7 @@ struct cil_args_copy {
 	struct cil_db *db;
 };
 
-int cil_copy_list(struct cil_list *orig, struct cil_list **copy)
+int cil_copy_list(struct cil_list *data, struct cil_list **copy)
 {
 	struct cil_list *new = NULL;
 	struct cil_list *new_sub = NULL;
@@ -52,11 +52,11 @@ int cil_copy_list(struct cil_list *orig, struct cil_list **copy)
 	struct cil_list_item *orig_item = NULL;
 	int rc = SEPOL_ERR;
 
-	if (orig == NULL) {
+	if (data == NULL) {
 		goto exit;
 	}
 
-	orig_item = orig->head;
+	orig_item = data->head;
 	cil_list_init(&new);
 	while(orig_item != NULL) {
 		if (new_item == NULL) {
@@ -88,48 +88,67 @@ exit:
 	return rc;
 }
 
-int cil_copy_block(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_parse(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	char *new = NULL;
+
+	new = cil_strdup(data);
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
+int cil_copy_block(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
+{
+	struct cil_block *orig = data;
 	struct cil_block *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_block_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
 
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_block: cil_symtab_insert failed, rc: %d\n", rc);
-		cil_destroy_block(new);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_block: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL){
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
 	cil_symtab_array_init(new->symtab, CIL_SYM_NUM);
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
 exit:
+	cil_destroy_block(new);
 	return rc;
 }
 
-int cil_copy_policycap(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_policycap(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_policycap *orig = data;
 	struct cil_policycap *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = ((struct cil_symtab_datum*)orig->data)->name;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_policycap_init(&new);
 
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_policycap: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_policycap: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 exit:
@@ -137,24 +156,26 @@ exit:
 	return rc;
 }
 
-int cil_copy_perm(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_perm(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_perm *orig = data;
 	struct cil_perm *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_perm_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_perm: cil_symtab_insert failed, rc: %d\n", rc);
-		free(new);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_perm: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -163,65 +184,72 @@ exit:
 	return rc;
 }
 
-int cil_copy_classmap_perm(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_classmap_perm(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_classmap_perm *orig = data;
 	struct cil_classmap_perm *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_classmap_perm_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_classmap_perm: cil_symtab_insert failed, rc: %d\n", rc);
-		free(new);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_classmap_perm: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
 exit:
+	cil_destroy_classmap_perm(new);
 	return rc;
 }
 
-int cil_copy_classmap(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_classmap(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_classmap *orig = data;
 	struct cil_classmap *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_classmap_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_classmap: cil_symtab_insert failed, rc: %d\n", rc);
-		cil_destroy_classmap(new);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_classmap: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_ERR;
+		printf("cil_copy_classmap: classmap cannot be redefined\n");
 		goto exit;
 	}
 
 	rc = symtab_init(&new->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
 		printf("cil_copy_classmap: symtab_init failed, rc: %d\n", rc);
-		cil_destroy_classmap(new);
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
 exit:
+	cil_destroy_classmap(new);
 	return rc;
 }
 
-int cil_copy_classmapping(struct cil_classmapping *orig, struct cil_classmapping **copy)
+int cil_copy_classmapping(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_classmapping *orig = data;
 	struct cil_classmapping *new = NULL;
 	struct cil_list_item *curr = NULL;
 	struct cil_list_item *new_item = NULL;
@@ -265,31 +293,36 @@ exit:
 	return rc;
 }
 
-int cil_copy_permset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_permset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_permset *orig = data;
 	struct cil_permset *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_permset_init(&new);
 
-	if (((struct cil_symtab_datum*)orig->data)->name != NULL) {
-		key = ((struct cil_symtab_datum*)orig->data)->name;
-		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-		if (rc != SEPOL_OK) {
-			printf("cil_copy_permset: cil_symtab_insert failed, rc: %d\n", rc);
+	if (key != NULL) {
+		rc = cil_symtab_get_node(symtab, key, &node);
+		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+			printf("cil_copy_permset: cil_symtab_get_node failed, rc: %d\n", rc);
+			goto exit;
+		} else if (node != NULL) {
+			printf("cil_copy_permset: permset cannot be redefined\n");
+			rc = SEPOL_ERR;
 			goto exit;
 		}
 	}
 
-	if (((struct cil_permset*)orig->data)->perms_list_str != NULL) {
-		rc = cil_copy_list(((struct cil_permset*)orig->data)->perms_list_str, &new->perms_list_str);
+	if (orig->perms_list_str != NULL) {
+		rc = cil_copy_list(orig->perms_list_str, &new->perms_list_str);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -298,26 +331,30 @@ exit:
 	return rc;
 }
 
-int cil_copy_class(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_class(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_class *orig = data;
 	struct cil_class *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_class_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_class: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_class: failed to get symtab node\n");
+		goto exit;
+	} else if (node != NULL) {
+		printf("cil_copy_class: class cannot be redefined\n");
+		rc = SEPOL_ERR;
 		goto exit;
 	}
 
 	cil_symtab_init(&new->perms, CIL_SYM_SIZE);
 
 	new->common = NULL;
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -326,17 +363,17 @@ exit:
 	return rc;
 }
 
-int cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new)
+int cil_copy_fill_classpermset(struct cil_classpermset *data, struct cil_classpermset *new)
 {
 	int rc = SEPOL_ERR;
 
-	new->class_str = cil_strdup(orig->class_str);
-	new->permset_str = cil_strdup(orig->permset_str);
+	new->class_str = cil_strdup(data->class_str);
+	new->permset_str = cil_strdup(data->permset_str);
 
-	if (orig->permset != NULL) {
+	if (data->permset != NULL) {
 		cil_permset_init(&new->permset);
 
-		rc = cil_copy_list(orig->permset->perms_list_str, &new->permset->perms_list_str);
+		rc = cil_copy_list(data->permset->perms_list_str, &new->permset->perms_list_str);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -349,29 +386,34 @@ exit:
 	return rc;
 }
 
-int cil_copy_classpermset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_classpermset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_classpermset *orig = data;
 	struct cil_classpermset *new = NULL;
-	char *key = NULL;
+	char *key = orig->datum.name;
 	int rc = SEPOL_ERR;
+	struct cil_tree_node *node = NULL;
 
 	cil_classpermset_init(&new);
 
-	if (((struct cil_symtab_datum*)orig->data)->name != NULL) {
-		key = ((struct cil_symtab_datum*)orig->data)->name;
-		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-		if (rc != SEPOL_OK) {
-			printf("cil_copy_classpermset: cil_symtab_insert failed, rc: %d\n", rc);
+	if (key != NULL) {
+		rc = cil_symtab_get_node(symtab, key, &node);
+		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+			printf("cil_copy_classpermset: cil_symtab_get_node failed, rc: %d\n", rc);
+			goto exit;
+		} else if (node != NULL) {
+			rc = SEPOL_ERR;
+			printf("cil_copy_classpermset: classpermissionset cannot be redefined\n");
 			goto exit;
 		}
 	}
 
-	rc = cil_copy_fill_classpermset((struct cil_classpermset*)orig->data, new);
+	rc = cil_copy_fill_classpermset(orig, new);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -380,21 +422,27 @@ exit:
 	return rc;
 }
 
-int cil_copy_common(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_common(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_common *orig = data;
 	struct cil_common *new = NULL;
 	int rc = SEPOL_ERR;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_common_init(&new);
 
-	char *key = ((struct cil_symtab_datum *)orig->data)->name;
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
 		printf("cil_copy_common: cil_symtab_insert failed, rc: %d\n", rc);
 		goto exit;
-	}
+	} else if (node != NULL) {
+		printf("cil_copy_common: common cannot be redefined\n");
+		goto exit;
+	}	
+
 	cil_symtab_init(&new->perms, CIL_SYM_SIZE);
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -403,8 +451,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_classcommon(struct cil_classcommon *orig, struct cil_classcommon **copy)
+int cil_copy_classcommon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_classcommon *orig = data;
 	struct cil_classcommon *new = NULL;
 
 	cil_classcommon_init(&new);
@@ -417,23 +466,26 @@ int cil_copy_classcommon(struct cil_classcommon *orig, struct cil_classcommon **
 	return SEPOL_OK;
 }
 
-int cil_copy_sid(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_sid(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_sid *orig = data;
 	struct cil_sid *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_sid_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_sid: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_sid: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -442,24 +494,25 @@ exit:
 	return rc;
 }
 
-int cil_copy_sidcontext(struct cil_tree_node *orig, struct cil_tree_node *copy, __attribute__((unused)) symtab_t *symtab)
+int cil_copy_sidcontext(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_sidcontext *orig = data;
 	struct cil_sidcontext *new = NULL;
 	int rc = SEPOL_ERR;
 
 	cil_sidcontext_init(&new);
 
-	new->context_str = cil_strdup(((struct cil_sidcontext*)orig->data)->context_str);
+	new->context_str = cil_strdup(orig->context_str);
 
-	if (((struct cil_sidcontext*)orig->data)->context != NULL) {
+	if (orig->context != NULL) {
 		cil_context_init(&new->context);
-		rc = cil_copy_fill_context(((struct cil_sidcontext*)orig->data)->context, new->context);
+		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -468,23 +521,26 @@ exit:
 	return rc;
 }
 
-int cil_copy_user(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_user(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_user *orig = data;
 	struct cil_user *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_user_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_user: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_user: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -493,8 +549,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_userrole(struct cil_userrole *orig, struct cil_userrole **copy)
+int cil_copy_userrole(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_userrole *orig = data;
 	struct cil_userrole *new = NULL;
 
 	cil_userrole_init(&new);
@@ -507,8 +564,9 @@ int cil_copy_userrole(struct cil_userrole *orig, struct cil_userrole **copy)
 	return SEPOL_OK;
 }
 
-int cil_copy_userlevel(struct cil_userlevel *orig, struct cil_userlevel **copy)
+int cil_copy_userlevel(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_userlevel *orig = data;
 	struct cil_userlevel *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -534,8 +592,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_userrange(struct cil_userrange *orig, struct cil_userrange **copy)
+int cil_copy_userrange(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_userrange *orig = data;
 	struct cil_userrange *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -561,8 +620,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_userbounds(struct cil_userbounds *orig, struct cil_userbounds **copy)
+int cil_copy_userbounds(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_userbounds *orig = data;
 	struct cil_userbounds *new = NULL;
 
 	cil_userbounds_init(&new);
@@ -575,23 +635,26 @@ int cil_copy_userbounds(struct cil_userbounds *orig, struct cil_userbounds **cop
 	return SEPOL_OK;
 }
 
-int cil_copy_role(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_role(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_role *orig = data;
 	struct cil_role *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_role_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_role: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_role: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -600,8 +663,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_roletype(struct cil_roletype *orig, struct cil_roletype **copy)
+int cil_copy_roletype(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_roletype *orig = data;
 	struct cil_roletype *new = NULL;
 
 	cil_roletype_init(&new);
@@ -614,8 +678,9 @@ int cil_copy_roletype(struct cil_roletype *orig, struct cil_roletype **copy)
 	return SEPOL_OK;
 }
 
-int cil_copy_rolebounds(struct cil_rolebounds *orig, struct cil_rolebounds **copy)
+int cil_copy_rolebounds(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_rolebounds *orig = data;
 	struct cil_rolebounds *new = NULL;
 
 	cil_rolebounds_init(&new);
@@ -628,8 +693,9 @@ int cil_copy_rolebounds(struct cil_rolebounds *orig, struct cil_rolebounds **cop
 	return SEPOL_OK;
 }
 
-int cil_copy_roledominance(struct cil_roledominance *orig, struct cil_roledominance **copy)
+int cil_copy_roledominance(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_roledominance *orig = data;
 	struct cil_roledominance *new = NULL;
 
 	cil_roledominance_init(&new);
@@ -642,8 +708,9 @@ int cil_copy_roledominance(struct cil_roledominance *orig, struct cil_roledomina
 	return SEPOL_OK;
 }
 
-int cil_copy_roleallow(struct cil_roleallow *orig, struct cil_roleallow **copy)
+int cil_copy_roleallow(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_roleallow *orig = data;
 	struct cil_roleallow *new = NULL;
 
 	cil_roleallow_init(&new);
@@ -656,23 +723,26 @@ int cil_copy_roleallow(struct cil_roleallow *orig, struct cil_roleallow **copy)
 	return SEPOL_OK;
 }
 
-int cil_copy_type(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_type(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_type *orig = data;
 	struct cil_type *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_type_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_type: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node (symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_type: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -681,8 +751,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_typebounds(struct cil_typebounds *orig, struct cil_typebounds **copy)
+int cil_copy_typebounds(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_typebounds *orig = data;
 	struct cil_typebounds *new = NULL;
 
 	cil_typebounds_init(&new);
@@ -695,8 +766,9 @@ int cil_copy_typebounds(struct cil_typebounds *orig, struct cil_typebounds **cop
 	return SEPOL_OK;
 }
 
-int cil_copy_typepermissive(struct cil_typepermissive *orig, struct cil_typepermissive **copy)
+int cil_copy_typepermissive(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_typepermissive *orig = data;
 	struct cil_typepermissive *new = NULL;
 
 	cil_typepermissive_init(&new);
@@ -708,23 +780,26 @@ int cil_copy_typepermissive(struct cil_typepermissive *orig, struct cil_typeperm
 	return SEPOL_OK;
 }
 
-int cil_copy_typeattribute(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_typeattribute(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_typeattribute *orig = data;
 	struct cil_typeattribute *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_typeattribute_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
 		printf("cil_copy_typeattribute: cil_symtab_insert failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -733,8 +808,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_typeattributetypes(struct cil_typeattributetypes *orig, struct cil_typeattributetypes **copy)
+int cil_copy_typeattributetypes(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_typeattributetypes *orig = data;
 	struct cil_typeattributetypes *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -765,24 +841,27 @@ exit:
 	return rc;
 }
 
-int cil_copy_typealias(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_typealias(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_typealias *orig = data;
 	struct cil_typealias *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_typealias_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_typealias: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_typealias: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	new->type_str = cil_strdup(((struct cil_typealias*)orig->data)->type_str);
-	copy->data = new;
+	new->type_str = cil_strdup(orig->type_str);
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -791,8 +870,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_roletransition(struct cil_roletransition *orig, struct cil_roletransition **copy)
+int cil_copy_roletransition(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_roletransition *orig = data;
 	struct cil_roletransition *new = NULL;
 
 	cil_roletransition_init(&new);
@@ -807,8 +887,9 @@ int cil_copy_roletransition(struct cil_roletransition *orig, struct cil_roletran
 	return SEPOL_OK;
 }
 
-int cil_copy_filetransition(struct cil_filetransition *orig, struct cil_filetransition **copy)
+int cil_copy_filetransition(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_filetransition *orig = data;
 	struct cil_filetransition *new = NULL;
 
 	cil_filetransition_init(&new);
@@ -824,8 +905,9 @@ int cil_copy_filetransition(struct cil_filetransition *orig, struct cil_filetran
 	return SEPOL_OK;
 }
 
-int cil_copy_rangetransition(struct cil_rangetransition *orig, struct cil_rangetransition **copy)
+int cil_copy_rangetransition(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_rangetransition *orig = data;
 	struct cil_rangetransition *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -853,24 +935,28 @@ exit:
 	return rc;
 }
 
-int cil_copy_bool(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_bool(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_bool *orig = data;
 	struct cil_bool *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_bool_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_bool: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_bool: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
+		//TODO How do we handle merging of value?
 		goto exit;
 	}
 
-	new->value = ((struct cil_bool *)orig->data)->value;
-	copy->data = new;
+	new->value = orig->value;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -879,8 +965,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_avrule(struct cil_avrule *orig, struct cil_avrule **copy)
+int cil_copy_avrule(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_avrule *orig = data;
 	struct cil_avrule *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -905,8 +992,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_type_rule(struct cil_type_rule *orig, struct cil_type_rule **copy)
+int cil_copy_type_rule(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_type_rule  *orig = data;
 	struct cil_type_rule *new = NULL;
 
 	cil_type_rule_init(&new);
@@ -922,23 +1010,26 @@ int cil_copy_type_rule(struct cil_type_rule *orig, struct cil_type_rule **copy)
 	return SEPOL_OK;
 }
 
-int cil_copy_sens(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_sens(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_sens *orig = data;
 	struct cil_sens *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_sens_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_sens: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_sens: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -947,24 +1038,27 @@ exit:
 	return rc;
 }
 
-int cil_copy_sensalias(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_sensalias(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_sensalias *orig = data;
 	struct cil_sensalias *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_sensalias_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_sensalias: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_sensalias: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	new->sens_str = cil_strdup(((struct cil_sensalias*)orig->data)->sens_str);
-	copy->data = new;
+	new->sens_str = cil_strdup(orig->sens_str);
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -973,23 +1067,26 @@ exit:
 	return rc;
 }
 
-int cil_copy_cat(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_cat(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_cat *orig = data;
 	struct cil_cat *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_cat_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_cat: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_cat: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -998,24 +1095,27 @@ exit:
 	return rc;
 }
 
-int cil_copy_catalias(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_catalias(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_catalias *orig = data;
 	struct cil_catalias *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_catalias_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_catalias: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_catalias: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	new->cat_str = cil_strdup(((struct cil_catalias*)orig->data)->cat_str);
-	copy->data = new;
+	new->cat_str = cil_strdup(orig->cat_str);
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1024,35 +1124,36 @@ exit:
 	return rc;
 }
 
-int cil_copy_fill_catrange(struct cil_catrange *orig, struct cil_catrange *new)
+int cil_copy_fill_catrange(struct cil_catrange *data, struct cil_catrange *new)
 {
-	new->cat_low_str = cil_strdup(orig->cat_low_str);
-	new->cat_high_str = cil_strdup(orig->cat_high_str);
+	new->cat_low_str = cil_strdup(data->cat_low_str);
+	new->cat_high_str = cil_strdup(data->cat_high_str);
 
 	return SEPOL_OK;
 }
 
-int cil_copy_catrange(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_catrange(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_catrange *orig = data;
 	struct cil_catrange *new = NULL;
-	struct cil_catrange *old = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_catrange_init(&new);
 
-	old = orig->data;
-	key = old->datum.name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_catrange: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_catrange: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	new->cat_low_str = cil_strdup(old->cat_low_str);
-	new->cat_high_str = cil_strdup(old->cat_high_str);
-	copy->data = new;
+	new->cat_low_str = cil_strdup(orig->cat_low_str);
+	new->cat_high_str = cil_strdup(orig->cat_high_str);
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1061,7 +1162,7 @@ exit:
 	return rc;
 }
 
-int cil_copy_fill_catset(struct cil_catset *orig, struct cil_catset *new)
+int cil_copy_fill_catset(struct cil_catset *data, struct cil_catset *new)
 {
 	struct cil_list_item *orig_item;
 	struct cil_list_item *new_item;
@@ -1069,7 +1170,7 @@ int cil_copy_fill_catset(struct cil_catset *orig, struct cil_catset *new)
 
 	cil_list_init(&new->cat_list_str);
 
-	for (orig_item = orig->cat_list_str->head; orig_item != NULL; orig_item = orig_item->next) {
+	for (orig_item = data->cat_list_str->head; orig_item != NULL; orig_item = orig_item->next) {
 		cil_list_item_init(&new_item);
 
 		switch (orig_item->flavor) {
@@ -1106,30 +1207,31 @@ exit:
 	return rc;
 }
 
-int cil_copy_catset(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_catset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_catset *orig = data;
 	struct cil_catset *new = NULL;
-	struct cil_catset *old = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_catset_init(&new);
 
-	old = orig->data;
-	key = old->datum.name;
-
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_catset: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_catset: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	rc = cil_copy_fill_catset(old, new);
+	rc = cil_copy_fill_catset(orig, new);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1139,8 +1241,9 @@ exit:
 
 }
 
-int cil_copy_senscat(struct cil_senscat *orig, struct cil_senscat **copy)
+int cil_copy_senscat(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_senscat *orig = data;
 	struct cil_senscat *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1166,8 +1269,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_catorder(struct cil_catorder *orig, struct cil_catorder **copy)
+int cil_copy_catorder(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_catorder *orig = data;
 	struct cil_catorder *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1188,8 +1292,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_dominance(struct cil_sens_dominates *orig, struct cil_sens_dominates **copy)
+int cil_copy_dominance(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_sens_dominates *orig = data;
 	struct cil_sens_dominates *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1210,16 +1315,16 @@ exit:
 	return rc;
 }
 
-int cil_copy_fill_level(struct cil_level *orig, struct cil_level *new)
+int cil_copy_fill_level(struct cil_level *data, struct cil_level *new)
 {
 	int rc = SEPOL_ERR;
 
-	new->sens_str = cil_strdup(orig->sens_str);
-	new->catset_str = cil_strdup(orig->catset_str);
+	new->sens_str = cil_strdup(data->sens_str);
+	new->catset_str = cil_strdup(data->catset_str);
 
-	if (orig->catset != NULL) {
+	if (data->catset != NULL) {
 		cil_catset_init(&new->catset);
-		rc = cil_copy_fill_catset(orig->catset, new->catset);
+		rc = cil_copy_fill_catset(data->catset, new->catset);
 		if (rc != SEPOL_OK) {
 			cil_destroy_catset(new->catset);
 			goto exit;
@@ -1232,28 +1337,33 @@ exit:
 	return rc;
 }
 
-int cil_copy_level(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_level(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_level *orig = data;
 	struct cil_level *new = NULL;
+	char *key = orig->datum.name;
 	int rc = SEPOL_ERR;
+	struct cil_tree_node *node = NULL;
 
 	cil_level_init(&new);
 
-	if (((struct cil_level*)orig->data)->datum.name != NULL) {
-		char *key = ((struct cil_symtab_datum*)orig->data)->name;
-		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-		if (rc != SEPOL_OK) {
-			printf("cil_copy_level: cil_symtab_insert failed, rc: %d\n", rc);
+	if (key != NULL) {
+		rc = cil_symtab_get_node(symtab, key, &node);
+		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+			printf("cil_copy_level: cil_symtab_get_node failed, rc: %d\n", rc);
+			goto exit;
+		} else if (node != NULL) {
+			rc = SEPOL_EEXIST;
 			goto exit;
 		}
 	}
 
-	rc = cil_copy_fill_level((struct cil_level*)orig->data, new);
+	rc = cil_copy_fill_level(orig, new);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1262,25 +1372,25 @@ exit:
 	return rc;
 }
 
-int cil_copy_fill_levelrange(struct cil_levelrange *orig, struct cil_levelrange *new)
+int cil_copy_fill_levelrange(struct cil_levelrange *data, struct cil_levelrange *new)
 {
 	int rc = SEPOL_ERR;
 
-	new->low_str = cil_strdup(orig->low_str);
-	new->high_str = cil_strdup(orig->high_str);
+	new->low_str = cil_strdup(data->low_str);
+	new->high_str = cil_strdup(data->high_str);
 
-	if (orig->low != NULL) {
+	if (data->low != NULL) {
 		cil_level_init(&new->low);
-		rc = cil_copy_fill_level(orig->low, new->low);
+		rc = cil_copy_fill_level(data->low, new->low);
 		if (rc != SEPOL_OK) {
 			cil_destroy_level(new->low);
 			goto exit;
 		}
 	}
 
-	if (orig->high != NULL) {
+	if (data->high != NULL) {
 		cil_level_init(&new->high);
-		rc = cil_copy_fill_level(orig->high, new->high);
+		rc = cil_copy_fill_level(data->high, new->high);
 		if (rc != SEPOL_OK) {
 			cil_destroy_level(new->high);
 			goto exit;
@@ -1293,28 +1403,33 @@ exit:
 	return rc;
 }
 
-int cil_copy_levelrange(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_levelrange(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_levelrange *orig = data;
 	struct cil_levelrange *new = NULL;
 	int rc = SEPOL_ERR;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_levelrange_init(&new);
 
-	if (((struct cil_levelrange*)orig->data)->datum.name != NULL) {
-		char *key = ((struct cil_symtab_datum*)orig->data)->name;
-		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-		if (rc != SEPOL_OK) {
-			printf("cil_copy_levelrange: cil_symtab_insert failed, rc: %d\n", rc);
+	if (key != NULL) {
+		rc = cil_symtab_get_node(symtab, key, &node);
+		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+			printf("cil_copy_levelrange: cil_symtab_get_node failed, rc: %d\n", rc);
+			goto exit;
+		} else if (node != NULL) {
+			rc = SEPOL_EEXIST;
 			goto exit;
 		}
 	}
 
-	rc = cil_copy_fill_levelrange((struct cil_levelrange*)orig->data, new);
+	rc = cil_copy_fill_levelrange(orig, new);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1323,18 +1438,18 @@ exit:
 	return rc;
 }
 
-int cil_copy_fill_context(struct cil_context *orig, struct cil_context *new)
+int cil_copy_fill_context(struct cil_context *data, struct cil_context *new)
 {
 	int rc = SEPOL_ERR;
 
-	new->user_str = cil_strdup(orig->user_str);
-	new->role_str = cil_strdup(orig->role_str);
-	new->type_str = cil_strdup(orig->type_str);
-	new->range_str = cil_strdup(orig->range_str);
+	new->user_str = cil_strdup(data->user_str);
+	new->role_str = cil_strdup(data->role_str);
+	new->type_str = cil_strdup(data->type_str);
+	new->range_str = cil_strdup(data->range_str);
 
-	if (orig->range != NULL) {
+	if (data->range != NULL) {
 		cil_levelrange_init(&new->range);
-		rc = cil_copy_fill_levelrange(orig->range, new->range);
+		rc = cil_copy_fill_levelrange(data->range, new->range);
 		if (rc != SEPOL_OK) {
 			cil_destroy_levelrange(new->range);
 			goto exit;
@@ -1347,28 +1462,33 @@ exit:
 	return rc;
 }
 
-int cil_copy_context(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_context(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_context *orig = data;
 	struct cil_context *new = NULL;
 	int rc = SEPOL_ERR;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_context_init(&new);
 
-	if (((struct cil_context*)orig->data)->datum.name != NULL) {
-		char *key = ((struct cil_symtab_datum*)orig->data)->name;
-		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-		if (rc != SEPOL_OK) {
-			printf("cil_copy_context: cil_symtab_insert failed, rc: %d\n", rc);
+	if (key != NULL) {
+		rc = cil_symtab_get_node(symtab, key, &node);
+		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+			printf("cil_copy_context: cil_symtab_get_node failed, rc: %d\n", rc);
+			goto exit;
+		} else if (node != NULL) {
+			rc = SEPOL_EEXIST;
 			goto exit;
 		}
 	}
 
-	rc = cil_copy_fill_context(((struct cil_context*)orig->data), new);
+	rc = cil_copy_fill_context(orig, new);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1377,8 +1497,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_netifcon(struct cil_netifcon *orig, struct cil_netifcon **copy)
+int cil_copy_netifcon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_netifcon *orig = data;
 	struct cil_netifcon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1413,8 +1534,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_genfscon(struct cil_genfscon *orig, struct cil_genfscon **copy)
+int cil_copy_genfscon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_genfscon *orig = data;
 	struct cil_genfscon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1441,8 +1563,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_filecon(struct cil_filecon *orig, struct cil_filecon **copy)
+int cil_copy_filecon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_filecon *orig = data;
 	struct cil_filecon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1470,8 +1593,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_nodecon(struct cil_nodecon *orig, struct cil_nodecon **copy)
+int cil_copy_nodecon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_nodecon *orig = data;
 	struct cil_nodecon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1514,8 +1638,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_portcon(struct cil_portcon *orig, struct cil_portcon **copy)
+int cil_copy_portcon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_portcon *orig = data;
 	struct cil_portcon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1543,8 +1668,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_pirqcon(struct cil_pirqcon *orig, struct cil_pirqcon **copy)
+int cil_copy_pirqcon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_pirqcon *orig = data;
 	struct cil_pirqcon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1570,8 +1696,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_iomemcon(struct cil_iomemcon *orig, struct cil_iomemcon **copy)
+int cil_copy_iomemcon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_iomemcon *orig = data;
 	struct cil_iomemcon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1598,8 +1725,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_ioportcon(struct cil_ioportcon *orig, struct cil_ioportcon **copy)
+int cil_copy_ioportcon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_ioportcon *orig = data;
 	struct cil_ioportcon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1626,8 +1754,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_pcidevicecon(struct cil_pcidevicecon *orig, struct cil_pcidevicecon **copy)
+int cil_copy_pcidevicecon(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_pcidevicecon *orig = data;
 	struct cil_pcidevicecon *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1653,8 +1782,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_fsuse(struct cil_fsuse *orig, struct cil_fsuse **copy)
+int cil_copy_fsuse(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_fsuse *orig = data;
 	struct cil_fsuse *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1681,8 +1811,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_constrain(struct cil_constrain *orig, struct cil_constrain **copy)
+int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_constrain *orig = data;
 	struct cil_constrain *new = NULL;
 	struct cil_list_item *curr_old = NULL;
 	struct cil_list *new_list = NULL;
@@ -1714,7 +1845,7 @@ int cil_copy_constrain(struct cil_constrain *orig, struct cil_constrain **copy)
 
 		cil_conditional_init(&cond_new);
 
-		cil_copy_conditional(curr_old->data, cond_new);
+		cil_copy_conditional(db, curr_old, ((void**)&cond_new), NULL);
 		curr_new->data = cond_new;
 		curr_new->flavor = curr_old->flavor;
 
@@ -1736,8 +1867,9 @@ exit:
 	return rc;
 }
 
-int cil_copy_call(struct cil_db *db, struct cil_call *orig, struct cil_call **copy)
+int cil_copy_call(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_call *orig = data;
 	struct cil_call *new = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1761,25 +1893,29 @@ exit:
 	return rc;
 }
 
-int cil_copy_macro(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_macro(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_macro *orig = data;
 	struct cil_macro *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_macro_init(&new);
 
-	key = ((struct cil_symtab_datum*)orig->data)->name;
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_macro: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_macro: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
 	cil_symtab_array_init(new->symtab, CIL_SYM_NUM);
-	rc = cil_copy_list(((struct cil_macro*)orig->data)->params, &new->params);
+	rc = cil_copy_list(orig->params, &new->params);
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1788,22 +1924,26 @@ exit:
 	return rc;
 }
 
-int cil_copy_optional(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_optional(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_optional *orig = data;
 	struct cil_optional *new = NULL;
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
 
 	cil_optional_init(&new);
 
-	key = ((struct cil_symtab_datum *)orig->data)->name;
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_optional: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_optional: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1812,38 +1952,39 @@ exit:
 	return rc;
 }
 
-int cil_copy_fill_ipaddr(struct cil_ipaddr *orig, struct cil_ipaddr *new)
+int cil_copy_fill_ipaddr(struct cil_ipaddr *data, struct cil_ipaddr *new)
 {
-	new->family = orig->family;
-	memcpy(&new->ip, &orig->ip, sizeof(orig->ip));
+	new->family = data->family;
+	memcpy(&new->ip, &data->ip, sizeof(data->ip));
 
 	return SEPOL_OK;
 }
 
-int cil_copy_ipaddr(struct cil_tree_node *orig, struct cil_tree_node *copy, symtab_t *symtab)
+int cil_copy_ipaddr(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
+	struct cil_ipaddr *orig = data;
 	struct cil_ipaddr *new = NULL;
-	struct cil_ipaddr *old = NULL;
-	char * key = NULL;
+	char * key = orig->datum.name;	
 	int rc = SEPOL_ERR;
+	struct cil_tree_node *node = NULL;
 
 	cil_ipaddr_init(&new);
 
-	old = (struct cil_ipaddr*)orig->data;
-
-	key = old->datum.name;
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, &new->datum, copy);
-	if (rc != SEPOL_OK) {
-		printf("cil_copy_ipaddr: cil_symtab_insert failed, rc: %d\n", rc);
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		printf("cil_copy_ipaddr: cil_symtab_get_node failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
 		goto exit;
 	}
 
-	rc = cil_copy_fill_ipaddr(old, new);
+	rc = cil_copy_fill_ipaddr(orig, new);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	copy->data = new;
+	*copy = new;
 
 	return SEPOL_OK;
 
@@ -1852,22 +1993,28 @@ exit:
 	return rc;
 }
 
-int cil_copy_conditional(struct cil_conditional *orig, struct cil_conditional *new)
+int cil_copy_conditional(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	struct cil_conditional *orig = data;
+	struct cil_conditional *new = NULL;
+
 	new->str = cil_strdup(orig->str);
 	new->flavor = orig->flavor;
+
+	*copy = new;
 
 	return SEPOL_OK;
 }
 
-int cil_copy_boolif(struct cil_booleanif *orig, struct cil_booleanif **copy)
+int cil_copy_boolif(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
-	int rc = SEPOL_ERR;
+	struct cil_booleanif *orig = data;
 	struct cil_list_item *curr_old = NULL;
 	struct cil_list *new_list = NULL;
 	struct cil_list_item *curr_new = NULL;
 	struct cil_conditional *cond_new = NULL;
 	struct cil_booleanif *new = NULL;
+	int rc = SEPOL_ERR;
 
 	cil_boolif_init(&new);
 
@@ -1879,7 +2026,7 @@ int cil_copy_boolif(struct cil_booleanif *orig, struct cil_booleanif **copy)
 
 		cil_conditional_init(&cond_new);
 
-		cil_copy_conditional(curr_old->data, cond_new);
+		cil_copy_conditional(db, curr_old->data, ((void**)&cond_new), NULL);
 		curr_new->data = cond_new;
 		curr_new->flavor = curr_old->flavor;
 
@@ -1901,27 +2048,6 @@ exit:
 	return rc;
 }
 
-int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, enum cil_sym_index sym_index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym))
-{
-	int rc = SEPOL_ERR;
-	symtab_t *symtab = NULL;
-
-	rc = cil_get_symtab(db, new->parent, &symtab, sym_index);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	rc = (*copy_data)(orig, new, symtab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -1929,6 +2055,10 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	struct cil_tree_node *new = NULL;
 	struct cil_db *db = NULL;
 	struct cil_args_copy *args = NULL;
+	enum cil_sym_index sym_index = CIL_SYM_UNKNOWN;
+	symtab_t *symtab = NULL;
+	void *data = NULL;
+	int (*copy_func)(struct cil_db *db, void *data, void **copy, symtab_t *symtab) = NULL;
 
 	if (orig == NULL || extra_args == NULL) {
 		goto exit;
@@ -1938,234 +2068,253 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	parent = args->dest;
 	db = args->db;
 
-	rc = cil_tree_node_init(&new);
-	if (rc != SEPOL_OK) {
-		printf("Failed to init tree node, rc: %d\n", rc);
-		cil_tree_node_destroy(&new);
-		goto exit;
-	}
-
-	new->parent = parent;
-	new->line = orig->line;
-	new->path = orig->path;
-	new->flavor = orig->flavor;
-
-	if (parent->cl_head == NULL) {
-		parent->cl_head = new;
-		parent->cl_tail = new;
-	} else {
-		parent->cl_tail->next = new;
-		parent->cl_tail = new;
-	}
 
 	switch (orig->flavor) {
 	case CIL_BLOCK:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_BLOCKS, &cil_copy_block);
+		copy_func = &cil_copy_block;
 		break;
 	case CIL_POLICYCAP:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_POLICYCAPS, &cil_copy_policycap);
+		copy_func = &cil_copy_policycap;
 		break;
 	case CIL_PERM:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_UNKNOWN, &cil_copy_perm);
+		copy_func = &cil_copy_perm;
 		break;
 	case CIL_CLASSMAPPERM:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_UNKNOWN, &cil_copy_classmap_perm);
+		copy_func =  &cil_copy_classmap_perm;
 		break;
 	case CIL_CLASSMAP:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CLASSES, &cil_copy_classmap);
+		copy_func = &cil_copy_classmap;
 		break;
 	case CIL_CLASSMAPPING:
-		cil_copy_classmapping((struct cil_classmapping*)orig->data, (struct cil_classmapping**)&new->data);
+		copy_func = &cil_copy_classmapping;
 		break;
 	case CIL_PERMSET:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_PERMSETS, &cil_copy_permset);
+		copy_func = &cil_copy_permset;
 		break;
 	case CIL_CLASS:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CLASSES, &cil_copy_class);
+		copy_func = &cil_copy_class;
 		break;
 	case CIL_CLASSPERMSET:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CLASSPERMSETS, &cil_copy_classpermset);
+		copy_func = &cil_copy_classpermset;
 		break;
 	case CIL_COMMON:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_COMMONS, &cil_copy_common);
+		copy_func = &cil_copy_common;
 		break;
 	case CIL_CLASSCOMMON:
-		rc = cil_copy_classcommon((struct cil_classcommon*)orig->data, (struct cil_classcommon**)&new->data); 
+		copy_func = &cil_copy_classcommon;
 		break;
 	case CIL_SID:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_SIDS, &cil_copy_sid);
+		copy_func = &cil_copy_sid;
 		break;
 	case CIL_SIDCONTEXT:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_SIDS, &cil_copy_sidcontext);
+		copy_func = &cil_copy_sidcontext;
 		break;
 	case CIL_USER:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_USERS, &cil_copy_user);
+		copy_func = &cil_copy_user;
 		break;
 	case CIL_USERROLE:
-		rc = cil_copy_userrole((struct cil_userrole*)orig->data, (struct cil_userrole**)&new->data);
+		copy_func = &cil_copy_userrole;
 		break;
 	case CIL_USERLEVEL:
-		rc = cil_copy_userlevel((struct cil_userlevel*)orig->data, (struct cil_userlevel**)&new->data);
+		copy_func = &cil_copy_userlevel;
 		break;
 	case CIL_USERRANGE:
-		rc = cil_copy_userrange((struct cil_userrange*)orig->data, (struct cil_userrange**)&new->data);
+		copy_func = &cil_copy_userrange;
 		break;
 	case CIL_USERBOUNDS:
-		rc = cil_copy_userbounds((struct cil_userbounds*)orig->data, (struct cil_userbounds**)&new->data);
+		copy_func = &cil_copy_userbounds;
 		break;
 	case CIL_ROLE:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_ROLES, &cil_copy_role);
+		copy_func = &cil_copy_role;
 		break;
 	case CIL_ROLETYPE:
-		rc = cil_copy_roletype((struct cil_roletype*)orig->data, (struct cil_roletype**)&new->data);
+		copy_func = &cil_copy_roletype;
 		break;
 	case CIL_ROLEBOUNDS:
-		rc = cil_copy_rolebounds((struct cil_rolebounds*)orig->data, (struct cil_rolebounds**)&new->data);
+		copy_func = &cil_copy_rolebounds;
 		break;
 	case CIL_ROLEDOMINANCE:
-		rc = cil_copy_roledominance((struct cil_roledominance*)orig->data, (struct cil_roledominance**)&new->data);
+		copy_func = &cil_copy_roledominance;
 		break;
 	case CIL_ROLEALLOW:
-		rc = cil_copy_roleallow((struct cil_roleallow*)orig->data, (struct cil_roleallow**)&new->data);
+		copy_func = &cil_copy_roleallow;
 		break;
 	case CIL_TYPE:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_TYPES, &cil_copy_type);
+		copy_func = &cil_copy_type;
 		break;
 	case CIL_TYPEBOUNDS:
-		rc = cil_copy_typebounds((struct cil_typebounds*)orig->data, (struct cil_typebounds**)&new->data);
+		copy_func = &cil_copy_typebounds;
 		break;
 	case CIL_TYPEPERMISSIVE:
-		rc = cil_copy_typepermissive((struct cil_typepermissive*)orig->data, (struct cil_typepermissive**)&new->data);
+		copy_func = cil_copy_typepermissive;
 		break;
 	case CIL_TYPEATTRIBUTE:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_TYPES, &cil_copy_typeattribute);
+		copy_func = &cil_copy_typeattribute;
 		break;
 	case CIL_TYPEATTRIBUTETYPES:
-		rc = cil_copy_typeattributetypes((struct cil_typeattributetypes*)orig->data, (struct cil_typeattributetypes**)&new->data);
+		copy_func = &cil_copy_typeattributetypes;
 		break;
 	case CIL_TYPEALIAS:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_TYPES, &cil_copy_typealias);
+		copy_func = &cil_copy_typealias;
 		break;
 	case CIL_ROLETRANSITION:
-		rc = cil_copy_roletransition((struct cil_roletransition*)orig->data, (struct cil_roletransition**)&new->data);
+		copy_func = &cil_copy_roletransition;
 		break;
 	case CIL_FILETRANSITION:
-		rc = cil_copy_filetransition((struct cil_filetransition*)orig->data, (struct cil_filetransition**)&new->data);
+		copy_func = &cil_copy_filetransition;
 		break;
 	case CIL_RANGETRANSITION:
-		rc = cil_copy_rangetransition((struct cil_rangetransition*)orig->data, (struct cil_rangetransition**)&new->data);
+		copy_func = &cil_copy_rangetransition;
 		break;
 	case CIL_TUNABLE:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_TUNABLES, &cil_copy_bool);
+		copy_func = &cil_copy_bool;
 		break;
 	case CIL_BOOL:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_BOOLS, &cil_copy_bool);
+		copy_func = &cil_copy_bool;
 		break;
 	case CIL_AVRULE:
-		rc = cil_copy_avrule((struct cil_avrule*)orig->data, (struct cil_avrule**)&new->data);
+		copy_func = &cil_copy_avrule;
 		break;
 	case CIL_TYPE_RULE:
-		rc = cil_copy_type_rule((struct cil_type_rule*)orig->data, (struct cil_type_rule**)&new->data);
+		copy_func = &cil_copy_type_rule;
 		break;
 	case CIL_SENS:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_SENS, &cil_copy_sens);
+		copy_func = &cil_copy_sens;
 		break;
 	case CIL_SENSALIAS:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_SENS, &cil_copy_sensalias);
+		copy_func = &cil_copy_sensalias;
 		break;
 	case CIL_CAT:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CATS, &cil_copy_cat);
+		copy_func = &cil_copy_cat;
 		break;
 	case CIL_CATALIAS:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CATS, &cil_copy_catalias);
+		copy_func = &cil_copy_catalias;
 		break;
 	case CIL_CATRANGE:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CATS, &cil_copy_catrange);
+		copy_func = &cil_copy_catrange;
 		break;
 	case CIL_CATSET:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CATS, &cil_copy_catset);
+		copy_func = &cil_copy_catset;
 		break;
 	case CIL_SENSCAT:
-		rc = cil_copy_senscat((struct cil_senscat*)orig->data, (struct cil_senscat**)&new->data);
+		copy_func = &cil_copy_senscat;
 		break;
 	case CIL_CATORDER:
-		rc = cil_copy_catorder((struct cil_catorder*)orig->data, (struct cil_catorder**)&new->data);
+		copy_func = &cil_copy_catorder;
 		break;
 	case CIL_DOMINANCE:
-		rc = cil_copy_dominance((struct cil_sens_dominates*)orig->data, (struct cil_sens_dominates**)&new->data);
+		copy_func = &cil_copy_dominance;
 		break;
 	case CIL_LEVEL:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_LEVELS, &cil_copy_level);
+		copy_func = &cil_copy_level;
 		break;
 	case CIL_LEVELRANGE:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_LEVELRANGES, &cil_copy_levelrange);
+		copy_func = &cil_copy_levelrange;
 		break;
 	case CIL_CONTEXT:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_CONTEXTS, &cil_copy_context);
+		copy_func = &cil_copy_context;
 		break;
 	case CIL_NETIFCON:
-		rc = cil_copy_netifcon((struct cil_netifcon*)orig->data, (struct cil_netifcon**)&new->data);
+		copy_func = &cil_copy_netifcon;
 		break;
 	case CIL_GENFSCON:
-		rc = cil_copy_genfscon((struct cil_genfscon*)orig->data, (struct cil_genfscon**)&new->data);
+		copy_func = &cil_copy_genfscon;
 		break;
 	case CIL_FILECON:
-		rc = cil_copy_filecon((struct cil_filecon*)orig->data, (struct cil_filecon**)&new->data);
+		copy_func = &cil_copy_filecon;
 		break;
 	case CIL_NODECON:
-		rc = cil_copy_nodecon((struct cil_nodecon*)orig->data, (struct cil_nodecon**)&new->data);
+		copy_func = &cil_copy_nodecon;
 		break;
 	case CIL_PORTCON:
-		rc = cil_copy_portcon((struct cil_portcon*)orig->data, (struct cil_portcon**)&new->data);
+		copy_func = &cil_copy_portcon;
 		break;
 	case CIL_PIRQCON:
-		rc = cil_copy_pirqcon((struct cil_pirqcon*)orig->data, (struct cil_pirqcon**)&new->data);
+		copy_func = &cil_copy_pirqcon;
 		break;
 	case CIL_IOMEMCON:
-		rc = cil_copy_iomemcon((struct cil_iomemcon*)orig->data, (struct cil_iomemcon**)&new->data);
+		copy_func = &cil_copy_iomemcon;
 		break;
 	case CIL_IOPORTCON:
-		rc = cil_copy_ioportcon((struct cil_ioportcon*)orig->data, (struct cil_ioportcon**)&new->data);
+		copy_func = &cil_copy_ioportcon;
 		break;
 	case CIL_PCIDEVICECON:
-		rc = cil_copy_pcidevicecon((struct cil_pcidevicecon*)orig->data, (struct cil_pcidevicecon**)&new->data);
+		copy_func = &cil_copy_pcidevicecon;
 		break;
 	case CIL_FSUSE:
-		rc = cil_copy_fsuse((struct cil_fsuse*)orig->data, (struct cil_fsuse**)&new->data);
+		copy_func = &cil_copy_fsuse;
 		break;
 	case CIL_MLSCONSTRAIN:
-		rc = cil_copy_constrain((struct cil_constrain*)orig->data, (struct cil_constrain**)&new->data);
+		copy_func = &cil_copy_constrain;
 		break;
 	case CIL_CALL:
-		rc = cil_copy_call(db, (struct cil_call*)orig->data, (struct cil_call**)&new->data);
+		copy_func = &cil_copy_call;
 		break;
 	case CIL_MACRO:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_MACROS, &cil_copy_macro);
+		copy_func = &cil_copy_macro;
 		break;
 	case CIL_PARSE_NODE:
-		new->data = cil_strdup(((char*)orig->data));
-		rc = SEPOL_OK;
+		copy_func = &cil_copy_parse;
 		break;
 	case CIL_OPTIONAL:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_OPTIONALS, &cil_copy_optional);
+		copy_func = &cil_copy_optional;
 		break;
 	case CIL_IPADDR:
-		rc = __cil_copy_data_helper(db, orig, new, CIL_SYM_IPADDRS, &cil_copy_ipaddr);
+		copy_func = &cil_copy_ipaddr;
 		break;
 	case CIL_BOOLEANIF:
-		rc = cil_copy_boolif((struct cil_booleanif*)orig->data, (struct cil_booleanif**)&new->data);
+		copy_func = &cil_copy_boolif;
 		break;
 	default:
 		goto exit;
 	}
 
-	if (rc != SEPOL_OK) {
-		free(new);
-		goto exit;
+	if (orig->flavor >= CIL_MIN_DECLARATIVE) {
+		rc = cil_flavor_to_symtab_index(orig->flavor, &sym_index);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+
+		rc = cil_get_symtab(db, orig->parent, &symtab, sym_index);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
-	if (orig->cl_head != NULL) {
-		args->dest = new;
+
+	rc = (*copy_func)(db, orig->data, &data, symtab);
+	if (rc == SEPOL_OK) {
+
+		rc = cil_tree_node_init(&new);
+		if (rc != SEPOL_OK) {
+			printf("Failed to init tree node, rc: %d\n", rc);
+			cil_tree_node_destroy(&new);
+			goto exit;
+		}
+
+		new->parent = parent;
+		new->line = orig->line;
+		new->path = orig->path;
+		new->flavor = orig->flavor;
+		new->data = data;
+
+		if (parent->cl_head == NULL) {
+			parent->cl_head = new;
+			parent->cl_tail = new;
+		} else {
+			parent->cl_tail->next = new;
+			parent->cl_tail = new;
+		}
+
+		if (orig->cl_head != NULL) {
+			args->dest = new;
+		}
+	} else if (rc == SEPOL_EEXIST) {
+		//If blocklike, change parent
+
+		//Else, ignore/merge
+	} else {
+		goto exit;
 	}
 
 	return SEPOL_OK;

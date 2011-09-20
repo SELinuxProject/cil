@@ -286,6 +286,7 @@ enum cil_sym_index {
 	CIL_SYM_IPADDRS,
 	CIL_SYM_NUM,
 	CIL_SYM_UNKNOWN,
+	CIL_SYM_PERMS	// Special case for permissions. This symtab is not included in arrays
 };
 
 #define CIL_SYM_SIZE		256
