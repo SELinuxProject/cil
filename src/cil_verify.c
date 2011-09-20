@@ -1069,12 +1069,11 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 		for (curr = user->roles->head; curr != NULL; curr = curr->next) {
 			struct cil_role *userrole = curr->data;
 			if (userrole == role) {
-				found = CIL_TRUE;
 				break;
 			}
 		}
 
-		if (found != CIL_TRUE) {
+		if (curr == NULL) {
 			printf("Invalid role for specified user\n");
 			rc = SEPOL_ERR;
 			goto exit;
@@ -1086,16 +1085,14 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 	}
 
 	if (role->types != NULL) {
-		found = CIL_FALSE;
 		for (curr = role->types->head; curr != NULL; curr = curr->next) {
 			struct cil_type *roletype = curr->data;
 			if (roletype == type) {
-				found = CIL_TRUE;
 				break;
 			}
 		}
 
-		if (found != CIL_TRUE) {
+		if (curr == NULL) {
 			printf("Invalid type for specified role\n");
 			rc = SEPOL_ERR;
 			goto exit;
@@ -1111,7 +1108,6 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 		goto exit;
 	}
 
-	found = CIL_FALSE;
 	for (curr = dominance->head; curr != NULL; curr = curr->next) {
 		struct cil_sens *sens = curr->data;
 
