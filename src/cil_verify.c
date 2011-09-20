@@ -895,40 +895,23 @@ exit:
 	return rc;
 }
 
-int __cil_add_levelrange_sens_to_symtab(struct cil_levelrange *lvlrange, symtab_t *senstab)
+int __cil_add_level_sens_to_symtab(struct cil_level *lvl, symtab_t *senstab)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_level *low = lvlrange->low;
-	struct cil_level *high = lvlrange->high;
 	struct cil_symtab_datum *sensdatum = NULL;
 
 	sensdatum = cil_malloc(sizeof(*sensdatum));
 	cil_symtab_datum_init(sensdatum);
 
-	key = low->sens->datum.name;
+	key = lvl->sens->datum.name;
 	rc = cil_symtab_insert(senstab, key, sensdatum, NULL);
 	if (rc != SEPOL_OK) {
 		if ( rc == SEPOL_EEXIST) {
 			cil_symtab_datum_destroy(*sensdatum);
 			free(sensdatum);
 		} else {
-			printf("Failed to insert low level sensitivity into symtab\n");
-			goto exit;
-		}
-	}
-
-	sensdatum = cil_malloc(sizeof(*sensdatum));
-	cil_symtab_datum_init(sensdatum);
-
-	key = high->sens->datum.name;
-	rc = cil_symtab_insert(senstab, key, sensdatum, NULL);
-	if (rc != SEPOL_OK) {
-		if (rc == SEPOL_EEXIST) {
-			cil_symtab_datum_destroy(*sensdatum);
-			free(sensdatum);
-		} else {
-			printf("Failed to insert high level sensitivity into symtab\n");
+			printf("Failed to insert level sensitivity into symtab\n");
 			goto exit;
 		}
 	}
@@ -938,11 +921,29 @@ exit:
 	return rc;
 }
 
+int __cil_add_levelrange_sens_to_symtab(struct cil_levelrange *lvlrange, symtab_t *senstab)
+{
+	int rc = SEPOL_ERR;
+
+	rc = __cil_add_level_sens_to_symtab(lvlrange->low, senstab);
+	if (rc != SEPOL_OK) {
+		printf("Failed to add low level sens to symtab\n");
+		goto exit;
+	}
+
+	rc = __cil_add_level_sens_to_symtab(lvlrange->high, senstab);
+	if (rc !=  SEPOL_OK) {
+		printf("Failed to add high level sens to symtab\n");
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
 int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
 {
 	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_symtab_datum *sensdatum = NULL;
 	struct cil_user *user = node->data;
 
 	if (user->dftlevel == NULL) {
@@ -970,18 +971,10 @@ int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *s
 		goto exit;
 	}
 
-	sensdatum = cil_malloc(sizeof(*sensdatum));
-	cil_symtab_datum_init(sensdatum);
-
-	key = user->dftlevel->sens->datum.name;
-	rc = cil_symtab_insert(senstab, key, sensdatum, NULL);
+	rc = __cil_add_level_sens_to_symtab(user->dftlevel, senstab);
 	if (rc != SEPOL_OK) {
-		if (rc == SEPOL_EEXIST) {
-			cil_symtab_datum_destroy(*sensdatum);
-			free(sensdatum);
-		} else {
-			goto exit;
-		}
+		printf("Failed to add user default level sensitivty to symtab\n");
+		goto exit;
 	}
 
 	rc = __cil_add_levelrange_sens_to_symtab(user->range, senstab);
