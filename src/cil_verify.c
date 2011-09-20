@@ -1417,6 +1417,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 {
 	int rc = SEPOL_ERR;
 	int *avrule_cnt = 0;
+	int state = 0;
 	struct cil_args_verify *args = extra_args;
 	struct cil_db *db = NULL;
 	symtab_t *senstab = NULL;
@@ -1446,6 +1447,17 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	case CIL_BOOLEANIF:
 		rc = __cil_verify_booleanif(node);
 		*finished = CIL_TREE_SKIP_HEAD;
+		break;
+	case CIL_OPTIONAL:
+		state = ((struct cil_symtab_datum *)node->data)->state;
+		if (state == CIL_STATE_DISABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		rc = SEPOL_OK;
+		break;
+	case CIL_MACRO:
+		*finished = CIL_TREE_SKIP_HEAD;
+		rc = SEPOL_OK;
 		break;
 	case CIL_CONTEXT:
 		rc = __cil_verify_named_context(db, node);
