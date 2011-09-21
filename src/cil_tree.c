@@ -1448,7 +1448,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}	
 			case CIL_OPTIONAL: {
 				struct cil_optional *optional = node->data;
-				printf("OPTIONAL: %s", optional->datum.name);
+				printf("OPTIONAL: %s\n", optional->datum.name);
 				return;
 			}
 			case CIL_IPADDR: {
