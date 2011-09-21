@@ -360,6 +360,50 @@ exit:
 	return rc;
 }
 
+int cil_resolve_typealias_to_type(struct cil_tree_node *current)
+{
+	int rc = SEPOL_ERR;
+	int steps = 0;
+	int limit = 2;
+	struct cil_typealias *a1 = current->data;
+	struct cil_typealias *a2 = current->data;
+	struct cil_tree_node *a1_node = NULL;
+	enum cil_flavor flavor;
+
+	a1_node = a1->datum.node;
+	flavor = a1_node->flavor;
+
+	while (1) {
+		if (flavor == CIL_TYPE) {
+			break;
+		}
+		a1 = a1->type;
+		a1_node = a1->datum.node;
+		flavor = a1_node->flavor;
+
+		steps += 1;
+
+		if (a1 == a2) {
+			printf("Circular typealias found: %s\n", a1->datum.name);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		if (steps == limit) {
+			steps = 0;
+			limit *= 2;
+			a2 = a1;
+		}
+	}
+
+	a2 = current->data;
+	a2->type = (struct cil_type *)a1;
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_typebounds *typebnds = (struct cil_typebounds*)current->data;
@@ -2957,6 +3001,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		case CIL_CLASSCOMMON:
 			rc = cil_resolve_classcommon(db, node, call);
 			break;
+		case CIL_TYPEALIAS:
+			rc = cil_resolve_typealias(db, node, call);
+			break;
 		}
 		break;
 	case 7:
@@ -2965,7 +3012,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			rc = cil_resolve_typeattributetypes(db, node, call);
 			break;
 		case CIL_TYPEALIAS:
-			rc = cil_resolve_typealias(db, node, call);
+			rc = cil_resolve_typealias_to_type(node);
 			break;
 		case CIL_TYPEBOUNDS:
 			rc = cil_resolve_typebounds(db, node, call);

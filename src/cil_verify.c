@@ -1033,35 +1033,12 @@ int __cil_verify_type(struct cil_tree_node *node)
 	int limit = 2;
 	struct cil_type *bnding = node->data;
 	struct cil_type *bnded = node->data;
-	struct cil_tree_node *bnding_node = NULL;
-	struct cil_tree_node *bnded_node = NULL;
-	enum cil_flavor bnding_flavor;
-	enum cil_flavor bnded_flavor;
 
 	if (bnding->bounds != NULL) {
 		while (1) {
 			if (bnding == NULL) {
 				break;
 			}
-
-			bnding_node = bnding->datum.node;
-			bnding_flavor = bnding_node->flavor;
-
-			while (bnding_flavor == CIL_TYPEALIAS) {
-				bnding = ((struct cil_typealias *)bnding)->type;
-				bnding_node = bnding->datum.node;
-				bnding_flavor = bnding_node->flavor;
-			}
-
-			bnded_node = bnded->datum.node;
-			bnded_flavor = bnded_node->flavor;
-
-			while (bnded_flavor == CIL_TYPEALIAS) {
-				bnded = ((struct cil_typealias *)bnding)->type;
-				bnded_node = bnded->datum.node;
-				bnded_flavor = bnded_node->flavor;
-			}
-
 			bnding = bnding->bounds;
 			steps += 1;
 
