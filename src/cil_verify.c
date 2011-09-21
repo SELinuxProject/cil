@@ -993,18 +993,30 @@ exit:
 int __cil_verify_role(struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
-	struct cil_role *role = node->data;
+	int steps = 0;
+	int limit = 2;
+	struct cil_role *bnding = node->data;
+	struct cil_role *bnded = node->data;
 
-	if (role->bounds != NULL) {
-		struct cil_role *bnds = role->bounds;
-		if (role == bnds) {
-			printf("Role cannot bound self: %s\n", role->datum.name);
-			goto exit;
-		} else if (bnds->bounds != NULL) {
-			bnds = bnds->bounds;
-			if (role == bnds) {
-				printf("Circular rolebounds found: %s\n", role->datum.name);
+	if (bnding->bounds != NULL) {
+		while (1) {
+			if (bnding == NULL) {
+				break;
+			}
+			bnding = bnding->bounds;
+
+			steps += 1;
+
+			if (bnding == bnded) {
+				printf("Circular rolebounds found: %s\n", bnding->datum.name);
+				rc = SEPOL_ERR;
 				goto exit;
+			}
+
+			if (steps == limit) {
+				steps = 0;
+				limit *= 2;
+				bnded = bnding;
 			}
 		}
 	}
@@ -1017,27 +1029,52 @@ exit:
 int __cil_verify_type(struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
-	struct cil_type *type = node->data;
+	int steps = 0;
+	int limit = 2;
+	struct cil_type *bnding = node->data;
+	struct cil_type *bnded = node->data;
+	struct cil_tree_node *bnding_node = NULL;
+	struct cil_tree_node *bnded_node = NULL;
+	enum cil_flavor bnding_flavor;
+	enum cil_flavor bnded_flavor;
 
-	if (type->bounds != NULL) {
-		struct cil_type *bnds = type->bounds;
-		struct cil_tree_node *type_node = bnds->datum.node;
-		enum cil_flavor flavor = type_node->flavor;
+	if (bnding->bounds != NULL) {
+		while (1) {
+			if (bnding == NULL) {
+				break;
+			}
 
-		while (flavor == CIL_TYPEALIAS) {
-			bnds = ((struct cil_typealias *)bnds)->type;
-			type_node = bnds->datum.node;
-			flavor = type_node->flavor;
-		}
+			bnding_node = bnding->datum.node;
+			bnding_flavor = bnding_node->flavor;
 
-		if (type == bnds) {
-			printf("Type cannot bound self: %s\n", type->datum.name);
-			goto exit;
-		} else if (bnds->bounds != NULL) {
-			bnds = bnds->bounds;
-			if (type == bnds) {
-				printf("Circular typebounds found: %s\n", type->datum.name);
+			while (bnding_flavor == CIL_TYPEALIAS) {
+				bnding = ((struct cil_typealias *)bnding)->type;
+				bnding_node = bnding->datum.node;
+				bnding_flavor = bnding_node->flavor;
+			}
+
+			bnded_node = bnded->datum.node;
+			bnded_flavor = bnded_node->flavor;
+
+			while (bnded_flavor == CIL_TYPEALIAS) {
+				bnded = ((struct cil_typealias *)bnding)->type;
+				bnded_node = bnded->datum.node;
+				bnded_flavor = bnded_node->flavor;
+			}
+
+			bnding = bnding->bounds;
+			steps += 1;
+
+			if (bnding == bnded) {
+				printf("Circular typebounds found: %s\n", bnding->datum.name);
+				rc = SEPOL_ERR;
 				goto exit;
+			}
+
+			if (steps == limit) {
+				steps = 0;
+				limit *= 2;
+				bnded = bnding;
 			}
 		}
 	}
