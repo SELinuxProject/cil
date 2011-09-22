@@ -38,6 +38,7 @@
 
 %option nounput
 %option noinput
+%option noyywrap
 
 digit		[0-9]
 alpha		[a-zA-Z]

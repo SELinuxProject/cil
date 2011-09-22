@@ -27,7 +27,7 @@ ALL_OBJS= $(patsubst %.c,%.o,$(ALL_SRCS))
 LIBSEPOL_STATIC = /usr/lib/libsepol.a
 
 LIBS = 
-LDFLAGS = -lfl
+LDFLAGS =
 COVCFLAGS = -fprofile-arcs -ftest-coverage -O0
 
 CFLAGS ?= -Wall -Werror -Wshadow -Wextra -Wundef -Wmissing-format-attribute -Wcast-align -Wstrict-prototypes -Wpointer-arith -Wunused
