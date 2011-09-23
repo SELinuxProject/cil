@@ -1857,8 +1857,6 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 	while (curr_old != NULL) {
 		cil_list_item_init(&curr_new);
 
-		cil_conditional_init(&cond_new);
-
 		cil_copy_conditional(db, curr_old, ((void**)&cond_new), NULL);
 		curr_new->data = cond_new;
 		curr_new->flavor = curr_old->flavor;
@@ -2054,6 +2052,8 @@ int cil_copy_conditional(__attribute__((unused)) struct cil_db *db, void *data, 
 	struct cil_conditional *orig = data;
 	struct cil_conditional *new = NULL;
 
+	cil_conditional_init(&new);
+
 	new->str = cil_strdup(orig->str);
 	new->flavor = orig->flavor;
 
@@ -2079,8 +2079,6 @@ int cil_copy_boolif(struct cil_db *db, void *data, void **copy, __attribute__((u
 
 	while (curr_old != NULL) {
 		cil_list_item_init(&curr_new);
-
-		cil_conditional_init(&cond_new);
 
 		cil_copy_conditional(db, curr_old->data, ((void**)&cond_new), NULL);
 		curr_new->data = cond_new;
