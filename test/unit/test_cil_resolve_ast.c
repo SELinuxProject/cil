@@ -4617,7 +4617,7 @@ void test_cil_resolve_call1_extraargs_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_resolve_call1_copy_neg(CuTest *tc) {
+void test_cil_resolve_call1_copy_dup(CuTest *tc) {
 	char *line[] = {"(", "type", "qaz", ")",
 			"(", "class", "file", "(", "read", ")", ")",
 			"(", "macro", "mm", "(", "(", "type", "a", ")", ")",
@@ -4634,7 +4634,7 @@ void test_cil_resolve_call1_copy_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	int rc = cil_resolve_call1(test_db, test_db->ast->root->cl_head->next->next->next, NULL);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_resolve_call1_missing_arg_neg(CuTest *tc) {
@@ -7834,7 +7834,7 @@ void test_cil_resolve_ast_node_helper_typealias(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	uint32_t pass = 8;
+	uint32_t pass = 7;
 	uint32_t changed = 0;
 	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
 
@@ -7857,7 +7857,7 @@ void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	uint32_t pass = 8;
+	uint32_t pass = 7;
 	uint32_t changed = 0;
 	struct cil_args_resolve *extra_args = gen_resolve_args(test_db, &pass, &changed, NULL, NULL, NULL);
 

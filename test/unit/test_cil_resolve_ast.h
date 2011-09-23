@@ -310,7 +310,7 @@ void test_cil_resolve_call1_ipaddr_anon_neg(CuTest *);
 void test_cil_resolve_call1_unknown_neg(CuTest *);
 void test_cil_resolve_call1_unknowncall_neg(CuTest *);
 void test_cil_resolve_call1_extraargs_neg(CuTest *);
-void test_cil_resolve_call1_copy_neg(CuTest *);
+void test_cil_resolve_call1_copy_dup(CuTest *);
 void test_cil_resolve_call1_missing_arg_neg(CuTest *);
 void test_cil_resolve_call1_paramsflavor_neg(CuTest *);
 void test_cil_resolve_call1_unknownflavor_neg(CuTest *);

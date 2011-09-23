@@ -36,7 +36,6 @@
 #include "../../src/cil_resolve_ast.h"
 
 int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, void *extra_args);
-int __cil_copy_data_helper(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *new, symtab_t *symtab, uint32_t index, int (*copy_data)(struct cil_tree_node *orig_node, struct cil_tree_node *new_node, symtab_t *sym));
 
 struct cil_args_copy {
 	struct cil_tree_node *dest;
@@ -163,10 +162,8 @@ void test_cil_copy_block(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_block(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_block(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_block *)test_copy->data)->datum.name, 
-		((struct cil_block *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_perm(CuTest *tc) {
@@ -199,20 +196,14 @@ void test_cil_copy_perm(CuTest *tc) {
 	symtab_init(&sym, CIL_SYM_SIZE);
 
 	cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
-	int rc = cil_copy_perm(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_perm(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_perm *)test_copy->data)->datum.name, 
-		((struct cil_perm *)test_ast_node->data)->datum.name);
 	cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head->next, test_ast_node);
-	rc = cil_copy_perm(test_ast_node, test_copy, &sym);
+	rc = cil_copy_perm(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_perm *)test_copy->data)->datum.name, 
-		((struct cil_perm *)test_ast_node->data)->datum.name);
 	cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head->next->next, test_ast_node);
-	rc = cil_copy_perm(test_ast_node, test_copy, &sym);
+	rc = cil_copy_perm(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_perm *)test_copy->data)->datum.name, 
-		((struct cil_perm *)test_ast_node->data)->datum.name);
 	
 }
 
@@ -239,10 +230,8 @@ void test_cil_copy_class(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_class(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_class(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
-		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_common(CuTest *tc) {
@@ -268,10 +257,8 @@ void test_cil_copy_common(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_common(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_common(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_common *)test_copy->data)->datum.name, 
-		((struct cil_common *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_classcommon(CuTest *tc) {
@@ -302,15 +289,18 @@ void test_cil_copy_classcommon(CuTest *tc) {
 	
 	struct cil_classcommon *test_copy;
 	cil_classcommon_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_classcommon((struct cil_classcommon *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_classcommon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, ((struct cil_classcommon *)test_ast_node->data)->class_str, test_copy->class_str);
 	CuAssertStrEquals(tc, ((struct cil_classcommon *)test_ast_node->data)->common_str, test_copy->common_str);
 }
 
 void test_cil_copy_sid(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "sid", "test", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -332,10 +322,8 @@ void test_cil_copy_sid(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_sid(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_sid(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	//CuAssertStrEquals(tc, ((struct cil_user *)test_copy->data)->datum.name, 
-	//	((struct cil_user *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_sidcontext(CuTest *tc) {
@@ -361,7 +349,7 @@ void test_cil_copy_sidcontext(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_sidcontext(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_sidcontext(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, ((struct cil_user *)test_copy->data)->datum.name, 
 		((struct cil_user *)test_ast_node->data)->datum.name);
@@ -390,10 +378,8 @@ void test_cil_copy_user(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_user(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_user(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_user *)test_copy->data)->datum.name, 
-		((struct cil_user *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_role(CuTest *tc) {
@@ -419,10 +405,8 @@ void test_cil_copy_role(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_role(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_role(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_role *)test_copy->data)->datum.name, 
-		((struct cil_role *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_userrole(CuTest *tc) {
@@ -444,8 +428,11 @@ void test_cil_copy_userrole(CuTest *tc) {
 
 	struct cil_userrole *test_copy;
 	cil_userrole_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_userrole((struct cil_userrole *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_userrole(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, ((struct cil_userrole *)test_ast_node->data)->user_str, test_copy->user_str);
 	CuAssertStrEquals(tc, ((struct cil_userrole *)test_ast_node->data)->role_str, test_copy->role_str);
@@ -474,10 +461,8 @@ void test_cil_copy_type(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_type(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_type(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
-		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_typealias(CuTest *tc) {
@@ -503,10 +488,8 @@ void test_cil_copy_typealias(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_typealias(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_typealias(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_typealias *)test_copy->data)->type_str,
-		((struct cil_typealias *)test_ast_node->data)->type_str);
 }
 
 void test_cil_copy_typeattribute(CuTest *tc) {
@@ -532,10 +515,8 @@ void test_cil_copy_typeattribute(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_typeattribute(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_typeattribute(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_symtab_datum *)test_copy->data)->name, 
-		((struct cil_symtab_datum *)test_ast_node->data)->name);
 }
 
 void test_cil_copy_bool(CuTest *tc) {
@@ -561,12 +542,10 @@ void test_cil_copy_bool(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_bool(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_bool(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertIntEquals(tc, ((struct cil_bool *)test_copy->data)->value,
 		((struct cil_bool *)test_ast_node->data)->value);
-	CuAssertStrEquals(tc, ((struct cil_bool *)test_copy->data)->datum.name,
-		((struct cil_bool *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_type_rule(CuTest *tc) {
@@ -588,8 +567,11 @@ void test_cil_copy_type_rule(CuTest *tc) {
 
 	struct cil_type_rule *test_copy;
 	cil_type_rule_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_type_rule((struct cil_type_rule *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_type_rule(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertIntEquals(tc, ((struct cil_type_rule *)test_ast_node->data)->rule_kind, test_copy->rule_kind);
 	CuAssertStrEquals(tc, ((struct cil_type_rule *)test_ast_node->data)->src_str, test_copy->src_str);
@@ -619,8 +601,11 @@ void test_cil_copy_avrule(CuTest *tc) {
 
 	struct cil_avrule *test_copy;
 	cil_avrule_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_avrule((struct cil_avrule *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_avrule(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertIntEquals(tc, ((struct cil_avrule *)test_ast_node->data)->rule_kind, test_copy->rule_kind);
 	CuAssertStrEquals(tc, ((struct cil_avrule *)test_ast_node->data)->src_str, test_copy->src_str);
@@ -655,10 +640,8 @@ void test_cil_copy_sens(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_sens(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_sens(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_sensalias *)test_copy->data)->datum.name, 
-		((struct cil_sensalias *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_sensalias(CuTest *tc) {
@@ -684,12 +667,10 @@ void test_cil_copy_sensalias(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_sensalias(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_sensalias(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, ((struct cil_sensalias *)test_copy->data)->sens_str,
 		((struct cil_sensalias *)test_ast_node->data)->sens_str);
-	CuAssertStrEquals(tc, ((struct cil_sensalias *)test_copy->data)->datum.name, 
-		((struct cil_sensalias *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_cat(CuTest *tc) {
@@ -715,10 +696,8 @@ void test_cil_copy_cat(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_cat(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_cat(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
-		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_catalias(CuTest *tc) {
@@ -744,10 +723,10 @@ void test_cil_copy_catalias(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_catalias(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_catalias(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
-		((struct cil_class *)test_ast_node->data)->datum.name);
+	CuAssertStrEquals(tc, ((struct cil_catalias *)test_copy->data)->cat_str,
+		((struct cil_catalias *)test_ast_node->data)->cat_str);
 }
 
 void test_cil_copy_senscat(CuTest *tc) {
@@ -775,8 +754,11 @@ void test_cil_copy_senscat(CuTest *tc) {
 
 	struct cil_senscat *test_copy;
 	cil_senscat_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_senscat((struct cil_senscat *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_senscat(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, ((struct cil_senscat *)test_ast_node->data)->sens_str, test_copy->sens_str);
 	CuAssertStrEquals(tc, (char*)((struct cil_senscat *)test_ast_node->data)->catset->cat_list_str->head->data,
@@ -806,8 +788,11 @@ void test_cil_copy_catorder(CuTest *tc) {
 
 	struct cil_catorder *test_copy;
 	cil_catorder_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_catorder((struct cil_catorder *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_catorder(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, (char*)((struct cil_catorder *)test_ast_node->data)->cat_list_str->head->data, (char*)test_copy->cat_list_str->head->data);
 	CuAssertStrEquals(tc, (char*)((struct cil_catorder *)test_ast_node->data)->cat_list_str->head->next->data, (char*)test_copy->cat_list_str->head->next->data);
@@ -835,8 +820,11 @@ void test_cil_copy_dominance(CuTest *tc) {
 
 	struct cil_sens_dominates *test_copy;
 	cil_sens_dominates_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_dominance((struct cil_sens_dominates*)test_ast_node->data, &test_copy);
+	int rc = cil_copy_dominance(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, (char*)((struct cil_sens_dominates *)test_ast_node->data)->sens_list_str->head->data, (char*)test_copy->sens_list_str->head->data);
 	CuAssertStrEquals(tc, (char*)((struct cil_sens_dominates *)test_ast_node->data)->sens_list_str->head->next->data, (char*)test_copy->sens_list_str->head->next->data);
@@ -865,10 +853,8 @@ void test_cil_copy_level(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_level(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_level(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
-		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_fill_level(CuTest *tc) {
@@ -924,10 +910,8 @@ void test_cil_copy_context(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_context(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_context(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_class *)test_copy->data)->datum.name, 
-		((struct cil_class *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_netifcon(CuTest *tc) {
@@ -948,8 +932,11 @@ void test_cil_copy_netifcon(CuTest *tc) {
         cil_gen_netifcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	
 	struct cil_netifcon *test_copy;
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_netifcon((struct cil_netifcon*)test_ast_node->data, &test_copy);
+	int rc = cil_copy_netifcon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, test_copy->interface_str, 
 		((struct cil_netifcon *)test_ast_node->data)->interface_str);
@@ -979,8 +966,11 @@ void test_cil_copy_netifcon_nested(CuTest *tc) {
         cil_gen_netifcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	
 	struct cil_netifcon *test_copy;
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_netifcon((struct cil_netifcon*)test_ast_node->data, &test_copy);
+	int rc = cil_copy_netifcon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, test_copy->interface_str, 
 		((struct cil_netifcon *)test_ast_node->data)->interface_str);
@@ -1088,15 +1078,17 @@ void test_cil_copy_call(CuTest *tc) {
         cil_gen_call(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	
 	struct cil_call *test_copy;
-	cil_call_init(&test_copy);
 
-	int rc = cil_copy_call(test_db, (struct cil_call *)test_ast_node->data, &test_copy);
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_call(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, test_copy->macro_str, ((struct cil_call *)test_ast_node->data)->macro_str);
 }
 
 void test_cil_copy_optional(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -1118,10 +1110,8 @@ void test_cil_copy_optional(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_optional(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_optional(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, ((struct cil_optional *)test_copy->data)->datum.name, 
-		((struct cil_optional *)test_ast_node->data)->datum.name);
 }
 
 void test_cil_copy_nodecon(CuTest *tc) {
@@ -1142,9 +1132,11 @@ void test_cil_copy_nodecon(CuTest *tc) {
         cil_gen_nodecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 
 	struct cil_nodecon *test_copy;
-	cil_nodecon_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_nodecon((struct cil_nodecon *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_nodecon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, test_copy->addr_str,
 		((struct cil_nodecon *)test_ast_node->data)->addr_str);
@@ -1172,9 +1164,11 @@ void test_cil_copy_nodecon_anon(CuTest *tc) {
         cil_gen_nodecon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 
 	struct cil_nodecon *test_copy;
-	cil_nodecon_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_nodecon((struct cil_nodecon *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_nodecon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, test_copy->addr_str,
 		((struct cil_nodecon *)test_ast_node->data)->addr_str);
@@ -1239,14 +1233,14 @@ void test_cil_copy_ipaddr(CuTest *tc) {
 	symtab_t sym;
 	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_ipaddr(test_ast_node, test_copy, &sym);
+	int rc = cil_copy_ipaddr(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 }
 
 void test_cil_copy_conditional(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "true",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1266,8 +1260,11 @@ void test_cil_copy_conditional(CuTest *tc) {
 	curr_old = ((struct cil_booleanif*)test_ast_node->data)->expr_stack->head;
 
 	struct cil_conditional *cond_new;
-	cil_conditional_init(&cond_new);
-	int rc = cil_copy_conditional(curr_old->data, cond_new);
+
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
+
+	int rc = cil_copy_conditional(test_db, curr_old->data, (void**)&cond_new, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 
 	CuAssertStrEquals(tc, ((struct cil_conditional*)curr_old->data)->str, cond_new->str);
@@ -1277,7 +1274,7 @@ void test_cil_copy_conditional(CuTest *tc) {
 void test_cil_copy_boolif(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
 			"(", "true",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1294,9 +1291,11 @@ void test_cil_copy_boolif(CuTest *tc) {
 	cil_gen_boolif(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 
 	struct cil_booleanif *test_copy;
-	cil_boolif_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_boolif((struct cil_booleanif *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_boolif(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 }
 
@@ -1318,9 +1317,11 @@ void test_cil_copy_constrain(CuTest *tc) {
         cil_gen_constrain(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_MLSCONSTRAIN);
 
 	struct cil_constrain *test_copy;
-	cil_constrain_init(&test_copy);
+	
+	symtab_t sym;
+	symtab_init(&sym, CIL_SYM_SIZE);
 
-	int rc = cil_copy_constrain((struct cil_constrain *)test_ast_node->data, &test_copy);
+	int rc = cil_copy_constrain(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
 	CuAssertStrEquals(tc, (char*)test_copy->class_list_str->head->data, (char*)((struct cil_constrain *)test_ast_node->data)->class_list_str->head->data);
 }
@@ -1406,7 +1407,7 @@ void test_cil_copy_node_helper_block(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_block_neg(CuTest *tc) {
+void test_cil_copy_node_helper_block_merge(CuTest *tc) {
 	char *line[] = {"(", "block", "a", "(", "type", "log", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -1423,7 +1424,7 @@ void test_cil_copy_node_helper_block_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_perm(CuTest *tc) {
@@ -1500,8 +1501,8 @@ void test_cil_copy_node_helper_class(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_class_neg(CuTest *tc) {
-	char *line[] = {"(", "common", "test", "(", "read", "write", ")", ")", NULL};
+void test_cil_copy_node_helper_class_dup_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "test", "(", "read", "write", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1517,7 +1518,7 @@ void test_cil_copy_node_helper_class_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_common(CuTest *tc) {
@@ -1543,7 +1544,7 @@ void test_cil_copy_node_helper_common(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_common_neg(CuTest *tc) {
+void test_cil_copy_node_helper_common_dup_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -1560,7 +1561,7 @@ void test_cil_copy_node_helper_common_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_classcommon(CuTest *tc) {
@@ -1587,7 +1588,7 @@ void test_cil_copy_node_helper_classcommon(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_sid(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+	char *line[] = {"(", "sid", "test", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1609,8 +1610,8 @@ void test_cil_copy_node_helper_sid(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_sid_neg(CuTest *tc) {
-	char *line[] = {"(", "sid", "test", "(", "blah_u", "blah_r", "blah_t", "low", "high", ")", ")", NULL};
+void test_cil_copy_node_helper_sid_merge(CuTest *tc) {
+	char *line[] = {"(", "sid", "test", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1626,7 +1627,7 @@ void test_cil_copy_node_helper_sid_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_sidcontext(CuTest *tc) {
@@ -1675,7 +1676,7 @@ void test_cil_copy_node_helper_user(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_user_neg(CuTest *tc) {
+void test_cil_copy_node_helper_user_merge(CuTest *tc) {
 	char *line[] = {"(", "user", "sysadm", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -1692,7 +1693,7 @@ void test_cil_copy_node_helper_user_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_role(CuTest *tc) {
@@ -1718,7 +1719,7 @@ void test_cil_copy_node_helper_role(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_role_neg(CuTest *tc) {
+void test_cil_copy_node_helper_role_merge(CuTest *tc) {
 	char *line[] = {"(", "role", "role_r", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -1735,7 +1736,7 @@ void test_cil_copy_node_helper_role_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_userrole(CuTest *tc) {
@@ -1784,7 +1785,7 @@ void test_cil_copy_node_helper_type(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_type_neg(CuTest *tc) {
+void test_cil_copy_node_helper_type_merge(CuTest *tc) {
 	char *line[] = {"(", "type", "type_t", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -1801,7 +1802,7 @@ void test_cil_copy_node_helper_type_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_typeattribute(CuTest *tc) {
@@ -1827,7 +1828,7 @@ void test_cil_copy_node_helper_typeattribute(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_typeattribute_neg(CuTest *tc) {
+void test_cil_copy_node_helper_typeattribute_merge(CuTest *tc) {
 	char *line[] = {"(", "typeattribute", "bar", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -1844,7 +1845,7 @@ void test_cil_copy_node_helper_typeattribute_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_typealias(CuTest *tc) {
@@ -1870,7 +1871,7 @@ void test_cil_copy_node_helper_typealias(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_typealias_neg(CuTest *tc) {
+void test_cil_copy_node_helper_typealias_dup_neg(CuTest *tc) {
 	char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -1887,7 +1888,7 @@ void test_cil_copy_node_helper_typealias_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_bool(CuTest *tc) {
@@ -1913,7 +1914,7 @@ void test_cil_copy_node_helper_bool(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_bool_neg(CuTest *tc) {
+void test_cil_copy_node_helper_bool_dup_neg(CuTest *tc) {
 	char *line[] = {"(", "boolean", "foo", "true", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -1930,11 +1931,11 @@ void test_cil_copy_node_helper_bool_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_avrule(CuTest *tc) {
-	char *line[] = {"(", "allow", "test", "foo", "bar", "(", "read", "write", ")", ")", NULL};
+	char *line[] = {"(", "allow", "test", "foo", "(", "file", "(", "read", "write", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2002,7 +2003,7 @@ void test_cil_copy_node_helper_sens(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_sens_neg(CuTest *tc) {
+void test_cil_copy_node_helper_sens_merge(CuTest *tc) {
 	char *line[] = {"(", "sensitivity", "s0", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -2019,7 +2020,7 @@ void test_cil_copy_node_helper_sens_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_sensalias(CuTest *tc) {
@@ -2045,7 +2046,7 @@ void test_cil_copy_node_helper_sensalias(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_sensalias_neg(CuTest *tc) {
+void test_cil_copy_node_helper_sensalias_dup_neg(CuTest *tc) {
 	char *line[] = {"(", "sensitivityalias", "s0", "alias", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -2062,7 +2063,7 @@ void test_cil_copy_node_helper_sensalias_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_cat(CuTest *tc) {
@@ -2088,7 +2089,7 @@ void test_cil_copy_node_helper_cat(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_cat_neg(CuTest *tc) {
+void test_cil_copy_node_helper_cat_merge(CuTest *tc) {
 	char *line[] = {"(", "category", "c0", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -2105,7 +2106,7 @@ void test_cil_copy_node_helper_cat_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_catalias(CuTest *tc) {
@@ -2131,7 +2132,7 @@ void test_cil_copy_node_helper_catalias(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_catalias_neg(CuTest *tc) {
+void test_cil_copy_node_helper_catalias_dup_neg(CuTest *tc) {
 	char *line[] = {"(", "categoryalias", "c0", "red", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -2148,7 +2149,7 @@ void test_cil_copy_node_helper_catalias_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_senscat(CuTest *tc) {
@@ -2278,7 +2279,7 @@ void test_cil_copy_node_helper_level(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_level_neg(CuTest *tc) {
+void test_cil_copy_node_helper_level_dup_neg(CuTest *tc) {
 	char *line[] = {"(", "level", "low", "(", "s0", "(", "c1", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -2295,7 +2296,7 @@ void test_cil_copy_node_helper_level_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_context(CuTest *tc) {
@@ -2321,7 +2322,7 @@ void test_cil_copy_node_helper_context(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_context_neg(CuTest *tc) {
+void test_cil_copy_node_helper_context_dup_neg(CuTest *tc) {
 	char *line[] = {"(", "context", "packet_default", "(", "system_u", "object_r", "etc_t", "(", "low", "high", ")",  ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -2338,7 +2339,7 @@ void test_cil_copy_node_helper_context_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_netifcon(CuTest *tc) {
@@ -2388,7 +2389,7 @@ void test_cil_copy_node_helper_call(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_optional(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2410,8 +2411,8 @@ void test_cil_copy_node_helper_optional(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_optional_neg(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+void test_cil_copy_node_helper_optional_merge(CuTest *tc) {
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2427,7 +2428,7 @@ void test_cil_copy_node_helper_optional_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_copy_node_helper_ipaddr(CuTest *tc) {
@@ -2453,7 +2454,7 @@ void test_cil_copy_node_helper_ipaddr(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_copy_node_helper_ipaddr_neg(CuTest *tc) {
+void test_cil_copy_node_helper_ipaddr_dup_neg(CuTest *tc) {
 	char *line[] = {"(", "ipaddr", "ip", "192.168.1.1", ")", NULL};
 	
 	struct cil_tree *test_tree;
@@ -2470,12 +2471,13 @@ void test_cil_copy_node_helper_ipaddr_neg(CuTest *tc) {
 	
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_copy_node_helper_boolif(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "and", "foo", "bar", ")",
-			"(", "allow", "foo", "bar", "(", "read", ")", ")", ")", NULL};
+			"(", "true", 
+			"(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2561,90 +2563,3 @@ void test_cil_copy_node_helper_extraargsnull_neg(CuTest *tc) {
 	int rc = __cil_copy_node_helper(test_db->ast->root->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
-
-
-void test_cil_copy_data_helper(CuTest *tc) {
-	char *line[] = {"(", "user", "sysadm", ")", NULL};
-	
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	struct cil_db *test_db2;
-	cil_db_init(&test_db2);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	struct cil_tree_node *orig = test_db->ast->root->cl_head;
-	
-	struct cil_tree_node *new;
-	cil_tree_node_init(&new);
-	new->parent = test_db2->ast->root;
-	new->line = orig->line;
-	new->flavor = orig->flavor;
-
-	struct cil_db *db = test_db2;
-
-	symtab_t *symtab = NULL;
-
-	int rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_SYM_USERS, &cil_copy_user);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_copy_data_helper_getparentsymtab_neg(CuTest *tc) {
-	char *line[] = {"(", "user", "sysadm", ")", NULL};
-	
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	struct cil_db *test_db2;
-	cil_db_init(&test_db2);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	struct cil_tree_node *orig = test_db->ast->root->cl_head;
-	
-	struct cil_tree_node *new;
-	cil_tree_node_init(&new);
-	new->parent = test_db2->ast->root;
-	new->line = orig->line;
-	new->flavor = orig->flavor;
-
-	struct cil_db *db = test_db2;
-
-	symtab_t *symtab = NULL;
-
-	int rc = __cil_copy_data_helper(db, orig, new, symtab, CIL_USER, &cil_copy_user);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
-}
-
-void test_cil_copy_data_helper_duplicatedb_neg(CuTest *tc) {
-	char *line[] = {"(", "user", "sysadm", ")", NULL};
-	
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	struct cil_tree_node *orig = test_db->ast->root->cl_head;
-	
-	struct cil_tree_node *new;
-	cil_tree_node_init(&new);
-	new->parent = test_db->ast->root;
-	new->line = orig->line;
-	new->flavor = orig->flavor;
-
-	symtab_t *symtab = NULL;
-
-	int rc = __cil_copy_data_helper(test_db, orig, new, symtab, CIL_SYM_USERS, &cil_copy_user);
-	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
-}
-

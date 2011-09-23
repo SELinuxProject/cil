@@ -485,7 +485,7 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknown_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknowncall_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_extraargs_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_call1_copy_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_copy_dup);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_missing_arg_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_paramsflavor_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_unknownflavor_neg);
@@ -1674,7 +1674,7 @@ CuSuite* CilTreeGetSuite(void) {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_block);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_block);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_block_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_block_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_perm);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_perm);
@@ -1682,48 +1682,48 @@ CuSuite* CilTreeGetSuite(void) {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_class);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_class);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_class_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_class_dup_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_common);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_common);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_common_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_common_dup_neg);
 
 	SUITE_ADD_TEST(suite, test_cil_copy_classcommon);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_classcommon);
 	
-	//SUITE_ADD_TEST(suite, test_cil_copy_sid);
-	//SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sid);
-	//SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sid_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_sid);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sid);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sid_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_sidcontext);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sidcontext);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_user);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_user);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_user_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_user_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_role);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_role);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_role_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_role_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_userrole);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_userrole);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_type);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_type_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_typeattribute);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typeattribute);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typeattribute_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typeattribute_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_typealias);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typealias);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typealias_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_typealias_dup_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_bool);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_bool);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_bool_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_bool_dup_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_avrule);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_avrule);
@@ -1733,19 +1733,19 @@ CuSuite* CilTreeGetSuite(void) {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_sens);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sens);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sens_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sens_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_sensalias);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sensalias);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sensalias_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_sensalias_dup_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_cat);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_cat);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_cat_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_cat_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_catalias);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_catalias);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_catalias_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_catalias_dup_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_senscat);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_senscat);
@@ -1758,13 +1758,13 @@ CuSuite* CilTreeGetSuite(void) {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_level);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_level);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_level_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_level_dup_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_fill_level);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_context);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_context);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_context_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_context_dup_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_netifcon);
 	SUITE_ADD_TEST(suite, test_cil_copy_netifcon_nested);
@@ -1778,7 +1778,7 @@ CuSuite* CilTreeGetSuite(void) {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_optional);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_optional);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_optional_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_optional_merge);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_nodecon);
 	SUITE_ADD_TEST(suite, test_cil_copy_nodecon_anon);
@@ -1787,14 +1787,14 @@ CuSuite* CilTreeGetSuite(void) {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_ipaddr);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_ipaddr);
-	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_ipaddr_neg);
+	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_ipaddr_dup_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_conditional);
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_boolif);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_boolif);
 	
-//	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
+	SUITE_ADD_TEST(suite, test_cil_copy_constrain);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_mlsconstrain);
 
 	//SUITE_ADD_TEST(suite, test_cil_copy_ast);
@@ -1802,10 +1802,6 @@ CuSuite* CilTreeGetSuite(void) {
 	
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_orignull_neg);
 	SUITE_ADD_TEST(suite, test_cil_copy_node_helper_extraargsnull_neg);
-	
-	SUITE_ADD_TEST(suite, test_cil_copy_data_helper);
-	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_getparentsymtab_neg);
-	SUITE_ADD_TEST(suite, test_cil_copy_data_helper_duplicatedb_neg);
 	
 	/* test_post.c */
 	SUITE_ADD_TEST(suite, test_cil_post_filecon_compare_meta_a_not_b);
