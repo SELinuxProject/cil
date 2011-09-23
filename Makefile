@@ -85,8 +85,8 @@ install:
 
 clean:
 	-rm -f $(CIL_OBJS) $(TEST_OBJS) $(SECILC_OBJS) $(SRCDIR)/$(GENERATED)
-	-find . -name '*.gcno' -delete
-	-find . -name '*.gcda' -delete
+	-rm -rf $(patsubst %.o,%.gcda,$(CIL_OBJS) $(SECILC_OBJS) $(TEST_OBJS))
+	-rm -rf $(patsubst %.o,%.gcno,$(CIL_OBJS) $(SECILC_OBJS) $(TEST_OBJS))
 	-rm -rf cov/
 
 bare: clean
