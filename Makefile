@@ -10,23 +10,25 @@ LEX = flex
 
 DEBUG=0
 
-SECILC = secilc 
+SECILC = secilc
 
 UNIT = unit_tests
 
-SECILC_SRC = secilc.c
+SECILC_SRCS = secilc.c
+SECILC_OBJS = $(patsubst %.c,%.o,$(SECILC_SRCS))
+
 TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
-CIL_SRCS =  secil.c cil_tree.c cil_ast.c cil_parser.c cil_symtab.c cil_lexer.c
+TEST_OBJS = $(patsubst %.c,%.o,$(TEST_SRCS))
 
 GENERATED = cil_lexer.c
 
-ALL_SRCS= $(wildcard $(SRCDIR)/*.c) $(SRCDIR)/$(GENERATED)
-ALL_OBJS= $(patsubst %.c,%.o,$(ALL_SRCS))
+CIL_SRCS= $(wildcard $(SRCDIR)/*.c) $(SRCDIR)/$(GENERATED)
+CIL_OBJS= $(patsubst %.c,%.o,$(CIL_SRCS))
 
 
 LIBSEPOL_STATIC = /usr/lib/libsepol.a
 
-LIBS = 
+LIBS =
 LDFLAGS =
 COVCFLAGS = -fprofile-arcs -ftest-coverage -O0
 
@@ -55,21 +57,25 @@ all: $(SECILC)
 cil_lexer.c: cil_lexer.l
 	$(LEX) -t $< > $@
 
-$(UNIT): $(TEST_SRCS) $(ALL_SRCS)
-	$(CC) $(CFLAGS) $(COVCFLAGS) $^ $(LIBSEPOL_STATIC) $(LDFLAGS) -o unit_tests
+%.o:  %.c %.h
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(SECILC): $(SECILC_SRC) $(ALL_SRCS)
-	$(CC) $(CFLAGS) -o $(SECILC) $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
+$(UNIT): $(TEST_OBJS) $(CIL_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
+
+$(SECILC): $(SECILC_OBJS) $(CIL_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
 
 unit: $(SECILC) $(UNIT)
 
 # Requires lcov 1.9+ (--ignore-errors)
+coverage: CFLAGS += $(COVCFLAGS)
 coverage: clean unit
 	./unit_tests
 	test -d cov || mkdir cov
 	export GCOV_PREFIX_STRIP=1
-	lcov --directory . --capture --output-file cov/app.info --ignore-errors source
-	lcov --remove cov/app.info 'test/unit/*' --output-file cov/app.info
+	lcov --directory . --capture --output-file cov/app.info --ignore-errors source -b .
+	lcov --remove cov/app.info 'test/unit/*' --remove cov/app.info '/usr/include/*' --output-file cov/app.info
 	genhtml -o ./cov/html ./cov/app.info
 
 test: $(SECILC)
@@ -77,13 +83,16 @@ test: $(SECILC)
 
 install:
 
-clean: 
-	-rm -f $(SRCDIR)/$(ALL_OBJS) $(SRCDIR)/$(GENERATED) run_tests
-	-rm -f *.gcno *.gcda *.gcov unit_tests policy.* file_contexts
-	-rm -f $(SECILC)
+clean:
+	-rm -f $(CIL_OBJS) $(TEST_OBJS) $(SECILC_OBJS) $(SRCDIR)/$(GENERATED)
+	-find . -name '*.gcno' -delete
+	-find . -name '*.gcda' -delete
 	-rm -rf cov/
 
 bare: clean
-	-rm -f $(SECILC)
+	rm -f $(SECILC)
+	rm -f $(UNIT)
+	rm -f policy.*
+	rm -f file_contexts
 
-.PHONY: cil all clean install bare test
+.PHONY: cil all clean bare install test
