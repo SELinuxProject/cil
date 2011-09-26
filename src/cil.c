@@ -437,6 +437,9 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 			case CIL_BLOCK:
 				cil_symtab_array_destroy(((struct cil_block*)current->data)->symtab);
 				break;
+			case CIL_IN:
+				cil_symtab_array_destroy(((struct cil_in*)current->data)->symtab);
+				break;
 			case CIL_CLASS:
 				cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
 				break;
@@ -504,6 +507,8 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 			*symtab = &((struct cil_block*)ast_node->data)->symtab[sym_index];
 		} else if (ast_node->flavor == CIL_MACRO  && sym_index < CIL_SYM_NUM) {
 			*symtab = &((struct cil_macro*)ast_node->data)->symtab[sym_index];
+		} else if (ast_node->flavor == CIL_IN && sym_index < CIL_SYM_NUM) {
+			*symtab = &((struct cil_in*)ast_node->data)->symtab[sym_index];
 		} else if (ast_node->flavor == CIL_CALL  && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
@@ -653,6 +658,14 @@ void cil_blockinherit_init(struct cil_blockinherit **inherit)
 {
 	*inherit = cil_malloc(sizeof(**inherit));
 	(*inherit)->block_str = NULL;
+}
+
+void cil_in_init(struct cil_in **in)
+{
+	*in = cil_malloc(sizeof(**in));
+
+	cil_symtab_array_init((*in)->symtab, CIL_SYM_NUM);
+	(*in)->block_str = NULL;
 }
 
 void cil_class_init(struct cil_class **class)

@@ -78,6 +78,8 @@ int cil_resolve_ioportcon(struct cil_db *db, struct cil_tree_node *current, stru
 int cil_resolve_pcidevicecon(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_fsuse(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_blockinherit(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
+int cil_resolve_in(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call);
 int cil_resolve_call2(struct cil_db *, struct cil_tree_node *, struct cil_call *);
 int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_index sym_index, struct cil_tree_node **node);

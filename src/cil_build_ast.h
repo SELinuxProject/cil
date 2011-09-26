@@ -43,6 +43,8 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 void cil_destroy_block(struct cil_block *block);
 int cil_gen_blockinherit(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_blockinherit(struct cil_blockinherit *inherit);
+int cil_gen_in(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_in(struct cil_in *in);
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_class(struct cil_class *class);
 int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

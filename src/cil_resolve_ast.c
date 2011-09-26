@@ -2377,6 +2377,36 @@ exit:
 	return rc;
 }
 
+int cil_resolve_in(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
+{
+	struct cil_in *in = (struct cil_in*)current->data;
+	struct cil_tree_node *block_node = NULL;
+	int rc = SEPOL_ERR;
+
+	if (in->block_str != NULL) {
+		rc = cil_resolve_name(db, current, in->block_str, CIL_SYM_BLOCKS, call, &block_node);
+		if (rc != SEPOL_OK) {
+			printf("Failed to resolve in block, rc: %d\n", rc);
+			goto exit;
+		}
+	} else {
+		printf("block string is null\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = cil_copy_ast(db, current, block_node);
+	if (rc != SEPOL_OK) {
+		printf("Failed to copy in, rc: %d\n", rc);
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct cil_call *call)
 {
 	struct cil_call *new_call = (struct cil_call*)current->data;

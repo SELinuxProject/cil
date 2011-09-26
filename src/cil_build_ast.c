@@ -224,6 +224,54 @@ void cil_destroy_blockinherit(struct cil_blockinherit *inherit)
 
 	free(inherit);
 }
+int cil_gen_in(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_N_LISTS
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	int rc = SEPOL_ERR;
+	struct cil_in *in = NULL;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		printf("Invalid in statement (line: %d)\n", parse_current->line);
+		goto exit;
+	}
+
+	cil_in_init(&in);
+
+	in->block_str = cil_strdup(parse_current->next->data);
+
+	ast_node->data = in;
+	ast_node->flavor = CIL_IN;
+
+	return SEPOL_OK;
+exit:
+	if (in != NULL) {
+		cil_destroy_in(in);
+	}
+	return rc;
+}
+
+void cil_destroy_in(struct cil_in *in)
+{
+	if (in == NULL) {
+		return;
+	}
+
+	if (in->block_str != NULL) {
+		free(in->block_str);
+	}
+
+	free(in);
+}
 
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
@@ -5341,6 +5389,12 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_blockinherit(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "cil_gen_blockinherit failed, rc: %d\n", rc);
+			goto exit;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_IN)) {
+		rc = cil_gen_in(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			printf("cil_gen_in failed, rc: %d\n", rc);
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {

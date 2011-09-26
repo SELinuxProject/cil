@@ -159,6 +159,7 @@ enum cil_flavor {
 */
 #define CIL_KEY_BLOCK 		"block"
 #define CIL_KEY_BLOCKINHERIT	"blockinherit"
+#define CIL_KEY_IN		"in"
 #define CIL_KEY_CLASS		"class"
 #define CIL_KEY_PERM		"perm"
 #define CIL_KEY_PERMSET		"permissionset"
@@ -326,6 +327,11 @@ struct cil_block {
 };
 
 struct cil_blockinherit {
+	char *block_str;
+};
+
+struct cil_in {
+	symtab_t symtab[CIL_SYM_NUM];
 	char *block_str;
 };
 
@@ -829,6 +835,7 @@ void cil_levelrange_init(struct cil_levelrange **lvlrange);
 void cil_sens_init(struct cil_sens **sens);
 void cil_block_init(struct cil_block **block);
 void cil_blockinherit_init(struct cil_blockinherit **inherit);
+void cil_in_init(struct cil_in **in);
 void cil_class_init(struct cil_class **class);
 void cil_common_init(struct cil_common **common);
 void cil_classcommon_init(struct cil_classcommon **classcommon);
