@@ -71,7 +71,9 @@ void set_cil_file_data(struct cil_file_data **data) {
 	file_size = filedata.st_size;
 
 	buffer = malloc(file_size + 2);
-	fread(buffer, file_size, 1, file);
+	if(fread(buffer, file_size, 1, file) < 1) {
+		exit(1);
+	}
 	memset(buffer+file_size, 0, 2);
 	fclose(file);
 
