@@ -42,6 +42,30 @@ struct cil_symtab_datum {
 	int state;
 };
 
+struct cil_complex_symtab_key {
+	intptr_t key1;
+	intptr_t key2;
+	intptr_t key3;
+	intptr_t key4;
+};
+
+struct cil_complex_symtab_datum {
+	void *data;
+};
+
+struct cil_complex_symtab_node {
+	struct cil_complex_symtab_key *ckey;
+	struct cil_complex_symtab_datum *datum;
+	struct cil_complex_symtab_node *next;
+};
+
+struct cil_complex_symtab {
+	struct cil_complex_symtab_node **htable;
+	uint32_t nelems;
+	uint32_t nslots;
+	uint32_t mask;
+};
+
 void cil_symtab_init(symtab_t *symtab, unsigned int size);
 void cil_symtab_datum_init(struct cil_symtab_datum *datum);
 void cil_symtab_datum_destroy(struct cil_symtab_datum datum);
@@ -49,5 +73,9 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 int cil_symtab_remove(symtab_t *symtab, hashtab_key_t key);
 int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node);
 void cil_symtab_destroy(symtab_t *symtab);
+int cil_complex_symtab_init(struct cil_complex_symtab *symtab, unsigned int size);
+int cil_complex_symtab_insert(struct cil_complex_symtab *symtab, struct cil_complex_symtab_key *ckey, struct cil_complex_symtab_datum *datum);
+int cil_complex_symtab_search(struct cil_complex_symtab *symtab, struct cil_complex_symtab_key *ckey, struct cil_complex_symtab_datum **out);
+int cil_complex_symtab_destroy(struct cil_complex_symtab *symtab);
 
 #endif

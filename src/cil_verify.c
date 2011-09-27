@@ -1164,12 +1164,49 @@ exit:
 	return rc;
 }
 
-int __cil_verify_booleanif(struct cil_tree_node *node)
+int __cil_verify_type_rule(struct cil_tree_node *node, struct cil_complex_symtab *symtab)
+{
+
+	int rc = SEPOL_ERR;
+	struct cil_type_rule *typerule = node->data;
+	struct cil_complex_symtab_key ckey;
+
+	ckey.key1 = (intptr_t)typerule->src;
+	ckey.key2 = (intptr_t)typerule->tgt;
+	ckey.key3 = (intptr_t)typerule->obj;
+	ckey.key4 = (intptr_t)typerule->rule_kind;
+
+	rc = cil_complex_symtab_insert(symtab, &ckey, NULL);
+	if (rc != SEPOL_OK) {
+		if (rc == SEPOL_EEXIST) {
+			struct cil_complex_symtab_datum *datum = NULL;
+			rc = cil_complex_symtab_search(symtab, &ckey, &datum);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+			if (datum == NULL) {
+				rc = SEPOL_ERR;
+				goto exit;
+			}
+		}
+		goto exit;
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
+int __cil_verify_booleanif(struct cil_tree_node *node, struct cil_complex_symtab *symtab)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *cond_block = node->cl_head;
 	struct cil_tree_node *rule_node = NULL;
+	struct cil_tree_node *temp_node = NULL;
 	struct cil_avrule *avrule = NULL;
+	struct cil_type_rule *typerule = NULL;
+	struct cil_complex_symtab_key ckey;
+	struct cil_complex_symtab_datum datum;
 
 	while (cond_block != NULL) {
 		for (rule_node = cond_block->cl_head;
@@ -1185,6 +1222,35 @@ int __cil_verify_booleanif(struct cil_tree_node *node)
 						goto exit;
 					}
 				case CIL_TYPE_RULE:
+					typerule = rule_node->data;
+
+					ckey.key1 = (intptr_t)typerule->src;
+					ckey.key2 = (intptr_t)typerule->tgt;
+					ckey.key3 = (intptr_t)typerule->obj;
+					ckey.key4 = (intptr_t)typerule->rule_kind;
+
+					datum.data = node;
+
+					rc = cil_complex_symtab_insert(symtab, &ckey, &datum);
+					if (rc != SEPOL_OK) {
+						goto exit;
+					}
+
+					for (temp_node = rule_node->next;
+						temp_node != NULL;
+						temp_node = temp_node->next) {
+
+						if (temp_node->flavor == CIL_TYPE_RULE) {
+							typerule = temp_node->data;
+							if ((intptr_t)typerule->src == ckey.key1 &&
+								(intptr_t)typerule->tgt == ckey.key2 &&
+								(intptr_t)typerule->obj == ckey.key3 &&
+								(intptr_t)typerule->rule_kind == ckey.key4) {
+								rc = SEPOL_ERR;
+								goto exit;
+							}
+						}
+					}
 					break;
 				default:
 					printf("Invalid statement within booleanif (line: %d)\n", node->line);
@@ -1465,6 +1531,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	int *avrule_cnt = 0;
 	int state = 0;
 	struct cil_args_verify *args = extra_args;
+	struct cil_complex_symtab *csymtab = NULL;
 	struct cil_db *db = NULL;
 	symtab_t *senstab = NULL;
 
@@ -1475,6 +1542,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	db = args->db;
 	senstab = args->senstab;
 	avrule_cnt = args->avrule_cnt;
+	csymtab = args->csymtab;
 
 	switch (node->flavor) {
 	case CIL_USER:
@@ -1490,8 +1558,11 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 		(*avrule_cnt)++;
 		rc = SEPOL_OK;
 		break;
+	case CIL_TYPE_RULE:
+		rc = __cil_verify_type_rule(node, csymtab);
+		break;
 	case CIL_BOOLEANIF:
-		rc = __cil_verify_booleanif(node);
+		rc = __cil_verify_booleanif(node, csymtab);
 		*finished = CIL_TREE_SKIP_HEAD;
 		break;
 	case CIL_OPTIONAL:
