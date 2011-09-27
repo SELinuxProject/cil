@@ -47,7 +47,6 @@ struct cil_args_resolve {
 	struct cil_db *db;
 	uint32_t *pass;
 	uint32_t *changed;
-	symtab_t *calltab;
 	struct cil_tree_node *callstack;
 	struct cil_tree_node *optstack;
 };
@@ -3267,13 +3266,11 @@ int __cil_resolve_ast_first_child_helper(struct cil_tree_node *current, void *ex
 	struct cil_tree_node *callstack = NULL;
 	struct cil_tree_node *optstack = NULL;
 	struct cil_tree_node *parent = NULL;
-	symtab_t *calltab = NULL;
 
 	if (current == NULL || extra_args == NULL) {
 		goto exit;
 	}
 
-	calltab = args->calltab;
 	callstack = args->callstack;
 	optstack = args->optstack;
 	parent = current->parent;
@@ -3290,24 +3287,18 @@ int __cil_resolve_ast_first_child_helper(struct cil_tree_node *current, void *ex
 		new->flavor = parent->flavor;
 
 		if (parent->flavor == CIL_CALL) {
-			char *key = NULL;
-			struct cil_call *call = parent->data;
-			struct cil_symtab_datum *calldatum = cil_malloc(sizeof(*calldatum));
-			cil_symtab_datum_init(calldatum);
-
-			key = call->macro->datum.name;
-			rc = cil_symtab_insert(calltab, key, calldatum, NULL);
-			if (rc != SEPOL_OK) {
-				if (rc == SEPOL_EEXIST) {
-					printf("Error: recursive call found (line: %d)\n", parent->line);
-				} else {
-					printf("Error while inserting call into call symtab\n");
-				}
-				cil_symtab_datum_destroy(*calldatum);
-				goto exit;
-			}
-
 			if (callstack != NULL) {
+				struct cil_tree_node *curr = NULL;
+				for (curr = callstack->cl_head; curr != NULL;
+					curr = curr->cl_head) {
+					struct cil_call *curr_call = curr->data;
+					struct cil_call *new_call = new->data;
+					if (curr_call->macro == new_call->macro) {
+						printf("Recursive macro call found\n");
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+				}
 				callstack->parent = new;
 				new->cl_head = callstack;
 			}
@@ -3341,14 +3332,6 @@ int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *ext
 	parent = current->parent;
 
 	if (parent->flavor == CIL_CALL) {
-		symtab_t *calltab = args->calltab;
-		struct cil_call *call = parent->data;
-
-		rc = cil_symtab_remove(calltab, (hashtab_key_t)call->macro_str);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
 		/* pop off the stack */
 		struct cil_tree_node *callstack = args->callstack;
 		args->callstack = callstack->cl_head;
@@ -3390,8 +3373,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	struct cil_args_resolve extra_args;
 	uint32_t pass = 1;
 	uint32_t changed = 0;
-	symtab_t calltab;
-	cil_symtab_init(&calltab, CIL_SYM_SIZE);
 
 	if (db == NULL || current == NULL) {
 		goto exit;
@@ -3400,7 +3381,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.db = db;
 	extra_args.pass = &pass;
 	extra_args.changed = &changed;
-	extra_args.calltab = &calltab;
 	extra_args.callstack = NULL;
 	extra_args.optstack = NULL;
 
@@ -3471,7 +3451,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 	rc = SEPOL_OK;
 exit:
-	cil_symtab_destroy(&calltab);
 	return rc;
 }
 
