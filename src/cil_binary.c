@@ -1206,6 +1206,12 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 
 		cond_list->node = avtab_ptr;
 
+		// parse_context needs to be non-NULL for conditional rules to be
+		// written to the binary. it is normally used for finding duplicates,
+		// but cil checks that earlier, so we don't use it. it just needs to be
+		// set
+		avtab_ptr->parse_context = (void*)1;
+
 		flavor = node->flavor;
 		switch (flavor) {
 		case CIL_CONDTRUE:
