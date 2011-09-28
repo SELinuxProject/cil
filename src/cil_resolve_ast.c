@@ -2997,21 +2997,26 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 		}
 		break;
 	case 2:
+		if (node->flavor == CIL_IN) {
+			rc = cil_resolve_in(db, node, call);
+		}
+		break;
+	case 3:
 		if (node->flavor == CIL_BLOCKINHERIT) {
 			rc = cil_resolve_blockinherit(db, node, call);
 		}
 		break;
-	case 3:
+	case 4:
 		if (node->flavor == CIL_CALL) {
 			rc = cil_resolve_call1(db, node, call);
 		}
 		break;
-	case 4:
+	case 5:
 		if (node->flavor == CIL_CALL) {
 			rc = cil_resolve_call2(db, node, call);
 		}
 		break;
-	case 5:
+	case 6:
 		switch (node->flavor) {
 		case CIL_CATORDER:
 			rc = cil_resolve_catorder(db, node, call);
@@ -3045,7 +3050,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		}
 		break;
-	case 6:
+	case 7:
 		switch (node->flavor) {
 		case CIL_CATRANGE:
 			rc = cil_resolve_catrange(db, node, (struct cil_catrange*)node->data, call);
@@ -3058,7 +3063,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		}
 		break;
-	case 7:
+	case 8:
 		switch (node->flavor) {
 		case CIL_SENSCAT:
 			rc = cil_resolve_senscat(db, node, call);
@@ -3071,7 +3076,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, int pass, struct cil_db *
 			break;
 		}
 		break;
-	case 8:
+	case 9:
 		switch (node->flavor) {
 		case CIL_TYPEATTRIBUTETYPES:
 			rc = cil_resolve_typeattributetypes(db, node, call);
@@ -3415,7 +3420,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.callstack = NULL;
 	extra_args.optstack = NULL;
 
-	for (pass = 1; pass <= 8; pass++) {
+	for (pass = 1; pass <= 9; pass++) {
 #ifdef DEBUG
 		cil_log(CIL_ERR, "---------- Pass %i ----------\n", pass);
 #endif
@@ -3429,7 +3434,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		cil_tree_print(db->ast->root, 0);
 #endif
 
-		if (pass == 5) {
+		if (pass == 6) {
 #ifdef DEBUG
 			cil_log(CIL_ERR, "----- Verify Catorder ------\n");
 #endif
@@ -3453,10 +3458,10 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			cil_log(CIL_ERR, "----- Redoing resolve passes -----\n");
 #endif
 			/* Need to re-resolve because an optional was disabled. We only
-			 * need to reset to the thrid pass because things done in pass 1
-			 * and 2 aren't allowed in optionals, and thus can't be disabled.
-			 * Note: set pass to 2 because the pass++ will increment it to 3 */
-			pass = 2;
+			 * need to reset to the thrid pass because things done in pass 1, 2
+			 * and 3 aren't allowed in optionals, and thus can't be disabled.
+			 * Note: set pass to 3 because the pass++ will increment it to 4 */
+			pass = 3;
 			/* reset the global data */
 			cil_list_destroy(&db->catorder, 0);
 			cil_list_destroy(&db->dominance, 0);
