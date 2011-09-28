@@ -34,6 +34,7 @@
 #include <sepol/policydb/symtab.h>
 
 #include "cil.h"
+#include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_symtab.h"
@@ -149,7 +150,7 @@ int cil_list_prepend_item(struct cil_list *list, struct cil_list_item *item)
 	}
 
 	if (item->next != NULL) {
-		printf("Error: List item to prepend has next\n");
+		cil_log(CIL_INFO, "Error: List item to prepend has next\n");
 		goto exit;
 	}
 
@@ -173,14 +174,12 @@ void cil_print_list_lists(struct cil_list *list_list)
 	list_item = list_list->head;
 	while (list_item != NULL) {
 		sub_list_item = ((struct cil_list*)list_item->data)->head;
-		printf("(");
+		cil_log(CIL_INFO, "(");
 		while (sub_list_item != NULL) {
-			printf(" %p:%s ", sub_list_item->data, ((struct cil_symtab_datum*)sub_list_item->data)->name);
+			cil_log(CIL_INFO, " %p:%s ", sub_list_item->data, ((struct cil_symtab_datum*)sub_list_item->data)->name);
 			sub_list_item = sub_list_item->next;
 		}
-		printf(")\n");
+		cil_log(CIL_INFO, ")\n");
 		list_item = list_item->next;
 	}
 }
-
-

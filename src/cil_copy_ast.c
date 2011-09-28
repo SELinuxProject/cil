@@ -32,6 +32,7 @@
 #include <string.h>
 
 #include "cil.h"
+#include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_list.h"
@@ -111,7 +112,7 @@ int cil_copy_block(__attribute__((unused)) struct cil_db *db, void *data, void *
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_block: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_block: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL){
 		rc = SEPOL_EEXIST;
@@ -141,7 +142,7 @@ int cil_copy_policycap(__attribute__((unused)) struct cil_db *db, void *data, vo
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_policycap: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_policycap: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -168,7 +169,7 @@ int cil_copy_perm(__attribute__((unused)) struct cil_db *db, void *data, void **
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_perm: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_perm: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -196,10 +197,10 @@ int cil_copy_classmap_perm(__attribute__((unused)) struct cil_db *db, void *data
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_classmap_perm: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_classmap_perm: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_classmap_perm: classmap permissions cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_classmap_perm: classmap permissions cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -230,17 +231,17 @@ int cil_copy_classmap(__attribute__((unused)) struct cil_db *db, void *data, voi
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_classmap: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_classmap: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_ERR;
-		printf("cil_copy_classmap: classmap cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_classmap: classmap cannot be redefined\n");
 		goto exit;
 	}
 
 	rc = symtab_init(&new->perms, CIL_SYM_SIZE);
 	if (rc != SEPOL_OK) {
-		printf("cil_copy_classmap: symtab_init failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_classmap: symtab_init failed, rc: %d\n", rc);
 		goto exit;
 	}
 
@@ -312,10 +313,10 @@ int cil_copy_permset(__attribute__((unused)) struct cil_db *db, void *data, void
 	if (key != NULL) {
 		rc = cil_symtab_get_node(symtab, key, &node);
 		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-			printf("cil_copy_permset: cil_symtab_get_node failed, rc: %d\n", rc);
+			cil_log(CIL_INFO, "cil_copy_permset: cil_symtab_get_node failed, rc: %d\n", rc);
 			goto exit;
 		} else if (node != NULL) {
-			printf("cil_copy_permset: permset cannot be redefined\n");
+			cil_log(CIL_INFO, "cil_copy_permset: permset cannot be redefined\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -349,10 +350,10 @@ int cil_copy_class(__attribute__((unused)) struct cil_db *db, void *data, void *
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_class: failed to get symtab node\n");
+		cil_log(CIL_INFO, "cil_copy_class: failed to get symtab node\n");
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_class: class cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_class: class cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -405,11 +406,11 @@ int cil_copy_classpermset(__attribute__((unused)) struct cil_db *db, void *data,
 	if (key != NULL) {
 		rc = cil_symtab_get_node(symtab, key, &node);
 		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-			printf("cil_copy_classpermset: cil_symtab_get_node failed, rc: %d\n", rc);
+			cil_log(CIL_INFO, "cil_copy_classpermset: cil_symtab_get_node failed, rc: %d\n", rc);
 			goto exit;
 		} else if (node != NULL) {
 			rc = SEPOL_ERR;
-			printf("cil_copy_classpermset: classpermissionset cannot be redefined\n");
+			cil_log(CIL_INFO, "cil_copy_classpermset: classpermissionset cannot be redefined\n");
 			goto exit;
 		}
 	}
@@ -440,10 +441,10 @@ int cil_copy_common(__attribute__((unused)) struct cil_db *db, void *data, void 
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_common: cil_symtab_insert failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_common: cil_symtab_insert failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_common: common cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_common: common cannot be redefined\n");
 		goto exit;
 	}	
 
@@ -484,7 +485,7 @@ int cil_copy_sid(__attribute__((unused)) struct cil_db *db, void *data, void **c
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_sid: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_sid: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -539,7 +540,7 @@ int cil_copy_user(__attribute__((unused)) struct cil_db *db, void *data, void **
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_user: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_user: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -653,7 +654,7 @@ int cil_copy_role(__attribute__((unused)) struct cil_db *db, void *data, void **
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_role: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_role: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -741,7 +742,7 @@ int cil_copy_type(__attribute__((unused)) struct cil_db *db, void *data, void **
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_type: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_type: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -798,7 +799,7 @@ int cil_copy_typeattribute(__attribute__((unused)) struct cil_db *db, void *data
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_typeattribute: cil_symtab_insert failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_typeattribute: cil_symtab_insert failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -859,10 +860,10 @@ int cil_copy_typealias(__attribute__((unused)) struct cil_db *db, void *data, vo
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_typealias: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_typealias: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_typealias: alias cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_typealias: alias cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -954,10 +955,10 @@ int cil_copy_bool(__attribute__((unused)) struct cil_db *db, void *data, void **
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_bool: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_bool: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_bool: boolean/tunable cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_bool: boolean/tunable cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1029,7 +1030,7 @@ int cil_copy_sens(__attribute__((unused)) struct cil_db *db, void *data, void **
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_sens: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_sens: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -1057,10 +1058,10 @@ int cil_copy_sensalias(__attribute__((unused)) struct cil_db *db, void *data, vo
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_sensalias: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_sensalias: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_sensalias: sensitivityalias cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_sensalias: sensitivityalias cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1087,7 +1088,7 @@ int cil_copy_cat(__attribute__((unused)) struct cil_db *db, void *data, void **c
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_cat: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_cat: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -1115,10 +1116,10 @@ int cil_copy_catalias(__attribute__((unused)) struct cil_db *db, void *data, voi
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_catalias: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_catalias: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_catalias: categoryalias cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_catalias: categoryalias cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1153,10 +1154,10 @@ int cil_copy_catrange(__attribute__((unused)) struct cil_db *db, void *data, voi
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_catrange: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_catrange: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_catrange: categoryrange cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_catrange: categoryrange cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1229,10 +1230,10 @@ int cil_copy_catset(__attribute__((unused)) struct cil_db *db, void *data, void 
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_catset: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_catset: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_catset: categoryset cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_catset: categoryset cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1361,10 +1362,10 @@ int cil_copy_level(__attribute__((unused)) struct cil_db *db, void *data, void *
 	if (key != NULL) {
 		rc = cil_symtab_get_node(symtab, key, &node);
 		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-			printf("cil_copy_level: cil_symtab_get_node failed, rc: %d\n", rc);
+			cil_log(CIL_INFO, "cil_copy_level: cil_symtab_get_node failed, rc: %d\n", rc);
 			goto exit;
 		} else if (node != NULL) {
-			printf("cil_copy_level: level cannot be redefined\n");
+			cil_log(CIL_INFO, "cil_copy_level: level cannot be redefined\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -1428,10 +1429,10 @@ int cil_copy_levelrange(__attribute__((unused)) struct cil_db *db, void *data, v
 	if (key != NULL) {
 		rc = cil_symtab_get_node(symtab, key, &node);
 		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-			printf("cil_copy_levelrange: cil_symtab_get_node failed, rc: %d\n", rc);
+			cil_log(CIL_INFO, "cil_copy_levelrange: cil_symtab_get_node failed, rc: %d\n", rc);
 			goto exit;
 		} else if (node != NULL) {
-			printf("cil_copy_levelrange: levelrange cannot be redefined\n");
+			cil_log(CIL_INFO, "cil_copy_levelrange: levelrange cannot be redefined\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -1488,10 +1489,10 @@ int cil_copy_context(__attribute__((unused)) struct cil_db *db, void *data, void
 	if (key != NULL) {
 		rc = cil_symtab_get_node(symtab, key, &node);
 		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-			printf("cil_copy_context: cil_symtab_get_node failed, rc: %d\n", rc);
+			cil_log(CIL_INFO, "cil_copy_context: cil_symtab_get_node failed, rc: %d\n", rc);
 			goto exit;
 		} else if (node != NULL) {
-			printf("cil_copy_context: context cannot be redefined\n");
+			cil_log(CIL_INFO, "cil_copy_context: context cannot be redefined\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -1921,7 +1922,7 @@ int cil_copy_macro(__attribute__((unused)) struct cil_db *db, void *data, void *
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_macro: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_macro: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		if (((struct cil_macro*)node->data)->params != NULL) {
@@ -1969,7 +1970,7 @@ int cil_copy_macro(__attribute__((unused)) struct cil_db *db, void *data, void *
 	return SEPOL_OK;
 
 redef_error:
-	printf("cil_copy_macro: macro cannot be redefined\n");
+	cil_log(CIL_INFO, "cil_copy_macro: macro cannot be redefined\n");
 	rc = SEPOL_ERR;
 
 exit:
@@ -1989,7 +1990,7 @@ int cil_copy_optional(__attribute__((unused)) struct cil_db *db, void *data, voi
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_optional: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_optional: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
 		rc = SEPOL_EEXIST;
@@ -2025,10 +2026,10 @@ int cil_copy_ipaddr(__attribute__((unused)) struct cil_db *db, void *data, void 
 
 	rc = cil_symtab_get_node(symtab, key, &node);
 	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-		printf("cil_copy_ipaddr: cil_symtab_get_node failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_copy_ipaddr: cil_symtab_get_node failed, rc: %d\n", rc);
 		goto exit;
 	} else if (node != NULL) {
-		printf("cil_copy_ipaddr: ipaddress cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_ipaddr: ipaddress cannot be redefined\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -2340,7 +2341,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	if (rc == SEPOL_OK) {
 		rc = cil_tree_node_init(&new);
 		if (rc != SEPOL_OK) {
-			printf("Failed to init tree node, rc: %d\n", rc);
+			cil_log(CIL_INFO, "Failed to init tree node, rc: %d\n", rc);
 			cil_tree_node_destroy(&new);
 			goto exit;
 		}
@@ -2425,7 +2426,7 @@ int cil_copy_ast(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_
 
 	rc = cil_tree_walk(orig, __cil_copy_node_helper, NULL,  __cil_copy_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {
-		printf("cil_tree_walk failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_tree_walk failed, rc: %d\n", rc);
 		goto exit;
 	}
 

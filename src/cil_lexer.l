@@ -31,6 +31,7 @@
 	#include <stdint.h>
 	#include <sepol/errcodes.h>
 	#include "cil_lexer.h"
+	#include "cil_log.h"
 	#include "cil_mem.h"
 	char *value;
 	int line = 1;
@@ -55,7 +56,7 @@ comment		;[^\n]*
 "("		value=yytext; return OPAREN;
 ")"		value=yytext; return CPAREN;	
 {symbol}	value=yytext; return SYMBOL;
-{white}		//printf("white, ");
+{white}		//cil_log(CIL_INFO, "white, ");
 {qstring}	value=yytext; return QSTRING;
 .		value=yytext; return NONE;
 %%
@@ -64,7 +65,7 @@ int cil_lexer_setup(char *buffer, uint32_t size)
 {
 	size = (yy_size_t)size;
 	if (yy_scan_buffer(buffer, size) == NULL) {
-		printf("Lexer failed to setup buffer\n");
+		cil_log(CIL_INFO, "Lexer failed to setup buffer\n");
 		return SEPOL_ERR;
 	}
 	

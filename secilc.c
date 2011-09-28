@@ -35,6 +35,7 @@
 #include <getopt.h>
 
 #include "src/cil.h"
+#include "src/cil_log.h"
 #include "src/cil_tree.h"
 #include "src/cil_lexer.h"
 #include "src/cil_parser.h"
@@ -51,7 +52,7 @@
 
 void usage(char *prog)
 {
-	printf("Usage: %s [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] <files>...\n", prog);
+	printf("Usage: %s [-l|--log=<ver>] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] <files>...\n", prog);
 	exit(1);
 }
 
@@ -73,26 +74,41 @@ int main(int argc, char *argv[])
 	int opt_index = 0;
 	static struct option long_opts[] = {
 		{"help", no_argument, 0, 'h'},
+		{"log", required_argument, 0, 'l'},
 		{"target", required_argument, 0, 't'},
 		{"mls", no_argument, 0, 'M'},
 		{"policyversion", required_argument, 0, 'c'},
 		{0, 0, 0, 0}
 	};
 	int i;
-	
+
 	while (1) {
-		opt_char = getopt_long(argc, argv, "ht:Mc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "hlt:Mc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
 		switch (opt_char) {
+			case 'l': {
+				char *endptr = NULL;
+				errno = 0;
+				LOG_LEVEL = strtol(optarg, &endptr, 10);
+				if (errno != 0 || endptr == optarg || *endptr != '\0') {
+					cil_log(CIL_ERR, "Bad log level: %s\n", optarg);
+					usage(argv[0]);
+				}
+				if (LOG_LEVEL > 3 || LOG_LEVEL < 1) {
+					cil_log(CIL_ERR, "Log level must be: 1 (error), 2 (warnings), or 3 (info)\n");
+					usage(argv[0]);
+				}
+				break;
+			}
 			case 't':
 				if (!strcmp(optarg, "selinux")) {
 					target = SEPOL_TARGET_SELINUX;
 				} else if (!strcmp(optarg, "xen")) {
 					target = SEPOL_TARGET_XEN;
 				} else {
-					fprintf(stderr, "Unknown target: %s\n", optarg);
+					cil_log(CIL_ERR, "Unknown target: %s\n", optarg);
 					usage(argv[0]);
 				}
 				break;
@@ -104,11 +120,11 @@ int main(int argc, char *argv[])
 				errno = 0;
 				policyvers = strtol(optarg, &endptr, 10);
 				if (errno != 0 || endptr == optarg || *endptr != '\0') {
-					fprintf(stderr, "Bad policy version: %s\n", optarg);
+					cil_log(CIL_ERR, "Bad policy version: %s\n", optarg);
 					usage(argv[0]);
 				}
 				if (policyvers > POLICYDB_VERSION_MAX || policyvers < POLICYDB_VERSION_MIN) {
-					fprintf(stderr, "Policy version must be between %d and %d\n",
+					cil_log(CIL_ERR, "Policy version must be between %d and %d\n",
 					       POLICYDB_VERSION_MIN, POLICYDB_VERSION_MAX);
 					usage(argv[0]);
 				}
@@ -119,13 +135,17 @@ int main(int argc, char *argv[])
 			case '?':
 				break;
 			default:
-				fprintf(stderr, "Unsupported option: %s\n", optarg);
+					cil_log(CIL_ERR, "Unsupported option: %s\n", optarg);
 				usage(argv[0]);
 		}
 	}
 
+#ifdef DEBUG
+	LOG_LEVEL = 3;
+#endif
+
 	if (optind >= argc) {
-		fprintf(stderr, "No cil files specified\n");
+		cil_log(CIL_ERR, "No cil files specified\n");
 		usage(argv[0]);
 	}
 	
@@ -134,11 +154,11 @@ int main(int argc, char *argv[])
 	for (i = optind; i < argc; i++) {
 		file = fopen(argv[i], "r");
 		if (!file) {
-			fprintf(stderr, "Could not open file: %s\n", argv[i]);
+			cil_log(CIL_ERR, "Could not open file: %s\n", argv[i]);
 			goto exit;
 		}
 		if (stat(argv[i], &filedata) == -1) {
-			fprintf(stderr, "Could not stat file: %s\n", argv[i]);
+			cil_log(CIL_ERR, "Could not stat file: %s\n", argv[i]);
 			goto exit;
 		}
 		file_size = filedata.st_size;	
@@ -146,76 +166,79 @@ int main(int argc, char *argv[])
 		buffer = cil_malloc(file_size + 2);
 		rc = fread(buffer, file_size, 1, file);
 		if (rc != 1) {
-			fprintf(stderr, "Failure reading file: %s\n", argv[i]);
+			cil_log(CIL_ERR, "Failure reading file: %s\n", argv[i]);
 			goto exit;
 		}
 		memset(buffer+file_size, 0, 2);
 		fclose(file);
 		file = NULL;
 
-		printf("Parsing %s...\n", argv[i]);
+		cil_log(CIL_INFO, "Parsing %s...\n", argv[i]);
 		if (cil_parser(argv[i], buffer, file_size + 2, &parse_tree)) {
-			fprintf(stderr, "Failed to parse %s, exiting\n", argv[i]);
+			cil_log(CIL_ERR, "Failed to parse %s, exiting\n", argv[i]);
 			goto exit;
 		}
 
 		free(buffer);
 		buffer = NULL;
 
-#ifdef DEBUG
-		cil_tree_print(parse_tree->root, 0);
-#endif
+		if (LOG_LEVEL == 3) {
+			cil_tree_print(parse_tree->root, 0);
+		}
 	}
 	
 	cil_db_init(&db);
 
-	printf("Building AST from Parse Tree...\n");
+	cil_log(CIL_INFO, "Building AST from Parse Tree...\n");
 	if (cil_build_ast(db, parse_tree->root, db->ast->root)) {
-		fprintf(stderr, "Failed to build ast, exiting\n");
+		cil_log(CIL_ERR, "Failed to build ast, exiting\n");
 		goto exit;
 	}
-#ifdef DEBUG
-	cil_tree_print(db->ast->root, 0);
-#endif	
-	printf("Destroying Parse Tree...\n");
+
+	if (LOG_LEVEL == 3) {
+		cil_tree_print(db->ast->root, 0);
+	}
+
+	cil_log(CIL_INFO, "Destroying Parse Tree...\n");
 	cil_tree_destroy(&parse_tree);
 
-	printf("Resolving AST...\n");
+	cil_log(CIL_INFO, "Resolving AST...\n");
 	if (cil_resolve_ast(db, db->ast->root)) {
-		fprintf(stderr, "Failed to resolve ast, exiting\n");
+		cil_log(CIL_ERR, "Failed to resolve ast, exiting\n");
 		goto exit;
 	}
 
-#ifdef DEBUG
-	cil_tree_print(db->ast->root, 0);
-#endif
-	printf("Destroying AST Symtabs...\n");
+	if (LOG_LEVEL == 3) {
+		cil_tree_print(db->ast->root, 0);
+	}
+
+	cil_log(CIL_INFO, "Destroying AST Symtabs...\n");
 	if (cil_destroy_ast_symtabs(db->ast->root)) {
-		fprintf(stderr, "Failed to destroy ast symtabs, exiting\n");
+		cil_log(CIL_ERR, "Failed to destroy ast symtabs, exiting\n");
 		goto exit;
 	}
 
-	printf("Qualifying Names...\n");
+	cil_log(CIL_INFO, "Qualifying Names...\n");
 	if (cil_fqn_qualify(db->ast->root)) {
-		fprintf(stderr, "Failed to qualify names, exiting\n");
+		cil_log(CIL_ERR, "Failed to qualify names, exiting\n");
 		goto exit;
 	}
 
-	printf("Post process...\n");
+	cil_log(CIL_INFO, "Post process...\n");
 	if (cil_post_process(db)) {
-		fprintf(stderr, "Post process failed, exiting\n");
+		cil_log(CIL_ERR, "Post process failed, exiting\n");
 		goto exit;
 	}
 
 #ifdef DEBUG
 	rc = cil_gen_policy(db);
 	if (rc != SEPOL_OK) {
-		fprintf(stderr, "Failed to print to policy.conf file\n");
+		cil_log(CIL_ERR, "Failed to print to policy.conf file\n");
 		goto exit;
 	}
 	cil_tree_print(db->ast->root, 0);
 #endif
-	printf("Generating Binary...\n");
+	cil_log(CIL_INFO, "Generating Binary...\n");
 	policydb_init(&pdb);
 	sepol_set_policydb(&pdb);
 	pdb.policy_type = POLICY_KERN;
@@ -223,16 +246,16 @@ int main(int argc, char *argv[])
 	pdb.mls = mls;
 	rc = policydb_set_target_platform(&pdb, target);
 	if (rc != 0) {
-		fprintf(stderr, "Failed to set target platform: %d\n", rc);
+		cil_log(CIL_ERR, "Failed to set target platform: %d\n", rc);
 		goto exit;
 	}
 	snprintf(output, 10, "policy.%d", policyvers);
 	if (cil_binary_create(db, &pdb, output)) {
-		fprintf(stderr, "Failed to generate binary, exiting\n");
+		cil_log(CIL_ERR, "Failed to generate binary, exiting\n");
 		goto exit;
 	}
 
-	printf("Destroying DB...\n");
+	cil_log(CIL_INFO, "Destroying DB...\n");
 	policydb_destroy(&pdb);
 	cil_db_destroy(&db);
 

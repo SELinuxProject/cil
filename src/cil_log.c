@@ -29,48 +29,33 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include "cil_log.h"
 
-__attribute__((noreturn)) void cil_default_malloc_error_handler(void)
+int LOG_LEVEL = 1;
+
+void cil_default_log_handler(char *msg)
 {
-	cil_log(CIL_ERR, "Unable to proceed, failed to allocate memory\n");
-	exit(1);
+	fprintf(stderr, "%s", msg);
 }
 
-void (*cil_malloc_error_handler)(void) = &cil_default_malloc_error_handler;
+void (*cil_log_handler)(char *msg) = &cil_default_log_handler;
 
-void cil_set_malloc_error_handler(void (*handler)(void))
+void cil_set_log_handler(void (*handler)(char *msg))
 {
-	cil_malloc_error_handler = handler;
+	cil_log_handler = handler;
 }
 
-void *cil_malloc(size_t size)
+__attribute__ ((format (printf, 2, 3))) void cil_log(enum cil_log_level lvl, const char *msg, ...)
 {
-	void *mem = malloc(size);
-	if (mem == NULL){
-		if (size == 0) {
-			return NULL;
-		}
-		(*cil_malloc_error_handler)();
+	if (LOG_LEVEL >= (int)lvl) {
+		char buff[512];
+		va_list args;
+		va_start(args, msg);
+		vsprintf(buff, msg, args);
+		va_end(args);
+		(*cil_log_handler)(buff);
 	}
-
-	return mem;
-}
-
-char *cil_strdup(char *str)
-{
-	char *mem = NULL;
-
-	if (str == NULL) {
-		return NULL;
-	}
-
-	mem = strdup(str);
-	if (mem == NULL) {
-		(*cil_malloc_error_handler)();
-	}
-
-	return mem;
 }

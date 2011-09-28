@@ -39,6 +39,7 @@
 #include <sepol/policydb/flask.h>
 
 #include "cil.h"
+#include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
 
@@ -2717,7 +2718,7 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 
 	binary = fopen(fname, "w");
 	if (binary == NULL) {
-		fprintf(stderr, "Failure creating binary file\n");
+		cil_log(CIL_ERR, "Failure opening binary file for writing\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -2728,7 +2729,7 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 
 	rc = policydb_write(pdb, &pf);
 	if (rc != 0) {
-		fprintf(stderr, "Failed writing binary policy\n");
+		cil_log(CIL_ERR, "Failed writing binary policy\n");
 		goto exit;
 	}
 

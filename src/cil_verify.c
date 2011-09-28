@@ -38,6 +38,7 @@
 #include <sepol/errcodes.h>
 
 #include "cil.h"
+#include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_list.h"
@@ -51,14 +52,14 @@ int __cil_verify_name(const char *name)
 	int i = 0;
 
 	if (len >= CIL_MAX_NAME_LENGTH) {
-		printf("Name length greater than max name length of %d", CIL_MAX_NAME_LENGTH);
+		cil_log(CIL_ERR, "Name length greater than max name length of %d", CIL_MAX_NAME_LENGTH);
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
 	for (i = 0; i < len; i++) {
 		if (!isalnum(name[i]) && name[i] != '_') {
-			printf("Invalid character %c in %s\n", name[i], name);
+			cil_log(CIL_ERR, "Invalid character %c in %s\n", name[i], name);
 			goto exit;
 		}
 	}
@@ -187,7 +188,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 	    strcmp(lstr, CIL_KEY_CONS_U1) && strcmp(lstr, CIL_KEY_CONS_U2) &&
 	    strcmp(lstr, CIL_KEY_CONS_L1) && strcmp(lstr, CIL_KEY_CONS_L2) &&
 	    strcmp(lstr, CIL_KEY_CONS_H1)) {
-		printf("Left hand side must be valid keyword\n");
+		cil_log(CIL_ERR, "Left hand side must be valid keyword\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -207,7 +208,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 			rcond->flavor = CIL_CONS_T2;
 		} else {
 			if (riskeyword) {
-				printf("Keyword %s not allowed on right side of expression\n", rstr);
+				cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -222,7 +223,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 	} else if (!strcmp(lstr, CIL_KEY_CONS_T2)) {
 		lcond->flavor = CIL_CONS_T2;
 		if (riskeyword) {
-			printf("Keyword %s not allowed on right side of expression\n", rstr);
+			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -239,7 +240,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 			rcond->flavor = CIL_CONS_R2;
 		} else {
 			if (riskeyword) {
-				printf("Keyword %s not allowed on right side of expression\n", rstr);
+				cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -254,7 +255,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 	} else if (!strcmp(lstr, CIL_KEY_CONS_R2)) {
 		lcond->flavor = CIL_CONS_R2;
 		if (riskeyword) {
-			printf("Keyword %s not allowed on right side of expression\n", rstr);
+			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -271,7 +272,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 			rcond->flavor = CIL_CONS_U2;
 		} else {
 			if (riskeyword) {
-				printf("Keyword %s not allowed on right side of expression\n", rstr);
+				cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -286,7 +287,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 	} else if (!strcmp(lstr, CIL_KEY_CONS_U2)) {
 		lcond->flavor = CIL_CONS_U2;
 		if (riskeyword) {
-			printf("Keyword %s not allowed on right side of expression\n", rstr);
+			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -309,7 +310,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 			} else if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
 				rcond->flavor = CIL_CONS_H2;
 			} else {
-				printf("Right side of expression must be correct keyword\n");
+				cil_log(CIL_ERR, "Right side of expression must be correct keyword\n");
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -320,7 +321,7 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 			if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
 				rcond->flavor = CIL_CONS_H2;
 			} else {
-				printf("Right side of expression must be correct keyword\n");
+				cil_log(CIL_ERR, "Right side of expression must be correct keyword\n");
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -333,17 +334,17 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 			} else if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
 				rcond->flavor = CIL_CONS_H2;
 			} else {
-				printf("Right side of expression must be correct keyword\n");
+				cil_log(CIL_ERR, "Right side of expression must be correct keyword\n");
 				rc = SEPOL_ERR;
 				goto exit;
 			}
 		} else {
-			printf("Unknown left hand side\n");
+			cil_log(CIL_ERR, "Unknown left hand side\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 	} else {
-		printf("Unknown left hand side\n");
+		cil_log(CIL_ERR, "Unknown left hand side\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -539,7 +540,7 @@ int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finishe
 
 	if (node->flavor == *flavor) {
 		if (*empty) {
-			printf("Error: ordering is empty\n");
+			cil_log(CIL_ERR, "Error: ordering is empty\n");
 			goto exit;
 		}
 		ordered = order->head;
@@ -551,7 +552,7 @@ int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finishe
 			ordered = ordered->next;
 		}
 		if (!(*found)) {
-			printf("Item not ordered: %s\n", ((struct cil_symtab_datum*)node->data)->name);
+			cil_log(CIL_ERR, "Item not ordered: %s\n", ((struct cil_symtab_datum*)node->data)->name);
 			goto exit;
 		}
 		*found = 0;
@@ -581,7 +582,7 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, en
 	} else {
 		ordered = order->head;
 		if (ordered->next != NULL) {
-			printf("Disjoint category ordering exists\n");
+			cil_log(CIL_ERR, "Disjoint category ordering exists\n");
 			goto exit;
 		}
 
@@ -598,7 +599,7 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, en
 
 	rc = cil_tree_walk(current, __cil_verify_order_node_helper, NULL, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
-		printf("Failed to verify category order\n");
+		cil_log(CIL_ERR, "Failed to verify category order\n");
 		goto exit;
 	}
 
@@ -694,7 +695,7 @@ int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil
 			struct cil_cat *cat = catset_item->data;
 			rc = __cil_verify_senscat(db, sens, cat);
 			if (rc != SEPOL_OK) {
-				printf("Category %s can't be used with sensitivity %s\n", cat->datum.name, sens->datum.name);
+				cil_log(CIL_ERR, "Category %s can't be used with sensitivity %s\n", cat->datum.name, sens->datum.name);
 				goto exit;
 			}
 			break;
@@ -718,7 +719,7 @@ int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil
 				struct cil_cat *cat = catorder->data;
 				rc = __cil_verify_senscat(db, sens, cat);
 				if (rc != SEPOL_OK) {
-					printf("Category %s can't be used with sensitivity %s\n", cat->datum.name, sens->datum.name);
+					cil_log(CIL_ERR, "Category %s can't be used with sensitivity %s\n", cat->datum.name, sens->datum.name);
 					goto exit;
 				}
 				if (catorder->data == catrange->cat_high) {
@@ -770,7 +771,7 @@ int __cil_verify_levelrange_dominance(struct cil_db *db, struct cil_sens *low, s
 	return SEPOL_OK;
 
 exit:
-	printf("Failed to verify levelrange dominance\n");
+	cil_log(CIL_ERR, "Failed to verify levelrange dominance\n");
 	return rc;
 
 }
@@ -806,7 +807,7 @@ int __cil_verify_cat_in_catset(struct cil_db *db, struct cil_cat *cat, struct ci
 
 	return SEPOL_OK;
 exit:
-	printf("Failed to find cat in catset\n");
+	cil_log(CIL_ERR, "Failed to find cat in catset\n");
 	return rc;
 }
 
@@ -855,7 +856,7 @@ int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, stru
 	return SEPOL_OK;
 
 exit:
-	printf("Failed to verify levelrange categories\n");
+	cil_log(CIL_ERR, "Failed to verify levelrange categories\n");
 	return rc;
 }
 
@@ -876,7 +877,7 @@ int __cil_verify_levelrange(struct cil_db *db, struct cil_levelrange *lr)
 	return SEPOL_OK;
 
 exit:
-	printf("Failed to verify levelrange\n");
+	cil_log(CIL_ERR, "Failed to verify levelrange\n");
 	return rc;
 }
 
@@ -911,7 +912,7 @@ int __cil_add_level_sens_to_symtab(struct cil_level *lvl, symtab_t *senstab)
 			cil_symtab_datum_destroy(*sensdatum);
 			free(sensdatum);
 		} else {
-			printf("Failed to insert level sensitivity into symtab\n");
+			cil_log(CIL_ERR, "Failed to insert level sensitivity into symtab\n");
 			goto exit;
 		}
 	}
@@ -927,13 +928,13 @@ int __cil_add_levelrange_sens_to_symtab(struct cil_levelrange *lvlrange, symtab_
 
 	rc = __cil_add_level_sens_to_symtab(lvlrange->low, senstab);
 	if (rc != SEPOL_OK) {
-		printf("Failed to add low level sens to symtab\n");
+		cil_log(CIL_ERR, "Failed to add low level sens to symtab\n");
 		goto exit;
 	}
 
 	rc = __cil_add_level_sens_to_symtab(lvlrange->high, senstab);
 	if (rc !=  SEPOL_OK) {
-		printf("Failed to add high level sens to symtab\n");
+		cil_log(CIL_ERR, "Failed to add high level sens to symtab\n");
 		goto exit;
 	}
 
@@ -947,20 +948,20 @@ int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *s
 	struct cil_user *user = node->data;
 
 	if (user->dftlevel == NULL) {
-		printf("User does not have a default level: %s", user->datum.name);
+		cil_log(CIL_ERR, "User does not have a default level: %s", user->datum.name);
 		goto exit;
 	} else if (user->range == NULL) {
-		printf("User does not have a level range: %s", user->datum.name);
+		cil_log(CIL_ERR, "User does not have a level range: %s", user->datum.name);
 		goto exit;
 	} else if (user->bounds != NULL) {
 		struct cil_user *bnds = user->bounds;
 		if (user == bnds) {
-			printf("User cannot bound self: %s", user->datum.name);
+			cil_log(CIL_ERR, "User cannot bound self: %s", user->datum.name);
 			goto exit;
 		} else if (bnds->bounds != NULL) {
 			bnds = bnds->bounds;
 			if (user == bnds) {
-				printf("Circular userbounds found: %s\n", user->datum.name);
+				cil_log(CIL_ERR, "Circular userbounds found: %s\n", user->datum.name);
 				goto exit;
 			}
 		}
@@ -976,7 +977,7 @@ int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *s
 
 	rc = __cil_add_level_sens_to_symtab(user->dftlevel, senstab);
 	if (rc != SEPOL_OK) {
-		printf("Failed to add user default level sensitivty to symtab\n");
+		cil_log(CIL_ERR, "Failed to add user default level sensitivty to symtab\n");
 		goto exit;
 	}
 
@@ -1008,7 +1009,7 @@ int __cil_verify_role(struct cil_tree_node *node)
 			steps += 1;
 
 			if (bnding == bnded) {
-				printf("Circular rolebounds found: %s\n", bnding->datum.name);
+				cil_log(CIL_ERR, "Circular rolebounds found: %s\n", bnding->datum.name);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -1043,7 +1044,7 @@ int __cil_verify_type(struct cil_tree_node *node)
 			steps += 1;
 
 			if (bnding == bnded) {
-				printf("Circular typebounds found: %s\n", bnding->datum.name);
+				cil_log(CIL_ERR, "Circular typebounds found: %s\n", bnding->datum.name);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -1084,12 +1085,12 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 		}
 
 		if (curr == NULL) {
-			printf("Invalid role for specified user\n");
+			cil_log(CIL_ERR, "Invalid role for specified user\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 	} else {
-		printf("No roles given to the specified user\n");
+		cil_log(CIL_ERR, "No roles given to the specified user\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1103,12 +1104,12 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 		}
 
 		if (curr == NULL) {
-			printf("Invalid type for specified role\n");
+			cil_log(CIL_ERR, "Invalid type for specified role\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 	} else {
-		printf("No types given to the specified role\n");
+		cil_log(CIL_ERR, "No types given to the specified role\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1128,7 +1129,7 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 			if (sens == user_low->sens) {
 				found = CIL_TRUE;
 			} else if (sens == ctx_low->sens) {
-				printf("Invalid context level range for specified user\n");
+				cil_log(CIL_ERR, "Invalid context level range for specified user\n");
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -1138,7 +1139,7 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 			if (sens == ctx_high->sens) {
 				break;
 			} else if (sens == user_high->sens) {
-				printf("Invalid context level range for specified user\n");
+				cil_log(CIL_ERR, "Invalid context level range for specified user\n");
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -1217,7 +1218,7 @@ int __cil_verify_booleanif(struct cil_tree_node *node, struct cil_complex_symtab
 				case CIL_AVRULE:
 					avrule = rule_node->data;
 					if (avrule->rule_kind == CIL_AVRULE_NEVERALLOW) {
-						printf("Neverallow within booleanif block (line: %d)\n", node->line);
+						cil_log(CIL_ERR, "Neverallow within booleanif block (line: %d)\n", node->line);
 						rc = SEPOL_ERR;
 						goto exit;
 					}
@@ -1246,6 +1247,7 @@ int __cil_verify_booleanif(struct cil_tree_node *node, struct cil_complex_symtab
 								(intptr_t)typerule->tgt == ckey.key2 &&
 								(intptr_t)typerule->obj == ckey.key3 &&
 								(intptr_t)typerule->rule_kind == ckey.key4) {
+								cil_log(CIL_ERR, "Duplicate type rule found (line: %d)\n", node->line);
 								rc = SEPOL_ERR;
 								goto exit;
 							}
@@ -1253,7 +1255,7 @@ int __cil_verify_booleanif(struct cil_tree_node *node, struct cil_complex_symtab
 					}
 					break;
 				default:
-					printf("Invalid statement within booleanif (line: %d)\n", node->line);
+					cil_log(CIL_ERR, "Invalid statement within booleanif (line: %d)\n", node->line);
 					goto exit;
 			}
 		}

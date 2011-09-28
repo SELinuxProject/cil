@@ -34,6 +34,7 @@
 #include <sepol/policydb/conditional.h>
 
 #include "cil.h"
+#include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_list.h"
@@ -65,11 +66,11 @@ static int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *per
 			if (class->common != NULL) {
 				rc = cil_symtab_get_node(&class->common->perms, (char*)perm->data, &perm_node);
 				if (rc != SEPOL_OK) {
-					printf("Failed to find perm in class or common symtabs\n");
+					cil_log(CIL_ERR, "Failed to find perm in class or common symtabs\n");
 					goto exit;
 				}
 			} else {
-				printf("Failed to find perm '%s' in class symtab\n", (char*)perm->data);
+				cil_log(CIL_ERR, "Failed to find perm '%s' in class symtab\n", (char*)perm->data);
 				goto exit;
 			}
 		} else if (rc != SEPOL_OK) {
@@ -104,7 +105,7 @@ int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, s
 
 	rc = cil_resolve_name(db, current, cps->class_str, CIL_SYM_CLASSES, call, &class_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", cps->class_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", cps->class_str);
 		goto resolve_classpermset_out;
 	}
 
@@ -129,7 +130,7 @@ int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, s
 
 		rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->perms);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve permissionset, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve permissionset, rc: %d\n", rc);
 			goto resolve_classpermset_out;
 		}
 	} else if (cps->permset != NULL) {
@@ -139,7 +140,7 @@ int cil_resolve_classpermset(struct cil_db *db, struct cil_tree_node *current, s
 
 		rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->perms);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve permset, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve permset, rc: %d\n", rc);
 			goto resolve_classpermset_out;
 		}
 	}
@@ -160,7 +161,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 
 	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, call, &src_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rule->src_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rule->src_str);
 		goto exit;
 	}
 	rule->src = src_node->data;
@@ -170,7 +171,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	} else {
 		rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
 		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", rule->tgt_str);
+			cil_log(CIL_ERR, "Name resolution failed for %s\n", rule->tgt_str);
 			goto exit;
 		}
 		rule->tgt = tgt_node->data;
@@ -179,7 +180,7 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 	if (rule->classpermset_str != NULL) {
 		rc = cil_resolve_name(db, current, rule->classpermset_str, CIL_SYM_CLASSPERMSETS, call, &cps_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve classpermset %s\n", rule->classpermset_str);
+			cil_log(CIL_ERR, "Failed to resolve classpermset %s\n", rule->classpermset_str);
 			goto exit;
 		}
 		rule->classpermset = (struct cil_classpermset*)cps_node->data;
@@ -188,14 +189,14 @@ int cil_resolve_avrule(struct cil_db *db, struct cil_tree_node *current, struct 
 		if (rule->classpermset->datum.name == NULL) {
 			rc = cil_resolve_classpermset(db, current, rule->classpermset, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve classpermset, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve classpermset, rc: %d\n", rc);
 				goto exit;
 			}
 		}
 	} else if (rule->classpermset != NULL) {
 		rc = cil_resolve_classpermset(db, current, rule->classpermset, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve classpermset, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve classpermset, rc: %d\n", rc);
 			goto exit;
 		}
 	}
@@ -217,32 +218,32 @@ int cil_resolve_type_rule(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = cil_resolve_name(db, current, rule->src_str, CIL_SYM_TYPES, call, &src_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rule->src_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rule->src_str);
 		goto exit;
 	}
 	rule->src = src_node->data;
 
 	rc = cil_resolve_name(db, current, rule->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rule->tgt_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rule->tgt_str);
 		goto exit;
 	}
 	rule->tgt = tgt_node->data;
 
 	rc = cil_resolve_name(db, current, rule->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rule->obj_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rule->obj_str);
 		goto exit;
 	}
 	rule->obj = (struct cil_class*)(obj_node->data);
 
 	rc = cil_resolve_name(db, current, rule->result_str, CIL_SYM_TYPES, call, &result_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rule->result_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rule->result_str);
 		goto exit;
 	}
 	if (result_node->flavor != CIL_TYPE && result_node->flavor != CIL_TYPEALIAS) {
-		printf("Type rule result must be a type or type alias\n");
+		cil_log(CIL_ERR, "Type rule result must be a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -262,14 +263,14 @@ int cil_resolve_list(struct cil_db *db, struct cil_list *str_list, struct cil_li
 	struct cil_list_item *new_item = NULL;
 
 	if (str_list == NULL || res_list == NULL || current == NULL) {
-		printf("Invalid call to cil_resolve_list\n");
+		cil_log(CIL_ERR, "Invalid call to cil_resolve_list\n");
 		goto exit;
 	}
 
 	for (curr_str = str_list->head; curr_str != NULL; curr_str = curr_str->next) {
 		rc = cil_resolve_name(db, current, (char*)curr_str->data, sym_index, call, &res_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve list\n");
+			cil_log(CIL_ERR, "Failed to resolve list\n");
 			goto exit;
 		}
 
@@ -296,12 +297,12 @@ int cil_resolve_typeattributetypes(struct cil_db *db, struct cil_tree_node *curr
 
 	rc = cil_resolve_name(db, current, attrtypes->attr_str, CIL_SYM_TYPES, call, &attr_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", attrtypes->attr_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", attrtypes->attr_str);
 		goto exit;
 	}
 	if (attr_node->flavor != CIL_TYPEATTRIBUTE) {
 		rc = SEPOL_ERR;
-		printf("Attribute type not an attribute\n");
+		cil_log(CIL_ERR, "Attribute type not an attribute\n");
 		goto exit;
 	}
 	attr = attr_node->data;
@@ -343,11 +344,11 @@ int cil_resolve_typealias(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = cil_resolve_name(db, current, alias->type_str, CIL_SYM_TYPES, call, &type_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", alias->type_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", alias->type_str);
 		goto exit;
 	}
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
-		printf("Typealias must resolve to a type or type alias\n");
+		cil_log(CIL_ERR, "Typealias must resolve to a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -383,7 +384,7 @@ int cil_resolve_typealias_to_type(struct cil_tree_node *current)
 		steps += 1;
 
 		if (a1 == a2) {
-			printf("Circular typealias found: %s\n", a1->datum.name);
+			cil_log(CIL_ERR, "Circular typealias found: %s\n", a1->datum.name);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -413,29 +414,29 @@ int cil_resolve_typebounds(struct cil_db *db, struct cil_tree_node *current, str
 
 	rc = cil_resolve_name(db, current, typebnds->type_str, CIL_SYM_TYPES, call, &type_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", typebnds->type_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", typebnds->type_str);
 		goto exit;
 	}
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
-		printf("Typebounds must be a type or type alias\n");
+		cil_log(CIL_ERR, "Typebounds must be a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 	
 	rc = cil_resolve_name(db, current, typebnds->bounds_str, CIL_SYM_TYPES, call, &bounds_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", typebnds->bounds_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", typebnds->bounds_str);
 		goto exit;
 	}
 	if (bounds_node->flavor != CIL_TYPE && bounds_node->flavor != CIL_TYPEALIAS) {
-		printf("Typebounds must be a type or type alias\n");
+		cil_log(CIL_ERR, "Typebounds must be a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
 	type = type_node->data;
 	if (type->bounds != NULL) {
-		printf("Type cannot bind more than one type\n");
+		cil_log(CIL_ERR, "Type cannot bind more than one type\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -456,12 +457,12 @@ int cil_resolve_typepermissive(struct cil_db *db, struct cil_tree_node *current,
 
 	rc = cil_resolve_name(db, current, typeperm->type_str, CIL_SYM_TYPES, call, &type_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", typeperm->type_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", typeperm->type_str);
 		goto exit;
 	}
 
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
-		printf("Typepermissive must be a type or type alias\n");
+		cil_log(CIL_ERR, "Typepermissive must be a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -485,32 +486,32 @@ int cil_resolve_filetransition(struct cil_db *db, struct cil_tree_node *current,
 
 	rc = cil_resolve_name(db, current, filetrans->src_str, CIL_SYM_TYPES, call, &src_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", filetrans->src_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", filetrans->src_str);
 		goto exit;
 	}
 	filetrans->src = src_node->data;
 
 	rc = cil_resolve_name(db, current, filetrans->exec_str, CIL_SYM_TYPES, call, &exec_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", filetrans->exec_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", filetrans->exec_str);
 		goto exit;
 	}
 	filetrans->exec = exec_node->data;
 
 	rc = cil_resolve_name(db, current, filetrans->proc_str, CIL_SYM_CLASSES, call, &proc_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", filetrans->proc_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", filetrans->proc_str);
 		goto exit;
 	}
 	filetrans->proc = proc_node->data;
 
 	rc = cil_resolve_name(db, current, filetrans->dest_str, CIL_SYM_TYPES, call, &dest_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", filetrans->dest_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", filetrans->dest_str);
 		goto exit;
 	}
 	if (dest_node->flavor != CIL_TYPE && dest_node->flavor != CIL_TYPEALIAS) {
-		printf("File transition result is not a type or type alias\n");
+		cil_log(CIL_ERR, "File transition result is not a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -533,21 +534,21 @@ int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current
 
 	rc = cil_resolve_name(db, current, rangetrans->src_str, CIL_SYM_TYPES, call, &src_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rangetrans->src_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rangetrans->src_str);
 		goto exit;
 	}
 	rangetrans->src = src_node->data;
 
 	rc = cil_resolve_name(db, current, rangetrans->exec_str, CIL_SYM_TYPES, call, &exec_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rangetrans->exec_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rangetrans->exec_str);
 		goto exit;
 	}
 	rangetrans->exec = exec_node->data;
 
 	rc = cil_resolve_name(db, current, rangetrans->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rangetrans->obj_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rangetrans->obj_str);
 		goto exit;
 	}
 	rangetrans->obj = (struct cil_class*)obj_node->data;
@@ -555,7 +556,7 @@ int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current
 	if (rangetrans->range_str != NULL) {
 		rc = cil_resolve_name(db, current, rangetrans->range_str, CIL_SYM_LEVELRANGES, call, &range_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve levelrange, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve levelrange, rc: %d\n", rc);
 			goto exit;
 		}
 		rangetrans->range = (struct cil_levelrange*)range_node->data;
@@ -564,14 +565,14 @@ int cil_resolve_rangetransition(struct cil_db *db, struct cil_tree_node *current
 		if (rangetrans->range->datum.name == NULL) {
 			rc = cil_resolve_levelrange(db, current, rangetrans->range, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve levelrange, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve levelrange, rc: %d\n", rc);
 				goto exit;
 			}
 		}
 	} else {
 		rc = cil_resolve_levelrange(db, current, rangetrans->range, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve levelrange, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve levelrange, rc: %d\n", rc);
 			goto exit;
 		}
 	}
@@ -591,18 +592,18 @@ int cil_resolve_classcommon(struct cil_db *db, struct cil_tree_node *current, st
 
 	rc = cil_resolve_name(db, current, clscom->class_str, CIL_SYM_CLASSES, call, &class_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", clscom->class_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", clscom->class_str);
 		goto exit;
 	}
 
 	rc = cil_resolve_name(db, current, clscom->common_str, CIL_SYM_COMMONS, call, &common_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", clscom->common_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", clscom->common_str);
 		goto exit;
 	}
 
 	if (((struct cil_class*)class_node->data)->common != NULL) {
-		printf("class cannot be associeated with more than one common\n");
+		cil_log(CIL_ERR, "class cannot be associeated with more than one common\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -627,14 +628,14 @@ int cil_resolve_classmapping(struct cil_db *db, struct cil_tree_node *current, s
 
 	rc = cil_resolve_name(db, current, mapping->classmap_str, CIL_SYM_CLASSES, call, &tmp);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", mapping->classmap_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", mapping->classmap_str);
 		goto resolve_classmapping_out;
 	}
 	map = tmp->data;
 
 	rc = cil_symtab_get_node(&map->perms, mapping->classmap_perm_str, &tmp);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", mapping->classmap_perm_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", mapping->classmap_perm_str);
 		goto resolve_classmapping_out;
 	}
 	cmp = tmp->data;
@@ -652,7 +653,7 @@ int cil_resolve_classmapping(struct cil_db *db, struct cil_tree_node *current, s
 		if (curr_cps->flavor == CIL_AST_STR) {
 			rc = cil_resolve_name(db, current, (char*)curr_cps->data, CIL_SYM_CLASSPERMSETS, call, &tmp);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve named classpermissionset %s\n", (char*)curr_cps->data);
+				cil_log(CIL_ERR, "Failed to resolve named classpermissionset %s\n", (char*)curr_cps->data);
 				goto resolve_classmapping_out;
 			}
 
@@ -660,7 +661,7 @@ int cil_resolve_classmapping(struct cil_db *db, struct cil_tree_node *current, s
 			if (((struct cil_classpermset*)tmp->data)->datum.name == NULL) {
 				rc = cil_resolve_classpermset(db, current, (struct cil_classpermset*)tmp->data, call);
 				if (rc != SEPOL_OK) {
-					printf("Failed to resolve classpermset, rc: %d\n", rc);
+					cil_log(CIL_ERR, "Failed to resolve classpermset, rc: %d\n", rc);
 					goto resolve_classmapping_out;
 				}
 			}
@@ -670,7 +671,7 @@ int cil_resolve_classmapping(struct cil_db *db, struct cil_tree_node *current, s
 		} else if (curr_cps->flavor == CIL_CLASSPERMSET) {
 			rc = cil_resolve_classpermset(db, current, (struct cil_classpermset*)curr_cps->data, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve anonymous classpermissionset\n");
+				cil_log(CIL_ERR, "Failed to resolve anonymous classpermissionset\n");
 				goto resolve_classmapping_out;
 			}
 			new_item->data = curr_cps->data;
@@ -776,14 +777,14 @@ int cil_resolve_userrole(struct cil_db *db, struct cil_tree_node *current, struc
 
 	rc = cil_resolve_name(db, current, userrole->user_str, CIL_SYM_USERS, call, &user_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", userrole->user_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", userrole->user_str);
 		goto exit;
 	}
 	userrole->user = user_node->data;
 
 	rc = cil_resolve_name(db, current, userrole->role_str, CIL_SYM_ROLES, call, &role_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", userrole->role_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", userrole->role_str);
 		goto exit;
 	}
 	userrole->role = role_node->data;
@@ -815,7 +816,7 @@ int cil_resolve_userlevel(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = cil_resolve_name(db, current, usrlvl->user_str, CIL_SYM_USERS, call, &user_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", usrlvl->user_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", usrlvl->user_str);
 		goto exit;
 	}
 	user = user_node->data;
@@ -832,19 +833,19 @@ int cil_resolve_userlevel(struct cil_db *db, struct cil_tree_node *current, stru
 		if (user->dftlevel->datum.name == NULL) {
 			rc = cil_resolve_level(db, current, user->dftlevel, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve level, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve level, rc: %d\n", rc);
 				goto exit;
 			}
 		}
 	} else if (usrlvl->level != NULL) {
 		rc = cil_resolve_level(db, current, usrlvl->level, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve level, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve level, rc: %d\n", rc);
 			goto exit;
 		}
 		user->dftlevel = usrlvl->level;
 	} else {
-		printf("Invalid userlevel, level not found\n");
+		cil_log(CIL_ERR, "Invalid userlevel, level not found\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -865,7 +866,7 @@ int cil_resolve_userrange(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = cil_resolve_name(db, current, userrange->user_str, CIL_SYM_USERS, call, &user_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", userrange->user_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", userrange->user_str);
 		goto exit;
 	}
 	user = user_node->data;
@@ -882,19 +883,19 @@ int cil_resolve_userrange(struct cil_db *db, struct cil_tree_node *current, stru
 		if (user->range->datum.name == NULL) {
 			rc = cil_resolve_levelrange(db, current, user->range, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve levelramge, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve levelramge, rc: %d\n", rc);
 				goto exit;
 			}
 		}
 	} else if (userrange->range != NULL) {
 		rc = cil_resolve_levelrange(db, current, userrange->range, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve levelrange, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve levelrange, rc: %d\n", rc);
 			goto exit;
 		}
 		user->range = userrange->range;
 	} else {
-		printf("Invalid userrange, levelrange not found\n");
+		cil_log(CIL_ERR, "Invalid userrange, levelrange not found\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -914,18 +915,18 @@ int cil_resolve_userbounds(struct cil_db *db, struct cil_tree_node *current, str
 
 	rc = cil_resolve_name(db, current, userbnds->user_str, CIL_SYM_USERS, call, &user_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", userbnds->user_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", userbnds->user_str);
 		goto exit;
 	}
 
 	rc = cil_resolve_name(db, current, userbnds->bounds_str, CIL_SYM_USERS, call, &bounds_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", userbnds->bounds_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", userbnds->bounds_str);
 		goto exit;
 	}
 
 	if (((struct cil_user*)user_node->data)->bounds != NULL) {
-		printf("user cannot bind more than one user\n");
+		cil_log(CIL_ERR, "user cannot bind more than one user\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -948,14 +949,14 @@ int cil_resolve_roletype(struct cil_db *db, struct cil_tree_node *current, struc
 
 	rc = cil_resolve_name(db, current, roletype->role_str, CIL_SYM_ROLES, call, &role_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roletype->role_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roletype->role_str);
 		goto exit;
 	}
 	roletype->role = role_node->data;
 
 	rc = cil_resolve_name(db, current, roletype->type_str, CIL_SYM_TYPES, call, &type_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roletype->type_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roletype->type_str);
 		goto exit;
 	}
 	roletype->type = type_node->data;
@@ -988,28 +989,28 @@ int cil_resolve_roletransition(struct cil_db *db, struct cil_tree_node *current,
 
 	rc = cil_resolve_name(db, current, roletrans->src_str, CIL_SYM_ROLES, call, &src_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roletrans->src_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roletrans->src_str);
 		goto exit;
 	}
 	roletrans->src = (struct cil_role*)(src_node->data);
 
 	rc = cil_resolve_name(db, current, roletrans->tgt_str, CIL_SYM_TYPES, call, &tgt_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roletrans->tgt_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roletrans->tgt_str);
 		goto exit;
 	}
 	roletrans->tgt = tgt_node->data;
 
 	rc = cil_resolve_name(db, current, roletrans->obj_str, CIL_SYM_CLASSES, call, &obj_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roletrans->obj_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roletrans->obj_str);
 		goto exit;
 	}
 	roletrans->obj = (struct cil_class*)(obj_node->data);
 
 	rc = cil_resolve_name(db, current, roletrans->result_str, CIL_SYM_ROLES, call, &result_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roletrans->result_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roletrans->result_str);
 		goto exit;
 	}
 	roletrans->result = (struct cil_role*)(result_node->data);
@@ -1029,14 +1030,14 @@ int cil_resolve_roleallow(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = cil_resolve_name(db, current, roleallow->src_str, CIL_SYM_ROLES, call, &src_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roleallow->src_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roleallow->src_str);
 		goto exit;
 	}
 	roleallow->src = (struct cil_role*)(src_node->data);
 
 	rc = cil_resolve_name(db, current, roleallow->tgt_str, CIL_SYM_ROLES, call, &tgt_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roleallow->tgt_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roleallow->tgt_str);
 		goto exit;
 	}
 	roleallow->tgt = (struct cil_role*)(tgt_node->data);
@@ -1056,14 +1057,14 @@ int cil_resolve_roledominance(struct cil_db *db, struct cil_tree_node *current, 
 
 	rc = cil_resolve_name(db, current, roledom->role_str, CIL_SYM_ROLES, call, &role_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roledom->role_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roledom->role_str);
 		goto exit;
 	}
 	roledom->role = (struct cil_role*)(role_node->data);
 
 	rc = cil_resolve_name(db, current, roledom->domed_str, CIL_SYM_ROLES, call, &domed_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", roledom->domed_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", roledom->domed_str);
 		goto exit;
 	}
 	roledom->domed = (struct cil_role*)(domed_node->data);
@@ -1083,18 +1084,18 @@ int cil_resolve_rolebounds(struct cil_db *db, struct cil_tree_node *current, str
 
 	rc = cil_resolve_name(db, current, rolebnds->role_str, CIL_SYM_ROLES, call, &role_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rolebnds->role_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rolebnds->role_str);
 		goto exit;
 	}
 
 	rc = cil_resolve_name(db, current, rolebnds->bounds_str, CIL_SYM_ROLES, call, &bounds_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", rolebnds->bounds_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", rolebnds->bounds_str);
 		goto exit;
 	}
 
 	if (((struct cil_role*)role_node->data)->bounds != NULL) {
-		printf("role cannot bind more than one role\n");
+		cil_log(CIL_ERR, "role cannot bind more than one role\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1115,7 +1116,7 @@ int cil_resolve_sensalias(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = cil_resolve_name(db, current, alias->sens_str, CIL_SYM_SENS, call, &sens_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", alias->sens_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", alias->sens_str);
 		goto exit;
 	}
 	alias->sens = (struct cil_sens*)(sens_node->data);
@@ -1134,7 +1135,7 @@ int cil_resolve_catalias(struct cil_db *db, struct cil_tree_node *current, struc
 
 	rc = cil_resolve_name(db, current, alias->cat_str, CIL_SYM_CATS, call, &cat_node);
 	if (rc != SEPOL_OK) {
-		printf("Name resolution failed for %s\n", alias->cat_str);
+		cil_log(CIL_ERR, "Name resolution failed for %s\n", alias->cat_str);
 		goto exit;
 	}
 	alias->cat = (struct cil_cat*)(cat_node->data);
@@ -1161,7 +1162,7 @@ int __cil_set_append(struct cil_list_item *main_list_item, struct cil_list_item 
 	} else {
 		while (main_list_item != NULL || new_list_item != NULL) {
 			if (main_list_item->data != new_list_item->data) {
-				printf("Error: categoryorder adjacency mismatch\n");
+				cil_log(CIL_ERR, "Error: categoryorder adjacency mismatch\n");
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -1189,7 +1190,7 @@ int __cil_set_prepend(struct cil_list *main_list, struct cil_list *new_list, str
 	}
 
 	if (new_list_item->next != NULL) {
-		printf("Invalid list item given to prepend to list: Has next item\n");
+		cil_log(CIL_ERR, "Invalid list item given to prepend to list: Has next item\n");
 		goto exit;
 	}
 
@@ -1200,7 +1201,7 @@ int __cil_set_prepend(struct cil_list *main_list, struct cil_list *new_list, str
 				new_list_iter->next = NULL;
 				rc = cil_list_prepend_item(main_list, new_list_iter);
 				if (rc != SEPOL_OK) {
-					printf("Failed to prepend item to list\n");
+					cil_log(CIL_ERR, "Failed to prepend item to list\n");
 					goto exit;
 				}
 				*success = 1;
@@ -1210,7 +1211,7 @@ int __cil_set_prepend(struct cil_list *main_list, struct cil_list *new_list, str
 		rc = SEPOL_ERR;
 		goto exit;
 	} else {
-		printf("Error: Attempting to prepend to not the head of the list\n");
+		cil_log(CIL_ERR, "Error: Attempting to prepend to not the head of the list\n");
 		goto exit;
 	}
 
@@ -1237,13 +1238,13 @@ int __cil_set_merge_lists(struct cil_list *primary, struct cil_list *new, int *s
 				if (curr_new->next == NULL) {
 					rc = __cil_set_prepend(primary, new, curr_main, curr_new, success);
 					if (rc != SEPOL_OK) {
-						printf("Failed to prepend categoryorder sublist to primary list\n");
+						cil_log(CIL_ERR, "Failed to prepend categoryorder sublist to primary list\n");
 					}
 					goto exit;
 				} else {
 					rc = __cil_set_append(curr_main, curr_new, success);
 					if (rc != SEPOL_OK) {
-						printf("Failed to append categoryorder sublist to primary list\n");
+						cil_log(CIL_ERR, "Failed to append categoryorder sublist to primary list\n");
 					}
 					goto exit;
 				}
@@ -1300,7 +1301,7 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 			} else {
 				rc = __cil_set_merge_lists(order_sublist->data, edge_node->data, &success);
 				if (rc != SEPOL_OK) {
-					printf("Failed to merge categoryorder sublist with main list\n");
+					cil_log(CIL_ERR, "Failed to merge categoryorder sublist with main list\n");
 					goto exit;
 				}
 			}
@@ -1323,7 +1324,7 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 					if (order_sublist != order_lists) {
 						rc = __cil_set_merge_lists(order_sublist->data, order_lists->data, &success);
 						if (rc != SEPOL_OK) {
-							printf("Failed combining categoryorder lists into one\n");
+							cil_log(CIL_ERR, "Failed combining categoryorder lists into one\n");
 							goto exit;
 						}
 						if (success) {
@@ -1366,7 +1367,7 @@ int __cil_create_edge_list(struct cil_db *db, struct cil_tree_node *current, str
 	while (curr != NULL) {
 		rc = cil_resolve_name(db, current, (char*)curr->data, sym_flavor, call, &node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve name: %s\n", (char*)curr->data);
+			cil_log(CIL_ERR, "Failed to resolve name: %s\n", (char*)curr->data);
 			goto exit;
 		}
 		cil_list_item_init(&edge_node);
@@ -1418,7 +1419,7 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current, struc
 
 	rc = __cil_create_edge_list(db, current, catorder->cat_list_str, CIL_SYM_CATS, edge_list, call);
 	if (rc != SEPOL_OK) {
-		printf("Failed to create category edge list\n");
+		cil_log(CIL_ERR, "Failed to create category edge list\n");
 		goto exit;
 	}
 
@@ -1428,7 +1429,7 @@ int cil_resolve_catorder(struct cil_db *db, struct cil_tree_node *current, struc
 	}
 	rc = __cil_set_order(db->catorder, edge_list);
 	if (rc != SEPOL_OK) {
-		printf("Failed to order categoryorder\n");
+		cil_log(CIL_ERR, "Failed to order categoryorder\n");
 		goto exit;
 	}
 
@@ -1449,7 +1450,7 @@ int cil_resolve_dominance(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = __cil_create_edge_list(db, current, dom->sens_list_str, CIL_SYM_SENS, edge_list, call);
 	if (rc != SEPOL_OK) {
-		printf("Failed to create sensitivity edge list\n");
+		cil_log(CIL_ERR, "Failed to create sensitivity edge list\n");
 		goto exit;
 	}
 
@@ -1460,7 +1461,7 @@ int cil_resolve_dominance(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = __cil_set_order(db->dominance, edge_list);
 	if (rc != SEPOL_OK) {
-		printf("Failed to order dominance\n");
+		cil_log(CIL_ERR, "Failed to order dominance\n");
 		goto exit;
 	}
 
@@ -1484,7 +1485,7 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct
 	}
 
 	if (cat_list->head == NULL || cat_list->head->next == NULL || cat_list->head->next->next != NULL) {
-		printf("Invalid category list passed into category range resolution\n");
+		cil_log(CIL_ERR, "Invalid category list passed into category range resolution\n");
 		goto exit;
 	}
 
@@ -1510,7 +1511,7 @@ int __cil_resolve_cat_range(struct cil_db *db, struct cil_list *cat_list, struct
 				}
 				curr_catorder = curr_catorder->next;
 			}
-			printf("Invalid category range\n");
+			cil_log(CIL_ERR, "Invalid category range\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -1543,18 +1544,18 @@ int cil_resolve_cat_list(struct cil_db *db, struct cil_tree_node *current, struc
 			sub_list.head = NULL;
 			rc = __cil_resolve_cat_range(db, (struct cil_list*)curr->data, &sub_list);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve category range\n");
+				cil_log(CIL_ERR, "Failed to resolve category range\n");
 				goto exit;
 			}
 			new_item = sub_list.head;
 		} else {
 			rc = cil_resolve_name(db, current, (char*)curr->data, CIL_SYM_CATS, call, &cat_node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve category name: %s\n", (char*)curr->data);
+				cil_log(CIL_ERR, "Failed to resolve category name: %s\n", (char*)curr->data);
 				goto exit;
 			}
 			if (cat_node->flavor == CIL_CATSET) {
-				printf("categorysets are not allowed inside category lists\n");
+				cil_log(CIL_ERR, "categorysets are not allowed inside category lists\n");
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -1598,7 +1599,7 @@ int cil_resolve_catset(struct cil_db *db, struct cil_tree_node *current, struct 
 		case CIL_AST_STR: {
 			rc = cil_resolve_name(db, current, (char*)cat_item->data, CIL_SYM_CATS, call, &cat_node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve category name: %s\n", (char*)cat_item->data);
+				cil_log(CIL_ERR, "Failed to resolve category name: %s\n", (char*)cat_item->data);
 				goto exit;
 			}
 			res_cat_item->flavor = cat_node->flavor;
@@ -1647,7 +1648,7 @@ int cil_resolve_catrange(struct cil_db *db, struct cil_tree_node *current, struc
 
 	rc = cil_resolve_name(db, current, catrange->cat_low_str, CIL_SYM_CATS, call, &cat_low_node);
 	if (rc != SEPOL_OK) {
-		printf("Failed to resolve category\n");
+		cil_log(CIL_ERR, "Failed to resolve category\n");
 		goto exit;
 	}
 	catrange->cat_low = cat_low_node->data;
@@ -1659,14 +1660,14 @@ int cil_resolve_catrange(struct cil_db *db, struct cil_tree_node *current, struc
 	}
 
 	if (cat == NULL) {
-		printf("Invalid category order\n");
+		cil_log(CIL_ERR, "Invalid category order\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
 	rc = cil_resolve_name(db, current, catrange->cat_high_str, CIL_SYM_CATS, call, &cat_high_node);
 	if (rc != SEPOL_OK) {
-		printf("Failed to resolve category\n");
+		cil_log(CIL_ERR, "Failed to resolve category\n");
 		goto exit;
 	}
 	catrange->cat_high = cat_high_node->data;
@@ -1678,7 +1679,7 @@ int cil_resolve_catrange(struct cil_db *db, struct cil_tree_node *current, struc
 	}
 
 	if (cat == NULL) {
-		printf("Invalid category order\n");
+		cil_log(CIL_ERR, "Invalid category order\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1700,7 +1701,7 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct
 
 	rc = cil_resolve_name(db, current, (char*)senscat->sens_str, CIL_SYM_SENS, call, &sens_node);
 	if (rc != SEPOL_OK) {
-		printf("Failed to get sensitivity node\n");
+		cil_log(CIL_ERR, "Failed to get sensitivity node\n");
 		goto exit;
 	}
 
@@ -1712,12 +1713,12 @@ int cil_resolve_senscat(struct cil_db *db, struct cil_tree_node *current, struct
 	if (senscat->catset_str != NULL) {
 		rc = cil_resolve_name(db, current, (char*)senscat->catset_str, CIL_SYM_CATS, call, &cat_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve catset_str\n");
+			cil_log(CIL_ERR, "Failed to resolve catset_str\n");
 			goto exit;
 		}
 
 		if (cat_node->flavor != CIL_CATSET) {
-			printf("Named object is not a category set\n");
+			cil_log(CIL_ERR, "Named object is not a category set\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -1754,7 +1755,7 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 
 	rc = cil_resolve_name(db, current, (char*)level->sens_str, CIL_SYM_SENS, call, &sens_node);
 	if (rc != SEPOL_OK) {
-		printf("Failed to get sensitivity node\n");
+		cil_log(CIL_ERR, "Failed to get sensitivity node\n");
 		goto exit;
 	}
 
@@ -1768,21 +1769,21 @@ int cil_resolve_level(struct cil_db *db, struct cil_tree_node *current, struct c
 		if (level->catset_str != NULL) {
 			rc = cil_resolve_name(db, current, level->catset_str, CIL_SYM_CATS, call, &catset_node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve categoryset, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve categoryset, rc: %d\n", rc);
 				goto exit;
 			}
 			level->catset = catset_node->data;
 		} else {
 			rc = cil_resolve_catset(db, current, level->catset, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve category set\n");
+				cil_log(CIL_ERR, "Failed to resolve category set\n");
 				goto exit;
 			}
 		}
 
 		rc = __cil_verify_senscatset(db, level->sens, level->catset);
 		if (rc != SEPOL_OK) {
-			printf("Failed to verify sensitivitycategory relationship\n");
+			cil_log(CIL_ERR, "Failed to verify sensitivitycategory relationship\n");
 			goto exit;
 		}
 	}
@@ -1802,7 +1803,7 @@ int cil_resolve_levelrange(struct cil_db *db, struct cil_tree_node *current, str
 	if (lvlrange->low_str != NULL) {
 		rc = cil_resolve_name(db, current, lvlrange->low_str, CIL_SYM_LEVELS, call, &low_node);
 		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", lvlrange->low_str);
+			cil_log(CIL_ERR, "Name resolution failed for %s\n", lvlrange->low_str);
 			goto exit;
 		}
 		lvlrange->low = (struct cil_level*)low_node->data;
@@ -1811,14 +1812,14 @@ int cil_resolve_levelrange(struct cil_db *db, struct cil_tree_node *current, str
 		if (lvlrange->low->datum.name == NULL) {
 			rc = cil_resolve_level(db, current, lvlrange->low, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve low level, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve low level, rc: %d\n", rc);
 				goto exit;
 			}
 		}
 	} else if (lvlrange->low != NULL) {
 		rc = cil_resolve_level(db, current, lvlrange->low, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve low level, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve low level, rc: %d\n", rc);
 			goto exit;
 		}
 	}
@@ -1826,7 +1827,7 @@ int cil_resolve_levelrange(struct cil_db *db, struct cil_tree_node *current, str
 	if (lvlrange->high_str != NULL) {
 		rc = cil_resolve_name(db, current, lvlrange->high_str, CIL_SYM_LEVELS, call, &high_node);
 		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", lvlrange->high_str);
+			cil_log(CIL_ERR, "Name resolution failed for %s\n", lvlrange->high_str);
 			goto exit;
 		}
 		lvlrange->high = (struct cil_level*)high_node->data;
@@ -1835,14 +1836,14 @@ int cil_resolve_levelrange(struct cil_db *db, struct cil_tree_node *current, str
 		if (lvlrange->high->datum.name == NULL) {
 			rc = cil_resolve_level(db, current, lvlrange->high, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve high level, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve high level, rc: %d\n", rc);
 				goto exit;
 			}
 		}
 	} else if (lvlrange->high != NULL) {
 		rc = cil_resolve_level(db, current, lvlrange->high, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve high level, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve high level, rc: %d\n", rc);
 			goto exit;
 		}
 	}
@@ -1868,13 +1869,13 @@ int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, stru
 	while (curr_class != NULL) {
 		rc = cil_resolve_name(db, current, (char*)curr_class->data, CIL_SYM_CLASSES, call, &class_node);
 		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for: %s\n", (char*)curr_class->data);
+			cil_log(CIL_ERR, "Name resolution failed for: %s\n", (char*)curr_class->data);
 			goto exit;
 		}
 
 		rc = __cil_resolve_perm_list((struct cil_class*)class_node->data, cons->perm_list_str, NULL);
 		if (rc != SEPOL_OK) {
-			printf("Failed to verify perm list\n");
+			cil_log(CIL_ERR, "Failed to verify perm list\n");
 			goto exit;
 		}
 
@@ -1883,7 +1884,7 @@ int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, stru
 		new_item->data = class_node->data;
 		rc = cil_list_append_item(class_list, new_item);
 		if (rc != SEPOL_OK) {
-			printf("Failed to append to class list\n");
+			cil_log(CIL_ERR, "Failed to append to class list\n");
 			goto exit;
 		}
 		curr_class = curr_class->next;
@@ -1891,13 +1892,13 @@ int cil_resolve_constrain(struct cil_db *db, struct cil_tree_node *current, stru
 
 	rc = __cil_resolve_perm_list((struct cil_class*)class_node->data, cons->perm_list_str, perm_list);
 	if (rc != SEPOL_OK) {
-		printf("Failed to resolve perm list\n");
+		cil_log(CIL_ERR, "Failed to resolve perm list\n");
 		goto exit;
 	}
 
 	rc = cil_resolve_expr_stack(db, cons->expr, current, call);
 	if (rc != SEPOL_OK) {
-		printf("Failed to resolve constrain expression\n");
+		cil_log(CIL_ERR, "Failed to resolve constrain expression\n");
 		goto exit;
 	}
 
@@ -1950,7 +1951,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 	}
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
 		rc = SEPOL_ERR;
-		printf("Type not a type or type alias\n");
+		cil_log(CIL_ERR, "Type not a type or type alias\n");
 		goto exit;
 	}
 	context->type = type_node->data;
@@ -1967,18 +1968,18 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 		if (context->range->datum.name == NULL) {
 			rc = cil_resolve_levelrange(db, current, context->range, call);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve levelrange, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve levelrange, rc: %d\n", rc);
 				goto exit;
 			}
 		}
 	} else if (context->range != NULL) {
 		rc = cil_resolve_levelrange(db, current, context->range, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve levelrange, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve levelrange, rc: %d\n", rc);
 			goto exit;
 		}
 	} else {
-		printf("Invalid context, levelrange not found\n");
+		cil_log(CIL_ERR, "Invalid context, levelrange not found\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -1986,7 +1987,7 @@ int cil_resolve_context(struct cil_db *db, struct cil_tree_node *current, struct
 	return SEPOL_OK;
 
 exit:
-	printf("Name resolution failed for %s\n", error);
+	cil_log(CIL_ERR, "Name resolution failed for %s\n", error);
 	return rc;
 }
 
@@ -1999,14 +2000,14 @@ int cil_resolve_filecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (filecon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, filecon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve file context: %s, rc: %d\n", filecon->context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve file context: %s, rc: %d\n", filecon->context_str, rc);
 			return rc;
 		}
 		filecon->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, filecon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve file context\n");
+			cil_log(CIL_ERR, "Failed to resolve file context\n");
 			return rc;
 		}
 	}
@@ -2023,14 +2024,14 @@ int cil_resolve_portcon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (portcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, portcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve port context: %s, rc: %d\n", portcon->context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve port context: %s, rc: %d\n", portcon->context_str, rc);
 			goto exit;
 		}
 		portcon->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, portcon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve port context\n");
+			cil_log(CIL_ERR, "Failed to resolve port context\n");
 			goto exit;
 		}
 	}
@@ -2050,14 +2051,14 @@ int cil_resolve_genfscon(struct cil_db *db, struct cil_tree_node *current, struc
 	if (genfscon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, genfscon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve genfs context: %s, rc: %d\n", genfscon->context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve genfs context: %s, rc: %d\n", genfscon->context_str, rc);
 			goto exit;
 		}
 		genfscon->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, genfscon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve genfs context\n");
+			cil_log(CIL_ERR, "Failed to resolve genfs context\n");
 			goto exit;
 		}
 	}
@@ -2079,7 +2080,7 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (nodecon->addr_str != NULL) {
 		rc = cil_resolve_name(db, current, nodecon->addr_str, CIL_SYM_IPADDRS, call, &addr_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve node addr: %s, rc: %d\n", nodecon->addr_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve node addr: %s, rc: %d\n", nodecon->addr_str, rc);
 			goto exit;
 		}
 		nodecon->addr = (struct cil_ipaddr*)addr_node->data;
@@ -2088,7 +2089,7 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (nodecon->mask_str != NULL) {
 		rc = cil_resolve_name(db, current, nodecon->mask_str, CIL_SYM_IPADDRS, call, &mask_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve node mask: %s, rc: %d\n", nodecon->mask_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve node mask: %s, rc: %d\n", nodecon->mask_str, rc);
 			goto exit;
 		}
 		nodecon->mask = (struct cil_ipaddr*)mask_node->data;
@@ -2097,20 +2098,20 @@ int cil_resolve_nodecon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (nodecon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, nodecon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve node context: %s, rc: %d\n", nodecon->context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve node context: %s, rc: %d\n", nodecon->context_str, rc);
 			goto exit;
 		}
 		nodecon->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, nodecon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve node context\n");
+			cil_log(CIL_ERR, "Failed to resolve node context\n");
 			goto exit;
 		}
 	}
 
 	if (nodecon->addr->family != nodecon->mask->family) {
-		printf("Nodecon ip address not in the same family\n");
+		cil_log(CIL_ERR, "Nodecon ip address not in the same family\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -2133,14 +2134,14 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 	if (netifcon->if_context_str != NULL) {
 		rc = cil_resolve_name(db, current, netifcon->if_context_str, CIL_SYM_CONTEXTS, call, &ifcon_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve interface context: %s, rc: %d\n", netifcon->if_context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve interface context: %s, rc: %d\n", netifcon->if_context_str, rc);
 			goto exit;
 		}
 		netifcon->if_context = (struct cil_context*)ifcon_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, netifcon->if_context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve OTF interface context\n");
+			cil_log(CIL_ERR, "Failed to resolve OTF interface context\n");
 			goto exit;
 		}
 	}
@@ -2148,14 +2149,14 @@ int cil_resolve_netifcon(struct cil_db *db, struct cil_tree_node *current, struc
 	if (netifcon->packet_context_str != NULL) {
 		rc = cil_resolve_name(db, current, netifcon->packet_context_str, CIL_SYM_CONTEXTS, call, &packcon_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve packet context: %s, rc: %d\n", netifcon->packet_context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve packet context: %s, rc: %d\n", netifcon->packet_context_str, rc);
 			goto exit;
 		}
 		netifcon->packet_context = (struct cil_context*)packcon_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, netifcon->packet_context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve OTF packet context\n");
+			cil_log(CIL_ERR, "Failed to resolve OTF packet context\n");
 			goto exit;
 		}
 	}
@@ -2174,14 +2175,14 @@ int cil_resolve_pirqcon(struct cil_db *db, struct cil_tree_node *current, struct
 	if (pirqcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, pirqcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve pirq context: %s, rc: %d\n", pirqcon->context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve pirq context: %s, rc: %d\n", pirqcon->context_str, rc);
 			goto exit;
 		}
 		pirqcon->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, pirqcon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve pirq context\n");
+			cil_log(CIL_ERR, "Failed to resolve pirq context\n");
 			goto exit;
 		}
 	}
@@ -2201,14 +2202,14 @@ int cil_resolve_iomemcon(struct cil_db *db, struct cil_tree_node *current, struc
 	if (iomemcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, iomemcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve iomem context: %s, rc: %d\n", iomemcon->context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve iomem context: %s, rc: %d\n", iomemcon->context_str, rc);
 			goto exit;
 		}
 		iomemcon->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, iomemcon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve iomem context\n");
+			cil_log(CIL_ERR, "Failed to resolve iomem context\n");
 			goto exit;
 		}
 	}
@@ -2228,14 +2229,14 @@ int cil_resolve_ioportcon(struct cil_db *db, struct cil_tree_node *current, stru
 	if (ioportcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, ioportcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve ioport context: %s, rc: %d\n", ioportcon->context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve ioport context: %s, rc: %d\n", ioportcon->context_str, rc);
 			goto exit;
 		}
 		ioportcon->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, ioportcon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve ioport context\n");
+			cil_log(CIL_ERR, "Failed to resolve ioport context\n");
 			goto exit;
 		}
 	}
@@ -2255,14 +2256,14 @@ int cil_resolve_pcidevicecon(struct cil_db *db, struct cil_tree_node *current, s
 	if (pcidevicecon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, pcidevicecon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve pcidevice context: %s, rc: %d\n", pcidevicecon->context_str, rc);
+			cil_log(CIL_ERR, "Failed to resolve pcidevice context: %s, rc: %d\n", pcidevicecon->context_str, rc);
 			goto exit;
 		}
 		pcidevicecon->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, pcidevicecon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve pcidevice context\n");
+			cil_log(CIL_ERR, "Failed to resolve pcidevice context\n");
 			goto exit;
 		}
 	}
@@ -2282,14 +2283,14 @@ int cil_resolve_fsuse(struct cil_db *db, struct cil_tree_node *current, struct c
 	if (fsuse->context_str != NULL) {
 		rc = cil_resolve_name(db, current, fsuse->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve context, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve context, rc: %d\n", rc);
 			goto exit;
 		}
 		fsuse->context = (struct cil_context*)context_node->data;
 	} else {
 		rc = cil_resolve_context(db, current, fsuse->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve context, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve context, rc: %d\n", rc);
 			goto exit;
 		}
 	}
@@ -2311,7 +2312,7 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 
 	rc = cil_resolve_name(db, current, sidcon->sid_str, CIL_SYM_SIDS, call, &sid_node);
 	if (rc != SEPOL_OK) {
-		printf("Failed to resolve sid, rc: %d : %s\n", rc, sidcon->sid_str);
+		cil_log(CIL_ERR, "Failed to resolve sid, rc: %d : %s\n", rc, sidcon->sid_str);
 		goto exit;
 	}
 	sid = sid_node->data;
@@ -2320,20 +2321,20 @@ int cil_resolve_sidcontext(struct cil_db *db, struct cil_tree_node *current, str
 	if (sidcon->context_str != NULL) {
 		rc = cil_resolve_name(db, current, sidcon->context_str, CIL_SYM_CONTEXTS, call, &context_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve context, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve context, rc: %d\n", rc);
 			goto exit;
 		}
 		sidcon->context = (struct cil_context*)context_node->data;
 	} else if (sidcon->context != NULL) {
 		rc = cil_resolve_context(db, current, sidcon->context, call);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve context, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve context, rc: %d\n", rc);
 			goto exit;
 		}
 	}
 
 	if (sid->context != NULL) {
-		printf("sid's cannot be associated with more than one context\n");
+		cil_log(CIL_ERR, "sid's cannot be associated with more than one context\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -2355,18 +2356,18 @@ int cil_resolve_blockinherit(struct cil_db *db, struct cil_tree_node *current, s
 	if (inherit->block_str != NULL) {
 		rc = cil_resolve_name(db, current, inherit->block_str, CIL_SYM_BLOCKS, call, &block_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve inherited block, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve inherited block, rc: %d\n", rc);
 			goto exit;
 		}
 	} else {
-		printf("block strings is null\n");
+		cil_log(CIL_ERR, "block strings is null\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
 	rc = cil_copy_ast(db, block_node, current);
 	if (rc != SEPOL_OK) {
-		printf("Failed to copy block, rc: %d\n", rc);
+		cil_log(CIL_ERR, "Failed to copy block, rc: %d\n", rc);
 		goto exit;
 	}
 
@@ -2385,12 +2386,12 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 	if (new_call->macro_str != NULL) {
 		rc = cil_resolve_name(db, current, new_call->macro_str, CIL_SYM_MACROS, call, &macro_node);
 		if (rc != SEPOL_OK) {
-			printf("Failed to resolve macro, rc: %d\n", rc);
+			cil_log(CIL_ERR, "Failed to resolve macro, rc: %d\n", rc);
 			goto exit;
 		}
 		new_call->macro = (struct cil_macro*)macro_node->data;
 	} else {
-		printf("Macro string is null\n");
+		cil_log(CIL_ERR, "Macro string is null\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -2403,7 +2404,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 		struct cil_tree_node *pc = NULL;
 
 		if (new_call->args_tree == NULL) {
-			printf("Missing arguments (line: %d)\n", current->line);
+			cil_log(CIL_ERR, "Missing arguments (line: %d)\n", current->line);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -2414,7 +2415,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 
 		while (item != NULL) {
 			if (item != NULL && pc == NULL) {
-				printf("Missing arguments (line: %d)\n", current->line);
+				cil_log(CIL_ERR, "Missing arguments (line: %d)\n", current->line);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -2447,7 +2448,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 					cil_catset_init(&catset);
 					rc = cil_fill_catset(pc->cl_head, catset);
 					if (rc != SEPOL_OK) {
-						printf("Failed to create anonymous category set, rc: %d\n", rc);
+						cil_log(CIL_ERR, "Failed to create anonymous category set, rc: %d\n", rc);
 						cil_destroy_catset(catset);
 						goto exit;
 					}
@@ -2470,7 +2471,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 
 					rc = cil_fill_level(pc->cl_head, level);
 					if (rc != SEPOL_OK) {
-						printf("Failed to create anonymous level, rc: %d\n", rc);
+						cil_log(CIL_ERR, "Failed to create anonymous level, rc: %d\n", rc);
 						cil_destroy_level(level);
 						goto exit;
 					}
@@ -2492,7 +2493,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 
 					rc = cil_fill_levelrange(pc->cl_head, range);
 					if (rc != SEPOL_OK) {
-						printf("Failed to create anonymous levelrange, rc: %d\n", rc);
+						cil_log(CIL_ERR, "Failed to create anonymous levelrange, rc: %d\n", rc);
 						cil_destroy_levelrange(range);
 						goto exit;
 					}
@@ -2515,7 +2516,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 
 					rc = cil_fill_ipaddr(pc->cl_head, ipaddr);
 					if (rc != SEPOL_OK) {
-						printf("Failed to create anonymous ip address, rc; %d\n", rc);
+						cil_log(CIL_ERR, "Failed to create anonymous ip address, rc; %d\n", rc);
 						cil_destroy_ipaddr(ipaddr);
 						goto exit;
 					}
@@ -2544,7 +2545,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 					cil_list_init(&permset->perms_list_str);
 					rc = cil_parse_to_list(pc->cl_head, permset->perms_list_str, CIL_AST_STR);
 					if (rc != SEPOL_OK) {
-						printf("Failed to parse perms\n");
+						cil_log(CIL_ERR, "Failed to parse perms\n");
 						goto exit;
 					}
 					cil_tree_node_init(&permset_node);
@@ -2564,7 +2565,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 					cil_classpermset_init(&cps);
 					rc = cil_fill_classpermset(pc->cl_head, cps);
 					if (rc != SEPOL_OK) {
-						printf("Failed to create anonymous classpermset, rc: %d\n", rc);
+						cil_log(CIL_ERR, "Failed to create anonymous classpermset, rc: %d\n", rc);
 						cil_destroy_classpermset(cps);
 						goto exit;
 					}
@@ -2578,7 +2579,7 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 				break;
 			}
 			default:
-				printf("Unexpected flavor: %d\n", item->flavor);
+				cil_log(CIL_ERR, "Unexpected flavor: %d\n", item->flavor);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -2605,19 +2606,19 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 		}
 
 		if (pc != NULL) {
-			printf("Unexpected arguments (line: %d)\n", current->line);
+			cil_log(CIL_ERR, "Unexpected arguments (line: %d)\n", current->line);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 	} else if (new_call->args_tree != NULL) {
-		printf("Rnexpected arguments (line: %d)\n", current->line);
+		cil_log(CIL_ERR, "Rnexpected arguments (line: %d)\n", current->line);
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
 	rc = cil_copy_ast(db, macro_node, current);
 	if (rc != SEPOL_OK) {
-		printf("Failed to copy macro, rc: %d\n", rc);
+		cil_log(CIL_ERR, "Failed to copy macro, rc: %d\n", rc);
 		goto exit;
 	}
 
@@ -2641,7 +2642,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 
 	for (item = new_call->args->head; item != NULL; item = item->next) {
 		if (((struct cil_args*)item->data)->arg == NULL && ((struct cil_args*)item->data)->arg_str == NULL) {
-			printf("Arguments not created correctly\n");
+			cil_log(CIL_ERR, "Arguments not created correctly\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -2722,7 +2723,7 @@ int cil_resolve_call2(struct cil_db *db, struct cil_tree_node *current, struct c
 		if (sym_index != CIL_SYM_UNKNOWN) {
 			rc = cil_resolve_name(db, current, ((struct cil_args*)item->data)->arg_str, sym_index, call, &(((struct cil_args*)item->data)->arg));
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve argument, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to resolve argument, rc: %d\n", rc);
 				goto exit;
 			}
 		}
@@ -2802,14 +2803,14 @@ int cil_resolve_expr_stack(struct cil_db *db, struct cil_list *expr_stack, struc
 		}
 
 		if (cond->str == NULL) {
-			printf("Invalid expression\n");
+			cil_log(CIL_ERR, "Invalid expression\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 
 		rc = cil_resolve_name(db, parent, cond->str, sym_index, call, &res_node);
 		if (rc != SEPOL_OK) {
-			printf("Name resolution failed for %s\n", cond->str);
+			cil_log(CIL_ERR, "Name resolution failed for %s\n", cond->str);
 			goto exit;
 		}
 		cond->data = res_node->data;
@@ -2829,7 +2830,7 @@ int cil_resolve_boolif(struct cil_db *db, struct cil_tree_node *current, struct 
 
 	rc = cil_resolve_expr_stack(db, bif->expr_stack, current, call);
 	if (rc != SEPOL_OK) {
-		printf("Failed to resolve booleanif (line %d)\n", current->line);
+		cil_log(CIL_ERR, "Failed to resolve booleanif (line %d)\n", current->line);
 		goto exit;
 	}
 
@@ -2921,7 +2922,7 @@ int cil_resolve_tunif(struct cil_db *db, struct cil_tree_node *current, struct c
 
 	rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
 	if (rc != SEPOL_OK) {
-		printf("Failed to evaluate expr stack\n");
+		cil_log(CIL_ERR, "Failed to evaluate expr stack\n");
 		goto exit;
 	}
 
@@ -3192,7 +3193,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	if (optstack != NULL) {
 		if (node->flavor == CIL_TUNABLE || node->flavor == CIL_MACRO) {
 			/* tuanbles and macros are not allowed in optionals*/
-			printf("Node of flavor %i is not allowed in optionals\n", node->flavor);
+			cil_log(CIL_ERR, "Node of flavor %i is not allowed in optionals\n", node->flavor);
 			goto exit;
 		}
 	}
@@ -3294,7 +3295,7 @@ int __cil_resolve_ast_first_child_helper(struct cil_tree_node *current, void *ex
 					struct cil_call *curr_call = curr->data;
 					struct cil_call *new_call = new->data;
 					if (curr_call->macro == new_call->macro) {
-						printf("Recursive macro call found\n");
+						cil_log(CIL_ERR, "Recursive macro call found\n");
 						rc = SEPOL_ERR;
 						goto exit;
 					}
@@ -3346,7 +3347,7 @@ int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *ext
 			/* go into the optional, removing everything that it added */
 			rc = cil_tree_walk(parent, __cil_disable_children_helper, NULL, NULL, NULL);
 			if (rc != SEPOL_OK) {
-				printf("Failed to disable optional children\n");
+				cil_log(CIL_ERR, "Failed to disable optional children\n");
 				goto exit;
 			}
 			((struct cil_optional *)parent->data)->datum.state = CIL_STATE_DISABLED;
@@ -3386,11 +3387,11 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 	for (pass = 1; pass <= 8; pass++) {
 #ifdef DEBUG
-		printf("---------- Pass %i ----------\n", pass);
+		cil_log(CIL_ERR, "---------- Pass %i ----------\n", pass);
 #endif
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_first_child_helper, __cil_resolve_ast_last_child_helper, &extra_args);
 		if (rc != SEPOL_OK) {
-			printf("Pass %i of resolution failed\n", pass);
+			cil_log(CIL_ERR, "Pass %i of resolution failed\n", pass);
 			goto exit;
 		}
 
@@ -3400,26 +3401,26 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 		if (pass == 5) {
 #ifdef DEBUG
-			printf("----- Verify Catorder ------\n");
+			cil_log(CIL_ERR, "----- Verify Catorder ------\n");
 #endif
 			rc = __cil_verify_order(db->catorder, current, CIL_CAT);
 			if (rc != SEPOL_OK) {
-				printf("Failed to verify categoryorder\n");
+				cil_log(CIL_ERR, "Failed to verify categoryorder\n");
 				goto exit;
 			}
 #ifdef DEBUG
-			printf("----- Verify Dominance -----\n");
+			cil_log(CIL_ERR, "----- Verify Dominance -----\n");
 #endif
 			rc = __cil_verify_order(db->dominance, current, CIL_SENS);
 			if (rc != SEPOL_OK) {
-				printf("Failed to verify dominance\n");
+				cil_log(CIL_ERR, "Failed to verify dominance\n");
 				goto exit;
 			}
 		}
 
 		if (changed) {
 #ifdef DEBUG
-			printf("----- Redoing resolve passes -----\n");
+			cil_log(CIL_ERR, "----- Redoing resolve passes -----\n");
 #endif
 			/* Need to re-resolve because an optional was disabled. We only
 			 * need to reset to the thrid pass because things done in pass 1
@@ -3476,17 +3477,17 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 				if (rc == SEPOL_OK) {
 					rc = cil_symtab_get_node(symtab, tok_current, node);
 					if (rc != SEPOL_OK) {
-						printf("Failed to get node from parent symtab of call\n");
+						cil_log(CIL_ERR, "Failed to get node from parent symtab of call\n");
 						goto exit;
 					}
 				} else {
-					printf("Failed to get symtab from call parent\n");
+					cil_log(CIL_ERR, "Failed to get symtab from call parent\n");
 					goto exit;
 				}
 			} else if (rc == SEPOL_ENOENT) {
 				rc = cil_get_symtab(db, call->macro->datum.node->parent, &symtab, CIL_SYM_BLOCKS);
 				if (rc != SEPOL_OK) {
-					printf("Failed to get node from parent symtab of macro\n");
+					cil_log(CIL_ERR, "Failed to get node from parent symtab of macro\n");
 					goto exit;
 				} else {
 					symtab = &(db->symtab[CIL_SYM_BLOCKS]);
@@ -3498,7 +3499,7 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		} else {
 			rc = cil_get_symtab(db, ast_node->parent, &symtab, CIL_SYM_BLOCKS);
 			if (rc != SEPOL_OK) {
-				printf("Failed to get parent symtab, rc: %d\n", rc);
+				cil_log(CIL_ERR, "Failed to get parent symtab, rc: %d\n", rc);
 				goto exit;
 			}
 		}
@@ -3518,11 +3519,11 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			}
 			symtab = &(((struct cil_block*)tmp_node->data)->symtab[CIL_SYM_BLOCKS]);
 		} else {
-			//printf("type key: %s\n", tok_current);
+			//cil_log(CIL_ERR, "type key: %s\n", tok_current);
 			symtab = &(((struct cil_block*)tmp_node->data)->symtab[sym_index]);
 			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to resolve name, current: %s\n", tok_current);
+				cil_log(CIL_ERR, "Failed to resolve name, current: %s\n", tok_current);
 				goto exit;
 			}
 		}
@@ -3546,7 +3547,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 	char first;
 
 	if (db == NULL || ast_node == NULL || name == NULL) {
-		printf("Invalid call to cil_resolve_name\n");
+		cil_log(CIL_ERR, "Invalid call to cil_resolve_name\n");
 		goto exit;
 	}
 
@@ -3564,11 +3565,11 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 					if (rc == SEPOL_OK) {
 						rc = cil_symtab_get_node(symtab, name, node);
 						if (rc != SEPOL_OK) {
-							printf("Failed to get node from parent symtab of call\n");
+							cil_log(CIL_ERR, "Failed to get node from parent symtab of call\n");
 						}
 						goto exit;
 					} else {
-						printf("Failed to get parent symtab from call\n");
+						cil_log(CIL_ERR, "Failed to get parent symtab from call\n");
 						goto exit;
 					}
 
@@ -3595,7 +3596,7 @@ int cil_resolve_name(struct cil_db *db, struct cil_tree_node *ast_node, char *na
 			} else {
 				rc = cil_get_symtab(db, ast_node->parent, &symtab, sym_index);
 				if (rc != SEPOL_OK) {
-					printf("Failed to get parent symtab, rc: %d\n", rc);
+					cil_log(CIL_ERR, "Failed to get parent symtab, rc: %d\n", rc);
 					goto exit;
 				}
 				rc = cil_symtab_get_node(symtab, name, node);

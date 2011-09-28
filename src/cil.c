@@ -34,6 +34,7 @@
 #include <sepol/policydb/symtab.h>
 
 #include "cil.h"
+#include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_list.h"
@@ -317,7 +318,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_INT: break;
 	default:
-		printf("Unknown data flavor: %d\n", flavor);
+		cil_log(CIL_INFO, "Unknown data flavor: %d\n", flavor);
 		break;
 	}
 	
@@ -399,7 +400,7 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		break;
 	default:
 		*sym_index = CIL_SYM_UNKNOWN;
-		printf("cil_flavor_to_symtab_index: Failed to find flavor: %d\n", flavor);
+		cil_log(CIL_INFO, "cil_flavor_to_symtab_index: Failed to find flavor: %d\n", flavor);
 		return SEPOL_ERR;
 	}
 
@@ -469,7 +470,7 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 				/* do nothing */
 				break;
 			default:
-				printf("destroy symtab error, wrong flavor node: %d\n", current->flavor);
+				cil_log(CIL_INFO, "destroy symtab error, wrong flavor node: %d\n", current->flavor);
 				rc = SEPOL_ERR;
 				goto destroy_ast_symtabs_out;
 			}
@@ -506,13 +507,13 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 		} else if (ast_node->flavor == CIL_CALL  && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
-				printf("cil_get_symtab: cil_call failed, rc: %d\n", rc);
+				cil_log(CIL_INFO, "cil_get_symtab: cil_call failed, rc: %d\n", rc);
 				goto exit;
 			}
 		} else if (ast_node->flavor == CIL_BLOCKINHERIT && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
-				printf("cil_get_symtab: cil_blockinherit failed, rc: %d\n", rc);
+				cil_log(CIL_INFO, "cil_get_symtab: cil_blockinherit failed, rc: %d\n", rc);
 				goto exit;
 			}
 		} else if (ast_node->flavor == CIL_CLASS || ast_node->flavor == CIL_CLASSMAP) {
@@ -524,28 +525,28 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 		} else if ((ast_node->flavor == CIL_BOOLEANIF || ast_node->flavor == CIL_CONDTRUE || ast_node->flavor == CIL_CONDFALSE) && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
-				printf("cil_get_symtab: cil_booleanif failed, rc: %d\n", rc);
+				cil_log(CIL_INFO, "cil_get_symtab: cil_booleanif failed, rc: %d\n", rc);
 				goto exit;
 			}
 		} else if (ast_node->flavor == CIL_OPTIONAL && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
-				printf("cil_get_symtab: cil_optional failed, rc: %d\n", rc);
+				cil_log(CIL_INFO, "cil_get_symtab: cil_optional failed, rc: %d\n", rc);
 				goto exit;
 			}
 		} else if (ast_node->flavor == CIL_ROOT && sym_index < CIL_SYM_NUM) {
 			*symtab = &db->symtab[sym_index];
 		} else if (sym_index >= CIL_SYM_NUM) {
-			printf("Invalid index passed to cil_get_symtab\n");
+			cil_log(CIL_INFO, "Invalid index passed to cil_get_symtab\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		} else {
-			printf("Failed to get symtab from node\n");
+			cil_log(CIL_INFO, "Failed to get symtab from node\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 	} else {
-		printf("Failed to get symtab: no node\n");
+		cil_log(CIL_INFO, "Failed to get symtab: no node\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}

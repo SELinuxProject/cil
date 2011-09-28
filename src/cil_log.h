@@ -26,51 +26,19 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of Tresys Technology, LLC.
  */
+#ifndef CIL_LOG_H_
+#define CIL_LOG_H_
 
 #include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
-#include "cil_log.h"
+extern int LOG_LEVEL; // Logging level
 
-__attribute__((noreturn)) void cil_default_malloc_error_handler(void)
-{
-	cil_log(CIL_ERR, "Unable to proceed, failed to allocate memory\n");
-	exit(1);
-}
+enum cil_log_level {
+	CIL_ERR = 1,
+	CIL_WARN,
+	CIL_INFO
+};
 
-void (*cil_malloc_error_handler)(void) = &cil_default_malloc_error_handler;
+void cil_log(enum cil_log_level lvl, const char *msg, ...);
 
-void cil_set_malloc_error_handler(void (*handler)(void))
-{
-	cil_malloc_error_handler = handler;
-}
-
-void *cil_malloc(size_t size)
-{
-	void *mem = malloc(size);
-	if (mem == NULL){
-		if (size == 0) {
-			return NULL;
-		}
-		(*cil_malloc_error_handler)();
-	}
-
-	return mem;
-}
-
-char *cil_strdup(char *str)
-{
-	char *mem = NULL;
-
-	if (str == NULL) {
-		return NULL;
-	}
-
-	mem = strdup(str);
-	if (mem == NULL) {
-		(*cil_malloc_error_handler)();
-	}
-
-	return mem;
-}
+#endif // CIL_LOG_H_

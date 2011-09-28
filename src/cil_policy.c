@@ -36,10 +36,11 @@
 #include <sepol/policydb/conditional.h>
 #include <sepol/errcodes.h>
 
+#include "cil.h"
+#include "cil_log.h"
+#include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_list.h"
-#include "cil.h"
-#include "cil_mem.h"
 #include "cil_policy.h"
 
 #define SEPOL_DONE			555
@@ -89,7 +90,7 @@ int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 		while (!feof(file_arr[i])) {
 			rc_read = fread(temp, 1, BUFFER, file_arr[i]);
 			if (rc_read == 0 && ferror(file_arr[i])) {
-				printf("Error reading temp policy file\n");
+				cil_log(CIL_ERR, "Error reading temp policy file\n");
 				return SEPOL_ERR;
 			}
 			rc_write = 0;
@@ -97,7 +98,7 @@ int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 				rc = fwrite(temp+rc_write, 1, rc_read-rc_write, policy_file);
 				rc_write += rc;
 				if (rc == 0 && ferror(file_arr[i])) {
-					printf("Error writing to policy.conf\n");
+					cil_log(CIL_ERR, "Error writing to policy.conf\n");
 					return SEPOL_ERR;
 				}
 			}
@@ -177,7 +178,7 @@ int cil_nodecon_to_policy(FILE **file_arr, struct cil_sort *sort)
 		}
 
 		if (errno != 0) {
-			printf("Failed to convert ip address to string\n");
+			cil_log(CIL_INFO, "Failed to convert ip address to string\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -194,7 +195,7 @@ int cil_nodecon_to_policy(FILE **file_arr, struct cil_sort *sort)
 		}
 
 		if (errno != 0) {
-			printf("Failed to convert mask to string\n");
+			cil_log(CIL_INFO, "Failed to convert mask to string\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -361,7 +362,7 @@ int cil_multimap_insert(struct cil_list *list, struct cil_symtab_datum *key, str
 				return SEPOL_OK;
 			}
 		} else {
-			printf("No data in list item\n");
+			cil_log(CIL_INFO, "No data in list item\n");
 			return SEPOL_ERR;
 		}
 		curr_key = curr_key->next;
@@ -383,7 +384,7 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 	while (current_user != NULL) {
 		struct cil_list_item *current_role = NULL;
 		if (((struct cil_multimap_item*)current_user->data)->values->head == NULL) {
-			printf("No roles associated with user %s (line %d)\n",  ((struct cil_multimap_item*)current_user->data)->key->name,  ((struct cil_multimap_item*)current_user->data)->key->node->line);
+			cil_log(CIL_INFO, "No roles associated with user %s (line %d)\n",  ((struct cil_multimap_item*)current_user->data)->key->name,  ((struct cil_multimap_item*)current_user->data)->key->node->line);
 			return SEPOL_ERR;
 		}
 
@@ -599,7 +600,7 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 			fprintf(file_arr[file_index], "neverallow");
 			break;
 		default :
-			printf("Unknown avrule kind: %d\n", rule->rule_kind);
+			cil_log(CIL_INFO, "Unknown avrule kind: %d\n", rule->rule_kind);
 			return SEPOL_ERR;
 		}
 
@@ -642,7 +643,7 @@ int cil_typerule_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t fil
 		fprintf(file_arr[ALLOWS], "type_member %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
 		break;
 	default:
-		printf("Unknown type_rule kind: %d\n", rule->rule_kind);
+		cil_log(CIL_INFO, "Unknown type_rule kind: %d\n", rule->rule_kind);
 		return SEPOL_ERR;
 	}
 
@@ -760,14 +761,14 @@ int __cil_booleanif_node_helper(struct cil_tree_node *node, __attribute__((unuse
 	case CIL_AVRULE:
 		rc = cil_avrule_to_policy(file_arr, *file_index, (struct cil_avrule*)node->data);
 		if (rc != SEPOL_OK) {
-			printf("cil_avrule_to_policy failed, rc: %d\n", rc);
+			cil_log(CIL_INFO, "cil_avrule_to_policy failed, rc: %d\n", rc);
 			return rc;
 		}
 		break;
 	case CIL_TYPE_RULE:
 		rc = cil_typerule_to_policy(file_arr, *file_index, (struct cil_type_rule*)node->data);
 		if (rc != SEPOL_OK) {
-			printf("cil_typerule_to_policy failed, rc: %d\n", rc);
+			cil_log(CIL_INFO, "cil_typerule_to_policy failed, rc: %d\n", rc);
 			return rc;
 		}
 		break;
@@ -814,7 +815,7 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 
 	rc = cil_expr_stack_to_policy(file_arr, file_index, stack);
 	if (rc != SEPOL_OK) {
-		printf("cil_expr_stack_to_policy failed, rc: %d\n", rc);
+		cil_log(CIL_INFO, "cil_expr_stack_to_policy failed, rc: %d\n", rc);
 		return rc;
 	}
 
@@ -823,7 +824,7 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 	if (bif->condtrue != NULL) {
 		rc = cil_tree_walk(bif->condtrue, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
-			printf("Failed to write booleanif content to file, rc: %d\n", rc);
+			cil_log(CIL_INFO, "Failed to write booleanif content to file, rc: %d\n", rc);
 			return rc;
 		}
 	}
@@ -833,7 +834,7 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 		fprintf(file_arr[file_index], "else {\n");
 		rc = cil_tree_walk(bif->condfalse, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
-			printf("Failed to write booleanif false content to file, rc: %d\n", rc);
+			cil_log(CIL_INFO, "Failed to write booleanif false content to file, rc: %d\n", rc);
 			return rc;
 		}
 		fprintf(file_arr[file_index], "}\n");
@@ -884,7 +885,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			current = current->cl_head;
 			fprintf(file_arr[COMMONS], " {");
 		} else {
-			printf("No permissions given\n");
+			cil_log(CIL_INFO, "No permissions given\n");
 			return SEPOL_ERR;
 		}
 
@@ -892,7 +893,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			if (current->flavor == CIL_PERM) {
 				fprintf(file_arr[COMMONS], "%s ", ((struct cil_symtab_datum*)current->data)->name);
 			} else {
-				printf("Improper data type found in common permissions: %d\n", current->flavor);
+				cil_log(CIL_INFO, "Improper data type found in common permissions: %d\n", current->flavor);
 				return SEPOL_ERR;
 			}
 			current = current->next;
@@ -917,7 +918,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 				if (current->flavor == CIL_PERM) {
 					fprintf(file_arr[CLASSES], "%s ", ((struct cil_symtab_datum*)current->data)->name);
 				} else {
-					printf("Improper data type found in class permissions: %d\n", current->flavor);
+					cil_log(CIL_INFO, "Improper data type found in class permissions: %d\n", current->flavor);
 					return SEPOL_ERR;
 				}
 				current = current->next;
@@ -932,7 +933,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		struct cil_avrule *avrule = (struct cil_avrule*)current->data;
 		rc = cil_avrule_to_policy(file_arr, ALLOWS, avrule);
 		if (rc != SEPOL_OK) {
-			printf("Failed to write avrule to policy\n");
+			cil_log(CIL_INFO, "Failed to write avrule to policy\n");
 			return rc;
 		}
 		break;
@@ -941,7 +942,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		struct cil_type_rule *rule = (struct cil_type_rule*)current->data;
 		rc = cil_typerule_to_policy(file_arr, ALLOWS, rule);
 		if (rc != SEPOL_OK) {
-			printf("Failed to write type rule to policy\n");
+			cil_log(CIL_INFO, "Failed to write type rule to policy\n");
 			return rc;
 		}
 		break;
@@ -950,7 +951,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		struct cil_filetransition *filetrans = (struct cil_filetransition*)current->data;
 		rc = cil_filetransition_to_policy(file_arr, ALLOWS, filetrans);
 		if (rc != SEPOL_OK) {
-			printf("Failed to write filetransition to policy\n");
+			cil_log(CIL_INFO, "Failed to write filetransition to policy\n");
 			return rc;
 		}
 	}
@@ -1050,7 +1051,7 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 		if (node->flavor == CIL_BOOLEANIF) {
 			rc = cil_booleanif_to_policy(file_arr, CONDS, node);
 			if (rc != SEPOL_OK) {
-				printf("Failed to write booleanif contents to file\n");
+				cil_log(CIL_INFO, "Failed to write booleanif contents to file\n");
 				return rc;
 			}
 			*finished = CIL_TREE_SKIP_HEAD;
@@ -1067,7 +1068,7 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 		if (node->flavor != CIL_ROOT) {
 			rc = cil_name_to_policy(file_arr, node);
 			if (rc != SEPOL_OK && rc != SEPOL_DONE) {
-				printf("Error converting node to policy %d\n", node->flavor);
+				cil_log(CIL_ERR, "Error converting node to policy %d\n", node->flavor);
 				return SEPOL_ERR;
 			}
 		}
@@ -1088,7 +1089,7 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 		default:
 			rc = cil_name_to_policy(file_arr, node);
 			if (rc != SEPOL_OK && rc != SEPOL_DONE) {
-				printf("Error converting node to policy %d\n", rc);
+				cil_log(CIL_ERR, "Error converting node to policy %d\n", rc);
 				return SEPOL_ERR;
 			}
 			break;
@@ -1209,85 +1210,85 @@ int cil_gen_policy(struct cil_db *db)
 
 	rc = cil_tree_walk(curr, __cil_gen_policy_node_helper, NULL, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
-		printf("Error walking tree\n");
+		cil_log(CIL_ERR, "Error walking tree\n");
 		return rc;
 	}
 
 	rc = cil_netifcon_to_policy(file_arr, db->netifcon);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 	
 	rc = cil_genfscon_to_policy(file_arr, db->genfscon);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 
 	rc = cil_portcon_to_policy(file_arr, db->portcon);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 
 	rc = cil_nodecon_to_policy(file_arr, db->nodecon);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 
 	rc = cil_fsuse_to_policy(file_arr, db->fsuse);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 
 	rc = cil_pirqcon_to_policy(file_arr, db->pirqcon);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 
 	rc = cil_iomemcon_to_policy(file_arr, db->iomemcon);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 
 	rc = cil_ioportcon_to_policy(file_arr, db->ioportcon);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 
 	rc = cil_pcidevicecon_to_policy(file_arr, db->pcidevicecon);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return rc;
 	}
 
 	rc = cil_userrole_to_policy(file_arr, users);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return SEPOL_ERR;
 	}
 
 	rc = cil_sens_to_policy(file_arr, sens);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return SEPOL_ERR;
 	}
 
 	rc = cil_cat_to_policy(file_arr, cats);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return SEPOL_ERR;
 	}
 
 	rc = cil_combine_policy(file_arr, policy_file);
 	if (rc != SEPOL_OK) {
-		printf("Error creating policy.conf\n");
+		cil_log(CIL_ERR, "Error creating policy.conf\n");
 		return SEPOL_ERR;
 	}
 
@@ -1296,12 +1297,12 @@ int cil_gen_policy(struct cil_db *db)
 	for (i=0; i<NUM_POLICY_FILES; i++) {
 		rc = fclose(file_arr[i]);
 		if (rc != 0) {
-			printf("Error closing temporary file\n");
+			cil_log(CIL_ERR, "Error closing temporary file\n");
 			return SEPOL_ERR;
 		}
 		rc = unlink(file_path_arr[i]);
 		if (rc != 0) {
-			printf("Error unlinking temporary files\n");
+			cil_log(CIL_ERR, "Error unlinking temporary files\n");
 			return SEPOL_ERR;
 		}
 		free(file_path_arr[i]);
@@ -1309,7 +1310,7 @@ int cil_gen_policy(struct cil_db *db)
 
 	rc = fclose(policy_file);
 	if (rc != 0) {
-		printf("Error closing policy.conf\n");
+		cil_log(CIL_ERR, "Error closing policy.conf\n");
 		return SEPOL_ERR;
 	}
 	free(file_arr);

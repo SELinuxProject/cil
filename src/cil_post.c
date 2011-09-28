@@ -37,6 +37,7 @@
 #include <sepol/errcodes.h>
 
 #include "cil.h"
+#include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_list.h"
@@ -383,7 +384,7 @@ int __cil_post_context_sort_count_helper(struct cil_tree_node *node, uint32_t *f
 	return SEPOL_OK;
 
 exit:
-	printf("cil_post_context_sort_count_helper failed\n");
+	cil_log(CIL_INFO, "cil_post_context_sort_count_helper failed\n");
 	return rc;
 }
 
@@ -526,7 +527,7 @@ int __cil_post_context_sort_array_helper(struct cil_tree_node *node, __attribute
 	return SEPOL_OK;
 
 exit:
-	printf("cil_post_context_sort_array_helper failed\n");
+	cil_log(CIL_INFO, "cil_post_context_sort_array_helper failed\n");
 	return rc;
 }
 
@@ -536,13 +537,13 @@ int cil_post_context_sort(struct cil_db *db)
 
 	rc = cil_tree_walk(db->ast->root, __cil_post_context_sort_count_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
-		printf("Failed to count contexts\n");
+		cil_log(CIL_INFO, "Failed to count contexts\n");
 		goto exit;
 	}
 
 	rc = cil_tree_walk(db->ast->root, __cil_post_context_sort_array_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
-		printf("Failed to sort contexts\n");
+		cil_log(CIL_INFO, "Failed to sort contexts\n");
 		goto exit;
 	}
 
@@ -580,12 +581,12 @@ int cil_post_verify(struct cil_db *db)
 
 	rc = cil_tree_walk(db->ast->root, __cil_verify_helper, NULL, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
-		printf("Failed to verify cil database\n");
+		cil_log(CIL_ERR, "Failed to verify cil database\n");
 		goto exit;
 	}
 
 	if (avrule_cnt == 0) {
-		printf("Policy must include at least one avrule\n");
+		cil_log(CIL_ERR, "Policy must include at least one avrule\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -598,7 +599,7 @@ int cil_post_verify(struct cil_db *db)
 		key = sens->datum.name;
 		datum = (struct cil_symtab_datum *)hashtab_search(senstab.table, key);
 		if (datum == NULL) {
-			printf("Sensitivity not used in a level: %s\n", key);
+			cil_log(CIL_ERR, "Sensitivity not used in a level: %s\n", key);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -618,19 +619,19 @@ int cil_post_process(struct cil_db *db)
 
 	rc = cil_post_verify(db);
 	if (rc != SEPOL_OK) {
-		printf("Failed to verify cil database\n");
+		cil_log(CIL_ERR, "Failed to verify cil database\n");
 		goto exit;
 	}
 
 	rc = cil_post_context_sort(db);
 	if (rc != SEPOL_OK) {
-		printf("Failed to sort contexts\n");
+		cil_log(CIL_ERR, "Failed to sort contexts\n");
 		goto exit;
 	}
 
 	rc = cil_post_filecon_to_policy(db->filecon);
 	if (rc != SEPOL_OK) {
-		printf("Failed writing filecontexts to file\n");
+		cil_log(CIL_ERR, "Failed writing filecontexts to file\n");
 		goto exit;
 	}
 
