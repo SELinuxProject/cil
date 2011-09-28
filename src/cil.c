@@ -387,10 +387,10 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		*sym_index = CIL_SYM_CATS;
 		break;
 	case CIL_MACRO:
-		*sym_index = CIL_SYM_MACROS;
+		*sym_index = CIL_SYM_BLOCKS;
 		break;
 	case CIL_OPTIONAL:
-		*sym_index = CIL_SYM_OPTIONALS;
+		*sym_index = CIL_SYM_BLOCKS;
 		break;
 	case CIL_POLICYCAP:
 		*sym_index = CIL_SYM_POLICYCAPS;

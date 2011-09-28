@@ -2414,9 +2414,14 @@ int cil_resolve_call1(struct cil_db *db, struct cil_tree_node *current, struct c
 	int rc = SEPOL_ERR;
 
 	if (new_call->macro_str != NULL) {
-		rc = cil_resolve_name(db, current, new_call->macro_str, CIL_SYM_MACROS, call, &macro_node);
+		rc = cil_resolve_name(db, current, new_call->macro_str, CIL_SYM_BLOCKS, call, &macro_node);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to resolve macro, rc: %d\n", rc);
+			goto exit;
+		}
+		if (macro_node->flavor != CIL_MACRO) {
+			printf("Failed to resolve macro %s\n", new_call->macro_str);
+			rc = SEPOL_ERR;
 			goto exit;
 		}
 		new_call->macro = (struct cil_macro*)macro_node->data;
@@ -3507,12 +3512,21 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 			symtab = &call->macro->symtab[CIL_SYM_BLOCKS];
 			rc = cil_symtab_get_node(symtab, tok_current, node);
 			if (rc == SEPOL_OK) {
+				if ((*node)->flavor != CIL_BLOCK) {
+					printf("Failed to get block from symtab\n");
+					rc = SEPOL_ERR;
+					goto exit;
+				}
 				// if in macro, check call parent to verify successful copy to call
 				rc = cil_get_symtab(db, ast_node->parent->parent, &symtab, CIL_SYM_BLOCKS);
 				if (rc == SEPOL_OK) {
 					rc = cil_symtab_get_node(symtab, tok_current, node);
 					if (rc != SEPOL_OK) {
 						cil_log(CIL_ERR, "Failed to get node from parent symtab of call\n");
+						goto exit;
+					} else if ((*node)->flavor != CIL_BLOCK) {
+						printf("Failed to get block from symtab\n");
+						rc = SEPOL_ERR;
 						goto exit;
 					}
 				} else {
@@ -3550,6 +3564,10 @@ static int __cil_resolve_name_helper(struct cil_db *db, struct cil_tree_node *as
 		if (tok_next != NULL) {
 			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
 			if (rc != SEPOL_OK) {
+				goto exit;
+			} else if (tmp_node->flavor != CIL_BLOCK && ast_node->flavor != CIL_IN) {
+				printf("Failed to resolve block: %s\n", tok_current);
+				rc = SEPOL_ERR;
 				goto exit;
 			}
 			symtab = &(((struct cil_block*)tmp_node->data)->symtab[CIL_SYM_BLOCKS]);

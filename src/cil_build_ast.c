@@ -4828,7 +4828,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	cil_tree_subtree_destroy(parse_current->next->next);
 	parse_current->next->next = macro_content;
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)macro, (hashtab_key_t)key, CIL_SYM_MACROS, CIL_MACRO);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)macro, (hashtab_key_t)key, CIL_SYM_BLOCKS, CIL_MACRO);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -4981,7 +4981,7 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	key = parse_current->next->data;
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)optional, (hashtab_key_t)key, CIL_SYM_OPTIONALS, CIL_OPTIONAL);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)optional, (hashtab_key_t)key, CIL_SYM_BLOCKS, CIL_OPTIONAL);
 	if (rc != SEPOL_OK)
 		goto exit;
 
