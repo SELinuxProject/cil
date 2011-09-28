@@ -88,7 +88,6 @@
 	(booleanif console_login
 		(true
 			(typechange auditadm_t console_device_t file user_tty_device_t)
-			(typechange auditadm_t console_device_t file user_tty_device_t)
 			(allow getty_t console_device_t (file (getattr open read write append)))
 		)
 		(false
