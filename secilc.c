@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
 
 	cil_log(CIL_INFO, "Resolving AST...\n");
 	if (cil_resolve_ast(db, db->ast->root)) {
-		cil_log(CIL_ERR, "Failed to resolve ast, exiting\n");
+		cil_log(CIL_INFO, "Failed to resolve ast, exiting\n");
 		goto exit;
 	}
 

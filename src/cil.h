@@ -56,7 +56,6 @@ enum cil_flavor {
 	CIL_INT,
 	CIL_FILES,
 	CIL_AVRULE,
-	CIL_SENS_DOM,
 	CIL_BLOCKINHERIT,
 	CIL_IN,
 	CIL_FILECON,
@@ -157,6 +156,9 @@ enum cil_flavor {
 /*
 	Keywords
 */
+#define CIL_KEY_ROOT		"<root>"
+#define CIL_KEY_AST_NODE	"<ast node>"
+#define CIL_KEY_PARSE_NODE	"<parse node>"
 #define CIL_KEY_BLOCK 		"block"
 #define CIL_KEY_BLOCKINHERIT	"blockinherit"
 #define CIL_KEY_IN		"in"
@@ -818,6 +820,7 @@ void cil_db_destroy(struct cil_db **db);
 void cil_destroy_data(void **data, enum cil_flavor flavor);
 
 int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *index);
+const char * cil_node_to_string(struct cil_tree_node *node);
 
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
 void cil_symtab_array_destroy(symtab_t symtab[]);
