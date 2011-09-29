@@ -34,28 +34,33 @@
 
 #include "cil_log.h"
 
-int LOG_LEVEL = 1;
+enum cil_log_level cil_log_level = CIL_ERR;
 
-void cil_default_log_handler(char *msg)
+void cil_default_log_handler(__attribute__((unused)) int lvl, char *msg)
 {
 	fprintf(stderr, "%s", msg);
 }
 
-void (*cil_log_handler)(char *msg) = &cil_default_log_handler;
+void (*cil_log_handler)(int lvl, char *msg) = &cil_default_log_handler;
 
-void cil_set_log_handler(void (*handler)(char *msg))
+void cil_set_log_handler(void (*handler)(int lvl, char *msg))
 {
 	cil_log_handler = handler;
 }
 
 __attribute__ ((format (printf, 2, 3))) void cil_log(enum cil_log_level lvl, const char *msg, ...)
 {
-	if (LOG_LEVEL >= (int)lvl) {
-		char buff[512];
+	if (cil_log_level >= lvl) {
+		char buff[MAX_LOG_SIZE];
 		va_list args;
 		va_start(args, msg);
-		vsprintf(buff, msg, args);
+		vsnprintf(buff, MAX_LOG_SIZE, msg, args);
 		va_end(args);
-		(*cil_log_handler)(buff);
+		(*cil_log_handler)(cil_log_level, buff);
 	}
+}
+
+void cil_set_log_level(enum cil_log_level lvl)
+{
+	cil_log_level = lvl;
 }

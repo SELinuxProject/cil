@@ -31,7 +31,9 @@
 
 #include <stdlib.h>
 
-extern int LOG_LEVEL; // Logging level
+#define MAX_LOG_SIZE 512
+
+extern enum cil_log_level cil_log_level; // Logging level
 
 enum cil_log_level {
 	CIL_ERR = 1,
@@ -40,5 +42,7 @@ enum cil_log_level {
 };
 
 void cil_log(enum cil_log_level lvl, const char *msg, ...);
+void cil_set_log_level(enum cil_log_level lvl);
+void cil_set_log_handler(void (*handler)(int lvl, char *msg));
 
 #endif // CIL_LOG_H_

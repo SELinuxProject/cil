@@ -52,7 +52,7 @@
 
 void usage(char *prog)
 {
-	printf("Usage: %s [-l|--log=<ver>] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] <files>...\n", prog);
+	printf("Usage: %s [-v|--verbose] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] <files>...\n", prog);
 	exit(1);
 }
 
@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
 	int policyvers = POLICYDB_VERSION_MAX;
 	int opt_char;
 	int opt_index = 0;
+	enum cil_log_level log_level = CIL_ERR;
 	static struct option long_opts[] = {
 		{"help", no_argument, 0, 'h'},
 		{"log", required_argument, 0, 'l'},
@@ -83,25 +84,14 @@ int main(int argc, char *argv[])
 	int i;
 
 	while (1) {
-		opt_char = getopt_long(argc, argv, "hlt:Mc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "hvt:Mc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
 		switch (opt_char) {
-			case 'l': {
-				char *endptr = NULL;
-				errno = 0;
-				LOG_LEVEL = strtol(optarg, &endptr, 10);
-				if (errno != 0 || endptr == optarg || *endptr != '\0') {
-					cil_log(CIL_ERR, "Bad log level: %s\n", optarg);
-					usage(argv[0]);
-				}
-				if (LOG_LEVEL > 3 || LOG_LEVEL < 1) {
-					cil_log(CIL_ERR, "Log level must be: 1 (error), 2 (warnings), or 3 (info)\n");
-					usage(argv[0]);
-				}
+			case 'v':
+				log_level++;
 				break;
-			}
 			case 't':
 				if (!strcmp(optarg, "selinux")) {
 					target = SEPOL_TARGET_SELINUX;
@@ -139,10 +129,7 @@ int main(int argc, char *argv[])
 				usage(argv[0]);
 		}
 	}
-
-#ifdef DEBUG
-	LOG_LEVEL = 3;
-#endif
+	cil_set_log_level(log_level);
 
 	if (optind >= argc) {
 		cil_log(CIL_ERR, "No cil files specified\n");
@@ -182,9 +169,9 @@ int main(int argc, char *argv[])
 		free(buffer);
 		buffer = NULL;
 
-		if (LOG_LEVEL == 3) {
-			cil_tree_print(parse_tree->root, 0);
-		}
+#ifdef DEBUG
+		cil_tree_print(parse_tree->root, 0);
+#endif
 	}
 	
 	cil_db_init(&db);
@@ -195,9 +182,9 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-	if (LOG_LEVEL == 3) {
-		cil_tree_print(db->ast->root, 0);
-	}
+#ifdef DEBUG
+	cil_tree_print(db->ast->root, 0);
+#endif
 
 	cil_log(CIL_INFO, "Destroying Parse Tree...\n");
 	cil_tree_destroy(&parse_tree);
@@ -208,9 +195,9 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-	if (LOG_LEVEL == 3) {
-		cil_tree_print(db->ast->root, 0);
-	}
+#ifdef DEBUG
+	cil_tree_print(db->ast->root, 0);
+#endif
 
 	cil_log(CIL_INFO, "Destroying AST Symtabs...\n");
 	if (cil_destroy_ast_symtabs(db->ast->root)) {
