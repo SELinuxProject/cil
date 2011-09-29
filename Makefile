@@ -81,8 +81,6 @@ coverage: clean unit
 test: $(SECILC)
 	./$(SECILC) test/policy.cil
 
-install:
-
 clean:
 	-rm -f $(CIL_OBJS) $(TEST_OBJS) $(SECILC_OBJS) $(SRCDIR)/$(GENERATED)
 	-rm -rf $(patsubst %.o,%.gcda,$(CIL_OBJS) $(SECILC_OBJS) $(TEST_OBJS))
@@ -95,4 +93,4 @@ bare: clean
 	rm -f policy.*
 	rm -f file_contexts
 
-.PHONY: cil all clean bare install test
+.PHONY: all bare clean coverage test unit
