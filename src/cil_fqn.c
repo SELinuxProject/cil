@@ -80,7 +80,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		goto exit;
 	}
 
-	if (node->flavor < CIL_MIN_DECLARATIVE) {
+	if (node->flavor < CIL_MIN_DECLARATIVE || node->flavor == CIL_PERM) {
 		rc = SEPOL_OK;
 		goto exit;
 	}
