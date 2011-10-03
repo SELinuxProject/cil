@@ -243,7 +243,6 @@ int cil_complex_symtab_search(struct cil_complex_symtab *symtab,
 {
 	int rc = SEPOL_ERR;
 	intptr_t hash = 0;
-	struct cil_complex_symtab_node *prev = NULL;
 	struct cil_complex_symtab_node *curr = NULL;
 
 	if (symtab == NULL || symtab->htable == NULL || *out != NULL) {
@@ -251,8 +250,7 @@ int cil_complex_symtab_search(struct cil_complex_symtab *symtab,
 	}
 
 	hash = cil_complex_symtab_hash(ckey, symtab->mask, &hash);
-	for (prev = NULL, curr = symtab->htable[hash]; curr != NULL;
-		prev = curr, curr = curr->next) {
+	for (curr = symtab->htable[hash]; curr != NULL; curr = curr->next) {
 		if (ckey->key1 == curr->ckey->key1 &&
 			ckey->key2 == curr->ckey->key2 &&
 			ckey->key3 == curr->ckey->key3 &&
