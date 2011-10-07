@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include "CuTest.h"
+#include "../../src/cil_log.h"
 
 CuSuite* CilTreeGetSuite(void);
 CuSuite* CilTreeGetResolveSuite(void);
@@ -36,6 +37,9 @@ CuSuite* CilTreeGetBuildSuite(void);
 CuSuite* CilTestFullCil(void);
 
 void RunAllTests(void) {
+    /* disable cil log output */
+    cil_set_log_level(0);
+
     CuString *output  = CuStringNew();
     CuSuite* suite = CuSuiteNew();
     CuSuite* suiteResolve = CuSuiteNew();
