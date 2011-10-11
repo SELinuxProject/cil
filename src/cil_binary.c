@@ -102,6 +102,7 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	char *key = NULL;
 	struct cil_class *cil_class = node->data;
 	struct cil_tree_node *cil_perm = node->cl_head;
+	common_datum_t *sepol_common = NULL;
 	class_datum_t *sepol_class = cil_malloc(sizeof(*sepol_class));
 	memset(sepol_class, 0, sizeof(class_datum_t));
 
@@ -116,6 +117,17 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	rc = symtab_init(&sepol_class->permissions, PERM_SYMTAB_SIZE);
 	if (rc != SEPOL_OK) {
 		goto exit;
+	}
+
+	if (cil_class->common != NULL) {
+		key = cil_class->common->datum.name;
+		sepol_common = hashtab_search(pdb->p_commons.table, key);
+		if (sepol_common == NULL) {
+			goto exit;
+		}
+		sepol_class->comdatum = sepol_common;
+		sepol_class->comkey = cil_strdup(key);
+		sepol_class->permissions.nprim += sepol_common->permissions.nprim;
 	}
 
 	while (cil_perm != NULL) {
@@ -138,37 +150,6 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 exit:
 	free(key);
-	return rc;
-}
-
-int cil_classcommon_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
-{
-	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_class *cil_class = node->data;
-	class_datum_t *sepol_class;
-	common_datum_t *sepol_common;
-
-	if (cil_class->common != NULL) {
-		key = cil_class->datum.name;
-		sepol_class = hashtab_search(pdb->p_classes.table, key);
-		if (sepol_class == NULL) {
-			goto exit;
-		}
-
-		key = cil_class->common->datum.name;
-		sepol_common = hashtab_search(pdb->p_commons.table, key);
-		if (sepol_common == NULL) {
-			goto exit;
-		}
-		sepol_class->comdatum = sepol_common;
-		sepol_class->comkey = cil_strdup(cil_class->common->datum.name);
-		sepol_class->permissions.nprim += sepol_class->comdatum->permissions.nprim;
-	}
-
-	return SEPOL_OK;
-
-exit:
 	return rc;
 }
 
@@ -2452,9 +2433,6 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 		case CIL_COMMON:
 			rc = cil_common_to_policydb(pdb, node);
 			break;
-		case CIL_CLASS:
-			rc = cil_class_to_policydb(pdb, node);
-			break;
 		case CIL_ROLE:
 			rc = cil_role_to_policydb(pdb, node);
 			break;
@@ -2498,7 +2476,7 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			rc = cil_sensalias_to_policydb(pdb, node);
 			break;
 		case CIL_CLASS:
-			rc = cil_classcommon_to_policydb(pdb, node);
+			rc = cil_class_to_policydb(pdb, node);
 			break;
 		case CIL_ROLETYPE:
 			rc = cil_roletype_to_policydb(pdb, node);
