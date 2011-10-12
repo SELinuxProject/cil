@@ -49,7 +49,7 @@ struct cil_args_binary {
 	int pass;
 };
 
-int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node, common_datum_t **common_out)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
@@ -88,6 +88,8 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		cil_perm = cil_perm->next;
 	}
 
+	*common_out = sepol_common;
+
 	return SEPOL_OK;
 
 exit:
@@ -120,10 +122,16 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	}
 
 	if (cil_class->common != NULL) {
+		struct cil_common *cil_common = cil_class->common;
+		struct cil_tree_node *common_node = cil_common->datum.node;
+
 		key = cil_class->common->datum.name;
 		sepol_common = hashtab_search(pdb->p_commons.table, key);
 		if (sepol_common == NULL) {
-			goto exit;
+			rc = cil_common_to_policydb(pdb, common_node, &sepol_common);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
 		}
 		sepol_class->comdatum = sepol_common;
 		sepol_class->comkey = cil_strdup(key);
@@ -2430,8 +2438,8 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 	switch (pass) {
 	case 1:
 		switch (node->flavor) {
-		case CIL_COMMON:
-			rc = cil_common_to_policydb(pdb, node);
+		case CIL_CLASS:
+			rc = cil_class_to_policydb(pdb, node);
 			break;
 		case CIL_ROLE:
 			rc = cil_role_to_policydb(pdb, node);
@@ -2474,9 +2482,6 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			break;
 		case CIL_SENSALIAS:
 			rc = cil_sensalias_to_policydb(pdb, node);
-			break;
-		case CIL_CLASS:
-			rc = cil_class_to_policydb(pdb, node);
 			break;
 		case CIL_ROLETYPE:
 			rc = cil_roletype_to_policydb(pdb, node);

@@ -40,10 +40,11 @@
  *
  * @param[in] pdb The policy database to insert the common into.
  * @param[in] node The tree node that contains the cil_common.
+ * @param[out] common_out The sepol common to send back.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node, commond_datum_t **common_out);
 
 /**
  * Insert cil class structure into sepol policydb.
