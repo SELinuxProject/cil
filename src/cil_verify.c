@@ -1527,6 +1527,41 @@ exit:
 	return rc;
 }
 
+int __cil_verify_class(struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_class *class = node->data;
+
+	if (class->common != NULL) {
+		struct cil_common *common = class->common;
+		struct cil_tree_node *common_node = common->datum.node;
+		struct cil_tree_node *curr_com_perm = NULL;
+
+		for (curr_com_perm = common_node->cl_head;
+			curr_com_perm != NULL;
+			curr_com_perm = curr_com_perm->next) {
+			struct cil_perm *com_perm = curr_com_perm->data;
+			struct cil_tree_node *curr_class_perm = NULL;
+
+			for (curr_class_perm = node->cl_head;
+				curr_class_perm != NULL;
+				curr_class_perm = curr_class_perm->next) {
+				struct cil_perm *class_perm = curr_class_perm->data;
+
+				if (!strcmp(com_perm->datum.name, class_perm->datum.name)) {
+					cil_log(CIL_ERR, "Duplicate permissions within common and class: %s\n",
+											class_perm->datum.name);
+					goto exit;
+				}
+			}
+		}
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -1616,6 +1651,9 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 		break;
 	case CIL_RANGETRANSITION:
 		rc = __cil_verify_rangetransition(node, senstab);
+		break;
+	case CIL_CLASS:
+		rc = __cil_verify_class(node);
 		break;
 	default:
 		rc = SEPOL_OK;
