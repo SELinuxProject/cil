@@ -121,7 +121,7 @@ exit:
 	return rc;
 }
 
-int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract, char *condition)
+int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -146,7 +146,6 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	cil_block_init(&block);
 
 	block->is_abstract = is_abstract;
-	block->condition = condition;
 
 	key = parse_current->next->data;
 
@@ -224,6 +223,57 @@ void cil_destroy_blockinherit(struct cil_blockinherit *inherit)
 
 	free(inherit);
 }
+
+int cil_gen_blockabstract(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_blockabstract *abstract = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Invalid blockabstract declaration (line: %d)\n", parse_current->line);
+		goto exit;
+	}
+
+	cil_blockabstract_init(&abstract);
+
+	abstract->block_str = cil_strdup(parse_current->next->data);
+
+	ast_node->data = abstract;
+	ast_node->flavor = CIL_BLOCKABSTRACT;
+
+	return SEPOL_OK;
+
+exit:
+	if (abstract != NULL) {
+		cil_destroy_blockabstract(abstract);
+	}
+	return rc;
+}
+
+void cil_destroy_blockabstract(struct cil_blockabstract *abstract)
+{
+	if (abstract == NULL) {
+		return;
+	}
+
+	if (abstract->block_str != NULL) {
+		free(abstract->block_str);
+	}
+
+	free(abstract);
+}
+
 int cil_gen_in(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -5380,7 +5430,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	args->ast = ast_current;
 
 	if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
-		rc = cil_gen_block(db, parse_current, ast_node, 0, NULL);
+		rc = cil_gen_block(db, parse_current, ast_node, 0);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "cil_gen_block failed, rc: %d\n", rc);
 			goto exit;
@@ -5391,10 +5441,16 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			cil_log(CIL_ERR, "cil_gen_blockinherit failed, rc: %d\n", rc);
 			goto exit;
 		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_BLOCKABSTRACT)) {
+		rc = cil_gen_blockabstract(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_blockabstract failed, rc: %d\n", rc);
+			goto exit;
+		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_IN)) {
 		rc = cil_gen_in(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
-			printf("cil_gen_in failed, rc: %d\n", rc);
+			cil_log(CIL_ERR, "cil_gen_in failed, rc: %d\n", rc);
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {

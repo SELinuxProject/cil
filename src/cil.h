@@ -45,6 +45,23 @@
 */
 #define CIL_MIN_DECLARATIVE	500
 
+enum cil_pass {
+	CIL_PASS_INIT = 0,
+
+	CIL_PASS_TIF,
+	CIL_PASS_IN,
+	CIL_PASS_BLKIN,
+	CIL_PASS_BLKABS,
+	CIL_PASS_CALL1,
+	CIL_PASS_CALL2,
+	CIL_PASS_MISC1,
+	CIL_PASS_MLS,
+	CIL_PASS_MISC2,
+	CIL_PASS_MISC3,
+
+	CIL_PASS_NUM
+};
+
 enum cil_flavor {
 	CIL_ROOT = 0,
 	CIL_DB,
@@ -57,6 +74,7 @@ enum cil_flavor {
 	CIL_FILES,
 	CIL_AVRULE,
 	CIL_BLOCKINHERIT,
+	CIL_BLOCKABSTRACT,
 	CIL_IN,
 	CIL_FILECON,
 	CIL_PORTCON,
@@ -161,6 +179,7 @@ enum cil_flavor {
 #define CIL_KEY_PARSE_NODE	"<parse node>"
 #define CIL_KEY_BLOCK 		"block"
 #define CIL_KEY_BLOCKINHERIT	"blockinherit"
+#define CIL_KEY_BLOCKABSTRACT	"blockabstract"
 #define CIL_KEY_IN		"in"
 #define CIL_KEY_CLASS		"class"
 #define CIL_KEY_PERM		"perm"
@@ -320,13 +339,14 @@ struct cil_sort {
 struct cil_block {
 	struct cil_symtab_datum datum;
 	symtab_t symtab[CIL_SYM_NUM];
-	/* TODO CDS eventually, these should probably become a flags bit vector */
 	uint16_t is_abstract;
-	/* TODO CDS we need to figure out how to handle conditionals */
-	char *condition;
 };
 
 struct cil_blockinherit {
+	char *block_str;
+};
+
+struct cil_blockabstract {
 	char *block_str;
 };
 
@@ -836,6 +856,7 @@ void cil_levelrange_init(struct cil_levelrange **lvlrange);
 void cil_sens_init(struct cil_sens **sens);
 void cil_block_init(struct cil_block **block);
 void cil_blockinherit_init(struct cil_blockinherit **inherit);
+void cil_blockabstract_init(struct cil_blockabstract **abstract);
 void cil_in_init(struct cil_in **in);
 void cil_class_init(struct cil_class **class);
 void cil_common_init(struct cil_common **common);

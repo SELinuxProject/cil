@@ -2546,7 +2546,14 @@ int __cil_binary_create_helper(struct cil_tree_node *node, __attribute__((unused
 	pdb = args->pdb;
 	pass = args->pass;
 
-	if (node->flavor == CIL_OPTIONAL) {
+	if (node->flavor == CIL_BLOCK) {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+			rc = SEPOL_OK;
+			goto exit;
+		}
+	} else if (node->flavor == CIL_OPTIONAL) {
 		struct cil_optional *opt = node->data;
 		if (opt->datum.state != CIL_STATE_ENABLED) {
 			*finished = CIL_TREE_SKIP_HEAD;

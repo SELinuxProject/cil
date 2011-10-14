@@ -1065,6 +1065,11 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 			return SEPOL_OK;
 		}
 
+		if (node->flavor == CIL_BLOCK && ((struct cil_block*)node->data)->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+			return SEPOL_OK;
+		}
+
 		if (node->flavor != CIL_ROOT) {
 			rc = cil_name_to_policy(file_arr, node);
 			if (rc != SEPOL_OK && rc != SEPOL_DONE) {

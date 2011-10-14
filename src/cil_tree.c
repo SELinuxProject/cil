@@ -462,6 +462,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				cil_log(CIL_INFO, "BLOCKINHERIT: %s\n", inherit->block_str);
 				return;
 			}
+			case CIL_BLOCKABSTRACT: {
+				struct cil_blockabstract *abstract = node->data;
+				cil_log(CIL_INFO, "BLOCKABSTRACT: %s\n", abstract->block_str);
+				return;
+			}
 			case CIL_IN: {
 				struct cil_in *in = node->data;
 				printf("IN: %s\n", in->block_str);

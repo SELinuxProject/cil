@@ -110,6 +110,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_BLOCKINHERIT:
 		cil_destroy_blockinherit(*data);
 		break;
+	case CIL_BLOCKABSTRACT:
+		cil_destroy_blockabstract(*data);
+		break;
 	case CIL_CLASS:
 		cil_destroy_class(*data);
 		break;
@@ -862,14 +865,19 @@ void cil_block_init(struct cil_block **block)
 
 	cil_symtab_array_init((*block)->symtab, CIL_SYM_NUM);
 
-	(*block)->is_abstract = 0;
-	(*block)->condition = NULL;
+	(*block)->is_abstract = CIL_FALSE;
 }
 
 void cil_blockinherit_init(struct cil_blockinherit **inherit)
 {
 	*inherit = cil_malloc(sizeof(**inherit));
 	(*inherit)->block_str = NULL;
+}
+
+void cil_blockabstract_init(struct cil_blockabstract **abstract)
+{
+	*abstract = cil_malloc(sizeof(**abstract));
+	(*abstract)->block_str = NULL;
 }
 
 void cil_in_init(struct cil_in **in)
