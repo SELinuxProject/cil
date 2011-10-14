@@ -52,7 +52,7 @@
 
 void usage(char *prog)
 {
-	printf("Usage: %s [-v|--verbose] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] <files>...\n", prog);
+	printf("Usage: %s [-v|--verbose] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown]<files>...\n", prog);
 	exit(1);
 }
 
@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
 	struct cil_db *db;
 	int target = SEPOL_TARGET_SELINUX;
 	int mls = 0;
+	int handle_unknown = SEPOL_DENY_UNKNOWN;
 	int policyvers = POLICYDB_VERSION_MAX;
 	int opt_char;
 	int opt_index = 0;
@@ -79,6 +80,7 @@ int main(int argc, char *argv[])
 		{"target", required_argument, 0, 't'},
 		{"mls", no_argument, 0, 'M'},
 		{"policyversion", required_argument, 0, 'c'},
+		{"handle-unknown", required_argument, 0, 'U'},
 		{0, 0, 0, 0}
 	};
 	int i;
@@ -120,6 +122,16 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
+			case 'U':
+				if (!strcasecmp(optarg, "deny")) {
+					handle_unknown = SEPOL_DENY_UNKNOWN;
+				} else if (!strcasecmp(optarg, "allow")) {
+					handle_unknown = SEPOL_ALLOW_UNKNOWN;
+				} else if (!strcasecmp(optarg, "reject")) {
+					handle_unknown = SEPOL_REJECT_UNKNOWN;
+				} else {
+					usage(argv[0]);
+				}	
 			case 'h':
 				usage(argv[0]);
 			case '?':
@@ -236,6 +248,13 @@ int main(int argc, char *argv[])
 		cil_log(CIL_ERR, "Failed to set target platform: %d\n", rc);
 		goto exit;
 	}
+
+	rc = sepol_policydb_set_handle_unknown(pdb, handle_unknown);
+	if (rc != 0) {
+		cil_log(CIL_ERR, "Failed to set handle unknown: %d\n", rc);
+		goto exit;
+	}
+
 	snprintf(output, 10, "policy.%d", policyvers);
 	if (cil_binary_create(db, &pdb, output)) {
 		cil_log(CIL_ERR, "Failed to generate binary, exiting\n");
