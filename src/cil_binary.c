@@ -2741,16 +2741,15 @@ exit:
 	return rc;
 }
 
-int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fname)
+int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 {
 	int rc = SEPOL_ERR;
 	int i;
-	FILE *binary;
 	ebitmap_t types_bitmap;
-	struct policy_file pf;
 	struct cil_args_binary extra_args;
+	policydb_t *pdb = &policydb->p;
 
-	if (db == NULL || pdb == NULL || fname == NULL) {
+	if (db == NULL || policydb == NULL) {
 		goto exit;
 	}
 
@@ -2782,25 +2781,6 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 			goto exit;
 		}
 	}
-
-	binary = fopen(fname, "w");
-	if (binary == NULL) {
-		cil_log(CIL_ERR, "Failure opening binary file for writing\n");
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	policy_file_init(&pf);
-	pf.type = PF_USE_STDIO;
-	pf.fp = binary;
-
-	rc = policydb_write(pdb, &pf);
-	if (rc != 0) {
-		cil_log(CIL_ERR, "Failed writing binary policy\n");
-		goto exit;
-	}
-
-	fclose(binary);
 
 	return SEPOL_OK;
 

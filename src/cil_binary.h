@@ -43,7 +43,7 @@
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fname);
+int cil_binary_create(const struct cil_db *db, sepol_policydb_t *pdb);
 
 
 #endif //_CIL_BINARY_H_

@@ -46,9 +46,7 @@
 #include "src/cil_policy.h"
 #include "src/cil_post.h"
 
-#include <sepol/policydb/hashtab.h>
-#include <sepol/policydb/policydb.h>
-#include <sepol/policydb/services.h>
+#include <sepol/policydb.h>
 
 void usage(char *prog)
 {
@@ -60,7 +58,9 @@ int main(int argc, char *argv[])
 {
 	int rc = SEPOL_ERR;
 	struct stat filedata;
-	policydb_t pdb;
+	sepol_policydb_t *pdb = NULL;
+	struct sepol_policy_file *pf = NULL;
+	FILE *binary = NULL;
 	uint32_t file_size;
 	char *buffer;
 	FILE *file;
@@ -238,14 +238,15 @@ int main(int argc, char *argv[])
 	cil_tree_print(db->ast->root, 0);
 #endif
 	cil_log(CIL_INFO, "Generating Binary...\n");
-	policydb_init(&pdb);
-	sepol_set_policydb(&pdb);
-	pdb.policy_type = POLICY_KERN;
-	pdb.policyvers = policyvers;
-	pdb.mls = mls;
-	rc = policydb_set_target_platform(&pdb, target);
+
+	sepol_policydb_create(&pdb);
+	pdb->p.policy_type = POLICY_KERN;
+	pdb->p.mls = mls;
+	pdb->p.target_platform = target;
+	
+	rc = sepol_policydb_set_vers(pdb, policyvers);
 	if (rc != 0) {
-		cil_log(CIL_ERR, "Failed to set target platform: %d\n", rc);
+		cil_log(CIL_ERR, "Failed to set policy version: %d\n", rc);
 		goto exit;
 	}
 
@@ -255,15 +256,36 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-	snprintf(output, 10, "policy.%d", policyvers);
-	if (cil_binary_create(db, &pdb, output)) {
+	if (cil_binary_create(db, pdb)) {
 		cil_log(CIL_ERR, "Failed to generate binary, exiting\n");
 		goto exit;
 	}
 
+	cil_log(CIL_INFO, "Writing Binary: %s...\n", output);
+
+	snprintf(output, 10, "policy.%d", policyvers);
+	binary = fopen(output, "w");
+	if (binary == NULL) {
+		cil_log(CIL_ERR, "Failure opening binary file for writing\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = sepol_policy_file_create(&pf);
+	if (rc != 0) {
+		cil_log(CIL_ERR, "Failed to create policy file: %d\n", rc);
+		goto exit;
+	}
+
+	sepol_policy_file_set_fp(pf, binary);
+
+	rc = sepol_policydb_write(pdb, pf);
+	if (rc != 0) {
+		cil_log(CIL_ERR, "Failed to write binary policy: %d\n", rc);
+		goto exit;
+	}
+
 	cil_log(CIL_INFO, "Destroying DB...\n");
-	policydb_destroy(&pdb);
-	cil_db_destroy(&db);
 
 	return SEPOL_OK;
 
@@ -271,6 +293,12 @@ exit:
 	if (file != NULL) {
 		fclose(file);
 	}
+	if (binary != NULL) {
+		fclose(binary);
+	}
+	cil_db_destroy(&db);
+	sepol_policydb_free(pdb);
+	sepol_policy_file_free(pf);
 	free(buffer);
 	return SEPOL_ERR;
 }
