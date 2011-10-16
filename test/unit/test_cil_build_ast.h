@@ -246,19 +246,19 @@ void test_cil_gen_typealias_dbnull_neg(CuTest *tc);
 void test_cil_gen_typealias_currnull_neg(CuTest *tc);
 void test_cil_gen_typealias_astnull_neg(CuTest *tc);
 
-void test_cil_gen_typeattributetypes(CuTest *);
-void test_cil_gen_typeattributetypes_list_of_multi_items(CuTest *);
-void test_cil_gen_typeattributetypes_exclude(CuTest *);
-void test_cil_gen_typeattributetypes_exclude_multi_items(CuTest *);
-void test_cil_gen_typeattributetypes_exclude_neg(CuTest *);
-void test_cil_gen_typeattributetypes_dbnull_neg(CuTest *);
-void test_cil_gen_typeattributetypes_currnull_neg(CuTest *);
-void test_cil_gen_typeattributetypes_astnull_neg(CuTest *);
-void test_cil_gen_typeattributetypes_noname_neg(CuTest *);
-void test_cil_gen_typeattributetypes_nameinparens_neg(CuTest *);
-void test_cil_gen_typeattributetypes_emptylists_neg(CuTest *);
-void test_cil_gen_typeattributetypes_listinparens_neg(CuTest *);
-void test_cil_gen_typeattributetypes_extra_neg(CuTest *);
+void test_cil_gen_typeattributeset(CuTest *);
+void test_cil_gen_typeattributeset_and_two_types(CuTest *);
+void test_cil_gen_typeattributeset_not(CuTest *);
+void test_cil_gen_typeattributeset_exclude_attr(CuTest *);
+void test_cil_gen_typeattributeset_exclude_neg(CuTest *);
+void test_cil_gen_typeattributeset_dbnull_neg(CuTest *);
+void test_cil_gen_typeattributeset_currnull_neg(CuTest *);
+void test_cil_gen_typeattributeset_astnull_neg(CuTest *);
+void test_cil_gen_typeattributeset_noname_neg(CuTest *);
+void test_cil_gen_typeattributeset_nameinparens_neg(CuTest *);
+void test_cil_gen_typeattributeset_emptylists_neg(CuTest *);
+void test_cil_gen_typeattributeset_listinparens_neg(CuTest *);
+void test_cil_gen_typeattributeset_extra_neg(CuTest *);
 
 void test_cil_gen_userbounds(CuTest *);
 void test_cil_gen_userbounds_notype1_neg(CuTest *);
@@ -945,8 +945,8 @@ void test_cil_build_ast_node_helper_filetransition_neg(CuTest *);
 void test_cil_build_ast_node_helper_rangetransition(CuTest *);
 void test_cil_build_ast_node_helper_rangetransition_neg(CuTest *);
 
-void test_cil_build_ast_node_helper_typeattributetypes(CuTest *);
-void test_cil_build_ast_node_helper_typeattributetypes_neg(CuTest *);
+void test_cil_build_ast_node_helper_typeattributeset(CuTest *);
+void test_cil_build_ast_node_helper_typeattributeset_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_userbounds(CuTest *);
 void test_cil_build_ast_node_helper_userbounds_neg(CuTest *);

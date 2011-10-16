@@ -164,16 +164,16 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_name);
 	SUITE_ADD_TEST(suite, test_cil_resolve_name_invalid_type_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_type_in_multiple_attrs);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_multiple_excludes);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_multiple_types);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_list_of_attrs);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_name_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_list_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_exclude);
-	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributetypes_exclude_neg);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typeattributetypes);
-	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typeattributetypes_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributeset_type_in_multiple_attrs);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributeset_multiple_excludes_with_not);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributeset_multiple_types_with_and);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributeset_using_attr);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributeset_name_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributeset_undef_type_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributeset_not);
+	SUITE_ADD_TEST(suite, test_cil_resolve_typeattributeset_undef_type_not_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typeattributeset);
+	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_typeattributeset_undef_type_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias);
 	SUITE_ADD_TEST(suite, test_cil_resolve_typealias_neg);
@@ -864,21 +864,21 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_astnull_neg);
 
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_list_of_multi_items);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_exclude);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_exclude_multi_items);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_exclude_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_dbnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_currnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_astnull_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_noname_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_nameinparens_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_emptylists_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_listinparens_neg);
-	SUITE_ADD_TEST(suite, test_cil_gen_typeattributetypes_extra_neg);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattributetypes);
-	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattributetypes_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_and_two_types);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_not);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_exclude_attr);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_exclude_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_nameinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_emptylists_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_listinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_typeattributeset_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattributeset);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_typeattributeset_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_userbounds);
 	SUITE_ADD_TEST(suite, test_cil_gen_userbounds_notype1_neg);

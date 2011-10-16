@@ -122,14 +122,14 @@ void test_cil_resolve_roletransition_srcdecl_neg(CuTest *);
 void test_cil_resolve_roletransition_tgtdecl_neg(CuTest *);
 void test_cil_resolve_roletransition_resultdecl_neg(CuTest *);
 
-void test_cil_resolve_typeattributetypes_type_in_multiple_attrs(CuTest *);
-void test_cil_resolve_typeattributetypes_multiple_excludes(CuTest *);
-void test_cil_resolve_typeattributetypes_multiple_types(CuTest *);
-void test_cil_resolve_typeattributetypes_list_of_attrs(CuTest *);
-void test_cil_resolve_typeattributetypes_name_neg(CuTest *);
-void test_cil_resolve_typeattributetypes_list_neg(CuTest *);
-void test_cil_resolve_typeattributetypes_exclude(CuTest *);
-void test_cil_resolve_typeattributetypes_exclude_neg(CuTest *);
+void test_cil_resolve_typeattributeset_type_in_multiple_attrs(CuTest *);
+void test_cil_resolve_typeattributeset_multiple_excludes_with_not(CuTest *);
+void test_cil_resolve_typeattributeset_multiple_types_with_and(CuTest *);
+void test_cil_resolve_typeattributeset_using_attr(CuTest *);
+void test_cil_resolve_typeattributeset_name_neg(CuTest *);
+void test_cil_resolve_typeattributeset_undef_type_neg(CuTest *);
+void test_cil_resolve_typeattributeset_not(CuTest *);
+void test_cil_resolve_typeattributeset_undef_type_not_neg(CuTest *);
 
 void test_cil_resolve_typealias(CuTest *);
 void test_cil_resolve_typealias_neg(CuTest *);
@@ -483,8 +483,8 @@ void test_cil_resolve_ast_node_helper_roletransition_srcdecl_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_roletransition_tgtdecl_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_roletransition_resultdecl_neg(CuTest *);
 
-void test_cil_resolve_ast_node_helper_typeattributetypes(CuTest *);
-void test_cil_resolve_ast_node_helper_typeattributetypes_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_typeattributeset(CuTest *);
+void test_cil_resolve_ast_node_helper_typeattributeset_undef_type_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_typealias(CuTest *);
 void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *);
