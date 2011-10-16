@@ -66,7 +66,13 @@
 	(sid unlabeled)
 		
 	(typeattribute exec_type)
-	(typeattributetypes exec_type (bin_t))
+	(typeattribute foo_type)
+	(typeattribute bar_type)
+	(typeattribute baz_type)
+	(typeattributeset exec_type (or bin_t kernel_t))
+	(typeattributeset foo_type (and exec_type kernel_t))
+	(typeattributeset bar_type (xor exec_type foo_type))
+	(typeattributeset baz_type (not bin_t))
 	(typealias bin_t sbin_t)
 	(typepermissive device_t) 
 	(typebounds device_t bin_t)
@@ -77,6 +83,7 @@
 
 	(filetransition device_t console_t file getty_t some_file)  
 	
+	(allow foo_type self (file (execute)))
 	(allow bin_t device_t (file (execute)))
 			
 	(booleanif secure_mode

@@ -115,8 +115,8 @@ int cil_gen_condtrue(struct cil_db *db, struct cil_tree_node *parse_current, str
 int cil_gen_condfalse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_typealias(struct cil_typealias *alias);
-int cil_gen_typeattributetypes(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_typeattributetypes(struct cil_typeattributetypes *attrtypes);
+int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_typeattributeset(struct cil_typeattributeset *attrtypes);
 int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_typebounds(struct cil_typebounds *typebnds);
 int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

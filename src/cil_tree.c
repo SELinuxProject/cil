@@ -483,7 +483,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				return;
 			}
 			case CIL_TYPEATTRIBUTETYPES: {
-				struct cil_typeattributetypes *attrtypes = node->data;
+				struct cil_typeattributeset *attrtypes = node->data;
 				struct cil_list_item *curr = NULL;
 				cil_log(CIL_INFO, "TYPEATTRIBUTETYPES: attr: %s", attrtypes->attr_str);
 				if (attrtypes->types_list_str != NULL) {

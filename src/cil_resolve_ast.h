@@ -39,7 +39,7 @@ int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classperm
 int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_type_rule(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_list(struct cil_list *str_list, struct cil_list *res_list, struct cil_tree_node *current, enum cil_sym_index sym_index, void *extra_args);
-int cil_resolve_typeattributetypes(struct cil_tree_node *current, void *extra_args);
+int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_typealias(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_typebounds(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_typepermissive(struct cil_tree_node *current, void *extra_args);

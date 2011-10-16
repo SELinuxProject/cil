@@ -215,7 +215,7 @@ enum cil_flavor {
 #define CIL_KEY_FILETRANSITION	"filetransition"
 #define CIL_KEY_TYPECHANGE	"typechange"
 #define CIL_KEY_TYPEMEMBER	"typemember"
-#define CIL_KEY_TYPEATTRIBUTETYPES	"typeattributetypes"
+#define CIL_KEY_TYPEATTRIBUTETYPES	"typeattributeset"
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_TYPEBOUNDS	"typebounds"
 #define CIL_KEY_TYPEPERMISSIVE	"typepermissive"
@@ -488,10 +488,12 @@ struct cil_typeattribute {
 	struct cil_symtab_datum datum;
 	struct cil_list *types_list;
 	struct cil_list *neg_list;
+	struct cil_list *expr_stack;
 };
 
-struct cil_typeattributetypes {
+struct cil_typeattributeset {
 	char *attr_str;
+	struct cil_list *expr_stack;
 	struct cil_list *types_list_str; /* list of types, aliases, and attributes */
 	struct cil_list *neg_list_str; /* list of types, aliases, and attributes */
 };
@@ -869,7 +871,7 @@ void cil_roledominance_init(struct cil_roledominance **roledominance);
 void cil_rolebounds_init(struct cil_rolebounds **rolebounds);
 void cil_roletype_init(struct cil_roletype **roletype);
 void cil_typeattribute_init(struct cil_typeattribute **attribute);
-void cil_typeattributetypes_init(struct cil_typeattributetypes **attrtypes);
+void cil_typeattributeset_init(struct cil_typeattributeset **attrtypes);
 void cil_typealias_init(struct cil_typealias **typealias);
 void cil_typebounds_init(struct cil_typebounds **typebnds);
 void cil_typepermissive_init(struct cil_typepermissive **typeperm);

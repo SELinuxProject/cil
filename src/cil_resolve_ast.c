@@ -281,9 +281,9 @@ exit:
 	return rc;
 }
 
-int cil_resolve_typeattributetypes(struct cil_tree_node *current, void *extra_args)
+int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_typeattributetypes *attrtypes = (struct cil_typeattributetypes*)current->data;
+	struct cil_typeattributeset *attrtypes = (struct cil_typeattributeset*)current->data;
 	struct cil_tree_node *attr_node = NULL;
 	struct cil_typeattribute *attr = NULL;
 	int rc = SEPOL_ERR;
@@ -299,31 +299,13 @@ int cil_resolve_typeattributetypes(struct cil_tree_node *current, void *extra_ar
 	}
 	attr = attr_node->data;
 
-
-	if (attrtypes->types_list_str != NULL) {
-		if (attr->types_list == NULL) {
-			cil_list_init(&attr->types_list);
-		}
-
-		rc = cil_resolve_list(attrtypes->types_list_str, attr->types_list, current, CIL_SYM_TYPES, extra_args);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+	rc = cil_resolve_expr_stack(attrtypes->expr_stack, current, extra_args);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
+	attr->expr_stack = attrtypes->expr_stack;
 
-	if (attrtypes->neg_list_str != NULL) {
-		if (attr->neg_list == NULL) {
-			cil_list_init(&attr->neg_list);
-		}
-
-		rc = cil_resolve_list(attrtypes->neg_list_str, attr->neg_list, current, CIL_SYM_TYPES, extra_args);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	}
-
-	return SEPOL_OK;
-
+	rc = SEPOL_OK;
 exit:
 	return rc;
 }
@@ -3070,7 +3052,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 	case CIL_PASS_MISC3:
 		switch (node->flavor) {
 		case CIL_TYPEATTRIBUTETYPES:
-			rc = cil_resolve_typeattributetypes(node, args);
+			rc = cil_resolve_typeattributeset(node, args);
 			break;
 		case CIL_TYPEALIAS:
 			rc = cil_resolve_typealias_to_type(node);

@@ -815,13 +815,13 @@ exit:
 	return rc;
 }
 
-int cil_copy_typeattributetypes(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+int cil_copy_typeattributeset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
-	struct cil_typeattributetypes *orig = data;
-	struct cil_typeattributetypes *new = NULL;
+	struct cil_typeattributeset *orig = data;
+	struct cil_typeattributeset *new = NULL;
 	int rc = SEPOL_ERR;
 
-	cil_typeattributetypes_init(&new);
+	cil_typeattributeset_init(&new);
 
 	new->attr_str = cil_strdup(orig->attr_str);
 
@@ -844,7 +844,7 @@ int cil_copy_typeattributetypes(__attribute__((unused)) struct cil_db *db, void 
 	return SEPOL_OK;
 
 exit:
-	cil_destroy_typeattributetypes(new);
+	cil_destroy_typeattributeset(new);
 	return rc;
 }
 
@@ -2210,7 +2210,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		copy_func = &cil_copy_typeattribute;
 		break;
 	case CIL_TYPEATTRIBUTETYPES:
-		copy_func = &cil_copy_typeattributetypes;
+		copy_func = &cil_copy_typeattributeset;
 		break;
 	case CIL_TYPEALIAS:
 		copy_func = &cil_copy_typealias;

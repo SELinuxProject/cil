@@ -200,7 +200,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		cil_destroy_typealias(*data);
 		break;
 	case CIL_TYPEATTRIBUTETYPES:
-		cil_destroy_typeattributetypes(*data);
+		cil_destroy_typeattributeset(*data);
 		break;
 	case CIL_TYPEBOUNDS:
 		cil_destroy_typebounds(*data);
@@ -989,13 +989,14 @@ void cil_typeattribute_init(struct cil_typeattribute **attr)
 	(*attr)->neg_list = NULL;
 }
 
-void cil_typeattributetypes_init(struct cil_typeattributetypes **attrtypes)
+void cil_typeattributeset_init(struct cil_typeattributeset **attrset)
 {
-	*attrtypes = cil_malloc(sizeof(**attrtypes));
+	*attrset = cil_malloc(sizeof(**attrset));
 
-	(*attrtypes)->attr_str = NULL;
-	(*attrtypes)->types_list_str = NULL;
-	(*attrtypes)->neg_list_str = NULL;
+	(*attrset)->attr_str = NULL;
+	(*attrset)->expr_stack = NULL;
+	(*attrset)->types_list_str = NULL;
+	(*attrset)->neg_list_str = NULL;
 }
 
 void cil_typealias_init(struct cil_typealias **typealias)

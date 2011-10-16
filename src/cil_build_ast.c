@@ -2539,19 +2539,16 @@ void cil_destroy_typealias(struct cil_typealias *alias)
 	free(alias);
 }
 
-int cil_gen_typeattributetypes(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING,
-		SYM_LIST,
+		SYM_STRING | SYM_LIST,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_typeattributetypes *attrtypes = NULL;
-	struct cil_tree_node *curr = NULL;
-	struct cil_list_item *new_type = NULL;
-	char *type = NULL;
+	struct cil_typeattributeset *attrset = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -2560,89 +2557,50 @@ int cil_gen_typeattributetypes(struct cil_db *db, struct cil_tree_node *parse_cu
 
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Invalid attributetypes statement (line: %d)\n", parse_current->line);
+		cil_log(CIL_ERR, "Invalid attributeset statement (line: %d)\n", parse_current->line);
 		goto exit;
 	}
 
-	cil_typeattributetypes_init(&attrtypes);
+	cil_typeattributeset_init(&attrset);
 
-	attrtypes->attr_str = cil_strdup(parse_current->next->data);
+	attrset->attr_str = cil_strdup(parse_current->next->data);
 
-	curr = parse_current->next->next->cl_head;
-
-	while(curr != NULL) {
-		if (curr->cl_head != NULL) {
-			cil_log(CIL_ERR, "Invalid attributetypes statement (line: %d)\n", parse_current->line);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-
-		cil_list_item_init(&new_type);
-		new_type->flavor = CIL_AST_STR;
-
-		type = curr->data;
-		if (type[0] == '-') {
-			if (type[1] == '\0') {
-				cil_log(CIL_ERR, "Invalid negative type in attributetypes statement\n");
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-			if (attrtypes->neg_list_str == NULL) {
-				cil_list_init(&attrtypes->neg_list_str);
-			}
-
-			new_type->data = cil_strdup(&type[1]);
-			rc = cil_list_prepend_item(attrtypes->neg_list_str, new_type);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-		} else {
-			if (attrtypes->types_list_str == NULL) {
-				cil_list_init(&attrtypes->types_list_str);
-			}
-
-			new_type->data = cil_strdup(type);
-			rc = cil_list_prepend_item(attrtypes->types_list_str, new_type);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-		}
-
-		curr = curr->next;
+	rc = cil_gen_expr_stack(parse_current->next->next, CIL_TYPE, &attrset->expr_stack);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "cil_gen_typeattributeset (line %d): failed to create expr tree, rc: %d\n", parse_current->line, rc);
+		goto exit;
 	}
-
-	ast_node->data = attrtypes;
+	ast_node->data = attrset;
 	ast_node->flavor = CIL_TYPEATTRIBUTETYPES;
 
 	return SEPOL_OK;
 
 exit:
-	if (attrtypes != NULL) {
-		cil_destroy_typeattributetypes(attrtypes);
+	if (attrset != NULL) {
+		cil_destroy_typeattributeset(attrset);
 	}
 	return rc;
 }
 
-void cil_destroy_typeattributetypes(struct cil_typeattributetypes *attrtypes)
+void cil_destroy_typeattributeset(struct cil_typeattributeset *attrset)
 {
-	if (attrtypes == NULL) {
+	if (attrset == NULL) {
 		return;
 	}
 
-	if (attrtypes->attr_str != NULL) {
-		free(attrtypes->attr_str);
+	if (attrset->attr_str != NULL) {
+		free(attrset->attr_str);
 	}
 
-	if (attrtypes->types_list_str != NULL) {
-		cil_list_destroy(&attrtypes->types_list_str, 1);
+	if (attrset->types_list_str != NULL) {
+		cil_list_destroy(&attrset->types_list_str, 1);
 	}
 
-	if (attrtypes->neg_list_str != NULL) {
-		cil_list_destroy(&attrtypes->neg_list_str, 1);
+	if (attrset->neg_list_str != NULL) {
+		cil_list_destroy(&attrset->neg_list_str, 1);
 	}
 
-	free(attrtypes);
+	free(attrset);
 }
 
 int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -5555,9 +5513,9 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTRIBUTETYPES)) {
-		rc = cil_gen_typeattributetypes(db, parse_current, ast_node);
+		rc = cil_gen_typeattributeset(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "cil_gen_typeattributetypes failed, rc: %d\n", rc);
+			cil_log(CIL_ERR, "cil_gen_typeattributeset failed, rc: %d\n", rc);
 			goto exit;
 		}
 		*finished = CIL_TREE_SKIP_NEXT;

@@ -46,6 +46,7 @@
 struct cil_args_binary {
 	const struct cil_db *db;
 	policydb_t *pdb;
+	ebitmap_t *types_bitmap;
 	int pass;
 };
 
@@ -284,7 +285,7 @@ exit:
 	return rc;
 }
 
-int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node, ebitmap_t *types_bitmap)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
@@ -302,6 +303,10 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	}
 	sepol_type->s.value = value;
 	sepol_type->primary = 1;
+
+	if (ebitmap_set_bit(types_bitmap, value - 1, 1)) {
+		goto exit;
+	}
 
 	return SEPOL_OK;
 
@@ -403,30 +408,23 @@ exit:
 	return rc;
 }
 
-int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute *attr, ebitmap_t *out);
+int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute *attr, ebitmap_t *types_bitmap, ebitmap_t *out);
 
-int __cil_typeattr_expand_to_bitmap(policydb_t *pdb, struct cil_list *types, ebitmap_t *out)
+int __cil_typeattr_expand_to_bitmap(policydb_t *pdb, void *type, ebitmap_t *types_bitmap, ebitmap_t *out)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
 	char *key = NULL;
-	struct cil_list_item *curr_type = types->head;
-	enum cil_flavor flavor;
+	enum cil_flavor flavor = ((struct cil_symtab_datum *)type)->node->flavor;
 	type_datum_t *sepol_type = NULL;
 
-	while (curr_type != NULL) {
-		flavor = curr_type->flavor;
-
-		if (flavor == CIL_TYPEATTRIBUTE) {
-			rc = __cil_typeattr_expand_to_policydb(pdb, curr_type->data, out);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-			curr_type = curr_type->next;
-			continue;
+	if (flavor == CIL_TYPEATTRIBUTE) {
+		rc = __cil_typeattr_expand_to_policydb(pdb, type, types_bitmap, out);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
-
-		key = ((struct cil_symtab_datum *)curr_type->data)->name;
+	} else {
+		key = ((struct cil_symtab_datum *)type)->name;
 		sepol_type = hashtab_search(pdb->p_types.table, key);
 		if (sepol_type == NULL) {
 			goto exit;
@@ -436,8 +434,6 @@ int __cil_typeattr_expand_to_bitmap(policydb_t *pdb, struct cil_list *types, ebi
 		if (ebitmap_set_bit(out, value - 1, 1)) {
 			goto exit;
 		}
-
-		curr_type = curr_type->next;
 	}
 
 	return SEPOL_OK;
@@ -447,43 +443,77 @@ exit:
 
 }
 
-int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute *attr, ebitmap_t *types)
+int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute *attr, ebitmap_t *types_bitmap, ebitmap_t *types)
 {
 	int rc = SEPOL_ERR;
-	ebitmap_t negtypes;
-	ebitmap_init(&negtypes);
+	uint16_t pos = 0;
+	struct cil_list *expr_stack = attr->expr_stack;
+	struct cil_list_item *curr_expr = expr_stack->head;
+	enum cil_flavor flavor;
+	ebitmap_t bitmap_tmp;
+	ebitmap_t bitmap_stack[COND_EXPR_MAXDEPTH];
 
-	if (attr->types_list != NULL) {
-		rc = __cil_typeattr_expand_to_bitmap(pdb, attr->types_list, types);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	} else {
-		rc = SEPOL_OK;
-		goto exit;
-	}
-
-	if (attr->neg_list != NULL) {
-		rc = __cil_typeattr_expand_to_bitmap(pdb, attr->neg_list, &negtypes);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		unsigned int i;
-		ebitmap_node_t *tnode;
-		ebitmap_for_each_bit(types, tnode, i) {
-			if (ebitmap_get_bit(&negtypes, i)) {
-				if (ebitmap_set_bit(types, i, 0)) {
-					goto exit;
-				}
+	while (curr_expr != NULL) {
+		struct cil_conditional *cil_cond = curr_expr->data;
+		flavor = cil_cond->flavor;
+		switch (flavor) {
+		case CIL_TYPE:
+			ebitmap_init(&bitmap_tmp);
+			rc = __cil_typeattr_expand_to_bitmap(pdb, cil_cond->data, types_bitmap, &bitmap_tmp);
+			if (rc != SEPOL_OK) {
+				goto exit;
 			}
+			bitmap_stack[pos] = bitmap_tmp;
+			pos++;
+			break;
+		case CIL_NOT:
+			if (ebitmap_not(&bitmap_tmp, &bitmap_stack[pos - 1], ebitmap_length(types_bitmap))) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure NOTing bitmap\n");
+				goto exit;
+			}
+			if (ebitmap_and(types, &bitmap_tmp, types_bitmap)) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure ANDing types bitmap\n");
+				goto exit;
+			}
+			break;
+		case CIL_OR:
+			if (ebitmap_or(types, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure ORing bitmaps\n");
+				goto exit;
+			}
+			break;
+		case CIL_AND:
+			if (ebitmap_and(types, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure ANDing bitmaps\n");
+				goto exit;
+			}
+			break;
+		case CIL_XOR:
+			if (ebitmap_xor(&bitmap_tmp, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure XORing bitmaps\n");
+				goto exit;
+			}
+			if (ebitmap_and(types, &bitmap_tmp, types_bitmap)) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure ANDing types bitmap\n");
+				goto exit;
+			}
+			break;
+		default:
+			rc = SEPOL_ERR;
+			goto exit;
 		}
+
+		curr_expr = curr_expr->next;
 	}
 
 	rc = SEPOL_OK;
-
 exit:
-	ebitmap_destroy(&negtypes);
 	return rc;
 }
 
@@ -508,7 +538,7 @@ exit:
 	return rc;
 }
 
-int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
+int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node, ebitmap_t *types_bitmap)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
@@ -536,7 +566,7 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node)
 	}
 	value = sepol_type->s.value;
 
-	rc = __cil_typeattr_expand_to_policydb(pdb, cil_attr, &types);
+	rc = __cil_typeattr_expand_to_policydb(pdb, cil_attr, types_bitmap, &types);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1103,7 +1133,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 		if (srcdatum->node->flavor == CIL_TYPEATTRIBUTE) {
 			unsigned int i;
 			ebitmap_node_t *tnode;
-			rc = __cil_typeattr_expand_to_policydb(pdb, srcdatum->node->data, &types);
+			rc = __cil_typeattr_expand_to_policydb(pdb, srcdatum->node->data, NULL, &types);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -2432,9 +2462,18 @@ exit:
 	return rc;
 }
 
-int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass)
+int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 {
 	int rc = SEPOL_OK;
+	int pass;
+	struct cil_args_binary *args = extra_args;
+	policydb_t *pdb;
+	ebitmap_t *types_bitmap;
+
+	pdb = args->pdb;
+	pass = args->pass;
+	types_bitmap = args->types_bitmap;
+
 	switch (pass) {
 	case 1:
 		switch (node->flavor) {
@@ -2445,7 +2484,7 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			rc = cil_role_to_policydb(pdb, node);
 			break;
 		case CIL_TYPE:
-			rc = cil_type_to_policydb(pdb, node);
+			rc = cil_type_to_policydb(pdb, node, types_bitmap);
 			break;
 		case CIL_TYPEATTRIBUTE:
 			rc = cil_typeattribute_to_policydb(pdb, node);
@@ -2478,7 +2517,7 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 			rc = cil_typepermissive_to_policydb(pdb, node);
 			break;
 		case CIL_TYPEATTRIBUTE:
-			rc = cil_typeattribute_to_bitmap(pdb, node);
+			rc = cil_typeattribute_to_bitmap(pdb, node, types_bitmap);
 			break;
 		case CIL_SENSALIAS:
 			rc = cil_sensalias_to_policydb(pdb, node);
@@ -2539,12 +2578,6 @@ int __cil_node_to_policydb(policydb_t *pdb, struct cil_tree_node *node, int pass
 int __cil_binary_create_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
-	int pass;
-	struct cil_args_binary *args = extra_args;
-	policydb_t *pdb;
-
-	pdb = args->pdb;
-	pass = args->pass;
 
 	if (node->flavor == CIL_BLOCK) {
 		struct cil_block *blk = node->data;
@@ -2568,7 +2601,7 @@ int __cil_binary_create_helper(struct cil_tree_node *node, __attribute__((unused
 		*finished = CIL_TREE_SKIP_HEAD;
 	}
 
-	rc = __cil_node_to_policydb(pdb, node, pass);
+	rc = __cil_node_to_policydb(node, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2672,6 +2705,7 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	int rc = SEPOL_ERR;
 	int i;
 	FILE *binary;
+	ebitmap_t types_bitmap;
 	struct policy_file pf;
 	struct cil_args_binary extra_args;
 
@@ -2683,9 +2717,11 @@ int cil_binary_create(const struct cil_db *db, policydb_t *pdb, const char *fnam
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+	ebitmap_init(&types_bitmap);
 
 	extra_args.db = db;
 	extra_args.pdb = pdb;
+	extra_args.types_bitmap = &types_bitmap;
 	for (i = 1; i <= 2; i++) {
 		extra_args.pass = i;
 		rc = cil_tree_walk(db->ast->root, __cil_binary_create_helper, NULL, NULL, &extra_args);
