@@ -213,11 +213,10 @@ void test_cil_gen_block(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, NULL);
+	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertPtrNotNull(tc, test_ast_node->data);
 	CuAssertIntEquals(tc, ((struct cil_block*)test_ast_node->data)->is_abstract, 0);
-	CuAssertPtrEquals(tc, ((struct cil_block*)test_ast_node->data)->condition, NULL);
 	CuAssertIntEquals(tc, test_ast_node->flavor, CIL_BLOCK);
 }
 
@@ -236,7 +235,7 @@ void test_cil_gen_block_justblock_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, NULL);
+	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -255,7 +254,7 @@ void test_cil_gen_block_noname_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, NULL);
+	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -270,7 +269,7 @@ void test_cil_gen_block_dbnull_neg(CuTest *tc) {
 
 	struct cil_db *test_db = NULL;
 
-	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, NULL);
+	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -291,7 +290,7 @@ void test_cil_gen_block_treenull_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, NULL);
+	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -306,7 +305,7 @@ void test_cil_gen_block_nodenull_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, NULL);
+	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -325,7 +324,7 @@ void test_cil_gen_block_nodeparentnull_neg(CuTest *tc) {
 	test_ast_node->parent = NULL;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, NULL);
+	int rc = cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -344,7 +343,7 @@ void test_cil_destroy_block(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0, NULL);
+	cil_gen_block(test_db, test_tree->root->cl_head->cl_head, test_ast_node, 0);
 
 	cil_destroy_block((struct cil_block*)test_ast_node->data);
 	CuAssertPtrEquals(tc, NULL,test_ast_node->data);

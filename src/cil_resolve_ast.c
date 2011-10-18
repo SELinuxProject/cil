@@ -3603,7 +3603,6 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
 	struct cil_call *call = NULL;
-	enum cil_pass pass = CIL_PASS_INIT;
 	int rc = SEPOL_ERR;
 	char *global_symtab_name = NULL;
 	char first;
@@ -3613,7 +3612,6 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 		if (args->callstack != NULL) {
 			call = args->callstack->data;
 		}
-		pass = args->pass;
 	}
 
 	if (db == NULL || ast_node == NULL || name == NULL) {

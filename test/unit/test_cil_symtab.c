@@ -53,7 +53,6 @@ void test_cil_symtab_insert(CuTest *tc) {
 	cil_symtab_array_init(test_block->symtab, CIL_SYM_NUM);
 
 	test_block->is_abstract = 0;
-	test_block->condition = NULL;
 
 	cil_get_symtab(test_db, test_ast_node->parent, &test_symtab, CIL_SYM_BLOCKS);
 
