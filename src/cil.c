@@ -1276,10 +1276,8 @@ void cil_constrain_init(struct cil_constrain **constrain)
 {
 	*constrain = cil_malloc(sizeof(**constrain));
 
-	(*constrain)->class_list_str = NULL;
-	(*constrain)->class_list = NULL;
-	(*constrain)->perm_list_str = NULL;
-	(*constrain)->perm_list = NULL;
+	(*constrain)->classpermset_str = NULL;
+	(*constrain)->classpermset = NULL;
 	(*constrain)->expr = NULL;
 }
 

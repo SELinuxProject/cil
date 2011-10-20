@@ -3638,8 +3638,7 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
-		SYM_LIST,
-		SYM_LIST,
+		SYM_STRING | SYM_LIST,
 		SYM_LIST,
 		SYM_END
 	};
@@ -3659,12 +3658,19 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	cil_constrain_init(&cons);
 
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	if (parse_current->next->cl_head == NULL) {
+		cons->classpermset_str = cil_strdup(parse_current->next->data);
+	} else {
+		cil_classpermset_init(&cons->classpermset);
 
-	rc = cil_gen_expr_stack(parse_current->next->next->next, flavor, &cons->expr);
+		rc = cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to fill classpermset\n");
+			goto exit;
+		}
+	}
+
+	rc = cil_gen_expr_stack(parse_current->next->next, flavor, &cons->expr);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to build constrain expression tree\n");
 		goto exit;
@@ -3688,18 +3694,14 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 		return;
 	}
 
-	if (cons->class_list_str != NULL) {
-		cil_list_destroy(&cons->class_list_str, 1);
+	if (cons->classpermset_str != NULL) {
+		free(cons->classpermset_str);
 	}
-	if (cons->class_list != NULL) {
-		cil_list_destroy(&cons->class_list, 0);
+
+	if (cons->classpermset != NULL) {
+		cil_destroy_classpermset(cons->classpermset);
 	}
-	if (cons->perm_list_str != NULL) {
-		cil_list_destroy(&cons->perm_list_str, 1);
-	}
-	if (cons->perm_list != NULL) {
-		cil_list_destroy(&cons->perm_list, 0);
-	}
+
 	if (cons->expr != NULL) {
 		cil_list_destroy(&cons->expr, CIL_TRUE);
 	}

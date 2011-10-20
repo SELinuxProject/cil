@@ -389,41 +389,14 @@ void cil_tree_print_context(struct cil_context *context)
 
 void cil_tree_print_constrain(struct cil_constrain *cons)
 {
-	struct cil_list_item *class_curr = NULL;
-	struct cil_list_item *perm_curr = NULL;
 	struct cil_list_item *expr_curr = NULL;
 
-	if (cons->class_list != NULL) {
-		class_curr = cons->class_list->head;
+	if (cons->classpermset != NULL) {
+		cil_tree_print_classpermset(cons->classpermset);
 	} else {
-		class_curr = cons->class_list_str->head;
+		 cil_log(CIL_INFO, "%s", cons->classpermset_str);
 	}
 
-	if (cons->perm_list != NULL) {
-		perm_curr = cons->perm_list->head;
-	} else {
-		perm_curr = cons->perm_list_str->head;
-	}
-
-	while (class_curr != NULL) {
-		if (cons->class_list != NULL) {
-			cil_log(CIL_INFO, "%s ", ((struct cil_class*)class_curr->data)->datum.name);
-		} else {
-			cil_log(CIL_INFO, "%s ", (char*)class_curr->data);
-		}
-		class_curr = class_curr->next;
-	}
-	cil_log(CIL_INFO, ") \n\t\t( ");
-
-	while (perm_curr != NULL) {
-		if (cons->perm_list != NULL) {
-			cil_log(CIL_INFO, "%s ", ((struct cil_class*)perm_curr->data)->datum.name);
-		} else {
-			cil_log(CIL_INFO, "%s ", (char*)perm_curr->data);
-		}
-		perm_curr = perm_curr->next;
-	}
-	cil_log(CIL_INFO, ") \n\t\t");
 	expr_curr = cons->expr->head;
 	while (expr_curr != NULL) {
 		struct cil_conditional *cond = expr_curr->data;

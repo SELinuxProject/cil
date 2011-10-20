@@ -652,6 +652,19 @@ int cil_reset_class(struct cil_tree_node *current, __attribute__((unused)) void 
 	return SEPOL_OK;
 }
 
+int cil_reset_classmap_perm(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_classmap_perm *cmp = current->data;
+
+	/* during a re-resolve the classperms list needs to be reset to avoid
+	   duplicate entries
+	*/
+
+	cil_list_destroy(&cmp->classperms, 0);
+
+	return SEPOL_OK;
+}
+
 int cil_reset_sens(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
 	struct cil_sens *sens = (struct cil_sens *)current->data;
@@ -1800,59 +1813,36 @@ exit:
 int cil_resolve_constrain(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_constrain *cons = (struct cil_constrain*)current->data;
-	struct cil_tree_node *class_node = NULL;
-	struct cil_list_item *curr_class = cons->class_list_str->head;
-	struct cil_list_item *new_item = NULL;
-	struct cil_list *class_list = NULL;
-	struct cil_list *perm_list = NULL;
+	struct cil_args_resolve *args = extra_args;
+	struct cil_tree_node *cps_node = NULL;
 	int rc = SEPOL_ERR;
 
-	cil_list_init(&class_list);
-	cil_list_init(&perm_list);
-	while (curr_class != NULL) {
-		rc = cil_resolve_name(current, (char*)curr_class->data, CIL_SYM_CLASSES, extra_args, &class_node);
+	if (cons->classpermset_str != NULL) {
+		rc = cil_resolve_name(current, cons->classpermset_str, CIL_SYM_CLASSPERMSETS, args, &cps_node);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+		cons->classpermset = (struct cil_classpermset*)cps_node->data;
 
-		rc = __cil_resolve_perm_list((struct cil_class*)class_node->data, cons->perm_list_str, NULL);
+		/* This could still be an anonymous classpermset even if classpermset_str is set, if classpermset_str is a param_str*/
+		if (cons->classpermset->datum.name == NULL) {
+
+			rc = cil_resolve_classpermset(current, cons->classpermset, args);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+	} else if (cons->classpermset != NULL) {
+		rc = cil_resolve_classpermset(current, cons->classpermset, args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to verify perm list\n");
 			goto exit;
 		}
-
-		cil_list_item_init(&new_item);
-		new_item->flavor = CIL_CLASS;
-		new_item->data = class_node->data;
-		rc = cil_list_append_item(class_list, new_item);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to append to class list\n");
-			goto exit;
-		}
-		curr_class = curr_class->next;
-	}
-
-	rc = __cil_resolve_perm_list((struct cil_class*)class_node->data, cons->perm_list_str, perm_list);
-	if (rc != SEPOL_OK) {
-		goto exit;
 	}
 
 	rc = cil_resolve_expr_stack(cons->expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-
-	if (cons->class_list != NULL) {
-		/* clean up because of re-resolve */
-		cil_list_destroy(&cons->class_list, 0);
-	}
-	cons->class_list = class_list;
-
-	if (cons->perm_list != NULL) {
-		/* clean up because of re-resolve */
-		cil_list_destroy(&cons->perm_list, 0);
-	}
-	cons->perm_list = perm_list;
 
 	return SEPOL_OK;
 
@@ -2992,6 +2982,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_CLASS:
 			rc = cil_reset_class(node, args);
+			break;
+		case CIL_CLASSMAPPERM:
+			rc = cil_reset_classmap_perm(node, args);
 			break;
 		case CIL_ROLE:
 			rc = cil_reset_role(node, args);

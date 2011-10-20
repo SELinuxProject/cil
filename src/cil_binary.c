@@ -1705,16 +1705,19 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 	struct cil_constrain *cil_constrain = node->data;
-	struct cil_list *classes = cil_constrain->class_list;
-	struct cil_list *perms = cil_constrain->perm_list;
+	struct cil_class *class = NULL;
+	struct cil_list *perms = NULL;
+	struct cil_list_item *curr_cmp = NULL;
+	struct cil_list_item *curr_cps = NULL;
 	struct cil_list *expr = cil_constrain->expr;
-	struct cil_list_item *curr_class = classes->head;
 	class_datum_t *sepol_class = NULL;
 	constraint_node_t *sepol_constrain = NULL;
 	constraint_expr_t *sepol_expr = NULL;
 
-	while (curr_class != NULL) {
-		struct cil_class *class = curr_class->data;
+	if (cil_constrain->classpermset->flavor == CIL_CLASS) {
+		class = cil_constrain->classpermset->class;
+		perms = cil_constrain->classpermset->perms;
+
 		key = class->datum.name;
 		sepol_class = hashtab_search(pdb->p_classes.table, key);
 		if (sepol_class == NULL) {
@@ -1742,9 +1745,47 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 			sepol_constrain->next = sepol_class->constraints;
 			sepol_class->constraints = sepol_constrain;
 		}
+	} else if (cil_constrain->classpermset->flavor == CIL_CLASSMAP) {
+		curr_cmp = cil_constrain->classpermset->perms->head;
+		while (curr_cmp != NULL) {
+			curr_cps = ((struct cil_classmap_perm*)curr_cmp->data)->classperms->head;
+			while (curr_cps != NULL) {
+				key = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
+				sepol_class = hashtab_search(pdb->p_classes.table, key);
+				if (sepol_class == NULL) {
+					rc = SEPOL_ERR;
+					goto exit;
+				}
 
-		sepol_expr = NULL;
-		curr_class = curr_class->next;
+				sepol_constrain = cil_malloc(sizeof(*sepol_constrain));
+				memset(sepol_constrain, 0, sizeof(constraint_node_t));
+
+				perms = ((struct cil_classpermset*)curr_cps->data)->perms;
+
+				rc = __cil_perms_to_datum(perms, sepol_class, &sepol_constrain->permissions);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+				sepol_constrain->expr = sepol_expr;
+
+				if (sepol_class->constraints == NULL) {
+					sepol_class->constraints = sepol_constrain;
+				} else {
+					sepol_constrain->next = sepol_class->constraints;
+					sepol_class->constraints = sepol_constrain;
+				}
+
+				curr_cps = curr_cps->next;
+			}
+
+
+			curr_cmp = curr_cmp->next;
+		}
 	}
 
 	return SEPOL_OK;

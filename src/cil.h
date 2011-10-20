@@ -778,10 +778,8 @@ struct cil_fsuse {
 #define CIL_MLSCONSTRAIN_KEYS CIL_MLS_LEVELS CIL_CONSTRAIN_KEYS
 #define CIL_CONSTRAIN_OPER "== != eq dom domby incomp not and or"
 struct cil_constrain {
-	struct cil_list *class_list_str;
-	struct cil_list *class_list;
-	struct cil_list *perm_list_str;
-	struct cil_list *perm_list;
+	char *classpermset_str;
+	struct cil_classpermset *classpermset;
 	struct cil_list *expr;
 };
 

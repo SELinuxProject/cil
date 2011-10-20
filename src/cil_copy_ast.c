@@ -1838,18 +1838,11 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 
 	cil_constrain_init(&new);
 
-	if (orig->class_list_str != NULL) {
-		rc = cil_copy_list(orig->class_list_str, &new->class_list_str);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	}
-
-	if (orig->perm_list_str != NULL) {
-		rc = cil_copy_list(orig->perm_list_str, &new->perm_list_str);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+	new->classpermset_str = cil_strdup(orig->classpermset_str);
+	cil_classpermset_init(&new->classpermset);
+	rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
 
 	cil_list_init(&new_list);
