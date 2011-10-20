@@ -4328,7 +4328,7 @@ void test_cil_gen_bool_extraname_true_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_t1type(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4345,17 +4345,16 @@ void test_cil_gen_constrain_expr_stack_eq2_t1type(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_t1t1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t1", "t1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "t1", "t1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4372,17 +4371,15 @@ void test_cil_gen_constrain_expr_stack_eq2_t1t1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
 	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_t2type(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t2", "type_t", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "t2", "type_t", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4399,17 +4396,15 @@ void test_cil_gen_constrain_expr_stack_eq2_t2type(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_t2t2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t2", "t2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "t2", "t2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4426,17 +4421,15 @@ void test_cil_gen_constrain_expr_stack_eq2_t2t2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_r1role(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "role_r", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r1", "role_r", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4453,17 +4446,15 @@ void test_cil_gen_constrain_expr_stack_eq2_r1role(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_r1r1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r1", "r1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4480,17 +4471,15 @@ void test_cil_gen_constrain_expr_stack_eq2_r1r1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_r2role(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r2", "role_r", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r2", "role_r", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4507,17 +4496,15 @@ void test_cil_gen_constrain_expr_stack_eq2_r2role(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_r2r2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r2", "r2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r2", "r2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4534,17 +4521,15 @@ void test_cil_gen_constrain_expr_stack_eq2_r2r2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_t1t2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t1", "t2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "t1", "t2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4561,17 +4546,15 @@ void test_cil_gen_constrain_expr_stack_eq2_t1t2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_r1r2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4588,17 +4571,15 @@ void test_cil_gen_constrain_expr_stack_eq_r1r2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_r1r2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4615,17 +4596,15 @@ void test_cil_gen_constrain_expr_stack_eq2_r1r2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_u1u2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "u1", "u2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "u1", "u2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4642,17 +4621,15 @@ void test_cil_gen_constrain_expr_stack_eq2_u1u2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_u1user(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "u1", "user_u", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "u1", "user_u", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4669,17 +4646,15 @@ void test_cil_gen_constrain_expr_stack_eq2_u1user(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_u1u1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "u1", "u1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "u1", "u1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4696,17 +4671,15 @@ void test_cil_gen_constrain_expr_stack_eq2_u1u1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_u2user(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "u2", "user_u", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "u2", "user_u", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4723,17 +4696,15 @@ void test_cil_gen_constrain_expr_stack_eq2_u2user(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_u2u2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "u2", "u2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "u2", "u2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4750,17 +4721,15 @@ void test_cil_gen_constrain_expr_stack_eq2_u2u2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l2h2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4777,17 +4746,15 @@ void test_cil_gen_constrain_expr_stack_eq_l2h2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4804,17 +4771,15 @@ void test_cil_gen_constrain_expr_stack_eq_l2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1l2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4831,17 +4796,15 @@ void test_cil_gen_constrain_expr_stack_eq_l1l2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1h1(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "h1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "h1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4858,17 +4821,15 @@ void test_cil_gen_constrain_expr_stack_eq_l1h1(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1h2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4885,17 +4846,15 @@ void test_cil_gen_constrain_expr_stack_eq_l1h2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_h1l2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "h1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "h1", "l2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4912,17 +4871,15 @@ void test_cil_gen_constrain_expr_stack_eq_h1l2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_h1h2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "h1", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "h1", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4939,17 +4896,15 @@ void test_cil_gen_constrain_expr_stack_eq_h1h2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_h1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "h1", "l1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "h1", "l1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4966,17 +4921,15 @@ void test_cil_gen_constrain_expr_stack_eq_h1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1l1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "l1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "l1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -4993,17 +4946,15 @@ void test_cil_gen_constrain_expr_stack_eq_l1l1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_l1l2_constrain_neg(CuTest *tc) {
-	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "constrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5020,17 +4971,15 @@ void test_cil_gen_constrain_expr_stack_eq2_l1l2_constrain_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_CONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_CONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_l1l2_constrain_neg(CuTest *tc) {
-	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "constrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5047,17 +4996,15 @@ void test_cil_gen_constrain_expr_stack_eq_l1l2_constrain_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_CONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_CONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_leftkeyword_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "h2", "h1", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "h2", "h1", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5074,17 +5021,15 @@ void test_cil_gen_constrain_expr_stack_eq_leftkeyword_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_noexpr1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5101,17 +5046,15 @@ void test_cil_gen_constrain_expr_stack_eq_noexpr1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_expr1inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "(", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "(", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5128,17 +5071,15 @@ void test_cil_gen_constrain_expr_stack_eq_expr1inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_noexpr2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5155,17 +5096,15 @@ void test_cil_gen_constrain_expr_stack_eq_noexpr2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_expr2inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "(", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "(", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5182,17 +5121,15 @@ void test_cil_gen_constrain_expr_stack_eq_expr2inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "foo", "foo", "extra", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "foo", "foo", "extra", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5209,17 +5146,15 @@ void test_cil_gen_constrain_expr_stack_eq_extraexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5236,17 +5171,15 @@ void test_cil_gen_constrain_expr_stack_eq2(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_noexpr1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5263,17 +5196,15 @@ void test_cil_gen_constrain_expr_stack_eq2_noexpr1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_expr1inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "(", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "(", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5290,17 +5221,15 @@ void test_cil_gen_constrain_expr_stack_eq2_expr1inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_noexpr2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5317,17 +5246,15 @@ void test_cil_gen_constrain_expr_stack_eq2_noexpr2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_expr2inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "(", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "(", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5344,17 +5271,15 @@ void test_cil_gen_constrain_expr_stack_eq2_expr2inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_eq2_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "foo", "foo", "extra", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "foo", "foo", "extra", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5371,17 +5296,15 @@ void test_cil_gen_constrain_expr_stack_eq2_extraexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_noteq(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "neq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "neq", "l2", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5398,17 +5321,15 @@ void test_cil_gen_constrain_expr_stack_noteq(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_noteq_noexpr1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "neq", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "neq", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5425,17 +5346,15 @@ void test_cil_gen_constrain_expr_stack_noteq_noexpr1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_noteq_expr1inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "neq", "(", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "neq", "(", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5452,17 +5371,15 @@ void test_cil_gen_constrain_expr_stack_noteq_expr1inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_noteq_noexpr2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "neq", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "neq", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5479,17 +5396,15 @@ void test_cil_gen_constrain_expr_stack_noteq_noexpr2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_noteq_expr2inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "neq", "l1", "(", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "neq", "l1", "(", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5506,17 +5421,15 @@ void test_cil_gen_constrain_expr_stack_noteq_expr2inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_noteq_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "neq", "foo", "foo", "extra", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "neq", "foo", "foo", "extra", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5533,17 +5446,15 @@ void test_cil_gen_constrain_expr_stack_noteq_extraexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_not(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "not", "(", "neq", "l2", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "not", "(", "neq", "l2", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5560,17 +5471,15 @@ void test_cil_gen_constrain_expr_stack_not(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
-	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
+
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_not_noexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "not", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "not", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5587,17 +5496,15 @@ void test_cil_gen_constrain_expr_stack_not_noexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_not_emptyparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "not", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "not", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5614,17 +5521,15 @@ void test_cil_gen_constrain_expr_stack_not_emptyparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_not_extraparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "not", "(", "neq", "l2", "h2", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "not", "(", "neq", "l2", "h2", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5641,17 +5546,16 @@ void test_cil_gen_constrain_expr_stack_not_extraparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_or(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", 
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "or", 
 			"(", "neq", "l1", "l2", ")", "(", "neq", "l1", "h1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5669,17 +5573,15 @@ void test_cil_gen_constrain_expr_stack_or(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_or_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", 
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "or", 
 			"(", "foo", ")", "(", "neq", "l1", "h1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5697,17 +5599,15 @@ void test_cil_gen_constrain_expr_stack_or_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_or_noexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "or", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5724,17 +5624,15 @@ void test_cil_gen_constrain_expr_stack_or_noexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_or_emptyfirstparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "or", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5751,17 +5649,16 @@ void test_cil_gen_constrain_expr_stack_or_emptyfirstparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_or_missingsecondexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", "(", "foo", ")", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "or", "(", "foo", ")", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5778,17 +5675,15 @@ void test_cil_gen_constrain_expr_stack_or_missingsecondexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_or_emptysecondparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", "(", "foo", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "or", "(", "foo", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5805,17 +5700,15 @@ void test_cil_gen_constrain_expr_stack_or_emptysecondparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_or_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "or", "(", "foo", ")", "(", "foo", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "or", "(", "foo", ")", "(", "foo", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5832,17 +5725,15 @@ void test_cil_gen_constrain_expr_stack_or_extraexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_and(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", 
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "and", 
 			"(", "neq", "l1", "l2", ")", "(", "neq", "l1", "h1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5860,17 +5751,15 @@ void test_cil_gen_constrain_expr_stack_and(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_and_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", 
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "and", 
 			"(", "foo", ")", "(", "neq", "l1", "h1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -5888,17 +5777,15 @@ void test_cil_gen_constrain_expr_stack_and_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_and_noexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "and", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5915,17 +5802,15 @@ void test_cil_gen_constrain_expr_stack_and_noexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_and_emptyfirstparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "and", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5942,17 +5827,15 @@ void test_cil_gen_constrain_expr_stack_and_emptyfirstparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_and_missingsecondexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", "(", "foo", ")", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "and", "(", "foo", ")", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5969,17 +5852,15 @@ void test_cil_gen_constrain_expr_stack_and_missingsecondexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_and_emptysecondparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", "(", "foo", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "and", "(", "foo", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -5996,17 +5877,15 @@ void test_cil_gen_constrain_expr_stack_and_emptysecondparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_and_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "and", "(", "foo", ")", "(", "foo", ")", "(", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "and", "(", "foo", ")", "(", "foo", ")", "(", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6023,17 +5902,15 @@ void test_cil_gen_constrain_expr_stack_and_extraexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_dom(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "dom", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "dom", "l2", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6050,17 +5927,15 @@ void test_cil_gen_constrain_expr_stack_dom(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_dom_noexpr1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "dom", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "dom", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6077,17 +5952,15 @@ void test_cil_gen_constrain_expr_stack_dom_noexpr1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_dom_expr1inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "dom", "(", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "dom", "(", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6104,17 +5977,15 @@ void test_cil_gen_constrain_expr_stack_dom_expr1inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_dom_noexpr2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "dom", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "dom", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6131,17 +6002,15 @@ void test_cil_gen_constrain_expr_stack_dom_noexpr2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_dom_expr2inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "dom", "l1", "(", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "dom", "l1", "(", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6158,17 +6027,15 @@ void test_cil_gen_constrain_expr_stack_dom_expr2inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_dom_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "dom", "foo", "foo", "extra", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "dom", "foo", "foo", "extra", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6185,17 +6052,15 @@ void test_cil_gen_constrain_expr_stack_dom_extraexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_domby(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "domby", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "domby", "l2", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6212,17 +6077,15 @@ void test_cil_gen_constrain_expr_stack_domby(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_domby_noexpr1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "domby", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "domby", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6239,17 +6102,15 @@ void test_cil_gen_constrain_expr_stack_domby_noexpr1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_domby_expr1inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "domby", "(", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "domby", "(", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6266,17 +6127,15 @@ void test_cil_gen_constrain_expr_stack_domby_expr1inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_domby_noexpr2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "domby", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "domby", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6293,17 +6152,15 @@ void test_cil_gen_constrain_expr_stack_domby_noexpr2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_domby_expr2inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "domby", "l1", "(", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "domby", "l1", "(", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6320,17 +6177,15 @@ void test_cil_gen_constrain_expr_stack_domby_expr2inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_domby_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "domby", "foo", "foo", "extra", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "domby", "foo", "foo", "extra", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6347,17 +6202,15 @@ void test_cil_gen_constrain_expr_stack_domby_extraexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_incomp(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "incomp", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "incomp", "l2", "h2", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6374,17 +6227,15 @@ void test_cil_gen_constrain_expr_stack_incomp(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_incomp_noexpr1_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "incomp", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "incomp", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6401,17 +6252,15 @@ void test_cil_gen_constrain_expr_stack_incomp_noexpr1_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_incomp_expr1inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "incomp", "(", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "incomp", "(", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6428,17 +6277,15 @@ void test_cil_gen_constrain_expr_stack_incomp_expr1inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_incomp_noexpr2_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "incomp", "l1", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "incomp", "l1", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6455,17 +6302,15 @@ void test_cil_gen_constrain_expr_stack_incomp_noexpr2_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_incomp_expr2inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "incomp", "l1", "(", "h2", ")", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "incomp", "l1", "(", "h2", ")", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6482,17 +6327,15 @@ void test_cil_gen_constrain_expr_stack_incomp_expr2inparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_incomp_extraexpr_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "incomp", "foo", "foo", "extra", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "incomp", "foo", "foo", "extra", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6509,17 +6352,15 @@ void test_cil_gen_constrain_expr_stack_incomp_extraexpr_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_currnull_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6536,17 +6377,15 @@ void test_cil_gen_constrain_expr_stack_currnull_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_stacknull_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6563,17 +6402,15 @@ void test_cil_gen_constrain_expr_stack_stacknull_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, NULL);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, NULL);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_operatorinparens_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "(", "eq", ")", "t1", "type_t", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "(", "eq", ")", "t1", "type_t", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6590,17 +6427,15 @@ void test_cil_gen_constrain_expr_stack_operatorinparens_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_constrain_expr_stack_incorrectcall_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 	
@@ -6617,12 +6452,10 @@ void test_cil_gen_constrain_expr_stack_incorrectcall_neg(CuTest *tc) {
 
 	struct cil_constrain *cons;
 	cil_constrain_init(&cons);
-	cil_list_init(&cons->class_list_str);
-	cil_parse_to_list(parse_current->next->cl_head, cons->class_list_str, CIL_AST_STR);
-	cil_list_init(&cons->perm_list_str);
-	cil_parse_to_list(parse_current->next->next->cl_head, cons->perm_list_str, CIL_AST_STR);
+	cil_classpermset_init(&cons->classpermset);
+	cil_fill_classpermset(parse_current->next->cl_head, cons->classpermset);
 	
-	int rc = cil_gen_expr_stack(parse_current->next->next->next->cl_head->next->next, CIL_MLSCONSTRAIN, &cons->expr);
+	int rc = cil_gen_expr_stack(parse_current->next->next->cl_head->next->next, CIL_MLSCONSTRAIN, &cons->expr);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -10576,7 +10409,7 @@ void test_cil_gen_levelrange_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -10595,7 +10428,7 @@ void test_cil_gen_constrain(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "dne", "l1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "dne", "l1", "l2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -10728,7 +10561,7 @@ void test_cil_gen_constrain_permset_noperm_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_expression_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -10747,7 +10580,7 @@ void test_cil_gen_constrain_expression_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "12", "h2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -10781,7 +10614,7 @@ void test_cil_gen_constrain_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_constrain_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "12", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "12", "h2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -17012,7 +16845,7 @@ void test_cil_build_ast_node_helper_gen_levelrange_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_constrain(CuTest *tc) {
-	char *line[] = {"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+	char *line[] = {"(", "constrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -17048,7 +16881,7 @@ void test_cil_build_ast_node_helper_gen_constrain_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_mlsconstrain(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

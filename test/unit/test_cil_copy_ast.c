@@ -1300,7 +1300,7 @@ void test_cil_copy_boolif(CuTest *tc) {
 }
 
 void test_cil_copy_constrain(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 	
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -1323,7 +1323,7 @@ void test_cil_copy_constrain(CuTest *tc) {
 
 	int rc = cil_copy_constrain(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
-	CuAssertStrEquals(tc, (char*)test_copy->class_list_str->head->data, (char*)((struct cil_constrain *)test_ast_node->data)->class_list_str->head->data);
+	CuAssertStrEquals(tc, ((struct cil_constrain*)test_copy)->classpermset->class_str, ((struct cil_constrain *)test_ast_node->data)->classpermset->class_str);
 }
 /*
 void test_cil_copy_ast(CuTest *tc) {
@@ -2500,7 +2500,7 @@ void test_cil_copy_node_helper_boolif(CuTest *tc) {
 }
 
 void test_cil_copy_node_helper_mlsconstrain(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l1", "l2", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

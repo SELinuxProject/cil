@@ -1461,7 +1461,7 @@ void test_cil_resolve_constrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1484,7 +1484,7 @@ void test_cil_resolve_constrain_class_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "foo", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1508,7 +1508,7 @@ void test_cil_resolve_constrain_perm_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1530,7 +1530,7 @@ void test_cil_resolve_constrain_perm_resolve_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "foo", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "foo", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6255,7 +6255,7 @@ void test_cil_resolve_expr_stack_type(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "type", "t1", ")",
 			"(", "type", "type_t", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "t1", "type_t", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6279,7 +6279,7 @@ void test_cil_resolve_expr_stack_role(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "role", "r1", ")",
 			"(", "role", "role_r", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "role_r", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r1", "role_r", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -6303,7 +6303,7 @@ void test_cil_resolve_expr_stack_user(CuTest *tc) {
 			"(", "class", "dir", "(", "create", "relabelto", ")", ")",
 			"(", "user", "u1", ")",
 			"(", "user", "user_u", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "u1", "user_u", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "u1", "user_u", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -7786,7 +7786,7 @@ void test_cil_disable_children_helper_tunable(CuTest *tc) {
 }
 
 void test_cil_disable_children_helper_unknown(CuTest *tc) {
-	char *line[] = {"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+	char *line[] = {"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8537,7 +8537,7 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "role", "r1", ")",
 			"(", "role", "r2", ")",
-			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8564,7 +8564,7 @@ void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "role", "r1", ")",
 			"(", "role", "r2", ")",
-			"(", "constrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "r1", "r2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8591,7 +8591,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -8618,7 +8618,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
 			"(", "category", "c1", ")",
 			"(", "level", "l2", "(", "s0", "(", "c1", ")", ")", ")",
 			"(", "level", "h2", "(", "s0", "(", "c1", ")", ")", ")",
-			"(", "mlsconstrain", "(", "file", "dir", ")", "(", "create", "relabelto", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
+			"(", "mlsconstrain", "(", "file", "(", "create", "relabelto", ")", ")", "(", "eq", "l2", "h2", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
