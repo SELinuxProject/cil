@@ -84,6 +84,14 @@ void test_cil_gen_class_permsnotinlist_neg(CuTest *);
 void test_cil_gen_class_extrapermlist_neg(CuTest *);
 void test_cil_gen_class_listinlist_neg(CuTest *);
 
+void test_cil_gen_classmap(CuTest *);
+void test_cil_gen_classmap_extra_neg(CuTest *);
+void test_cil_gen_classmap_noname_neg(CuTest *);
+void test_cil_gen_classmap_emptyperms_neg(CuTest *);
+void test_cil_gen_classmap_dbnull_neg(CuTest *tc);
+void test_cil_gen_classmap_currnull_neg(CuTest *tc);
+void test_cil_gen_classmap_astnull_neg(CuTest *tc);
+
 void test_cil_gen_common(CuTest *);
 void test_cil_gen_common_dbnull_neg(CuTest *tc);
 void test_cil_gen_common_currnull_neg(CuTest *tc);
@@ -829,6 +837,7 @@ void test_cil_gen_macro_category(CuTest *tc);
 void test_cil_gen_macro_catset(CuTest *tc);
 void test_cil_gen_macro_level(CuTest *tc);
 void test_cil_gen_macro_class(CuTest *tc);
+void test_cil_gen_macro_classmap(CuTest *tc);
 void test_cil_gen_macro_permset(CuTest *tc);
 void test_cil_gen_macro_duplicate(CuTest *tc);
 void test_cil_gen_macro_duplicate_neg(CuTest *tc);
@@ -899,6 +908,9 @@ void test_cil_build_ast_node_helper_permset_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_class(CuTest *);
 void test_cil_build_ast_node_helper_class_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_classmap(CuTest *);
+void test_cil_build_ast_node_helper_classmap_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_common(CuTest *);
 void test_cil_build_ast_node_helper_common_neg(CuTest *);

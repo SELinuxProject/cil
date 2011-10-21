@@ -693,6 +693,16 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_emptyperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_classmap);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_classmap_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_common);
 	SUITE_ADD_TEST(suite, test_cil_gen_common_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_common_currnull_neg);
@@ -1538,6 +1548,7 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_catset);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_level);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_class);
+	SUITE_ADD_TEST(suite, test_cil_gen_macro_classmap);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_permset);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_duplicate);
 	SUITE_ADD_TEST(suite, test_cil_gen_macro_duplicate_neg);
