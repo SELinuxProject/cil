@@ -1868,25 +1868,24 @@ int cil_resolve_context(struct cil_tree_node *current, struct cil_context *conte
 	struct cil_tree_node *lvlrange_node = NULL;
 
 	int rc = SEPOL_ERR;
-	char *error = NULL;
 
 	rc = cil_resolve_name(current, context->user_str, CIL_SYM_USERS, extra_args, &user_node);
 	if (rc != SEPOL_OK) {
-		error = context->user_str;
+		cil_log(CIL_ERR, "Unable to resolve name: %s\n", context->user_str);
 		goto exit;
 	}
 	context->user = (struct cil_user*)user_node->data;
 
 	rc = cil_resolve_name(current, context->role_str, CIL_SYM_ROLES, extra_args, &role_node);
 	if (rc != SEPOL_OK) {
-		error = context->role_str;
+		cil_log(CIL_ERR, "Unable to resolve name: %s\n", context->role_str);
 		goto exit;
 	}
 	context->role = (struct cil_role*)role_node->data;
 
 	rc = cil_resolve_name(current, context->type_str, CIL_SYM_TYPES, extra_args, &type_node);
 	if (rc != SEPOL_OK) {
-		error = context->type_str;
+		cil_log(CIL_ERR, "Unable to resolve name: %s\n", context->type_str);
 		goto exit;
 	}
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
@@ -1899,7 +1898,7 @@ int cil_resolve_context(struct cil_tree_node *current, struct cil_context *conte
 	if (context->range_str != NULL) {
 		rc = cil_resolve_name(current, context->range_str, CIL_SYM_LEVELRANGES, extra_args, &lvlrange_node);
 		if (rc != SEPOL_OK) {
-			error = context->range_str;
+			cil_log(CIL_ERR, "Unable to resolve name: %s\n", context->range_str);
 			goto exit;
 		}
 		context->range = (struct cil_levelrange*)lvlrange_node->data;
@@ -2944,19 +2943,13 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 {
 	int rc = SEPOL_OK;
 	struct cil_args_resolve *args = extra_args;
-	struct cil_db *db = NULL;
-	struct cil_call *call = NULL;
 	enum cil_pass pass = 0;
 
 	if (node == NULL || args == NULL) {
 		goto exit;
 	}
 
-	db = args->db;
 	pass = args->pass;
-	if (args->callstack != NULL) {
-		call = args->callstack->data;
-	}
 
 	switch (pass) {
 	case CIL_PASS_TIF:
@@ -3177,7 +3170,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 {
 	int rc = SEPOL_ERR;
 	struct cil_args_resolve *args = extra_args;
-	struct cil_db *db = NULL;
 	enum cil_pass pass = 0;
 	struct cil_tree_node *optstack = NULL;
 	uint32_t *changed = NULL;
@@ -3187,7 +3179,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	}
 
 	if (args != NULL) {
-		db = args->db;
 		changed = args->changed;
 		optstack = args->optstack;
 		pass = args->pass;
