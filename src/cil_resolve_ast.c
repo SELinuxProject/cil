@@ -2378,7 +2378,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 		struct cil_tree_node *pc = NULL;
 
 		if (new_call->args_tree == NULL) {
-			cil_log(CIL_ERR, "Missing arguments (line: %d)\n", current->line);
+			cil_log(CIL_ERR, "Missing arguments (%s, line: %d)\n", current->path, current->line);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -2389,7 +2389,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 
 		while (item != NULL) {
 			if (item != NULL && pc == NULL) {
-				cil_log(CIL_ERR, "Missing arguments (line: %d)\n", current->line);
+				cil_log(CIL_ERR, "Missing arguments (%s, line: %d)\n", current->path, current->line);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -2580,12 +2580,12 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 		}
 
 		if (pc != NULL) {
-			cil_log(CIL_ERR, "Unexpected arguments (line: %d)\n", current->line);
+			cil_log(CIL_ERR, "Unexpected arguments (%s, line: %d)\n", current->path, current->line);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 	} else if (new_call->args_tree != NULL) {
-		cil_log(CIL_ERR, "Rnexpected arguments (line: %d)\n", current->line);
+		cil_log(CIL_ERR, "Rnexpected arguments (%s, line: %d)\n", current->path, current->line);
 		rc = SEPOL_ERR;
 		goto exit;
 	}

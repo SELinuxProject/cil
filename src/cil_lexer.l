@@ -33,7 +33,7 @@
 	#include "cil_lexer.h"
 	#include "cil_log.h"
 	#include "cil_mem.h"
-	char *value;
+	char *value =  NULL;
 	int line = 1;
 %}
 
@@ -68,6 +68,8 @@ int cil_lexer_setup(char *buffer, uint32_t size)
 		cil_log(CIL_INFO, "Lexer failed to setup buffer\n");
 		return SEPOL_ERR;
 	}
+
+	line = 1;
 	
 	return SEPOL_OK;
 }

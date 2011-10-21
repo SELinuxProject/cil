@@ -5875,7 +5875,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto exit;
 		}
 	} else {
-		cil_log(CIL_ERR, "Error: Unknown keyword %s\n", (char*)parse_current->data);
+		cil_log(CIL_ERR, "Error: Unknown keyword %s (%s, line: %d)\n", (char*)parse_current->data, parse_current->path, parse_current->line);
 		rc = SEPOL_ERR;
 		goto exit;
 	}

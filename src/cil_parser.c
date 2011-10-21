@@ -80,13 +80,13 @@ int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_
 		} else if (tok.type == CPAREN) {
 			paren_count--;
 			if (paren_count < 0) {
-				cil_log(CIL_ERR, "Syntax error: Close parenthesis without matching open: line %d\n", tok.line);
+				cil_log(CIL_ERR, "Syntax error: Close parenthesis without matching open (%s, line %d)\n", path, tok.line);
 				return SEPOL_ERR;
 			}
 			current = current->parent;
 		} else if ((tok.type == SYMBOL) || (tok.type == QSTRING)) {
 			if (paren_count == 0) {
-				cil_log(CIL_ERR, "Syntax error: Symbol not inside parenthesis: line %d\n", tok.line);
+				cil_log(CIL_ERR, "Syntax error: Symbol not inside parenthesis (%s, line %d)\n", path, tok.line);
 				return SEPOL_ERR;
 			}
 			cil_tree_node_init(&item);
@@ -107,7 +107,7 @@ int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_
 			}
 			current->cl_tail = item;
 		} else if ((tok.type == 0) && (paren_count > 0)) {
-			cil_log(CIL_ERR, "Syntax error: Open parenthesis without matching close\n");
+			cil_log(CIL_ERR, "Syntax error: Open parenthesis without matching close (%s)\n", path);
 			return SEPOL_ERR;
 		}	
 			
