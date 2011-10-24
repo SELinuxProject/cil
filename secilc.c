@@ -182,12 +182,22 @@ int main(int argc, char *argv[])
 
 	sepol_policydb_create(&pdb);
 	pdb->p.policy_type = POLICY_KERN;
-	pdb->p.mls = mls;
-	pdb->p.target_platform = target;
-	
+
 	rc = sepol_policydb_set_vers(pdb, policyvers);
 	if (rc != 0) {
 		fprintf(stderr, "Failed to set policy version: %d\n", rc);
+		goto exit;
+	}
+
+	rc = sepol_policydb_set_mls(pdb, mls);
+	if (rc != 0) {
+		fprintf(stderr, "Failed to set mls: %d\n", rc);
+		goto exit;
+	}
+
+	rc = sepol_policydb_set_target_platform(pdb, target);
+	if (rc != 0) {
+		fprintf(stderr, "Failed to set target platform: %d\n", rc);
 		goto exit;
 	}
 
