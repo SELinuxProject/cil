@@ -514,15 +514,22 @@ void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_cont
 	cil_levelrange_to_policy(file_arr, file_index, lvlrange);
 }
 
-void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_constrain *cons)
+void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_constrain *cons, enum cil_flavor flavor)
 {
 	struct cil_list_item *curr_cmp = NULL;
 	struct cil_list_item *curr_cps = NULL;
 	char *obj_str = NULL;
 	struct cil_list_item *perm = NULL;
+	char *statement = NULL;
+
+	if (flavor == CIL_CONSTRAIN) {
+		statement = CIL_KEY_CONSTRAIN;
+	} else if (flavor == CIL_MLSCONSTRAIN) {
+		statement = CIL_KEY_MLSCONSTRAIN;
+	}
 
 	if (cons->classpermset->flavor == CIL_CLASS) {
-		fprintf(file_arr[CONSTRAINS], "constrain ");
+		fprintf(file_arr[CONSTRAINS], "%s", statement);
 		fprintf(file_arr[CONSTRAINS], " %s {", ((struct cil_class*)cons->classpermset->class)->datum.name);
 
 		perm = cons->classpermset->perms->head;
@@ -540,7 +547,7 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 		while (curr_cmp != NULL) {
 			curr_cps = ((struct cil_classmap_perm*)curr_cmp->data)->classperms->head;
 			while(curr_cps != NULL) {
-				fprintf(file_arr[CONSTRAINS], "constrain ");
+				fprintf(file_arr[CONSTRAINS], "%s", statement);
 				obj_str = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
 				fprintf(file_arr[CONSTRAINS], " %s {", obj_str);
 
@@ -1016,12 +1023,27 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 			fprintf(file_arr[LEVELS], ";\n");
 			break;
 	case CIL_CONSTRAIN:
-		cil_constrain_to_policy(file_arr, CONSTRAINS, (struct cil_constrain*)current->data);
+		cil_constrain_to_policy(file_arr, CONSTRAINS, (struct cil_constrain*)current->data, flavor);
 		break;
 	case CIL_MLSCONSTRAIN:
-		fprintf(file_arr[CONSTRAINS], "mlsconstrain ");
-		cil_constrain_to_policy(file_arr, CONSTRAINS, (struct cil_constrain*)current->data);
+		cil_constrain_to_policy(file_arr, CONSTRAINS, (struct cil_constrain*)current->data, flavor);
 		break;
+	case CIL_VALIDATETRANS: {
+		struct cil_validatetrans *vt = current->data;
+		fprintf(file_arr[CONSTRAINS], "validatetrans");
+		fprintf(file_arr[CONSTRAINS], " %s ", ((struct cil_class*)vt->class)->datum.name);
+		cil_expr_stack_to_policy(file_arr, CONSTRAINS, vt->expr);
+		fprintf(file_arr[CONSTRAINS], ";\n");
+		break;
+	}
+	case CIL_MLSVALIDATETRANS: {
+		struct cil_validatetrans *vt = current->data;
+		fprintf(file_arr[CONSTRAINS], "mlsvalidatetrans");
+		fprintf(file_arr[CONSTRAINS], " %s " , ((struct cil_class*)vt->class)->datum.name);
+		cil_expr_stack_to_policy(file_arr, CONSTRAINS, vt->expr);
+		fprintf(file_arr[CONSTRAINS], ";\n");
+		break;
+	}
 	case CIL_SID:
 		fprintf(file_arr[ISIDS], "sid %s\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;

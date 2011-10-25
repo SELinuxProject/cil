@@ -49,7 +49,7 @@ ifneq (,$(filter i386,$(ARCH)))
 endif
 ifneq (,$(filter x86_64,$(ARCH)))
 	override LDFLAGS += -I/usr/lib64
-	override LIBSEPOL_STATIC = /usr/lib64/libsepol.a
+	#override LIBSEPOL_STATIC = /usr/lib64/libsepol.a
 endif
 
 all: $(SECILC)

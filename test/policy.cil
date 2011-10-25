@@ -188,11 +188,15 @@
 	(constrain (file (open)) (domby r1 r2))
 	(constrain (file (open)) (incomp r1 r2))
 
+	(validatetrans file (eq t1 exec_t))
+
 	(mlsconstrain (file (open)) (not (or (and (eq l1 l2) (eq u1 u2)) (eq r1 r2))))
 	(mlsconstrain (file (open)) (or (and (eq l1 l2) (eq u1 u2)) (neq r1 r2)))
 	(mlsconstrain (file (open)) (dom h1 l2))
 	(mlsconstrain (file (open)) (domby l1 h2))
 	(mlsconstrain (file (open)) (incomp l1 l2))
+
+	(mlsvalidatetrans file (domby l1 h2))
 )
 
 (macro all ((type x))

@@ -1594,10 +1594,16 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				case CIL_CONS_U2:
 					curr_expr->attr = CEXPR_USER | CEXPR_TARGET;
 					break;
+				case CIL_CONS_U3:
+					curr_expr->attr = CEXPR_USER | CEXPR_TARGET;
+					break;
 				case CIL_CONS_R1:
 					curr_expr->attr = CEXPR_ROLE;
 					break;
 				case CIL_CONS_R2:
+					curr_expr->attr = CEXPR_ROLE | CEXPR_TARGET;
+					break;
+				case CIL_CONS_R3:
 					curr_expr->attr = CEXPR_ROLE | CEXPR_TARGET;
 					break;
 				case CIL_CONS_T1:
@@ -1605,6 +1611,9 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 					break;
 				case CIL_CONS_T2:
 					curr_expr->attr = CEXPR_TYPE | CEXPR_TARGET;
+					break;
+				case CIL_CONS_T3:
+					curr_expr->attr = CEXPR_TYPE | CEXPR_XTARGET;
 					break;
 				case CIL_CONS_L1:
 					if (rnode->flavor == CIL_CONS_L2) {
@@ -1792,6 +1801,48 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 
 exit:
 	free(sepol_constrain);
+	return rc;
+}
+
+int cil_validatetrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_class *class = NULL;
+	struct cil_validatetrans *cil_validatetrans = node->data;
+	struct cil_list *expr = cil_validatetrans->expr;
+	class_datum_t *sepol_class = NULL;
+	constraint_node_t *sepol_validatetrans = NULL;
+	constraint_expr_t *sepol_expr = NULL;
+
+	class = cil_validatetrans->class;
+	key = class->datum.name;
+	sepol_class = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_class == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	sepol_validatetrans = cil_malloc(sizeof(*sepol_validatetrans));
+	memset(sepol_validatetrans, 0, sizeof(constraint_node_t));
+
+	rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	sepol_validatetrans->expr = sepol_expr;
+
+	if (sepol_class->validatetrans == NULL) {
+		sepol_class->validatetrans = sepol_validatetrans;
+	} else {
+		sepol_validatetrans->next = sepol_class->validatetrans;
+		sepol_class->validatetrans = sepol_validatetrans;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	free(sepol_validatetrans);
 	return rc;
 }
 
@@ -2599,6 +2650,10 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 		case CIL_CONSTRAIN:
 		case CIL_MLSCONSTRAIN:
 			rc = cil_constrain_to_policydb(pdb, node);
+			break;
+		case CIL_VALIDATETRANS:
+		case CIL_MLSVALIDATETRANS:
+			rc = cil_validatetrans_to_policydb(pdb, node);
 			break;
 		case CIL_SID:
 			rc = cil_sid_to_policydb(pdb, node);

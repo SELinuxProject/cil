@@ -1157,14 +1157,40 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_CONSTRAIN: {
 				struct cil_constrain *cons = node->data;
-				cil_log(CIL_INFO, "CONSTRAIN: \n\t(");
+				cil_log(CIL_INFO, "CONSTRAIN: (");
 				cil_tree_print_constrain(cons);
 				return;
 			}
 			case CIL_MLSCONSTRAIN: {
 				struct cil_constrain *cons = node->data;
-				cil_log(CIL_INFO, "MLSCONSTRAIN: \n\t(");
+				cil_log(CIL_INFO, "MLSCONSTRAIN: (");
 				cil_tree_print_constrain(cons);
+				return;
+			}
+			case CIL_VALIDATETRANS:
+			case CIL_MLSVALIDATETRANS: {
+				struct cil_validatetrans *vt = node->data;
+				struct cil_list_item *expr_curr = NULL;
+
+				cil_log(CIL_INFO, "VALIDATETRANS: class: ");
+				if (vt->class != NULL) {
+					cil_log(CIL_INFO, "%s ", vt->class->datum.name);
+				} else if (vt->class_str != NULL) {
+					cil_log(CIL_INFO, "%s ", vt->class_str);
+				}
+
+				expr_curr = vt->expr->head;
+				while (expr_curr != NULL) {
+					struct cil_conditional *cond = expr_curr->data;
+					if (cond->data != NULL) {
+						cil_log(CIL_INFO, "%s:%i ", ((struct cil_symtab_datum *)cond->data)->name, cond->flavor);
+					} else {
+						cil_log(CIL_INFO, "-%s:%i ", cond->str, cond->flavor);
+					}
+					expr_curr = expr_curr->next;
+				}
+				cil_log(CIL_INFO, ")\n");
+				cil_log(CIL_INFO, "\n");
 				return;
 			}
 			case CIL_CONTEXT: {

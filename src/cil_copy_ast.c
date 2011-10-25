@@ -1841,14 +1841,48 @@ exit:
 	return rc;
 }
 
+int cil_copy_expr(struct cil_db *db, struct cil_list *orig, struct cil_list **new)
+{
+	struct cil_list_item *curr_old = NULL;
+	struct cil_list_item *curr_new = NULL;
+	struct cil_conditional *cond_new = NULL;
+	int rc = SEPOL_ERR;
+
+	if (orig == NULL) {
+		return SEPOL_OK;
+	}
+
+	curr_old = orig->head;
+
+	cil_list_init(new);
+
+	while (curr_old != NULL) {
+		cil_list_item_init(&curr_new);
+
+		cil_copy_conditional(db, curr_old->data, ((void**)&cond_new), NULL);
+		curr_new->data = cond_new;
+		curr_new->flavor = curr_old->flavor;
+
+		rc = cil_list_append_item(*new, curr_new);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+
+		curr_old = curr_old->next;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	cil_list_destroy(new, 1);
+	return rc;
+}
+
 int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_constrain *orig = data;
 	struct cil_constrain *new = NULL;
-	struct cil_list_item *curr_old = NULL;
 	struct cil_list *new_list = NULL;
-	struct cil_list_item *curr_new = NULL;
-	struct cil_conditional *cond_new = NULL;
 	int rc = SEPOL_ERR;
 
 	cil_constrain_init(&new);
@@ -1857,26 +1891,16 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 	cil_classpermset_init(&new->classpermset);
 	rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
 	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed to copy classpermset\n");
 		goto exit;
 	}
 
-	cil_list_init(&new_list);
-	curr_old = orig->expr->head;
-
-	while (curr_old != NULL) {
-		cil_list_item_init(&curr_new);
-
-		cil_copy_conditional(db, curr_old, ((void**)&cond_new), NULL);
-		curr_new->data = cond_new;
-		curr_new->flavor = curr_old->flavor;
-
-		rc = cil_list_append_item(new_list, curr_new);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		curr_old = curr_old->next;
+	rc = cil_copy_expr(db, orig->expr, &new_list);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed to copy expression stack\n");
+		goto exit;
 	}
+
 	new->expr = new_list;
 
 	*copy = new;
@@ -1885,6 +1909,33 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 
 exit:
 	cil_destroy_constrain(new);
+	return rc;
+}
+
+int cil_copy_validatetrans(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_validatetrans *orig = data;
+	struct cil_validatetrans *new = NULL;
+	struct cil_list *new_list = NULL;
+	int rc = SEPOL_ERR;
+
+	cil_validatetrans_init(&new);
+
+	new->class_str = cil_strdup(orig->class_str);
+
+	rc = cil_copy_expr(db, orig->expr, &new_list);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	new->expr = new_list;
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	cil_destroy_validatetrans(new);
 	return rc;
 }
 
@@ -2313,8 +2364,13 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_FSUSE:
 		copy_func = &cil_copy_fsuse;
 		break;
+	case CIL_CONSTRAIN:
 	case CIL_MLSCONSTRAIN:
 		copy_func = &cil_copy_constrain;
+		break;
+	case CIL_VALIDATETRANS:
+	case CIL_MLSVALIDATETRANS:
+		copy_func = &cil_copy_validatetrans;
 		break;
 	case CIL_CALL:
 		copy_func = &cil_copy_call;

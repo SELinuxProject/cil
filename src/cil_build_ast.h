@@ -157,6 +157,8 @@ void cil_destroy_levelrange(struct cil_levelrange *lvlrange);
 void cil_destroy_constrain_node(struct cil_tree_node *cons_node);
 int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_constrain(struct cil_constrain *cons);
+int cil_gen_validatetrans(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
+void cil_destroy_validatetrans(struct cil_validatetrans *validtrans);
 int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context);
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_context(struct cil_context *context);

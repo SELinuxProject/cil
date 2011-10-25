@@ -187,7 +187,10 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 	    strcmp(lstr, CIL_KEY_CONS_R1) && strcmp(lstr, CIL_KEY_CONS_R2) &&
 	    strcmp(lstr, CIL_KEY_CONS_U1) && strcmp(lstr, CIL_KEY_CONS_U2) &&
 	    strcmp(lstr, CIL_KEY_CONS_L1) && strcmp(lstr, CIL_KEY_CONS_L2) &&
-	    strcmp(lstr, CIL_KEY_CONS_H1)) {
+	    strcmp(lstr, CIL_KEY_CONS_H1) &&
+	    ((flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS) &&
+	    strcmp(lstr, CIL_KEY_CONS_T3) && strcmp(lstr, CIL_KEY_CONS_R3) &&
+	    strcmp(lstr, CIL_KEY_CONS_U3))) {
 		cil_log(CIL_ERR, "Left hand side must be valid keyword\n");
 		rc = SEPOL_ERR;
 		goto exit;
@@ -197,7 +200,10 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 	    !strcmp(rstr, CIL_KEY_CONS_R1) || !strcmp(rstr, CIL_KEY_CONS_R2) ||
 	    !strcmp(rstr, CIL_KEY_CONS_U1) || !strcmp(rstr, CIL_KEY_CONS_U2) ||
 	    !strcmp(rstr, CIL_KEY_CONS_L1) || !strcmp(rstr, CIL_KEY_CONS_L2) ||
-	    !strcmp(rstr, CIL_KEY_CONS_H1) || !strcmp(rstr, CIL_KEY_CONS_H2)) {
+	    !strcmp(rstr, CIL_KEY_CONS_H1) || !strcmp(rstr, CIL_KEY_CONS_H2) ||
+	    ((flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS) &&
+	    (!strcmp(rstr, CIL_KEY_CONS_T3) || !strcmp(rstr, CIL_KEY_CONS_R3) ||
+	    !strcmp(rstr, CIL_KEY_CONS_U3)))) {
 		riskeyword = 1;
 	}
 
@@ -224,6 +230,21 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 		lcond->flavor = CIL_CONS_T2;
 		if (riskeyword) {
 			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		rcond->flavor = CIL_TYPE;
+
+	/* t3 op something */
+	} else if (!strcmp(lstr, CIL_KEY_CONS_T3) &&
+		  (flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS)) {
+		lcond->flavor = CIL_CONS_T3;
+		if (riskeyword) {
+			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression", rstr);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -265,6 +286,21 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 			goto exit;
 		}
 
+	/* r3 op something */
+	} else if (!strcmp(lstr, CIL_KEY_CONS_R3) &&
+		  (flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS)) {
+		lcond->flavor = CIL_CONS_R3;
+		if (riskeyword) {
+			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression", rstr);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		rcond->flavor = CIL_ROLE;
+
 	/* u1 op something */
 	} else if (!strcmp(lstr, CIL_KEY_CONS_U1)) {
 		lcond->flavor = CIL_CONS_U1;
@@ -297,8 +333,23 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 			goto exit;
 		}
 
+	/* u3 op something */
+	} else if (!strcmp(lstr, CIL_KEY_CONS_U3) &&
+		  (flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS)) {
+		lcond->flavor = CIL_CONS_U3;
+		if (riskeyword) {
+			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression", rstr);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		rcond->flavor = CIL_USER;
+
 	/* mls specific levels */
-	} else if (flavor == CIL_MLSCONSTRAIN) {
+	} else if (flavor == CIL_MLSCONSTRAIN || flavor == CIL_MLSVALIDATETRANS) {
 
 		/* l1 op something */
 		if (!strcmp(lstr, CIL_KEY_CONS_L1)) {
@@ -372,9 +423,9 @@ int __cil_verify_expr_oper_flavor(const char *key, struct cil_conditional *cond,
 		cond->flavor = CIL_EQ;
 	} else if (!strcmp(key, CIL_KEY_NEQ)) {
 		cond->flavor = CIL_NEQ;
-	} else if (flavor != CIL_CONSTRAIN && flavor != CIL_MLSCONSTRAIN && !strcmp(key, CIL_KEY_XOR)) {
+	} else if (flavor != CIL_CONSTRAIN && flavor != CIL_MLSCONSTRAIN && flavor != CIL_VALIDATETRANS && flavor != CIL_MLSVALIDATETRANS && !strcmp(key, CIL_KEY_XOR)) {
 		cond->flavor = CIL_XOR;
-	} else if (flavor == CIL_CONSTRAIN || flavor == CIL_MLSCONSTRAIN) {
+	} else if (flavor == CIL_CONSTRAIN || flavor == CIL_MLSCONSTRAIN || flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS) {
 		if (!strcmp(key, CIL_KEY_CONS_DOM)) {
 			cond->flavor = CIL_CONS_DOM;
 		} else if (!strcmp(key, CIL_KEY_CONS_DOMBY)) {
@@ -405,7 +456,7 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor
 {
 	int rc = SEPOL_ERR;
 
-	if (nflavor == CIL_CONSTRAIN || nflavor == CIL_MLSCONSTRAIN) {
+	if (nflavor == CIL_CONSTRAIN || nflavor == CIL_MLSCONSTRAIN || nflavor == CIL_VALIDATETRANS || nflavor == CIL_MLSVALIDATETRANS) {
 		if (eflavor == CIL_NOT) {
 			enum cil_syntax syntax[] = {
 				SYM_STRING,

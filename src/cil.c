@@ -256,6 +256,10 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_MLSCONSTRAIN:
 		cil_destroy_constrain(*data);
 		break;
+	case CIL_VALIDATETRANS:
+	case CIL_MLSVALIDATETRANS:
+		cil_destroy_validatetrans(*data);
+		break;
 	case CIL_ROLETYPE:
 		cil_destroy_roletype(*data);
 		break;
@@ -1406,6 +1410,15 @@ void cil_constrain_init(struct cil_constrain **constrain)
 	(*constrain)->classpermset_str = NULL;
 	(*constrain)->classpermset = NULL;
 	(*constrain)->expr = NULL;
+}
+
+void cil_validatetrans_init(struct cil_validatetrans **validtrans)
+{
+	*validtrans = cil_malloc(sizeof(**validtrans));
+
+	(*validtrans)->class_str = NULL;
+	(*validtrans)->class = NULL;
+	(*validtrans)->expr = NULL;
 }
 
 void cil_ipaddr_init(struct cil_ipaddr **ipaddr)

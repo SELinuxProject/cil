@@ -68,6 +68,7 @@ int cil_resolve_senscat(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_level(struct cil_tree_node *current, struct cil_level *level, void *extra_args); 
 int cil_resolve_levelrange(struct cil_tree_node *current, struct cil_levelrange *levelrange, void *extra_args); 
 int cil_resolve_constrain(struct cil_tree_node *current, void *extra_args);
+int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_context(struct cil_tree_node *current, struct cil_context *context, void *extra_args);
 int cil_resolve_filecon(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_portcon(struct cil_tree_node *current, void *extra_args);

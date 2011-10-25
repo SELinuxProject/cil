@@ -2271,7 +2271,7 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 	}
 
 	if (cond->flavor != CIL_AND && cond->flavor != CIL_OR && cond->flavor != CIL_NOT &&
-		(flavor == CIL_MLSCONSTRAIN  || flavor == CIL_CONSTRAIN)) {
+		(flavor == CIL_MLSCONSTRAIN  || flavor == CIL_CONSTRAIN || flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS)) {
 		rc = __cil_verify_constrain_expr(node, flavor, cond, stack);
 		if (rc != SEPOL_OK) {
 			goto exit;
@@ -2308,6 +2308,13 @@ exit:
 	return rc;
 }
 
+int __cil_gen_expr_stack_last_helper(__attribute__((unused)) struct cil_tree_node *node, void *extra_args)
+{
+	struct cil_args_stack *args = extra_args;
+	args->depth--;
+	return SEPOL_OK;
+}
+
 int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **stack)
 {
 	int rc = SEPOL_ERR;
@@ -2323,7 +2330,8 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 		struct cil_conditional *cond = NULL;
 		struct cil_list_item *stack_item = NULL;
 		if (current->data == NULL || flavor == CIL_CONSTRAIN 
-					  || flavor == CIL_MLSCONSTRAIN) {
+		    || flavor == CIL_VALIDATETRANS || flavor == CIL_MLSCONSTRAIN
+		    || flavor == CIL_MLSVALIDATETRANS) {
 			cil_log(CIL_ERR, "Invalid expression (%s, line: %d)\n", current->path, current->line);
 			rc = SEPOL_ERR;
 			goto exit;
@@ -2340,8 +2348,9 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 		extra_args.flavor = flavor;
 		extra_args.depth = 0;
 		extra_args.nbools = 0;
-		rc = cil_tree_walk(current, __cil_gen_expr_stack_helper, NULL, NULL, &extra_args);
+		rc = cil_tree_walk(current, __cil_gen_expr_stack_helper, NULL, __cil_gen_expr_stack_last_helper, &extra_args);
 		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Error (%s, line: %d)\n", current->path, current->line);
 			goto exit;
 		}
 	}
@@ -3852,7 +3861,7 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 		free(cons->classpermset_str);
 	}
 
-	if (cons->classpermset != NULL) {
+	if (cons->classpermset != NULL && cons->classpermset_str == NULL) {
 		cil_destroy_classpermset(cons->classpermset);
 	}
 
@@ -3861,6 +3870,65 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 	}
 
 	free(cons);
+}
+
+int cil_gen_validatetrans(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_validatetrans *validtrans = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Invalid validatetrans declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
+		goto exit;
+	}
+
+	cil_validatetrans_init(&validtrans);
+
+	validtrans->class_str = cil_strdup(parse_current->next->data);
+
+	rc = cil_gen_expr_stack(parse_current->next->next, flavor, &validtrans->expr);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to build validatetrans expression tree\n");
+		goto exit;
+	}
+
+	ast_node->data = validtrans;
+	ast_node->flavor = flavor;
+
+	return SEPOL_OK;
+
+exit:
+	if (validtrans != NULL) {
+		cil_destroy_validatetrans(validtrans);
+	}
+	return rc;
+
+
+}
+
+void cil_destroy_validatetrans(struct cil_validatetrans *validtrans)
+{
+	if (validtrans == NULL) {
+		return;
+	}
+
+	free(validtrans->class_str);
+	cil_destroy_class(validtrans->class);
+	cil_list_destroy(&validtrans->expr, CIL_TRUE);
+
+	free(validtrans);
 }
 
 /* Fills in context starting from user */
@@ -5934,6 +6002,20 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_constrain(db, parse_current, ast_node, CIL_MLSCONSTRAIN);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "cil_gen_constrain failed, rc: %d\n", rc);
+			goto exit;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_VALIDATETRANS)) {
+		rc = cil_gen_validatetrans(db, parse_current, ast_node, CIL_VALIDATETRANS);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_validatetrans failed, rc: %d\n");
+			goto exit;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_MLSVALIDATETRANS)) {
+		rc = cil_gen_validatetrans(db, parse_current, ast_node, CIL_MLSVALIDATETRANS);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_validatetrans failed, rc: %d\n");
 			goto exit;
 		}
 		*finished = CIL_TREE_SKIP_NEXT;

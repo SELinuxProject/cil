@@ -96,7 +96,9 @@ int cil_copy_iomemcon(struct cil_db *db, void *data, void **copy, symtab_t *symt
 int cil_copy_ioportcon(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_pcidevicecon(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_fsuse(struct cil_db *db, void *data, void **copy, symtab_t *symtab); 
+int cil_copy_exrp(struct cil_db *db, struct cil_list *orig, struct cil_list **new);
 int cil_copy_constrain(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_validatetrans(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_call(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_optional(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_fill_ipaddr(struct cil_ipaddr *orig, struct cil_ipaddr *new);
