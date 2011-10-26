@@ -489,8 +489,11 @@ void cil_level_to_policy(FILE **file_arr, uint32_t file_index, struct cil_level 
 {
 	char *sens_str = level->sens->datum.name;
 
-	fprintf(file_arr[file_index], "%s:", sens_str);
-	cil_catset_to_policy(file_arr, file_index, level->catset);
+	fprintf(file_arr[file_index], "%s", sens_str);
+	if (level->catset != NULL) {
+		fprintf(file_arr[file_index], ":");
+		cil_catset_to_policy(file_arr, file_index, level->catset);
+	}
 }
 
 void cil_levelrange_to_policy(FILE **file_arr, uint32_t file_index, struct cil_levelrange *lvlrange)

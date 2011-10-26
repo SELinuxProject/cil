@@ -871,6 +871,15 @@ int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, stru
 	struct cil_cat *range_high = NULL;
 	int found = CIL_FALSE;
 
+	if (low == NULL || (low == NULL && high == NULL)) {
+		return SEPOL_OK;
+	}
+
+	if (high == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+	
 	for (low_curr = low->cat_list->head; low_curr != NULL; low_curr = low_curr->next) {
 		switch (low_curr->flavor) {
 		case CIL_CAT:
