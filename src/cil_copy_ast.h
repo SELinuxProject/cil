@@ -64,7 +64,7 @@ int cil_copy_type(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_typebounds(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_typepermissive(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_typeattribute(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_typeattributetypes(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_typeattributeset(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_typealias(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_filetransition(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_rangetransition(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
