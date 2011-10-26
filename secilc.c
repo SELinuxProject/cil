@@ -154,9 +154,11 @@ int main(int argc, char *argv[])
 		file = fopen(argv[i], "r");
 		if (!file) {
 			cil_log(CIL_ERR, "Could not open file: %s\n", argv[i]);
+			rc = SEPOL_ERR;
 			goto exit;
 		}
-		if (stat(argv[i], &filedata) == -1) {
+		rc = stat(argv[i], &filedata);
+		if (rc == -1) {
 			cil_log(CIL_ERR, "Could not stat file: %s\n", argv[i]);
 			goto exit;
 		}
@@ -173,7 +175,8 @@ int main(int argc, char *argv[])
 		file = NULL;
 
 		cil_log(CIL_INFO, "Parsing %s...\n", argv[i]);
-		if (cil_parser(argv[i], buffer, file_size + 2, &parse_tree)) {
+		rc = cil_parser(argv[i], buffer, file_size + 2, &parse_tree);
+		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to parse %s, exiting\n", argv[i]);
 			goto exit;
 		}
@@ -190,7 +193,8 @@ int main(int argc, char *argv[])
 	db->mls = mls;
 
 	cil_log(CIL_INFO, "Building AST from Parse Tree...\n");
-	if (cil_build_ast(db, parse_tree->root, db->ast->root)) {
+	rc = cil_build_ast(db, parse_tree->root, db->ast->root);
+	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to build ast, exiting\n");
 		goto exit;
 	}
@@ -203,7 +207,8 @@ int main(int argc, char *argv[])
 	cil_tree_destroy(&parse_tree);
 
 	cil_log(CIL_INFO, "Resolving AST...\n");
-	if (cil_resolve_ast(db, db->ast->root)) {
+	rc = cil_resolve_ast(db, db->ast->root);
+	if (rc != SEPOL_OK) {
 		cil_log(CIL_INFO, "Failed to resolve ast, exiting\n");
 		goto exit;
 	}
@@ -213,19 +218,22 @@ int main(int argc, char *argv[])
 #endif
 
 	cil_log(CIL_INFO, "Destroying AST Symtabs...\n");
-	if (cil_destroy_ast_symtabs(db->ast->root)) {
+	rc = cil_destroy_ast_symtabs(db->ast->root);
+	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to destroy ast symtabs, exiting\n");
 		goto exit;
 	}
 
 	cil_log(CIL_INFO, "Qualifying Names...\n");
-	if (cil_fqn_qualify(db->ast->root)) {
+	rc = cil_fqn_qualify(db->ast->root);
+	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to qualify names, exiting\n");
 		goto exit;
 	}
 
 	cil_log(CIL_INFO, "Post process...\n");
-	if (cil_post_process(db)) {
+	rc = cil_post_process(db);
+	if (rc != SEPOL_OK ) {
 		cil_log(CIL_ERR, "Post process failed, exiting\n");
 		goto exit;
 	}
@@ -257,7 +265,8 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-	if (cil_binary_create(db, pdb)) {
+	rc = cil_binary_create(db, pdb);
+	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to generate binary, exiting\n");
 		goto exit;
 	}
@@ -286,9 +295,12 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
+	fclose(binary);
+	binary = NULL;
+
 	cil_log(CIL_INFO, "Destroying DB...\n");
 
-	return SEPOL_OK;
+	rc = SEPOL_OK;
 
 exit:
 	if (file != NULL) {
@@ -301,5 +313,5 @@ exit:
 	sepol_policydb_free(pdb);
 	sepol_policy_file_free(pf);
 	free(buffer);
-	return SEPOL_ERR;
+	return rc;
 }
