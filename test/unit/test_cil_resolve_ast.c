@@ -1972,7 +1972,7 @@ void test_cil_resolve_typeattributeset_multiple_excludes_with_not(CuTest *tc) {
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
-	int rc = cil_resolve_typeattributeset(test_db->ast->root->cl_head->next->next->next->next, args);
+	int rc = cil_resolve_typeattributeset(test_db->ast->root->cl_head->next->next->next->next->next->next, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
