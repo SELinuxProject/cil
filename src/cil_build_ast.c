@@ -6141,7 +6141,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto exit;
 		}
 
-		if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
+		if (!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
 			rc = SEPOL_ERR;
 			goto exit;
 		}
