@@ -74,10 +74,12 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 		goto exit;
 	}
 
-	rc = cil_symtab_insert(symtab, (hashtab_key_t)key, datum, ast_node);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to insert %s into symtab, rc: %d\n", key, rc);
-		goto exit;
+	if (symtab != NULL) {
+		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, datum, ast_node);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to insert %s into symtab, rc: %d (%s, line: %d)\n", key, rc, ast_node->path, ast_node->line);
+			goto exit;
+		}
 	}
 
 	ast_node->data = datum;
@@ -2539,7 +2541,6 @@ void cil_destroy_tunif(struct cil_tunableif *tif)
 	if (tif->expr_stack != NULL) {
 		cil_list_destroy(&tif->expr_stack, CIL_TRUE);
 	}
-	cil_symtab_array_destroy(tif->symtab);
 
 	free(tif);
 }
@@ -6195,10 +6196,6 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 
 	if (args->ast->flavor == CIL_MACRO) {
 		args->macro = NULL;
-	}
-
-	if (args->ast->flavor == CIL_TUNABLEIF) {
-		cil_symtab_destroy(((struct cil_tunableif*)args->ast->data)->symtab);
 	}
 
 	return SEPOL_OK;

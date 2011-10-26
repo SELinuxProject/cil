@@ -782,7 +782,6 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 				cil_symtab_array_destroy(((struct cil_macro*)current->data)->symtab);
 				break;
 			case CIL_TUNABLEIF:
-				cil_symtab_array_destroy(((struct cil_tunableif*)current->data)->symtab);
 				break;
 			case CIL_BOOLEANIF:
 				/* do nothing */
@@ -855,7 +854,7 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 		} else if (ast_node->flavor == CIL_COMMON) {
 			*symtab = &((struct cil_common*)ast_node->data)->perms;
 		} else if (ast_node->flavor == CIL_TUNABLEIF) {
-			*symtab = &((struct cil_tunableif*)ast_node->data)->symtab[sym_index];
+			*symtab = NULL;
 		} else if ((ast_node->flavor == CIL_BOOLEANIF || ast_node->flavor == CIL_CONDTRUE || ast_node->flavor == CIL_CONDFALSE) && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
 			if (rc != SEPOL_OK) {
@@ -1217,7 +1216,6 @@ void cil_tunif_init(struct cil_tunableif **tif)
 	*tif = cil_malloc(sizeof(**tif));
 
 	(*tif)->expr_stack = NULL;
-	cil_symtab_array_init((*tif)->symtab, CIL_SYM_NUM);
 
 	(*tif)->condtrue = NULL;
 	(*tif)->condfalse = NULL;

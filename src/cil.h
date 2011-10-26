@@ -859,7 +859,6 @@ struct cil_booleanif {
 };
 
 struct cil_tunableif {
-	symtab_t symtab[CIL_SYM_NUM];
 	struct cil_list *expr_stack;
 	struct cil_tree_node *condtrue;
 	struct cil_tree_node *condfalse;
