@@ -636,10 +636,10 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 	return "<unknown>";
 }
 
-int cil_userprefixes_to_string(struct cil_db *db, char **out)
+int cil_userprefixes_to_string(struct cil_db *db, char **out, size_t *size)
 {
 	int rc = SEPOL_ERR;
-	int str_len = 0;
+	size_t str_len = 0;
 	int buf_pos = 0;
 	char *str_tmp = NULL;
 	struct cil_list_item *curr = NULL;
@@ -657,6 +657,7 @@ int cil_userprefixes_to_string(struct cil_db *db, char **out)
 		str_len += strlen("user ") + strlen(user->datum.name) + strlen(" prefix ") + strlen(userprefix->prefix_str) + 2;
 	}
 
+	*size = str_len * sizeof(char);
 	str_tmp = cil_malloc((str_len + 1) * sizeof(char));
 	*out = str_tmp;
 
@@ -676,10 +677,10 @@ exit:
 
 }
 
-int cil_selinuxusers_to_string(struct cil_db *db, char **out)
+int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 {
 	int rc = SEPOL_ERR;
-	int str_len = 0;
+	size_t str_len = 0;
 	int buf_pos = 0;
 	char *str_tmp = NULL;
 	struct cil_list_item *curr = NULL;
@@ -705,6 +706,7 @@ int cil_selinuxusers_to_string(struct cil_db *db, char **out)
 		}
 	}
 
+	*size = str_len * sizeof(char);
 	str_tmp = cil_malloc((str_len + 1) * sizeof(char));
 	*out = str_tmp;
 
