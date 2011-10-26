@@ -419,9 +419,9 @@ int __cil_verify_expr_oper_flavor(const char *key, struct cil_conditional *cond,
 		cond->flavor = CIL_OR;
 	} else if (!strcmp(key, CIL_KEY_NOT)) {
 		cond->flavor = CIL_NOT;
-	} else if (!strcmp(key, CIL_KEY_EQ)) {
+	} else if (flavor != CIL_TYPE && !strcmp(key, CIL_KEY_EQ)) {
 		cond->flavor = CIL_EQ;
-	} else if (!strcmp(key, CIL_KEY_NEQ)) {
+	} else if (flavor != CIL_TYPE && !strcmp(key, CIL_KEY_NEQ)) {
 		cond->flavor = CIL_NEQ;
 	} else if (flavor != CIL_CONSTRAIN && flavor != CIL_MLSCONSTRAIN && flavor != CIL_VALIDATETRANS && flavor != CIL_MLSVALIDATETRANS && !strcmp(key, CIL_KEY_XOR)) {
 		cond->flavor = CIL_XOR;
