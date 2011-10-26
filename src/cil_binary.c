@@ -2780,11 +2780,6 @@ int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 		goto exit;
 	}
 
-	rc = cond_policydb_init(pdb);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	rc = avtab_alloc(&pdb->te_cond_avtab, MAX_AVTAB_SIZE);
 	if (rc != SEPOL_OK) {
 		goto exit;
