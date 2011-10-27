@@ -1000,10 +1000,13 @@ int cil_copy_avrule(__attribute__((unused)) struct cil_db *db, void *data, void 
 	new->src_str = cil_strdup(orig->src_str);
 	new->tgt_str = cil_strdup(orig->tgt_str);
 	new->classpermset_str = cil_strdup(orig->classpermset_str);
-	cil_classpermset_init(&new->classpermset);
-	rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
-	if (rc != SEPOL_OK) {
-		goto exit;
+
+	if (orig->classpermset != NULL) {
+		cil_classpermset_init(&new->classpermset);
+		rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	*copy = new;
@@ -1888,11 +1891,14 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 	cil_constrain_init(&new);
 
 	new->classpermset_str = cil_strdup(orig->classpermset_str);
-	cil_classpermset_init(&new->classpermset);
-	rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failed to copy classpermset\n");
-		goto exit;
+
+	if (orig->classpermset != NULL) {
+		cil_classpermset_init(&new->classpermset);
+		rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failed to copy classpermset\n");
+			goto exit;
+		}
 	}
 
 	rc = cil_copy_expr(db, orig->expr, &new_list);
