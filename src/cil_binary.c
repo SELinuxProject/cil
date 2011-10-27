@@ -1595,7 +1595,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 					curr_expr->attr = CEXPR_USER | CEXPR_TARGET;
 					break;
 				case CIL_CONS_U3:
-					curr_expr->attr = CEXPR_USER | CEXPR_TARGET;
+					curr_expr->attr = CEXPR_USER | CEXPR_XTARGET;
 					break;
 				case CIL_CONS_R1:
 					curr_expr->attr = CEXPR_ROLE;
@@ -1604,7 +1604,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 					curr_expr->attr = CEXPR_ROLE | CEXPR_TARGET;
 					break;
 				case CIL_CONS_R3:
-					curr_expr->attr = CEXPR_ROLE | CEXPR_TARGET;
+					curr_expr->attr = CEXPR_ROLE | CEXPR_XTARGET;
 					break;
 				case CIL_CONS_T1:
 					curr_expr->attr = CEXPR_TYPE;
