@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
 	char *buffer;
 	FILE *file;
 	char output[10];
-	struct cil_tree *parse_tree;
-	struct cil_db *db;
+	struct cil_tree *parse_tree = NULL;
+	struct cil_db *db = NULL;
 	int target = SEPOL_TARGET_SELINUX;
 	int mls = 0;
 	int handle_unknown = SEPOL_DENY_UNKNOWN;

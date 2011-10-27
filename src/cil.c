@@ -70,6 +70,10 @@ void cil_db_init(struct cil_db **db)
 
 void cil_db_destroy(struct cil_db **db)
 {
+	if (db == NULL || *db == NULL) {
+		return;
+	}
+
 	cil_tree_destroy(&(*db)->ast);
 	cil_symtab_array_destroy((*db)->symtab);
 	cil_list_destroy(&(*db)->catorder, CIL_FALSE);
