@@ -3926,7 +3926,7 @@ void cil_destroy_validatetrans(struct cil_validatetrans *validtrans)
 	}
 
 	free(validtrans->class_str);
-	cil_destroy_class(validtrans->class);
+
 	cil_list_destroy(&validtrans->expr, CIL_TRUE);
 
 	free(validtrans);
