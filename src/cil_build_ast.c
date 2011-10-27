@@ -4969,16 +4969,23 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	struct cil_tree_node *current_item = parse_current->next->next->cl_head;
 	struct cil_list_item *params_tail = NULL;
 	while (current_item != NULL) {
+		enum cil_syntax param_syntax[] = {
+			SYM_STRING,
+			SYM_STRING,
+			SYM_END
+		};
+		int param_syntax_len = sizeof(param_syntax)/sizeof(*param_syntax);
 		char *kind = NULL;
 		struct cil_param *param = NULL;
 
-		if (macro->params == NULL) {
-			cil_list_init(&macro->params);
-		}
-
-		if (current_item->cl_head == NULL) {
+		rc =__cil_verify_syntax(current_item->cl_head, param_syntax, param_syntax_len);
+		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Invalid macro declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
 			goto exit;
+		}
+
+		if (macro->params == NULL) {
+			cil_list_init(&macro->params);
 		}
 
 		kind = current_item->cl_head->data;
