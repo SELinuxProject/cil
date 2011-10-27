@@ -1917,13 +1917,11 @@ int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args)
 	struct cil_tree_node *class_node = NULL;
 	int rc = SEPOL_ERR;
 
-	if (validtrans->class_str != NULL) {
-		rc = cil_resolve_name(current, validtrans->class_str, CIL_SYM_CLASSES, args, &class_node);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-		validtrans->class = (struct cil_class*)class_node->data;
+	rc = cil_resolve_name(current, validtrans->class_str, CIL_SYM_CLASSES, args, &class_node);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
+	validtrans->class = (struct cil_class*)class_node->data;
 
 	rc = cil_resolve_expr_stack(validtrans->expr, current, extra_args);
 	if (rc != SEPOL_OK) {
