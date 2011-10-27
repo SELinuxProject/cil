@@ -129,6 +129,8 @@
 
 	(user system_u)
 	(user user_u)
+	(userprefix user_u user)
+	(userprefix system_u user)
 
 	(role system_r)
 	(role user_r)

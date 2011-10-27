@@ -94,6 +94,7 @@ enum cil_flavor {
 	CIL_USERLEVEL,
 	CIL_USERRANGE,
 	CIL_USERBOUNDS,
+	CIL_USERPREFIX,
 	CIL_TYPEATTRIBUTETYPES,
 	CIL_TYPE_RULE,
 	CIL_TYPEBOUNDS,
@@ -193,6 +194,7 @@ enum cil_flavor {
 #define CIL_KEY_SIDCONTEXT	"sidcontext"
 #define CIL_KEY_USER		"user"
 #define CIL_KEY_USERBOUNDS	"userbounds"
+#define CIL_KEY_USERPREFIX	"userprefix"
 #define CIL_KEY_ROLE 		"role"
 #define CIL_KEY_USERROLE	"userrole"
 #define CIL_KEY_USERLEVEL	"userlevel"
@@ -327,6 +329,8 @@ struct cil_db {
 	struct cil_sort *ioportcon;
 	struct cil_sort *pcidevicecon;
 	struct cil_sort *fsuse;
+	char **userprefixes;
+	uint32_t nusers;
 };
 
 struct cil_sort {
@@ -427,6 +431,7 @@ struct cil_user {
 	struct cil_list *roles;
 	struct cil_level *dftlevel;
 	struct cil_levelrange *range;
+	char *prefix;
 };
 
 struct cil_userrole {
@@ -451,6 +456,11 @@ struct cil_userrange {
 struct cil_userbounds {
 	char *user_str;
 	char *bounds_str;
+};
+
+struct cil_userprefix {
+	char *user_str;
+	char *prefix_str;
 };
 
 struct cil_role {
@@ -865,6 +875,7 @@ void cil_sid_init(struct cil_sid **sid);
 void cil_sidcontext_init(struct cil_sidcontext **sidcontext);
 void cil_userrole_init(struct cil_userrole **userrole);
 void cil_userbounds_init(struct cil_userbounds **userbounds);
+void cil_userprefix_init(struct cil_userprefix **userprefix);
 void cil_roledominance_init(struct cil_roledominance **roledominance);
 void cil_rolebounds_init(struct cil_rolebounds **rolebounds);
 void cil_roletype_init(struct cil_roletype **roletype);

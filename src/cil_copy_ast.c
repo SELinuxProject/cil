@@ -642,6 +642,21 @@ int cil_copy_userbounds(__attribute__((unused)) struct cil_db *db, void *data, v
 	return SEPOL_OK;
 }
 
+int cil_copy_userprefix(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_userprefix *orig = data;
+	struct cil_userprefix *new = NULL;
+
+	cil_userprefix_init(&new);
+
+	new->user_str = cil_strdup(orig->user_str);
+	new->prefix_str = cil_strdup(orig->prefix_str);
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
 int cil_copy_role(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
 	struct cil_role *orig = data;
@@ -2174,6 +2189,9 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_USERBOUNDS:
 		copy_func = &cil_copy_userbounds;
+		break;
+	case CIL_USERPREFIX:
+		copy_func = &cil_copy_userprefix;
 		break;
 	case CIL_ROLE:
 		copy_func = &cil_copy_role;

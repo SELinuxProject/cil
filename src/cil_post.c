@@ -325,7 +325,7 @@ int cil_post_fsuse_compare(const void *a, const void *b)
 	return rc;
 }
 
-int __cil_post_context_sort_count_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
+int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_db *db = NULL;
@@ -337,6 +337,10 @@ int __cil_post_context_sort_count_helper(struct cil_tree_node *node, uint32_t *f
 	db = (struct cil_db*)extra_args;
 
 	switch(node->flavor) {
+	case CIL_USER: {
+		db->nusers++;
+		break;
+	}
 	case CIL_OPTIONAL: {
                 struct cil_optional *opt = node->data;
                 if (opt->datum.state != CIL_STATE_ENABLED) {
@@ -384,14 +388,16 @@ int __cil_post_context_sort_count_helper(struct cil_tree_node *node, uint32_t *f
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_INFO, "cil_post_context_sort_count_helper failed\n");
+	cil_log(CIL_INFO, "cil_post_db_count_helper failed\n");
 	return rc;
 }
 
-int __cil_post_context_sort_array_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_db *db = NULL;
+	char *prefix_tmp = NULL;
+	int prefix_len = 0;
 
 	if (node == NULL || extra_args == NULL) {
 		goto exit;
@@ -400,6 +406,15 @@ int __cil_post_context_sort_array_helper(struct cil_tree_node *node, __attribute
 	db = extra_args;
 
 	switch(node->flavor) {
+	case CIL_USER: {
+		struct cil_user *user =  node->data;
+		prefix_len = strlen("user ") + strlen(user->datum.name) + strlen(" prefix ") + strlen(user->prefix) + 2;
+		prefix_tmp = cil_malloc(prefix_len * sizeof(char));
+		snprintf(prefix_tmp, prefix_len, "user %s prefix %s;", user->datum.name, user->prefix);
+		db->userprefixes[db->nusers] = prefix_tmp;
+		db->nusers++;
+		break;
+	}
 	case CIL_OPTIONAL: {
                 struct cil_optional *opt = node->data;
                 if (opt->datum.state != CIL_STATE_ENABLED) {
@@ -527,21 +542,24 @@ int __cil_post_context_sort_array_helper(struct cil_tree_node *node, __attribute
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_INFO, "cil_post_context_sort_array_helper failed\n");
+	cil_log(CIL_INFO, "cil_post_db_array_helper failed\n");
 	return rc;
 }
 
-int cil_post_context_sort(struct cil_db *db)
+int cil_post_db(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 
-	rc = cil_tree_walk(db->ast->root, __cil_post_context_sort_count_helper, NULL, NULL, db);
+	rc = cil_tree_walk(db->ast->root, __cil_post_db_count_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_INFO, "Failed to count contexts\n");
 		goto exit;
 	}
 
-	rc = cil_tree_walk(db->ast->root, __cil_post_context_sort_array_helper, NULL, NULL, db);
+	db->userprefixes = cil_malloc(db->nusers * sizeof(char *));
+	db->nusers = 0;
+
+	rc = cil_tree_walk(db->ast->root, __cil_post_db_array_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_INFO, "Failed to sort contexts\n");
 		goto exit;
@@ -623,7 +641,7 @@ int cil_post_process(struct cil_db *db)
 		goto exit;
 	}
 
-	rc = cil_post_context_sort(db);
+	rc = cil_post_db(db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to sort contexts\n");
 		goto exit;

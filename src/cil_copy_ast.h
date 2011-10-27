@@ -54,6 +54,7 @@ int cil_copy_userrole(struct cil_db *db, void *data, void **copy, symtab_t *symt
 int cil_copy_userlevel(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_userrange(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_userbounds(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_userprefix(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_role(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_roletype(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_rolebounds(struct cil_db *db, void *data, void **copy, symtab_t *symtab);

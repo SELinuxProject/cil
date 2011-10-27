@@ -60,6 +60,8 @@ void cil_db_init(struct cil_db **db)
 	cil_sort_init(&(*db)->ioportcon);
 	cil_sort_init(&(*db)->pcidevicecon);
 	cil_sort_init(&(*db)->fsuse);
+	(*db)->userprefixes = NULL;
+	(*db)->nusers = 0;
 
 	cil_type_init(&(*db)->selftype);
 	(*db)->selftype->datum.name = cil_strdup(CIL_KEY_SELF);
@@ -267,6 +269,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_USERBOUNDS:
 		cil_destroy_userbounds(*data);
+		break;
+	case CIL_USERPREFIX:
+		cil_destroy_userprefix(*data);
 		break;
 	case CIL_CONTEXT:
 		cil_destroy_context(*data);
@@ -951,6 +956,14 @@ void cil_userbounds_init(struct cil_userbounds **userbounds)
 	(*userbounds)->bounds_str = NULL;
 }
 
+void cil_userprefix_init(struct cil_userprefix **userprefix)
+{
+	*userprefix = cil_malloc(sizeof(**userprefix));
+
+	(*userprefix)->user_str = NULL;
+	(*userprefix)->prefix_str = NULL;
+}
+
 void cil_roledominance_init(struct cil_roledominance **roledominance)
 {
 	*roledominance = cil_malloc(sizeof(**roledominance));
@@ -1351,6 +1364,7 @@ void cil_user_init(struct cil_user **user)
 	(*user)->roles = NULL;
 	(*user)->dftlevel = NULL;
 	(*user)->range = NULL;
+	(*user)->prefix = NULL;
 }
 
 void cil_userlevel_init(struct cil_userlevel **usrlvl)

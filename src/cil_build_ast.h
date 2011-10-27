@@ -80,6 +80,8 @@ int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, st
 void cil_destroy_userrange(struct cil_userrange *userrange);
 int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_userbounds(struct cil_userbounds *userbnds);
+int cil_gen_userprefix(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_userprefix(struct cil_userprefix *userprefix);
 int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_role(struct cil_role *role);
 int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

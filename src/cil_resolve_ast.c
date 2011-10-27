@@ -710,6 +710,7 @@ int cil_reset_user(struct cil_tree_node *current, __attribute__((unused)) void *
 	user->bounds = NULL;
 	user->dftlevel = NULL;
 	user->range = NULL;
+	user->prefix = NULL;
 
 	return SEPOL_OK;
 }
@@ -890,6 +891,24 @@ int cil_resolve_userbounds(struct cil_tree_node *current, void *extra_args)
 	((struct cil_user*)user_node->data)->bounds = bounds_node->data;
 
 	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_resolve_userprefix(struct cil_tree_node *current, void *extra_args)
+{
+	struct cil_userprefix *userprefix = current->data;
+	struct cil_tree_node *user_node = NULL;
+	struct cil_user *user = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(current, userprefix->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	user = user_node->data;
+	user->prefix = userprefix->prefix_str;
 
 exit:
 	return rc;
@@ -3078,6 +3097,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_USERBOUNDS:
 			rc = cil_resolve_userbounds(node, args);
+			break;
+		case CIL_USERPREFIX:
+			rc = cil_resolve_userprefix(node, args);
 			break;
 		case CIL_ROLETYPE:
 			rc = cil_resolve_roletype(node, args);
