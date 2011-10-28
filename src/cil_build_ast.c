@@ -2725,7 +2725,7 @@ int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_curr
 		goto exit;
 	}
 	ast_node->data = attrset;
-	ast_node->flavor = CIL_TYPEATTRIBUTETYPES;
+	ast_node->flavor = CIL_TYPEATTRIBUTESET;
 
 	return SEPOL_OK;
 
@@ -5686,7 +5686,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			cil_log(CIL_ERR, "cil_gen_typeattribute failed, rc: %d\n", rc);
 			goto exit;
 		}
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTRIBUTETYPES)) {
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTRIBUTESET)) {
 		rc = cil_gen_typeattributeset(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "cil_gen_typeattributeset failed, rc: %d\n", rc);

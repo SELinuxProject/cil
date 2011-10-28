@@ -3097,7 +3097,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		break;
 	case CIL_PASS_MISC3:
 		switch (node->flavor) {
-		case CIL_TYPEATTRIBUTETYPES:
+		case CIL_TYPEATTRIBUTESET:
 			rc = cil_resolve_typeattributeset(node, args);
 			break;
 		case CIL_TYPEALIAS:

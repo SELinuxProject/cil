@@ -2220,7 +2220,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_TYPEATTRIBUTE:
 		copy_func = &cil_copy_typeattribute;
 		break;
-	case CIL_TYPEATTRIBUTETYPES:
+	case CIL_TYPEATTRIBUTESET:
 		copy_func = &cil_copy_typeattributeset;
 		break;
 	case CIL_TYPEALIAS:

@@ -97,7 +97,7 @@ enum cil_flavor {
 	CIL_USERPREFIX,
 	CIL_SELINUXUSER,
 	CIL_SELINUXUSERDEFAULT,
-	CIL_TYPEATTRIBUTETYPES,
+	CIL_TYPEATTRIBUTESET,
 	CIL_TYPE_RULE,
 	CIL_TYPEBOUNDS,
 	CIL_FILETRANSITION,
@@ -221,7 +221,7 @@ enum cil_flavor {
 #define CIL_KEY_FILETRANSITION	"filetransition"
 #define CIL_KEY_TYPECHANGE	"typechange"
 #define CIL_KEY_TYPEMEMBER	"typemember"
-#define CIL_KEY_TYPEATTRIBUTETYPES	"typeattributeset"
+#define CIL_KEY_TYPEATTRIBUTESET	"typeattributeset"
 #define CIL_KEY_TYPEALIAS	"typealias"
 #define CIL_KEY_TYPEBOUNDS	"typebounds"
 #define CIL_KEY_TYPEPERMISSIVE	"typepermissive"

@@ -202,7 +202,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPEALIAS:
 		cil_destroy_typealias(*data);
 		break;
-	case CIL_TYPEATTRIBUTETYPES:
+	case CIL_TYPEATTRIBUTESET:
 		cil_destroy_typeattributeset(*data);
 		break;
 	case CIL_TYPEBOUNDS:
@@ -481,8 +481,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_USERRANGE;
 	case CIL_USERBOUNDS:
 		return CIL_KEY_USERBOUNDS;
-	case CIL_TYPEATTRIBUTETYPES:
-		return CIL_KEY_TYPEATTRIBUTETYPES;
+	case CIL_TYPEATTRIBUTESET:
+		return CIL_KEY_TYPEATTRIBUTESET;
 	case CIL_TYPE_RULE:
 		switch (((struct cil_type_rule *)node->data)->rule_kind) {
 		case CIL_TYPE_TRANSITION:
