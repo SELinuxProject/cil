@@ -911,6 +911,46 @@ exit:
 	return rc;
 }
 
+int cil_resolve_selinuxuser(struct cil_tree_node *current, void *extra_args)
+{
+	struct cil_selinuxuser *selinuxuser = current->data;
+	struct cil_tree_node *user_node = NULL;
+	struct cil_tree_node *lvlrange_node = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(current, selinuxuser->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	selinuxuser->user = user_node->data;
+
+	if (selinuxuser->range_str != NULL) {
+		rc = cil_resolve_name(current, selinuxuser->range_str, CIL_SYM_LEVELRANGES, extra_args, &lvlrange_node);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Unable to resolve name: %s\n", selinuxuser->range_str);
+			goto exit;
+		}
+		selinuxuser->range = (struct cil_levelrange*)lvlrange_node->data;
+
+		/* This could still be an anonymous levelrange even if range_str is set, if range_str is a param_str*/
+		if (selinuxuser->range->datum.name == NULL) {
+			rc = cil_resolve_levelrange(current, selinuxuser->range, extra_args);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+	} else if (selinuxuser->range != NULL) {
+		rc = cil_resolve_levelrange(current, selinuxuser->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	} else {
+		cil_log(CIL_ERR, "Invalid selinuxuser, levelrange not found\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = SEPOL_OK;
 exit:
 	return rc;
 }
@@ -3101,6 +3141,10 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_USERPREFIX:
 			rc = cil_resolve_userprefix(node, args);
+			break;
+		case CIL_SELINUXUSER:
+		case CIL_SELINUXUSERDEFAULT:
+			rc = cil_resolve_selinuxuser(node, args);
 			break;
 		case CIL_ROLETYPE:
 			rc = cil_resolve_roletype(node, args);

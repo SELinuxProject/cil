@@ -1566,6 +1566,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 {
 	int rc = SEPOL_ERR;
 	int *avrule_cnt = 0;
+	int *nseuserdflt = 0;
 	int state = 0;
 	struct cil_args_verify *args = extra_args;
 	struct cil_complex_symtab *csymtab = NULL;
@@ -1579,11 +1580,16 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	db = args->db;
 	senstab = args->senstab;
 	avrule_cnt = args->avrule_cnt;
+	nseuserdflt = args->nseuserdflt;
 	csymtab = args->csymtab;
 
 	switch (node->flavor) {
 	case CIL_USER:
 		rc = __cil_verify_user(db, node, senstab);
+		break;
+	case CIL_SELINUXUSERDEFAULT:
+		(*nseuserdflt)++;
+		rc = SEPOL_OK;
 		break;
 	case CIL_ROLE:
 		rc = __cil_verify_role(node);

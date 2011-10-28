@@ -412,6 +412,28 @@ int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused
 		}
 		break;
 	}
+	case CIL_SELINUXUSER: {
+		struct cil_selinuxuser *selinuxuser = node->data;
+		struct cil_list_item *new = NULL;
+		cil_list_item_init(&new);
+		new->data = selinuxuser;
+		new->flavor = CIL_SELINUXUSER;
+		rc = cil_list_prepend_item(db->selinuxusers, new);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_SELINUXUSERDEFAULT: {
+		struct cil_selinuxuser *selinuxuser = node->data;
+		struct cil_list_item *new = NULL;
+		cil_list_item_init(&new);
+		new->data = selinuxuser;
+		new->flavor = CIL_SELINUXUSERDEFAULT;
+		rc = cil_list_append_item(db->selinuxusers, new);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 		break;
 	}
 	case CIL_OPTIONAL: {
@@ -580,6 +602,7 @@ int cil_post_verify(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	int avrule_cnt = 0;
+	int nseuserdflt = 0;
 	struct cil_list_item *curr = NULL;
 	struct cil_args_verify extra_args;
 	struct cil_complex_symtab csymtab;
@@ -592,6 +615,7 @@ int cil_post_verify(struct cil_db *db)
 	extra_args.csymtab = &csymtab;
 	extra_args.senstab = &senstab;
 	extra_args.avrule_cnt = &avrule_cnt;
+	extra_args.nseuserdflt = &nseuserdflt;
 
 	rc = cil_tree_walk(db->ast->root, __cil_verify_helper, NULL, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
@@ -601,6 +625,12 @@ int cil_post_verify(struct cil_db *db)
 
 	if (avrule_cnt == 0) {
 		cil_log(CIL_ERR, "Policy must include at least one avrule\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	if (nseuserdflt == 0 || nseuserdflt > 1) {
+		cil_log(CIL_ERR, "Policy must include one selinuxuserdefault, found: %d\n", nseuserdflt);
 		rc = SEPOL_ERR;
 		goto exit;
 	}

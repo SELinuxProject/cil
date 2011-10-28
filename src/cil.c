@@ -61,6 +61,7 @@ void cil_db_init(struct cil_db **db)
 	cil_sort_init(&(*db)->pcidevicecon);
 	cil_sort_init(&(*db)->fsuse);
 	cil_list_init(&(*db)->userprefixes);
+	cil_list_init(&(*db)->selinuxusers);
 	(*db)->mls = CIL_FALSE;
 
 	cil_type_init(&(*db)->selftype);
@@ -272,6 +273,10 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_USERPREFIX:
 		cil_destroy_userprefix(*data);
+		break;
+	case CIL_SELINUXUSER:
+	case CIL_SELINUXUSERDEFAULT:
+		cil_destroy_selinuxuser(*data);
 		break;
 	case CIL_CONTEXT:
 		cil_destroy_context(*data);
@@ -667,6 +672,64 @@ exit:
 
 }
 
+int cil_selinuxusers_to_string(struct cil_db *db, char **out)
+{
+	int rc = SEPOL_ERR;
+	int str_len = 0;
+	int buf_pos = 0;
+	char *str_tmp = NULL;
+	struct cil_list_item *curr = NULL;
+	struct cil_selinuxuser *selinuxuser = NULL;
+	struct cil_user *user = NULL;
+
+	if (db->selinuxusers->head == NULL) {
+		cil_log(CIL_ERR, "No selinuxusers\n");
+		goto exit;
+	}
+
+	for(curr = db->selinuxusers->head; curr != NULL; curr = curr->next) {
+		selinuxuser = curr->data;
+		user = selinuxuser->user;
+		str_len += strlen(selinuxuser->name_str) + strlen(user->datum.name) + 2;
+
+		if (db->mls == CIL_TRUE) {
+			struct cil_levelrange *range = selinuxuser->range;
+			struct cil_level *low = range->low;
+			struct cil_level *high = range->high;
+
+			str_len += strlen(low->datum.name) + strlen(high->datum.name) + 2;
+		}
+	}
+
+	str_tmp = cil_malloc((str_len + 1) * sizeof(char));
+	*out = str_tmp;
+
+	for(curr = db->selinuxusers->head; curr != NULL; curr = curr->next) {
+		selinuxuser = curr->data;
+		user = selinuxuser->user;
+
+		if (db->mls == CIL_TRUE) {
+			struct cil_levelrange *range = selinuxuser->range;
+			struct cil_level *low = range->low;
+			struct cil_level *high = range->high;
+
+			buf_pos = snprintf(str_tmp, str_len, "%s:%s:%s-%s\n", selinuxuser->name_str,
+									user->datum.name,
+									low->datum.name,
+									high->datum.name);
+		} else {
+			buf_pos = snprintf(str_tmp, str_len, "%s:%s\n", selinuxuser->name_str,
+								user->datum.name);
+		}
+		str_len -= buf_pos;
+		str_tmp += buf_pos;
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 {
 	uint32_t i = 0;
@@ -1002,6 +1065,17 @@ void cil_userprefix_init(struct cil_userprefix **userprefix)
 
 	(*userprefix)->user_str = NULL;
 	(*userprefix)->prefix_str = NULL;
+}
+
+void cil_selinuxuser_init(struct cil_selinuxuser **selinuxuser)
+{
+	*selinuxuser = cil_malloc(sizeof(**selinuxuser));
+
+	(*selinuxuser)->name_str = NULL;
+	(*selinuxuser)->user_str = NULL;
+	(*selinuxuser)->user = NULL;
+	(*selinuxuser)->range_str = NULL;
+	(*selinuxuser)->range = NULL;
 }
 
 void cil_roledominance_init(struct cil_roledominance **roledominance)

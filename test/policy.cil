@@ -132,6 +132,9 @@
 	(userprefix user_u user)
 	(userprefix system_u user)
 
+	(selinuxuser name user_u low_high)
+	(selinuxuserdefault user_u low_high)
+
 	(role system_r)
 	(role user_r)
 

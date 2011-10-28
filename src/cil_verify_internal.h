@@ -50,6 +50,7 @@ struct cil_args_verify {
 	struct cil_complex_symtab *csymtab;
 	symtab_t *senstab;
 	int *avrule_cnt;
+	int *nseuserdflt;
 };
 
 struct cil_args_verify_order {

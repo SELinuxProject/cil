@@ -1385,6 +1385,114 @@ void cil_destroy_userprefix(struct cil_userprefix *userprefix)
 	free(userprefix);
 }
 
+int cil_gen_selinuxuser(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_selinuxuser *selinuxuser = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Invalid selinuxuser declaration (%s, line %d)\n", parse_current->path, parse_current->line);
+		goto exit;
+	}
+
+	cil_selinuxuser_init(&selinuxuser);
+
+	selinuxuser->name_str = cil_strdup(parse_current->next->data);
+	selinuxuser->user_str = cil_strdup(parse_current->next->next->data);
+
+	if (parse_current->next->next->next->cl_head == NULL) {
+		selinuxuser->range_str = cil_strdup(parse_current->next->next->next->data);
+	} else {
+		cil_levelrange_init(&selinuxuser->range);
+
+		rc = cil_fill_levelrange(parse_current->next->next->next->cl_head, selinuxuser->range);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_selinuxuser: Failed to fill levelrange, rc: %d\n", rc);
+			goto exit;
+		}
+	}
+
+	ast_node->data = selinuxuser;
+	ast_node->flavor = CIL_SELINUXUSER;
+
+	return SEPOL_OK;
+exit:
+	cil_destroy_selinuxuser(selinuxuser);
+	return rc;
+}
+
+int cil_gen_selinuxuserdefault(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_selinuxuser *selinuxuser = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Invalid selinuxuserdefault declaration (%s, line %d)\n", parse_current->path, parse_current->line);
+		goto exit;
+	}
+
+	cil_selinuxuser_init(&selinuxuser);
+
+	selinuxuser->name_str = cil_strdup("__default__");
+	selinuxuser->user_str = cil_strdup(parse_current->next->data);
+
+	if (parse_current->next->next->cl_head == NULL) {
+		selinuxuser->range_str = cil_strdup(parse_current->next->next->data);
+	} else {
+		cil_levelrange_init(&selinuxuser->range);
+
+		rc = cil_fill_levelrange(parse_current->next->next->cl_head, selinuxuser->range);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_selinuxuser: Failed to fill levelrange, rc: %d\n", rc);
+			goto exit;
+		}
+	}
+
+	ast_node->data = selinuxuser;
+	ast_node->flavor = CIL_SELINUXUSERDEFAULT;
+
+	return SEPOL_OK;
+exit:
+	cil_destroy_selinuxuser(selinuxuser);
+	return rc;
+}
+
+void cil_destroy_selinuxuser(struct cil_selinuxuser *selinuxuser)
+{
+	if (selinuxuser == NULL) {
+		return;
+	}
+	free(selinuxuser->name_str);
+	free(selinuxuser->user_str);
+	free(selinuxuser->range_str);
+	free(selinuxuser);
+}
+
 int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -5552,6 +5660,18 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_userprefix(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "cil_gen_userprefix failed, rc: %d\n", rc);
+			goto exit;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_SELINUXUSER)) {
+		rc = cil_gen_selinuxuser(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_selinuxuser failed, rc: %d\n", rc);
+			goto exit;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_SELINUXUSERDEFAULT)) {
+		rc = cil_gen_selinuxuserdefault(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_selinuxuserdefault failed, rc: %d\n", rc);
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {

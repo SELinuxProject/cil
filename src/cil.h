@@ -95,6 +95,8 @@ enum cil_flavor {
 	CIL_USERRANGE,
 	CIL_USERBOUNDS,
 	CIL_USERPREFIX,
+	CIL_SELINUXUSER,
+	CIL_SELINUXUSERDEFAULT,
 	CIL_TYPEATTRIBUTETYPES,
 	CIL_TYPE_RULE,
 	CIL_TYPEBOUNDS,
@@ -195,6 +197,8 @@ enum cil_flavor {
 #define CIL_KEY_USER		"user"
 #define CIL_KEY_USERBOUNDS	"userbounds"
 #define CIL_KEY_USERPREFIX	"userprefix"
+#define CIL_KEY_SELINUXUSER	"selinuxuser"
+#define CIL_KEY_SELINUXUSERDEFAULT	"selinuxuserdefault"
 #define CIL_KEY_ROLE 		"role"
 #define CIL_KEY_USERROLE	"userrole"
 #define CIL_KEY_USERLEVEL	"userlevel"
@@ -330,6 +334,7 @@ struct cil_db {
 	struct cil_sort *pcidevicecon;
 	struct cil_sort *fsuse;
 	struct cil_list *userprefixes;
+	struct cil_list *selinuxusers;
 	int mls;
 };
 
@@ -461,6 +466,14 @@ struct cil_userprefix {
 	char *user_str;
 	struct cil_user *user;
 	char *prefix_str;
+};
+
+struct cil_selinuxuser {
+	char *name_str;
+	char *user_str;
+	struct cil_user *user;
+	char *range_str;
+	struct cil_levelrange *range;
 };
 
 struct cil_role {
@@ -853,6 +866,8 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *index
 const char * cil_node_to_string(struct cil_tree_node *node);
 
 int cil_userprefixes_to_string(struct cil_db *db, char **out);
+int cil_selinuxusers_to_string(struct cil_db *db, char **out);
+
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
 void cil_symtab_array_destroy(symtab_t symtab[]);
 int cil_destroy_ast_symtabs(struct cil_tree_node *root);
@@ -877,6 +892,7 @@ void cil_sidcontext_init(struct cil_sidcontext **sidcontext);
 void cil_userrole_init(struct cil_userrole **userrole);
 void cil_userbounds_init(struct cil_userbounds **userbounds);
 void cil_userprefix_init(struct cil_userprefix **userprefix);
+void cil_selinuxuser_init(struct cil_selinuxuser **selinuxuser);
 void cil_roledominance_init(struct cil_roledominance **roledominance);
 void cil_rolebounds_init(struct cil_rolebounds **rolebounds);
 void cil_roletype_init(struct cil_roletype **roletype);
