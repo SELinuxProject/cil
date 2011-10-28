@@ -47,7 +47,7 @@ spec_char	[\[\]\.\@\=\/\*\-\_\$\%\@\+\-\!\|\&\^\:]
 symbol		({digit}|{alpha}|{spec_char})+
 white		[ \t]
 newline		[\n\r]
-qstring		\"[^"\n\']*\"
+qstring		\"[^"\n]*\"
 comment		;[^\n]*
 
 %%
