@@ -62,6 +62,7 @@ void cil_db_init(struct cil_db **db)
 	cil_sort_init(&(*db)->fsuse);
 	(*db)->userprefixes = NULL;
 	(*db)->nusers = 0;
+	(*db)->mls = CIL_FALSE;
 
 	cil_type_init(&(*db)->selftype);
 	(*db)->selftype->datum.name = cil_strdup(CIL_KEY_SELF);

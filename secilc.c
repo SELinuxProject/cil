@@ -187,6 +187,7 @@ int main(int argc, char *argv[])
 	}
 	
 	cil_db_init(&db);
+	db->mls = mls;
 
 	cil_log(CIL_INFO, "Building AST from Parse Tree...\n");
 	if (cil_build_ast(db, parse_tree->root, db->ast->root)) {

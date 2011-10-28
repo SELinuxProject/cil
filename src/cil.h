@@ -331,6 +331,7 @@ struct cil_db {
 	struct cil_sort *fsuse;
 	char **userprefixes;
 	uint32_t nusers;
+	int mls;
 };
 
 struct cil_sort {
