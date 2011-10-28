@@ -88,6 +88,8 @@ void cil_db_destroy(struct cil_db **db)
 	cil_sort_destroy(&(*db)->ioportcon);
 	cil_sort_destroy(&(*db)->pcidevicecon);
 	cil_sort_destroy(&(*db)->fsuse);
+	cil_list_destroy(&(*db)->userprefixes, CIL_FALSE);
+	cil_list_destroy(&(*db)->selinuxusers, CIL_FALSE);
 	
 	cil_destroy_type((*db)->selftype);
 

@@ -2752,6 +2752,10 @@ void cil_destroy_typeattributeset(struct cil_typeattributeset *attrset)
 		return;
 	}
 
+	if (attrset->expr_stack != NULL) {
+		cil_list_destroy(&attrset->expr_stack, CIL_TRUE);
+	}
+
 	if (attrset->attr_str != NULL) {
 		free(attrset->attr_str);
 	}
@@ -3019,6 +3023,8 @@ void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans)
 
 	if (rangetrans->range_str != NULL) {
 		free(rangetrans->range_str);
+	} else if (rangetrans->range != NULL) {
+		cil_destroy_levelrange(rangetrans->range);
 	}
 
 	free(rangetrans);
