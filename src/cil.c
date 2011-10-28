@@ -677,6 +677,85 @@ exit:
 
 }
 
+int __cil_level_to_string(struct cil_level *lvl, char **out)
+{
+	struct cil_list_item *curr_cat = NULL;
+	struct cil_catset *catset = lvl->catset;
+	int str_len = 0;
+	int buf_pos = 0;
+	char *str_tmp = NULL;
+
+	str_len += strlen(lvl->sens->datum.name) + 1;
+
+	if (catset != NULL) {
+		for (curr_cat = catset->cat_list->head; curr_cat != NULL; 
+						curr_cat = curr_cat->next) {
+			switch (curr_cat->flavor) {
+			case CIL_CATRANGE: {
+				struct cil_catrange *catrange = curr_cat->data;
+				str_len += (strlen(catrange->cat_low->datum.name)
+					+ strlen(catrange->cat_high->datum.name)) + 1;
+				break;
+			}
+			case CIL_CAT: {
+				struct cil_cat *cat = curr_cat->data;
+				str_len += strlen(cat->datum.name);
+			}
+			default:
+				break;
+			}
+
+			if (curr_cat->next != NULL) {
+				str_len += 1;
+			}
+		}
+	}
+	str_len += 1;
+	str_tmp = cil_malloc(sizeof(char) * (str_len));
+	*out = str_tmp;
+
+	buf_pos = snprintf(str_tmp, str_len, "%s", lvl->sens->datum.name);
+	str_len -= buf_pos;
+	str_tmp += buf_pos;
+
+	if (catset != NULL) {
+		strncat(str_tmp, ":", str_len);
+		str_len -= 1;
+		str_tmp += 1;
+
+		for (curr_cat = catset->cat_list->head; curr_cat != NULL;
+						curr_cat = curr_cat->next) {
+			switch (curr_cat->flavor) {
+			case CIL_CATRANGE: {
+				struct cil_catrange *catrange = curr_cat->data;
+				buf_pos = snprintf(str_tmp, str_len, "%s.%s",
+						catrange->cat_low->datum.name,
+						catrange->cat_high->datum.name);
+				str_len -= buf_pos;
+				str_tmp += buf_pos;
+				break;
+			}
+			case CIL_CAT: {
+				struct cil_cat *cat = curr_cat->data;
+				buf_pos = snprintf(str_tmp, str_len, "%s", cat->datum.name);
+				str_len -= buf_pos;
+				str_tmp += buf_pos;
+			}
+			default:
+				break;
+			}
+
+			if (curr_cat->next != NULL) {
+				strncat(str_tmp, ",", str_len);
+				str_len -= 1;
+				str_tmp += 1;
+			}
+		}
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 {
 	int rc = SEPOL_ERR;
@@ -701,8 +780,22 @@ int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 			struct cil_levelrange *range = selinuxuser->range;
 			struct cil_level *low = range->low;
 			struct cil_level *high = range->high;
+			char *str_low = NULL;
+			char *str_high = NULL;
 
-			str_len += strlen(low->datum.name) + strlen(high->datum.name) + 2;
+			rc = __cil_level_to_string(low, &str_low);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			rc = __cil_level_to_string(high, &str_high);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			str_len += (strlen(str_low) + strlen(str_high));
+			free(str_low);
+			free(str_high);
 		}
 	}
 
@@ -718,11 +811,31 @@ int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 			struct cil_levelrange *range = selinuxuser->range;
 			struct cil_level *low = range->low;
 			struct cil_level *high = range->high;
+			char *str_low = NULL;
+			char *str_high = NULL;
 
-			buf_pos = snprintf(str_tmp, str_len, "%s:%s:%s-%s\n", selinuxuser->name_str,
-									user->datum.name,
-									low->datum.name,
-									high->datum.name);
+			rc = __cil_level_to_string(low, &str_low);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			rc = __cil_level_to_string(high, &str_high);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			buf_pos = snprintf(str_tmp, str_len, "%s:%s:", selinuxuser->name_str,
+									user->datum.name);
+			strncat(str_tmp, str_low, str_len);
+			strncat(str_tmp, "-", str_len);
+			strncat(str_tmp, str_high, str_len);
+			strncat(str_tmp, "\n", str_len);
+
+			str_len -= (strlen(str_low) + strlen(str_high) + 2);
+			str_tmp += (strlen(str_low) + strlen(str_high) + 2);
+
+			free(str_low);
+			free(str_high);
 		} else {
 			buf_pos = snprintf(str_tmp, str_len, "%s:%s\n", selinuxuser->name_str,
 								user->datum.name);
