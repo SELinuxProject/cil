@@ -60,8 +60,7 @@ void cil_db_init(struct cil_db **db)
 	cil_sort_init(&(*db)->ioportcon);
 	cil_sort_init(&(*db)->pcidevicecon);
 	cil_sort_init(&(*db)->fsuse);
-	(*db)->userprefixes = NULL;
-	(*db)->nusers = 0;
+	cil_list_init(&(*db)->userprefixes);
 	(*db)->mls = CIL_FALSE;
 
 	cil_type_init(&(*db)->selftype);
@@ -626,6 +625,46 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 	}
 
 	return "<unknown>";
+}
+
+int cil_userprefixes_to_string(struct cil_db *db, char **out)
+{
+	int rc = SEPOL_ERR;
+	int str_len = 0;
+	int buf_pos = 0;
+	char *str_tmp = NULL;
+	struct cil_list_item *curr = NULL;
+	struct cil_userprefix *userprefix = NULL;
+	struct cil_user *user = NULL;
+
+	if (db->userprefixes->head == NULL) {
+		cil_log(CIL_ERR, "No userprefixes\n");
+		goto exit;
+	}
+
+	for (curr = db->userprefixes->head; curr != NULL; curr = curr->next) {
+		userprefix = curr->data;
+		user = userprefix->user;
+		str_len += strlen("user ") + strlen(user->datum.name) + strlen(" prefix ") + strlen(userprefix->prefix_str) + 2;
+	}
+
+	str_tmp = cil_malloc((str_len + 1) * sizeof(char));
+	*out = str_tmp;
+
+	for (curr = db->userprefixes->head; curr != NULL; curr = curr->next) {
+		userprefix = curr->data;
+		user = userprefix->user;
+
+		buf_pos = snprintf(str_tmp, str_len, "user %s prefix %s;\n", user->datum.name,
+									userprefix->prefix_str);
+		str_len -= buf_pos;
+		str_tmp += buf_pos;
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+
 }
 
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
@@ -1365,7 +1404,6 @@ void cil_user_init(struct cil_user **user)
 	(*user)->roles = NULL;
 	(*user)->dftlevel = NULL;
 	(*user)->range = NULL;
-	(*user)->prefix = NULL;
 }
 
 void cil_userlevel_init(struct cil_userlevel **usrlvl)

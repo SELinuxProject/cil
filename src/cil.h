@@ -329,8 +329,7 @@ struct cil_db {
 	struct cil_sort *ioportcon;
 	struct cil_sort *pcidevicecon;
 	struct cil_sort *fsuse;
-	char **userprefixes;
-	uint32_t nusers;
+	struct cil_list *userprefixes;
 	int mls;
 };
 
@@ -432,7 +431,6 @@ struct cil_user {
 	struct cil_list *roles;
 	struct cil_level *dftlevel;
 	struct cil_levelrange *range;
-	char *prefix;
 };
 
 struct cil_userrole {
@@ -461,6 +459,7 @@ struct cil_userbounds {
 
 struct cil_userprefix {
 	char *user_str;
+	struct cil_user *user;
 	char *prefix_str;
 };
 
@@ -853,6 +852,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor);
 int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *index);
 const char * cil_node_to_string(struct cil_tree_node *node);
 
+int cil_userprefixes_to_string(struct cil_db *db, char **out);
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
 void cil_symtab_array_destroy(symtab_t symtab[]);
 int cil_destroy_ast_symtabs(struct cil_tree_node *root);

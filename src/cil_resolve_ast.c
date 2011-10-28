@@ -710,7 +710,6 @@ int cil_reset_user(struct cil_tree_node *current, __attribute__((unused)) void *
 	user->bounds = NULL;
 	user->dftlevel = NULL;
 	user->range = NULL;
-	user->prefix = NULL;
 
 	return SEPOL_OK;
 }
@@ -900,15 +899,17 @@ int cil_resolve_userprefix(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_userprefix *userprefix = current->data;
 	struct cil_tree_node *user_node = NULL;
-	struct cil_user *user = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, userprefix->user_str, CIL_SYM_USERS, extra_args, &user_node);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	user = user_node->data;
-	user->prefix = userprefix->prefix_str;
+	userprefix->user = user_node->data;
+
+exit:
+	return rc;
+}
 
 exit:
 	return rc;

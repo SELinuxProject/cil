@@ -337,10 +337,6 @@ int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *finished, v
 	db = (struct cil_db*)extra_args;
 
 	switch(node->flavor) {
-	case CIL_USER: {
-		db->nusers++;
-		break;
-	}
 	case CIL_OPTIONAL: {
                 struct cil_optional *opt = node->data;
                 if (opt->datum.state != CIL_STATE_ENABLED) {
@@ -396,8 +392,6 @@ int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused
 {
 	int rc = SEPOL_ERR;
 	struct cil_db *db = NULL;
-	char *prefix_tmp = NULL;
-	int prefix_len = 0;
 
 	if (node == NULL || extra_args == NULL) {
 		goto exit;
@@ -406,13 +400,18 @@ int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused
 	db = extra_args;
 
 	switch(node->flavor) {
-	case CIL_USER: {
-		struct cil_user *user =  node->data;
-		prefix_len = strlen("user ") + strlen(user->datum.name) + strlen(" prefix ") + strlen(user->prefix) + 2;
-		prefix_tmp = cil_malloc(prefix_len * sizeof(char));
-		snprintf(prefix_tmp, prefix_len, "user %s prefix %s;", user->datum.name, user->prefix);
-		db->userprefixes[db->nusers] = prefix_tmp;
-		db->nusers++;
+	case CIL_USERPREFIX: {
+		struct cil_userprefix *userprefix =  node->data;
+		struct cil_list_item *new = NULL;
+		cil_list_item_init(&new);
+		new->data = userprefix;
+		new->flavor = CIL_USERPREFIX;
+		rc = cil_list_append_item(db->userprefixes, new);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
 		break;
 	}
 	case CIL_OPTIONAL: {
@@ -555,9 +554,6 @@ int cil_post_db(struct cil_db *db)
 		cil_log(CIL_INFO, "Failed to count contexts\n");
 		goto exit;
 	}
-
-	db->userprefixes = cil_malloc(db->nusers * sizeof(char *));
-	db->nusers = 0;
 
 	rc = cil_tree_walk(db->ast->root, __cil_post_db_array_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {

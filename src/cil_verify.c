@@ -953,9 +953,6 @@ int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *s
 	} else if (user->range == NULL) {
 		cil_log(CIL_ERR, "User does not have a level range: %s", user->datum.name);
 		goto exit;
-	} else if (user->prefix == NULL) {
-		cil_log(CIL_ERR, "User does not have a prefix: %s\n", user->datum.name);
-		goto exit;
 	} else if (user->bounds != NULL) {
 		struct cil_user *bnds = user->bounds;
 		if (user == bnds) {
