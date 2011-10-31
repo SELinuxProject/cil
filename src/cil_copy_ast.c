@@ -377,7 +377,7 @@ int cil_copy_fill_classpermset(struct cil_classpermset *data, struct cil_classpe
 	new->class_str = cil_strdup(data->class_str);
 	new->permset_str = cil_strdup(data->permset_str);
 
-	if (data->permset != NULL) {
+	if (data->permset != NULL && data->permset_str == NULL) {
 		cil_permset_init(&new->permset);
 
 		rc = cil_copy_list(data->permset->perms_list_str, &new->permset->perms_list_str);
@@ -511,7 +511,7 @@ int cil_copy_sidcontext(__attribute__((unused)) struct cil_db *db, void *data, v
 
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -582,7 +582,7 @@ int cil_copy_userlevel(__attribute__((unused)) struct cil_db *db, void *data, vo
 	new->user_str = cil_strdup(orig->user_str);
 	new->level_str = cil_strdup(orig->level_str);
 
-	if (orig->level != NULL) {
+	if (orig->level != NULL && orig->level_str == NULL) {
 		cil_level_init(&new->level);
 		rc = cil_copy_fill_level(orig->level, new->level);
 		if (rc != SEPOL_OK) {
@@ -610,7 +610,7 @@ int cil_copy_userrange(__attribute__((unused)) struct cil_db *db, void *data, vo
 	new->user_str = cil_strdup(orig->user_str);
 	new->range_str = cil_strdup(orig->range_str);
 
-	if (orig->range != NULL) {
+	if (orig->range != NULL && orig->range_str == NULL) {
 		cil_levelrange_init(&new->range);
 		rc = cil_copy_fill_levelrange(orig->range, new->range);
 		if (rc != SEPOL_OK) {
@@ -941,7 +941,7 @@ int cil_copy_rangetransition(__attribute__((unused)) struct cil_db *db, void *da
 	new->obj_str = cil_strdup(orig->obj_str);
 	new->range_str = cil_strdup(orig->range_str);
 
-	if (orig->range != NULL) {
+	if (orig->range != NULL && orig->range_str == NULL) {
 		cil_levelrange_init(&new->range);
 		rc = cil_copy_fill_levelrange(orig->range, new->range);
 		if (rc != SEPOL_OK) {
@@ -1001,7 +1001,7 @@ int cil_copy_avrule(__attribute__((unused)) struct cil_db *db, void *data, void 
 	new->tgt_str = cil_strdup(orig->tgt_str);
 	new->classpermset_str = cil_strdup(orig->classpermset_str);
 
-	if (orig->classpermset != NULL) {
+	if (orig->classpermset != NULL && orig->classpermset_str == NULL) {
 		cil_classpermset_init(&new->classpermset);
 		rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
 		if (rc != SEPOL_OK) {
@@ -1282,7 +1282,7 @@ int cil_copy_senscat(__attribute__((unused)) struct cil_db *db, void *data, void
 	new->sens_str = cil_strdup(orig->sens_str);
 	new->catset_str = cil_strdup(orig->catset_str);
 
-	if (orig->catset != NULL) {
+	if (orig->catset != NULL && orig->catset_str == NULL) {
 		cil_catset_init(&new->catset);
 		rc = cil_copy_fill_catset(orig->catset, new->catset);
 		if (rc != SEPOL_OK) {
@@ -1352,7 +1352,7 @@ int cil_copy_fill_level(struct cil_level *data, struct cil_level *new)
 	new->sens_str = cil_strdup(data->sens_str);
 	new->catset_str = cil_strdup(data->catset_str);
 
-	if (data->catset != NULL) {
+	if (data->catset != NULL && data->catset_str == NULL) {
 		cil_catset_init(&new->catset);
 		rc = cil_copy_fill_catset(data->catset, new->catset);
 		if (rc != SEPOL_OK) {
@@ -1410,7 +1410,7 @@ int cil_copy_fill_levelrange(struct cil_levelrange *data, struct cil_levelrange 
 	new->low_str = cil_strdup(data->low_str);
 	new->high_str = cil_strdup(data->high_str);
 
-	if (data->low != NULL) {
+	if (data->low != NULL && data->low_str == NULL) {
 		cil_level_init(&new->low);
 		rc = cil_copy_fill_level(data->low, new->low);
 		if (rc != SEPOL_OK) {
@@ -1419,7 +1419,7 @@ int cil_copy_fill_levelrange(struct cil_levelrange *data, struct cil_levelrange 
 		}
 	}
 
-	if (data->high != NULL) {
+	if (data->high != NULL && data->high_str == NULL) {
 		cil_level_init(&new->high);
 		rc = cil_copy_fill_level(data->high, new->high);
 		if (rc != SEPOL_OK) {
@@ -1479,7 +1479,7 @@ int cil_copy_fill_context(struct cil_context *data, struct cil_context *new)
 	new->type_str = cil_strdup(data->type_str);
 	new->range_str = cil_strdup(data->range_str);
 
-	if (data->range != NULL) {
+	if (data->range != NULL && data->range_str == NULL) {
 		cil_levelrange_init(&new->range);
 		rc = cil_copy_fill_levelrange(data->range, new->range);
 		if (rc != SEPOL_OK) {
@@ -1542,7 +1542,7 @@ int cil_copy_netifcon(__attribute__((unused)) struct cil_db *db, void *data, voi
 	new->if_context_str = cil_strdup(orig->if_context_str);
 	new->packet_context_str = cil_strdup(orig->packet_context_str);
 
-	if (orig->if_context != NULL) {
+	if (orig->if_context != NULL && orig->if_context_str == NULL) {
 		cil_context_init(&new->if_context);
 		rc = cil_copy_fill_context(orig->if_context, new->if_context);
 		if (rc != SEPOL_OK) {
@@ -1550,7 +1550,7 @@ int cil_copy_netifcon(__attribute__((unused)) struct cil_db *db, void *data, voi
 		}
 	}
 
-	if (orig->packet_context != NULL) {
+	if (orig->packet_context != NULL && orig->packet_context_str == NULL) {
 		cil_context_init(&new->packet_context);
 		rc = cil_copy_fill_context(orig->packet_context, new->packet_context);
 		if (rc != SEPOL_OK) {
@@ -1579,7 +1579,7 @@ int cil_copy_genfscon(__attribute__((unused)) struct cil_db *db, void *data, voi
 	new->path_str = cil_strdup(orig->path_str);
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1609,7 +1609,7 @@ int cil_copy_filecon(__attribute__((unused)) struct cil_db *db, void *data, void
 	new->type = orig->type;
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1638,7 +1638,7 @@ int cil_copy_nodecon(__attribute__((unused)) struct cil_db *db, void *data, void
 	new->mask_str = cil_strdup(orig->mask_str);
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->addr != NULL) {
+	if (orig->addr != NULL && orig->addr_str == NULL) {
 		cil_ipaddr_init(&new->addr);
 		rc = cil_copy_fill_ipaddr(orig->addr, new->addr);
 		if (rc != SEPOL_OK) {
@@ -1646,7 +1646,7 @@ int cil_copy_nodecon(__attribute__((unused)) struct cil_db *db, void *data, void
 		}
 	}
 
-	if (orig->mask != NULL) {
+	if (orig->mask != NULL && orig->mask_str == NULL) {
 		cil_ipaddr_init(&new->mask);
 		rc = cil_copy_fill_ipaddr(orig->mask, new->mask);
 		if (rc != SEPOL_OK) {
@@ -1654,7 +1654,7 @@ int cil_copy_nodecon(__attribute__((unused)) struct cil_db *db, void *data, void
 		}
 	}
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1684,7 +1684,7 @@ int cil_copy_portcon(__attribute__((unused)) struct cil_db *db, void *data, void
 	new->port_high = orig->port_high;
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1712,7 +1712,7 @@ int cil_copy_pirqcon(__attribute__((unused)) struct cil_db *db, void *data, void
 	new->pirq = orig->pirq;
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1741,7 +1741,7 @@ int cil_copy_iomemcon(__attribute__((unused)) struct cil_db *db, void *data, voi
 	new->iomem_high = orig->iomem_high;
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1770,7 +1770,7 @@ int cil_copy_ioportcon(__attribute__((unused)) struct cil_db *db, void *data, vo
 	new->ioport_high = orig->ioport_high;
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1798,7 +1798,7 @@ int cil_copy_pcidevicecon(__attribute__((unused)) struct cil_db *db, void *data,
 	new->dev = orig->dev;
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1827,7 +1827,7 @@ int cil_copy_fsuse(__attribute__((unused)) struct cil_db *db, void *data, void *
 	new->fs_str = cil_strdup(orig->fs_str);
 	new->context_str = cil_strdup(orig->context_str);
 
-	if (orig->context != NULL) {
+	if (orig->context != NULL && orig->context_str == NULL) {
 		cil_context_init(&new->context);
 		rc = cil_copy_fill_context(orig->context, new->context);
 		if (rc != SEPOL_OK) {
@@ -1892,7 +1892,7 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 
 	new->classpermset_str = cil_strdup(orig->classpermset_str);
 
-	if (orig->classpermset != NULL) {
+	if (orig->classpermset != NULL && orig->classpermset_str == NULL) {
 		cil_classpermset_init(&new->classpermset);
 		rc = cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
 		if (rc != SEPOL_OK) {
