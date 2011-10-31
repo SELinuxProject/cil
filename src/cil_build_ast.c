@@ -4068,7 +4068,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		SYM_STRING,
 		SYM_STRING,
 		SYM_STRING,
-		SYM_STRING | SYM_LIST,
+		SYM_STRING | SYM_LIST | SYM_EMPTY_LIST,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -4117,12 +4117,16 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	if (parse_current->next->next->next->next->cl_head == NULL) {
 		filecon->context_str = cil_strdup(parse_current->next->next->next->next->data);
 	} else {
-		cil_context_init(&filecon->context);
+		if (parse_current->next->next->next->next->cl_head->next == NULL) {
+			filecon->context = NULL;
+		} else {
+			cil_context_init(&filecon->context);
 
-		rc = cil_fill_context(parse_current->next->next->next->next->cl_head, filecon->context);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to fill file context\n");
-			goto exit;
+			rc = cil_fill_context(parse_current->next->next->next->next->cl_head, filecon->context);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_ERR, "Failed to fill file context\n");
+				goto exit;
+			}
 		}
 	}
 

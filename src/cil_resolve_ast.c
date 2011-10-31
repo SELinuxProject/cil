@@ -2013,7 +2013,7 @@ int cil_resolve_filecon(struct cil_tree_node *current, void *extra_args)
 			return rc;
 		}
 		filecon->context = (struct cil_context*)context_node->data;
-	} else {
+	} else if (filecon->context != NULL) {
 		rc = cil_resolve_context(current, filecon->context, extra_args);
 		if (rc != SEPOL_OK) {
 			return rc;

@@ -166,6 +166,8 @@
 	(ipaddr netmask_v6 2001:0DE0:DA88:2222::)
 
 	(filecon "/usr/bin/" "sh" file system_u_bin_t_l2h)
+	(filecon "/usr/bin/" "sh" file ())
+	(filecon "/usr/bin/" "sh" any ())
 	(nodecon ip_v4 netmask system_u_bin_t_l2h)
 	(nodecon ip_v6 netmask_v6 system_u_bin_t_l2h)
 	(portcon udp 25 system_u_bin_t_l2h)

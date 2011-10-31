@@ -160,7 +160,11 @@ int cil_post_filecon_to_policy(struct cil_sort *sort)
 			fclose(file_contexts);
 			return SEPOL_ERR;
 		}
-		cil_context_to_policy(&file_contexts, 0, filecon->context);
+		if (filecon->context != NULL) {
+			cil_context_to_policy(&file_contexts, 0, filecon->context);
+		} else {
+			fprintf(file_contexts, "<<none>>");
+		}
 		fprintf(file_contexts, "\n");
 	}
 	rc = fclose(file_contexts);

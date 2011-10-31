@@ -1394,6 +1394,11 @@ int __cil_verify_filecon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 	struct cil_filecon *file = node->data;
 	struct cil_context *ctx = file->context;
 
+	if (ctx == NULL) {
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
 	/* Verify only when anonymous */
 	if (ctx->datum.name == NULL) {
 		rc = __cil_verify_context(db, ctx);
