@@ -131,29 +131,37 @@ int cil_post_filecon_to_policy(struct cil_sort *sort)
 
 	for (i=0; i<sort->count; i++) {
 		struct cil_filecon *filecon = (struct cil_filecon*)sort->array[i];
-		fprintf(file_contexts, "filecon %s%s ", filecon->root_str, filecon->path_str);
-		if (filecon->type == CIL_FILECON_FILE) {
-			fprintf(file_contexts, "-- ");
-		} else if (filecon->type == CIL_FILECON_DIR) {
-			fprintf(file_contexts, "-d ");
-		} else if (filecon->type == CIL_FILECON_CHAR) {
-			fprintf(file_contexts, "-c ");
-		} else if (filecon->type == CIL_FILECON_BLOCK) {
-			fprintf(file_contexts, "-b ");
-		} else if (filecon->type == CIL_FILECON_SOCKET) {
-			fprintf(file_contexts, "-s ");
-		} else if (filecon->type == CIL_FILECON_PIPE) {
-			fprintf(file_contexts, "-p ");
-		} else if (filecon->type == CIL_FILECON_SYMLINK) {
-			fprintf(file_contexts, "-l ");
-		} else if (filecon->type == CIL_FILECON_ANY) {
-			fprintf(file_contexts, "  ");
-		} else {
+		fprintf(file_contexts, "%s%s\t", filecon->root_str, filecon->path_str);
+		switch(filecon->type) {
+		case CIL_FILECON_FILE:
+			fprintf(file_contexts, "--\t");
+			break;
+		case CIL_FILECON_DIR:
+			fprintf(file_contexts, "-d\t");
+			break;
+		case CIL_FILECON_CHAR:
+			fprintf(file_contexts, "-c\t");
+			break;
+		case CIL_FILECON_BLOCK:
+			fprintf(file_contexts, "-b\t");
+			break;
+		case CIL_FILECON_SOCKET:
+			fprintf(file_contexts, "-s\t");
+			break;
+		case CIL_FILECON_PIPE:
+			fprintf(file_contexts, "-p\t");
+			break;
+		case CIL_FILECON_SYMLINK:
+			fprintf(file_contexts, "-l\t");
+			break;
+		case CIL_FILECON_ANY:
+			break;
+		default:
 			fclose(file_contexts);
 			return SEPOL_ERR;
 		}
 		cil_context_to_policy(&file_contexts, 0, filecon->context);
-		fprintf(file_contexts, ";\n");
+		fprintf(file_contexts, "\n");
 	}
 	rc = fclose(file_contexts);
 	if (rc != 0) {
