@@ -693,6 +693,12 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_perm);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_perm_dupeperm_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_perm_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_perm_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmap_perm_astnull_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_classmap);
 	SUITE_ADD_TEST(suite, test_cil_gen_classmap_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_classmap_noname_neg);
@@ -702,6 +708,18 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_classmap_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_classmap);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_classmap_neg);
+
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_anonpermset);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_anonpermset_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_namedpermset);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_noclassmapname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_noclassmapperm_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_nopermissionsets_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classmapping_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_classmapping);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_classmapping_neg);
 	
 	SUITE_ADD_TEST(suite, test_cil_gen_common);
 	SUITE_ADD_TEST(suite, test_cil_gen_common_dbnull_neg);

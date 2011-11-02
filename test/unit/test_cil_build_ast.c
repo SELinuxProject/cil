@@ -947,6 +947,147 @@ void test_cil_gen_class_listinlist_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_classmap_perm(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	struct cil_classmap *map = NULL;
+	cil_classmap_init(&map);	
+
+	test_ast_node->flavor = CIL_CLASSMAP;
+	test_ast_node->data = map;
+	
+	struct cil_tree_node *test_ast_node_a;
+	cil_tree_node_init(&test_ast_node_a);
+
+	test_ast_node_a->parent = test_ast_node;
+	test_ast_node_a->line = test_tree->root->cl_head->cl_head->next->next->cl_head->line;
+	test_ast_node_a->path = test_tree->root->cl_head->cl_head->next->next->cl_head->path;
+	
+	int rc = cil_gen_classmap_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node_a);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_classmap_perm_dupeperm_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_classmap(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+
+	struct cil_tree_node *test_ast_node_a;
+	cil_tree_node_init(&test_ast_node_a);
+
+	test_ast_node_a->parent = test_ast_node;
+	test_ast_node_a->line = test_tree->root->cl_head->cl_head->next->next->cl_head->line;
+	test_ast_node_a->path = test_tree->root->cl_head->cl_head->next->next->cl_head->path; 
+	
+	int rc = cil_gen_classmap_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node_a);
+	CuAssertIntEquals(tc, SEPOL_EEXIST, rc);
+}
+
+void test_cil_gen_classmap_perm_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_classmap(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_tree_node *test_ast_node_a;
+	cil_tree_node_init(&test_ast_node_a);
+
+	test_ast_node_a->parent = test_ast_node;
+	test_ast_node_a->line = test_tree->root->cl_head->cl_head->line;
+	test_ast_node_a->path = test_tree->root->cl_head->cl_head->path;
+
+	test_db = NULL;
+
+	int rc = cil_gen_classmap_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node_a);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmap_perm_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_classmap(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_tree_node *test_ast_node_a;
+	cil_tree_node_init(&test_ast_node_a);
+
+	test_ast_node_a->parent = test_ast_node;
+	test_ast_node_a->line = test_tree->root->cl_head->cl_head->line;
+	test_ast_node_a->path = test_tree->root->cl_head->cl_head->path;
+
+	int rc = cil_gen_classmap_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node_a);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmap_perm_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	cil_gen_classmap(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	
+	struct cil_tree_node *test_ast_node_a = NULL;
+
+	int rc = cil_gen_classmap_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node_a);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_classmap(CuTest *tc) {
 	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")", NULL};
 
@@ -1069,6 +1210,173 @@ void test_cil_gen_classmap_astnull_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	int rc = cil_gen_classmap(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmapping_anonpermset(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "read", 
+			"(", "file", "(", "open", "read", "getattr", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_classmapping_anonpermset_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "read", 
+			"(", "file", "(", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmapping_namedpermset(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "read", "char_w", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_classmapping_noclassmapname_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmapping_noclassmapperm_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmapping_nopermissionsets_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "read", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmapping_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "read", 
+			"(", "file", "(", "open", "read", "getattr", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db = NULL;
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmapping_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_classmapping_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "read", 
+			"(", "file", "(", "open", "read", "getattr", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_classmapping(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -15322,6 +15630,42 @@ void test_cil_build_ast_node_helper_classmap(CuTest *tc) {
 
 void test_cil_build_ast_node_helper_classmap_neg(CuTest *tc) {
 	char *line[] = {"(", "classmap", "(", "read", "write", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_classmapping(CuTest *tc) {
+	char *line[] = {"(", "classmapping", "files", "read", "char_w", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 1, finished);
+}
+
+void test_cil_build_ast_node_helper_classmapping_neg(CuTest *tc) {
+	char *line[] = {"(", "classmapping", "files", "read", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
