@@ -1214,7 +1214,7 @@ void test_cil_gen_classmap_astnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classmapping_anonpermset(CuTest *tc) {
-	char *line[] = {"(", "classmap", "files", "read", 
+	char *line[] = {"(", "classmapping", "files", "read", 
 			"(", "file", "(", "open", "read", "getattr", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1234,7 +1234,7 @@ void test_cil_gen_classmapping_anonpermset(CuTest *tc) {
 }
 
 void test_cil_gen_classmapping_anonpermset_neg(CuTest *tc) {
-	char *line[] = {"(", "classmap", "files", "read", 
+	char *line[] = {"(", "classmapping", "files", "read", 
 			"(", "file", "(", ")", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1254,7 +1254,7 @@ void test_cil_gen_classmapping_anonpermset_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classmapping_namedpermset(CuTest *tc) {
-	char *line[] = {"(", "classmap", "files", "read", "char_w", ")", NULL};
+	char *line[] = {"(", "classmapping", "files", "read", "char_w", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1273,7 +1273,7 @@ void test_cil_gen_classmapping_namedpermset(CuTest *tc) {
 }
 
 void test_cil_gen_classmapping_noclassmapname_neg(CuTest *tc) {
-	char *line[] = {"(", "classmap", ")", NULL};
+	char *line[] = {"(", "classmapping", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1292,7 +1292,7 @@ void test_cil_gen_classmapping_noclassmapname_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classmapping_noclassmapperm_neg(CuTest *tc) {
-	char *line[] = {"(", "classmap", "files", ")", NULL};
+	char *line[] = {"(", "classmapping", "files", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1311,7 +1311,7 @@ void test_cil_gen_classmapping_noclassmapperm_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classmapping_nopermissionsets_neg(CuTest *tc) {
-	char *line[] = {"(", "classmap", "files", "read", ")", NULL};
+	char *line[] = {"(", "classmapping", "files", "read", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -1330,7 +1330,7 @@ void test_cil_gen_classmapping_nopermissionsets_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classmapping_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "classmap", "files", "read", 
+	char *line[] = {"(", "classmapping", "files", "read", 
 			"(", "file", "(", "open", "read", "getattr", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -1365,7 +1365,7 @@ void test_cil_gen_classmapping_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_classmapping_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "classmap", "files", "read", 
+	char *line[] = {"(", "classmapping", "files", "read", 
 			"(", "file", "(", "open", "read", "getattr", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
