@@ -241,6 +241,176 @@ void test_cil_resolve_roledominance_role2_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
+void test_cil_resolve_classmapping_anon(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "open", ")", ")",
+			"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "classmapping", "files", "read", "(", "file", "(", "open", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_classmapping_anon_inmacro(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "class", "file", "(", "open", ")", ")",
+			"(", "macro", "mm", "(", "(", "classpermissionset", "a", ")", ")", 
+				"(", "classmapping", "files", "read", "a", ")", ")",
+			"(", "call", "mm", "(", "(", "file", "(", "open", ")", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL); 
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	args->pass = CIL_PASS_CALL1;
+	
+	int rc2 = cil_resolve_call1(test_db->ast->root->cl_head->next->next->next, args);
+
+	args->pass = CIL_PASS_CALL2;
+
+	int rc3 = cil_resolve_call2(test_db->ast->root->cl_head->next->next->next, args);
+
+	args->pass = CIL_PASS_MISC3;
+	args->callstack = test_db->ast->root->cl_head->next->next->next;
+
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next->cl_head, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
+	CuAssertIntEquals(tc, SEPOL_OK, rc3);
+}
+
+void test_cil_resolve_classmapping_anon_inmacro_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "class", "file", "(", "open", ")", ")",
+			"(", "macro", "mm", "(", "(", "classpermissionset", "a", ")", ")", 
+				"(", "classmapping", "files", "read", "a", ")", ")",
+			"(", "call", "mm", "(", "(", "DNE", "(", "open", ")", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL); 
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+	
+	args->pass = CIL_PASS_CALL1;
+	
+	int rc2 = cil_resolve_call1(test_db->ast->root->cl_head->next->next->next, args);
+
+	args->pass = CIL_PASS_CALL2;
+
+	int rc3 = cil_resolve_call2(test_db->ast->root->cl_head->next->next->next, args);
+
+	args->pass = CIL_PASS_MISC3;
+	args->callstack = test_db->ast->root->cl_head->next->next->next;
+
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next->cl_head, args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
+	CuAssertIntEquals(tc, SEPOL_OK, rc3);
+}
+
+void test_cil_resolve_classmapping_named(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "classpermissionset", "char_w", "(", "char", "(", "read", ")", ")", ")",
+			"(", "classmapping", "files", "read", "char_w", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_classmapping_named_classmapname_neg(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", "(", "read", ")", ")", ")",
+			"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "classmapping", "files", "read", "foo", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_classmapping_anon_classmapname_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "open", ")", ")",
+			"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "classmapping", "dne", "read", "(", "file", "(", "open", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
+void test_cil_resolve_classmapping_anon_permset_neg(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "open", ")", ")",
+			"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "classmapping", "files", "read", "(", "dne", "(", "open", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 void test_cil_resolve_rolebounds(CuTest *tc) {
 	char *line[] = {"(", "role", "role1", ")", 
 			"(", "role", "role2", ")", 
@@ -5331,6 +5501,73 @@ void test_cil_resolve_call1_permset_anon(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_call1_classpermset_named(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "class", "file", "(", "open", ")", ")",
+			"(", "classpermissionset", "char_w", "(", "file", "(", "open", ")", ")", ")",
+			"(", "macro", "mm", "(", "(", "classpermissionset", "a", ")", ")", 
+				"(", "classmapping", "files", "read", "a", ")", ")",
+			"(", "call", "mm", "(", "char_w", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_call1(test_db->ast->root->cl_head->next->next->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call1_classpermset_anon(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "class", "file", "(", "open", ")", ")",
+			"(", "macro", "mm", "(", "(", "classpermissionset", "a", ")", ")", 
+				"(", "classmapping", "files", "read", "a", ")", ")",
+			"(", "call", "mm", "(", "(", "file", "(", "open", ")", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_call1(test_db->ast->root->cl_head->next->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call1_classpermset_anon_neg(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "class", "file", "(", "open", ")", ")",
+			"(", "macro", "mm", "(", "(", "classpermissionset", "a", ")", ")", 
+				"(", "classmapping", "files", "read", "a", ")", ")",
+			"(", "call", "mm", "(", "(", "file", "(", ")", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_call1(test_db->ast->root->cl_head->next->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_resolve_call1_unknown_neg(CuTest *tc) {
 	char *line[] = {"(", "class", "foo", "(", "read", ")", ")",
 			"(", "class", "file", "(", "read", ")", ")",
@@ -5762,6 +5999,59 @@ void test_cil_resolve_call2_permset_anon(CuTest *tc) {
 	args->pass = CIL_PASS_CALL2;
 
 	int rc = cil_resolve_call2(test_db->ast->root->cl_head->next->next->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_classpermset_named(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "class", "file", "(", "open", ")", ")",
+			"(", "classpermissionset", "char_w", "(", "file", "(", "open", ")", ")", ")",
+			"(", "macro", "mm", "(", "(", "classpermissionset", "a", ")", ")", 
+				"(", "classmapping", "files", "read", "a", ")", ")",
+			"(", "call", "mm", "(", "char_w", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db->ast->root->cl_head->next->next->next->next, args);
+
+	args->pass = CIL_PASS_CALL2;
+
+	int rc = cil_resolve_call2(test_db->ast->root->cl_head->next->next->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_classpermset_anon(CuTest *tc) {
+	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+			"(", "class", "file", "(", "open", ")", ")",
+			"(", "macro", "mm", "(", "(", "classpermissionset", "a", ")", ")", 
+				"(", "classmapping", "files", "read", "a", ")", ")",
+			"(", "call", "mm", "(", "(", "file", "(", "open", ")", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	cil_resolve_call1(test_db->ast->root->cl_head->next->next->next, args);
+
+	args->pass = CIL_PASS_CALL2;
+
+	int rc = cil_resolve_call2(test_db->ast->root->cl_head->next->next->next, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 

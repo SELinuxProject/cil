@@ -227,6 +227,14 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_classcommon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_classcommon_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_classmapping_named);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classmapping_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classmapping_anon_inmacro);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classmapping_anon_inmacro_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classmapping_named_classmapname_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classmapping_anon_classmapname_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classmapping_anon_permset_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_rolebounds);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rolebounds_exists_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_rolebounds_role1_neg);
@@ -478,6 +486,9 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_class);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_permset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_permset_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_classpermset_named);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_classpermset_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call1_classpermset_anon_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_level_anon_neg);
@@ -503,6 +514,8 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_catset_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_permset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_permset_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_classpermset_named);
+	SUITE_ADD_TEST(suite, test_cil_resolve_call2_classpermset_anon);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_class);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call2_level_anon);

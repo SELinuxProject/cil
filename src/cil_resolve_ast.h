@@ -46,6 +46,7 @@ int cil_resolve_typepermissive(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_filetransition(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_rangetransition(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_classcommon(struct cil_tree_node *current, void *extra_args);
+int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_userrole(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_userlevel(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_userrange(struct cil_tree_node *current, void *extra_args);
