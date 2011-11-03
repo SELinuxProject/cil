@@ -664,7 +664,8 @@ int cil_userprefixes_to_string(struct cil_db *db, char **out, size_t *size)
 	}
 
 	*size = str_len * sizeof(char);
-	str_tmp = cil_malloc((str_len + 1) * sizeof(char));
+	str_len++;
+	str_tmp = cil_malloc(str_len * sizeof(char));
 	*out = str_tmp;
 
 	for (curr = db->userprefixes->head; curr != NULL; curr = curr->next) {
@@ -780,7 +781,7 @@ int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 	for(curr = db->selinuxusers->head; curr != NULL; curr = curr->next) {
 		selinuxuser = curr->data;
 		user = selinuxuser->user;
-		str_len += strlen(selinuxuser->name_str) + strlen(user->datum.name) + 2;
+		str_len += strlen(selinuxuser->name_str) + strlen(user->datum.name) + 1;
 
 		if (db->mls == CIL_TRUE) {
 			struct cil_levelrange *range = selinuxuser->range;
@@ -799,20 +800,28 @@ int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 				goto exit;
 			}
 
-			str_len += (strlen(str_low) + strlen(str_high));
+			str_len += (strlen(str_low) + strlen(str_high) + 2);
 			free(str_low);
 			free(str_high);
 		}
+
+		str_len++;
 	}
 
 	*size = str_len * sizeof(char);
-	str_tmp = cil_malloc((str_len + 1) * sizeof(char));
+	str_len++;
+	str_tmp = cil_malloc(str_len * sizeof(char));
 	*out = str_tmp;
 
 	for(curr = db->selinuxusers->head; curr != NULL; curr = curr->next) {
 		selinuxuser = curr->data;
 		user = selinuxuser->user;
 
+		buf_pos = snprintf(str_tmp, str_len, "%s:%s", selinuxuser->name_str,
+									user->datum.name);
+		str_len -= buf_pos;
+		str_tmp += buf_pos;
+
 		if (db->mls == CIL_TRUE) {
 			struct cil_levelrange *range = selinuxuser->range;
 			struct cil_level *low = range->low;
@@ -830,24 +839,17 @@ int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 				goto exit;
 			}
 
-			buf_pos = snprintf(str_tmp, str_len, "%s:%s:", selinuxuser->name_str,
-									user->datum.name);
-			strncat(str_tmp, str_low, str_len);
-			strncat(str_tmp, "-", str_len);
-			strncat(str_tmp, str_high, str_len);
-			strncat(str_tmp, "\n", str_len);
-
-			str_len -= (strlen(str_low) + strlen(str_high) + 2);
-			str_tmp += (strlen(str_low) + strlen(str_high) + 2);
+			buf_pos = snprintf(str_tmp, str_len, ":%s-%s", str_low, str_high);
+			str_len -= buf_pos;
+			str_tmp += buf_pos;
 
 			free(str_low);
 			free(str_high);
-		} else {
-			buf_pos = snprintf(str_tmp, str_len, "%s:%s\n", selinuxuser->name_str,
-								user->datum.name);
 		}
-		str_len -= buf_pos;
-		str_tmp += buf_pos;
+
+		buf_pos = snprintf(str_tmp, str_len, "\n");
+		str_len -= 1;
+		str_tmp += 1;
 	}
 
 	rc = SEPOL_OK;
@@ -870,9 +872,9 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 		filecon = filecons->array[i];
 		ctx = filecon->context;
 
-		str_len += (strlen(filecon->root_str) + strlen(filecon->path_str) + 2);
+		str_len += (strlen(filecon->root_str) + strlen(filecon->path_str));
 
-		if (filecon->type < CIL_FILECON_FILE) {
+		if (filecon->type != CIL_FILECON_ANY) {
 			/* If a type is specified,
 			   +2 for type string, +1 for tab */
 			str_len += 3;
@@ -883,7 +885,7 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 			struct cil_role *role = ctx->role;
 			struct cil_type *type = ctx->type;
 
-			str_len += (strlen(user->datum.name) + strlen(role->datum.name) + strlen(type->datum.name));
+			str_len += (strlen(user->datum.name) + strlen(role->datum.name) + strlen(type->datum.name) + 3);
 
 			if (db->mls == CIL_TRUE) {
 				struct cil_levelrange *range = ctx->range;
@@ -902,17 +904,20 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 					goto exit;
 				}
 
-				str_len += (strlen(str_low) + strlen(str_high));
+				str_len += (strlen(str_low) + strlen(str_high) + 2);
 				free(str_low);
 				free(str_high);
 			}
 		} else {
 			str_len += strlen("\t<<none>>");
 		}
+
+		str_len++;
 	}
 
 	*size = str_len * sizeof(char);
-	str_tmp = cil_malloc((str_len + 1) * sizeof(char));
+	str_len++;
+	str_tmp = cil_malloc(str_len * sizeof(char));
 	*out = str_tmp;
 
 	for (i = 0; i < filecons->count; i++) {
@@ -920,7 +925,7 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 		filecon = filecons->array[i];
 		ctx = filecon->context;
 
-		buf_pos = snprintf(str_tmp, str_len, "%s%s\t", filecon->root_str,
+		buf_pos = snprintf(str_tmp, str_len, "%s%s", filecon->root_str,
 									filecon->path_str);
 
 		str_len += buf_pos;
@@ -928,25 +933,25 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 
 		switch(filecon->type) {
 		case CIL_FILECON_FILE:
-			str_type = "--\t";
+			str_type = "\t--";
 			break;
 		case CIL_FILECON_DIR:
-			str_type = "-d\t";
+			str_type = "\t-d";
 			break;
 		case CIL_FILECON_CHAR:
-			str_type = "-c\t";
+			str_type = "\t-c";
 			break;
 		case CIL_FILECON_BLOCK:
-			str_type = "-b\t";
+			str_type = "\t-b";
 			break;
 		case CIL_FILECON_SOCKET:
-			str_type = "-s\t";
+			str_type = "\t-s";
 			break;
 		case CIL_FILECON_PIPE:
-			str_type = "-p\t";
+			str_type = "\t-p";
 			break;
 		case CIL_FILECON_SYMLINK:
-			str_type = "-l\t";
+			str_type = "\t-l";
 			break;
 		default:
 			str_type = "";
@@ -962,7 +967,7 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 			struct cil_role *role = ctx->role;
 			struct cil_type *type = ctx->type;
 
-			buf_pos = snprintf(str_tmp, str_len, "%s:%s:%s", user->datum.name,
+			buf_pos = snprintf(str_tmp, str_len, "\t%s:%s:%s", user->datum.name,
 									role->datum.name,
 									type->datum.name);
 
@@ -986,26 +991,22 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 					goto exit;
 				}
 
-				strncat(str_tmp, str_low, str_len);
-				strncat(str_tmp, "-", str_len);
-				strncat(str_tmp, str_high, str_len);
-				strncat(str_tmp, "\n", str_len);
-
-				str_len -= (strlen(str_low) + strlen(str_high) + 2);
-				str_tmp += (strlen(str_low) + strlen(str_high) + 2);
+				buf_pos = snprintf(str_tmp, str_len, ":%s-%s", str_low, str_high);
+				str_len -= buf_pos;
+				str_tmp += buf_pos;
 
 				free(str_low);
 				free(str_high);
-			} else {
-				strncat(str_tmp, "\n", str_len);
-				str_len -= 1;
-				str_tmp += 1;
 			}
 		} else {
-			strncat(str_tmp, "\t<<none>>\n", str_len);
-			str_len -= strlen("\t<<none>>\n");
-			str_tmp += strlen("\t<<none>>\n");
+			buf_pos = snprintf(str_tmp, str_len, "\t<<none>>");
+			str_len -= buf_pos;
+			str_tmp += buf_pos;
 		}
+
+		buf_pos = snprintf(str_tmp, str_len, "\n");
+		str_len -= 1;
+		str_tmp += 1;
 	}
 
 	rc = SEPOL_OK;
