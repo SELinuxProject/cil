@@ -123,58 +123,6 @@ int cil_post_filecon_compare(const void *a, const void *b)
 	return rc;
 }
 
-int cil_post_filecon_to_policy(struct cil_sort *sort)
-{
-	int rc = SEPOL_ERR;
-	uint32_t i = 0;
-	FILE *file_contexts = fopen("file_contexts", "w+");
-
-	for (i=0; i<sort->count; i++) {
-		struct cil_filecon *filecon = (struct cil_filecon*)sort->array[i];
-		fprintf(file_contexts, "%s%s\t", filecon->root_str, filecon->path_str);
-		switch(filecon->type) {
-		case CIL_FILECON_FILE:
-			fprintf(file_contexts, "--\t");
-			break;
-		case CIL_FILECON_DIR:
-			fprintf(file_contexts, "-d\t");
-			break;
-		case CIL_FILECON_CHAR:
-			fprintf(file_contexts, "-c\t");
-			break;
-		case CIL_FILECON_BLOCK:
-			fprintf(file_contexts, "-b\t");
-			break;
-		case CIL_FILECON_SOCKET:
-			fprintf(file_contexts, "-s\t");
-			break;
-		case CIL_FILECON_PIPE:
-			fprintf(file_contexts, "-p\t");
-			break;
-		case CIL_FILECON_SYMLINK:
-			fprintf(file_contexts, "-l\t");
-			break;
-		case CIL_FILECON_ANY:
-			break;
-		default:
-			fclose(file_contexts);
-			return SEPOL_ERR;
-		}
-		if (filecon->context != NULL) {
-			cil_context_to_policy(&file_contexts, 0, filecon->context);
-		} else {
-			fprintf(file_contexts, "<<none>>");
-		}
-		fprintf(file_contexts, "\n");
-	}
-	rc = fclose(file_contexts);
-	if (rc != 0) {
-		return SEPOL_ERR;
-	}
-
-	return SEPOL_OK;
-}
-
 int cil_post_portcon_compare(const void *a, const void *b)
 {
 	int rc = SEPOL_ERR;
@@ -682,12 +630,6 @@ int cil_post_process(struct cil_db *db)
 	rc = cil_post_db(db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to sort contexts\n");
-		goto exit;
-	}
-
-	rc = cil_post_filecon_to_policy(db->filecon);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed writing filecontexts to file\n");
 		goto exit;
 	}
 

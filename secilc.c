@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
 	uint32_t file_size;
 	char *buffer;
 	FILE *file;
+	FILE *file_contexts;
 	char output[10];
 	struct cil_tree *parse_tree = NULL;
 	struct cil_db *db = NULL;
@@ -73,6 +74,8 @@ int main(int argc, char *argv[])
 	int policyvers = POLICYDB_VERSION_MAX;
 	int opt_char;
 	int opt_index = 0;
+	char *fc_buf = NULL;
+	size_t fc_size;
 	enum cil_log_level log_level = CIL_ERR;
 	static struct option long_opts[] = {
 		{"help", no_argument, 0, 'h'},
@@ -298,8 +301,27 @@ int main(int argc, char *argv[])
 	fclose(binary);
 	binary = NULL;
 
-	cil_log(CIL_INFO, "Destroying DB...\n");
+	cil_log(CIL_INFO, "Writing File Contexts\n");
+	
+	rc = cil_filecons_to_string(db, &fc_buf, &fc_size);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to get file context data\n");
+		goto exit;
+	}
 
+	file_contexts = fopen("file_contexts", "w+");
+	if (file_contexts == NULL) {
+		cil_log(CIL_ERR, "Failed to open file_contexts file\n");
+		goto exit;
+	}
+	
+	if (fwrite(fc_buf, sizeof(char), fc_size, file_contexts) != fc_size) {
+		cil_log(CIL_ERR, "Failed to write file_contexts file\n");
+		goto exit;
+	}
+
+	fclose(file_contexts);
+	
 	rc = SEPOL_OK;
 
 exit:
@@ -313,5 +335,6 @@ exit:
 	sepol_policydb_free(pdb);
 	sepol_policy_file_free(pf);
 	free(buffer);
+	free(fc_buf);
 	return rc;
 }
