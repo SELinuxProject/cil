@@ -43,7 +43,7 @@
 #include "cil_tree.h"
 #include "cil_list.h"
 
-#include "cil_verify_internal.h"
+#include "cil_verify.h"
 
 int __cil_verify_name(const char *name)
 {

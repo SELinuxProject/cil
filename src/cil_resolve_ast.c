@@ -41,8 +41,7 @@
 #include "cil_build_ast.h"
 #include "cil_resolve_ast.h"
 #include "cil_copy_ast.h"
-
-#include "cil_verify_internal.h"
+#include "cil_verify.h"
 
 struct cil_args_resolve {
 	struct cil_db *db;

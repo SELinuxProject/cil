@@ -43,8 +43,7 @@
 #include "cil_parser.h"
 #include "cil_build_ast.h"
 #include "cil_copy_ast.h"
-
-#include "cil_verify_internal.h"
+#include "cil_verify.h"
 
 struct cil_args_build {
 	struct cil_tree_node *ast;

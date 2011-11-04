@@ -43,8 +43,7 @@
 #include "cil_list.h"
 #include "cil_post.h"
 #include "cil_policy.h"
-
-#include "cil_verify_internal.h"
+#include "cil_verify.h"
 
 void cil_post_fc_fill_data(struct fc_data *fc, char *path)
 {
