@@ -34,7 +34,7 @@
 #include <getopt.h>
 #include <sys/stat.h>
 
-#include <cil/cil.h>
+#include <sepol/cil/cil.h>
 #include <sepol/policydb.h>
 
 void usage(char *prog)

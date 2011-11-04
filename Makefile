@@ -20,8 +20,6 @@ SECILC_OBJS = $(patsubst %.c,%.o,$(SECILC_SRCS))
 TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
 TEST_OBJS = $(patsubst %.c,%.o,$(TEST_SRCS))
 
-LIBCIL_STATIC = $(SRCDIR)/libcil.a
-
 LIBSEPOL_STATIC = /usr/lib/libsepol.a
 
 LIBS =
@@ -53,14 +51,11 @@ all: $(SECILC)
 %.o:  %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(LIBCIL_STATIC):
-	make -C src/ CFLAGS="$(CFLAGS)" libcil.a
+$(UNIT): $(TEST_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
 
-$(UNIT): $(TEST_OBJS) $(LIBCIL_STATIC)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBCIL_STATIC) $(LIBSEPOL_STATIC) $(LDFLAGS)
-
-$(SECILC): $(SECILC_OBJS) $(LIBCIL_STATIC)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBCIL_STATIC) $(LIBSEPOL_STATIC) $(LDFLAGS)
+$(SECILC): $(SECILC_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
 
 unit: $(SECILC) $(UNIT)
 
