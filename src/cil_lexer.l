@@ -30,6 +30,7 @@
 %{
 	#include <stdint.h>
 	#include <sepol/errcodes.h>
+	#include "cil_internal.h"
 	#include "cil_lexer.h"
 	#include "cil_log.h"
 	#include "cil_mem.h"

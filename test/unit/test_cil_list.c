@@ -30,7 +30,7 @@
 #include "CuTest.h"
 #include "CilTest.h"
 
-#include "../../src/cil.h"
+#include "../../src/cil_internal.h"
 #include "../../src/cil_build_ast.h"
 
 void test_cil_list_init(CuTest *tc) {

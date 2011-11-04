@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 
-#include "cil.h"
+#include "cil_internal.h"
 #include "cil_list.h"
 
 struct cil_tree {

@@ -20,11 +20,7 @@ SECILC_OBJS = $(patsubst %.c,%.o,$(SECILC_SRCS))
 TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
 TEST_OBJS = $(patsubst %.c,%.o,$(TEST_SRCS))
 
-GENERATED = cil_lexer.c
-
-CIL_SRCS= $(wildcard $(SRCDIR)/*.c) $(SRCDIR)/$(GENERATED)
-CIL_OBJS= $(patsubst %.c,%.o,$(CIL_SRCS))
-
+LIBCIL_STATIC = $(SRCDIR)/libcil.a
 
 LIBSEPOL_STATIC = /usr/lib/libsepol.a
 
@@ -41,7 +37,7 @@ else
 	override CFLAGS += -O2
 endif
 
-override CFLAGS += -I$(INCLUDEDIR) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
+override CFLAGS += -I./include -I$(INCLUDEDIR) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
 
 ARCH := $(patsubst i%86,i386,$(shell uname -m))
 ifneq (,$(filter i386,$(ARCH)))
@@ -54,17 +50,17 @@ endif
 
 all: $(SECILC)
 
-cil_lexer.c: cil_lexer.l
-	$(LEX) -t $< > $@
-
 %.o:  %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(UNIT): $(TEST_OBJS) $(CIL_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
+$(LIBCIL_STATIC):
+	make -C src/ CFLAGS="$(CFLAGS)" libcil.a
 
-$(SECILC): $(SECILC_OBJS) $(CIL_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBSEPOL_STATIC) $(LDFLAGS)
+$(UNIT): $(TEST_OBJS) $(LIBCIL_STATIC)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBCIL_STATIC) $(LIBSEPOL_STATIC) $(LDFLAGS)
+
+$(SECILC): $(SECILC_OBJS) $(LIBCIL_STATIC)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBCIL_STATIC) $(LIBSEPOL_STATIC) $(LDFLAGS)
 
 unit: $(SECILC) $(UNIT)
 
@@ -73,19 +69,17 @@ coverage: CFLAGS += $(COVCFLAGS)
 coverage: clean unit
 	./unit_tests
 	test -d cov || mkdir cov
-	export GCOV_PREFIX_STRIP=1
-	lcov --directory . --capture --output-file cov/app.info --ignore-errors source -b .
-	lcov --remove cov/app.info 'test/unit/*' --remove cov/app.info '/usr/include/*' --output-file cov/app.info
+	lcov --directory src --capture --output-file cov/app.info --ignore-errors source -b src
+	lcov --remove cov/app.info '/usr/include/*' --remove cov/app.info 'sepol/*' --output-file cov/app.info
 	genhtml -o ./cov/html ./cov/app.info
 
 test: $(SECILC)
 	./$(SECILC) test/policy.cil
 
 clean:
-	-rm -f $(CIL_OBJS) $(TEST_OBJS) $(SECILC_OBJS) $(SRCDIR)/$(GENERATED)
-	-rm -rf $(patsubst %.o,%.gcda,$(CIL_OBJS) $(SECILC_OBJS) $(TEST_OBJS))
-	-rm -rf $(patsubst %.o,%.gcno,$(CIL_OBJS) $(SECILC_OBJS) $(TEST_OBJS))
-	-rm -rf cov/
+	-rm -f $(TEST_OBJS) $(SECILC_OBJS)
+	-rm -rf cov src/*.gcda src/*.gcno *.gcda *.gcno
+	make -C src clean
 
 bare: clean
 	rm -f $(SECILC)

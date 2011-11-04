@@ -34,7 +34,7 @@
 
 #include "../../src/cil_tree.h"
 #include "../../src/cil_symtab.h"
-#include "../../src/cil.h"
+#include "../../src/cil_internal.h"
 
 void test_cil_symtab_insert(CuTest *tc) {
 	symtab_t *test_symtab = NULL;

@@ -32,14 +32,22 @@
 
 #include <sepol/policydb/policydb.h>
 #include <sepol/policydb/symtab.h>
+#include <sys/stat.h>
 
-#include "cil.h"
+#include "cil_internal.h"
 #include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_list.h"
 #include "cil_symtab.h"
 #include "cil_build_ast.h"
+
+#include "cil_parser.h"
+#include "cil_build_ast.h"
+#include "cil_resolve_ast.h"
+#include "cil_fqn.h"
+#include "cil_post.h"
+#include "cil_binary.h"
 
 void cil_db_init(struct cil_db **db)
 {
@@ -95,7 +103,138 @@ void cil_db_destroy(struct cil_db **db)
 
 	free(*db);
 	*db = NULL;	
+}
 
+int cil_parse_files(cil_db_t *db, char **files_list, int num_files)
+{
+	char *buffer = NULL;
+	struct stat filedata;
+	FILE *file;
+	uint32_t file_size;
+	struct cil_tree *parse_tree = NULL;
+	int rc;
+	int i;
+
+	cil_tree_init(&parse_tree);
+
+	for (i = 0; i < num_files; i++) {
+		file = fopen(files_list[i], "r");
+		if (!file) {
+			cil_log(CIL_ERR, "Could not open file: %s\n", files_list[i]);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		rc = stat(files_list[i], &filedata);
+		if (rc == -1) {
+			cil_log(CIL_ERR, "Could not stat file: %s\n", files_list[i]);
+			goto exit;
+		}
+		file_size = filedata.st_size;	
+
+		buffer = cil_malloc(file_size + 2);
+		rc = fread(buffer, file_size, 1, file);
+		if (rc != 1) {
+			cil_log(CIL_ERR, "Failure reading file: %s\n", files_list[i]);
+			goto exit;
+		}
+		memset(buffer+file_size, 0, 2);
+		fclose(file);
+		file = NULL;
+
+		cil_log(CIL_INFO, "Parsing %s...\n", files_list[i]);
+		rc = cil_parser(files_list[i], buffer, file_size + 2, &parse_tree);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to parse %s, exiting\n", files_list[i]);
+			goto exit;
+		}
+
+		free(buffer);
+		buffer = NULL;
+
+#ifdef DEBUG
+		cil_tree_print(parse_tree->root, 0);
+#endif
+	}
+	
+	/*TODO: db->mls = mls;*/
+
+	cil_log(CIL_INFO, "Building AST from Parse Tree...\n");
+	rc = cil_build_ast(db, parse_tree->root, db->ast->root);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to build ast, exiting\n");
+		goto exit;
+	}
+
+#ifdef DEBUG
+	cil_tree_print(db->ast->root, 0);
+#endif
+
+	cil_log(CIL_INFO, "Destroying Parse Tree...\n");
+	cil_tree_destroy(&parse_tree);
+
+	cil_log(CIL_INFO, "Resolving AST...\n");
+	rc = cil_resolve_ast(db, db->ast->root);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed to resolve ast, exiting\n");
+		goto exit;
+	}
+
+#ifdef DEBUG
+	cil_tree_print(db->ast->root, 0);
+#endif
+
+	cil_log(CIL_INFO, "Destroying AST Symtabs...\n");
+	rc = cil_destroy_ast_symtabs(db->ast->root);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to destroy ast symtabs, exiting\n");
+		goto exit;
+	}
+
+	cil_log(CIL_INFO, "Qualifying Names...\n");
+	rc = cil_fqn_qualify(db->ast->root);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to qualify names, exiting\n");
+		goto exit;
+	}
+
+	cil_log(CIL_INFO, "Post process...\n");
+	rc = cil_post_process(db);
+	if (rc != SEPOL_OK ) {
+		cil_log(CIL_ERR, "Post process failed, exiting\n");
+		goto exit;
+	}
+
+#ifdef DEBUG
+	rc = cil_gen_policy(db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to print to policy.conf file\n");
+		goto exit;
+	}
+	cil_tree_print(db->ast->root, 0);
+#endif
+	cil_log(CIL_INFO, "Generating Binary...\n");
+
+exit:
+
+	if (file != NULL) {
+		fclose(file);
+	}
+	free(buffer);
+
+	return rc;
+}
+
+int cil_db_to_sepol_policydb(cil_db_t *db, sepol_policydb_t *sepol_db)
+{
+	int rc;
+	rc = cil_binary_create(db, sepol_db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to generate binary, exiting\n");
+		goto exit;
+	}
+
+exit:
+	return rc;
 }
 
 void cil_destroy_data(void **data, enum cil_flavor flavor)

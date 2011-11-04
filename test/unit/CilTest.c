@@ -37,7 +37,7 @@
 #include "CuTest.h"
 #include "CilTest.h"
 
-#include "../../src/cil.h"
+#include "../../src/cil_internal.h"
 
 #include "test_cil.h"
 #include "test_cil_tree.h"

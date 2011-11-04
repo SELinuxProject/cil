@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 
-#include "cil.h"
+#include "cil_internal.h"
 #include "cil_tree.h"
 
 int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classpermset *cps, void *extra_args);

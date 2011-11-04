@@ -33,7 +33,7 @@
 #include <sepol/policydb/policydb.h>
 #include <sepol/policydb/symtab.h>
 
-#include "cil.h"
+#include "cil_internal.h"
 #include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"

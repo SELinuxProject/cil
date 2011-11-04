@@ -29,7 +29,7 @@
 
 #include <stdio.h>
 
-#include "cil.h"
+#include "cil_internal.h"
 #include "cil_log.h"
 #include "cil_tree.h"
 #include "cil_list.h"

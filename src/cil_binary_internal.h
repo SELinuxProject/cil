@@ -32,7 +32,7 @@
 
 #include <sepol/policydb/policydb.h>
 
-#include "cil.h"
+#include "cil_internal.h"
 
 
 /**

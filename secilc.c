@@ -30,22 +30,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <sys/stat.h>
 #include <string.h>
 #include <getopt.h>
 
-#include "src/cil.h"
-#include "src/cil_log.h"
-#include "src/cil_tree.h"
-#include "src/cil_lexer.h"
-#include "src/cil_parser.h"
-#include "src/cil_build_ast.h"
-#include "src/cil_resolve_ast.h"
-#include "src/cil_fqn.h"
-#include "src/cil_binary.h"
-#include "src/cil_policy.h"
-#include "src/cil_post.h"
-
+#include <cil/cil.h>
 #include <sepol/policydb.h>
 
 void usage(char *prog)
@@ -57,16 +45,11 @@ void usage(char *prog)
 int main(int argc, char *argv[])
 {
 	int rc = SEPOL_ERR;
-	struct stat filedata;
 	sepol_policydb_t *pdb = NULL;
 	struct sepol_policy_file *pf = NULL;
 	FILE *binary = NULL;
-	uint32_t file_size;
-	char *buffer;
-	FILE *file;
 	FILE *file_contexts;
 	char output[10];
-	struct cil_tree *parse_tree = NULL;
 	struct cil_db *db = NULL;
 	int target = SEPOL_TARGET_SELINUX;
 	int mls = 0;
@@ -86,7 +69,6 @@ int main(int argc, char *argv[])
 		{"handle-unknown", required_argument, 0, 'U'},
 		{0, 0, 0, 0}
 	};
-	int i;
 
 	while (1) {
 		opt_char = getopt_long(argc, argv, "hvt:Mc:", long_opts, &opt_index);
@@ -103,7 +85,7 @@ int main(int argc, char *argv[])
 				} else if (!strcmp(optarg, "xen")) {
 					target = SEPOL_TARGET_XEN;
 				} else {
-					cil_log(CIL_ERR, "Unknown target: %s\n", optarg);
+					fprintf(stderr, "Unknown target: %s\n", optarg);
 					usage(argv[0]);
 				}
 				break;
@@ -115,11 +97,11 @@ int main(int argc, char *argv[])
 				errno = 0;
 				policyvers = strtol(optarg, &endptr, 10);
 				if (errno != 0 || endptr == optarg || *endptr != '\0') {
-					cil_log(CIL_ERR, "Bad policy version: %s\n", optarg);
+					fprintf(stderr, "Bad policy version: %s\n", optarg);
 					usage(argv[0]);
 				}
 				if (policyvers > POLICYDB_VERSION_MAX || policyvers < POLICYDB_VERSION_MIN) {
-					cil_log(CIL_ERR, "Policy version must be between %d and %d\n",
+					fprintf(stderr, "Policy version must be between %d and %d\n",
 					       POLICYDB_VERSION_MIN, POLICYDB_VERSION_MAX);
 					usage(argv[0]);
 				}
@@ -140,116 +122,24 @@ int main(int argc, char *argv[])
 			case '?':
 				break;
 			default:
-					cil_log(CIL_ERR, "Unsupported option: %s\n", optarg);
+					fprintf(stderr, "Unsupported option: %s\n", optarg);
 				usage(argv[0]);
 		}
 	}
-	cil_set_log_level(log_level);
-
 	if (optind >= argc) {
-		cil_log(CIL_ERR, "No cil files specified\n");
+		fprintf(stderr, "No cil files specified\n");
 		usage(argv[0]);
 	}
-	
-	cil_tree_init(&parse_tree);
 
-	for (i = optind; i < argc; i++) {
-		file = fopen(argv[i], "r");
-		if (!file) {
-			cil_log(CIL_ERR, "Could not open file: %s\n", argv[i]);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-		rc = stat(argv[i], &filedata);
-		if (rc == -1) {
-			cil_log(CIL_ERR, "Could not stat file: %s\n", argv[i]);
-			goto exit;
-		}
-		file_size = filedata.st_size;	
+	cil_set_log_level(log_level);
 
-		buffer = cil_malloc(file_size + 2);
-		rc = fread(buffer, file_size, 1, file);
-		if (rc != 1) {
-			cil_log(CIL_ERR, "Failure reading file: %s\n", argv[i]);
-			goto exit;
-		}
-		memset(buffer+file_size, 0, 2);
-		fclose(file);
-		file = NULL;
-
-		cil_log(CIL_INFO, "Parsing %s...\n", argv[i]);
-		rc = cil_parser(argv[i], buffer, file_size + 2, &parse_tree);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to parse %s, exiting\n", argv[i]);
-			goto exit;
-		}
-
-		free(buffer);
-		buffer = NULL;
-
-#ifdef DEBUG
-		cil_tree_print(parse_tree->root, 0);
-#endif
-	}
-	
 	cil_db_init(&db);
-	db->mls = mls;
 
-	cil_log(CIL_INFO, "Building AST from Parse Tree...\n");
-	rc = cil_build_ast(db, parse_tree->root, db->ast->root);
+	rc = cil_parse_files(db, argv + optind, argc - optind);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to build ast, exiting\n");
+		fprintf(stderr, "Failed to parse files\n");
 		goto exit;
 	}
-
-#ifdef DEBUG
-	cil_tree_print(db->ast->root, 0);
-#endif
-
-	cil_log(CIL_INFO, "Destroying Parse Tree...\n");
-	cil_tree_destroy(&parse_tree);
-
-	cil_log(CIL_INFO, "Resolving AST...\n");
-	rc = cil_resolve_ast(db, db->ast->root);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failed to resolve ast, exiting\n");
-		goto exit;
-	}
-
-#ifdef DEBUG
-	cil_tree_print(db->ast->root, 0);
-#endif
-
-	cil_log(CIL_INFO, "Destroying AST Symtabs...\n");
-	rc = cil_destroy_ast_symtabs(db->ast->root);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to destroy ast symtabs, exiting\n");
-		goto exit;
-	}
-
-	cil_log(CIL_INFO, "Qualifying Names...\n");
-	rc = cil_fqn_qualify(db->ast->root);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to qualify names, exiting\n");
-		goto exit;
-	}
-
-	cil_log(CIL_INFO, "Post process...\n");
-	rc = cil_post_process(db);
-	if (rc != SEPOL_OK ) {
-		cil_log(CIL_ERR, "Post process failed, exiting\n");
-		goto exit;
-	}
-
-#ifdef DEBUG
-	rc = cil_gen_policy(db);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to print to policy.conf file\n");
-		goto exit;
-	}
-	cil_tree_print(db->ast->root, 0);
-#endif
-	cil_log(CIL_INFO, "Generating Binary...\n");
 
 	sepol_policydb_create(&pdb);
 	pdb->p.policy_type = POLICY_KERN;
@@ -258,35 +148,37 @@ int main(int argc, char *argv[])
 	
 	rc = sepol_policydb_set_vers(pdb, policyvers);
 	if (rc != 0) {
-		cil_log(CIL_ERR, "Failed to set policy version: %d\n", rc);
+		fprintf(stderr, "Failed to set policy version: %d\n", rc);
 		goto exit;
 	}
 
 	rc = sepol_policydb_set_handle_unknown(pdb, handle_unknown);
 	if (rc != 0) {
-		cil_log(CIL_ERR, "Failed to set handle unknown: %d\n", rc);
+		fprintf(stderr, "Failed to set handle unknown: %d\n", rc);
 		goto exit;
 	}
 
-	rc = cil_binary_create(db, pdb);
+	rc = cil_db_to_sepol_policydb(db, pdb);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to generate binary, exiting\n");
+		fprintf(stderr, "Failed to build policydb\n");
 		goto exit;
 	}
 
-	cil_log(CIL_INFO, "Writing Binary: %s...\n", output);
+	if (log_level >= CIL_INFO) {
+		fprintf(stderr, "Writing Binary: %s...\n", output);
+	}
 
 	snprintf(output, 10, "policy.%d", policyvers);
 	binary = fopen(output, "w");
 	if (binary == NULL) {
-		cil_log(CIL_ERR, "Failure opening binary file for writing\n");
+		fprintf(stderr, "Failure opening binary file for writing\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
 	rc = sepol_policy_file_create(&pf);
 	if (rc != 0) {
-		cil_log(CIL_ERR, "Failed to create policy file: %d\n", rc);
+		fprintf(stderr, "Failed to create policy file: %d\n", rc);
 		goto exit;
 	}
 
@@ -294,29 +186,31 @@ int main(int argc, char *argv[])
 
 	rc = sepol_policydb_write(pdb, pf);
 	if (rc != 0) {
-		cil_log(CIL_ERR, "Failed to write binary policy: %d\n", rc);
+		fprintf(stderr, "Failed to write binary policy: %d\n", rc);
 		goto exit;
 	}
 
 	fclose(binary);
 	binary = NULL;
 
-	cil_log(CIL_INFO, "Writing File Contexts\n");
+	if (log_level >= CIL_INFO) {
+		fprintf(stderr, "Writing File Contexts\n");
+	}
 	
 	rc = cil_filecons_to_string(db, &fc_buf, &fc_size);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to get file context data\n");
+		fprintf(stderr, "Failed to get file context data\n");
 		goto exit;
 	}
 
 	file_contexts = fopen("file_contexts", "w+");
 	if (file_contexts == NULL) {
-		cil_log(CIL_ERR, "Failed to open file_contexts file\n");
+		fprintf(stderr, "Failed to open file_contexts file\n");
 		goto exit;
 	}
 	
 	if (fwrite(fc_buf, sizeof(char), fc_size, file_contexts) != fc_size) {
-		cil_log(CIL_ERR, "Failed to write file_contexts file\n");
+		fprintf(stderr, "Failed to write file_contexts file\n");
 		goto exit;
 	}
 
@@ -325,16 +219,12 @@ int main(int argc, char *argv[])
 	rc = SEPOL_OK;
 
 exit:
-	if (file != NULL) {
-		fclose(file);
-	}
 	if (binary != NULL) {
 		fclose(binary);
 	}
 	cil_db_destroy(&db);
 	sepol_policydb_free(pdb);
 	sepol_policy_file_free(pf);
-	free(buffer);
 	free(fc_buf);
 	return rc;
 }

@@ -27,23 +27,32 @@
  * either expressed or implied, of Tresys Technology, LLC.
  */
 
-#ifndef _CIL_BINARY_H_
-#define _CIL_BINARY_H_
+#ifndef CIL_H_
+#define CIL_H_
 
 #include <sepol/policydb/policydb.h>
 
-#include "cil_internal.h"
+struct cil_db;
+typedef struct cil_db cil_db_t;
 
+extern void cil_db_init(cil_db_t **db);
+extern void cil_db_destroy(cil_db_t **db);
 
-/**
- * Create a binary policydb from the cil db.
- *
- * @param[in] db The cil database.
- * @param[in] pdb The policy database.
- *
- * @return SEPOL_OK upon success or an error otherwise.
- */
-int cil_binary_create(const struct cil_db *db, sepol_policydb_t *pdb);
+extern int cil_parse_files(cil_db_t *db, char **files_list, int num_files);
 
+extern int cil_db_to_sepol_policydb(cil_db_t *db, sepol_policydb_t *sepol_db);
+extern int cil_userprefixes_to_string(cil_db_t *db, char **out, size_t *size);
+extern int cil_selinuxusers_to_string(cil_db_t *db, char **out, size_t *size);
+extern int cil_filecons_to_string(cil_db_t *db, char **out, size_t *size);
 
-#endif //_CIL_BINARY_H_
+enum cil_log_level {
+	CIL_ERR = 1,
+	CIL_WARN,
+	CIL_INFO
+};
+extern void cil_set_log_level(enum cil_log_level lvl);
+extern void cil_set_log_handler(void (*handler)(int lvl, char *msg));
+
+extern void cil_set_malloc_error_handler(void (*handler)(void));
+
+#endif

@@ -30,19 +30,12 @@
 #define CIL_LOG_H_
 
 #include <stdlib.h>
+#include <cil/cil.h>
 
 #define MAX_LOG_SIZE 512
 
-extern enum cil_log_level cil_log_level; // Logging level
 
-enum cil_log_level {
-	CIL_ERR = 1,
-	CIL_WARN,
-	CIL_INFO
-};
 
 void cil_log(enum cil_log_level lvl, const char *msg, ...);
-void cil_set_log_level(enum cil_log_level lvl);
-void cil_set_log_handler(void (*handler)(int lvl, char *msg));
 
 #endif // CIL_LOG_H_

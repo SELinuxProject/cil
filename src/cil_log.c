@@ -32,9 +32,10 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include <cil/cil.h>
 #include "cil_log.h"
 
-enum cil_log_level cil_log_level = CIL_ERR;
+static enum cil_log_level cil_log_level = CIL_ERR;
 
 void cil_default_log_handler(__attribute__((unused)) int lvl, char *msg)
 {

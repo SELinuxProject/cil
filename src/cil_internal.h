@@ -27,14 +27,15 @@
  * either expressed or implied, of Tresys Technology, LLC.
  */
 
-#ifndef CIL_H_
-#define CIL_H_
+#ifndef CIL_INTERNAL_H_
+#define CIL_INTERNAL_H_
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <arpa/inet.h>
 
+#include <cil/cil.h>
 #include "cil_symtab.h"
 #include "cil_mem.h"
 

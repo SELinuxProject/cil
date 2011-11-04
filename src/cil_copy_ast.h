@@ -30,7 +30,7 @@
 #ifndef CIL_COPY_H_
 #define CIL_COPY_H_
 
-#include "cil.h"
+#include "cil_internal.h"
 #include "cil_tree.h"
 #include "cil_symtab.h"
 

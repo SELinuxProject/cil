@@ -34,7 +34,7 @@
 #include "test_cil_post.h"
 
 #include "../../src/cil_post.h"
-#include "../../src/cil.h"
+#include "../../src/cil_internal.h"
 
 void test_cil_post_filecon_compare_meta_a_not_b(CuTest *tc) {
         struct cil_filecon *afilecon;

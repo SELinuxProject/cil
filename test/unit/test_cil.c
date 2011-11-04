@@ -32,7 +32,7 @@
 #include "CuTest.h"
 #include "test_cil.h"
 
-#include "../../src/cil.h"
+#include "../../src/cil_internal.h"
 #include "../../src/cil_tree.h"
 
 void test_cil_symtab_array_init(CuTest *tc) {

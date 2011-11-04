@@ -30,7 +30,7 @@
 #ifndef CIL_FQN_H_
 #define CIL_FQN_H_
 
-#include "cil.h"
+#include "cil_internal.h"
 #include "cil_tree.h"
 
 int cil_fqn_qualify(struct cil_tree_node *root);

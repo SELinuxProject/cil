@@ -34,7 +34,7 @@
 #include "test_cil_parser.h"
 
 #include "../../src/cil_parser.h"
-#include "../../src/cil.h"
+#include "../../src/cil_internal.h"
 
 // TODO rewrite to use the gen_tree function
 void test_cil_parser(CuTest *tc) {

@@ -32,7 +32,7 @@
 
 #include "cil_tree.h"
 #include "cil_list.h"
-#include "cil.h"
+#include "cil_internal.h"
 
 struct cil_multimap_item {
 	struct cil_symtab_datum *key;
