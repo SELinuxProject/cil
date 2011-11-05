@@ -2761,6 +2761,178 @@ exit:
 	return rc;
 }
 
+int __cil_common_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void *data)
+{
+	policydb_t *pdb = data;
+	common_datum_t *common = (common_datum_t *)datum;
+
+	if (common->s.value < 1 || common->s.value > pdb->p_commons.nprim) {
+		return -EINVAL;
+	}
+	pdb->p_common_val_to_name[common->s.value - 1] = (char *)key;
+
+	return 0;
+}
+
+int __cil_class_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void *data)
+{
+	policydb_t *pdb = data;
+	class_datum_t *class = (class_datum_t *)datum;
+
+	if (class->s.value < 1 || class->s.value > pdb->p_classes.nprim) {
+		return -EINVAL;
+	}
+	pdb->p_class_val_to_name[class->s.value - 1] = (char *)key;
+	pdb->class_val_to_struct[class->s.value - 1] = class;
+
+	return 0;
+}
+
+int __cil_role_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void *data)
+{
+	policydb_t *pdb = data;
+	role_datum_t *role = (role_datum_t *)datum;
+
+	if (role->s.value < 1 || role->s.value > pdb->p_roles.nprim) {
+		return -EINVAL;
+	}
+	pdb->p_role_val_to_name[role->s.value - 1] = (char *)key;
+	pdb->role_val_to_struct[role->s.value - 1] = role;
+
+	return 0;
+}
+
+int __cil_type_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void *data)
+{
+	policydb_t *pdb = data;
+	type_datum_t *type = (type_datum_t *)datum;
+
+	if (type->s.value < 1 || type->s.value > pdb->p_types.nprim) {
+		return -EINVAL;
+	}
+	pdb->p_type_val_to_name[type->s.value - 1] = (char *)key;
+	pdb->type_val_to_struct[type->s.value - 1] = type;
+
+	return 0;
+}
+
+int __cil_user_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void *data)
+{
+	policydb_t *pdb = data;
+	user_datum_t *user = (user_datum_t *)datum;
+
+	if (user->s.value < 1 || user->s.value > pdb->p_users.nprim) {
+		return -EINVAL;
+	}
+	pdb->p_user_val_to_name[user->s.value - 1] = (char *)key;
+	pdb->user_val_to_struct[user->s.value - 1] = user;
+
+	return 0;
+}
+
+int __cil_bool_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void *data)
+{
+	policydb_t *pdb = data;
+	cond_bool_datum_t *bool = (cond_bool_datum_t *)datum;
+
+	if (bool->s.value < 1 || bool->s.value > pdb->p_bools.nprim) {
+		return -EINVAL;
+	}
+	pdb->p_bool_val_to_name[bool->s.value - 1] = (char *)key;
+	pdb->bool_val_to_struct[bool->s.value - 1] = bool;
+
+	return 0;
+}
+
+int __cil_level_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void *data)
+{
+	policydb_t *pdb = data;
+	level_datum_t *level = (level_datum_t *)datum;
+
+	if (level->isalias == 1) {
+		if (level->level->sens < 1 || level->level->sens > pdb->p_levels.nprim) {
+			return -EINVAL;
+		}
+		pdb->p_sens_val_to_name[level->level->sens - 1] = (char *)key;
+	}
+
+	return 0;
+}
+
+int __cil_cat_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void *data)
+{
+	policydb_t *pdb = data;
+	cat_datum_t *cat = (cat_datum_t *)datum;
+
+	if (cat->s.value < 1 || cat->s.value > pdb->p_cats.nprim) {
+		return -EINVAL;
+	}
+	pdb->p_cat_val_to_name[cat->s.value - 1] = (char *)key;
+
+	return 0;
+}
+
+int __cil_policydb_val_arrays_create(policydb_t *policydb)
+{
+	int rc = SEPOL_ERR;
+
+	policydb->p_common_val_to_name = cil_malloc(sizeof(char *) * policydb->p_commons.nprim);
+	rc = hashtab_map(policydb->p_commons.table, &__cil_common_val_array_insert, policydb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	policydb->p_class_val_to_name = cil_malloc(sizeof(char *) * policydb->p_classes.nprim);
+	policydb->class_val_to_struct = cil_malloc(sizeof(class_datum_t *) * policydb->p_classes.nprim);
+	rc = hashtab_map(policydb->p_classes.table, &__cil_class_val_array_insert, policydb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	policydb->p_role_val_to_name = cil_malloc(sizeof(char *) * policydb->p_roles.nprim);
+	policydb->role_val_to_struct = cil_malloc(sizeof(role_datum_t *) * policydb->p_roles.nprim);
+	rc = hashtab_map(policydb->p_roles.table, &__cil_role_val_array_insert, policydb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	policydb->p_type_val_to_name = cil_malloc(sizeof(char *) * policydb->p_types.nprim);
+	policydb->type_val_to_struct = cil_malloc(sizeof(type_datum_t *) * policydb->p_types.nprim);
+	rc = hashtab_map(policydb->p_types.table, &__cil_type_val_array_insert, policydb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	policydb->p_user_val_to_name = cil_malloc(sizeof(char *) * policydb->p_users.nprim);
+	policydb->user_val_to_struct = cil_malloc(sizeof(user_datum_t *) * policydb->p_users.nprim);
+	rc = hashtab_map(policydb->p_users.table, &__cil_user_val_array_insert, policydb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	policydb->p_bool_val_to_name = cil_malloc(sizeof(char *) * policydb->p_bools.nprim);
+	policydb->bool_val_to_struct = cil_malloc(sizeof(cond_bool_datum_t *) * policydb->p_bools.nprim);
+	rc = hashtab_map(policydb->p_bools.table, &__cil_bool_val_array_insert, policydb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	policydb->p_sens_val_to_name = cil_malloc(sizeof(char *) * policydb->p_levels.nprim);
+	rc = hashtab_map(policydb->p_levels.table, &__cil_level_val_array_insert, policydb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	policydb->p_cat_val_to_name = cil_malloc(sizeof(char *) * policydb->p_cats.nprim);
+	rc = hashtab_map(policydb->p_cats.table, &__cil_cat_val_array_insert, policydb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+exit:
+	return rc;
+}
+
 int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
@@ -2818,6 +2990,12 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+	}
+
+	rc = __cil_policydb_val_arrays_create(pdb);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failure creating val_to_{struct,name} arrays\n");
+		goto exit;
 	}
 
 	rc = __cil_contexts_to_policydb(pdb, db);
