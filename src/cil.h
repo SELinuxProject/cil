@@ -884,6 +884,7 @@ const char * cil_node_to_string(struct cil_tree_node *node);
 
 int cil_userprefixes_to_string(struct cil_db *db, char **out, size_t *size);
 int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size);
+int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size);
 
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
 void cil_symtab_array_destroy(symtab_t symtab[]);

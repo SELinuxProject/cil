@@ -855,6 +855,164 @@ exit:
 	return rc;
 }
 
+int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
+{
+	int rc = SEPOL_ERR;
+	uint32_t i = 0;
+	int buf_pos = 0;
+	size_t str_len = 0;
+	char *str_tmp = NULL;
+	struct cil_sort *filecons = db->filecon;
+	struct cil_filecon *filecon = NULL;
+	struct cil_context *ctx = NULL;
+
+	for (i = 0; i < filecons->count; i++) {
+		filecon = filecons->array[i];
+		ctx = filecon->context;
+
+		str_len += (strlen(filecon->root_str) + strlen(filecon->path_str) + 2);
+
+		if (filecon->type < CIL_FILECON_FILE) {
+			/* If a type is specified,
+			   +2 for type string, +1 for tab */
+			str_len += 3;
+		}
+
+		if (ctx != NULL) {
+			struct cil_user *user = ctx->user;
+			struct cil_role *role = ctx->role;
+			struct cil_type *type = ctx->type;
+
+			str_len += (strlen(user->datum.name) + strlen(role->datum.name) + strlen(type->datum.name));
+
+			if (db->mls == CIL_TRUE) {
+				struct cil_levelrange *range = ctx->range;
+				struct cil_level *low = range->low;
+				struct cil_level *high = range->high;
+				char *str_low = NULL;
+				char *str_high = NULL;
+
+				rc = __cil_level_to_string(low, &str_low);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				rc = __cil_level_to_string(high, &str_high);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				str_len += (strlen(str_low) + strlen(str_high));
+				free(str_low);
+				free(str_high);
+			}
+		} else {
+			str_len += strlen("\t<<none>>");
+		}
+	}
+
+	*size = str_len * sizeof(char);
+	str_tmp = cil_malloc((str_len + 1) * sizeof(char));
+	*out = str_tmp;
+
+	for (i = 0; i < filecons->count; i++) {
+		char *str_type = NULL;
+		filecon = filecons->array[i];
+		ctx = filecon->context;
+
+		buf_pos = snprintf(str_tmp, str_len, "%s%s\t", filecon->root_str,
+									filecon->path_str);
+
+		str_len += buf_pos;
+		str_tmp += buf_pos;
+
+		switch(filecon->type) {
+		case CIL_FILECON_FILE:
+			str_type = "--\t";
+			break;
+		case CIL_FILECON_DIR:
+			str_type = "-d\t";
+			break;
+		case CIL_FILECON_CHAR:
+			str_type = "-c\t";
+			break;
+		case CIL_FILECON_BLOCK:
+			str_type = "-b\t";
+			break;
+		case CIL_FILECON_SOCKET:
+			str_type = "-s\t";
+			break;
+		case CIL_FILECON_PIPE:
+			str_type = "-p\t";
+			break;
+		case CIL_FILECON_SYMLINK:
+			str_type = "-l\t";
+			break;
+		default:
+			str_type = "";
+			break;
+		}
+		strncat(str_tmp, str_type, str_len);
+
+		str_len -= strlen(str_type);
+		str_tmp += strlen(str_type);
+
+		if (ctx != NULL) {
+			struct cil_user *user = ctx->user;
+			struct cil_role *role = ctx->role;
+			struct cil_type *type = ctx->type;
+
+			buf_pos = snprintf(str_tmp, str_len, "%s:%s:%s", user->datum.name,
+									role->datum.name,
+									type->datum.name);
+
+			str_len -= buf_pos;
+			str_tmp += buf_pos;
+
+			if (db->mls == CIL_TRUE) {
+				struct cil_levelrange *range = ctx->range;
+				struct cil_level *low = range->low;
+				struct cil_level *high = range->high;
+				char *str_low = NULL;
+				char *str_high = NULL;
+
+				rc = __cil_level_to_string(low, &str_low);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				rc = __cil_level_to_string(high, &str_high);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				strncat(str_tmp, str_low, str_len);
+				strncat(str_tmp, "-", str_len);
+				strncat(str_tmp, str_high, str_len);
+				strncat(str_tmp, "\n", str_len);
+
+				str_len -= (strlen(str_low) + strlen(str_high) + 2);
+				str_tmp += (strlen(str_low) + strlen(str_high) + 2);
+
+				free(str_low);
+				free(str_high);
+			} else {
+				strncat(str_tmp, "\n", str_len);
+				str_len -= 1;
+				str_tmp += 1;
+			}
+		} else {
+			strncat(str_tmp, "\t<<none>>\n", str_len);
+			str_len -= strlen("\t<<none>>\n");
+			str_tmp += strlen("\t<<none>>\n");
+		}
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
 {
 	uint32_t i = 0;
