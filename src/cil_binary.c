@@ -477,6 +477,8 @@ int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute 
 				cil_log(CIL_INFO, "Failure ANDing types bitmap\n");
 				goto exit;
 			}
+			ebitmap_destroy(&bitmap_tmp);
+			ebitmap_destroy(&bitmap_stack[pos - 1]);
 			break;
 		case CIL_OR:
 			if (ebitmap_or(types, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
@@ -484,6 +486,8 @@ int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute 
 				cil_log(CIL_INFO, "Failure ORing bitmaps\n");
 				goto exit;
 			}
+			ebitmap_destroy(&bitmap_stack[pos - 2]);
+			ebitmap_destroy(&bitmap_stack[pos - 1]);
 			break;
 		case CIL_AND:
 			if (ebitmap_and(types, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
@@ -491,6 +495,8 @@ int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute 
 				cil_log(CIL_INFO, "Failure ANDing bitmaps\n");
 				goto exit;
 			}
+			ebitmap_destroy(&bitmap_stack[pos - 2]);
+			ebitmap_destroy(&bitmap_stack[pos - 1]);
 			break;
 		case CIL_XOR:
 			if (ebitmap_xor(&bitmap_tmp, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
@@ -503,6 +509,9 @@ int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute 
 				cil_log(CIL_INFO, "Failure ANDing types bitmap\n");
 				goto exit;
 			}
+			ebitmap_destroy(&bitmap_tmp);
+			ebitmap_destroy(&bitmap_stack[pos - 2]);
+			ebitmap_destroy(&bitmap_stack[pos - 1]);
 			break;
 		default:
 			rc = SEPOL_ERR;
@@ -549,8 +558,6 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node, ebi
 	unsigned int i;
 	ebitmap_t types;
 	
-	ebitmap_init(&types);
-
 	if (pdb->type_attr_map == NULL) {
 		rc = __cil_typeattr_bitmap_init(pdb);
 		if (rc != SEPOL_OK) {
@@ -3010,8 +3017,8 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 		}
 	}
 
-	return SEPOL_OK;
-
+	rc = SEPOL_OK;
 exit:
+	ebitmap_destroy(&types_bitmap);
 	return rc;
 }
