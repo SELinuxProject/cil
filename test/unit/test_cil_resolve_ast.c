@@ -5454,6 +5454,27 @@ void test_cil_resolve_call1_class(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
+void test_cil_resolve_call1_classmap(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "open", ")", ")",
+			"(", "macro", "mm", "(", "(", "classmap", "a", ")", ")", 
+				"(", "classmapping", "a", "read", "(", "file", "(", "open", ")", ")", ")", ")",
+			"(", "call", "mm", "(", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_call1(test_db->ast->root->cl_head->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
 void test_cil_resolve_call1_permset(CuTest *tc) {
 	char *line[] = {"(", "permissionset", "foo", "(", "read", "open", ")", ")",
 			"(", "type", "dead", ")",
@@ -6080,6 +6101,34 @@ void test_cil_resolve_call2_class(CuTest *tc) {
 
 	int rc = cil_resolve_call2(test_db->ast->root->cl_head->next->next->next, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_call2_classmap(CuTest *tc) {
+	char *line[] = {"(", "class", "file", "(", "open", ")", ")",
+			"(", "classmap", "files", "(", "read", ")", ")",	
+			"(", "macro", "mm", "(", "(", "classmap", "a", ")", ")", 
+				"(", "classmapping", "a", "read", "(", "file", "(", "open", ")", ")", ")", ")",
+			"(", "call", "mm", "(", "files", ")", ")", NULL};
+
+//	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc2 = cil_resolve_call1(test_db->ast->root->cl_head->next->next->next, args);
+
+	args->pass = CIL_PASS_CALL2;
+
+	int rc = cil_resolve_call2(test_db->ast->root->cl_head->next->next->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 }
 
 void test_cil_resolve_call2_level(CuTest *tc) {
