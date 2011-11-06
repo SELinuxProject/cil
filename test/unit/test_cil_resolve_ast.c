@@ -326,7 +326,7 @@ void test_cil_resolve_classmapping_anon_inmacro_neg(CuTest *tc) {
 	args->callstack = test_db->ast->root->cl_head->next->next->next;
 
 	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next->cl_head, args);
-	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
 }
