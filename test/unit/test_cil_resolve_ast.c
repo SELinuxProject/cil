@@ -6110,7 +6110,6 @@ void test_cil_resolve_call2_classmap(CuTest *tc) {
 				"(", "classmapping", "a", "read", "(", "file", "(", "open", ")", ")", ")", ")",
 			"(", "call", "mm", "(", "files", ")", ")", NULL};
 
-//	char *line[] = {"(", "classmap", "files", "(", "read", ")", ")",
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
 
