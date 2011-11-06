@@ -48,6 +48,7 @@
 #include "cil_fqn.h"
 #include "cil_post.h"
 #include "cil_binary.h"
+#include "cil_policy.h"
 
 void cil_db_init(struct cil_db **db)
 {

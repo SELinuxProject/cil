@@ -34,7 +34,7 @@
 
 #include "../../src/cil_build_ast.h"
 #include "../../src/cil_resolve_ast.h"
-#include "../../src/cil_verify_internal.h"
+#include "../../src/cil_verify.h"
 #include "../../src/cil_internal.h"
 
 /* this all needs to be moved to a private header file */
