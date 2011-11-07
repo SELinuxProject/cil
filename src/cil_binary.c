@@ -1463,7 +1463,6 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void 
 	return SEPOL_OK;
 
 exit:
-	cond_node_destroy(cond_node);
 	cond_expr_destroy(cond_expr);
 	return rc;
 }
