@@ -77,17 +77,16 @@ static int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *per
 			goto exit;
 		}
 
-		if (res_list_perms != NULL) {
-			cil_list_item_init(&list_item);
-			list_item->flavor = CIL_PERM;
-			list_item->data = perm_node->data;
-			if (res_list_perms->head == NULL) {
-				res_list_perms->head = list_item;
-			} else {
-				list_tail->next = list_item;
-			}
-			list_tail = list_item;
+		cil_list_item_init(&list_item);
+		list_item->flavor = CIL_PERM;
+		list_item->data = perm_node->data;
+		if (res_list_perms->head == NULL) {
+			res_list_perms->head = list_item;
+		} else {
+			list_tail->next = list_item;
 		}
+		list_tail = list_item;
+
 		perm = perm->next;
 	}
 
@@ -122,24 +121,13 @@ int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classperm
 			goto resolve_classpermset_out;
 		}
 		cps->permset = (struct cil_permset*)permset_node->data;
+	}
 
-		if (cps->perms == NULL) {
-			cil_list_init(&cps->perms);
-		}
+	cil_list_init(&cps->perms);
 
-		rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->perms);
-		if (rc != SEPOL_OK) {
-			goto resolve_classpermset_out;
-		}
-	} else if (cps->permset != NULL) {
-		if (cps->perms == NULL) {
-			cil_list_init(&cps->perms);
-		}
-
-		rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->perms);
-		if (rc != SEPOL_OK) {
-			goto resolve_classpermset_out;
-		}
+	rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->perms);
+	if (rc != SEPOL_OK) {
+		goto resolve_classpermset_out;
 	}
 
 	return SEPOL_OK;
