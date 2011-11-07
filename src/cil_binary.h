@@ -34,6 +34,15 @@
 
 #include "cil_internal.h"
 
+struct cil_neverallow {
+	struct cil_tree_node *node;
+	struct cil_list *data;
+};
+
+struct cil_neverallow_data {
+	avtab_key_t *key;
+	int types;
+};
 
 /**
  * Create a binary policydb from the cil db.
