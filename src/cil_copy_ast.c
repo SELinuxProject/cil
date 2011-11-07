@@ -2130,36 +2130,30 @@ int cil_copy_conditional(__attribute__((unused)) struct cil_db *db, void *data, 
 	return SEPOL_OK;
 }
 
+int cil_copy_condblock(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_condblock *orig = data;
+	struct cil_condblock *new = *copy;
+	cil_condblock_init(&new);
+	new->flavor = orig->flavor;
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
 int cil_copy_boolif(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_booleanif *orig = data;
-	struct cil_list_item *curr_old = NULL;
-	struct cil_list *new_list = NULL;
-	struct cil_list_item *curr_new = NULL;
-	struct cil_conditional *cond_new = NULL;
 	struct cil_booleanif *new = NULL;
 	int rc = SEPOL_ERR;
 
 	cil_boolif_init(&new);
 
-	cil_list_init(&new_list);
-	curr_old = orig->expr_stack->head;
-
-	while (curr_old != NULL) {
-		cil_list_item_init(&curr_new);
-
-		cil_copy_conditional(db, curr_old->data, ((void**)&cond_new), NULL);
-		curr_new->data = cond_new;
-		curr_new->flavor = curr_old->flavor;
-
-		rc = cil_list_append_item(new_list, curr_new);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		curr_old = curr_old->next;
+	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "cil_copy_boolif: Failed to copy expression\n");
+		goto exit;
 	}
-	new->expr_stack = new_list;
 
 	*copy = new;
 
@@ -2167,6 +2161,29 @@ int cil_copy_boolif(struct cil_db *db, void *data, void **copy, __attribute__((u
 
 exit:
 	cil_destroy_boolif(new);
+	return rc;
+}
+
+int cil_copy_tunif(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_tunableif *orig = data;
+	struct cil_tunableif *new = NULL;
+	int rc = SEPOL_ERR;
+
+	cil_tunif_init(&new);
+
+	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "cil_copy_tunif: Failed to copy expression\n");
+		goto exit;
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	cil_destroy_tunif(new);
 	return rc;
 }
 
@@ -2393,8 +2410,14 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_IPADDR:
 		copy_func = &cil_copy_ipaddr;
 		break;
+	case CIL_CONDBLOCK:
+		copy_func = &cil_copy_condblock;
+		break;
 	case CIL_BOOLEANIF:
 		copy_func = &cil_copy_boolif;
+		break;
+	case CIL_TUNABLEIF:
+		copy_func = &cil_copy_tunif;
 		break;
 	default:
 		goto exit;

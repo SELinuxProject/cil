@@ -205,3 +205,21 @@
 	(allow x bin_t (policy.file (execute)))
 )
 (call all (bin_t))
+
+(block bb
+	(type t1)
+	(type t2)
+	(boolean b1 false)
+	(tunable tun1 true)
+	(macro m ()
+		(tunableif tun1
+			(true
+				(allow t1 t2 (policy.file (write))))
+			(false
+				(allow t1 t2 (policy.file (execute)))))
+		(booleanif b1
+			(true
+				(allow t1 t2 (policy.file (read))))))
+
+	(call m)
+)

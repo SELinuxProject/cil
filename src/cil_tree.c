@@ -414,14 +414,7 @@ void cil_tree_print_constrain(struct cil_constrain *cons)
 void cil_tree_print_node(struct cil_tree_node *node)
 {
 	if (node->data == NULL) {
-		if (node->flavor ==  CIL_CONDTRUE) {
-			cil_log(CIL_INFO, "true\n");
-		} else if (node->flavor == CIL_CONDFALSE) {
-			cil_log(CIL_INFO, "false\n");
-		} else {
-			cil_log(CIL_INFO, "FLAVOR: %d", node->flavor);
-		}
-
+		cil_log(CIL_INFO, "FLAVOR: %d", node->flavor);
 		return;
 	} else {
 		switch( node->flavor ) {
@@ -819,6 +812,15 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 
 				cil_log(CIL_INFO, ")\n");
+				return;
+			}
+			case CIL_CONDBLOCK: {
+				struct cil_condblock *cb = node->data;
+				if (cb->flavor == CIL_CONDTRUE) {
+					cil_log(CIL_INFO, "true\n");
+				} else if (cb->flavor == CIL_CONDFALSE) {
+					cil_log(CIL_INFO, "false\n");
+				}
 				return;
 			}
 			case CIL_AND:

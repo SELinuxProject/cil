@@ -49,6 +49,7 @@ struct cil_args_resolve {
 	uint32_t *changed;
 	struct cil_tree_node *callstack;
 	struct cil_tree_node *optstack;
+	struct cil_tree_node *macro;
 };
 
 static int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *perm_list_str, struct cil_list *res_list_perms)
@@ -2970,6 +2971,9 @@ int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args)
 	int rc = SEPOL_ERR;
 	struct cil_tunableif *tif = (struct cil_tunableif*)current->data;
 	uint16_t result = CIL_FALSE;
+	struct cil_tree_node *true_node = NULL;
+	struct cil_tree_node *false_node = NULL;
+	struct cil_condblock *cb = NULL;
 
 	if (args != NULL) {
 		db = args->db;
@@ -2986,16 +2990,34 @@ int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
+	if (current->cl_head != NULL && current->cl_head->flavor == CIL_CONDBLOCK) {
+		cb = current->cl_head->data;
+		if (cb->flavor == CIL_CONDTRUE) {
+			true_node = current->cl_head;
+		} else if (cb->flavor == CIL_CONDFALSE) {
+			false_node = current->cl_head;
+		}
+	}
+
+	if (current->cl_head != NULL && current->cl_head->next != NULL && current->cl_head->next->flavor == CIL_CONDBLOCK) {
+		cb = current->cl_head->next->data;
+		if (cb->flavor == CIL_CONDTRUE) {
+			true_node = current->cl_head->next;
+		} else if (cb->flavor == CIL_CONDFALSE) {
+			false_node = current->cl_head->next;
+		}
+	}
+
 	if (result == CIL_TRUE) {
-		if (tif->condtrue != NULL) {
-			rc = cil_copy_ast(db, tif->condtrue, current->parent);
+		if (true_node != NULL) {
+			rc = cil_copy_ast(db, true_node, current->parent);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else {
-		if (tif->condfalse != NULL) {
-			rc = cil_copy_ast(db, tif->condfalse, current->parent);
+		if (false_node != NULL) {
+			rc = cil_copy_ast(db, false_node, current->parent);
 			if (rc  != SEPOL_OK) {
 				goto exit;
 			}
@@ -3281,9 +3303,11 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	}
 
 	if (node->flavor == CIL_MACRO) {
-		*finished = CIL_TREE_SKIP_HEAD;
-		rc = SEPOL_OK;
-		goto exit;
+		if (pass > CIL_PASS_TIF) {
+			*finished = CIL_TREE_SKIP_HEAD;
+			rc = SEPOL_OK;
+			goto exit;
+		}
 	}
 
 	if (node->flavor == CIL_OPTIONAL && ((struct cil_symtab_datum *)node->data)->state == CIL_STATE_DISABLED) {
@@ -3401,6 +3425,8 @@ int __cil_resolve_ast_first_child_helper(struct cil_tree_node *current, void *ex
 			}
 			args->optstack = new;
 		}
+	} else if (parent->flavor == CIL_MACRO) {
+		args->macro = parent;
 	}
 
 	return SEPOL_OK;
@@ -3430,6 +3456,8 @@ int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *ext
 			callstack->cl_head->parent = NULL;
 		}
 		free(callstack);
+	} else if (parent->flavor == CIL_MACRO) {
+		args->macro = NULL;
 	} else if (parent->flavor == CIL_OPTIONAL) {
 		struct cil_tree_node *optstack;
 
@@ -3474,6 +3502,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.changed = &changed;
 	extra_args.callstack = NULL;
 	extra_args.optstack = NULL;
+	extra_args.macro = NULL;
 
 	for (pass = CIL_PASS_TIF; pass < CIL_PASS_NUM; pass++) {
 #ifdef DEBUG
@@ -3551,6 +3580,7 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
 	struct cil_call *call = NULL;
+	struct cil_tree_node *macro = NULL;
 	enum cil_pass pass = CIL_PASS_INIT;
 
 	int rc = SEPOL_ERR;
@@ -3566,6 +3596,7 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 			call = args->callstack->data;
 		}
 		pass = args->pass;
+		macro = args->macro;
 	}
 
 	if (ast_node->flavor == CIL_ROOT) {
@@ -3610,7 +3641,11 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 			}
 
 		} else {
-			rc = cil_get_symtab(db, ast_node->parent, &symtab, CIL_SYM_BLOCKS);
+			if (ast_node->flavor == CIL_TUNABLEIF && macro != NULL) {
+				rc = cil_get_symtab(db, macro->parent, &symtab, CIL_SYM_BLOCKS);
+			} else {
+				rc = cil_get_symtab(db, ast_node->parent, &symtab, CIL_SYM_BLOCKS);
+			}
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_ERR, "Failed to get parent symtab, rc: %d\n", rc);
 				goto exit;
@@ -3663,6 +3698,7 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
 	struct cil_call *call = NULL;
+	struct cil_tree_node *macro = NULL;
 	int rc = SEPOL_ERR;
 	char *global_symtab_name = NULL;
 	char first;
@@ -3672,6 +3708,7 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 		if (args->callstack != NULL) {
 			call = args->callstack->data;
 		}
+		macro = args->macro;
 	}
 
 	if (db == NULL || ast_node == NULL || name == NULL) {
@@ -3722,7 +3759,11 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 					strncat(global_symtab_name, name, strlen(name));
 				}
 			} else {
-				rc = cil_get_symtab(db, ast_node->parent, &symtab, sym_index);
+				if (ast_node->flavor == CIL_TUNABLEIF && macro != NULL) {
+					rc = cil_get_symtab(db, macro->parent, &symtab, sym_index);
+				} else {
+					rc = cil_get_symtab(db, ast_node->parent, &symtab, sym_index);
+				}
 				if (rc != SEPOL_OK) {
 					cil_log(CIL_ERR, "Failed to get parent symtab, rc: %d\n", rc);
 					goto exit;

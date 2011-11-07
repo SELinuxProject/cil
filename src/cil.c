@@ -334,8 +334,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TUNABLE:
 		cil_destroy_bool(*data);
 		break;
-	case CIL_CONDTRUE: break;
-	case CIL_CONDFALSE: break;
+	case CIL_CONDBLOCK: break;
 	case CIL_BOOLEANIF:
 		cil_destroy_boolif(*data);
 		break;
@@ -680,10 +679,16 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_BOOLEANIF;
 	case CIL_TUNABLEIF:
 		return CIL_KEY_TUNABLEIF;
-	case CIL_CONDTRUE:
-		return CIL_KEY_CONDTRUE;
-	case CIL_CONDFALSE:
-		return CIL_KEY_CONDFALSE;
+	case CIL_CONDBLOCK:
+		switch (((struct cil_condblock*)node->data)->flavor) {
+		case CIL_CONDTRUE:
+			return CIL_KEY_CONDTRUE;
+		case CIL_CONDFALSE:
+			return CIL_KEY_CONDFALSE;
+		default:
+			break;
+		}
+		break;
 	case CIL_TUNABLEIFDEF:
 		return CIL_KEY_TUNABLEIFDEF;
 	case CIL_TUNABLEIFNDEF:
@@ -1215,11 +1220,8 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 			case CIL_OPTIONAL:
 				/* do nothing */
 				break;
-			case CIL_CONDTRUE:
-				/* do nothing */
-				break;
-			case CIL_CONDFALSE:
-				/* do nothing */
+			case CIL_CONDBLOCK:
+				cil_symtab_array_destroy(((struct cil_condblock*)current->data)->symtab);
 				break;
 			default:
 				cil_log(CIL_INFO, "destroy symtab error, wrong flavor node: %d\n", current->flavor);
@@ -1274,13 +1276,15 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 			*symtab = &((struct cil_class*)ast_node->data)->perms;
 		} else if (ast_node->flavor == CIL_COMMON) {
 			*symtab = &((struct cil_common*)ast_node->data)->perms;
-		} else if (ast_node->flavor == CIL_TUNABLEIF) {
-			*symtab = NULL;
-		} else if ((ast_node->flavor == CIL_BOOLEANIF || ast_node->flavor == CIL_CONDTRUE || ast_node->flavor == CIL_CONDFALSE) && sym_index < CIL_SYM_NUM) {
-			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_INFO, "cil_get_symtab: cil_booleanif failed, rc: %d\n", rc);
-				goto exit;
+		} else if (ast_node->flavor == CIL_CONDBLOCK && sym_index < CIL_SYM_NUM) {
+			if (ast_node->parent->flavor == CIL_TUNABLEIF) {
+				*symtab = &((struct cil_condblock*)ast_node->data)->symtab[sym_index];
+			} else if (ast_node->parent->flavor == CIL_BOOLEANIF) {
+				rc = cil_get_symtab(db, ast_node->parent->parent, symtab, sym_index);
+				if (rc != SEPOL_OK) {
+					cil_log(CIL_INFO, "cil_get_symtab: cil_booleanif failed, rc: %d\n", rc);
+					goto exit;
+				}
 			}
 		} else if (ast_node->flavor == CIL_OPTIONAL && sym_index < CIL_SYM_NUM) {
 			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
@@ -1614,13 +1618,18 @@ void cil_bool_init(struct cil_bool **cilbool)
 	(*cilbool)->value = 0;
 }
 
+void cil_condblock_init(struct cil_condblock **cb)
+{
+	*cb = cil_malloc(sizeof(**cb));
+
+	cil_symtab_array_init((*cb)->symtab, CIL_SYM_NUM);
+}
+
 void cil_boolif_init(struct cil_booleanif **bif)
 {
 	*bif = cil_malloc(sizeof(**bif));
 
 	(*bif)->expr_stack = NULL;
-	(*bif)->condtrue = NULL;
-	(*bif)->condfalse = NULL;
 }
 
 void cil_conditional_init(struct cil_conditional **cond)
@@ -1637,9 +1646,6 @@ void cil_tunif_init(struct cil_tunableif **tif)
 	*tif = cil_malloc(sizeof(**tif));
 
 	(*tif)->expr_stack = NULL;
-
-	(*tif)->condtrue = NULL;
-	(*tif)->condfalse = NULL;
 }
 
 void cil_avrule_init(struct cil_avrule **avrule)

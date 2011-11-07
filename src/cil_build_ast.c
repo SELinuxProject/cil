@@ -2544,7 +2544,7 @@ void cil_destroy_tunif(struct cil_tunableif *tif)
 	free(tif);
 }
 
-int cil_gen_condtrue(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_condblock(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -2552,6 +2552,7 @@ int cil_gen_condtrue(struct cil_db *db, struct cil_tree_node *parse_current, str
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
+	struct cil_condblock *cb = NULL;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
 		goto exit;
@@ -2563,27 +2564,12 @@ int cil_gen_condtrue(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	ast_node->flavor = CIL_CONDTRUE;
+	ast_node->flavor = CIL_CONDBLOCK;
 
-	if (ast_node->parent->flavor == CIL_TUNABLEIF) {
-		struct cil_tunableif *tif = ast_node->parent->data;
-		if (tif->condtrue == NULL) {
-			tif->condtrue = ast_node;
-		} else {
-			cil_log(CIL_ERR, "Duplicate true condition declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-	} else if (ast_node->parent->flavor == CIL_BOOLEANIF) {
-		struct cil_booleanif *bif = ast_node->parent->data;
-		if (bif->condtrue == NULL) {
-			bif->condtrue = ast_node;
-		} else {
-			cil_log(CIL_ERR, "Duplicate true condition declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-	}
+	cil_condblock_init(&cb);
+	cb->flavor = flavor;
+
+	ast_node->data = cb;
 
 	return SEPOL_OK;
 
@@ -2591,51 +2577,14 @@ exit:
 	return rc;
 }
 
-int cil_gen_condfalse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+void cil_destroy_condblock(struct cil_condblock *cb)
 {
-	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_N_LISTS
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto exit;
+	if (cb == NULL) {
+		return;
 	}
 
-	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Invalid false condition declaration (%s, line: %d\n", parse_current->path, parse_current->line);
-		goto exit;
-	}
-
-	ast_node->flavor = CIL_CONDFALSE;
-
-	if (ast_node->parent->flavor == CIL_TUNABLEIF) {
-		struct cil_tunableif *tif = ast_node->parent->data;
-		if (tif->condfalse == NULL) {
-			tif->condfalse = ast_node;
-		} else {
-			cil_log(CIL_ERR, "Duplicate false condition declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-	} else if (ast_node->parent->flavor == CIL_BOOLEANIF) {
-		struct cil_booleanif *bif = ast_node->parent->data;
-		if (bif->condfalse == NULL) {
-			bif->condfalse = ast_node;
-		} else {
-			cil_log(CIL_ERR, "Duplicate false condition declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
+	cil_symtab_array_destroy(cb->symtab);
+	free(cb);
 }
 
 int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -5877,13 +5826,13 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_CONDTRUE)) {
-		rc = cil_gen_condtrue(db, parse_current, ast_node);
+		rc = cil_gen_condblock(db, parse_current, ast_node, CIL_CONDTRUE);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "cil_gen_condtrue failed, rc: %d\n", rc);
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_CONDFALSE)) {
-		rc = cil_gen_condfalse(db, parse_current, ast_node);
+		rc = cil_gen_condblock(db, parse_current, ast_node, CIL_CONDFALSE);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "cil_gen_condfalse failed, rc: %d\n", rc);
 			goto exit;

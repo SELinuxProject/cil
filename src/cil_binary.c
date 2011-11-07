@@ -1239,7 +1239,7 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 		// set
 		avtab_ptr->parse_context = (void*)1;
 
-		flavor = node->flavor;
+		flavor = ((struct cil_condblock*)node->data)->flavor;
 		switch (flavor) {
 		case CIL_CONDTRUE:
 			if (cond_node->true_list == NULL) {
@@ -1278,6 +1278,9 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	struct cil_booleanif *cil_boolif = node->data;
 	struct cil_list *expr_stack = cil_boolif->expr_stack;
 	struct cil_list_item *curr_expr = expr_stack->head;
+	struct cil_tree_node *true_node = NULL;
+	struct cil_tree_node *false_node = NULL;
+	struct cil_condblock *cb = NULL;
 	cond_expr_t *cond_expr = NULL;
 	cond_expr_t *cond_expr_tail = NULL;
 	cond_node_t *cond_node = NULL;
@@ -1340,15 +1343,33 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		curr_expr = curr_expr->next;
 	}
 
-	if (cil_boolif->condtrue != NULL) {
-		rc = __cil_cond_to_policydb(pdb, cil_boolif->condtrue, cond_node);
+	if (node->cl_head != NULL && node->cl_head->flavor == CIL_CONDBLOCK) {
+		cb = node->cl_head->data;
+		if (cb->flavor == CIL_CONDTRUE) {
+			true_node = node->cl_head;
+		} else if (cb->flavor == CIL_CONDFALSE) {
+			false_node = node->cl_head;
+		}
+	}
+
+	if (node->cl_head != NULL && node->cl_head->next != NULL && node->cl_head->next->flavor == CIL_CONDBLOCK) {
+		cb = node->cl_head->next->data;
+		if (cb->flavor == CIL_CONDTRUE) {
+			true_node = node->cl_head->next;
+		} else if (cb->flavor == CIL_CONDFALSE) {
+			false_node = node->cl_head->next;
+		}
+	}
+
+	if (true_node != NULL) {
+		rc = __cil_cond_to_policydb(pdb, true_node, cond_node);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 	}
 
-	if (cil_boolif->condfalse != NULL) {
-		rc = __cil_cond_to_policydb(pdb, cil_boolif->condfalse, cond_node);
+	if (false_node != NULL) {
+		rc = __cil_cond_to_policydb(pdb, false_node, cond_node);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}

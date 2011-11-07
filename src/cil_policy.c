@@ -839,6 +839,9 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 	struct cil_booleanif *bif = node->data;
 	struct cil_list *stack = bif->expr_stack;
 	struct cil_args_booleanif extra_args;
+	struct cil_tree_node *true_node = NULL;
+	struct cil_tree_node *false_node = NULL;
+	struct cil_condblock *cb = NULL;
 
 	extra_args.file_arr = file_arr;
 	extra_args.file_index = &file_index;;
@@ -851,10 +854,27 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 		return rc;
 	}
 
+	if (node->cl_head != NULL && node->cl_head->flavor == CIL_CONDBLOCK) {
+		cb = node->cl_head->data;
+		if (cb->flavor == CIL_CONDTRUE) {
+			true_node = node->cl_head;
+		} else if (cb->flavor == CIL_CONDFALSE) {
+			false_node = node->cl_head;
+		}
+	}
+
+	if (node->cl_head != NULL && node->cl_head->next != NULL && node->cl_head->next->flavor == CIL_CONDBLOCK) {
+		cb = node->cl_head->next->data;
+		if (cb->flavor == CIL_CONDTRUE) {
+			true_node = node->cl_head->next;
+		} else if (cb->flavor == CIL_CONDFALSE) {
+			false_node = node->cl_head->next;
+		}
+	}
 
 	fprintf(file_arr[file_index], "{\n");
-	if (bif->condtrue != NULL) {
-		rc = cil_tree_walk(bif->condtrue, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
+	if (true_node != NULL) {
+		rc = cil_tree_walk(true_node, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Failed to write booleanif content to file, rc: %d\n", rc);
 			return rc;
@@ -862,9 +882,9 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 	}
 	fprintf(file_arr[file_index], "}\n");
 
-	if (bif->condfalse != NULL) {
+	if (false_node != NULL) {
 		fprintf(file_arr[file_index], "else {\n");
-		rc = cil_tree_walk(bif->condfalse, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
+		rc = cil_tree_walk(false_node, __cil_booleanif_node_helper, __cil_booleanif_last_child_helper, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Failed to write booleanif false content to file, rc: %d\n", rc);
 			return rc;

@@ -47,9 +47,10 @@ struct cil_args_resolve {
 	uint32_t *changed;
 	struct cil_tree_node *callstack;
 	struct cil_tree_node *optstack;
+	struct cil_tree_node *macro;
 };
 
-struct cil_args_resolve *gen_resolve_args(struct cil_db *db, enum cil_pass pass, uint32_t *changed, struct cil_tree_node *calls, struct cil_tree_node *opts)
+struct cil_args_resolve *gen_resolve_args(struct cil_db *db, enum cil_pass pass, uint32_t *changed, struct cil_tree_node *calls, struct cil_tree_node *opts, struct cil_tree_node *macro)
 {
 	struct cil_args_resolve *args = cil_malloc(sizeof(*args));
 	args->db = db;
@@ -57,6 +58,7 @@ struct cil_args_resolve *gen_resolve_args(struct cil_db *db, enum cil_pass pass,
 	args->changed = changed;
 	args->callstack = calls;
 	args->optstack = opts;
+	args->macro = macro;
 
 	return args;
 }
@@ -73,7 +75,7 @@ void test_cil_resolve_name(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -97,7 +99,7 @@ void test_cil_resolve_name_invalid_type_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -136,7 +138,7 @@ void test_cil_resolve_roleallow(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -155,7 +157,7 @@ void test_cil_resolve_roleallow_srcdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	int rc1=cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	rc1 = rc1;
@@ -175,7 +177,7 @@ void test_cil_resolve_roleallow_tgtdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -195,7 +197,7 @@ void test_cil_resolve_roledominance(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -214,7 +216,7 @@ void test_cil_resolve_roledominance_role1_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -233,7 +235,7 @@ void test_cil_resolve_roledominance_role2_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -423,7 +425,7 @@ void test_cil_resolve_rolebounds(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -443,7 +445,7 @@ void test_cil_resolve_rolebounds_exists_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -464,7 +466,7 @@ void test_cil_resolve_rolebounds_role1_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -484,7 +486,7 @@ void test_cil_resolve_rolebounds_role2_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -503,7 +505,7 @@ void test_cil_resolve_sensalias(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -521,7 +523,7 @@ void test_cil_resolve_sensalias_sensdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -540,7 +542,7 @@ void test_cil_resolve_catalias(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -558,7 +560,7 @@ void test_cil_resolve_catalias_catdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -580,7 +582,7 @@ void test_cil_resolve_catorder(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	int rc = cil_resolve_catorder(test_db->ast->root->cl_head->next->next, args);
 	int rc2 = cil_resolve_catorder(test_db->ast->root->cl_head->next->next, args);
@@ -600,7 +602,7 @@ void test_cil_resolve_catorder_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -623,7 +625,7 @@ void test_cil_resolve_dominance(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	int rc = cil_resolve_dominance(test_db->ast->root->cl_head->next->next->next, args);
 	int rc2 = cil_resolve_dominance(test_db->ast->root->cl_head->next->next->next, args);
@@ -644,7 +646,7 @@ void test_cil_resolve_dominance_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -665,7 +667,7 @@ void test_cil_resolve_cat_list(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -691,7 +693,7 @@ void test_cil_resolve_cat_list_catlistnull_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -718,7 +720,7 @@ void test_cil_resolve_cat_list_rescatlistnull_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -746,7 +748,7 @@ void test_cil_resolve_cat_list_catrange(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, args);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -774,7 +776,7 @@ void test_cil_resolve_cat_list_catrange_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -805,7 +807,7 @@ void test_cil_resolve_cat_list_catname_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -834,7 +836,7 @@ void test_cil_resolve_catset(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -857,7 +859,7 @@ void test_cil_resolve_catset_catlist_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -880,7 +882,7 @@ void test_cil_resolve_catrange(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	cil_resolve_catorder(test_db->ast->root->cl_head->next->next, args);
@@ -905,7 +907,7 @@ void test_cil_resolve_catrange_catloworder_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	cil_resolve_catorder(test_db->ast->root->cl_head->next->next, args);
@@ -933,7 +935,7 @@ void test_cil_resolve_catrange_cathighorder_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	cil_resolve_catorder(test_db->ast->root->cl_head->next->next, args);
@@ -958,7 +960,7 @@ void test_cil_resolve_catrange_cat1_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	cil_resolve_catorder(test_db->ast->root->cl_head->next->next, args);
@@ -983,7 +985,7 @@ void test_cil_resolve_catrange_cat2_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	cil_resolve_catorder(test_db->ast->root->cl_head->next->next, args);
@@ -1011,7 +1013,7 @@ void test_cil_resolve_senscat(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1036,7 +1038,7 @@ void test_cil_resolve_senscat_catrange_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1065,7 +1067,7 @@ void test_cil_resolve_senscat_catsetname(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1093,7 +1095,7 @@ void test_cil_resolve_senscat_catsetname_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1120,7 +1122,7 @@ void test_cil_resolve_senscat_sublist(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, args);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -1144,7 +1146,7 @@ void test_cil_resolve_senscat_missingsens_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1168,7 +1170,7 @@ void test_cil_resolve_senscat_category_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1195,7 +1197,7 @@ void test_cil_resolve_senscat_currrangecat(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_tree_walk(test_db->ast->root, __cil_resolve_ast_node_helper, NULL, NULL, args);
 	__cil_verify_order(test_db->catorder, test_db->ast->root, CIL_CAT);
@@ -1226,7 +1228,7 @@ void test_cil_resolve_level(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1263,7 +1265,7 @@ void test_cil_resolve_level_catlist(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next->next->next, args);
 	
@@ -1300,7 +1302,7 @@ void test_cil_resolve_level_catset(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	struct cil_catset *cs = (struct cil_catset *)test_db->ast->root->cl_head->next->next->next->data;
 
@@ -1345,7 +1347,7 @@ void test_cil_resolve_level_catset_name_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next->next, args);
 
@@ -1377,7 +1379,7 @@ void test_cil_resolve_level_sens_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next->next, args);
 	struct cil_tree_node *level = test_db->ast->root->cl_head->next->next->next->next->next->next->next;
@@ -1409,7 +1411,7 @@ void test_cil_resolve_level_cat_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1444,7 +1446,7 @@ void test_cil_resolve_level_senscat_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next->next, args);
 	struct cil_tree_node *level = test_db->ast->root->cl_head->next->next->next->next->next->next->next;
@@ -1473,7 +1475,7 @@ void test_cil_resolve_levelrange_namedlvl(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next, args);
 
@@ -1502,7 +1504,7 @@ void test_cil_resolve_levelrange_namedlvl_low_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next, args);
 
@@ -1531,7 +1533,7 @@ void test_cil_resolve_levelrange_namedlvl_high_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next, args);
 
@@ -1558,7 +1560,7 @@ void test_cil_resolve_levelrange_anonlvl(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next, args);
 
@@ -1585,7 +1587,7 @@ void test_cil_resolve_levelrange_anonlvl_low_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next, args);
 
@@ -1612,7 +1614,7 @@ void test_cil_resolve_levelrange_anonlvl_high_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next, args);
 
@@ -1642,7 +1644,7 @@ void test_cil_resolve_constrain(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	int rc = cil_resolve_constrain(test_db->ast->root->cl_head->next->next->next->next->next->next, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -1663,7 +1665,7 @@ void test_cil_resolve_constrain_class_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1687,7 +1689,7 @@ void test_cil_resolve_constrain_perm_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1709,7 +1711,7 @@ void test_cil_resolve_constrain_perm_resolve_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1736,7 +1738,7 @@ void test_cil_resolve_context(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1768,7 +1770,7 @@ void test_cil_resolve_context_macro(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 	
 	struct cil_context *test_context = (struct cil_context*)test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head->data;
 
@@ -1811,7 +1813,7 @@ void test_cil_resolve_context_macro_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1856,7 +1858,7 @@ void test_cil_resolve_context_namedrange(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1888,7 +1890,7 @@ void test_cil_resolve_context_namedrange_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	struct cil_context *test_context = (struct cil_context*)test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->data;
 
@@ -1914,7 +1916,7 @@ void test_cil_resolve_context_user_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1942,7 +1944,7 @@ void test_cil_resolve_context_role_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1970,7 +1972,7 @@ void test_cil_resolve_context_type_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -1999,7 +2001,7 @@ void test_cil_resolve_context_anon_level_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2027,7 +2029,7 @@ void test_cil_resolve_roletransition(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2048,7 +2050,7 @@ void test_cil_resolve_roletransition_srcdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2069,7 +2071,7 @@ void test_cil_resolve_roletransition_tgtdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2090,7 +2092,7 @@ void test_cil_resolve_roletransition_resultdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2114,7 +2116,7 @@ void test_cil_resolve_typeattributeset_type_in_multiple_attrs(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	int rc = cil_resolve_typeattributeset(test_db->ast->root->cl_head->next->next->next->next, args);
 	int rc2 = cil_resolve_typeattributeset(test_db->ast->root->cl_head->next->next->next, args);
@@ -2138,7 +2140,7 @@ void test_cil_resolve_typeattributeset_multiple_excludes_with_not(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2159,7 +2161,7 @@ void test_cil_resolve_typeattributeset_multiple_types_with_and(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2179,7 +2181,7 @@ void test_cil_resolve_typeattributeset_using_attr(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2198,7 +2200,7 @@ void test_cil_resolve_typeattributeset_name_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2217,7 +2219,7 @@ void test_cil_resolve_typeattributeset_undef_type_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2240,7 +2242,7 @@ void test_cil_resolve_typeattributeset_not(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	int rc = cil_resolve_typeattributeset(test_db->ast->root->cl_head->next->next->next, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -2260,7 +2262,7 @@ void test_cil_resolve_typeattributeset_undef_type_not_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	int rc = cil_resolve_typeattributeset(test_db->ast->root->cl_head->next->next, args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
@@ -2278,7 +2280,7 @@ void test_cil_resolve_typealias(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2297,7 +2299,7 @@ void test_cil_resolve_typealias_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2317,7 +2319,7 @@ void test_cil_resolve_typebounds(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2338,7 +2340,7 @@ void test_cil_resolve_typebounds_repeatbind_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2359,7 +2361,7 @@ void test_cil_resolve_typebounds_type1_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2378,7 +2380,7 @@ void test_cil_resolve_typebounds_type2_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2397,7 +2399,7 @@ void test_cil_resolve_typepermissive(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2416,7 +2418,7 @@ void test_cil_resolve_typepermissive_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2438,7 +2440,7 @@ void test_cil_resolve_filetransition(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2460,7 +2462,7 @@ void test_cil_resolve_filetransition_type1_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2482,7 +2484,7 @@ void test_cil_resolve_filetransition_type2_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2504,7 +2506,7 @@ void test_cil_resolve_filetransition_class_neg(CuTest *tc) {
 	cil_db_init(&test_db);
  
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2526,7 +2528,7 @@ void test_cil_resolve_filetransition_type3_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2551,7 +2553,7 @@ void test_cil_resolve_rangetransition(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2579,7 +2581,7 @@ void test_cil_resolve_rangetransition_namedrange_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL); 
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2622,7 +2624,7 @@ void test_cil_resolve_rangetransition_namedrange_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2663,7 +2665,7 @@ void test_cil_resolve_rangetransition_namedrange(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2689,7 +2691,7 @@ void test_cil_resolve_rangetransition_namedrange_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2714,7 +2716,7 @@ void test_cil_resolve_rangetransition_type1_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2739,7 +2741,7 @@ void test_cil_resolve_rangetransition_type2_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2764,7 +2766,7 @@ void test_cil_resolve_rangetransition_class_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2791,7 +2793,7 @@ void test_cil_resolve_rangetransition_call_level_l_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2833,7 +2835,7 @@ void test_cil_resolve_rangetransition_call_level_l_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2875,7 +2877,7 @@ void test_cil_resolve_rangetransition_call_level_h_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2917,7 +2919,7 @@ void test_cil_resolve_rangetransition_call_level_h_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -2957,7 +2959,7 @@ void test_cil_resolve_rangetransition_level_l_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -2982,7 +2984,7 @@ void test_cil_resolve_rangetransition_level_h_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3007,7 +3009,7 @@ void test_cil_resolve_rangetransition_anon_level_l(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -3036,7 +3038,7 @@ void test_cil_resolve_rangetransition_anon_level_l_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -3065,7 +3067,7 @@ void test_cil_resolve_rangetransition_anon_level_h(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3094,7 +3096,7 @@ void test_cil_resolve_rangetransition_anon_level_h_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -3118,7 +3120,7 @@ void test_cil_resolve_classcommon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3137,7 +3139,7 @@ void test_cil_resolve_classcommon_no_class_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3156,7 +3158,7 @@ void test_cil_resolve_classcommon_no_common_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3177,7 +3179,7 @@ void test_cil_resolve_avrule(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3199,7 +3201,7 @@ void test_cil_resolve_avrule_permset(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3221,7 +3223,7 @@ void test_cil_resolve_avrule_permset_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3242,7 +3244,7 @@ void test_cil_resolve_avrule_firsttype_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3263,7 +3265,7 @@ void test_cil_resolve_avrule_secondtype_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3284,7 +3286,7 @@ void test_cil_resolve_avrule_class_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3305,7 +3307,7 @@ void test_cil_resolve_avrule_perm_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3327,7 +3329,7 @@ void test_cil_resolve_type_rule_transition(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3348,7 +3350,7 @@ void test_cil_resolve_type_rule_transition_srcdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3369,7 +3371,7 @@ void test_cil_resolve_type_rule_transition_tgtdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3390,7 +3392,7 @@ void test_cil_resolve_type_rule_transition_objdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3411,7 +3413,7 @@ void test_cil_resolve_type_rule_transition_resultdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3433,7 +3435,7 @@ void test_cil_resolve_type_rule_change(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3454,7 +3456,7 @@ void test_cil_resolve_type_rule_change_srcdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3475,7 +3477,7 @@ void test_cil_resolve_type_rule_change_tgtdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3496,7 +3498,7 @@ void test_cil_resolve_type_rule_change_objdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3517,7 +3519,7 @@ void test_cil_resolve_type_rule_change_resultdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3539,7 +3541,7 @@ void test_cil_resolve_type_rule_member(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3560,7 +3562,7 @@ void test_cil_resolve_type_rule_member_srcdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3581,7 +3583,7 @@ void test_cil_resolve_type_rule_member_tgtdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3602,7 +3604,7 @@ void test_cil_resolve_type_rule_member_objdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3623,7 +3625,7 @@ void test_cil_resolve_type_rule_member_resultdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3649,7 +3651,7 @@ void test_cil_resolve_filecon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3675,7 +3677,7 @@ void test_cil_resolve_filecon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3700,7 +3702,7 @@ void test_cil_resolve_filecon_anon_context(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3726,7 +3728,7 @@ void test_cil_resolve_filecon_anon_context_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	int rc = cil_resolve_filecon(test_db->ast->root->cl_head->next->next->next->next->next->next, args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
@@ -3750,7 +3752,7 @@ void test_cil_resolve_portcon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3776,7 +3778,7 @@ void test_cil_resolve_portcon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3801,7 +3803,7 @@ void test_cil_resolve_portcon_anon_context(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3825,7 +3827,7 @@ void test_cil_resolve_portcon_anon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3851,7 +3853,7 @@ void test_cil_resolve_genfscon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3877,7 +3879,7 @@ void test_cil_resolve_genfscon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3902,7 +3904,7 @@ void test_cil_resolve_genfscon_anon_context(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3926,7 +3928,7 @@ void test_cil_resolve_genfscon_anon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3954,7 +3956,7 @@ void test_cil_resolve_nodecon_ipv4(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -3982,7 +3984,7 @@ void test_cil_resolve_nodecon_ipv6(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4009,7 +4011,7 @@ void test_cil_resolve_nodecon_anonipaddr_ipv4(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4036,7 +4038,7 @@ void test_cil_resolve_nodecon_anonnetmask_ipv4(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4063,7 +4065,7 @@ void test_cil_resolve_nodecon_anonipaddr_ipv6(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4090,7 +4092,7 @@ void test_cil_resolve_nodecon_anonnetmask_ipv6(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4117,7 +4119,7 @@ void test_cil_resolve_nodecon_diffipfam_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4145,7 +4147,7 @@ void test_cil_resolve_nodecon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4173,7 +4175,7 @@ void test_cil_resolve_nodecon_ipaddr_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4200,7 +4202,7 @@ void test_cil_resolve_nodecon_netmask_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4226,7 +4228,7 @@ void test_cil_resolve_nodecon_anon_context(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4251,7 +4253,7 @@ void test_cil_resolve_nodecon_anon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4271,7 +4273,7 @@ void test_cil_resolve_netifcon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4290,7 +4292,7 @@ void test_cil_resolve_netifcon_otf_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4309,7 +4311,7 @@ void test_cil_resolve_netifcon_interface_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4336,7 +4338,7 @@ void test_cil_resolve_netifcon_unnamed(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4362,7 +4364,7 @@ void test_cil_resolve_netifcon_unnamed_packet_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4389,7 +4391,7 @@ void test_cil_resolve_netifcon_unnamed_otf_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4408,7 +4410,7 @@ void test_cil_resolve_netifcon_sublist_secondlist_missing_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4427,7 +4429,7 @@ void test_cil_resolve_pirqcon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4446,7 +4448,7 @@ void test_cil_resolve_pirqcon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4474,7 +4476,7 @@ void test_cil_resolve_pirqcon_anon_context(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_resolve_senscat(test_db->ast->root->cl_head->next->next->next->next->next, args);
 
@@ -4494,7 +4496,7 @@ void test_cil_resolve_pirqcon_anon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4513,7 +4515,7 @@ void test_cil_resolve_iomemcon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4532,7 +4534,7 @@ void test_cil_resolve_iomemcon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4558,7 +4560,7 @@ void test_cil_resolve_iomemcon_anon_context(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4580,7 +4582,7 @@ void test_cil_resolve_iomemcon_anon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4599,7 +4601,7 @@ void test_cil_resolve_ioportcon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4618,7 +4620,7 @@ void test_cil_resolve_ioportcon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4644,7 +4646,7 @@ void test_cil_resolve_ioportcon_anon_context(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4666,7 +4668,7 @@ void test_cil_resolve_ioportcon_anon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4685,7 +4687,7 @@ void test_cil_resolve_pcidevicecon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4704,7 +4706,7 @@ void test_cil_resolve_pcidevicecon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4730,7 +4732,7 @@ void test_cil_resolve_pcidevicecon_anon_context(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4752,7 +4754,7 @@ void test_cil_resolve_pcidevicecon_anon_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4779,7 +4781,7 @@ void test_cil_resolve_fsuse(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4806,7 +4808,7 @@ void test_cil_resolve_fsuse_nocontext_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4833,7 +4835,7 @@ void test_cil_resolve_fsuse_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4859,7 +4861,7 @@ void test_cil_resolve_fsuse_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4885,7 +4887,7 @@ void test_cil_resolve_fsuse_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4911,7 +4913,7 @@ void test_cil_resolve_sidcontext(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4943,7 +4945,7 @@ void test_cil_resolve_sidcontext_named_levels(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -4977,7 +4979,7 @@ void test_cil_resolve_sidcontext_named_context(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5011,7 +5013,7 @@ void test_cil_resolve_sidcontext_named_context_wrongname_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5044,7 +5046,7 @@ void test_cil_resolve_sidcontext_named_context_invaliduser_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
         cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5069,7 +5071,7 @@ void test_cil_resolve_call1_noparam(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5092,7 +5094,7 @@ void test_cil_resolve_call1_type(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5115,7 +5117,7 @@ void test_cil_resolve_call1_role(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5138,7 +5140,7 @@ void test_cil_resolve_call1_user(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5161,7 +5163,7 @@ void test_cil_resolve_call1_sens(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5184,7 +5186,7 @@ void test_cil_resolve_call1_cat(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5208,7 +5210,7 @@ void test_cil_resolve_call1_catset(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5231,7 +5233,7 @@ void test_cil_resolve_call1_catset_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5254,7 +5256,7 @@ void test_cil_resolve_call1_catset_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5281,7 +5283,7 @@ void test_cil_resolve_call1_level(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5308,7 +5310,7 @@ void test_cil_resolve_call1_level_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5335,7 +5337,7 @@ void test_cil_resolve_call1_level_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5365,7 +5367,7 @@ void test_cil_resolve_call1_ipaddr(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5394,7 +5396,7 @@ void test_cil_resolve_call1_ipaddr_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5423,7 +5425,7 @@ void test_cil_resolve_call1_ipaddr_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5446,7 +5448,7 @@ void test_cil_resolve_call1_class(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5491,7 +5493,7 @@ void test_cil_resolve_call1_permset(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5514,7 +5516,7 @@ void test_cil_resolve_call1_permset_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5604,7 +5606,7 @@ void test_cil_resolve_call1_unknown_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5635,7 +5637,7 @@ void test_cil_resolve_call1_unknowncall_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5658,7 +5660,7 @@ void test_cil_resolve_call1_extraargs_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5681,7 +5683,7 @@ void test_cil_resolve_call1_copy_dup(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5708,7 +5710,7 @@ void test_cil_resolve_call1_missing_arg_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5731,7 +5733,7 @@ void test_cil_resolve_call1_paramsflavor_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5762,7 +5764,7 @@ void test_cil_resolve_call1_unknownflavor_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5793,7 +5795,7 @@ void test_cil_resolve_call2_type(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5820,7 +5822,7 @@ void test_cil_resolve_call2_role(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5847,7 +5849,7 @@ void test_cil_resolve_call2_user(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5874,7 +5876,7 @@ void test_cil_resolve_call2_sens(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5901,7 +5903,7 @@ void test_cil_resolve_call2_cat(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5929,7 +5931,7 @@ void test_cil_resolve_call2_catset(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5956,7 +5958,7 @@ void test_cil_resolve_call2_catset_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -5984,7 +5986,7 @@ void test_cil_resolve_call2_permset(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6011,7 +6013,7 @@ void test_cil_resolve_call2_permset_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6091,7 +6093,7 @@ void test_cil_resolve_call2_class(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6149,7 +6151,7 @@ void test_cil_resolve_call2_level(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6180,7 +6182,7 @@ void test_cil_resolve_call2_level_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6214,7 +6216,7 @@ void test_cil_resolve_call2_ipaddr(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6247,7 +6249,7 @@ void test_cil_resolve_call2_ipaddr_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6278,7 +6280,7 @@ void test_cil_resolve_call2_unknown_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6306,7 +6308,7 @@ void test_cil_resolve_call2_name_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6333,7 +6335,7 @@ void test_cil_resolve_name_call_args(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6368,7 +6370,7 @@ void test_cil_resolve_name_call_args_multipleparams(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6399,8 +6401,7 @@ void test_cil_resolve_name_call_args_diffflavor(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
-
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	struct cil_tree_node *test_node;
@@ -6432,7 +6433,7 @@ void test_cil_resolve_name_call_args_callnull_neg(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	struct cil_tree_node *test_node;
 	cil_tree_node_init(&test_node);
@@ -6461,7 +6462,7 @@ void test_cil_resolve_name_call_args_namenull_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6492,7 +6493,7 @@ void test_cil_resolve_name_call_args_callargsnull_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6523,7 +6524,7 @@ void test_cil_resolve_name_call_args_name_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6553,7 +6554,7 @@ void test_cil_resolve_expr_stack_bools(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6578,7 +6579,7 @@ void test_cil_resolve_expr_stack_tunables(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6602,7 +6603,7 @@ void test_cil_resolve_expr_stack_type(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6626,7 +6627,7 @@ void test_cil_resolve_expr_stack_role(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6650,7 +6651,7 @@ void test_cil_resolve_expr_stack_user(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6675,7 +6676,7 @@ void test_cil_resolve_expr_stack_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6700,7 +6701,7 @@ void test_cil_resolve_expr_stack_emptystr_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6726,7 +6727,7 @@ void test_cil_resolve_boolif(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6749,7 +6750,7 @@ void test_cil_resolve_boolif_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -6773,7 +6774,7 @@ void test_cil_evaluate_expr_stack_and(CuTest *tc) {
 
 	uint16_t result = CIL_FALSE;
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6800,7 +6801,7 @@ void test_cil_evaluate_expr_stack_not(CuTest *tc) {
 
 	uint16_t result = CIL_FALSE;
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6827,7 +6828,7 @@ void test_cil_evaluate_expr_stack_or(CuTest *tc) {
 
 	uint16_t result = CIL_FALSE;
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6854,7 +6855,7 @@ void test_cil_evaluate_expr_stack_xor(CuTest *tc) {
 
 	uint16_t result = CIL_FALSE;
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6881,7 +6882,7 @@ void test_cil_evaluate_expr_stack_eq(CuTest *tc) {
 
 	uint16_t result = CIL_FALSE;
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6908,7 +6909,7 @@ void test_cil_evaluate_expr_stack_neq(CuTest *tc) {
 
 	uint16_t result = CIL_FALSE;
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6936,7 +6937,7 @@ void test_cil_evaluate_expr_stack_oper1(CuTest *tc) {
 
 	uint16_t result = CIL_FALSE;
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -6964,7 +6965,7 @@ void test_cil_evaluate_expr_stack_oper2(CuTest *tc) {
 
 	uint16_t result = CIL_FALSE;
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7028,7 +7029,7 @@ void test_cil_resolve_tunif_false(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -7051,7 +7052,7 @@ void test_cil_resolve_tunif_true(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -7074,7 +7075,7 @@ void test_cil_resolve_tunif_resolveexpr_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -7129,7 +7130,7 @@ void test_cil_resolve_userbounds(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7149,7 +7150,7 @@ void test_cil_resolve_userbounds_exists_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7170,7 +7171,7 @@ void test_cil_resolve_userbounds_user1_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7190,7 +7191,7 @@ void test_cil_resolve_userbounds_user2_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7210,7 +7211,7 @@ void test_cil_resolve_roletype(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7229,7 +7230,7 @@ void test_cil_resolve_roletype_type_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7248,7 +7249,7 @@ void test_cil_resolve_roletype_role_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7270,7 +7271,7 @@ void test_cil_resolve_userrole(CuTest *tc) {
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	int rc = cil_resolve_userrole(test_db->ast->root->cl_head->next->next, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -7287,7 +7288,7 @@ void test_cil_resolve_userrole_user_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7306,7 +7307,7 @@ void test_cil_resolve_userrole_role_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7329,7 +7330,7 @@ void test_cil_resolve_userlevel(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7357,7 +7358,7 @@ void test_cil_resolve_userlevel_macro(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7399,7 +7400,7 @@ void test_cil_resolve_userlevel_macro_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7436,7 +7437,7 @@ void test_cil_resolve_userlevel_level_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7462,7 +7463,7 @@ void test_cil_resolve_userlevel_level_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7489,7 +7490,7 @@ void test_cil_resolve_userlevel_user_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7516,7 +7517,7 @@ void test_cil_resolve_userlevel_level_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7543,7 +7544,7 @@ void test_cil_resolve_userrange(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7570,7 +7571,7 @@ void test_cil_resolve_userrange_macro(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7611,7 +7612,7 @@ void test_cil_resolve_userrange_macro_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7650,7 +7651,7 @@ void test_cil_resolve_userrange_range_anon(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7678,7 +7679,7 @@ void test_cil_resolve_userrange_range_anon_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7705,7 +7706,7 @@ void test_cil_resolve_userrange_user_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -7732,7 +7733,7 @@ void test_cil_resolve_userrange_range_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -8160,7 +8161,7 @@ void test_cil_resolve_ast_node_helper_call1(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8186,7 +8187,7 @@ void test_cil_resolve_ast_node_helper_call1_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8212,7 +8213,7 @@ void test_cil_resolve_ast_node_helper_call2(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8242,7 +8243,7 @@ void test_cil_resolve_ast_node_helper_call2_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8270,7 +8271,7 @@ void test_cil_resolve_ast_node_helper_boolif(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8295,7 +8296,7 @@ void test_cil_resolve_ast_node_helper_boolif_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8320,7 +8321,7 @@ void test_cil_resolve_ast_node_helper_tunif(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8345,7 +8346,7 @@ void test_cil_resolve_ast_node_helper_tunif_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE; 
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8369,7 +8370,7 @@ void test_cil_resolve_ast_node_helper_catorder(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8392,7 +8393,7 @@ void test_cil_resolve_ast_node_helper_catorder_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8415,7 +8416,7 @@ void test_cil_resolve_ast_node_helper_dominance(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8438,7 +8439,7 @@ void test_cil_resolve_ast_node_helper_dominance_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8460,7 +8461,7 @@ void test_cil_resolve_ast_node_helper_roleallow(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8482,7 +8483,7 @@ void test_cil_resolve_ast_node_helper_roleallow_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -8505,7 +8506,7 @@ void test_cil_resolve_ast_node_helper_roledominance(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8527,7 +8528,7 @@ void test_cil_resolve_ast_node_helper_roledominance_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -8549,7 +8550,7 @@ void test_cil_resolve_ast_node_helper_sensalias(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -8570,7 +8571,7 @@ void test_cil_resolve_ast_node_helper_sensalias_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -8592,7 +8593,7 @@ void test_cil_resolve_ast_node_helper_catalias(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8613,7 +8614,7 @@ void test_cil_resolve_ast_node_helper_catalias_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -8636,7 +8637,7 @@ void test_cil_resolve_ast_node_helper_catset(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8659,7 +8660,7 @@ void test_cil_resolve_ast_node_helper_catset_catlist_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8684,7 +8685,7 @@ void test_cil_resolve_ast_node_helper_catrange(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8712,7 +8713,7 @@ void test_cil_resolve_ast_node_helper_catrange_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MLS, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8736,7 +8737,7 @@ void test_cil_resolve_ast_node_helper_level(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8772,7 +8773,7 @@ void test_cil_resolve_ast_node_helper_level_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8808,7 +8809,7 @@ void test_cil_resolve_ast_node_helper_levelrange(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8847,7 +8848,7 @@ void test_cil_resolve_ast_node_helper_levelrange_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8884,7 +8885,7 @@ void test_cil_resolve_ast_node_helper_constrain(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8911,7 +8912,7 @@ void test_cil_resolve_ast_node_helper_constrain_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8938,7 +8939,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8965,7 +8966,7 @@ void test_cil_resolve_ast_node_helper_mlsconstrain_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -8995,7 +8996,7 @@ void test_cil_resolve_ast_node_helper_context(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -9035,7 +9036,7 @@ void test_cil_resolve_ast_node_helper_context_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC1, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -9072,7 +9073,7 @@ void test_cil_resolve_ast_node_helper_senscat(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -9099,7 +9100,7 @@ void test_cil_resolve_ast_node_helper_senscat_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -9124,7 +9125,7 @@ void test_cil_resolve_ast_node_helper_roletransition(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9148,7 +9149,7 @@ void test_cil_resolve_ast_node_helper_roletransition_srcdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9172,7 +9173,7 @@ void test_cil_resolve_ast_node_helper_roletransition_tgtdecl_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9196,7 +9197,7 @@ void test_cil_resolve_ast_node_helper_roletransition_resultdecl_neg(CuTest *tc) 
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9220,7 +9221,7 @@ void test_cil_resolve_ast_node_helper_typeattributeset(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9243,7 +9244,7 @@ void test_cil_resolve_ast_node_helper_typeattributeset_undef_type_neg(CuTest *tc
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9266,7 +9267,7 @@ void test_cil_resolve_ast_node_helper_typealias(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9288,7 +9289,7 @@ void test_cil_resolve_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9311,7 +9312,7 @@ void test_cil_resolve_ast_node_helper_typebounds(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9333,7 +9334,7 @@ void test_cil_resolve_ast_node_helper_typebounds_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9355,7 +9356,7 @@ void test_cil_resolve_ast_node_helper_typepermissive(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 	uint32_t finished = 0;
 	
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
@@ -9376,7 +9377,7 @@ void test_cil_resolve_ast_node_helper_typepermissive_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9404,7 +9405,7 @@ void test_cil_resolve_ast_node_helper_rangetransition(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9432,7 +9433,7 @@ void test_cil_resolve_ast_node_helper_rangetransition_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9457,7 +9458,7 @@ void test_cil_resolve_ast_node_helper_filetransition(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9482,7 +9483,7 @@ void test_cil_resolve_ast_node_helper_filetransition_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9506,7 +9507,7 @@ void test_cil_resolve_ast_node_helper_avrule(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9527,7 +9528,7 @@ void test_cil_resolve_ast_node_helper_avrule_src_nores_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9549,7 +9550,7 @@ void test_cil_resolve_ast_node_helper_avrule_tgt_nores_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9572,7 +9573,7 @@ void test_cil_resolve_ast_node_helper_avrule_class_nores_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9595,7 +9596,7 @@ void test_cil_resolve_ast_node_helper_avrule_datum_null_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 	
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9620,7 +9621,7 @@ void test_cil_resolve_ast_node_helper_type_rule_transition(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9644,7 +9645,7 @@ void test_cil_resolve_ast_node_helper_type_rule_transition_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9669,7 +9670,7 @@ void test_cil_resolve_ast_node_helper_type_rule_change(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9693,7 +9694,7 @@ void test_cil_resolve_ast_node_helper_type_rule_change_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9718,7 +9719,7 @@ void test_cil_resolve_ast_node_helper_type_rule_member(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9742,7 +9743,7 @@ void test_cil_resolve_ast_node_helper_type_rule_member_neg(CuTest *tc) {
 	cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 	
@@ -9770,7 +9771,7 @@ void test_cil_resolve_ast_node_helper_userbounds(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -9795,7 +9796,7 @@ void test_cil_resolve_ast_node_helper_userbounds_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -9821,7 +9822,7 @@ void test_cil_resolve_ast_node_helper_roletype(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -9846,7 +9847,7 @@ void test_cil_resolve_ast_node_helper_roletype_role_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -9871,7 +9872,7 @@ void test_cil_resolve_ast_node_helper_roletype_type_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -9897,7 +9898,7 @@ void test_cil_resolve_ast_node_helper_userrole(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -9922,7 +9923,7 @@ void test_cil_resolve_ast_node_helper_userrole_user_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -9947,7 +9948,7 @@ void test_cil_resolve_ast_node_helper_userrole_role_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -9976,7 +9977,7 @@ void test_cil_resolve_ast_node_helper_userlevel(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -10005,7 +10006,7 @@ void test_cil_resolve_ast_node_helper_userlevel_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -10034,7 +10035,7 @@ void test_cil_resolve_ast_node_helper_userrange(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -10063,7 +10064,7 @@ void test_cil_resolve_ast_node_helper_userrange_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -10090,7 +10091,7 @@ void test_cil_resolve_ast_node_helper_filecon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10119,7 +10120,7 @@ void test_cil_resolve_ast_node_helper_filecon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10148,7 +10149,7 @@ void test_cil_resolve_ast_node_helper_portcon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10177,7 +10178,7 @@ void test_cil_resolve_ast_node_helper_portcon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10206,7 +10207,7 @@ void test_cil_resolve_ast_node_helper_genfscon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10235,7 +10236,7 @@ void test_cil_resolve_ast_node_helper_genfscon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10265,7 +10266,7 @@ void test_cil_resolve_ast_node_helper_nodecon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10296,7 +10297,7 @@ void test_cil_resolve_ast_node_helper_nodecon_ipaddr_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10327,7 +10328,7 @@ void test_cil_resolve_ast_node_helper_nodecon_netmask_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10350,7 +10351,7 @@ void test_cil_resolve_ast_node_helper_netifcon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10372,7 +10373,7 @@ void test_cil_resolve_ast_node_helper_netifcon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10394,7 +10395,7 @@ void test_cil_resolve_ast_node_helper_pirqcon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10416,7 +10417,7 @@ void test_cil_resolve_ast_node_helper_pirqcon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10438,7 +10439,7 @@ void test_cil_resolve_ast_node_helper_iomemcon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10460,7 +10461,7 @@ void test_cil_resolve_ast_node_helper_iomemcon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10482,7 +10483,7 @@ void test_cil_resolve_ast_node_helper_ioportcon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10504,7 +10505,7 @@ void test_cil_resolve_ast_node_helper_ioportcon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10526,7 +10527,7 @@ void test_cil_resolve_ast_node_helper_pcidevicecon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10548,7 +10549,7 @@ void test_cil_resolve_ast_node_helper_pcidevicecon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10578,7 +10579,7 @@ void test_cil_resolve_ast_node_helper_fsuse(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10600,7 +10601,7 @@ void test_cil_resolve_ast_node_helper_fsuse_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10630,7 +10631,7 @@ void test_cil_resolve_ast_node_helper_sidcontext(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10658,7 +10659,7 @@ void test_cil_resolve_ast_node_helper_sidcontext_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10681,7 +10682,7 @@ void test_cil_resolve_ast_node_helper_classcommon(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10703,7 +10704,7 @@ void test_cil_resolve_ast_node_helper_classcommon_neg(CuTest *tc) {
         cil_db_init(&test_db);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, NULL, NULL);
 
         uint32_t finished = 0;
 
@@ -10731,7 +10732,7 @@ void test_cil_resolve_ast_node_helper_rolebounds(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -10756,7 +10757,7 @@ void test_cil_resolve_ast_node_helper_rolebounds_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -10785,7 +10786,7 @@ void test_cil_resolve_ast_node_helper_callstack(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -10813,7 +10814,7 @@ void test_cil_resolve_ast_node_helper_call(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -10840,7 +10841,7 @@ void test_cil_resolve_ast_node_helper_optional(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -10868,7 +10869,7 @@ void test_cil_resolve_ast_node_helper_macro(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -10898,7 +10899,7 @@ void test_cil_resolve_ast_node_helper_optstack(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 
@@ -10921,7 +10922,7 @@ void test_cil_resolve_ast_node_helper_optstack_tunable_neg(CuTest *tc) {
 	test_ast_node_opt->flavor = CIL_OPTIONAL;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, test_ast_node_opt);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, test_ast_node_opt, NULL);
 
 	uint32_t finished = 0;
 
@@ -10950,7 +10951,7 @@ void test_cil_resolve_ast_node_helper_optstack_macro_neg(CuTest *tc) {
 	test_ast_node_opt->flavor = CIL_OPTIONAL;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, test_ast_node_opt);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, test_ast_node_opt, NULL);
 
 	uint32_t finished = 0;
 
@@ -10980,7 +10981,7 @@ void test_cil_resolve_ast_node_helper_nodenull_neg(CuTest *tc) {
 	cil_tree_node_init(&test_ast_node);
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_TIF, &changed, NULL, NULL, NULL);
 
 	uint32_t finished = 0;
 
@@ -11030,7 +11031,7 @@ void test_cil_resolve_ast_node_helper_dbflavor_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -11055,7 +11056,7 @@ void test_cil_resolve_ast_node_helper_pass_neg(CuTest *tc) {
 	uint32_t finished = 0;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
 
 	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
 	
@@ -11082,7 +11083,7 @@ void test_cil_resolve_ast_node_helper_optfailedtoresolve(CuTest *tc) {
 	test_ast_node_opt->data = opt;
 
 	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, test_ast_node_opt);
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC2, &changed, NULL, test_ast_node_opt, NULL);
 
         uint32_t finished = 0;
 

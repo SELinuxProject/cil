@@ -120,6 +120,7 @@ enum cil_flavor {
 	CIL_ARGS,
 	CIL_BOOLEANIF,
 	CIL_TUNABLEIF,
+	CIL_CONDBLOCK,
 	CIL_CONDTRUE,
 	CIL_CONDFALSE,
 	CIL_TUNABLEIFDEF,
@@ -853,16 +854,17 @@ struct cil_call {
 #define CIL_TRUE	1
 #define CIL_FALSE	0
 
+struct cil_condblock {
+	enum cil_flavor flavor;
+	symtab_t symtab[CIL_SYM_NUM];
+};
+
 struct cil_booleanif {
 	struct cil_list *expr_stack;
-	struct cil_tree_node *condtrue;
-	struct cil_tree_node *condfalse;
 };
 
 struct cil_tunableif {
 	struct cil_list *expr_stack;
-	struct cil_tree_node *condtrue;
-	struct cil_tree_node *condfalse;
 };
 
 struct cil_conditional {
@@ -924,6 +926,7 @@ void cil_filetransition_init(struct cil_filetransition **filetrans);
 void cil_rangetransition_init(struct cil_rangetransition **rangetrans);
 void cil_bool_init(struct cil_bool **cilbool);
 void cil_boolif_init(struct cil_booleanif **bif);
+void cil_condblock_init(struct cil_condblock **cb);
 void cil_conditional_init(struct cil_conditional **cond);
 void cil_tunif_init(struct cil_tunableif **tif);
 void cil_avrule_init(struct cil_avrule **avrule);
