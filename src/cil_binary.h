@@ -137,7 +137,7 @@ int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node, ebitmap_t *types_bitmap);
 
 /**
  * Insert cil typealias structure into sepol policydb.
@@ -183,7 +183,7 @@ int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node);
+int cil_typeattribute_to_bitmap(policydb_t *pdb, struct cil_tree_node *node, ebitmap_t *types_bitmap);
 
 /**
  * Insert cil policycap structure into sepol policydb.
@@ -253,7 +253,7 @@ int cil_catalias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_dominance_to_policydb(policydb_t *pdb, struct cil_db *db);
+int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db);
 
 /**
  * Insert cil type rule structure into sepol policydb.  This includes
@@ -274,7 +274,7 @@ int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void *extra_args);
 
 /**
  * Insert cil booleanif structure into sepol policydb.  This populates the
@@ -286,7 +286,7 @@ int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void *extra_args);
 
 /**
  * Insert cil role transition structure into sepol policydb.
