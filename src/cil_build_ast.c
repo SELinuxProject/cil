@@ -613,7 +613,7 @@ int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current,
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
 	struct cil_classpermset *cps = NULL;
-	int rc = SEPOL_OK;
+	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
 		goto gen_classpermset_cleanup;
