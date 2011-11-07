@@ -180,9 +180,18 @@ void test_cil_resolve_classmapping_named_classmapname_neg(CuTest *);
 void test_cil_resolve_classmapping_anon_classmapname_neg(CuTest *);
 void test_cil_resolve_classmapping_anon_permset_neg(CuTest *);
 
+void test_cil_resolve_classpermset_named(CuTest *);
+void test_cil_resolve_classpermset_named_namedpermlist(CuTest *);
+void test_cil_resolve_classpermset_named_permlist_neg(CuTest *);
+void test_cil_resolve_classpermset_named_unnamedcps_neg(CuTest *);
+void test_cil_resolve_classpermset_anon(CuTest *);
+void test_cil_resolve_classpermset_anon_namedpermlist(CuTest *);
+void test_cil_resolve_classpermset_anon_permlist_neg(CuTest *);
+
 void test_cil_resolve_avrule(CuTest *);
 void test_cil_resolve_avrule_permset(CuTest *);
 void test_cil_resolve_avrule_permset_neg(CuTest *);
+void test_cil_resolve_avrule_permset_permdne_neg(CuTest *);
 void test_cil_resolve_avrule_firsttype_neg(CuTest *);
 void test_cil_resolve_avrule_secondtype_neg(CuTest *);
 void test_cil_resolve_avrule_class_neg(CuTest *);

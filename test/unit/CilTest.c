@@ -348,9 +348,18 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roledominance);
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_roledominance_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_resolve_classpermset_named);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classpermset_named_namedpermlist);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classpermset_named_permlist_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classpermset_named_unnamedcps_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classpermset_anon);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classpermset_anon_namedpermlist);
+	SUITE_ADD_TEST(suite, test_cil_resolve_classpermset_anon_permlist_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_permset);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_permset_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_permset_permdne_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_firsttype_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_secondtype_neg);
 	SUITE_ADD_TEST(suite, test_cil_resolve_avrule_class_neg);
