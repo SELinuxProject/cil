@@ -84,6 +84,17 @@ void test_cil_gen_class_permsnotinlist_neg(CuTest *);
 void test_cil_gen_class_extrapermlist_neg(CuTest *);
 void test_cil_gen_class_listinlist_neg(CuTest *);
 
+void test_cil_gen_classpermset(CuTest *);
+void test_cil_gen_classpermset_noname_neg(CuTest *);
+void test_cil_gen_classpermset_nameinparens_neg(CuTest *);
+void test_cil_gen_classpermset_noclass_neg(CuTest *);
+void test_cil_gen_classpermset_noperms_neg(CuTest *);
+void test_cil_gen_classpermset_emptyperms_neg(CuTest *);
+void test_cil_gen_classpermset_extra_neg(CuTest *);
+void test_cil_gen_classpermset_dbnull_neg(CuTest *);
+void test_cil_gen_classpermset_currnull_neg(CuTest *);
+void test_cil_gen_classpermset_astnull_neg(CuTest *);
+
 void test_cil_gen_classmap_perm(CuTest *);
 void test_cil_gen_classmap_perm_dupeperm_neg(CuTest *);
 void test_cil_gen_classmap_perm_dbnull_neg(CuTest *tc);
@@ -925,6 +936,9 @@ void test_cil_build_ast_node_helper_permset_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_class(CuTest *);
 void test_cil_build_ast_node_helper_class_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_classpermset(CuTest *);
+void test_cil_build_ast_node_helper_classpermset_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_classmap(CuTest *);
 void test_cil_build_ast_node_helper_classmap_neg(CuTest *);

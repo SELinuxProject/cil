@@ -708,6 +708,19 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_noname_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_nameinparens_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_noperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_emptyperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_classpermset);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_classpermset_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_classmap_perm);
 	SUITE_ADD_TEST(suite, test_cil_gen_classmap_perm_dupeperm_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_classmap_perm_dbnull_neg);
