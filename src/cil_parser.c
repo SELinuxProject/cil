@@ -53,12 +53,7 @@ int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_
 
 	cil_lexer_setup(buffer, size);
 
-	if (*parse_tree == NULL) {
-		cil_tree_init(&tree);
-		tree->root->flavor = CIL_ROOT;
-	} else {
-		tree = *parse_tree;
-	}
+	tree = *parse_tree;
 	current = tree->root;	
 
 	do {

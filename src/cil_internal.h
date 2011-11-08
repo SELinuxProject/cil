@@ -332,6 +332,7 @@ enum cil_sym_index {
 #define CIL_SYM_SIZE		256
 
 struct cil_db {
+	struct cil_tree *parse;
 	struct cil_tree *ast;
 	symtab_t symtab[CIL_SYM_NUM];
 	struct cil_type *selftype;

@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <getopt.h>
+#include <sys/stat.h>
 
 #include <cil/cil.h>
 #include <sepol/policydb.h>
@@ -49,6 +50,10 @@ int main(int argc, char *argv[])
 	struct sepol_policy_file *pf = NULL;
 	FILE *binary = NULL;
 	FILE *file_contexts;
+	FILE *file;
+	char *buffer = NULL;
+	struct stat filedata;
+	uint32_t file_size;
 	char output[10];
 	struct cil_db *db = NULL;
 	int target = SEPOL_TARGET_SELINUX;
@@ -69,6 +74,7 @@ int main(int argc, char *argv[])
 		{"handle-unknown", required_argument, 0, 'U'},
 		{0, 0, 0, 0}
 	};
+	int i;
 
 	while (1) {
 		opt_char = getopt_long(argc, argv, "hvt:Mc:", long_opts, &opt_index);
@@ -135,10 +141,37 @@ int main(int argc, char *argv[])
 
 	cil_db_init(&db);
 
-	rc = cil_parse_files(db, argv + optind, argc - optind);
-	if (rc != SEPOL_OK) {
-		fprintf(stderr, "Failed to parse files\n");
-		goto exit;
+	for (i = optind; i < argc; i++) {
+		file = fopen(argv[i], "r");
+		if (!file) {
+			fprintf(stderr, "Could not open file: %s\n", argv[i]);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		rc = stat(argv[i], &filedata);
+		if (rc == -1) {
+			fprintf(stderr, "Could not stat file: %s\n", argv[i]);
+			goto exit;
+		}
+		file_size = filedata.st_size;	
+
+		buffer = malloc(file_size);
+		rc = fread(buffer, file_size, 1, file);
+		if (rc != 1) {
+			fprintf(stderr, "Failure reading file: %s\n", argv[i]);
+			goto exit;
+		}
+		fclose(file);
+		file = NULL;
+
+		rc = cil_add_file(db, argv[i], buffer, file_size);
+		if (rc != SEPOL_OK) {
+			fprintf(stderr, "Failure adding %s\n", argv[i]);
+			goto exit;
+		}
+
+		free(buffer);
+		buffer = NULL;
 	}
 
 	sepol_policydb_create(&pdb);
@@ -158,7 +191,13 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-	rc = cil_db_to_sepol_policydb(db, pdb);
+	rc = cil_compile(db, pdb);
+	if (rc != SEPOL_OK) {
+		fprintf(stderr, "Failed to compile cildb: %d\n", rc);
+		goto exit;
+	}
+
+	rc = cil_build_policydb(db, pdb);
 	if (rc != SEPOL_OK) {
 		fprintf(stderr, "Failed to build policydb\n");
 		goto exit;
@@ -222,6 +261,10 @@ exit:
 	if (binary != NULL) {
 		fclose(binary);
 	}
+	if (file != NULL) {
+		fclose(file);
+	}
+	free(buffer);
 	cil_db_destroy(&db);
 	sepol_policydb_free(pdb);
 	sepol_policy_file_free(pf);

@@ -32,7 +32,6 @@
 
 #include <sepol/policydb/policydb.h>
 #include <sepol/policydb/symtab.h>
-#include <sys/stat.h>
 
 #include "cil_internal.h"
 #include "cil_log.h"
@@ -56,6 +55,7 @@ void cil_db_init(struct cil_db **db)
 
 	cil_symtab_array_init((*db)->symtab, CIL_SYM_NUM);
 
+	cil_tree_init(&(*db)->parse);
 	cil_tree_init(&(*db)->ast);
 	cil_list_init(&(*db)->catorder);
 	cil_list_init(&(*db)->dominance);
@@ -82,6 +82,7 @@ void cil_db_destroy(struct cil_db **db)
 		return;
 	}
 
+	cil_tree_destroy(&(*db)->parse);
 	cil_tree_destroy(&(*db)->ast);
 	cil_symtab_array_destroy((*db)->symtab);
 	cil_list_destroy(&(*db)->catorder, CIL_FALSE);
@@ -105,59 +106,48 @@ void cil_db_destroy(struct cil_db **db)
 	*db = NULL;	
 }
 
-int cil_parse_files(cil_db_t *db, char **files_list, int num_files)
+int cil_add_file(cil_db_t *db, char *name, char *data, size_t size)
 {
 	char *buffer = NULL;
-	struct stat filedata;
-	FILE *file;
-	uint32_t file_size;
-	struct cil_tree *parse_tree = NULL;
 	int rc;
-	int i;
 
-	cil_tree_init(&parse_tree);
+	cil_log(CIL_INFO, "Parsing %s...\n", name);
 
-	for (i = 0; i < num_files; i++) {
-		file = fopen(files_list[i], "r");
-		if (!file) {
-			cil_log(CIL_ERR, "Could not open file: %s\n", files_list[i]);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-		rc = stat(files_list[i], &filedata);
-		if (rc == -1) {
-			cil_log(CIL_ERR, "Could not stat file: %s\n", files_list[i]);
-			goto exit;
-		}
-		file_size = filedata.st_size;	
+	buffer = cil_malloc(size + 2);
+	memcpy(buffer, data, size);
+	memset(buffer + size, 0, 2);
 
-		buffer = cil_malloc(file_size + 2);
-		rc = fread(buffer, file_size, 1, file);
-		if (rc != 1) {
-			cil_log(CIL_ERR, "Failure reading file: %s\n", files_list[i]);
-			goto exit;
-		}
-		memset(buffer+file_size, 0, 2);
-		fclose(file);
-		file = NULL;
+	rc = cil_parser(name, buffer, size + 2, &db->parse);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to parse %s, exiting\n", name);
+		goto exit;
+	}
 
-		cil_log(CIL_INFO, "Parsing %s...\n", files_list[i]);
-		rc = cil_parser(files_list[i], buffer, file_size + 2, &parse_tree);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to parse %s, exiting\n", files_list[i]);
-			goto exit;
-		}
-
-		free(buffer);
-		buffer = NULL;
+	free(buffer);
+	buffer = NULL;
 
 #ifdef DEBUG
-		cil_tree_print(parse_tree->root, 0);
+	cil_tree_print(parse->root, 0);
 #endif
+
+	rc = SEPOL_OK;
+
+exit:
+	free(buffer);
+
+	return rc;
+}
+
+int cil_compile(struct cil_db *db, sepol_policydb_t *sepol_db)
+{
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || sepol_db == NULL) {
+		goto exit;
 	}
-	
+
 	cil_log(CIL_INFO, "Building AST from Parse Tree...\n");
-	rc = cil_build_ast(db, parse_tree->root, db->ast->root);
+	rc = cil_build_ast(db, db->parse->root, db->ast->root);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to build ast, exiting\n");
 		goto exit;
@@ -168,7 +158,7 @@ int cil_parse_files(cil_db_t *db, char **files_list, int num_files)
 #endif
 
 	cil_log(CIL_INFO, "Destroying Parse Tree...\n");
-	cil_tree_destroy(&parse_tree);
+	cil_tree_destroy(&db->parse);
 
 	cil_log(CIL_INFO, "Resolving AST...\n");
 	rc = cil_resolve_ast(db, db->ast->root);
@@ -214,15 +204,10 @@ int cil_parse_files(cil_db_t *db, char **files_list, int num_files)
 
 exit:
 
-	if (file != NULL) {
-		fclose(file);
-	}
-	free(buffer);
-
 	return rc;
 }
 
-int cil_db_to_sepol_policydb(cil_db_t *db, sepol_policydb_t *sepol_db)
+int cil_build_policydb(cil_db_t *db, sepol_policydb_t *sepol_db)
 {
 	int rc;
 	rc = cil_binary_create(db, sepol_db);
