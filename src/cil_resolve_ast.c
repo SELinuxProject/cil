@@ -3381,10 +3381,7 @@ int __cil_resolve_ast_first_child_helper(struct cil_tree_node *current, void *ex
 	if (parent->flavor == CIL_CALL || parent->flavor == CIL_OPTIONAL) {
 		/* push this node onto a stack */
 		struct cil_tree_node *new;
-		rc = cil_tree_node_init(&new);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+		cil_tree_node_init(&new);
 
 		new->data = parent->data;
 		new->flavor = parent->flavor;

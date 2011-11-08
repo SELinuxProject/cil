@@ -2437,12 +2437,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 
 	rc = (*copy_func)(db, orig->data, &data, symtab);
 	if (rc == SEPOL_OK) {
-		rc = cil_tree_node_init(&new);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failed to init tree node, rc: %d\n", rc);
-			cil_tree_node_destroy(&new);
-			goto exit;
-		}
+		cil_tree_node_init(&new);
 
 		new->parent = parent;
 		new->line = orig->line;

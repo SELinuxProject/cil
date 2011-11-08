@@ -5559,11 +5559,9 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		goto exit;
 	}
 
-	rc = cil_tree_node_init(&ast_node);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to init tree node, rc: %d\n", rc);
-		goto exit;
 	}
+
+	cil_tree_node_init(&ast_node);
 
 	ast_node->parent = ast_current;
 	ast_node->line = parse_current->line;
