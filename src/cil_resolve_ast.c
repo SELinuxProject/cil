@@ -52,25 +52,35 @@ struct cil_args_resolve {
 	struct cil_tree_node *macro;
 };
 
-static int __cil_resolve_perm_list(struct cil_class *class, struct cil_list *perm_list_str, struct cil_list *res_list_perms)
+static int __cil_resolve_perm_list(void *class, struct cil_list *perm_list_str, struct cil_list *res_list_perms)
 {
 	struct cil_tree_node *perm_node = NULL;
 	struct cil_list_item *perm = perm_list_str->head;
 	struct cil_list_item *list_item = NULL;
 	struct cil_list_item *list_tail = NULL;
+	struct cil_tree_node *class_node = NULL;
+	symtab_t *perms_symtab = NULL;
 	int rc = SEPOL_ERR;
 
+	class_node = ((struct cil_symtab_datum*)class)->node;
+	if (class_node->flavor == CIL_CLASS) {
+		perms_symtab = &((struct cil_class*)class)->perms;
+	} else {
+		perms_symtab = &((struct cil_classmap*)class)->perms;
+	}
+
 	while (perm != NULL) {
-		rc = cil_symtab_get_node(&class->perms, (char*)perm->data, &perm_node);
+		rc = cil_symtab_get_node(perms_symtab, (char*)perm->data, &perm_node);
 		if (rc == SEPOL_ENOENT) {
-			if (class->common != NULL) {
-				rc = cil_symtab_get_node(&class->common->perms, (char*)perm->data, &perm_node);
+			if (class_node->flavor == CIL_CLASS && ((struct cil_class*)class)->common != NULL) {
+				symtab_t *com_perms_symtab = &((struct cil_class*)class)->common->perms;
+				rc = cil_symtab_get_node(com_perms_symtab, (char*)perm->data, &perm_node);
 				if (rc != SEPOL_OK) {
 					cil_log(CIL_ERR, "Failed to find perm in class or common symtabs\n");
 					goto exit;
 				}
 			} else {
-				cil_log(CIL_ERR, "Failed to find perm '%s' in class symtab\n", (char*)perm->data);
+				cil_log(CIL_ERR, "Failed to find perm '%s' in %s symtab\n", (char*)perm->data, cil_node_to_string(class_node));
 				goto exit;
 			}
 		} else if (rc != SEPOL_OK) {
