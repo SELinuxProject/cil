@@ -1465,7 +1465,7 @@ exit:
 int __cil_verify_pirqcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
 {
 	int rc = SEPOL_ERR;
-	struct cil_genfscon *pirq = node->data;
+	struct cil_pirqcon *pirq = node->data;
 	struct cil_context *ctx = pirq->context;
 
 	/* Verify only when anonymous */
