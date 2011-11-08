@@ -49,6 +49,7 @@ struct cil_args_build {
 	struct cil_tree_node *ast;
 	struct cil_db *db;
 	struct cil_tree_node *macro;
+	struct cil_tree_node *tifstack;
 };
 
 struct cil_args_stack {
@@ -5533,6 +5534,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	struct cil_db *db = NULL;
 	struct cil_tree_node *ast_node = NULL;
 	struct cil_tree_node *macro = NULL;
+	struct cil_tree_node *tifstack = NULL;
 	int rc = SEPOL_ERR;
 
 	if (parse_current == NULL || finished == NULL || extra_args == NULL) {
@@ -5543,6 +5545,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	ast_current = args->ast;
 	db = args->db;
 	macro = args->macro;
+	tifstack = args->tifstack;
 
 	if (parse_current->parent->cl_head != parse_current) {
 		/* ignore anything that isn't following a parenthesis */
@@ -5559,6 +5562,26 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		goto exit;
 	}
 
+	if (macro != NULL) {
+		if (!strcmp(parse_current->data, CIL_KEY_MACRO)) {
+			rc = SEPOL_ERR;
+			cil_log(CIL_ERR, "Macros cannot be defined within macro statement (%s, line: %d)\n", parse_current->path, parse_current->line);
+			goto exit;
+		}
+
+		if (!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
+			rc = SEPOL_ERR;
+			cil_log(CIL_ERR, "Tunables cannot be defined within macro statment (%s, line: %d)\n", parse_current->path, parse_current->line);
+			goto exit;
+		}
+	}
+
+	if (tifstack != NULL) {
+		if (!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
+			rc = SEPOL_ERR;
+			cil_log(CIL_ERR, "Tunables cannot be defined within tunableif statement (%s, line: %d)\n", parse_current->path, parse_current->line);
+			goto exit;
+		}
 	}
 
 	cil_tree_node_init(&ast_node);
@@ -6098,18 +6121,6 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		goto exit;
 	}
 
-	if (macro != NULL) {
-		if (!strcmp(parse_current->data, CIL_KEY_MACRO)) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-
-		if (!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -6131,6 +6142,18 @@ int __cil_build_ast_first_child_helper(__attribute__((unused)) struct cil_tree_n
 		args->macro = args->ast; 
 	}
 
+	if (args->ast->flavor == CIL_TUNABLEIF) {
+		struct cil_tree_node *new;
+		cil_tree_node_init(&new);
+		new->data = args->ast->data;
+		new->flavor = args->ast->flavor;
+		if (args->tifstack != NULL) {
+			args->tifstack->parent = new;
+			new->cl_head = args->tifstack;
+		}
+		args->tifstack = new;
+	}
+
 	return SEPOL_OK;
 
 exit:
@@ -6142,6 +6165,7 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *ast = NULL;
 	struct cil_args_build *args = NULL;
+	struct cil_tree_node *tifstack = NULL;
 
 	if (extra_args == NULL) {
 		goto exit;
@@ -6157,8 +6181,18 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 
 	args->ast = ast->parent;
 
-	if (args->ast->flavor == CIL_MACRO) {
+	if (ast->flavor == CIL_MACRO) {
 		args->macro = NULL;
+	}
+
+	if (ast->flavor == CIL_TUNABLEIF) {
+		/* pop off the stack */
+                tifstack = args->tifstack;
+                args->tifstack = tifstack->cl_head;
+                if (tifstack->cl_head) {
+                        tifstack->cl_head->parent = NULL;
+                }
+                free(tifstack);
 	}
 
 	return SEPOL_OK;
@@ -6179,6 +6213,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	extra_args.ast = ast;
 	extra_args.db = db;
 	extra_args.macro = NULL;
+	extra_args.tifstack = NULL;
 
 	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_first_child_helper, __cil_build_ast_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {

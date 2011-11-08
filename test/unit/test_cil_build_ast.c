@@ -45,14 +45,16 @@ struct cil_args_build {
 	struct cil_tree_node *ast;
 	struct cil_db *db;
 	struct cil_tree_node *macro;
+	struct cil_tree_node *tifstack;
 };
 
-struct cil_args_build *gen_build_args(struct cil_tree_node *node, struct cil_db *db, struct cil_tree_node * macro)
+struct cil_args_build *gen_build_args(struct cil_tree_node *node, struct cil_db *db, struct cil_tree_node * macro, struct cil_tree_node *tifstack)
 {
 	struct cil_args_build *args = cil_malloc(sizeof(*args));
 	args->ast = node;
 	args->db = db;
 	args->macro = macro;
+	args->tifstack = tifstack;
 
 	return args;
 }
@@ -15698,7 +15700,7 @@ void test_cil_build_ast_node_helper_block(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -15716,7 +15718,7 @@ void test_cil_build_ast_node_helper_block_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -15735,7 +15737,7 @@ void test_cil_build_ast_node_helper_permset(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -15753,7 +15755,7 @@ void test_cil_build_ast_node_helper_permset_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -15772,7 +15774,7 @@ void test_cil_build_ast_node_helper_class(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -15790,7 +15792,7 @@ void test_cil_build_ast_node_helper_class_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -15808,7 +15810,7 @@ void test_cil_build_ast_node_helper_classpermset(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -15826,7 +15828,7 @@ void test_cil_build_ast_node_helper_classpermset_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -15845,7 +15847,7 @@ void test_cil_build_ast_node_helper_classmap(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -15863,7 +15865,7 @@ void test_cil_build_ast_node_helper_classmap_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -15881,7 +15883,7 @@ void test_cil_build_ast_node_helper_classmapping(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -15899,7 +15901,7 @@ void test_cil_build_ast_node_helper_classmapping_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -15917,7 +15919,7 @@ void test_cil_build_ast_node_helper_common(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -15935,7 +15937,7 @@ void test_cil_build_ast_node_helper_common_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -15953,7 +15955,7 @@ void test_cil_build_ast_node_helper_sid(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -15971,7 +15973,7 @@ void test_cil_build_ast_node_helper_sid_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -15989,7 +15991,7 @@ void test_cil_build_ast_node_helper_sidcontext(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16007,7 +16009,7 @@ void test_cil_build_ast_node_helper_sidcontext_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16025,7 +16027,7 @@ void test_cil_build_ast_node_helper_user(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16043,7 +16045,7 @@ void test_cil_build_ast_node_helper_user_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16061,7 +16063,7 @@ void test_cil_build_ast_node_helper_userlevel(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16079,7 +16081,7 @@ void test_cil_build_ast_node_helper_userlevel_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16097,7 +16099,7 @@ void test_cil_build_ast_node_helper_userrange(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16115,7 +16117,7 @@ void test_cil_build_ast_node_helper_userrange_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16133,7 +16135,7 @@ void test_cil_build_ast_node_helper_type(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16151,7 +16153,7 @@ void test_cil_build_ast_node_helper_type_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16169,7 +16171,7 @@ void test_cil_build_ast_node_helper_attribute(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16187,7 +16189,7 @@ void test_cil_build_ast_node_helper_attribute_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16204,7 +16206,7 @@ void test_cil_build_ast_node_helper_typebounds(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16222,7 +16224,7 @@ void test_cil_build_ast_node_helper_typebounds_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16239,7 +16241,7 @@ void test_cil_build_ast_node_helper_typepermissive(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16257,7 +16259,7 @@ void test_cil_build_ast_node_helper_typepermissive_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16275,7 +16277,7 @@ void test_cil_build_ast_node_helper_filetransition(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16293,7 +16295,7 @@ void test_cil_build_ast_node_helper_filetransition_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16311,7 +16313,7 @@ void test_cil_build_ast_node_helper_rangetransition(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16329,7 +16331,7 @@ void test_cil_build_ast_node_helper_rangetransition_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16349,7 +16351,7 @@ void test_cil_build_ast_node_helper_boolif(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16369,7 +16371,7 @@ void test_cil_build_ast_node_helper_boolif_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16389,7 +16391,7 @@ void test_cil_build_ast_node_helper_tunif(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16408,7 +16410,7 @@ void test_cil_build_ast_node_helper_tunif_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16426,7 +16428,7 @@ void test_cil_build_ast_node_helper_typealias(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16444,7 +16446,7 @@ void test_cil_build_ast_node_helper_typealias_notype_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16463,7 +16465,7 @@ void test_cil_build_ast_node_helper_typeattribute(CuTest *tc)
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16482,7 +16484,7 @@ void test_cil_build_ast_node_helper_typeattribute_neg(CuTest *tc)
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16500,7 +16502,7 @@ void test_cil_build_ast_node_helper_typeattributeset(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16518,7 +16520,7 @@ void test_cil_build_ast_node_helper_typeattributeset_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16536,7 +16538,7 @@ void test_cil_build_ast_node_helper_userbounds(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16554,7 +16556,7 @@ void test_cil_build_ast_node_helper_userbounds_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16572,7 +16574,7 @@ void test_cil_build_ast_node_helper_role(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16590,7 +16592,7 @@ void test_cil_build_ast_node_helper_role_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16608,7 +16610,7 @@ void test_cil_build_ast_node_helper_roletransition(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16626,7 +16628,7 @@ void test_cil_build_ast_node_helper_roletransition_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16644,7 +16646,7 @@ void test_cil_build_ast_node_helper_roleallow(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16662,7 +16664,7 @@ void test_cil_build_ast_node_helper_roleallow_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16680,7 +16682,7 @@ void test_cil_build_ast_node_helper_roledominance(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16698,7 +16700,7 @@ void test_cil_build_ast_node_helper_roledominance_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16716,7 +16718,7 @@ void test_cil_build_ast_node_helper_rolebounds(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16734,7 +16736,7 @@ void test_cil_build_ast_node_helper_rolebounds_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16752,7 +16754,7 @@ void test_cil_build_ast_node_helper_avrule_allow(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16770,7 +16772,7 @@ void test_cil_build_ast_node_helper_avrule_allow_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16788,7 +16790,7 @@ void test_cil_build_ast_node_helper_avrule_auditallow(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16806,7 +16808,7 @@ void test_cil_build_ast_node_helper_avrule_auditallow_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16824,7 +16826,7 @@ void test_cil_build_ast_node_helper_avrule_dontaudit(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16842,7 +16844,7 @@ void test_cil_build_ast_node_helper_avrule_dontaudit_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16860,7 +16862,7 @@ void test_cil_build_ast_node_helper_avrule_neverallow(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16878,7 +16880,7 @@ void test_cil_build_ast_node_helper_avrule_neverallow_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16896,7 +16898,7 @@ void test_cil_build_ast_node_helper_type_rule_transition(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16914,7 +16916,7 @@ void test_cil_build_ast_node_helper_type_rule_transition_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16932,7 +16934,7 @@ void test_cil_build_ast_node_helper_type_rule_change(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16950,7 +16952,7 @@ void test_cil_build_ast_node_helper_type_rule_change_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -16968,7 +16970,7 @@ void test_cil_build_ast_node_helper_type_rule_member(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -16986,7 +16988,7 @@ void test_cil_build_ast_node_helper_type_rule_member_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17004,7 +17006,7 @@ void test_cil_build_ast_node_helper_bool(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17022,7 +17024,7 @@ void test_cil_build_ast_node_helper_bool_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17040,7 +17042,7 @@ void test_cil_build_ast_node_helper_bool_tunable(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17058,7 +17060,7 @@ void test_cil_build_ast_node_helper_bool_tunable_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17076,7 +17078,7 @@ void test_cil_build_ast_node_helper_sensitivity(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17094,7 +17096,7 @@ void test_cil_build_ast_node_helper_sensitivity_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17112,7 +17114,7 @@ void test_cil_build_ast_node_helper_sensalias(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17130,7 +17132,7 @@ void test_cil_build_ast_node_helper_sensalias_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17148,7 +17150,7 @@ void test_cil_build_ast_node_helper_category(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17166,7 +17168,7 @@ void test_cil_build_ast_node_helper_category_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17184,7 +17186,7 @@ void test_cil_build_ast_node_helper_catset(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17202,7 +17204,7 @@ void test_cil_build_ast_node_helper_catset_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17220,7 +17222,7 @@ void test_cil_build_ast_node_helper_catorder(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17238,7 +17240,7 @@ void test_cil_build_ast_node_helper_catorder_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17256,7 +17258,7 @@ void test_cil_build_ast_node_helper_catalias(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17274,7 +17276,7 @@ void test_cil_build_ast_node_helper_catalias_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17292,7 +17294,7 @@ void test_cil_build_ast_node_helper_catrange(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
@@ -17310,7 +17312,7 @@ void test_cil_build_ast_node_helper_catrange_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
@@ -17329,7 +17331,7 @@ void test_cil_build_ast_node_helper_roletype(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17347,7 +17349,7 @@ void test_cil_build_ast_node_helper_roletype_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 	
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17365,7 +17367,7 @@ void test_cil_build_ast_node_helper_userrole(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, 0, finished);
@@ -17383,7 +17385,7 @@ void test_cil_build_ast_node_helper_userrole_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17401,7 +17403,7 @@ void test_cil_build_ast_node_helper_gen_classcommon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17419,7 +17421,7 @@ void test_cil_build_ast_node_helper_gen_classcommon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17440,7 +17442,7 @@ void test_cil_build_ast_node_helper_gen_dominance(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->next->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17461,7 +17463,7 @@ void test_cil_build_ast_node_helper_gen_dominance_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->next->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17485,7 +17487,7 @@ void test_cil_build_ast_node_helper_gen_senscat(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->next->next->next->next->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17509,7 +17511,7 @@ void test_cil_build_ast_node_helper_gen_senscat_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->next->next->next->next->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17529,7 +17531,7 @@ void test_cil_build_ast_node_helper_gen_level(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17549,7 +17551,7 @@ void test_cil_build_ast_node_helper_gen_level_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->next->next->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17567,7 +17569,7 @@ void test_cil_build_ast_node_helper_gen_levelrange(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17585,7 +17587,7 @@ void test_cil_build_ast_node_helper_gen_levelrange_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17603,7 +17605,7 @@ void test_cil_build_ast_node_helper_gen_constrain(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17621,7 +17623,7 @@ void test_cil_build_ast_node_helper_gen_constrain_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17639,7 +17641,7 @@ void test_cil_build_ast_node_helper_gen_mlsconstrain(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17657,7 +17659,7 @@ void test_cil_build_ast_node_helper_gen_mlsconstrain_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17675,7 +17677,7 @@ void test_cil_build_ast_node_helper_gen_context(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17693,7 +17695,7 @@ void test_cil_build_ast_node_helper_gen_context_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17711,7 +17713,7 @@ void test_cil_build_ast_node_helper_gen_filecon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17729,7 +17731,7 @@ void test_cil_build_ast_node_helper_gen_filecon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17747,7 +17749,7 @@ void test_cil_build_ast_node_helper_gen_portcon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17765,7 +17767,7 @@ void test_cil_build_ast_node_helper_gen_portcon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17783,7 +17785,7 @@ void test_cil_build_ast_node_helper_gen_nodecon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17801,7 +17803,7 @@ void test_cil_build_ast_node_helper_gen_nodecon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17819,7 +17821,7 @@ void test_cil_build_ast_node_helper_gen_genfscon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17837,7 +17839,7 @@ void test_cil_build_ast_node_helper_gen_genfscon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17857,7 +17859,7 @@ void test_cil_build_ast_node_helper_gen_netifcon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17875,7 +17877,7 @@ void test_cil_build_ast_node_helper_gen_netifcon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17893,7 +17895,7 @@ void test_cil_build_ast_node_helper_gen_pirqcon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17911,7 +17913,7 @@ void test_cil_build_ast_node_helper_gen_pirqcon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17929,7 +17931,7 @@ void test_cil_build_ast_node_helper_gen_iomemcon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17947,7 +17949,7 @@ void test_cil_build_ast_node_helper_gen_iomemcon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -17965,7 +17967,7 @@ void test_cil_build_ast_node_helper_gen_ioportcon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -17983,7 +17985,7 @@ void test_cil_build_ast_node_helper_gen_ioportcon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18001,7 +18003,7 @@ void test_cil_build_ast_node_helper_gen_pcidevicecon(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -18019,7 +18021,7 @@ void test_cil_build_ast_node_helper_gen_pcidevicecon_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18037,7 +18039,7 @@ void test_cil_build_ast_node_helper_gen_fsuse(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -18055,7 +18057,7 @@ void test_cil_build_ast_node_helper_gen_fsuse_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18073,7 +18075,7 @@ void test_cil_build_ast_node_helper_gen_macro(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18091,7 +18093,7 @@ void test_cil_build_ast_node_helper_gen_macro_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18117,7 +18119,7 @@ void test_cil_build_ast_node_helper_gen_macro_nested_macro_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, macronode);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, macronode, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18147,7 +18149,7 @@ void test_cil_build_ast_node_helper_gen_macro_nested_tunif_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, macronode);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, macronode, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18168,7 +18170,7 @@ void test_cil_build_ast_node_helper_gen_call(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -18186,7 +18188,7 @@ void test_cil_build_ast_node_helper_gen_call_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18204,7 +18206,7 @@ void test_cil_build_ast_node_helper_gen_optional(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18222,7 +18224,7 @@ void test_cil_build_ast_node_helper_gen_optional_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18240,7 +18242,7 @@ void test_cil_build_ast_node_helper_gen_policycap(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 1);
@@ -18258,7 +18260,7 @@ void test_cil_build_ast_node_helper_gen_policycap_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18276,7 +18278,7 @@ void test_cil_build_ast_node_helper_gen_ipaddr(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18294,7 +18296,7 @@ void test_cil_build_ast_node_helper_gen_ipaddr_neg(CuTest *tc) {
 
 	uint32_t finished = 0;
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 
 	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
 	CuAssertIntEquals(tc, finished, 0);
@@ -18327,7 +18329,7 @@ void test_cil_build_ast_last_child_helper(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL);
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
 	
 	int rc = __cil_build_ast_last_child_helper(test_tree->root->cl_head->cl_head, extra_args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
