@@ -433,7 +433,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_IN: {
 				struct cil_in *in = node->data;
-				printf("IN: %s\n", in->block_str);
+				cil_log(CIL_INFO, "IN: %s\n", in->block_str);
 				return;
 			}
 			case CIL_USER: {
