@@ -211,15 +211,15 @@
 	(type t2)
 	(boolean b1 false)
 	(tunable tun1 true)
-	(macro m ()
+	(macro m ((boolean b))
 		(tunableif tun1
 			(true
 				(allow t1 t2 (policy.file (write))))
 			(false
 				(allow t1 t2 (policy.file (execute)))))
-		(booleanif b1
+		(booleanif b
 			(true
 				(allow t1 t2 (policy.file (read))))))
 
-	(call m)
+	(call m (b1))
 )

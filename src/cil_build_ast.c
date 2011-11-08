@@ -4976,6 +4976,8 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			param->flavor = CIL_PERMSET;
 		} else if (!strcmp(kind, CIL_KEY_CLASSPERMSET)) {
 			param->flavor = CIL_CLASSPERMSET;
+		} else if (!strcmp(kind, CIL_KEY_BOOL)) {
+			param->flavor = CIL_BOOL;
 		} else {
 			cil_log(CIL_ERR, "Invalid macro declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
 			cil_destroy_param(param);

@@ -2498,6 +2498,9 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			case CIL_CAT:
 				new_arg->arg_str = cil_strdup(pc->data);
 				break;
+			case CIL_BOOL:
+				new_arg->arg_str = cil_strdup(pc->data);
+				break;
 			case CIL_CATSET: {
 				if (pc->cl_head != NULL) {
 					struct cil_catset *catset = NULL;
@@ -2770,6 +2773,9 @@ int cil_resolve_call2(struct cil_tree_node *current, void *extra_args)
 			break;
 		case CIL_CLASSMAP:
 			sym_index = CIL_SYM_CLASSES;
+			break;
+		case CIL_BOOL:
+			sym_index = CIL_SYM_BOOLS;
 			break;
 		default:
 			rc = SEPOL_ERR;
