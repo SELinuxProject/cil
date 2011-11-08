@@ -259,6 +259,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_BLOCKABSTRACT:
 		cil_destroy_blockabstract(*data);
 		break;
+	case CIL_IN:
+		cil_destroy_in(*data);
+		break;
 	case CIL_CLASS:
 		cil_destroy_class(*data);
 		break;
