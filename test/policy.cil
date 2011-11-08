@@ -223,3 +223,8 @@
 
 	(call m (b1))
 )
+
+(in bb
+	(tunableif bb.tun1
+		(true
+			(allow bb.t2 bb.t1 (policy.file (read write execute))))))
