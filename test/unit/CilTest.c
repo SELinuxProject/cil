@@ -703,6 +703,11 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_nodes_failgen_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_fill_permset);
+	SUITE_ADD_TEST(suite, test_cil_fill_permset_sublist_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_permset_startpermnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_permset_permsetnull_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_class);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_nodenull_neg);

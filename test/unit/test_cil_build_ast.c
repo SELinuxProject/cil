@@ -732,6 +732,69 @@ void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_fill_permset(CuTest *tc) { 
+	char *line[] = {"(", "permissionset", "foo", "(", "read", "write", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_permset *permset;
+	cil_permset_init(&permset);
+
+	int rc = cil_fill_permset(test_tree->root->cl_head->cl_head->next->next->cl_head, permset);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_fill_permset_sublist_neg(CuTest *tc) { 
+	char *line[] = {"(", "permissionset", "foo", "(", "read", "(", "write", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_permset *permset;
+	cil_permset_init(&permset);
+
+	int rc = cil_fill_permset(test_tree->root->cl_head->cl_head->next->next->cl_head, permset);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_permset_startpermnull_neg(CuTest *tc) { 
+	char *line[] = {"(", "permissionset", "foo", "(", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_permset *permset;
+	cil_permset_init(&permset);
+
+	int rc = cil_fill_permset(test_tree->root->cl_head->cl_head->next->next->cl_head, permset);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_permset_permsetnull_neg(CuTest *tc) { 
+	char *line[] = {"(", "permissionset", "foo", "(", "read", "write", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_permset *permset = NULL;
+
+	int rc = cil_fill_permset(test_tree->root->cl_head->cl_head->next->next->cl_head, permset);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_class(CuTest *tc) { 
 	char *line[] = {"(", "class", "file", "(", "read", "write", "open", ")", ")", NULL};
 

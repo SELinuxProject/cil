@@ -71,6 +71,11 @@ void test_cil_gen_perm_nodes(CuTest *);
 void test_cil_gen_perm_nodes_failgen_neg(CuTest *);
 void test_cil_gen_perm_nodes_inval_perm_neg(CuTest *);
 
+void test_cil_fill_permset(CuTest *);
+void test_cil_fill_permset_sublist_neg(CuTest *);
+void test_cil_fill_permset_startpermnull_neg(CuTest *);
+void test_cil_fill_permset_permsetnull_neg(CuTest *);
+
 void test_cil_gen_class(CuTest *);
 void test_cil_gen_class_noname_neg(CuTest *);
 void test_cil_gen_class_nodenull_neg(CuTest *);
