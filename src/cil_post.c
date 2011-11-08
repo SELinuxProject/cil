@@ -588,8 +588,8 @@ int cil_post_verify(struct cil_db *db)
 		goto exit;
 	}
 
-	if (nseuserdflt == 0 || nseuserdflt > 1) {
-		cil_log(CIL_ERR, "Policy must include one selinuxuserdefault, found: %d\n", nseuserdflt);
+	if (nseuserdflt > 1) {
+		cil_log(CIL_ERR, "Policy cannot contain more than one selinuxuserdefault, found: %d\n", nseuserdflt);
 		rc = SEPOL_ERR;
 		goto exit;
 	}
