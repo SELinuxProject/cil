@@ -76,6 +76,13 @@ void test_cil_fill_permset_sublist_neg(CuTest *);
 void test_cil_fill_permset_startpermnull_neg(CuTest *);
 void test_cil_fill_permset_permsetnull_neg(CuTest *);
 
+void test_cil_gen_in(CuTest *);
+void test_cil_gen_in_blockstrnull_neg(CuTest *);
+void test_cil_gen_in_extra_neg(CuTest *);
+void test_cil_gen_in_dbnull_neg(CuTest *);
+void test_cil_gen_in_currnull_neg(CuTest *);
+void test_cil_gen_in_astnull_neg(CuTest *);
+
 void test_cil_gen_class(CuTest *);
 void test_cil_gen_class_noname_neg(CuTest *);
 void test_cil_gen_class_nodenull_neg(CuTest *);
@@ -948,6 +955,9 @@ void test_cil_build_ast_node_helper_block_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_permset(CuTest *);
 void test_cil_build_ast_node_helper_permset_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_in(CuTest *);
+void test_cil_build_ast_node_helper_in_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_class(CuTest *);
 void test_cil_build_ast_node_helper_class_neg(CuTest *);

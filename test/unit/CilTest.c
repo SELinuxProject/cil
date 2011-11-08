@@ -708,6 +708,15 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_fill_permset_startpermnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_fill_permset_permsetnull_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_in);
+	SUITE_ADD_TEST(suite, test_cil_gen_in_blockstrnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_in_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_in_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_in_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_in_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_in);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_in_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_class);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_class_nodenull_neg);
