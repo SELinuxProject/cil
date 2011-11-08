@@ -1250,7 +1250,9 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 		goto exit;
 	}
 
-	if (ast_node != NULL) {
+	*symtab = NULL;
+
+	while (ast_node != NULL && *symtab == NULL) {
 		if (ast_node->flavor == CIL_BLOCK && sym_index < CIL_SYM_NUM) {
 			*symtab = &((struct cil_block*)ast_node->data)->symtab[sym_index];
 		} else if (ast_node->flavor == CIL_MACRO  && sym_index < CIL_SYM_NUM) {
@@ -1258,17 +1260,9 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 		} else if (ast_node->flavor == CIL_IN && sym_index < CIL_SYM_NUM) {
 			*symtab = &((struct cil_in*)ast_node->data)->symtab[sym_index];
 		} else if (ast_node->flavor == CIL_CALL  && sym_index < CIL_SYM_NUM) {
-			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_INFO, "cil_get_symtab: cil_call failed, rc: %d\n", rc);
-				goto exit;
-			}
+			ast_node = ast_node->parent;
 		} else if (ast_node->flavor == CIL_BLOCKINHERIT && sym_index < CIL_SYM_NUM) {
-			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_INFO, "cil_get_symtab: cil_blockinherit failed, rc: %d\n", rc);
-				goto exit;
-			}
+			ast_node = ast_node->parent;
 		} else if (ast_node->flavor == CIL_CLASS || ast_node->flavor == CIL_CLASSMAP) {
 			*symtab = &((struct cil_class*)ast_node->data)->perms;
 		} else if (ast_node->flavor == CIL_COMMON) {
@@ -1277,18 +1271,10 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 			if (ast_node->parent->flavor == CIL_TUNABLEIF) {
 				*symtab = &((struct cil_condblock*)ast_node->data)->symtab[sym_index];
 			} else if (ast_node->parent->flavor == CIL_BOOLEANIF) {
-				rc = cil_get_symtab(db, ast_node->parent->parent, symtab, sym_index);
-				if (rc != SEPOL_OK) {
-					cil_log(CIL_INFO, "cil_get_symtab: cil_booleanif failed, rc: %d\n", rc);
-					goto exit;
-				}
+				ast_node = ast_node->parent->parent;
 			}
 		} else if (ast_node->flavor == CIL_OPTIONAL && sym_index < CIL_SYM_NUM) {
-			rc = cil_get_symtab(db, ast_node->parent, symtab, sym_index);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_INFO, "cil_get_symtab: cil_optional failed, rc: %d\n", rc);
-				goto exit;
-			}
+			ast_node = ast_node->parent;
 		} else if (ast_node->flavor == CIL_ROOT && sym_index < CIL_SYM_NUM) {
 			*symtab = &db->symtab[sym_index];
 		} else if (sym_index >= CIL_SYM_NUM) {
@@ -1300,8 +1286,10 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 			rc = SEPOL_ERR;
 			goto exit;
 		}
-	} else {
-		cil_log(CIL_INFO, "Failed to get symtab: no node\n");
+	}
+
+	if (ast_node == NULL || *symtab == NULL) {
+		cil_log(CIL_INFO, "Failed to get symtab\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
