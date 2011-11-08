@@ -758,6 +758,48 @@ int cil_copy_roledominance(__attribute__((unused)) struct cil_db *db, void *data
 	return SEPOL_OK;
 }
 
+int cil_copy_roleattribute(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
+{
+	struct cil_roleattribute *orig = data;
+	struct cil_roleattribute *new = NULL;
+	int rc = SEPOL_ERR;
+	char *key = orig->datum.name;
+	struct cil_tree_node *node = NULL;
+
+	cil_roleattribute_init(&new);
+
+	rc = cil_symtab_get_node(symtab, key, &node);
+	if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
+		cil_log(CIL_INFO, "cil_copy_roleattribute: cil_symtab_insert failed, rc: %d\n", rc);
+		goto exit;
+	} else if (node != NULL) {
+		rc = SEPOL_EEXIST;
+		goto exit;
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+
+exit:
+	cil_destroy_roleattribute(new);
+	return rc;
+}
+
+int cil_copy_roleattributeset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_roleattributeset *orig = data;
+	struct cil_roleattributeset *new = NULL;
+
+	cil_roleattributeset_init(&new);
+
+	new->attr_str = cil_strdup(orig->attr_str);
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
 int cil_copy_roleallow(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_roleallow *orig = data;
@@ -2308,6 +2350,12 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_ROLEDOMINANCE:
 		copy_func = &cil_copy_roledominance;
+		break;
+	case CIL_ROLEATTRIBUTE:
+		copy_func = &cil_copy_roleattribute;
+		break;
+	case CIL_ROLEATTRIBUTESET:
+		copy_func = &cil_copy_roleattributeset;
 		break;
 	case CIL_ROLEALLOW:
 		copy_func = &cil_copy_roleallow;

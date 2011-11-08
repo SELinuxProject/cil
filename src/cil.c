@@ -74,6 +74,11 @@ void cil_db_init(struct cil_db **db)
 
 	cil_type_init(&(*db)->selftype);
 	(*db)->selftype->datum.name = cil_strdup(CIL_KEY_SELF);
+
+	(*db)->num_types = 0;
+	(*db)->num_roles = 0;
+	(*db)->val_to_type = NULL;
+	(*db)->val_to_role = NULL;
 }
 
 void cil_db_destroy(struct cil_db **db)
@@ -101,6 +106,9 @@ void cil_db_destroy(struct cil_db **db)
 	cil_list_destroy(&(*db)->selinuxusers, CIL_FALSE);
 	
 	cil_destroy_type((*db)->selftype);
+
+	free((*db)->val_to_type);
+	free((*db)->val_to_role);
 
 	free(*db);
 	*db = NULL;	
@@ -309,6 +317,12 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_ROLEDOMINANCE:
 		cil_destroy_roledominance(*data);
+		break;
+	case CIL_ROLEATTRIBUTE:
+		cil_destroy_roleattribute(*data);
+		break;
+	case CIL_ROLEATTRIBUTESET:
+		cil_destroy_roleattributeset(*data);
 		break;
 	case CIL_ROLEBOUNDS:
 		cil_destroy_rolebounds(*data);
@@ -1520,6 +1534,24 @@ void cil_rolebounds_init(struct cil_rolebounds **rolebounds)
 	(*rolebounds)->bounds_str = NULL;
 }
 
+void cil_roleattribute_init(struct cil_roleattribute **attr)
+{
+	*attr = cil_malloc(sizeof(**attr));
+
+	cil_symtab_datum_init(&(*attr)->datum);
+
+	(*attr)->expr_stack_list = NULL;
+	(*attr)->roles = NULL;
+}
+
+void cil_roleattributeset_init(struct cil_roleattributeset **attrset)
+{
+	*attrset = cil_malloc(sizeof(**attrset));
+
+	(*attrset)->attr_str = NULL;
+	(*attrset)->expr_stack = NULL;
+}
+
 void cil_typeattribute_init(struct cil_typeattribute **attr)
 {
 	*attr = cil_malloc(sizeof(**attr));
@@ -1527,6 +1559,7 @@ void cil_typeattribute_init(struct cil_typeattribute **attr)
 	cil_symtab_datum_init(&(*attr)->datum);
 
 	(*attr)->expr_stack_list = NULL;
+	(*attr)->types = NULL;
 }
 
 void cil_typeattributeset_init(struct cil_typeattributeset **attrset)

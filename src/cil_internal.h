@@ -111,6 +111,8 @@ enum cil_flavor {
 	CIL_ROLEALLOW,
 	CIL_ROLETYPE,
 	CIL_ROLEDOMINANCE,
+	CIL_ROLEATTRIBUTE,
+	CIL_ROLEATTRIBUTESET,
 	CIL_ROLEBOUNDS,
 	CIL_CATORDER,
 	CIL_DOMINANCE,
@@ -215,6 +217,8 @@ enum cil_flavor {
 #define CIL_KEY_ROLETRANSITION		"roletransition"
 #define CIL_KEY_ROLEALLOW		"roleallow"
 #define CIL_KEY_ROLEDOMINANCE		"roledominance"
+#define CIL_KEY_ROLEATTRIBUTE		"roleattribute"
+#define CIL_KEY_ROLEATTRIBUTESET	"roleattributeset"
 #define CIL_KEY_ROLEBOUNDS		"rolebounds"
 #define CIL_KEY_TYPE 			"type"
 #define CIL_KEY_SELF			"self"
@@ -351,6 +355,10 @@ struct cil_db {
 	struct cil_sort *fsuse;
 	struct cil_list *userprefixes;
 	struct cil_list *selinuxusers;
+	int num_types;
+	int num_roles;
+	struct cil_type **val_to_type;
+	struct cil_role **val_to_role;
 };
 
 struct cil_sort {
@@ -493,8 +501,9 @@ struct cil_selinuxuser {
 
 struct cil_role {
 	struct cil_symtab_datum datum;
-	struct cil_list *types;
 	struct cil_role *bounds;
+	ebitmap_t *types;
+	int value;
 };
 
 /* TODO Waiting on design */
@@ -505,9 +514,20 @@ struct cil_roledominance {
 	struct cil_role *domed;
 };
 
+struct cil_roleattribute {
+	struct cil_symtab_datum datum;
+	struct cil_list *expr_stack_list;
+	ebitmap_t *roles;
+};
+
+struct cil_roleattributeset {
+	char *attr_str;
+	struct cil_list *expr_stack;
+};
+
 struct cil_roletype {
 	char *role_str;
-	struct cil_role *role;
+	void *role; /* role or attribute */
 	char *type_str;
 	void *type; /* type, alias, or attribute */
 };
@@ -520,11 +540,13 @@ struct cil_rolebounds {
 struct cil_type	{
 	struct cil_symtab_datum datum;
 	void *bounds; /* type or alias */
+	int value;
 };
 
 struct cil_typeattribute {
 	struct cil_symtab_datum datum;
 	struct cil_list *expr_stack_list;
+	ebitmap_t *types;
 };
 
 struct cil_typeattributeset {
@@ -912,10 +934,12 @@ void cil_userbounds_init(struct cil_userbounds **userbounds);
 void cil_userprefix_init(struct cil_userprefix **userprefix);
 void cil_selinuxuser_init(struct cil_selinuxuser **selinuxuser);
 void cil_roledominance_init(struct cil_roledominance **roledominance);
+void cil_roleattribute_init(struct cil_roleattribute **attribute);
+void cil_roleattributeset_init(struct cil_roleattributeset **attrset);
 void cil_rolebounds_init(struct cil_rolebounds **rolebounds);
 void cil_roletype_init(struct cil_roletype **roletype);
 void cil_typeattribute_init(struct cil_typeattribute **attribute);
-void cil_typeattributeset_init(struct cil_typeattributeset **attrtypes);
+void cil_typeattributeset_init(struct cil_typeattributeset **attrset);
 void cil_typealias_init(struct cil_typealias **typealias);
 void cil_typebounds_init(struct cil_typebounds **typebnds);
 void cil_typepermissive_init(struct cil_typepermissive **typeperm);

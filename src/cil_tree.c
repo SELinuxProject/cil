@@ -546,16 +546,19 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 			case CIL_ROLETYPE: {
 				struct cil_roletype *roletype = node->data;
+				struct cil_symtab_datum *datum = NULL;
 				cil_log(CIL_INFO, "ROLETYPE:");
 
 				if (roletype->role != NULL) {
-					cil_log(CIL_INFO, " %s", roletype->role->datum.name);
+					datum = roletype->role;
+					cil_log(CIL_INFO, " %s", datum->name);
 				} else if (roletype->role_str != NULL) {
 					cil_log(CIL_INFO, " %s", roletype->role_str);
 				}
 
 				if (roletype->type != NULL) {
-					cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)roletype->type)->name);
+					datum = roletype->type;
+					cil_log(CIL_INFO, " %s", datum->name);
 				} else if (roletype->type_str != NULL) {
 					cil_log(CIL_INFO, " %s", roletype->type_str);
 				}
@@ -629,6 +632,32 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 
 				cil_log(CIL_INFO, "\n");
+				return;
+			}
+			case CIL_ROLEATTRIBUTESET: {
+				struct cil_roleattributeset *attrroles = node->data;
+				struct cil_list_item *curr = NULL;
+				cil_log(CIL_INFO, "ROLEATTRIBUTESET: attr: %s, stack: ", attrroles->attr_str);
+
+				cil_log(CIL_INFO, " stack: (");
+				curr = attrroles->expr_stack->head;
+				while (curr != NULL) {
+					struct cil_conditional *cond = curr->data;
+					if (cond->data != NULL) {
+						cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)cond->data)->name);
+					} else if (cond->str != NULL) {
+						cil_log(CIL_INFO, "%s ", cond->str);
+					}
+					curr = curr->next;
+				}
+				cil_log(CIL_INFO, " )");
+
+				cil_log(CIL_INFO, "\n");
+				return;
+			}
+			case CIL_ROLEATTRIBUTE: {
+				struct cil_roleattribute *attr = node->data;
+				cil_log(CIL_INFO, "ROLEATTRIBUTE: %s\n", attr->datum.name);
 				return;
 			}
 			case CIL_ROLEBOUNDS: {

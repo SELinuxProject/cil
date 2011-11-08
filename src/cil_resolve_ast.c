@@ -731,6 +731,28 @@ int cil_reset_user(struct cil_tree_node *current, __attribute__((unused)) void *
 	return SEPOL_OK;
 }
 
+int cil_reset_roleattr(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_roleattribute *attr = (struct cil_roleattribute*)current->data;
+
+	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributeroles statement */
+	if (attr->expr_stack_list != NULL) {
+		/* we don't want to destroy the expression stacks (cil_list) inside
+		 * this list cil_list_destroy destroys sublists, so we need to do it
+		 * manually */
+		struct cil_list_item *expr_stack = attr->expr_stack_list->head;
+		while (expr_stack != NULL) {
+			struct cil_list_item *next = expr_stack->next;
+			cil_list_item_destroy(&expr_stack, CIL_FALSE);
+			expr_stack = next;
+		}
+		free(attr->expr_stack_list);
+		attr->expr_stack_list = NULL;
+	}
+
+	return SEPOL_OK;
+}
+
 int cil_reset_role(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
 	struct cil_role *role = (struct cil_role*)current->data;
@@ -965,7 +987,6 @@ int cil_resolve_roletype(struct cil_tree_node *current, void *extra_args)
 	struct cil_roletype *roletype = (struct cil_roletype*)current->data;
 	struct cil_tree_node *role_node = NULL;
 	struct cil_tree_node *type_node = NULL;
-	struct cil_list_item *type = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, roletype->role_str, CIL_SYM_ROLES, extra_args, &role_node);
@@ -979,17 +1000,6 @@ int cil_resolve_roletype(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 	roletype->type = type_node->data;
-
-	cil_list_item_init(&type);
-	type->flavor = CIL_TYPE;
-	type->data = roletype->type;
-
-	if (roletype->role->types == NULL) {
-		cil_list_init(&roletype->role->types);
-		roletype->role->types->head = type;
-	} else {
-		cil_list_append_item(roletype->role->types, type);
-	}
 
 	return SEPOL_OK;
 
@@ -1082,6 +1092,48 @@ int cil_resolve_roledominance(struct cil_tree_node *current, void *extra_args)
 
 	return SEPOL_OK;
 
+exit:
+	return rc;
+}
+
+int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args)
+{
+	struct cil_roleattributeset *attrroles = (struct cil_roleattributeset*)current->data;
+	struct cil_tree_node *attr_node = NULL;
+	struct cil_roleattribute *attr = NULL;
+	struct cil_list_item *item = NULL;
+	int rc = SEPOL_ERR;
+
+	rc = cil_resolve_name(current, attrroles->attr_str, CIL_SYM_ROLES, extra_args, &attr_node);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	if (attr_node->flavor != CIL_ROLEATTRIBUTE) {
+		rc = SEPOL_ERR;
+		cil_log(CIL_ERR, "Attribute role not an attribute\n");
+		goto exit;
+	}
+	attr = attr_node->data;
+
+	rc = cil_resolve_expr_stack(attrroles->expr_stack, current, extra_args);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	if (attr->expr_stack_list == NULL) {
+		cil_list_init(&attr->expr_stack_list);
+	}
+
+	cil_list_item_init(&item);
+	item->data = attrroles->expr_stack;
+	item->flavor = CIL_LIST;
+
+	rc = cil_list_append_item(attr->expr_stack_list, item);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = SEPOL_OK;
 exit:
 	return rc;
 }
@@ -3092,6 +3144,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_USER:
 			rc = cil_reset_user(node, args);
 			break;
+		case CIL_ROLEATTRIBUTE:
+			rc = cil_reset_roleattr(node, args);
+			break;
 		case CIL_TYPEATTRIBUTE:
 			rc = cil_reset_typeattr(node, args);
 			break;
@@ -3182,6 +3237,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_SELINUXUSER:
 		case CIL_SELINUXUSERDEFAULT:
 			rc = cil_resolve_selinuxuser(node, args);
+			break;
+		case CIL_ROLEATTRIBUTESET:
+			rc = cil_resolve_roleattributeset(node, args);
 			break;
 		case CIL_ROLETYPE:
 			rc = cil_resolve_roletype(node, args);

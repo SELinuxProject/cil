@@ -1156,20 +1156,13 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 	}
 
 	if (role->types != NULL) {
-		for (curr = role->types->head; curr != NULL; curr = curr->next) {
-			struct cil_type *roletype = curr->data;
-			if (roletype == type) {
-				break;
-			}
-		}
-
-		if (curr == NULL) {
+		if (!ebitmap_get_bit(role->types, type->value)) {
 			cil_log(CIL_ERR, "Invalid type for specified role\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 	} else {
-		cil_log(CIL_ERR, "No types given to the specified role\n");
+		cil_log(CIL_ERR, "No types associated with specified role\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}

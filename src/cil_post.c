@@ -296,6 +296,18 @@ int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *finished, v
 	db = (struct cil_db*)extra_args;
 
 	switch(node->flavor) {
+	case CIL_TYPE: {
+		struct cil_type *type = node->data;
+		type->value = db->num_types;
+		db->num_types++;
+		break;
+	}
+	case CIL_ROLE: {
+		struct cil_role *role = node->data;
+		role->value = db->num_roles;
+		db->num_roles++;
+		break;
+	}
 	case CIL_OPTIONAL: {
                 struct cil_optional *opt = node->data;
                 if (opt->datum.state != CIL_STATE_ENABLED) {
@@ -359,6 +371,22 @@ int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused
 	db = extra_args;
 
 	switch(node->flavor) {
+	case CIL_TYPE: {
+		struct cil_type *type = node->data;
+		if (db->val_to_type == NULL) {
+			db->val_to_type = cil_malloc(sizeof(*db->val_to_type) * db->num_types);
+		}
+		db->val_to_type[type->value] = type;
+		break;
+	}
+	case CIL_ROLE: {
+		struct cil_role *role = node->data;
+		if (db->val_to_role == NULL) {
+			db->val_to_role = cil_malloc(sizeof(*db->val_to_role) * db->num_roles);
+		}
+		db->val_to_role[role->value] = role;
+		break;
+	}
 	case CIL_USERPREFIX: {
 		struct cil_userprefix *userprefix =  node->data;
 		struct cil_list_item *new = NULL;
@@ -526,19 +554,286 @@ exit:
 	return rc;
 }
 
+int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_list, ebitmap_t *out)
+{
+	int rc = SEPOL_ERR;
+	uint16_t pos;
+	struct cil_list_item *expr_stack = NULL;
+	struct cil_list_item *expr = NULL;
+	ebitmap_t bitmap_tmp;
+	ebitmap_t bitmap_stack[COND_EXPR_MAXDEPTH];
+
+	if (expr_stack_list == NULL) {
+		goto exit;
+	}
+
+	expr_stack = expr_stack_list->head;
+	for (; expr_stack != NULL; expr_stack = expr_stack->next) {
+		pos = 0;
+
+		expr = ((struct cil_list *)expr_stack->data)->head;
+		for (; expr != NULL; expr = expr->next) {
+			struct cil_conditional *cond = expr->data;
+
+			switch (cond->flavor) {
+			case CIL_TYPE: {
+				struct cil_symtab_datum *datum = cond->data;
+
+				ebitmap_init(&bitmap_tmp);
+				if (datum->node->flavor == CIL_TYPEATTRIBUTE) {
+					struct cil_typeattribute *attr = cond->data;
+					rc = __cil_expr_stack_to_bitmap(db, attr->expr_stack_list, &bitmap_tmp);
+					if (rc != SEPOL_OK) {
+						rc = SEPOL_ERR;
+						cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
+						goto exit;
+					}
+				} else if (datum->node->flavor == CIL_TYPEALIAS) {
+					struct cil_typealias *alias = cond->data;
+					struct cil_type *type = alias->type;
+					if (ebitmap_set_bit(&bitmap_tmp, type->value, 1)) {
+						rc = SEPOL_ERR;
+						cil_log(CIL_INFO, "Failed to set type bit\n");
+						goto exit;
+					}
+				} else {
+					struct cil_type *type = cond->data;
+					if (ebitmap_set_bit(&bitmap_tmp, type->value, 1)) {
+						rc = SEPOL_ERR;
+						cil_log(CIL_INFO, "Failed to set type bit\n");
+						goto exit;
+					}
+				}
+				bitmap_stack[pos] = bitmap_tmp;
+				pos++;
+				break;
+			}
+			case CIL_ROLE: {
+				struct cil_symtab_datum *datum = cond->data;
+
+				ebitmap_init(&bitmap_tmp);
+				if (datum->node->flavor == CIL_ROLEATTRIBUTE) {
+					struct cil_roleattribute *attr = cond->data;
+					rc = __cil_expr_stack_to_bitmap(db, attr->expr_stack_list, &bitmap_tmp);
+					if (rc != SEPOL_OK) {
+						rc = SEPOL_ERR;
+						cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
+						goto exit;
+					}
+				} else {
+					struct cil_role *role = cond->data;
+					if (ebitmap_set_bit(&bitmap_tmp, role->value, 1)) {
+						rc = SEPOL_ERR;
+						cil_log(CIL_INFO, "Failed to set role bit\n");
+						goto exit;
+					}
+				}
+				bitmap_stack[pos] = bitmap_tmp;
+				pos++;
+				break;
+			}
+			case CIL_NOT:
+				if (ebitmap_not(&bitmap_tmp, &bitmap_stack[pos - 1], db->num_types)) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure NOTing bitmap\n");
+					goto exit;
+				}
+				ebitmap_destroy(&bitmap_stack[pos - 1]);
+				bitmap_stack[pos - 1] = bitmap_tmp;
+				break;
+			case CIL_OR:
+				if (ebitmap_or(&bitmap_tmp, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure ORing attribute bitmaps\n");
+					goto exit;
+				}
+				ebitmap_destroy(&bitmap_stack[pos - 2]);
+				ebitmap_destroy(&bitmap_stack[pos - 1]);
+				bitmap_stack[pos - 2] = bitmap_tmp;
+				pos--;
+				break;
+			case CIL_AND:
+				if (ebitmap_and(&bitmap_tmp, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure ANDing attribute bitmaps\n");
+					goto exit;
+				}
+				ebitmap_destroy(&bitmap_stack[pos - 2]);
+				ebitmap_destroy(&bitmap_stack[pos - 1]);
+				bitmap_stack[pos - 2] = bitmap_tmp;
+				pos--;
+				break;
+			case CIL_XOR:
+				if (ebitmap_xor(&bitmap_tmp, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure XORing attribute bitmaps\n");
+					goto exit;
+				}
+				ebitmap_destroy(&bitmap_stack[pos - 2]);
+				ebitmap_destroy(&bitmap_stack[pos - 1]);
+				bitmap_stack[pos - 2] = bitmap_tmp;
+				pos--;
+				break;
+			default:
+				break;
+			}
+		}
+		ebitmap_union(out, &bitmap_stack[0]);
+		ebitmap_destroy(&bitmap_stack[0]);
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
+int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_db *db = NULL;
+
+	if (node == NULL || extra_args == NULL) {
+		goto exit;
+	}
+
+	db = extra_args;
+
+	switch (node->flavor) {
+	case CIL_TYPEATTRIBUTE: {
+		struct cil_typeattribute *attr = node->data;
+		struct cil_list *expr_list = attr->expr_stack_list;
+
+		attr->types = cil_malloc(sizeof(*attr->types));
+		ebitmap_init(attr->types);
+
+		int i;
+		for (i = 0; i < db->num_types; i++) {
+			if (ebitmap_set_bit(attr->types, i, 0)) {
+				goto exit;
+			}
+		}
+
+		rc = __cil_expr_stack_to_bitmap(db, expr_list, attr->types);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
+			goto exit;
+		}
+		break;
+	}
+	case CIL_ROLEATTRIBUTE: {
+		struct cil_roleattribute *attr = node->data;
+		struct cil_list *expr_list = attr->expr_stack_list;
+
+		attr->roles = cil_malloc(sizeof(*attr->roles));
+		ebitmap_init(attr->roles);
+
+		int i;
+		for (i = 0; i < db->num_roles; i++) {
+			if (ebitmap_set_bit(attr->roles, i, 0)) {
+				goto exit;
+			}
+		}
+
+		rc = __cil_expr_stack_to_bitmap(db, expr_list, attr->roles);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
+			goto exit;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	return SEPOL_OK;
+exit:
+	cil_log(CIL_INFO, "cil_post_db_attr_helper failed\n");
+	return rc;
+
+}
+
+int __cil_post_db_roletype_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+{
+	int rc = SEPOL_ERR;
+
+	if (node == NULL || extra_args == NULL) {
+		goto exit;
+	}
+
+	switch (node->flavor) {
+	case CIL_ROLETYPE: {
+		struct cil_roletype *roletype = node->data;
+		struct cil_role *role = roletype->role;
+		struct cil_symtab_datum *datum = roletype->type;
+		ebitmap_t bitmap_tmp;
+
+		if (role->types == NULL) {
+			role->types = cil_malloc(sizeof(*role->types));
+			ebitmap_init(role->types);
+		}
+
+		if (datum->node->flavor == CIL_TYPE) {
+			struct cil_type *type = roletype->type;
+			if (ebitmap_set_bit(role->types, type->value, 1)) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure while setting bit in role types bitmap\n");
+				goto exit;
+			}
+		} else if (datum->node->flavor == CIL_TYPEALIAS) {
+			struct cil_typealias *typealias = roletype->type;
+			struct cil_type *type = typealias->type;
+			if (ebitmap_set_bit(role->types, type->value, 1)) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure while setting bit in role types bitmap\n");
+				goto exit;
+			}
+		} else if (datum->node->flavor == CIL_TYPEATTRIBUTE) {
+			struct cil_typeattribute *attr = roletype->type;
+			if (ebitmap_or(&bitmap_tmp, attr->types, role->types)) {
+				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure ORing role attribute bitmaps\n");
+				goto exit;
+			}
+			ebitmap_union(role->types, &bitmap_tmp);
+			ebitmap_destroy(&bitmap_tmp);
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	return SEPOL_OK;
+exit:
+	cil_log(CIL_INFO, "cil_post_db_roletype_helper failed\n");
+	return rc;
+}
+
 int cil_post_db(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 
 	rc = cil_tree_walk(db->ast->root, __cil_post_db_count_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failed to count contexts\n");
+		cil_log(CIL_INFO, "Failure during cil databse count helper\n");
 		goto exit;
 	}
 
 	rc = cil_tree_walk(db->ast->root, __cil_post_db_array_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failed to sort contexts\n");
+		cil_log(CIL_INFO, "Failure during cil database array helper\n");
+		goto exit;
+	}
+
+	rc = cil_tree_walk(db->ast->root, __cil_post_db_attr_helper, NULL, NULL, db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed to create attribute bitmaps\n");
+		goto exit;
+	}
+
+	rc = cil_tree_walk(db->ast->root, __cil_post_db_roletype_helper, NULL, NULL, db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed during roletype association\n");
 		goto exit;
 	}
 
@@ -620,18 +915,17 @@ int cil_post_process(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 
+	rc = cil_post_db(db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed post db handling\n");
+		goto exit;
+	}
+
 	rc = cil_post_verify(db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to verify cil database\n");
 		goto exit;
 	}
-
-	rc = cil_post_db(db);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to sort contexts\n");
-		goto exit;
-	}
-
 exit:
 	return rc;
 		

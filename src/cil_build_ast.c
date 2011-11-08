@@ -1558,9 +1558,7 @@ int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 
 exit:
-	if (role != NULL) {
-		cil_destroy_role(role);
-	}
+	cil_destroy_role(role);
 	return rc;
 }
 
@@ -1571,7 +1569,7 @@ void cil_destroy_role(struct cil_role *role)
 	}
 
 	cil_symtab_datum_destroy(role->datum);
-	cil_list_destroy(&role->types, CIL_FALSE);
+	ebitmap_destroy(role->types);
 	free(role);
 }
 
@@ -1865,6 +1863,127 @@ void cil_destroy_roledominance(struct cil_roledominance *roledom)
 	}
 
 	free(roledom);
+}
+
+int cil_gen_roleattribute(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key = NULL;
+	struct cil_roleattribute *attr = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Invalid %s declaration (%s, line: %d)\n", (char*)parse_current->data, parse_current->path, parse_current->line);
+		goto exit;
+	}
+
+	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+		cil_log(CIL_ERR, "The keyword '%s' is reserved and cannot be used for a roleattribute name\n", CIL_KEY_SELF);
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	cil_roleattribute_init(&attr);
+
+	key = parse_current->next->data;
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)attr, (hashtab_key_t)key, CIL_SYM_ROLES, CIL_ROLEATTRIBUTE);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+exit:
+	cil_destroy_roleattribute(attr);
+	return rc;
+}
+
+void cil_destroy_roleattribute(struct cil_roleattribute *attr)
+{
+	if (attr == NULL) {
+		return;
+	}
+
+	if (attr->expr_stack_list != NULL) {
+		/* we don't want to destroy the expression stacks (cil_list) inside
+		 * this list cil_list_destroy destroys sublists, so we need to do it
+		 * manually */
+		struct cil_list_item *expr_stack = attr->expr_stack_list->head;
+		while (expr_stack != NULL) {
+			struct cil_list_item *next = expr_stack->next;
+			cil_list_item_destroy(&expr_stack, CIL_FALSE);
+			expr_stack = next;
+		}
+		free(attr->expr_stack_list);
+		attr->expr_stack_list = NULL;
+	}
+
+	cil_symtab_datum_destroy(attr->datum);
+	ebitmap_destroy(attr->roles);
+	free(attr);
+}
+
+int cil_gen_roleattributeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING | SYM_LIST,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_roleattributeset *attrset = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Invalid attributeset statement (%s, line: %d)\n", parse_current->path, parse_current->line);
+		goto exit;
+	}
+
+	cil_roleattributeset_init(&attrset);
+
+	attrset->attr_str = cil_strdup(parse_current->next->data);
+
+	rc = cil_gen_expr_stack(parse_current->next->next, CIL_ROLE, &attrset->expr_stack);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "cil_gen_roleattributeset (%s, line %d): failed to create expr tree, rc: %d\n", parse_current->path, parse_current->line, rc);
+		goto exit;
+	}
+	ast_node->data = attrset;
+	ast_node->flavor = CIL_ROLEATTRIBUTESET;
+
+	return SEPOL_OK;
+
+exit:
+	if (attrset != NULL) {
+		cil_destroy_roleattributeset(attrset);
+	}
+	return rc;
+}
+
+void cil_destroy_roleattributeset(struct cil_roleattributeset *attrset)
+{
+	if (attrset == NULL) {
+		return;
+	}
+
+	cil_list_destroy(&attrset->expr_stack, CIL_TRUE);
+	free(attrset->attr_str);
+	free(attrset);
 }
 
 int cil_gen_rolebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -2163,9 +2282,7 @@ int cil_gen_typeattribute(struct cil_db *db, struct cil_tree_node *parse_current
 	return SEPOL_OK;
 
 exit:
-	if (attr != NULL) {
-		cil_destroy_typeattribute(attr);
-	}
+	cil_destroy_typeattribute(attr);
 	return rc;
 }
 
@@ -2190,6 +2307,7 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 		free(attr->expr_stack_list);
 		attr->expr_stack_list = NULL;
 	}
+	ebitmap_destroy(attr->types);
 
 	free(attr);
 }
@@ -5845,6 +5963,19 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			cil_log(CIL_ERR, "cil_gen_roledominance failed, rc: %d\n", rc);
 			goto exit;
 		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEATTRIBUTE)) {
+		rc = cil_gen_roleattribute(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_roleattribute failed, rc: %d\n", rc);
+			goto exit;
+		}
+	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEATTRIBUTESET)) {
+		rc = cil_gen_roleattributeset(db, parse_current, ast_node);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "cil_gen_roleattributeset failed, rc: %d\n", rc);
+			goto exit;
+		}
+		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEBOUNDS)) {
 		rc = cil_gen_rolebounds(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
