@@ -785,8 +785,11 @@ int cil_userprefixes_to_string(struct cil_db *db, __attribute__((unused)) sepol_
 	struct cil_userprefix *userprefix = NULL;
 	struct cil_user *user = NULL;
 
+	*out = NULL;
+
 	if (db->userprefixes->head == NULL) {
-		cil_log(CIL_ERR, "No userprefixes\n");
+		rc = SEPOL_OK;
+		*size = 0;
 		goto exit;
 	}
 
@@ -906,8 +909,11 @@ int cil_selinuxusers_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, ch
 	struct cil_selinuxuser *selinuxuser = NULL;
 	struct cil_user *user = NULL;
 
+	*out = NULL;
+
 	if (db->selinuxusers->head == NULL) {
-		cil_log(CIL_ERR, "No selinuxusers\n");
+		*size = 0;
+		rc = SEPOL_OK;
 		goto exit;
 	}
 
