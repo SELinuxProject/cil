@@ -71,7 +71,6 @@ void cil_db_init(struct cil_db **db)
 	cil_sort_init(&(*db)->fsuse);
 	cil_list_init(&(*db)->userprefixes);
 	cil_list_init(&(*db)->selinuxusers);
-	(*db)->mls = CIL_FALSE;
 
 	cil_type_init(&(*db)->selftype);
 	(*db)->selftype->datum.name = cil_strdup(CIL_KEY_SELF);
@@ -157,8 +156,6 @@ int cil_parse_files(cil_db_t *db, char **files_list, int num_files)
 #endif
 	}
 	
-	/*TODO: db->mls = mls;*/
-
 	cil_log(CIL_INFO, "Building AST from Parse Tree...\n");
 	rc = cil_build_ast(db, parse_tree->root, db->ast->root);
 	if (rc != SEPOL_OK) {
@@ -790,7 +787,7 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 	return "<unknown>";
 }
 
-int cil_userprefixes_to_string(struct cil_db *db, char **out, size_t *size)
+int cil_userprefixes_to_string(struct cil_db *db, __attribute__((unused)) sepol_policydb_t *sepol_db, char **out, size_t *size)
 {
 	int rc = SEPOL_ERR;
 	size_t str_len = 0;
@@ -911,7 +908,7 @@ int __cil_level_to_string(struct cil_level *lvl, char **out)
 	return SEPOL_OK;
 }
 
-int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
+int cil_selinuxusers_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char **out, size_t *size)
 {
 	int rc = SEPOL_ERR;
 	size_t str_len = 0;
@@ -931,7 +928,7 @@ int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 		user = selinuxuser->user;
 		str_len += strlen(selinuxuser->name_str) + strlen(user->datum.name) + 1;
 
-		if (db->mls == CIL_TRUE) {
+		if (sepol_db->p.mls == CIL_TRUE) {
 			struct cil_levelrange *range = selinuxuser->range;
 			struct cil_level *low = range->low;
 			struct cil_level *high = range->high;
@@ -970,7 +967,7 @@ int cil_selinuxusers_to_string(struct cil_db *db, char **out, size_t *size)
 		str_len -= buf_pos;
 		str_tmp += buf_pos;
 
-		if (db->mls == CIL_TRUE) {
+		if (sepol_db->p.mls == CIL_TRUE) {
 			struct cil_levelrange *range = selinuxuser->range;
 			struct cil_level *low = range->low;
 			struct cil_level *high = range->high;
@@ -1005,7 +1002,7 @@ exit:
 	return rc;
 }
 
-int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
+int cil_filecons_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char **out, size_t *size)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
@@ -1035,7 +1032,7 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 
 			str_len += (strlen(user->datum.name) + strlen(role->datum.name) + strlen(type->datum.name) + 3);
 
-			if (db->mls == CIL_TRUE) {
+			if (sepol_db->p.mls == CIL_TRUE) {
 				struct cil_levelrange *range = ctx->range;
 				struct cil_level *low = range->low;
 				struct cil_level *high = range->high;
@@ -1122,7 +1119,7 @@ int cil_filecons_to_string(struct cil_db *db, char **out, size_t *size)
 			str_len -= buf_pos;
 			str_tmp += buf_pos;
 
-			if (db->mls == CIL_TRUE) {
+			if (sepol_db->p.mls == CIL_TRUE) {
 				struct cil_levelrange *range = ctx->range;
 				struct cil_level *low = range->low;
 				struct cil_level *high = range->high;

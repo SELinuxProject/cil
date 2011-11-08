@@ -2159,11 +2159,13 @@ int __cil_context_to_sepol_context(policydb_t *pdb, struct cil_context *cil_cont
 	}
 	sepol_context->type = sepol_type->s.value;
 
-	mls_context_init(sepol_context);
+	if (pdb->mls == CIL_TRUE) {
+		mls_context_init(sepol_context);
 
-	rc = __cil_levelrange_to_mls_range(pdb, cil_lvlrange, &sepol_context->range);
-	if (rc != SEPOL_OK) {
-		goto exit;
+		rc = __cil_levelrange_to_mls_range(pdb, cil_lvlrange, &sepol_context->range);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	return SEPOL_OK;
@@ -2699,7 +2701,9 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			rc = cil_catalias_to_policydb(pdb, node);
 			break;
 		case CIL_SENS:
-			rc = cil_sepol_level_define(pdb, node);
+			if (pdb->mls == CIL_TRUE) {
+				rc = cil_sepol_level_define(pdb, node);
+			}
 			break;
 		default:
 			break;
@@ -2717,7 +2721,9 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			rc = cil_typeattribute_to_bitmap(pdb, node, types_bitmap);
 			break;
 		case CIL_SENSALIAS:
-			rc = cil_sensalias_to_policydb(pdb, node);
+			if (pdb->mls == CIL_TRUE) {
+				rc = cil_sensalias_to_policydb(pdb, node);
+			}
 			break;
 		case CIL_ROLETYPE:
 			rc = cil_roletype_to_policydb(pdb, node);
@@ -2729,7 +2735,9 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			rc = cil_rolebounds_to_policydb(pdb, node);
 			break;
 		case CIL_USER:
-			rc = cil_userlevel_userrange_to_policydb(pdb, node);
+			if (pdb->mls == CIL_TRUE) {
+				rc = cil_userlevel_userrange_to_policydb(pdb, node);
+			}
 			break;
 		case CIL_USERROLE:
 			rc = cil_userrole_to_policydb(pdb, node);
@@ -2771,18 +2779,28 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			rc = cil_filetransition_to_policydb(pdb, node);
 			break;
 		case CIL_CONSTRAIN:
-		case CIL_MLSCONSTRAIN:
 			rc = cil_constrain_to_policydb(pdb, node);
 			break;
+		case CIL_MLSCONSTRAIN:
+			if (pdb->mls == CIL_TRUE) {
+				rc = cil_constrain_to_policydb(pdb, node);
+			}
+			break;
 		case CIL_VALIDATETRANS:
-		case CIL_MLSVALIDATETRANS:
 			rc = cil_validatetrans_to_policydb(pdb, node);
+			break;
+		case CIL_MLSVALIDATETRANS:
+			if (pdb->mls == CIL_TRUE) {
+				rc = cil_validatetrans_to_policydb(pdb, node);
+			}
 			break;
 		case CIL_SID:
 			rc = cil_sid_to_policydb(pdb, node);
 			break;
 		case CIL_RANGETRANSITION:
-			rc = cil_rangetransition_to_policydb(pdb, node);
+			if (pdb->mls == CIL_TRUE) {
+				rc = cil_rangetransition_to_policydb(pdb, node);
+			}
 			break;
 		default:
 			break;
@@ -2871,28 +2889,28 @@ int __cil_contexts_to_policydb(policydb_t *pdb, const struct cil_db *db)
 		goto exit;
 	}
 
-	rc = cil_pirqcon_to_policydb(pdb, db->pirqcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	if (pdb->target_platform == SEPOL_TARGET_XEN) {
+		rc = cil_pirqcon_to_policydb(pdb, db->pirqcon);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 
-	rc = cil_iomemcon_to_policydb(pdb, db->iomemcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+		rc = cil_iomemcon_to_policydb(pdb, db->iomemcon);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 
-	rc = cil_ioportcon_to_policydb(pdb, db->ioportcon);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+		rc = cil_ioportcon_to_policydb(pdb, db->ioportcon);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 
-	rc = cil_pcidevicecon_to_policydb(pdb, db->pcidevicecon);
-	if (rc != SEPOL_OK) {
-		goto exit;
+		rc = cil_pcidevicecon_to_policydb(pdb, db->pcidevicecon);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
-
 	return SEPOL_OK;
-
 exit:
 	return rc;
 }
@@ -3078,9 +3096,11 @@ int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 		goto exit;
 	}
 
-	rc = cil_dominance_to_policydb(pdb, db);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	if (pdb->mls == CIL_TRUE) {
+		rc = cil_dominance_to_policydb(pdb, db);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 	}
 
 	rc = avtab_alloc(&pdb->te_avtab, MAX_AVTAB_SIZE);
@@ -3128,6 +3148,7 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 
 		rc = cil_tree_walk(db->ast->root, __cil_binary_create_helper, NULL, NULL, &extra_args);
 		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failure while walking cil database\n");
 			goto exit;
 		}
 	}
@@ -3140,12 +3161,14 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 
 	rc = __cil_contexts_to_policydb(pdb, db);
 	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failure while inserting cil contexts into sepol policydb\n");
 		goto exit;
 	}
 
 	if (pdb->type_attr_map == NULL) {
 		rc = __cil_typeattr_bitmap_init(pdb);
 		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failure while initializing typeattribute bitmap\n");
 			goto exit;
 		}
 	}

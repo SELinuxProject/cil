@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Writing File Contexts\n");
 	}
 	
-	rc = cil_filecons_to_string(db, &fc_buf, &fc_size);
+	rc = cil_filecons_to_string(db, pdb, &fc_buf, &fc_size);
 	if (rc != SEPOL_OK) {
 		fprintf(stderr, "Failed to get file context data\n");
 		goto exit;

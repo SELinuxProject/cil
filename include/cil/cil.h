@@ -41,9 +41,9 @@ extern void cil_db_destroy(cil_db_t **db);
 extern int cil_parse_files(cil_db_t *db, char **files_list, int num_files);
 
 extern int cil_db_to_sepol_policydb(cil_db_t *db, sepol_policydb_t *sepol_db);
-extern int cil_userprefixes_to_string(cil_db_t *db, char **out, size_t *size);
-extern int cil_selinuxusers_to_string(cil_db_t *db, char **out, size_t *size);
-extern int cil_filecons_to_string(cil_db_t *db, char **out, size_t *size);
+extern int cil_userprefixes_to_string(cil_db_t *db, sepol_policydb_t *sepol_db, char **out, size_t *size);
+extern int cil_selinuxusers_to_string(cil_db_t *db, sepol_policydb_t *sepol_db, char **out, size_t *size);
+extern int cil_filecons_to_string(cil_db_t *db, sepol_policydb_t *sepol_db, char **out, size_t *size);
 
 enum cil_log_level {
 	CIL_ERR = 1,
