@@ -37,9 +37,8 @@
 void test_cil_tree_node_init(CuTest *tc) {
    struct cil_tree_node *test_node;
 
-   int rc = cil_tree_node_init(&test_node);
+   cil_tree_node_init(&test_node);
 
-   CuAssertIntEquals(tc, SEPOL_OK, rc);
    CuAssertPtrNotNull(tc, test_node);
    CuAssertPtrEquals(tc, NULL, test_node->cl_head);
    CuAssertPtrEquals(tc, NULL, test_node->cl_tail);
