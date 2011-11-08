@@ -722,6 +722,16 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_class_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_anonperms);
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_anonperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_namedperms);
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_emptypermslist_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_noperms_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_noclass_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_classnodenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_fill_classpermset_cpsnull_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_classpermset);
 	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_noname_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_classpermset_nameinparens_neg);

@@ -1017,6 +1017,149 @@ void test_cil_gen_class_listinlist_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_fill_classpermset_anonperms(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", "(", "write", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps;
+	cil_classpermset_init(&cps);
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_fill_classpermset_anonperms_neg(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", "(", "write", "(", "extra", ")", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps;
+	cil_classpermset_init(&cps);
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_classpermset_namedperms(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", "perms", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps;
+	cil_classpermset_init(&cps);
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_fill_classpermset_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", "(", "write", ")", "extra", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps;
+	cil_classpermset_init(&cps);
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_classpermset_emptypermslist_neg(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", "(", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps;
+	cil_classpermset_init(&cps);
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_classpermset_noperms_neg(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps;
+	cil_classpermset_init(&cps);
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_classpermset_noclass_neg(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "(", "write", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps;
+	cil_classpermset_init(&cps);
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_classpermset_classnodenull_neg(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps;
+	cil_classpermset_init(&cps);
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_fill_classpermset_cpsnull_neg(CuTest *tc) {
+	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_classpermset *cps = NULL;
+
+	int rc = cil_fill_classpermset(test_tree->root->cl_head->cl_head->next->next->cl_head, cps);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_classpermset(CuTest *tc) {
 	char *line[] = {"(", "classpermissionset", "char_w", "(", "char", "(", "write", ")", ")", ")", NULL};
 

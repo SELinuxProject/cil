@@ -89,6 +89,16 @@ void test_cil_gen_class_permsnotinlist_neg(CuTest *);
 void test_cil_gen_class_extrapermlist_neg(CuTest *);
 void test_cil_gen_class_listinlist_neg(CuTest *);
 
+void test_cil_fill_classpermset_anonperms(CuTest *);
+void test_cil_fill_classpermset_anonperms_neg(CuTest *);
+void test_cil_fill_classpermset_namedperms(CuTest *);
+void test_cil_fill_classpermset_extra_neg(CuTest *);
+void test_cil_fill_classpermset_emptypermslist_neg(CuTest *);
+void test_cil_fill_classpermset_noperms_neg(CuTest *);
+void test_cil_fill_classpermset_noclass_neg(CuTest *);
+void test_cil_fill_classpermset_classnodenull_neg(CuTest *);
+void test_cil_fill_classpermset_cpsnull_neg(CuTest *);
+
 void test_cil_gen_classpermset(CuTest *);
 void test_cil_gen_classpermset_noname_neg(CuTest *);
 void test_cil_gen_classpermset_nameinparens_neg(CuTest *);
