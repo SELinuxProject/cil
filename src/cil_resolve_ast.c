@@ -678,13 +678,9 @@ int cil_reset_typeattr(struct cil_tree_node *current, __attribute__((unused)) vo
 {
 	struct cil_typeattribute *attr = (struct cil_typeattribute*)current->data;
 
-	/* during a re-resolve, we need to reset the lists of types (and negative types) associated with this attribute from a attributetypes statement */
-	if (attr->types_list != NULL) {
-		cil_list_destroy(&attr->types_list, 0);
-	}
-
-	if (attr->neg_list != NULL) {
-		cil_list_destroy(&attr->neg_list, 0);
+	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributetypes statement */
+	if (attr->expr_stack != NULL) {
+		cil_list_destroy(&attr->expr_stack, CIL_FALSE);
 	}
 
 	return SEPOL_OK;

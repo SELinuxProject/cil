@@ -840,20 +840,6 @@ int cil_copy_typeattributeset(struct cil_db *db, void *data, void **copy, __attr
 
 	new->attr_str = cil_strdup(orig->attr_str);
 
-	if (orig->types_list_str != NULL) {
-		rc = cil_copy_list(orig->types_list_str, &new->types_list_str);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	}
-
-	if (orig->neg_list_str != NULL) {
-		rc = cil_copy_list(orig->neg_list_str, &new->neg_list_str);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	}
-
 	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
 	if (rc != SEPOL_OK) {
 		goto exit;

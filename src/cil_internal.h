@@ -523,16 +523,12 @@ struct cil_type	{
 
 struct cil_typeattribute {
 	struct cil_symtab_datum datum;
-	struct cil_list *types_list;
-	struct cil_list *neg_list;
 	struct cil_list *expr_stack;
 };
 
 struct cil_typeattributeset {
 	char *attr_str;
 	struct cil_list *expr_stack;
-	struct cil_list *types_list_str; /* list of types, aliases, and attributes */
-	struct cil_list *neg_list_str; /* list of types, aliases, and attributes */
 };
 
 struct cil_typealias {

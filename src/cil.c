@@ -1515,8 +1515,7 @@ void cil_typeattribute_init(struct cil_typeattribute **attr)
 
 	cil_symtab_datum_init(&(*attr)->datum);
 
-	(*attr)->types_list = NULL;
-	(*attr)->neg_list = NULL;
+	(*attr)->expr_stack = NULL;
 }
 
 void cil_typeattributeset_init(struct cil_typeattributeset **attrset)
@@ -1525,8 +1524,6 @@ void cil_typeattributeset_init(struct cil_typeattributeset **attrset)
 
 	(*attrset)->attr_str = NULL;
 	(*attrset)->expr_stack = NULL;
-	(*attrset)->types_list_str = NULL;
-	(*attrset)->neg_list_str = NULL;
 }
 
 void cil_typealias_init(struct cil_typealias **typealias)

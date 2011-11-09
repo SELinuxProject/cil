@@ -453,53 +453,27 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_TYPEATTRIBUTESET: {
 				struct cil_typeattributeset *attrtypes = node->data;
 				struct cil_list_item *curr = NULL;
-				cil_log(CIL_INFO, "TYPEATTRIBUTESET: attr: %s", attrtypes->attr_str);
-				if (attrtypes->types_list_str != NULL) {
-					cil_log(CIL_INFO, " types list: (");
-					curr = attrtypes->types_list_str->head;
-					while (curr != NULL) {
-						cil_log(CIL_INFO, " %s", (char*)curr->data);
-						curr = curr->next;
-					}
-					cil_log(CIL_INFO, " )");
-				}
+				cil_log(CIL_INFO, "TYPEATTRIBUTESET: attr: %s, stack: ", attrtypes->attr_str);
 
-				if (attrtypes->neg_list_str != NULL) {
-					cil_log(CIL_INFO, " neg list: (");
-					curr = attrtypes->neg_list_str->head;
-					while (curr != NULL) {
-						cil_log(CIL_INFO, " %s", (char*)curr->data);
-						curr = curr->next;
+				cil_log(CIL_INFO, " stack: (");
+				curr = attrtypes->expr_stack->head;
+				while (curr != NULL) {
+					struct cil_conditional *cond = curr->data;
+					if (cond->data != NULL) {
+						cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)cond->data)->name);
+					} else if (cond->str != NULL) {
+						cil_log(CIL_INFO, "%s ", cond->str);
 					}
-					cil_log(CIL_INFO, " )");
+					curr = curr->next;
 				}
+				cil_log(CIL_INFO, " )");
 
 				cil_log(CIL_INFO, "\n");
 				return;
 			}
 			case CIL_TYPEATTRIBUTE: {
 				struct cil_typeattribute *attr = node->data;
-				struct cil_list_item *curr = NULL;
-				cil_log(CIL_INFO, "TYPEATTRIBUTE: %s", attr->datum.name);
-				if (attr->types_list != NULL) {
-					curr = attr->types_list->head;
-					cil_log(CIL_INFO, " types: ( ");
-					while (curr != NULL) {
-						cil_log(CIL_INFO, "%s ", ((struct cil_symtab_datum *)curr->data)->name);
-						curr = curr->next;
-					}
-					cil_log(CIL_INFO, ")");
-				}
-				if (attr->neg_list != NULL) {
-					curr = attr->neg_list->head;
-					cil_log(CIL_INFO, " neg types: (");
-					while (curr != NULL) {
-						cil_log(CIL_INFO, " %s ", ((struct cil_symtab_datum *)curr->data)->name);
-						curr = curr->next;
-					}
-					cil_log(CIL_INFO, ")");
-				}
-				cil_log(CIL_INFO, "\n");
+				cil_log(CIL_INFO, "TYPEATTRIBUTE: %s\n", attr->datum.name);
 				return;
 			}
 			case CIL_ROLE: {

@@ -2148,12 +2148,8 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 
 	cil_symtab_datum_destroy(attr->datum);
 
-	if (attr->types_list != NULL) {
-		cil_list_destroy(&attr->types_list, CIL_FALSE);
-	}
-
-	if (attr->neg_list) {
-		cil_list_destroy(&attr->neg_list, CIL_FALSE);
+	if (attr->expr_stack != NULL) {
+		cil_list_destroy(&attr->expr_stack, CIL_FALSE);
 	}
 
 	free(attr);
@@ -2707,14 +2703,6 @@ void cil_destroy_typeattributeset(struct cil_typeattributeset *attrset)
 
 	if (attrset->attr_str != NULL) {
 		free(attrset->attr_str);
-	}
-
-	if (attrset->types_list_str != NULL) {
-		cil_list_destroy(&attrset->types_list_str, 1);
-	}
-
-	if (attrset->neg_list_str != NULL) {
-		cil_list_destroy(&attrset->neg_list_str, 1);
 	}
 
 	free(attrset);
