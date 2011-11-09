@@ -38,6 +38,8 @@ int cil_copy_list(struct cil_list *orig, struct cil_list **copy);
 int cil_copy_expr(struct cil_db *db, struct cil_list *orig, struct cil_list **new);
 
 int cil_copy_block(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_blockabstract(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_blockinherit(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_perm(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_class(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_classmap_perm(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
