@@ -483,6 +483,11 @@ CuSuite* CilTreeGetResolveSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sidcontext); 
 	SUITE_ADD_TEST(suite, test_cil_resolve_ast_node_helper_sidcontext_neg); 
 
+	SUITE_ADD_TEST(suite, test_cil_resolve_in_block);
+	SUITE_ADD_TEST(suite, test_cil_resolve_in_blockstrdne_neg);
+	SUITE_ADD_TEST(suite, test_cil_resolve_in_macro);
+	SUITE_ADD_TEST(suite, test_cil_resolve_in_optional);
+	
 	//SUITE_ADD_TEST(suite, test_cil_resolve_call1_noparam);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_type);
 	SUITE_ADD_TEST(suite, test_cil_resolve_call1_role);

@@ -305,6 +305,11 @@ void test_cil_resolve_sidcontext_named_context_sidcontextnull_neg(CuTest *tc);
 void test_cil_resolve_ast_node_helper_sidcontext(CuTest *tc);
 void test_cil_resolve_ast_node_helper_sidcontext_neg(CuTest *tc);
 
+void test_cil_resolve_in_block(CuTest *);
+void test_cil_resolve_in_blockstrdne_neg(CuTest *);
+void test_cil_resolve_in_macro(CuTest *);
+void test_cil_resolve_in_optional(CuTest *);
+
 void test_cil_resolve_call1_noparam(CuTest *);
 void test_cil_resolve_call1_type(CuTest *);
 void test_cil_resolve_call1_role(CuTest *);
