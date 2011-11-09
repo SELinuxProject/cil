@@ -50,6 +50,14 @@ void test_cil_gen_block_nodenull_neg(CuTest *);
 void test_cil_gen_block_nodeparentnull_neg(CuTest *);
 void test_cil_destroy_block(CuTest *);
 
+void test_cil_gen_blockinherit(CuTest *);
+void test_cil_gen_blockinherit_namelist_neg(CuTest *);
+void test_cil_gen_blockinherit_namenull_neg(CuTest *);
+void test_cil_gen_blockinherit_extra_neg(CuTest *);
+void test_cil_gen_blockinherit_dbnull_neg(CuTest *);
+void test_cil_gen_blockinherit_currnull_neg(CuTest *);
+void test_cil_gen_blockinherit_astnull_neg(CuTest *);
+
 void test_cil_gen_perm(CuTest *);
 void test_cil_gen_perm_noname_neg(CuTest *);
 void test_cil_gen_perm_dbnull_neg(CuTest *);
@@ -953,6 +961,9 @@ void test_cil_build_ast_treenull_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_block(CuTest *);
 void test_cil_build_ast_node_helper_block_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_blockinherit(CuTest *);
+void test_cil_build_ast_node_helper_blockinherit_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_permset(CuTest *);
 void test_cil_build_ast_node_helper_permset_neg(CuTest *);

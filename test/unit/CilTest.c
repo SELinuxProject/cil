@@ -687,6 +687,16 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_block);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_block_neg);
 
+	SUITE_ADD_TEST(suite, test_cil_gen_blockinherit);
+	SUITE_ADD_TEST(suite, test_cil_gen_blockinherit_namelist_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_blockinherit_namenull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_blockinherit_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_blockinherit_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_blockinherit_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_blockinherit_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_blockinherit);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_blockinherit_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_perm);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_perm_currnull_neg);
