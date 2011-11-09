@@ -1669,6 +1669,7 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_astnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_unnamed_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_optional_extra_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_nameinparens_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_optional_norule_neg);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_optional);
