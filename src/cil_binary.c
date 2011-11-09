@@ -55,6 +55,7 @@ struct cil_args_binary {
 struct cil_args_booleanif {
 	policydb_t *pdb;
 	struct cil_tree_node *cond_block;
+	struct cil_list *neverallows;
 };
 
 int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node, common_datum_t **common_out)
@@ -1016,14 +1017,12 @@ exit:
 	return rc;
 }
 
-int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, avtab_t *avtab, avtab_ptr_t *avtab_ptr, void *extra_args, uint32_t merge)
+int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, avtab_t *avtab, avtab_ptr_t *avtab_ptr, struct cil_list *neverallows, uint32_t merge)
 {
 	int rc = SEPOL_ERR;
 	avtab_key_t avtab_key;
 	avtab_datum_t avtab_datum;
 	avtab_datum_t *avtab_dup = NULL;
-	struct cil_args_binary *args = extra_args;
-	struct cil_list *neverallows = args->neverallows;
 	struct cil_list_item *curr = NULL;
 	
 	avtab_key.source_type = src;
@@ -1092,12 +1091,9 @@ exit:
 	return rc;
 }
 
-int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, void *extra_args)
+int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, struct cil_list *neverallows)
 {
-	struct cil_args_binary *args = extra_args;
 	int rc = SEPOL_ERR;
-
-	struct cil_list *neverallows = args->neverallows;
 	struct cil_neverallow *neverallow = neverallows->head->data;
 	struct cil_list *neverallow_data = neverallow->data;
 	struct cil_neverallow_data *new_data = NULL;
@@ -1129,7 +1125,7 @@ int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t d
 }
 
 /* Before inserting, expand out avrule classpermset if it is a classmap */
-int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr, void *extra_args, uint32_t merge)
+int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr, struct cil_list *neverallows, uint32_t merge)
 {
 	int rc = SEPOL_ERR;
 	uint32_t data = 0;
@@ -1157,13 +1153,13 @@ int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_
 		}
 
 		if (kind == CIL_AVRULE_NEVERALLOW) {
-			rc = __cil_neverallow_handle(src, tgt, sepol_obj->s.value, data, extra_args);
+			rc = __cil_neverallow_handle(src, tgt, sepol_obj->s.value, data, neverallows);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_ERR, "Failure while handling neverallow statement\n");
 				goto exit;
 			}
 		} else {
-			rc = __cil_insert_avrule(kind, src, tgt, sepol_obj->s.value, data, avtab, avtab_ptr, extra_args, merge);
+			rc = __cil_insert_avrule(kind, src, tgt, sepol_obj->s.value, data, avtab, avtab_ptr, neverallows, merge);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1196,13 +1192,13 @@ int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_
 				}
 
 				if (kind == CIL_AVRULE_NEVERALLOW) {
-					rc = __cil_neverallow_handle(src, tgt, sepol_obj->s.value, data, extra_args);
+					rc = __cil_neverallow_handle(src, tgt, sepol_obj->s.value, data, neverallows);
 					if (rc != SEPOL_OK) {
 						cil_log(CIL_ERR, "Failure while handling neverallow statement\n");
 						goto exit;
 					}
 				} else {
-					rc = __cil_insert_avrule(kind, src, tgt, sepol_obj->s.value, data, avtab, avtab_ptr, extra_args, merge);
+					rc = __cil_insert_avrule(kind, src, tgt, sepol_obj->s.value, data, avtab, avtab_ptr, neverallows, merge);
 					if (rc != SEPOL_OK) {
 						goto exit;
 					}
@@ -1217,7 +1213,7 @@ exit:
 	return rc;
 }
 
-int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr, void *extra_args, uint32_t merge)
+int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_t *avtab, avtab_ptr_t *avtab_ptr, struct cil_list *neverallows, uint32_t merge)
 {
 	int rc = SEPOL_ERR;
 	char *src = NULL;
@@ -1251,13 +1247,13 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 					continue;
 				}
 
-				rc = __cil_avrule_expand(pdb, i + 1, i + 1, cil_avrule, avtab, avtab_ptr, extra_args, merge);
+				rc = __cil_avrule_expand(pdb, i + 1, i + 1, cil_avrule, avtab, avtab_ptr, neverallows, merge);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
 			}
 		} else {
-			rc = __cil_avrule_expand(pdb, sepol_src->s.value, sepol_src->s.value, cil_avrule, avtab, avtab_ptr, extra_args, merge);
+			rc = __cil_avrule_expand(pdb, sepol_src->s.value, sepol_src->s.value, cil_avrule, avtab, avtab_ptr, neverallows, merge);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1269,7 +1265,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, struct cil_avrule *cil_avrule, avtab_
 			goto exit;
 		}
 
-		rc = __cil_avrule_expand(pdb, sepol_src->s.value, sepol_tgt->s.value, cil_avrule, avtab, avtab_ptr, extra_args, merge);
+		rc = __cil_avrule_expand(pdb, sepol_src->s.value, sepol_tgt->s.value, cil_avrule, avtab, avtab_ptr, neverallows, merge);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1282,13 +1278,13 @@ exit:
 	return rc;
 }
 
-int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void *extra_args)
+int cil_avrule_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struct cil_list *neverallows)
 {
 	int rc = SEPOL_ERR;
 	struct cil_avrule *cil_avrule = node->data;
 	avtab_ptr_t avtab_ptr;
 
-	rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_avtab, &avtab_ptr, extra_args, 1);
+	rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_avtab, &avtab_ptr, neverallows, 1);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to insert avrule into avtab (line: %d)\n", node->line);
 		goto exit;
@@ -1328,7 +1324,7 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 		break;
 	case CIL_AVRULE:
 		cil_avrule = curr_rule->data;
-		rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_cond_avtab, &avtab_ptr, extra_args, 0);
+		rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_cond_avtab, &avtab_ptr, args->neverallows, 0);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to insert avrule into avtab (line: %d)\n", curr_rule->line);
 		}
@@ -1382,11 +1378,11 @@ exit:
 
 }
 
-int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struct cil_list *neverallows)
 {
 	int rc = SEPOL_ERR;
 	enum cil_flavor flavor;
-	struct cil_args_booleanif extra_args;
+	struct cil_args_booleanif bool_args;
 	struct cil_booleanif *cil_boolif = node->data;
 	struct cil_list *expr_stack = cil_boolif->expr_stack;
 	struct cil_list_item *curr_expr = expr_stack->head;
@@ -1479,11 +1475,12 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 		cb_node = cb_node->next;
 	}
 
-	extra_args.pdb = pdb;
+	bool_args.pdb = pdb;
+	bool_args.neverallows = neverallows;
 
 	if (true_node != NULL) {
-		extra_args.cond_block = true_node;
-		rc = cil_tree_walk(true_node, __cil_cond_to_policydb_helper, NULL, NULL, &extra_args);
+		bool_args.cond_block = true_node;
+		rc = cil_tree_walk(true_node, __cil_cond_to_policydb_helper, NULL, NULL, &bool_args);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Failure while walking true conditional block (line: %d)", true_node->line);
 			goto exit;
@@ -1491,8 +1488,8 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 	}
 
 	if (false_node != NULL) {
-		extra_args.cond_block = false_node;
-		rc = cil_tree_walk(false_node, __cil_cond_to_policydb_helper, NULL, NULL, &extra_args);
+		bool_args.cond_block = false_node;
+		rc = cil_tree_walk(false_node, __cil_cond_to_policydb_helper, NULL, NULL, &bool_args);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Failure while walking false conditional block (line: %d)", false_node->line);
 			goto exit;
@@ -2804,7 +2801,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 					new_item->next = neverallows->head;
 					neverallows->head = new_item;
 				}
-				rc = cil_avrule_to_policydb(pdb, node, extra_args);
+				rc = cil_avrule_to_policydb(pdb, node, neverallows);
 			}
 			break;
 		}
@@ -2848,12 +2845,12 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 	case 3:
 		switch (node->flavor) {
 		case CIL_BOOLEANIF:
-			rc = cil_booleanif_to_policydb(pdb, node);
+			rc = cil_booleanif_to_policydb(pdb, node, args->neverallows);
 			break;
 		case CIL_AVRULE: {
 				struct cil_avrule *rule = node->data;
 				if (rule->rule_kind != CIL_AVRULE_NEVERALLOW) {
-					rc = cil_avrule_to_policydb(pdb, node, extra_args);
+					rc = cil_avrule_to_policydb(pdb, node, args->neverallows);
 				}
 			}
 			break;
