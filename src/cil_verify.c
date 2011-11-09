@@ -1258,68 +1258,78 @@ exit:
 	return rc;
 }
 
+int __cil_verify_booleanif_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, __attribute__((unused)) void *extra_args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_avrule *avrule = NULL;
+	struct cil_type_rule *typerule = NULL;
+	struct cil_tree_node *temp_node = NULL;
+	struct cil_tree_node *rule_node = node;
+	struct cil_complex_symtab *symtab = extra_args;
+	struct cil_complex_symtab_key ckey;
+	struct cil_complex_symtab_datum datum;
+
+	switch (rule_node->flavor) {
+	case CIL_AVRULE:
+		avrule = rule_node->data;
+		if (avrule->rule_kind == CIL_AVRULE_NEVERALLOW) {
+			cil_log(CIL_ERR, "Neverallow within booleanif block (line: %d)\n", node->line);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	case CIL_TYPE_RULE:
+		typerule = rule_node->data;
+
+		ckey.key1 = (intptr_t)typerule->src;
+		ckey.key2 = (intptr_t)typerule->tgt;
+		ckey.key3 = (intptr_t)typerule->obj;
+		ckey.key4 = (intptr_t)typerule->rule_kind;
+
+		datum.data = node;
+
+		rc = cil_complex_symtab_insert(symtab, &ckey, &datum);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+
+		for (temp_node = rule_node->next;
+			temp_node != NULL;
+			temp_node = temp_node->next) {
+
+			if (temp_node->flavor == CIL_TYPE_RULE) {
+				typerule = temp_node->data;
+				if ((intptr_t)typerule->src == ckey.key1 &&
+					(intptr_t)typerule->tgt == ckey.key2 &&
+					(intptr_t)typerule->obj == ckey.key3 &&
+					(intptr_t)typerule->rule_kind == ckey.key4) {
+						cil_log(CIL_ERR, "Duplicate type rule found (line: %d)\n", node->line);
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+				}
+			}
+		break;
+	default:
+		cil_log(CIL_ERR, "Invalid statement within booleanif (line: %d)\n", node->line);
+		goto exit;
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 int __cil_verify_booleanif(struct cil_tree_node *node, struct cil_complex_symtab *symtab)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *cond_block = node->cl_head;
-	struct cil_tree_node *rule_node = NULL;
-	struct cil_tree_node *temp_node = NULL;
-	struct cil_avrule *avrule = NULL;
-	struct cil_type_rule *typerule = NULL;
-	struct cil_complex_symtab_key ckey;
-	struct cil_complex_symtab_datum datum;
 
 	while (cond_block != NULL) {
-		for (rule_node = cond_block->cl_head;
-			rule_node != NULL;
-			rule_node = rule_node->next) {
-
-			switch (rule_node->flavor) {
-				case CIL_AVRULE:
-					avrule = rule_node->data;
-					if (avrule->rule_kind == CIL_AVRULE_NEVERALLOW) {
-						cil_log(CIL_ERR, "Neverallow within booleanif block (line: %d)\n", node->line);
-						rc = SEPOL_ERR;
-						goto exit;
-					}
-				case CIL_TYPE_RULE:
-					typerule = rule_node->data;
-
-					ckey.key1 = (intptr_t)typerule->src;
-					ckey.key2 = (intptr_t)typerule->tgt;
-					ckey.key3 = (intptr_t)typerule->obj;
-					ckey.key4 = (intptr_t)typerule->rule_kind;
-
-					datum.data = node;
-
-					rc = cil_complex_symtab_insert(symtab, &ckey, &datum);
-					if (rc != SEPOL_OK) {
-						goto exit;
-					}
-
-					for (temp_node = rule_node->next;
-						temp_node != NULL;
-						temp_node = temp_node->next) {
-
-						if (temp_node->flavor == CIL_TYPE_RULE) {
-							typerule = temp_node->data;
-							if ((intptr_t)typerule->src == ckey.key1 &&
-								(intptr_t)typerule->tgt == ckey.key2 &&
-								(intptr_t)typerule->obj == ckey.key3 &&
-								(intptr_t)typerule->rule_kind == ckey.key4) {
-								cil_log(CIL_ERR, "Duplicate type rule found (line: %d)\n", node->line);
-								rc = SEPOL_ERR;
-								goto exit;
-							}
-						}
-					}
-					break;
-				default:
-					cil_log(CIL_ERR, "Invalid statement within booleanif (line: %d)\n", node->line);
-					goto exit;
-			}
+		rc = cil_tree_walk(cond_block->cl_head, __cil_verify_booleanif_helper, NULL, NULL, symtab);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to verify category order\n");
+			goto exit;
 		}
-
 		cond_block = cond_block->next;
 	}
 

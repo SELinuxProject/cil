@@ -52,6 +52,11 @@ struct cil_args_binary {
 	int pass;
 };
 
+struct cil_args_booleanif {
+	policydb_t *pdb;
+	struct cil_tree_node *cond_block;
+};
+
 int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node, common_datum_t **common_out)
 {
 	int rc = SEPOL_ERR;
@@ -1021,23 +1026,25 @@ int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj,
 		break;
 	}
 
-	for (curr = neverallows->head; curr != NULL; curr = curr->next) {
-		struct cil_neverallow *neverallow = curr->data;
-		struct cil_list *ndata_list = neverallow->data;
-		struct cil_list_item *curr_data = NULL;
+	if (neverallows != NULL) {
+		for (curr = neverallows->head; curr != NULL; curr = curr->next) {
+			struct cil_neverallow *neverallow = curr->data;
+			struct cil_list *ndata_list = neverallow->data;
+			struct cil_list_item *curr_data = NULL;
 
-		for (curr_data = ndata_list->head; curr_data != NULL;
-						curr_data = curr_data->next) {
-			struct cil_tree_node *node = neverallow->node;
-			struct cil_neverallow_data *ndata = curr_data->data;
-			avtab_key_t *never_key = ndata->key;
-			if (src == never_key->source_type
-			&& tgt == never_key->target_type
-			&& obj == never_key->target_class
-			&& (ndata->types & data) != 0) {
-				cil_log(CIL_ERR, "Neverallow found that matches avrule (line: %d)\n", node->line);
-				rc = SEPOL_ERR;
-				goto exit;
+			for (curr_data = ndata_list->head; curr_data != NULL;
+							curr_data = curr_data->next) {
+				struct cil_tree_node *node = neverallow->node;
+				struct cil_neverallow_data *ndata = curr_data->data;
+				avtab_key_t *never_key = ndata->key;
+				if (src == never_key->source_type
+				&& tgt == never_key->target_type
+				&& obj == never_key->target_class
+				&& (ndata->types & data) != 0) {
+					cil_log(CIL_ERR, "Neverallow found that matches avrule (line: %d)\n", node->line);
+					rc = SEPOL_ERR;
+					goto exit;
+				}
 			}
 		}
 	}
@@ -1273,73 +1280,78 @@ exit:
 	return rc;
 }
 
-int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_node_t *cond_node, void *extra_args)
+int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	enum cil_flavor flavor;
+	struct cil_args_booleanif *args = extra_args;
 	struct cil_type_rule *cil_type_rule = NULL;
 	struct cil_avrule *cil_avrule = NULL;
-	struct cil_tree_node *curr_rule = NULL;
-	cond_av_list_t *cond_list = NULL;
+	struct cil_tree_node *curr_rule = node;
+	struct cil_tree_node *cond_block = args->cond_block;
+	policydb_t *pdb = args->pdb;
 	avtab_ptr_t avtab_ptr = NULL;
+	cond_av_list_t *cond_list = NULL;
+	cond_node_t *cond_node = pdb->cond_list;
 
-	curr_rule = node->cl_head;
-	while (curr_rule != NULL) {
-		cond_list = cil_malloc(sizeof(*cond_list));
-		memset(cond_list, 0, sizeof(cond_av_list_t));
+	cond_list = cil_malloc(sizeof(*cond_list));
+	memset(cond_list, 0, sizeof(cond_av_list_t));
 
-		flavor = curr_rule->flavor;
-		switch (flavor) {
-		case CIL_TYPE_RULE:
-			cil_type_rule = curr_rule->data;
-			rc = __cil_type_rule_to_avtab(pdb, cil_type_rule, &pdb->te_cond_avtab, &avtab_ptr);
-			break;
-		case CIL_AVRULE:
-			cil_avrule = curr_rule->data;
-			rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_cond_avtab, &avtab_ptr, extra_args, 0);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_ERR, "Failed to insert avrule into avtab (line: %d)\n", curr_rule->line);
-			}
-			break;
-		default:
-			rc = SEPOL_ERR;
-			break;
-		}
+	flavor = curr_rule->flavor;
+	switch (flavor) {
+	case CIL_TYPE_RULE:
+		cil_type_rule = curr_rule->data;
+		rc = __cil_type_rule_to_avtab(pdb, cil_type_rule, &pdb->te_cond_avtab, &avtab_ptr);
 		if (rc != SEPOL_OK) {
-			goto exit;
+			cil_log(CIL_ERR, "Failed to insert typerule into avtab (line: %d)\n", curr_rule->line);
 		}
-
-		cond_list->node = avtab_ptr;
-
-		// parse_context needs to be non-NULL for conditional rules to be
-		// written to the binary. it is normally used for finding duplicates,
-		// but cil checks that earlier, so we don't use it. it just needs to be
-		// set
-		avtab_ptr->parse_context = (void*)1;
-
-		flavor = ((struct cil_condblock*)node->data)->flavor;
-		switch (flavor) {
-		case CIL_CONDTRUE:
-			if (cond_node->true_list == NULL) {
-				cond_node->true_list = cond_list;
-			} else {
-				cond_list->next = cond_node->true_list;
-				cond_node->true_list = cond_list;
-			}
-			break;
-		case CIL_CONDFALSE:
-			if (cond_node->false_list == NULL) {
-				cond_node->false_list = cond_list;
-			} else {
-				cond_list->next = cond_node->false_list;
-				cond_node->false_list = cond_list;
-			}
-			break;
-		default:
-			rc = SEPOL_ERR;
-			goto exit;
+		break;
+	case CIL_AVRULE:
+		cil_avrule = curr_rule->data;
+		rc = __cil_avrule_to_avtab(pdb, cil_avrule, &pdb->te_cond_avtab, &avtab_ptr, extra_args, 0);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to insert avrule into avtab (line: %d)\n", curr_rule->line);
 		}
-		curr_rule = curr_rule->next;
+		break;
+	default:
+		rc = SEPOL_ERR;
+		cil_log(CIL_ERR, "Invalid statement within booleanif (line: %d)\n", curr_rule->line);
+		break;
+	}
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cond_list->node = avtab_ptr;
+
+	// parse_context needs to be non-NULL for conditional rules to be
+	// written to the binary. it is normally used for finding duplicates,
+	// but cil checks that earlier, so we don't use it. it just needs to be
+	// set
+	avtab_ptr->parse_context = (void*)1;
+
+	flavor = ((struct cil_condblock*)cond_block->data)->flavor;
+	switch (flavor) {
+	case CIL_CONDTRUE:
+		if (cond_node->true_list == NULL) {
+			cond_node->true_list = cond_list;
+		} else {
+			cond_list->next = cond_node->true_list;
+			cond_node->true_list = cond_list;
+		}
+		break;
+	case CIL_CONDFALSE:
+		if (cond_node->false_list == NULL) {
+			cond_node->false_list = cond_list;
+		} else {
+			cond_list->next = cond_node->false_list;
+			cond_node->false_list = cond_list;
+		}
+		break;
+	default:
+		rc = SEPOL_ERR;
+		cil_log(CIL_ERR, "Invalid block type within booleanif (line: %d)\n", curr_rule->line);
+		goto exit;
 	}
 
 	return SEPOL_OK;
@@ -1347,15 +1359,18 @@ int __cil_cond_to_policydb(policydb_t *pdb, struct cil_tree_node *node, cond_nod
 exit:
 	cond_av_list_destroy(cond_list);
 	return rc;
+
 }
 
-int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void *extra_args)
+int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	enum cil_flavor flavor;
+	struct cil_args_booleanif extra_args;
 	struct cil_booleanif *cil_boolif = node->data;
 	struct cil_list *expr_stack = cil_boolif->expr_stack;
 	struct cil_list_item *curr_expr = expr_stack->head;
+	struct cil_tree_node *cb_node = NULL;
 	struct cil_tree_node *true_node = NULL;
 	struct cil_tree_node *false_node = NULL;
 	struct cil_condblock *cb = NULL;
@@ -1366,6 +1381,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void 
 	cond_node = cond_node_create(pdb, NULL);
 	if (cond_node == NULL) {
 		rc = SEPOL_ERR;
+		cil_log(CIL_INFO, "Failure while creating sepol conditional node\n");
 		goto exit;
 	}
 
@@ -1384,6 +1400,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void 
 			sepol_bool = hashtab_search(pdb->p_bools.table, key);
 			if (sepol_bool == NULL) {
 				rc = SEPOL_ERR;
+				cil_log(CIL_INFO, "Failure while searching hashtab for sepol boolean\n");
 				goto exit;
 			}
 			cond_expr->bool = sepol_bool->s.value;
@@ -1408,6 +1425,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void 
 			break;
 		default:
 			rc = SEPOL_ERR;
+			cil_log(CIL_INFO, "Unknown booleanif operator (line: %d)\n", node->line);
 			goto exit;
 		}
 
@@ -1421,43 +1439,44 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, void 
 		curr_expr = curr_expr->next;
 	}
 
-	if (node->cl_head != NULL && node->cl_head->flavor == CIL_CONDBLOCK) {
-		cb = node->cl_head->data;
-		if (cb->flavor == CIL_CONDTRUE) {
-			true_node = node->cl_head;
-		} else if (cb->flavor == CIL_CONDFALSE) {
-			false_node = node->cl_head;
-		}
-	}
-
-	if (node->cl_head != NULL && node->cl_head->next != NULL && node->cl_head->next->flavor == CIL_CONDBLOCK) {
-		cb = node->cl_head->next->data;
-		if (cb->flavor == CIL_CONDTRUE) {
-			true_node = node->cl_head->next;
-		} else if (cb->flavor == CIL_CONDFALSE) {
-			false_node = node->cl_head->next;
-		}
-	}
-
-	if (true_node != NULL) {
-		rc = __cil_cond_to_policydb(pdb, true_node, cond_node, extra_args);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	}
-
-	if (false_node != NULL) {
-		rc = __cil_cond_to_policydb(pdb, false_node, cond_node, extra_args);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	}
-
 	if (pdb->cond_list == NULL) {
 		pdb->cond_list = cond_node;
 	} else {
 		cond_node->next = pdb->cond_list;
 		pdb->cond_list = cond_node;
+	}
+
+	cb_node = node->cl_head;
+	while (cb_node != NULL) {
+		if (cb_node->flavor == CIL_CONDBLOCK) {
+			cb = cb_node->data;
+			if (cb->flavor == CIL_CONDTRUE) {
+				true_node = cb_node;
+			} else if (cb->flavor == CIL_CONDFALSE) {
+				false_node = cb_node;
+			}
+		}
+		cb_node = cb_node->next;
+	}
+
+	extra_args.pdb = pdb;
+
+	if (true_node != NULL) {
+		extra_args.cond_block = true_node;
+		rc = cil_tree_walk(true_node, __cil_cond_to_policydb_helper, NULL, NULL, &extra_args);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failure while walking true conditional block (line: %d)", true_node->line);
+			goto exit;
+		}
+	}
+
+	if (false_node != NULL) {
+		extra_args.cond_block = false_node;
+		rc = cil_tree_walk(false_node, __cil_cond_to_policydb_helper, NULL, NULL, &extra_args);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failure while walking false conditional block (line: %d)", false_node->line);
+			goto exit;
+		}
 	}
 
 	return SEPOL_OK;
@@ -2809,7 +2828,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 	case 3:
 		switch (node->flavor) {
 		case CIL_BOOLEANIF:
-			rc = cil_booleanif_to_policydb(pdb, node, extra_args);
+			rc = cil_booleanif_to_policydb(pdb, node);
 			break;
 		case CIL_AVRULE: {
 				struct cil_avrule *rule = node->data;
