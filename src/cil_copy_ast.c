@@ -830,7 +830,7 @@ exit:
 	return rc;
 }
 
-int cil_copy_typeattributeset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+int cil_copy_typeattributeset(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_typeattributeset *orig = data;
 	struct cil_typeattributeset *new = NULL;
@@ -852,6 +852,11 @@ int cil_copy_typeattributeset(__attribute__((unused)) struct cil_db *db, void *d
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+	}
+
+	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
 
 	*copy = new;
