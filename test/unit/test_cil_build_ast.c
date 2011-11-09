@@ -15417,7 +15417,7 @@ void test_cil_gen_call_noname_neg(CuTest *tc) {
 }
 
 void test_cil_gen_optional(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -15436,7 +15436,7 @@ void test_cil_gen_optional(CuTest *tc) {
 }
 
 void test_cil_gen_optional_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -15470,7 +15470,7 @@ void test_cil_gen_optional_currnull_neg(CuTest *tc) {
 }
 
 void test_cil_gen_optional_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);
@@ -18544,7 +18544,7 @@ void test_cil_build_ast_node_helper_gen_call_neg(CuTest *tc) {
 }
 
 void test_cil_build_ast_node_helper_gen_optional(CuTest *tc) {
-	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "baz", "file", "(", "read", ")", ")", ")", NULL};
+	char *line[] = {"(", "optional", "opt", "(", "allow", "foo", "bar", "(", "file", "(", "read", ")", ")", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
