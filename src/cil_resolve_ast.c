@@ -284,6 +284,7 @@ int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args
 	struct cil_typeattributeset *attrtypes = (struct cil_typeattributeset*)current->data;
 	struct cil_tree_node *attr_node = NULL;
 	struct cil_typeattribute *attr = NULL;
+	struct cil_list_item *item = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, attrtypes->attr_str, CIL_SYM_TYPES, extra_args, &attr_node);
@@ -301,7 +302,19 @@ int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	attr->expr_stack = attrtypes->expr_stack;
+
+	if (attr->expr_stack_list == NULL) {
+		cil_list_init(&attr->expr_stack_list);
+	}
+
+	cil_list_item_init(&item);
+	item->data = attrtypes->expr_stack;
+	item->flavor = CIL_LIST;
+
+	rc = cil_list_append_item(attr->expr_stack_list, item);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
 
 	rc = SEPOL_OK;
 exit:
@@ -679,8 +692,18 @@ int cil_reset_typeattr(struct cil_tree_node *current, __attribute__((unused)) vo
 	struct cil_typeattribute *attr = (struct cil_typeattribute*)current->data;
 
 	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributetypes statement */
-	if (attr->expr_stack != NULL) {
-		cil_list_destroy(&attr->expr_stack, CIL_FALSE);
+	if (attr->expr_stack_list != NULL) {
+		/* we don't want to destroy the expression stacks (cil_list) inside
+		 * this list cil_list_destroy destroys sublists, so we need to do it
+		 * manually */
+		struct cil_list_item *expr_stack = attr->expr_stack_list->head;
+		while (expr_stack != NULL) {
+			struct cil_list_item *next = expr_stack->next;
+			cil_list_item_destroy(&expr_stack, CIL_FALSE);
+			expr_stack = next;
+		}
+		free(attr->expr_stack_list);
+		attr->expr_stack_list = NULL;
 	}
 
 	return SEPOL_OK;

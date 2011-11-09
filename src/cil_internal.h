@@ -523,7 +523,7 @@ struct cil_type	{
 
 struct cil_typeattribute {
 	struct cil_symtab_datum datum;
-	struct cil_list *expr_stack;
+	struct cil_list *expr_stack_list;
 };
 
 struct cil_typeattributeset {

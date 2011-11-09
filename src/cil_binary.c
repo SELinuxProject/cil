@@ -453,79 +453,99 @@ exit:
 int __cil_typeattr_expand_to_policydb(policydb_t *pdb, struct cil_typeattribute *attr, ebitmap_t *types_bitmap, ebitmap_t *types)
 {
 	int rc = SEPOL_ERR;
-	uint16_t pos = 0;
-	struct cil_list *expr_stack = attr->expr_stack;
-	struct cil_list_item *curr_expr = expr_stack->head;
+	uint16_t pos;
+	struct cil_list_item *expr_stack;
+	struct cil_list_item *expr;
 	enum cil_flavor flavor;
 	ebitmap_t bitmap_tmp;
+	ebitmap_t bitmap_tmp2;
 	ebitmap_t bitmap_stack[COND_EXPR_MAXDEPTH];
 
-	while (curr_expr != NULL) {
-		struct cil_conditional *cil_cond = curr_expr->data;
-		flavor = cil_cond->flavor;
-		switch (flavor) {
-		case CIL_TYPE:
-			ebitmap_init(&bitmap_tmp);
-			rc = __cil_typeattr_expand_to_bitmap(pdb, cil_cond->data, types_bitmap, &bitmap_tmp);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-			bitmap_stack[pos] = bitmap_tmp;
-			pos++;
-			break;
-		case CIL_NOT:
-			if (ebitmap_not(&bitmap_tmp, &bitmap_stack[pos - 1], ebitmap_length(types_bitmap))) {
+	ebitmap_init(types);
+
+	if (attr->expr_stack_list == NULL) {
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
+	for (expr_stack = attr->expr_stack_list->head; expr_stack != NULL; expr_stack = expr_stack->next) {
+		pos = 0;
+
+		for (expr = ((struct cil_list *)expr_stack->data)->head; expr != NULL; expr = expr->next) {
+			struct cil_conditional *cil_cond = expr->data;
+			flavor = cil_cond->flavor;
+			switch (flavor) {
+			case CIL_TYPE:
+				ebitmap_init(&bitmap_tmp);
+				rc = __cil_typeattr_expand_to_bitmap(pdb, cil_cond->data, types_bitmap, &bitmap_tmp);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+				bitmap_stack[pos] = bitmap_tmp;
+				pos++;
+				break;
+			case CIL_NOT:
+				if (ebitmap_not(&bitmap_tmp2, &bitmap_stack[pos - 1], ebitmap_length(types_bitmap))) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure NOTing bitmap\n");
+					goto exit;
+				}
+				if (ebitmap_and(&bitmap_tmp, &bitmap_tmp2, types_bitmap)) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure ANDing types bitmap\n");
+					goto exit;
+				}
+				ebitmap_destroy(&bitmap_tmp2);
+				ebitmap_destroy(&bitmap_stack[pos - 1]);
+				bitmap_stack[pos - 1] = bitmap_tmp;
+				break;
+			case CIL_OR:
+				if (ebitmap_or(&bitmap_tmp, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure ORing bitmaps\n");
+					goto exit;
+				}
+				ebitmap_destroy(&bitmap_stack[pos - 2]);
+				ebitmap_destroy(&bitmap_stack[pos - 1]);
+				bitmap_stack[pos - 2] = bitmap_tmp;
+				pos--;
+				break;
+			case CIL_AND:
+				if (ebitmap_and(&bitmap_tmp, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure ANDing bitmaps\n");
+					goto exit;
+				}
+				ebitmap_destroy(&bitmap_stack[pos - 2]);
+				ebitmap_destroy(&bitmap_stack[pos - 1]);
+				bitmap_stack[pos - 2] = bitmap_tmp;
+				pos--;
+				break;
+			case CIL_XOR:
+				if (ebitmap_xor(&bitmap_tmp2, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure XORing bitmaps\n");
+					goto exit;
+				}
+				if (ebitmap_and(&bitmap_tmp, &bitmap_tmp2, types_bitmap)) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure ANDing types bitmap\n");
+					goto exit;
+				}
+				ebitmap_destroy(&bitmap_tmp2);
+				ebitmap_destroy(&bitmap_stack[pos - 2]);
+				ebitmap_destroy(&bitmap_stack[pos - 1]);
+				bitmap_stack[pos - 2] = bitmap_tmp;
+				pos--;
+				break;
+			default:
 				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure NOTing bitmap\n");
 				goto exit;
 			}
-			if (ebitmap_and(types, &bitmap_tmp, types_bitmap)) {
-				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure ANDing types bitmap\n");
-				goto exit;
-			}
-			ebitmap_destroy(&bitmap_tmp);
-			ebitmap_destroy(&bitmap_stack[pos - 1]);
-			break;
-		case CIL_OR:
-			if (ebitmap_or(types, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
-				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure ORing bitmaps\n");
-				goto exit;
-			}
-			ebitmap_destroy(&bitmap_stack[pos - 2]);
-			ebitmap_destroy(&bitmap_stack[pos - 1]);
-			break;
-		case CIL_AND:
-			if (ebitmap_and(types, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
-				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure ANDing bitmaps\n");
-				goto exit;
-			}
-			ebitmap_destroy(&bitmap_stack[pos - 2]);
-			ebitmap_destroy(&bitmap_stack[pos - 1]);
-			break;
-		case CIL_XOR:
-			if (ebitmap_xor(&bitmap_tmp, &bitmap_stack[pos - 2], &bitmap_stack[pos - 1])) {
-				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure XORing bitmaps\n");
-				goto exit;
-			}
-			if (ebitmap_and(types, &bitmap_tmp, types_bitmap)) {
-				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure ANDing types bitmap\n");
-				goto exit;
-			}
-			ebitmap_destroy(&bitmap_tmp);
-			ebitmap_destroy(&bitmap_stack[pos - 2]);
-			ebitmap_destroy(&bitmap_stack[pos - 1]);
-			break;
-		default:
-			rc = SEPOL_ERR;
-			goto exit;
 		}
 
-		curr_expr = curr_expr->next;
+		ebitmap_union(types, &bitmap_stack[0]);
+		ebitmap_destroy(&bitmap_stack[0]);
 	}
 
 	rc = SEPOL_OK;

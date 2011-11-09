@@ -2148,8 +2148,18 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 
 	cil_symtab_datum_destroy(attr->datum);
 
-	if (attr->expr_stack != NULL) {
-		cil_list_destroy(&attr->expr_stack, CIL_FALSE);
+	if (attr->expr_stack_list != NULL) {
+		/* we don't want to destroy the expression stacks (cil_list) inside
+		 * this list cil_list_destroy destroys sublists, so we need to do it
+		 * manually */
+		struct cil_list_item *expr_stack = attr->expr_stack_list->head;
+		while (expr_stack != NULL) {
+			struct cil_list_item *next = expr_stack->next;
+			cil_list_item_destroy(&expr_stack, CIL_FALSE);
+			expr_stack = next;
+		}
+		free(attr->expr_stack_list);
+		attr->expr_stack_list = NULL;
 	}
 
 	free(attr);

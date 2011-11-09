@@ -1515,7 +1515,7 @@ void cil_typeattribute_init(struct cil_typeattribute **attr)
 
 	cil_symtab_datum_init(&(*attr)->datum);
 
-	(*attr)->expr_stack = NULL;
+	(*attr)->expr_stack_list = NULL;
 }
 
 void cil_typeattributeset_init(struct cil_typeattributeset **attrset)
