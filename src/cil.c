@@ -127,7 +127,7 @@ int cil_add_file(cil_db_t *db, char *name, char *data, size_t size)
 	buffer = NULL;
 
 #ifdef DEBUG
-	cil_tree_print(parse->root, 0);
+	cil_tree_print(db->parse->root, 0);
 #endif
 
 	rc = SEPOL_OK;
