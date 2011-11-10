@@ -1174,7 +1174,12 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 	struct cil_tree_node *current = root;
 	uint16_t reverse = 0;
 	int rc = SEPOL_ERR;
-	
+
+	if (current == NULL) {
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
 	do {
 		if (current->cl_head != NULL && !reverse) {
 			switch (current->flavor) {
@@ -1217,7 +1222,7 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 			default:
 				cil_log(CIL_INFO, "destroy symtab error, wrong flavor node: %d\n", current->flavor);
 				rc = SEPOL_ERR;
-				goto destroy_ast_symtabs_out;
+				goto exit;
 			}
 			current = current->cl_head;
 		} else if (current->next != NULL) {
@@ -1228,11 +1233,11 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 			reverse = 1;
 		}
 	}
-	while (current->flavor != CIL_ROOT);
+	while (current != NULL && current->flavor != CIL_ROOT);
 
 	return SEPOL_OK;
 
-destroy_ast_symtabs_out:
+exit:
 	return rc;
 }
 
