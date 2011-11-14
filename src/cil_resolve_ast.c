@@ -2424,10 +2424,6 @@ int cil_resolve_in(struct cil_tree_node *current, void *extra_args)
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-	} else {
-		printf("block string is null\n");
-		rc = SEPOL_ERR;
-		goto exit;
 	}
 
 	rc = cil_copy_ast(db, current, block_node);
