@@ -74,16 +74,23 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 		goto exit;
 	}
 
+	ast_node->data = datum;
+	ast_node->flavor = nflavor;
+
 	if (symtab != NULL) {
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, datum, ast_node);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to insert %s into symtab, rc: %d (%s, line: %d)\n", key, rc, ast_node->path, ast_node->line);
+		if (rc == SEPOL_EEXIST) {
+			struct cil_tree_node *dup;
+			cil_log(CIL_ERR, "Re-declaration of %s %s (%s:%d)\n", cil_node_to_string(ast_node), key, ast_node->path, ast_node->line);
+			if (cil_symtab_get_node(symtab, key, &dup) == SEPOL_OK) {
+				cil_log(CIL_ERR, "Note: Previous declaration (%s:%d)\n", dup->path, dup->line);
+			}
+			goto exit;
+		} else if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to insert %s %s: (%s:%d)\n", cil_node_to_string(ast_node), key, ast_node->path, ast_node->line);
 			goto exit;
 		}
 	}
-
-	ast_node->data = datum;
-	ast_node->flavor = nflavor;
 
 	return SEPOL_OK;
 
