@@ -300,7 +300,7 @@ int cil_gen_in(struct cil_db *db, struct cil_tree_node *parse_current, struct ci
 
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
-		printf("Invalid in statement (%s, line: %d)\n", parse_current->path, parse_current->line);
+		cil_log(CIL_ERR, "Invalid in statement (%s, line: %d)\n", parse_current->path, parse_current->line);
 		goto exit;
 	}
 
