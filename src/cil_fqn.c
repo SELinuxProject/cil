@@ -68,6 +68,39 @@ exit:
 	return rc;
 }
 
+int __cil_fqn_qualify_first_child_helper(struct cil_tree_node *node, void *extra_args)
+{
+	struct cil_args_qualify *args = NULL;
+	struct cil_symtab_datum *datum = NULL;
+	int rc = SEPOL_ERR;
+
+	if (node == NULL || extra_args == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	if (node->parent->flavor != CIL_BLOCK) {
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
+	args = extra_args;
+	datum = node->data;
+
+	if (args->len + strlen(datum->name) + 1 >= CIL_MAX_NAME_LENGTH) {
+		cil_log(CIL_INFO, "Fully qualified name too long\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	strcat(args->fqparent, datum->name);
+	strcat(args->fqparent, ".");
+	args->len += (strlen(datum->name) + 1);
+
+exit:
+	return rc;
+}
+
 int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	struct cil_args_qualify *args = NULL;
@@ -98,16 +131,10 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		*finished = CIL_TREE_SKIP_HEAD;
 		break;
 	case CIL_BLOCK:
-		if (args->len + strlen(datum->name) + 1 >= CIL_MAX_NAME_LENGTH) {
-			cil_log(CIL_INFO, "Fully qualified name too long\n");
-			rc = SEPOL_ERR;
-			goto exit;
+		if (((struct cil_block *)datum)->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
 		}
-		strcat(args->fqparent, datum->name);
-		strcat(args->fqparent, ".");
-		args->len += (strlen(datum->name) + 1);
 		break;
-
 	case CIL_TYPEATTRIBUTE:
 	case CIL_BOOL:
 	case CIL_CAT:
@@ -169,7 +196,7 @@ int cil_fqn_qualify(struct cil_tree_node *root)
 	extra_args.fqparent[0] = '\0';
 	extra_args.len = 0;
 
-	rc = cil_tree_walk(root, __cil_fqn_qualify_node_helper, NULL, __cil_fqn_qualify_last_child_helper, &extra_args);
+	rc = cil_tree_walk(root, __cil_fqn_qualify_node_helper, __cil_fqn_qualify_first_child_helper, __cil_fqn_qualify_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
