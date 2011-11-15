@@ -97,6 +97,8 @@ int __cil_fqn_qualify_first_child_helper(struct cil_tree_node *node, void *extra
 	strcat(args->fqparent, ".");
 	args->len += (strlen(datum->name) + 1);
 
+	return SEPOL_OK;
+
 exit:
 	return rc;
 }
