@@ -85,7 +85,7 @@ int __cil_fqn_qualify_first_child_helper(struct cil_tree_node *node, void *extra
 	}
 
 	args = extra_args;
-	datum = node->data;
+	datum = node->parent->data;
 
 	if (args->len + strlen(datum->name) + 1 >= CIL_MAX_NAME_LENGTH) {
 		cil_log(CIL_INFO, "Fully qualified name too long\n");
