@@ -12631,7 +12631,7 @@ void test_cil_gen_filecon_extra_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_portcon(CuTest *tc) {
+void test_cil_gen_portcon_udp(CuTest *tc) {
 	char *line[] = {"(", "portcon", "udp", "80", "con", ")", NULL};
 
         struct cil_tree *test_tree;
@@ -12648,6 +12648,44 @@ void test_cil_gen_portcon(CuTest *tc) {
 
         int rc = cil_gen_portcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
         CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_portcon_tcp(CuTest *tc) {
+	char *line[] = {"(", "portcon", "tcp", "80", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_portcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_portcon_unknownprotocol_neg(CuTest *tc) {
+	char *line[] = {"(", "portcon", "unknown", "80", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_portcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
 void test_cil_gen_portcon_anon_context(CuTest *tc) {
@@ -12709,6 +12747,63 @@ void test_cil_gen_portcon_portrange_one_neg(CuTest *tc) {
 
 void test_cil_gen_portcon_portrange_morethanone_neg(CuTest *tc) {
 	char *line[] = {"(", "portcon", "udp", "(", "0", "1", "2", ")", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_portcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_portcon_singleport_neg(CuTest *tc) {
+	char *line[] = {"(", "portcon", "udp", "foo", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_portcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_portcon_lowport_neg(CuTest *tc) {
+	char *line[] = {"(", "portcon", "udp", "(", "foo", "90", ")", "con", ")", NULL};
+
+        struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_tree_node *test_ast_node;
+        cil_tree_node_init(&test_ast_node);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+        test_ast_node->parent = test_db->ast->root;
+        test_ast_node->line = 1;
+
+        int rc = cil_gen_portcon(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+        CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_portcon_highport_neg(CuTest *tc) {
+	char *line[] = {"(", "portcon", "udp", "(", "80", "foo", ")", "con", ")", NULL};
 
         struct cil_tree *test_tree;
         gen_test_tree(&test_tree, line);

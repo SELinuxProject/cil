@@ -752,11 +752,16 @@ void test_cil_gen_filecon_contextnull_neg(CuTest *tc);
 void test_cil_gen_filecon_context_neg(CuTest *tc);
 void test_cil_gen_filecon_extra_neg(CuTest *tc);
 
-void test_cil_gen_portcon(CuTest *tc);
+void test_cil_gen_portcon_udp(CuTest *tc);
+void test_cil_gen_portcon_tcp(CuTest *tc);
+void test_cil_gen_portcon_unknownprotocol_neg(CuTest *tc);
 void test_cil_gen_portcon_anon_context(CuTest *tc);
 void test_cil_gen_portcon_portrange(CuTest *tc);
 void test_cil_gen_portcon_portrange_one_neg(CuTest *tc);
 void test_cil_gen_portcon_portrange_morethanone_neg(CuTest *tc);
+void test_cil_gen_portcon_singleport_neg(CuTest *tc);
+void test_cil_gen_portcon_lowport_neg(CuTest *tc);
+void test_cil_gen_portcon_highport_neg(CuTest *tc);
 void test_cil_gen_portcon_dbnull_neg(CuTest *tc);
 void test_cil_gen_portcon_currnull_neg(CuTest *tc);
 void test_cil_gen_portcon_astnull_neg(CuTest *tc);

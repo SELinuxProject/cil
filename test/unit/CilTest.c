@@ -1485,11 +1485,16 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_filecon);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_gen_filecon_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_gen_portcon);
+	SUITE_ADD_TEST(suite, test_cil_gen_portcon_udp);
+	SUITE_ADD_TEST(suite, test_cil_gen_portcon_tcp);
+	SUITE_ADD_TEST(suite, test_cil_gen_portcon_unknownprotocol_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_anon_context);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_portrange);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_portrange_one_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_portrange_morethanone_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_portcon_singleport_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_portcon_lowport_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_portcon_highport_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_dbnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_portcon_astnull_neg);
