@@ -5239,6 +5239,46 @@ void test_cil_resolve_sidcontext_named_context_invaliduser_neg(CuTest *tc) {
         CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
+void test_cil_resolve_blockinherit(CuTest *tc) {
+	char *line[] = {"(", "block", "baz", "(", "type", "b", ")", ")",
+			"(", "block", "foo", "(", "type", "a", ")", 
+				"(", "blockinherit", "baz", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_blockinherit(test_db->ast->root->cl_head->next->cl_head->next, args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_resolve_blockinherit_blockstrdne_neg(CuTest *tc) {
+	char *line[] = {"(", "block", "baz", "(", "type", "b", ")", ")",
+			"(", "block", "foo", "(", "type", "a", ")", 
+				"(", "blockinherit", "dne", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_CALL1, &changed, NULL, NULL, NULL);
+
+	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+	int rc = cil_resolve_blockinherit(test_db->ast->root->cl_head->next->cl_head->next, args);
+	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+}
+
 void test_cil_resolve_in_block(CuTest *tc) {
 	char *line[] = {"(", "class", "char", "(", "read", ")", ")",
 			"(", "block", "foo", "(", "type", "a", ")", ")",
@@ -10930,6 +10970,29 @@ void test_cil_resolve_ast_node_helper_sidcontext_neg(CuTest *tc) {
 
         int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next->next->next->next->next->next, &finished, args);
         CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
+        CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_resolve_ast_node_helper_blockinherit(CuTest *tc) {
+	char *line[] = {"(", "block", "baz", "(", "type", "foo", ")", ")",
+			"(", "block", "bar", "(", "type", "a", ")",
+				"(", "blockinherit", "baz", ")", ")", NULL};
+        
+	struct cil_tree *test_tree;
+        gen_test_tree(&test_tree, line);
+
+        struct cil_db *test_db;
+        cil_db_init(&test_db);
+
+	uint32_t changed = CIL_FALSE;
+	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_BLKIN, &changed, NULL, NULL, NULL);
+
+        uint32_t finished = 0;
+
+        cil_build_ast(test_db, test_tree->root, test_db->ast->root);
+
+        int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->cl_head->next, &finished, args);
+        CuAssertIntEquals(tc, SEPOL_OK, rc);
         CuAssertIntEquals(tc, 0, finished);
 }
 
