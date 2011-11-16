@@ -4617,6 +4617,131 @@ void test_cil_gen_tunif_notruelist_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
+void test_cil_gen_condblock_true(CuTest *tc) {
+	char *line[] = {"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_condblock(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_CONDTRUE);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_condblock_false(CuTest *tc) {
+	char *line[] = {"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_condblock(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_CONDFALSE);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+}
+
+void test_cil_gen_condblock_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db = NULL;
+
+	int rc = cil_gen_condblock(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_CONDFALSE);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_condblock_currnull_neg(CuTest *tc) {
+	char *line[] = {"(", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_condblock(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_CONDFALSE);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_condblock_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "false", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node = NULL;
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	int rc = cil_gen_condblock(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_CONDFALSE);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_condblock_nocond_neg(CuTest *tc) {
+	char *line[] = {"(", "true", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_condblock(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_CONDTRUE);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
+void test_cil_gen_condblock_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "true", "(", "allow", "foo", "bar", "baz", "(", "read", ")", ")", "Extra", ")", NULL};
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_tree_node *test_ast_node;
+	cil_tree_node_init(&test_ast_node);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	test_ast_node->parent = test_db->ast->root;
+	test_ast_node->line = 1;
+
+	int rc = cil_gen_condblock(test_db, test_tree->root->cl_head->cl_head, test_ast_node, CIL_CONDTRUE);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+}
+
 void test_cil_gen_typealias(CuTest *tc) {
 	char *line[] = {"(", "typealias", ".test.type", "type_t", ")", "(", "type", "test", ")", NULL};
 
@@ -17192,6 +17317,78 @@ void test_cil_build_ast_node_helper_boolif_neg(CuTest *tc) {
 	char *line[] = {"(", "booleanif", "(", "*&", "foo", "bar", ")",
 			"(", "true",
 			"(", "allow", "foo", "bar", "read", ")", ")", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+	
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}	
+
+void test_cil_build_ast_node_helper_condblock_true(CuTest *tc) {
+	char *line[] = {"(", "true", "(", "allow", "foo", "bar", "baz", "(", "write", ")", ")", ")", NULL}; 
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_condblock_true_neg(CuTest *tc) {
+	char *line[] = {"(", "true", "(", ")", ")", NULL};
+	
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+	
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_ERR, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}	
+
+void test_cil_build_ast_node_helper_condblock_false(CuTest *tc) {
+	char *line[] = {"(", "false", "(", "allow", "foo", "bar", "baz", "(", "write", ")", ")", ")", NULL}; 
+
+	struct cil_tree *test_tree;
+	gen_test_tree(&test_tree, line);
+
+	struct cil_db *test_db;
+	cil_db_init(&test_db);
+
+	uint32_t finished = 0;
+
+	struct cil_args_build *extra_args = gen_build_args(test_db->ast->root, test_db, NULL, NULL);
+
+	int rc = __cil_build_ast_node_helper(test_tree->root->cl_head->cl_head, &finished, extra_args);
+	CuAssertIntEquals(tc, SEPOL_OK, rc);
+	CuAssertIntEquals(tc, 0, finished);
+}
+
+void test_cil_build_ast_node_helper_condblock_false_neg(CuTest *tc) {
+	char *line[] = {"(", "false", "(", ")", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

@@ -972,6 +972,18 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_tunif);
 	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_tunif_neg);
 	
+	SUITE_ADD_TEST(suite, test_cil_gen_condblock_true);
+	SUITE_ADD_TEST(suite, test_cil_gen_condblock_false);
+	SUITE_ADD_TEST(suite, test_cil_gen_condblock_dbnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_condblock_currnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_condblock_astnull_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_condblock_nocond_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_condblock_extra_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_condblock_true);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_condblock_true_neg);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_condblock_false);
+	SUITE_ADD_TEST(suite, test_cil_build_ast_node_helper_condblock_false_neg);
+	
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_typealias_incomplete_neg2);

@@ -314,6 +314,14 @@ void test_cil_gen_tunif_astnull_neg(CuTest *);
 void test_cil_gen_tunif_nocond_neg(CuTest *);
 void test_cil_gen_tunif_notruelist_neg(CuTest *);
 
+void test_cil_gen_condblock_true(CuTest *);
+void test_cil_gen_condblock_false(CuTest *);
+void test_cil_gen_condblock_dbnull_neg(CuTest *);
+void test_cil_gen_condblock_currnull_neg(CuTest *);
+void test_cil_gen_condblock_astnull_neg(CuTest *);
+void test_cil_gen_condblock_nocond_neg(CuTest *);
+void test_cil_gen_condblock_extra_neg(CuTest *);
+
 void test_cil_gen_typealias(CuTest *);
 void test_cil_gen_typealias_incomplete_neg(CuTest *);
 void test_cil_gen_typealias_incomplete_neg2(CuTest *);
@@ -1027,6 +1035,11 @@ void test_cil_build_ast_node_helper_boolif_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_tunif(CuTest *);
 void test_cil_build_ast_node_helper_tunif_neg(CuTest *);
+
+void test_cil_build_ast_node_helper_condblock_true(CuTest *);
+void test_cil_build_ast_node_helper_condblock_true_neg(CuTest *);
+void test_cil_build_ast_node_helper_condblock_false(CuTest *);
+void test_cil_build_ast_node_helper_condblock_false_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_typealias(CuTest *);
 void test_cil_build_ast_node_helper_typealias_notype_neg(CuTest *);
