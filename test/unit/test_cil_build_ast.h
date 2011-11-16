@@ -271,7 +271,12 @@ void test_cil_gen_expr_stack_extraarg_neg(CuTest *);
 void test_cil_gen_expr_stack_currnull_neg(CuTest *);
 void test_cil_gen_expr_stack_stacknull_neg(CuTest *);
 
-void test_cil_gen_boolif(CuTest *);
+void test_cil_gen_boolif_multiplebools_true(CuTest *);
+void test_cil_gen_boolif_multiplebools_false(CuTest *);
+void test_cil_gen_boolif_multiplebools_unknowncond_neg(CuTest *);
+void test_cil_gen_boolif_true(CuTest *);
+void test_cil_gen_boolif_false(CuTest *);
+void test_cil_gen_boolif_unknowncond_neg(CuTest *);
 void test_cil_gen_boolif_nested(CuTest *);
 void test_cil_gen_boolif_nested_neg(CuTest *);
 void test_cil_gen_boolif_extra_neg(CuTest *);

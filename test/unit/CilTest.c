@@ -931,7 +931,12 @@ CuSuite* CilTreeGetBuildSuite(void) {
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_currnull_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_expr_stack_stacknull_neg);
 	
-	SUITE_ADD_TEST(suite, test_cil_gen_boolif);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_multiplebools_true);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_multiplebools_false);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_multiplebools_unknowncond_neg);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_true);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_false);
+	SUITE_ADD_TEST(suite, test_cil_gen_boolif_unknowncond_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_nested);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_nested_neg);
 	SUITE_ADD_TEST(suite, test_cil_gen_boolif_extra_neg);
