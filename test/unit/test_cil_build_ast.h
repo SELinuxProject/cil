@@ -296,7 +296,12 @@ void test_cil_gen_else_dbnull_neg(CuTest *);
 void test_cil_gen_else_currnull_neg(CuTest *);
 void test_cil_gen_else_astnull_neg(CuTest *);
 
-void test_cil_gen_tunif(CuTest *);
+void test_cil_gen_tunif_multiplebools_true(CuTest *);
+void test_cil_gen_tunif_multiplebools_false(CuTest *);
+void test_cil_gen_tunif_multiplebools_unknowncond_neg(CuTest *);
+void test_cil_gen_tunif_true(CuTest *);
+void test_cil_gen_tunif_false(CuTest *);
+void test_cil_gen_tunif_unknowncond_neg(CuTest *);
 void test_cil_gen_tunif_nocond(CuTest *);
 void test_cil_gen_tunif_nested(CuTest *);
 void test_cil_gen_tunif_nested_neg(CuTest *);
