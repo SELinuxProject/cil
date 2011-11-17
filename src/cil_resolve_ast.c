@@ -822,10 +822,6 @@ int cil_resolve_userlevel(struct cil_tree_node *current, void *extra_args)
 			goto exit;
 		}
 		user->dftlevel = usrlvl->level;
-	} else {
-		cil_log(CIL_ERR, "Invalid userlevel, level not found\n");
-		rc = SEPOL_ERR;
-		goto exit;
 	}
 
 	return SEPOL_OK;
@@ -869,10 +865,6 @@ int cil_resolve_userrange(struct cil_tree_node *current, void *extra_args)
 			goto exit;
 		}
 		user->range = userrange->range;
-	} else {
-		cil_log(CIL_ERR, "Invalid userrange, levelrange not found\n");
-		rc = SEPOL_ERR;
-		goto exit;
 	}
 
 	return SEPOL_OK;
@@ -961,10 +953,6 @@ int cil_resolve_selinuxuser(struct cil_tree_node *current, void *extra_args)
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-	} else {
-		cil_log(CIL_ERR, "Invalid selinuxuser, levelrange not found\n");
-		rc = SEPOL_ERR;
-		goto exit;
 	}
 
 	rc = SEPOL_OK;
@@ -2006,10 +1994,6 @@ int cil_resolve_context(struct cil_tree_node *current, struct cil_context *conte
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-	} else {
-		cil_log(CIL_ERR, "Invalid context, levelrange not found\n");
-		rc = SEPOL_ERR;
-		goto exit;
 	}
 
 	return SEPOL_OK;
@@ -2359,14 +2343,8 @@ int cil_resolve_blockinherit(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	if (inherit->block_str != NULL) {
-		rc = cil_resolve_name(current, inherit->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	} else {
-		cil_log(CIL_ERR, "block strings is null\n");
-		rc = SEPOL_ERR;
+	rc = cil_resolve_name(current, inherit->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
+	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
@@ -2388,14 +2366,9 @@ int cil_resolve_blockabstract(struct cil_tree_node *current, void *extra_args)
 	struct cil_tree_node *block_node = NULL;
 	int rc = SEPOL_ERR;
 
-	if (abstract->block_str != NULL) {
-		rc = cil_resolve_name(current, abstract->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
-		if (rc != SEPOL_OK || block_node->flavor != CIL_BLOCK) {
-			cil_log(CIL_ERR, "Failed to resolve block, rc: %d\n", rc);
-			goto exit;
-		}
-	} else {
-		cil_log(CIL_ERR, "block string is null\n");
+	rc = cil_resolve_name(current, abstract->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
+	if (rc != SEPOL_OK || block_node->flavor != CIL_BLOCK) {
+		cil_log(CIL_ERR, "Failed to resolve block, rc: %d\n", rc);
 		goto exit;
 	}
 
@@ -2419,11 +2392,9 @@ int cil_resolve_in(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	if (in->block_str != NULL) {
-		rc = cil_resolve_name(current, in->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+	rc = cil_resolve_name(current, in->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
 
 	rc = cil_copy_ast(db, current, block_node);
@@ -2453,22 +2424,16 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	if (new_call->macro_str != NULL) {
-		rc = cil_resolve_name(current, new_call->macro_str, CIL_SYM_BLOCKS, extra_args, &macro_node);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-		if (macro_node->flavor != CIL_MACRO) {
-			printf("Failed to resolve macro %s\n", new_call->macro_str);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-		new_call->macro = (struct cil_macro*)macro_node->data;
-	} else {
-		cil_log(CIL_ERR, "Macro string is null\n");
+	rc = cil_resolve_name(current, new_call->macro_str, CIL_SYM_BLOCKS, extra_args, &macro_node);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	if (macro_node->flavor != CIL_MACRO) {
+		printf("Failed to resolve macro %s\n", new_call->macro_str);
 		rc = SEPOL_ERR;
 		goto exit;
 	}
+	new_call->macro = (struct cil_macro*)macro_node->data;
 
 	if (new_call->macro->params != NULL ) {
 
