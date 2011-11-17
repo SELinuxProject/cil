@@ -63,6 +63,9 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 {
 	symtab_t *symtab = NULL;
 	int rc = SEPOL_ERR;
+	struct cil_list *param_list = NULL;
+	struct cil_list_item *item = NULL;
+	struct cil_param *param = NULL;
 
 	rc = __cil_verify_name((const char*)key);
 	if (rc != SEPOL_OK) {
@@ -89,6 +92,25 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 		} else if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to insert %s %s: (%s:%d)\n", cil_node_to_string(ast_node), key, ast_node->path, ast_node->line);
 			goto exit;
+		}
+	}
+
+	if (ast_node->flavor >= CIL_MIN_DECLARATIVE && ast_node->parent->flavor == CIL_MACRO) {
+		param_list = ((struct cil_macro*)ast_node->parent->data)->params;
+		if (param_list != NULL) {
+			item = param_list->head;
+			while (item != NULL) {
+				param = item->data;
+				if (param->flavor == ast_node->flavor) {
+					if (!strcmp(param->str, key)) {
+						cil_log(CIL_ERR, "%s %s shadows a macro parameter (%s:%d)\n", cil_node_to_string(ast_node), key, ast_node->path, ast_node->line);
+						cil_log(CIL_ERR, "Note: Macro declaration (%s:%d)\n", ast_node->parent->path, ast_node->parent->line);
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+				}
+				item = item->next;
+			}
 		}
 	}
 

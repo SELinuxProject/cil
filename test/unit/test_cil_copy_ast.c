@@ -1448,6 +1448,10 @@ void test_cil_copy_node_helper_perm(CuTest *tc) {
 	cil_tree_node_init(&parent_node);
 	parent_node->flavor = CIL_CLASS;
 	parent_node->data = test_class;
+	struct cil_tree_node *root;
+	cil_tree_node_init(&root);
+	root->flavor = CIL_ROOT;
+	parent_node->parent = root;
 
 	struct cil_args_copy *extra_args = gen_copy_args(parent_node, test_db2);
 	

@@ -292,7 +292,7 @@ void test_cil_resolve_classmapping_anon_inmacro(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next;
 
-	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next->cl_head, args);
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -327,7 +327,7 @@ void test_cil_resolve_classmapping_anon_inmacro_neg(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next;
 
-	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next->cl_head, args);
+	int rc = cil_resolve_classmapping(test_db->ast->root->cl_head->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -1787,7 +1787,7 @@ void test_cil_resolve_context_macro(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_context(test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head, test_context,  args);
+	int rc = cil_resolve_context(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, test_context,  args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -1832,7 +1832,7 @@ void test_cil_resolve_context_macro_neg(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_context(test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head, test_context, args);
+	int rc = cil_resolve_context(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, test_context, args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -2598,7 +2598,7 @@ void test_cil_resolve_rangetransition_namedrange_anon(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -2641,7 +2641,7 @@ void test_cil_resolve_rangetransition_namedrange_anon_neg(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head,  args);
+	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->next->cl_head,  args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -2810,7 +2810,7 @@ void test_cil_resolve_rangetransition_call_level_l_anon(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -2852,7 +2852,7 @@ void test_cil_resolve_rangetransition_call_level_l_anon_neg(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -2894,7 +2894,7 @@ void test_cil_resolve_rangetransition_call_level_h_anon(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -2936,7 +2936,7 @@ void test_cil_resolve_rangetransition_call_level_h_anon_neg(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_rangetransition(test_db->ast->root->cl_head->next->next->next->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -7681,7 +7681,7 @@ void test_cil_resolve_userlevel_macro(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next;
 
-	int rc = cil_resolve_userlevel(test_db->ast->root->cl_head->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_userlevel(test_db->ast->root->cl_head->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -7720,7 +7720,7 @@ void test_cil_resolve_userlevel_macro_neg(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next;
 
-	int rc = cil_resolve_userlevel(test_db->ast->root->cl_head->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_userlevel(test_db->ast->root->cl_head->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -7891,7 +7891,7 @@ void test_cil_resolve_userrange_macro(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_userrange(test_db->ast->root->cl_head->next->next->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_userrange(test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);
@@ -7932,7 +7932,7 @@ void test_cil_resolve_userrange_macro_neg(CuTest *tc) {
 	args->pass = CIL_PASS_MISC3;
 	args->callstack = test_db->ast->root->cl_head->next->next->next->next->next->next->next;
 
-	int rc = cil_resolve_userrange(test_db->ast->root->cl_head->next->next->next->next->next->next->cl_head, args);
+	int rc = cil_resolve_userrange(test_db->ast->root->cl_head->next->next->next->next->next->next->next->cl_head, args);
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 	CuAssertIntEquals(tc, SEPOL_OK, rc2);
 	CuAssertIntEquals(tc, SEPOL_OK, rc3);

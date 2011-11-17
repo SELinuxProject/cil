@@ -2214,6 +2214,11 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	struct cil_tree_node *node = NULL;
 	struct cil_db *db = NULL;
 	struct cil_args_copy *args = NULL;
+	struct cil_tree_node *namespace = NULL;
+	struct cil_macro *macro = NULL;
+	struct cil_list *param_list = NULL;
+	struct cil_list_item *item = NULL;
+	struct cil_param *param = NULL;
 	enum cil_sym_index sym_index = CIL_SYM_UNKNOWN;
 	symtab_t *symtab = NULL;
 	void *data = NULL;
@@ -2474,6 +2479,31 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 			rc = cil_symtab_insert(symtab, ((struct cil_symtab_datum*)orig->data)->name, ((struct cil_symtab_datum*)data), new);
 			if (rc != SEPOL_OK) {
 				goto exit;
+			}
+
+			namespace = new;
+			while (namespace->flavor != CIL_MACRO && namespace->flavor != CIL_BLOCK && namespace->flavor != CIL_ROOT) {
+				namespace = namespace->parent;
+			}
+
+			if (namespace->flavor == CIL_MACRO) {
+				macro = namespace->data;
+				param_list = macro->params;
+				if (param_list != NULL) {
+					item = param_list->head;
+					while (item != NULL) {
+						param = item->data;
+						if (param->flavor == new->flavor) {
+							if (!strcmp(param->str, ((struct cil_symtab_datum*)new->data)->name)) {
+								cil_log(CIL_ERR, "%s %s shadows a macro parameter (%s:%d)\n", cil_node_to_string(new), ((struct cil_symtab_datum*)orig->data)->name, orig->path, orig->line);
+								cil_log(CIL_ERR, "Note: macro declaration (%s:%d)\n", namespace->path, namespace->line);
+								rc = SEPOL_ERR;
+								goto exit;
+							}
+						}
+						item = item->next;
+					}
+				}
 			}
 		}
 

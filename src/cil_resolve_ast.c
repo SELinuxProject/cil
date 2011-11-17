@@ -3089,6 +3089,11 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			rc = cil_resolve_blockabstract(node, args);
 		}
 		break;
+	case CIL_PASS_MACRO:
+		if (node->flavor == CIL_CALL && args->macro != NULL) {
+			rc = cil_resolve_call1(node, args);
+		}
+		break;
 	case CIL_PASS_CALL1:
 		if (node->flavor == CIL_CALL) {
 			rc = cil_resolve_call1(node, args);
@@ -3325,7 +3330,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	}
 
 	if (node->flavor == CIL_MACRO) {
-		if (pass > CIL_PASS_TIF) {
+		if (pass != CIL_PASS_TIF && pass != CIL_PASS_MACRO) {
 			*finished = CIL_TREE_SKIP_HEAD;
 			rc = SEPOL_OK;
 			goto exit;
@@ -3718,6 +3723,7 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 	struct cil_db *db = NULL;
 	struct cil_call *call = NULL;
 	struct cil_tree_node *macro = NULL;
+	struct cil_tree_node *namespace = NULL;
 	int rc = SEPOL_ERR;
 	char *global_symtab_name = NULL;
 	char first;
@@ -3742,22 +3748,30 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 		if (strrchr(name, '.') == NULL) {
 			symtab_t *symtab = NULL;
 			if (call != NULL) {
-				symtab = &call->macro->symtab[sym_index];
-				rc = cil_symtab_get_node(symtab, name, node);
-				if (rc == SEPOL_OK) {
-					rc = cil_get_symtab(db, ast_node->parent->parent, &symtab, sym_index);
-					if (rc == SEPOL_OK) {
-						rc = cil_symtab_get_node(symtab, name, node);
-						if (rc != SEPOL_OK) {
-							cil_log(CIL_ERR, "Failed to get node from parent symtab of call\n");
-						}
-						goto exit;
-					} else {
-						cil_log(CIL_ERR, "Failed to get parent symtab from call\n");
+				namespace = ast_node;
+				while (namespace->flavor != CIL_BLOCK && namespace->flavor != CIL_CALL) {
+					namespace = namespace->parent;
+				}
+				if (namespace->flavor == CIL_BLOCK) {
+					rc = cil_get_symtab(db, namespace, &symtab, sym_index);
+					if (rc != SEPOL_OK) {
+						cil_log(CIL_ERR, "Failed to get parent symtab\n");
 						goto exit;
 					}
-
 				} else {
+					symtab = &call->macro->symtab[sym_index];
+					rc = cil_symtab_get_node(symtab, name, node);
+					if (rc == SEPOL_OK) {
+						rc = cil_get_symtab(db, namespace, &symtab, sym_index);
+						if (rc != SEPOL_OK) {
+							cil_log(CIL_ERR, "Failed to get parent symtab from call\n");
+							goto exit;
+						}
+					}
+				}
+
+				rc = cil_symtab_get_node(symtab, name, node);
+				if (rc != SEPOL_OK) {
 					rc = cil_resolve_name_call_args(call, name, sym_index, node);
 					if (rc == SEPOL_OK) {
 						goto exit;
