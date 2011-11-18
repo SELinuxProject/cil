@@ -706,13 +706,6 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 		attr->types = cil_malloc(sizeof(*attr->types));
 		ebitmap_init(attr->types);
 
-		int i;
-		for (i = 0; i < db->num_types; i++) {
-			if (ebitmap_set_bit(attr->types, i, 0)) {
-				goto exit;
-			}
-		}
-
 		rc = __cil_expr_stack_to_bitmap(db, expr_list, attr->types);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
@@ -726,13 +719,6 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 
 		attr->roles = cil_malloc(sizeof(*attr->roles));
 		ebitmap_init(attr->roles);
-
-		int i;
-		for (i = 0; i < db->num_roles; i++) {
-			if (ebitmap_set_bit(attr->roles, i, 0)) {
-				goto exit;
-			}
-		}
 
 		rc = __cil_expr_stack_to_bitmap(db, expr_list, attr->roles);
 		if (rc != SEPOL_OK) {

@@ -1570,6 +1570,7 @@ void cil_destroy_role(struct cil_role *role)
 
 	cil_symtab_datum_destroy(role->datum);
 	ebitmap_destroy(role->types);
+	free(role->types);
 	free(role);
 }
 
@@ -1929,6 +1930,7 @@ void cil_destroy_roleattribute(struct cil_roleattribute *attr)
 
 	cil_symtab_datum_destroy(attr->datum);
 	ebitmap_destroy(attr->roles);
+	free(attr->roles);
 	free(attr);
 }
 
@@ -2308,7 +2310,7 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 		attr->expr_stack_list = NULL;
 	}
 	ebitmap_destroy(attr->types);
-
+	free(attr->types);
 	free(attr);
 }
 
