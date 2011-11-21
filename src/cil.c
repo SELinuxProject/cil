@@ -333,7 +333,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TUNABLE:
 		cil_destroy_bool(*data);
 		break;
-	case CIL_CONDBLOCK: break;
+	case CIL_CONDBLOCK:
+		cil_destroy_condblock(*data);
+		break;
 	case CIL_BOOLEANIF:
 		cil_destroy_boolif(*data);
 		break;

@@ -2584,6 +2584,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	return SEPOL_OK;
 
 exit:
+	cil_tree_node_destroy(&new);
 	return rc;
 }
 

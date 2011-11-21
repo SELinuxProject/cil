@@ -53,6 +53,7 @@ struct cil_tree_node {
 int cil_tree_init(struct cil_tree **tree);
 void cil_tree_destroy(struct cil_tree **tree);
 void cil_tree_subtree_destroy(struct cil_tree_node *node);
+void cil_tree_children_destroy(struct cil_tree_node *node);
 
 void cil_tree_node_init(struct cil_tree_node **node);
 void cil_tree_node_destroy(struct cil_tree_node **node);

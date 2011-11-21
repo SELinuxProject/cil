@@ -2455,7 +2455,7 @@ int cil_resolve_in(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
-	cil_tree_subtree_destroy(current->cl_head);
+	cil_tree_children_destroy(current);
 	current->cl_head = NULL;
 
 	return SEPOL_OK;
@@ -3063,8 +3063,9 @@ int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args)
 		}
 	}
 
-	cil_tree_subtree_destroy(current->cl_head);
+	cil_tree_children_destroy(current);
 	current->cl_head = NULL;
+	current->cl_tail = NULL;
 
 	return SEPOL_OK;
 
