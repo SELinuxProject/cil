@@ -188,9 +188,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;
 
 exit:
-	if (block != NULL) {
-		cil_destroy_block(block);
-	}
+	cil_destroy_block(block);
 	return rc;
 }
 
@@ -236,9 +234,7 @@ int cil_gen_blockinherit(struct cil_db *db, struct cil_tree_node *parse_current,
 	return SEPOL_OK;
 
 exit:
-	if (inherit != NULL) {
-		cil_destroy_blockinherit(inherit);
-	}
+	cil_destroy_blockinherit(inherit);
 	return rc;
 }
 
@@ -286,9 +282,7 @@ int cil_gen_blockabstract(struct cil_db *db, struct cil_tree_node *parse_current
 	return SEPOL_OK;
 
 exit:
-	if (abstract != NULL) {
-		cil_destroy_blockabstract(abstract);
-	}
+	cil_destroy_blockabstract(abstract);
 	return rc;
 }
 
@@ -335,9 +329,7 @@ int cil_gen_in(struct cil_db *db, struct cil_tree_node *parse_current, struct ci
 
 	return SEPOL_OK;
 exit:
-	if (in != NULL) {
-		cil_destroy_in(in);
-	}
+	cil_destroy_in(in);
 	return rc;
 }
 
@@ -400,9 +392,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;
 
 exit:
-	if (class != NULL) {
-		cil_destroy_class(class);
-	}
+	cil_destroy_class(class);
 	return rc;
 }
 
@@ -440,9 +430,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 
 exit:
-	if (perm != NULL) {
-		cil_destroy_perm(perm);
-	}
+	cil_destroy_perm(perm);
 	return rc;
 }
 
@@ -506,25 +494,25 @@ int cil_fill_permset(struct cil_tree_node *start_perm, struct cil_permset *perms
 	int rc = SEPOL_ERR;
 
 	if (start_perm == NULL || permset == NULL) {
-		goto fill_permset_cleanup;
+		goto exit;
 	}
 
 	rc = __cil_verify_syntax(start_perm, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Invalid permissionset declaration (%s, line: %d)\n", start_perm->path, start_perm->line);
-		goto fill_permset_cleanup;
+		goto exit;
 	}
 
 	cil_list_init(&permset->perms_list_str);
 	rc = cil_parse_to_list(start_perm, permset->perms_list_str, CIL_AST_STR);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to parse perms\n");
-		goto fill_permset_cleanup;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-fill_permset_cleanup:
+exit:
 	return rc;
 }
 
@@ -570,9 +558,7 @@ int cil_gen_permset(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	return SEPOL_OK;
 
 exit:
-	if (permset != NULL) {
-		cil_destroy_permset(permset);
-	}
+	cil_destroy_permset(permset);
 	return rc;
 }
 
@@ -603,13 +589,13 @@ int cil_fill_classpermset(struct cil_tree_node *class_node, struct cil_classperm
 	int rc = SEPOL_ERR;
 
 	if (class_node == NULL || cps == NULL) {
-		goto fill_classpermset_cleanup;
+		goto exit;
 	}
 
 	rc = __cil_verify_syntax(class_node, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Invalid classpermissionset (%s, line: %d)\n", class_node->path, class_node->line);
-		goto fill_classpermset_cleanup;
+		goto exit;
 	}
 
 	cps->class_str = cil_strdup(class_node->data);
@@ -622,13 +608,13 @@ int cil_fill_classpermset(struct cil_tree_node *class_node, struct cil_classperm
 		rc = cil_fill_permset(class_node->next->cl_head, cps->permset);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to fill permissionset\n");
-			goto fill_classpermset_cleanup;
+			goto exit;
 		}
 	}
 
 	return SEPOL_OK;
 
-fill_classpermset_cleanup:
+exit:
 	return rc;
 }
 
@@ -646,13 +632,13 @@ int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current,
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto gen_classpermset_cleanup;
+		goto exit;
 	}
 
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Invalid classpermissionset declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
-		goto gen_classpermset_cleanup;
+		goto exit;
 	}
 
 	cil_classpermset_init(&cps);
@@ -661,21 +647,19 @@ int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current,
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cps, (hashtab_key_t)key, CIL_SYM_CLASSPERMSETS, CIL_CLASSPERMSET);
 	if (rc != SEPOL_OK) {
-		goto gen_classpermset_cleanup;
+		goto exit;
 	}
 
 	rc = cil_fill_classpermset(parse_current->next->next->cl_head, cps);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to fill classpermissionset, rc: %d\n", rc);
-		goto gen_classpermset_cleanup;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-gen_classpermset_cleanup:
-	if (cps != NULL) {
-		cil_destroy_classpermset(cps);
-	}
+exit:
+	cil_destroy_classpermset(cps);
 	return rc;
 }
 
@@ -725,9 +709,7 @@ int cil_gen_classmap_perm(struct cil_db *db, struct cil_tree_node *parse_current
 	return SEPOL_OK;
 
 exit:
-	if (cmp != NULL) {
-		cil_destroy_classmap_perm(cmp);
-	}
+	cil_destroy_classmap_perm(cmp);
 	return rc;
 }
 
@@ -759,13 +741,13 @@ int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, str
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto gen_classmap_cleanup;
+		goto exit;
 	}
 
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Invalid classmap declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
-		goto gen_classmap_cleanup;
+		goto exit;
 	}
 
 	cil_classmap_init(&map);
@@ -774,21 +756,19 @@ int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)map, (hashtab_key_t)key, CIL_SYM_CLASSES, CIL_CLASSMAP);
 	if (rc != SEPOL_OK) {
-		goto gen_classmap_cleanup;
+		goto exit;
 	}
 
 	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_CLASSMAPPERM);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to gen perm nodes\n");
-		goto gen_classmap_cleanup;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-gen_classmap_cleanup:
-	if (map != NULL) {
-		cil_destroy_classmap(map);
-	}
+exit:
+	cil_destroy_classmap(map);
 	return rc;
 }
 
@@ -820,13 +800,13 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 	struct cil_list_item *cps_tail = NULL;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto gen_classmapping_cleanup;
+		goto exit;
 	}
 
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Invalid classmapping declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
-		goto gen_classmapping_cleanup;
+		goto exit;
 	}
 
 	cil_classmapping_init(&mapping);
@@ -850,7 +830,7 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 			rc = cil_fill_classpermset(curr_cps->cl_head, new_cps);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_ERR, "cil_gen_classmapping: Failed to fill classpermissionset\n");
-				goto gen_classmapping_cleanup;
+				goto exit;
 			}
 			new_item->data = new_cps;
 			new_item->flavor = CIL_CLASSPERMSET;
@@ -872,7 +852,8 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 
 	return SEPOL_OK;
 
-gen_classmapping_cleanup:
+exit:
+	cil_destroy_classmapping(mapping);
 	return rc;
 }
 
@@ -931,9 +912,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	return SEPOL_OK;
 
 exit:
-	if (common != NULL) {
-		cil_destroy_common(common);
-	}
+	cil_destroy_common(common);
 	return rc;
 
 }
@@ -982,9 +961,7 @@ int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, 
 	return SEPOL_OK;
 
 exit:
-	if (clscom != NULL) {
-		cil_destroy_classcommon(clscom);
-	}
+	cil_destroy_classcommon(clscom);
 	return rc;
 
 }
@@ -1040,9 +1017,7 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 	return SEPOL_OK;
 
 exit:
-	if (sid != NULL) {
-		cil_destroy_sid(sid);
-	}
+	cil_destroy_sid(sid);
 	return rc;
 }
 
@@ -1100,9 +1075,7 @@ int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, s
 	return SEPOL_OK;
 
 exit:
-	if (sidcon != NULL) {
-		cil_destroy_sidcontext(sidcon);
-	}
+	cil_destroy_sidcontext(sidcon);
 	return rc;
 }
 
@@ -1159,9 +1132,7 @@ int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 
 exit:
-	if (user != NULL) {
-		cil_destroy_user(user);\
-	}
+	cil_destroy_user(user);\
 	return rc;
 }
 
@@ -1220,9 +1191,7 @@ int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (usrlvl != NULL) {
-		cil_destroy_userlevel(usrlvl);
-	}
+	cil_destroy_userlevel(usrlvl);
 	return rc;
 }
 
@@ -1289,9 +1258,7 @@ int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (userrange != NULL) {
-		cil_destroy_userrange(userrange);
-	}
+	cil_destroy_userrange(userrange);
 	return rc;
 }
 
@@ -1347,9 +1314,7 @@ int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 	return SEPOL_OK;
 
 exit:
-	if (userbnds != NULL) {
-		cil_destroy_userbounds(userbnds);
-	}
+	cil_destroy_userbounds(userbnds);
 	return rc;
 }
 
@@ -1606,9 +1571,7 @@ int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (roletype != NULL) {
-		cil_destroy_roletype(roletype);
-	}
+	cil_destroy_roletype(roletype);
 	return rc;
 }
 
@@ -1662,9 +1625,7 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (userrole != NULL) {
-		cil_destroy_userrole(userrole);
-	}
+	cil_destroy_userrole(userrole);
 	return rc;
 }
 
@@ -1722,9 +1683,7 @@ int cil_gen_roletransition(struct cil_tree_node *parse_current, struct cil_tree_
 	return SEPOL_OK;
 
 exit:
-	if (roletrans != NULL) {
-		cil_destroy_roletransition(roletrans);
-	}
+	cil_destroy_roletransition(roletrans);
 	return rc;
 }
 
@@ -1786,9 +1745,7 @@ int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (roleallow != NULL) {
-		cil_destroy_roleallow(roleallow);
-	}
+	cil_destroy_roleallow(roleallow);
 	return rc;
 }
 
@@ -1842,9 +1799,7 @@ int cil_gen_roledominance(struct cil_db *db, struct cil_tree_node *parse_current
 	return SEPOL_OK;
 
 exit:
-	if (roledom != NULL) {
-		cil_destroy_roledominance(roledom);
-	}
+	cil_destroy_roledominance(roledom);
 	return rc;
 }
 
@@ -2019,9 +1974,7 @@ int cil_gen_rolebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 	return SEPOL_OK;
 
 exit:
-	if (rolebnds != NULL) {
-		cil_destroy_rolebounds(rolebnds);
-	}
+	cil_destroy_rolebounds(rolebnds);
 	return rc;
 }
 
@@ -2088,9 +2041,7 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	return SEPOL_OK;
 
 exit:
-	if (rule != NULL) {
-		cil_destroy_avrule(rule);
-	}
+	cil_destroy_avrule(rule);
 	return rc;
 }
 
@@ -2157,9 +2108,7 @@ int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node 
 	return SEPOL_OK;
 
 exit:
-	if (rule != NULL) {
-		cil_destroy_type_rule(rule);
-	}
+	cil_destroy_type_rule(rule);
 	return rc;
 }
 
@@ -2227,9 +2176,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 
 exit:
-	if (type != NULL) {
-		cil_destroy_type(type);
-	}
+	cil_destroy_type(type);
 	return rc;
 }
 
@@ -2362,9 +2309,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 
 exit:
-	if (boolean != NULL) {
-		cil_destroy_bool(boolean);
-	}
+	cil_destroy_bool(boolean);
 	return rc;
 }
 
@@ -2583,9 +2528,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	return SEPOL_OK;
 
 exit:
-	if (bif != NULL) {
-		cil_destroy_boolif(bif);
-	}
+	cil_destroy_boolif(bif);
 	return rc;
 }
 
@@ -2679,9 +2622,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;
 
 exit:
-	if (tif != NULL) {
-		cil_destroy_tunif(tif);
-	}
+	cil_destroy_tunif(tif);
 	return rc;
 }
 
@@ -2728,6 +2669,7 @@ int cil_gen_condblock(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
+	cil_destroy_condblock(cb);
 	return rc;
 }
 
@@ -2784,9 +2726,7 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (alias != NULL) {
-		cil_destroy_typealias(alias);
-	}
+	cil_destroy_typealias(alias);
 	return rc;
 }
 
@@ -2842,9 +2782,7 @@ int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_curr
 	return SEPOL_OK;
 
 exit:
-	if (attrset != NULL) {
-		cil_destroy_typeattributeset(attrset);
-	}
+	cil_destroy_typeattributeset(attrset);
 	return rc;
 }
 
@@ -2898,9 +2836,7 @@ int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 	return SEPOL_OK;
 
 exit:
-	if (typebnds != NULL) {
-		cil_destroy_typebounds(typebnds);
-	}
+	cil_destroy_typebounds(typebnds);
 	return rc;
 }
 
@@ -2952,9 +2888,7 @@ int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_curren
 	return SEPOL_OK;
 
 exit:
-	if (typeperm != NULL) {
-		cil_destroy_typepermissive(typeperm);
-	}
+	cil_destroy_typepermissive(typeperm);
 	return rc;
 }
 
@@ -3010,9 +2944,7 @@ int cil_gen_filetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 	return SEPOL_OK;
 
 exit:
-	if (filetrans != NULL) {
-		cil_destroy_filetransition(filetrans);
-	}
+	cil_destroy_filetransition(filetrans);
 	return rc;
 }
 
@@ -3091,9 +3023,7 @@ int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_curre
 	return SEPOL_OK;
 
 exit:
-	if (rangetrans != NULL) {
-		cil_destroy_rangetransition(rangetrans);
-	}
+	cil_destroy_rangetransition(rangetrans);
 	return rc;
 }
 
@@ -3158,9 +3088,7 @@ int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, 
 	return SEPOL_OK;
 
 exit:
-	if (sens != NULL) {
-		cil_destroy_sensitivity(sens);
-	}
+	cil_destroy_sensitivity(sens);
 	return rc;
 }
 
@@ -3212,9 +3140,7 @@ int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (alias != NULL) {
-		cil_destroy_sensalias(alias);
-	}
+	cil_destroy_sensalias(alias);
 	return rc;
 }
 
@@ -3267,9 +3193,7 @@ int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (cat != NULL) {
-		cil_destroy_category(cat);
-	}
+	cil_destroy_category(cat);
 	return rc;
 }
 
@@ -3320,9 +3244,7 @@ int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (alias != NULL) {
-		cil_destroy_catalias(alias);
-	}
+	cil_destroy_catalias(alias);
 	return rc;
 }
 
@@ -3435,9 +3357,7 @@ int cil_gen_catrange(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (catrange != NULL) {
-		cil_destroy_catrange(catrange);
-	}
+	cil_destroy_catrange(catrange);
 	return rc;
 }
 
@@ -3501,9 +3421,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	return SEPOL_OK;
 
 exit:
-	if (catset != NULL) {
-		cil_destroy_catset(catset);
-	}
+	cil_destroy_catset(catset);
 	return rc;
 }
 
@@ -3562,9 +3480,7 @@ int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (catorder != NULL) {
-		cil_destroy_catorder(catorder);
-	}
+	cil_destroy_catorder(catorder);
 	return rc;
 }
 
@@ -3618,9 +3534,7 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (dom != NULL) {
-		cil_destroy_dominance(dom);
-	}
+	cil_destroy_dominance(dom);
 	return rc;
 }
 
@@ -3680,9 +3594,7 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	return SEPOL_OK;
 
 exit:
-	if (senscat != NULL) {
-		cil_destroy_senscat(senscat);
-	}
+	cil_destroy_senscat(senscat);
 	return rc;
 }
 
@@ -3748,9 +3660,7 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;
 
 exit:
-	if (level != NULL) {
-		cil_destroy_level(level);
-	}
+	cil_destroy_level(level);
 	return rc;
 }
 
@@ -3869,9 +3779,7 @@ int cil_gen_levelrange(struct cil_db *db, struct cil_tree_node *parse_current, s
 	return SEPOL_OK;
 
 exit:
-	if (lvlrange != NULL) {
-		cil_destroy_levelrange(lvlrange);
-	}
+	cil_destroy_levelrange(lvlrange);
 	return rc;
 }
 
@@ -3946,9 +3854,7 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (cons != NULL) {
-		cil_destroy_constrain(cons);
-	}
+	cil_destroy_constrain(cons);
 	return rc;
 }
 
@@ -4011,9 +3917,7 @@ int cil_gen_validatetrans(struct cil_db *db, struct cil_tree_node *parse_current
 	return SEPOL_OK;
 
 exit:
-	if (validtrans != NULL) {
-		cil_destroy_validatetrans(validtrans);
-	}
+	cil_destroy_validatetrans(validtrans);
 	return rc;
 
 
@@ -4120,9 +4024,7 @@ int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	return SEPOL_OK;
 
 exit:
-	if (context != NULL) {
-		cil_destroy_context(context);
-	}
+	cil_destroy_context(context);
 	return SEPOL_ERR;
 }
 
@@ -4230,9 +4132,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	return SEPOL_OK;
 
 exit:
-	if (filecon != NULL) {
-		cil_destroy_filecon(filecon);
-	}
+	cil_destroy_filecon(filecon);
 	return rc;
 }
 
@@ -4342,9 +4242,7 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	return SEPOL_OK;
 
 exit:
-	if (portcon != NULL) {
-		cil_destroy_portcon(portcon);
-	}
+	cil_destroy_portcon(portcon);
 	return rc;
 }
 
@@ -4430,9 +4328,7 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	return SEPOL_OK;
 
 exit:
-	if (nodecon != NULL) {
-		cil_destroy_nodecon(nodecon);
-	}
+	cil_destroy_nodecon(nodecon);
 	return rc;
 }
 
@@ -4509,9 +4405,7 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (genfscon != NULL) {
-		cil_destroy_genfscon(genfscon);
-	}
+	cil_destroy_genfscon(genfscon);
 	return SEPOL_ERR;
 }
 
@@ -4596,9 +4490,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (netifcon != NULL) {
-		cil_destroy_netifcon(netifcon);
-	}
+	cil_destroy_netifcon(netifcon);
 	return SEPOL_ERR;
 }
 
@@ -4675,9 +4567,7 @@ int cil_gen_pirqcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	return SEPOL_OK;
 
 exit:
-	if (pirqcon != NULL) {
-		cil_destroy_pirqcon(pirqcon);
-	}
+	cil_destroy_pirqcon(pirqcon);
 	return rc;
 }
 
@@ -4765,9 +4655,7 @@ int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (iomemcon != NULL) {
-		cil_destroy_iomemcon(iomemcon);
-	}
+	cil_destroy_iomemcon(iomemcon);
 	return rc;
 }
 
@@ -4855,9 +4743,7 @@ int cil_gen_ioportcon(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (ioportcon != NULL) {
-		cil_destroy_ioportcon(ioportcon);
-	}
+	cil_destroy_ioportcon(ioportcon);
 	return rc;
 }
 
@@ -4924,9 +4810,7 @@ int cil_gen_pcidevicecon(struct cil_db *db, struct cil_tree_node *parse_current,
 	return SEPOL_OK;
 
 exit:
-	if (pcidevicecon != NULL) {
-		cil_destroy_pcidevicecon(pcidevicecon);
-	}
+	cil_destroy_pcidevicecon(pcidevicecon);
 	return rc;
 }
 
@@ -5004,9 +4888,7 @@ int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;
 
 exit:
-	if (fsuse != NULL) {
-		cil_destroy_fsuse(fsuse);\
-	}
+	cil_destroy_fsuse(fsuse);
 	return SEPOL_ERR;
 }
 
@@ -5182,9 +5064,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	return SEPOL_OK;
 
 exit:
-	if (macro != NULL) {
-		cil_destroy_macro(macro);
-	}
+	cil_destroy_macro(macro);
 	return SEPOL_ERR;
 }
 
@@ -5241,9 +5121,7 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 
 exit:
-	if (call != NULL) {
-		cil_destroy_call(call);
-	}
+	cil_destroy_call(call);
 	return rc;
 }
 
@@ -5334,9 +5212,7 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	if (optional != NULL) {
-		cil_destroy_optional(optional);
-	}
+	cil_destroy_optional(optional);
 	return rc;
 }
 
@@ -5389,9 +5265,7 @@ int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	if (polcap != NULL) {
-		cil_destroy_policycap(polcap);
-	}
+	cil_destroy_policycap(polcap);
 	return rc;
 }
 
@@ -5445,9 +5319,7 @@ int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	return SEPOL_OK;
 
 exit:
-	if (ipaddr != NULL) {
-		cil_destroy_ipaddr(ipaddr);
-	}
+	cil_destroy_ipaddr(ipaddr);
 	return rc;
 }
 
