@@ -343,6 +343,8 @@ void cil_destroy_in(struct cil_in *in)
 		free(in->block_str);
 	}
 
+	cil_symtab_array_destroy(in->symtab);
+
 	free(in);
 }
 

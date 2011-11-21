@@ -58,6 +58,12 @@ void cil_tree_destroy(struct cil_tree **tree)
 
 void cil_tree_subtree_destroy(struct cil_tree_node *node)
 {
+	cil_tree_children_destroy(node);
+	cil_tree_node_destroy(&node);
+}
+
+void cil_tree_children_destroy(struct cil_tree_node *node)
+{
 	struct cil_tree_node *start_node = node;
 	struct cil_tree_node *next = NULL;
 
@@ -86,9 +92,6 @@ void cil_tree_subtree_destroy(struct cil_tree_node *node)
 		}
 		node = next;
 	}
-
-	// Destroy start node
-	cil_tree_node_destroy(&node);
 }
 
 void cil_tree_node_init(struct cil_tree_node **node)
@@ -108,6 +111,10 @@ void cil_tree_node_init(struct cil_tree_node **node)
 
 void cil_tree_node_destroy(struct cil_tree_node **node)
 {
+	if (node == NULL || *node == NULL) {
+		return;
+	}
+
 	cil_destroy_data(&(*node)->data, (*node)->flavor);
 	free(*node);
 	*node = NULL;
