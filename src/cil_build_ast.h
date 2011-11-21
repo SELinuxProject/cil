@@ -95,8 +95,6 @@ int cil_gen_roletransition(struct cil_tree_node *parse_current, struct cil_tree_
 void cil_destroy_roletransition(struct cil_roletransition *roletrans);
 int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_roleallow(struct cil_roleallow *roleallow);
-int cil_gen_roledominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_roledominance(struct cil_roledominance *roledom);
 int cil_gen_roleattribute(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_roleattribute(struct cil_roleattribute *role);
 int cil_gen_roleattributeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

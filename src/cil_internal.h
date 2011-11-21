@@ -110,7 +110,6 @@ enum cil_flavor {
 	CIL_ROLETRANSITION,
 	CIL_ROLEALLOW,
 	CIL_ROLETYPE,
-	CIL_ROLEDOMINANCE,
 	CIL_ROLEATTRIBUTE,
 	CIL_ROLEATTRIBUTESET,
 	CIL_ROLEBOUNDS,
@@ -216,7 +215,6 @@ enum cil_flavor {
 #define CIL_KEY_ROLETYPE		"roletype"
 #define CIL_KEY_ROLETRANSITION		"roletransition"
 #define CIL_KEY_ROLEALLOW		"roleallow"
-#define CIL_KEY_ROLEDOMINANCE		"roledominance"
 #define CIL_KEY_ROLEATTRIBUTE		"roleattribute"
 #define CIL_KEY_ROLEATTRIBUTESET	"roleattributeset"
 #define CIL_KEY_ROLEBOUNDS		"rolebounds"
@@ -505,14 +503,6 @@ struct cil_role {
 	struct cil_role *bounds;
 	ebitmap_t *types;
 	int value;
-};
-
-/* TODO Waiting on design */
-struct cil_roledominance {
-	char *role_str;
-	struct cil_role *role;
-	char *domed_str;
-	struct cil_role *domed;
 };
 
 struct cil_roleattribute {
@@ -934,7 +924,6 @@ void cil_userrole_init(struct cil_userrole **userrole);
 void cil_userbounds_init(struct cil_userbounds **userbounds);
 void cil_userprefix_init(struct cil_userprefix **userprefix);
 void cil_selinuxuser_init(struct cil_selinuxuser **selinuxuser);
-void cil_roledominance_init(struct cil_roledominance **roledominance);
 void cil_roleattribute_init(struct cil_roleattribute **attribute);
 void cil_roleattributeset_init(struct cil_roleattributeset **attrset);
 void cil_rolebounds_init(struct cil_rolebounds **rolebounds);

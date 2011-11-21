@@ -1071,31 +1071,6 @@ exit:
 	return rc;
 }
 
-int cil_resolve_roledominance(struct cil_tree_node *current, void *extra_args)
-{
-	struct cil_roledominance *roledom = (struct cil_roledominance*)current->data;
-	struct cil_tree_node *role_node = NULL;
-	struct cil_tree_node *domed_node = NULL;
-	int rc = SEPOL_ERR;
-
-	rc = cil_resolve_name(current, roledom->role_str, CIL_SYM_ROLES, extra_args, &role_node);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-	roledom->role = (struct cil_role*)(role_node->data);
-
-	rc = cil_resolve_name(current, roledom->domed_str, CIL_SYM_ROLES, extra_args, &domed_node);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-	roledom->domed = (struct cil_role*)(domed_node->data);
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_roleattributeset *attrroles = (struct cil_roleattributeset*)current->data;
@@ -3250,9 +3225,6 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_ROLEALLOW:
 			rc = cil_resolve_roleallow(node, args);
-			break;
-		case CIL_ROLEDOMINANCE:
-			rc = cil_resolve_roledominance(node, args);
 			break;
 		case CIL_ROLEBOUNDS:
 			rc = cil_resolve_rolebounds(node, args);

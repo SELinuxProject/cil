@@ -622,25 +622,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				cil_log(CIL_INFO, "\n");
 				return;
 			}
-			case CIL_ROLEDOMINANCE: {
-				struct cil_roledominance *roledom = node->data;
-				cil_log(CIL_INFO, "ROLEDOMINANCE:");
-
-				if (roledom->role != NULL) {
-					cil_log(CIL_INFO, " %s", roledom->role->datum.name);
-				} else {
-					cil_log(CIL_INFO, " %s", roledom->role_str);
-				}
-
-				if (roledom->domed != NULL) {
-					cil_log(CIL_INFO, " %s", roledom->domed->datum.name);
-				} else {
-					cil_log(CIL_INFO, " %s", roledom->domed_str);
-				}
-
-				cil_log(CIL_INFO, "\n");
-				return;
-			}
 			case CIL_ROLEATTRIBUTESET: {
 				struct cil_roleattributeset *attrroles = node->data;
 				struct cil_list_item *curr = NULL;

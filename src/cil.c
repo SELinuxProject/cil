@@ -317,9 +317,6 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_ROLEALLOW:
 		cil_destroy_roleallow(*data);
 		break;
-	case CIL_ROLEDOMINANCE:
-		cil_destroy_roledominance(*data);
-		break;
 	case CIL_ROLEATTRIBUTE:
 		cil_destroy_roleattribute(*data);
 		break;
@@ -662,8 +659,6 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_ROLEALLOW;
 	case CIL_ROLETYPE:
 		return CIL_KEY_ROLETYPE;
-	case CIL_ROLEDOMINANCE:
-		return CIL_KEY_ROLEDOMINANCE;
 	case CIL_ROLEBOUNDS:
 		return CIL_KEY_ROLEBOUNDS;
 	case CIL_CATORDER:
@@ -1513,16 +1508,6 @@ void cil_selinuxuser_init(struct cil_selinuxuser **selinuxuser)
 	(*selinuxuser)->user = NULL;
 	(*selinuxuser)->range_str = NULL;
 	(*selinuxuser)->range = NULL;
-}
-
-void cil_roledominance_init(struct cil_roledominance **roledominance)
-{
-	*roledominance = cil_malloc(sizeof(**roledominance));
-
-	(*roledominance)->role_str = NULL;
-	(*roledominance)->role = NULL;
-	(*roledominance)->domed_str = NULL;
-	(*roledominance)->domed = NULL;
 }
 
 void cil_roletype_init(struct cil_roletype **roletype)

@@ -743,21 +743,6 @@ int cil_copy_rolebounds(__attribute__((unused)) struct cil_db *db, void *data, v
 	return SEPOL_OK;
 }
 
-int cil_copy_roledominance(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
-{
-	struct cil_roledominance *orig = data;
-	struct cil_roledominance *new = NULL;
-
-	cil_roledominance_init(&new);
-
-	new->role_str = cil_strdup(orig->role_str);
-	new->domed_str = cil_strdup(orig->domed_str);
-
-	*copy = new;
-
-	return SEPOL_OK;
-}
-
 int cil_copy_roleattribute(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
 	struct cil_roleattribute *orig = data;
@@ -2347,9 +2332,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_ROLEBOUNDS:
 		copy_func = &cil_copy_rolebounds;
-		break;
-	case CIL_ROLEDOMINANCE:
-		copy_func = &cil_copy_roledominance;
 		break;
 	case CIL_ROLEATTRIBUTE:
 		copy_func = &cil_copy_roleattribute;

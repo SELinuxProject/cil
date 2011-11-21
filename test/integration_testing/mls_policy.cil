@@ -70,8 +70,6 @@
 (allow typea_t typeb_t testing (write))
 (allow typea_t typeb_t testing permset)
 
-(roledominance rolea_r roleb_r)
-
 (roleallow rolea_r roleb_r)
 
 (rolebounds rolea_r roleb_r)

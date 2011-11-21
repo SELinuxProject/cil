@@ -185,64 +185,6 @@ void test_cil_resolve_roleallow_tgtdecl_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
 }
 
-void test_cil_resolve_roledominance(CuTest *tc) {
-	char *line[] = {"(", "role", "foo", ")", \
-			"(", "role", "bar", ")", \
-			"(", "roledominance", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = cil_resolve_roledominance(test_db->ast->root->cl_head->next->next, args);
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-}
-
-void test_cil_resolve_roledominance_role1_neg(CuTest *tc) {
-	char *line[] = {"(", "role", "foo", ")", \
-			"(", "roledominance", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = cil_resolve_roledominance(test_db->ast->root->cl_head->next, args);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-}
-
-void test_cil_resolve_roledominance_role2_neg(CuTest *tc) {
-	char *line[] = {"(", "role", "bar", ")", \
-			"(", "roledominance", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = cil_resolve_roledominance(test_db->ast->root->cl_head->next, args);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-}
-
 void test_cil_resolve_classmapping_anon(CuTest *tc) {
 	char *line[] = {"(", "class", "file", "(", "open", ")", ")",
 			"(", "classmap", "files", "(", "read", ")", ")",
@@ -8778,51 +8720,6 @@ void test_cil_resolve_ast_node_helper_roleallow(CuTest *tc) {
 void test_cil_resolve_ast_node_helper_roleallow_neg(CuTest *tc) {
 	char *line[] = {"(", "role", "foo", ")", \
 			"(", "roleallow", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
-
-	uint32_t finished = 0;
-	
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next, &finished, args);
-	CuAssertIntEquals(tc, SEPOL_ENOENT, rc);
-	CuAssertIntEquals(tc, 0, finished);
-}
-
-void test_cil_resolve_ast_node_helper_roledominance(CuTest *tc) {
-	char *line[] = {"(", "role", "foo", ")", \
-			"(", "role", "bar", ")", \
-			"(", "roledominance", "foo", "bar", ")", NULL};
-
-	struct cil_tree *test_tree;
-	gen_test_tree(&test_tree, line);
-
-	struct cil_db *test_db;
-	cil_db_init(&test_db);
-
-	uint32_t changed = CIL_FALSE;
-	struct cil_args_resolve *args = gen_resolve_args(test_db, CIL_PASS_MISC3, &changed, NULL, NULL, NULL);
-
-	uint32_t finished = 0;
-
-	cil_build_ast(test_db, test_tree->root, test_db->ast->root);
-
-	int rc = __cil_resolve_ast_node_helper(test_db->ast->root->cl_head->next->next, &finished, args);	
-	CuAssertIntEquals(tc, SEPOL_OK, rc);
-	CuAssertIntEquals(tc, 0, finished);
-}
-
-void test_cil_resolve_ast_node_helper_roledominance_neg(CuTest *tc) {
-	char *line[] = {"(", "role", "foo", ")", \
-			"(", "roledominance", "foo", "bar", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

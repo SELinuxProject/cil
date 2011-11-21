@@ -56,7 +56,6 @@ int cil_resolve_selinuxuser(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_roletype(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_roletransition(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_roleallow(struct cil_tree_node *current, void *extra_args);
-int cil_resolve_roledominance(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_rolebounds(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_sensalias(struct cil_tree_node *current, void *extra_args);

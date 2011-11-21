@@ -1769,60 +1769,6 @@ void cil_destroy_roleallow(struct cil_roleallow *roleallow)
 	free(roleallow);
 }
 
-int cil_gen_roledominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_roledominance *roledom = NULL;
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Invalid roledominance delcaration (%s, line: %d)\n", parse_current->path, parse_current->line);
-		goto exit;
-	}
-
-	cil_roledominance_init(&roledom);
-
-	roledom->role_str = cil_strdup(parse_current->next->data);
-	roledom->domed_str = cil_strdup(parse_current->next->next->data);
-
-	ast_node->data = roledom;
-	ast_node->flavor = CIL_ROLEDOMINANCE;
-
-	return SEPOL_OK;
-
-exit:
-	cil_destroy_roledominance(roledom);
-	return rc;
-}
-
-void cil_destroy_roledominance(struct cil_roledominance *roledom)
-{
-	if (roledom == NULL) {
-		return;
-	}
-
-	if (roledom->role_str != NULL) {
-		free(roledom->role_str);
-	}
-
-	if (roledom->domed_str != NULL) {
-		free(roledom->domed_str);
-	}
-
-	free(roledom);
-}
-
 int cil_gen_roleattribute(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -5831,12 +5777,6 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_roleallow(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "cil_gen_roleallow failed, rc: %d\n", rc);
-			goto exit;
-		}
-	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEDOMINANCE)) {
-		rc = cil_gen_roledominance(db, parse_current, ast_node);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "cil_gen_roledominance failed, rc: %d\n", rc);
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEATTRIBUTE)) {
