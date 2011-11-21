@@ -1218,17 +1218,35 @@ exit:
 	return rc;
 }
 
-int __cil_verify_type_rule(struct cil_tree_node *node, struct cil_complex_symtab *symtab)
+int __cil_verify_rule(struct cil_tree_node *node, struct cil_complex_symtab *symtab)
 {
 
 	int rc = SEPOL_ERR;
-	struct cil_type_rule *typerule = node->data;
+	struct cil_type_rule *typerule = NULL;
+	struct cil_roletransition *roletrans = NULL;
 	struct cil_complex_symtab_key ckey;
 
-	ckey.key1 = (intptr_t)typerule->src;
-	ckey.key2 = (intptr_t)typerule->tgt;
-	ckey.key3 = (intptr_t)typerule->obj;
-	ckey.key4 = (intptr_t)typerule->rule_kind;
+	switch (node->flavor) {
+	case CIL_ROLETRANSITION: {
+		roletrans = node->data;
+		ckey.key1 = (intptr_t)roletrans->src;
+		ckey.key2 = (intptr_t)roletrans->tgt;
+		ckey.key3 = (intptr_t)roletrans->obj;
+		ckey.key4 = CIL_ROLETRANSITION;
+		break;
+	}
+	case CIL_TYPE_RULE: {
+		typerule = node->data;
+		ckey.key1 = (intptr_t)typerule->src;
+		ckey.key2 = (intptr_t)typerule->tgt;
+		ckey.key3 = (intptr_t)typerule->obj;
+		ckey.key4 = (intptr_t)typerule->rule_kind;
+		break;
+	}
+	default:
+		break;
+	}
+
 
 	rc = cil_complex_symtab_insert(symtab, &ckey, NULL);
 	if (rc != SEPOL_OK) {
@@ -1236,13 +1254,16 @@ int __cil_verify_type_rule(struct cil_tree_node *node, struct cil_complex_symtab
 			struct cil_complex_symtab_datum *datum = NULL;
 			rc = cil_complex_symtab_search(symtab, &ckey, &datum);
 			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failure searching complex symtab during rule verification\n");
 				goto exit;
 			}
 			if (datum == NULL) {
+				cil_log(CIL_ERR, "Error: Duplicate rule defined (line: %d)\n", node->line);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
 		}
+		cil_log(CIL_INFO, "Failure inserting rule into complex symtab\n");
 		goto exit;
 	}
 
@@ -1669,8 +1690,11 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 		(*avrule_cnt)++;
 		rc = SEPOL_OK;
 		break;
+	case CIL_ROLETRANSITION:
+		rc = __cil_verify_rule(node, csymtab);
+		break;
 	case CIL_TYPE_RULE:
-		rc = __cil_verify_type_rule(node, csymtab);
+		rc = __cil_verify_rule(node, csymtab);
 		break;
 	case CIL_BOOLEANIF:
 		rc = __cil_verify_booleanif(node, csymtab);
