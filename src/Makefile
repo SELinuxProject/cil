@@ -13,8 +13,7 @@ CIL_LIBA=libcil.a
 CIL_SRCS= $(wildcard *.c) $(GENERATED)
 CIL_OBJS= $(patsubst %.c,%.o,$(CIL_SRCS))
 
-LIBSEPOL_STATIC = /home/slawrence/tresys/selinux-maint/selinux.git/libsepol/src/libsepol.a
-LIBSEPOL_INCLUDE = /home/slawrence/tresys/selinux-maint/selinux.git/libsepol/include
+LIBSEPOL_STATIC = /usr/lib/libsepol.a
 
 LIBS =
 LDFLAGS =
@@ -38,7 +37,7 @@ ifneq (,$(filter i386,$(ARCH)))
 endif
 ifneq (,$(filter x86_64,$(ARCH)))
 	override LDFLAGS += -I/usr/lib64
-	#override LIBSEPOL_STATIC = /usr/lib64/libsepol.a
+	override LIBSEPOL_STATIC = /usr/lib64/libsepol.a
 endif
 
 $(CIL_LIBA):  $(CIL_OBJS)
