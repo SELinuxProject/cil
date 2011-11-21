@@ -39,7 +39,7 @@
 
 void usage(char *prog)
 {
-	printf("Usage: %s [-v|--verbose] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown]<files>...\n", prog);
+	printf("Usage: %s [-v|--verbose] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown]<files> [-D|--disable-dontaudit]...\n", prog);
 	exit(1);
 }
 
@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 	struct cil_db *db = NULL;
 	int target = SEPOL_TARGET_SELINUX;
 	int mls = 0;
+	int disable_dontaudit = 0;
 	int handle_unknown = SEPOL_DENY_UNKNOWN;
 	int policyvers = POLICYDB_VERSION_MAX;
 	int opt_char;
@@ -72,12 +73,13 @@ int main(int argc, char *argv[])
 		{"mls", no_argument, 0, 'M'},
 		{"policyversion", required_argument, 0, 'c'},
 		{"handle-unknown", required_argument, 0, 'U'},
+		{"disable-dontaudit", no_argument, 0, 'D'},
 		{0, 0, 0, 0}
 	};
 	int i;
 
 	while (1) {
-		opt_char = getopt_long(argc, argv, "hvt:Mc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "hvt:MDc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
@@ -122,7 +124,10 @@ int main(int argc, char *argv[])
 					handle_unknown = SEPOL_REJECT_UNKNOWN;
 				} else {
 					usage(argv[0]);
-				}	
+				}
+			case 'D':
+				disable_dontaudit = 1;
+				break;
 			case 'h':
 				usage(argv[0]);
 			case '?':
@@ -140,6 +145,7 @@ int main(int argc, char *argv[])
 	cil_set_log_level(log_level);
 
 	cil_db_init(&db);
+	cil_set_disable_dontaudit(db, disable_dontaudit);
 
 	for (i = optind; i < argc; i++) {
 		file = fopen(argv[i], "r");

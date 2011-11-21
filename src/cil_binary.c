@@ -1236,6 +1236,12 @@ int cil_avrule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_
 	struct cil_avrule *cil_avrule = node->data;
 	avtab_ptr_t avtab_ptr;
 
+	if (cil_avrule->rule_kind == CIL_AVRULE_DONTAUDIT && db->disable_dontaudit == CIL_TRUE) {
+		// Do not add dontaudit rules to binary
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
 	rc = __cil_avrule_to_avtab(pdb, db, cil_avrule, &pdb->te_avtab, &avtab_ptr, neverallows, 1);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to insert avrule into avtab (line: %d)\n", node->line);

@@ -79,6 +79,8 @@ void cil_db_init(struct cil_db **db)
 	(*db)->num_roles = 0;
 	(*db)->val_to_type = NULL;
 	(*db)->val_to_role = NULL;
+
+	(*db)->disable_dontaudit = CIL_FALSE;
 }
 
 void cil_db_destroy(struct cil_db **db)
@@ -1167,6 +1169,11 @@ int cil_filecons_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char *
 	rc = SEPOL_OK;
 exit:
 	return rc;
+}
+
+void cil_set_disable_dontaudit(struct cil_db *db, int disable_dontaudit)
+{
+	db->disable_dontaudit = disable_dontaudit;
 }
 
 void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
