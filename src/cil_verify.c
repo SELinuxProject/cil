@@ -633,29 +633,31 @@ int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, en
 	} else {
 		ordered = order->head;
 		if (ordered->next != NULL) {
-			cil_log(CIL_ERR, "Disjoint category ordering exists\n");
+			cil_log(CIL_ERR, "Disjoint ordering exists\n");
 			goto exit;
 		}
 
 		if (ordered->data != NULL) {
-			order->head = ((struct cil_list*)ordered->data)->head;
+			struct cil_list_item *temp_item = NULL;
+			temp_item = ((struct cil_list *)order->head->data)->head;
+			((struct cil_list *)order->head->data)->head = NULL;
+			cil_list_item_destroy(&order->head, CIL_TRUE);
+			order->head = temp_item;
 		}
 	}
 
 	extra_args.order = order;
-	extra_args.ordered = ordered;
 	extra_args.found = &found;
 	extra_args.empty = &empty;
 	extra_args.flavor = &flavor;
 
 	rc = cil_tree_walk(current, __cil_verify_order_node_helper, NULL, NULL, &extra_args);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to verify category order\n");
+		cil_log(CIL_ERR, "Failed to verify order\n");
 		goto exit;
 	}
 
-	return SEPOL_OK;
-
+	rc = SEPOL_OK;
 exit:
 	return rc;
 }

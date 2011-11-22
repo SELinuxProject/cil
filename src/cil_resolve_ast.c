@@ -1190,6 +1190,7 @@ int __cil_set_append(struct cil_list_item *main_list_item, struct cil_list_item 
 
 	if (main_list_item->data == new_list_item->data && main_list_item->next == NULL) {
 		main_list_item->next = new_list_item->next;
+		new_list_item->next = NULL;
 		*success = 1;
 		rc = SEPOL_OK;
 		goto exit;
@@ -1232,6 +1233,7 @@ int __cil_set_prepend(struct cil_list *main_list, struct cil_list *new_list, str
 		new_list_iter = new_list->head;
 		while (new_list_iter != NULL) {
 			if (new_list_iter->next == new_list_item) {
+				cil_list_item_destroy(&new_list_item, CIL_FALSE);
 				new_list_iter->next = NULL;
 				rc = cil_list_prepend_item(main_list, new_list_iter);
 				if (rc != SEPOL_OK) {
@@ -1261,7 +1263,7 @@ int __cil_set_merge_lists(struct cil_list *primary, struct cil_list *new, int *s
 	struct cil_list_item *curr_new = NULL;
 	int rc = SEPOL_ERR;
 
-	if (primary == NULL && new == NULL) {
+	if (primary == NULL || new == NULL) {
 		goto exit;
 	}
 
@@ -1280,6 +1282,7 @@ int __cil_set_merge_lists(struct cil_list *primary, struct cil_list *new, int *s
 					if (rc != SEPOL_OK) {
 						cil_log(CIL_ERR, "Failed to append categoryorder sublist to primary list\n");
 					}
+					cil_list_destroy(&new, CIL_FALSE);
 					goto exit;
 				}
 			}
@@ -1308,6 +1311,7 @@ int __cil_set_remove_list(struct cil_list *catorder, struct cil_list *remove_ite
 		}
 		list_item = list_item->next;
 	}
+	cil_list_destroy(&remove_item, CIL_FALSE);
 
 	return SEPOL_OK;
 
@@ -1331,6 +1335,7 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 		while (order_sublist != NULL) {
 			if (order_sublist->data == NULL) {
 				order_sublist->data = edge_node->data;
+				edge_node->data = NULL;
 				break;
 			} else {
 				rc = __cil_set_merge_lists(order_sublist->data, edge_node->data, &success);
@@ -1341,6 +1346,7 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 			}
 
 			if (success) {
+				edge_node->data = NULL;
 				break;
 			} else if (order_sublist->next == NULL) {
 				order_sublist->next = edge_node;
@@ -1362,7 +1368,11 @@ int __cil_set_order(struct cil_list *order, struct cil_list *edges)
 							goto exit;
 						}
 						if (success) {
-							__cil_set_remove_list(order, order_lists->data);
+							rc = __cil_set_remove_list(order, order_lists->data);
+							if (rc != SEPOL_OK) {
+								cil_log(CIL_ERR, "Failed removing list\n");
+								goto exit;
+							}
 						}
 					}
 					order_lists = order_lists->next;
@@ -1465,14 +1475,15 @@ int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args)
 		cil_list_item_init(&list_item);
 		db->catorder->head = list_item;
 	}
+
 	rc = __cil_set_order(db->catorder, edge_list);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to order categoryorder\n");
 		goto exit;
 	}
+	cil_list_destroy(&edge_list, CIL_FALSE);
 
-	return SEPOL_OK;
-
+	rc = SEPOL_OK;
 exit:
 	return rc;
 }
@@ -1508,6 +1519,7 @@ int cil_resolve_dominance(struct cil_tree_node *current, void *extra_args)
 		cil_log(CIL_ERR, "Failed to order dominance\n");
 		goto exit;
 	}
+	cil_list_destroy(&edge_list, CIL_FALSE);
 
 	return SEPOL_OK;
 
