@@ -847,9 +847,9 @@ int cil_post_verify(struct cil_db *db)
 	struct cil_args_verify extra_args;
 	struct cil_complex_symtab csymtab;
 	symtab_t senstab;
-	cil_symtab_init(&senstab, CIL_SYM_SIZE);
+	cil_symtab_init(&senstab, CIL_CLASS_SYM_SIZE);
 
-	cil_complex_symtab_init(&csymtab, CIL_SYM_SIZE);
+	cil_complex_symtab_init(&csymtab, CIL_CLASS_SYM_SIZE);
 
 	extra_args.db = db;
 	extra_args.csymtab = &csymtab;

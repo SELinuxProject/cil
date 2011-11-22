@@ -119,7 +119,7 @@ int cil_copy_block(__attribute__((unused)) struct cil_db *db, void *data, void *
 		goto exit;
 	}
 
-	cil_symtab_array_init(new->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init(new->symtab, cil_sym_sizes[CIL_SYM_ARRAY_BLOCK]);
 
 	*copy = new;
 
@@ -267,7 +267,7 @@ int cil_copy_classmap(__attribute__((unused)) struct cil_db *db, void *data, voi
 		goto exit;
 	}
 
-	rc = symtab_init(&new->perms, CIL_SYM_SIZE);
+	rc = symtab_init(&new->perms, CIL_CLASS_SYM_SIZE);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_INFO, "cil_copy_classmap: symtab_init failed, rc: %d\n", rc);
 		goto exit;
@@ -386,7 +386,7 @@ int cil_copy_class(__attribute__((unused)) struct cil_db *db, void *data, void *
 		goto exit;
 	}
 
-	cil_symtab_init(&new->perms, CIL_SYM_SIZE);
+	cil_symtab_init(&new->perms, CIL_CLASS_SYM_SIZE);
 
 	new->common = NULL;
 	*copy = new;
@@ -476,7 +476,7 @@ int cil_copy_common(__attribute__((unused)) struct cil_db *db, void *data, void 
 		goto exit;
 	}	
 
-	cil_symtab_init(&new->perms, CIL_SYM_SIZE);
+	cil_symtab_init(&new->perms, CIL_CLASS_SYM_SIZE);
 	*copy = new;
 
 	return SEPOL_OK;
@@ -2075,7 +2075,7 @@ int cil_copy_macro(__attribute__((unused)) struct cil_db *db, void *data, void *
 		goto exit;
 	}
 
-	cil_symtab_array_init(new->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init(new->symtab, cil_sym_sizes[CIL_SYM_ARRAY_MACRO]);
 	rc = cil_copy_list(orig->params, &new->params);
 
 	*copy = new;

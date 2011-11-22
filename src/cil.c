@@ -49,11 +49,19 @@
 #include "cil_binary.h"
 #include "cil_policy.h"
 
+int cil_sym_sizes[CIL_SYM_ARRAY_NUM][CIL_SYM_NUM] = {
+	{64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64},
+	{64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+};
+
 void cil_db_init(struct cil_db **db)
 {
 	*db = cil_malloc(sizeof(**db));
 
-	cil_symtab_array_init((*db)->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init((*db)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_ROOT]);
 
 	cil_tree_init(&(*db)->parse);
 	cil_tree_init(&(*db)->ast);
@@ -1171,11 +1179,11 @@ void cil_set_disable_dontaudit(struct cil_db *db, int disable_dontaudit)
 	db->disable_dontaudit = disable_dontaudit;
 }
 
-void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num)
+void cil_symtab_array_init(symtab_t symtab[], int symtab_sizes[CIL_SYM_NUM])
 {
 	uint32_t i = 0;
-	for (i = 0; i < symtab_num; i++) {
-		cil_symtab_init(&symtab[i], CIL_SYM_SIZE);
+	for (i = 0; i < CIL_SYM_NUM; i++) {
+		cil_symtab_init(&symtab[i], symtab_sizes[i]);
 	}
 }
 
@@ -1403,7 +1411,7 @@ void cil_block_init(struct cil_block **block)
 
 	cil_symtab_datum_init(&(*block)->datum);
 
-	cil_symtab_array_init((*block)->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init((*block)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_BLOCK]);
 
 	(*block)->is_abstract = CIL_FALSE;
 }
@@ -1424,7 +1432,7 @@ void cil_in_init(struct cil_in **in)
 {
 	*in = cil_malloc(sizeof(**in));
 
-	cil_symtab_array_init((*in)->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init((*in)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_IN]);
 	(*in)->block_str = NULL;
 }
 
@@ -1434,7 +1442,7 @@ void cil_class_init(struct cil_class **class)
 
 	cil_symtab_datum_init(&(*class)->datum);
 
-	cil_symtab_init(&(*class)->perms, CIL_SYM_SIZE);
+	cil_symtab_init(&(*class)->perms, CIL_CLASS_SYM_SIZE);
 
 	(*class)->common = NULL;
 }
@@ -1444,7 +1452,7 @@ void cil_common_init(struct cil_common **common)
 	*common = cil_malloc(sizeof(**common));
 
 	cil_symtab_datum_init(&(*common)->datum);
-	cil_symtab_init(&(*common)->perms, CIL_SYM_SIZE);
+	cil_symtab_init(&(*common)->perms, CIL_CLASS_SYM_SIZE);
 }
 
 void cil_classcommon_init(struct cil_classcommon **classcommon)
@@ -1630,7 +1638,7 @@ void cil_condblock_init(struct cil_condblock **cb)
 {
 	*cb = cil_malloc(sizeof(**cb));
 
-	cil_symtab_array_init((*cb)->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init((*cb)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_CONDBLOCK]);
 }
 
 void cil_boolif_init(struct cil_booleanif **bif)
@@ -1905,7 +1913,7 @@ void cil_classmap_init(struct cil_classmap **map)
 	*map = cil_malloc(sizeof(**map));
 
 	cil_symtab_datum_init(&(*map)->datum);
-	cil_symtab_init(&(*map)->perms, CIL_SYM_SIZE);
+	cil_symtab_init(&(*map)->perms, CIL_CLASS_SYM_SIZE);
 }
 
 void cil_classmapping_init(struct cil_classmapping **mapping)
@@ -2020,7 +2028,7 @@ void cil_macro_init(struct cil_macro **macro)
 	*macro = cil_malloc(sizeof(**macro));
 
 	cil_symtab_datum_init(&(*macro)->datum);
-	cil_symtab_array_init((*macro)->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init((*macro)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_MACRO]);
 	(*macro)->params = NULL;
 }
 

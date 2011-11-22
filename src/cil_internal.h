@@ -332,7 +332,18 @@ enum cil_sym_index {
 	CIL_SYM_PERMS	// Special case for permissions. This symtab is not included in arrays
 };
 
-#define CIL_SYM_SIZE		256
+enum cil_sym_array {
+	CIL_SYM_ARRAY_ROOT = 0,
+	CIL_SYM_ARRAY_BLOCK,
+	CIL_SYM_ARRAY_IN,
+	CIL_SYM_ARRAY_MACRO,
+	CIL_SYM_ARRAY_CONDBLOCK,
+	CIL_SYM_ARRAY_NUM
+};
+
+extern int cil_sym_sizes[CIL_SYM_ARRAY_NUM][CIL_SYM_NUM];
+
+#define CIL_CLASS_SYM_SIZE	256
 
 struct cil_db {
 	struct cil_tree *parse;
@@ -899,7 +910,7 @@ int cil_userprefixes_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, ch
 int cil_selinuxusers_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char **out, size_t *size);
 int cil_filecons_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char **out, size_t *size);
 
-void cil_symtab_array_init(symtab_t symtab[], uint32_t symtab_num);
+void cil_symtab_array_init(symtab_t symtab[], int symtab_sizes[CIL_SYM_NUM]);
 void cil_symtab_array_destroy(symtab_t symtab[]);
 int cil_destroy_ast_symtabs(struct cil_tree_node *root);
 int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index);
