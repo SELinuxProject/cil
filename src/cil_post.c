@@ -738,9 +738,48 @@ exit:
 
 }
 
+int __cil_role_assign_types(struct cil_role *role, struct cil_symtab_datum *datum)
+{
+	int rc = SEPOL_ERR;
+	ebitmap_t bitmap_tmp;
+
+	if (role->types == NULL) {
+		role->types = cil_malloc(sizeof(*role->types));
+		ebitmap_init(role->types);
+	}
+
+	if (datum->node->flavor == CIL_TYPE) {
+		struct cil_type *type = (struct cil_type *)datum;
+		if (ebitmap_set_bit(role->types, type->value, 1)) {
+			cil_log(CIL_INFO, "Failure while setting bit in role types bitmap\n");
+			goto exit;
+		}
+	} else if (datum->node->flavor == CIL_TYPEALIAS) {
+		struct cil_typealias *typealias = (struct cil_typealias *)datum;
+		struct cil_type *type = typealias->type;
+		if (ebitmap_set_bit(role->types, type->value, 1)) {
+			cil_log(CIL_INFO, "Failure while setting bit in role types bitmap\n");
+			goto exit;
+		}
+	} else if (datum->node->flavor == CIL_TYPEATTRIBUTE) {
+		struct cil_typeattribute *attr = (struct cil_typeattribute *)datum;
+		if (ebitmap_or(&bitmap_tmp, attr->types, role->types)) {
+			cil_log(CIL_INFO, "Failure ORing role attribute bitmaps\n");
+			goto exit;
+		}
+		ebitmap_union(role->types, &bitmap_tmp);
+		ebitmap_destroy(&bitmap_tmp);
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
 int __cil_post_db_roletype_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_db *db = extra_args;
 
 	if (node == NULL || extra_args == NULL) {
 		goto exit;
@@ -749,39 +788,35 @@ int __cil_post_db_roletype_helper(struct cil_tree_node *node, __attribute__((unu
 	switch (node->flavor) {
 	case CIL_ROLETYPE: {
 		struct cil_roletype *roletype = node->data;
-		struct cil_role *role = roletype->role;
-		struct cil_symtab_datum *datum = roletype->type;
-		ebitmap_t bitmap_tmp;
+		struct cil_symtab_datum *role_datum = roletype->role;
+		struct cil_symtab_datum *type_datum = roletype->type;
 
-		if (role->types == NULL) {
-			role->types = cil_malloc(sizeof(*role->types));
-			ebitmap_init(role->types);
-		}
+		if (role_datum->node->flavor == CIL_ROLEATTRIBUTE) {
+			struct cil_roleattribute *attr = roletype->role;
+			ebitmap_node_t *rnode;
+			unsigned int i;
+	
+			ebitmap_for_each_bit(attr->roles, rnode, i) {
+				struct cil_role *role = NULL;
 
-		if (datum->node->flavor == CIL_TYPE) {
-			struct cil_type *type = roletype->type;
-			if (ebitmap_set_bit(role->types, type->value, 1)) {
-				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure while setting bit in role types bitmap\n");
+				if (!ebitmap_get_bit(attr->roles, i)) {
+					continue;
+				}
+
+				role = db->val_to_role[i];
+
+				rc = __cil_role_assign_types(role, type_datum);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+			}
+		} else {
+			struct cil_role *role = roletype->role;
+
+			rc = __cil_role_assign_types(role, type_datum);
+			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-		} else if (datum->node->flavor == CIL_TYPEALIAS) {
-			struct cil_typealias *typealias = roletype->type;
-			struct cil_type *type = typealias->type;
-			if (ebitmap_set_bit(role->types, type->value, 1)) {
-				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure while setting bit in role types bitmap\n");
-				goto exit;
-			}
-		} else if (datum->node->flavor == CIL_TYPEATTRIBUTE) {
-			struct cil_typeattribute *attr = roletype->type;
-			if (ebitmap_or(&bitmap_tmp, attr->types, role->types)) {
-				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure ORing role attribute bitmaps\n");
-				goto exit;
-			}
-			ebitmap_union(role->types, &bitmap_tmp);
-			ebitmap_destroy(&bitmap_tmp);
 		}
 		break;
 	}
