@@ -1949,7 +1949,45 @@ exit:
 	return rc;
 }
 
-int __cil_mls_level_build(policydb_t *pdb, struct cil_sens *cil_sens, mls_level_t *mls_level)
+int __cil_catset_to_mls_level(policydb_t *pdb, struct cil_catset *catset, mls_level_t *mls_level)
+{
+	int rc = SEPOL_ERR;
+	struct cil_list *cats = catset->cat_list;
+	struct cil_list_item *curr_cat = NULL;
+
+	for (curr_cat = cats->head; curr_cat != NULL; curr_cat = curr_cat->next)  {
+		if (curr_cat->flavor == CIL_CATRANGE) {
+			struct cil_catrange *catrange = curr_cat->data;
+			struct cil_cat *start_cat = catrange->cat_low;
+			struct cil_cat *end_cat = catrange->cat_high;
+
+			rc = __cil_catrange_expand_to_bitmap(pdb, start_cat, end_cat, &mls_level->cat);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		} else {
+			struct cil_cat *cil_cat = curr_cat->data;
+			cat_datum_t *sepol_cat = NULL;
+			char *key = NULL;
+
+			key = cil_cat->datum.name;
+			sepol_cat = hashtab_search(pdb->p_cats.table, key);
+			if (sepol_cat == NULL) {
+				goto exit;
+			}
+
+			if (ebitmap_set_bit(&mls_level->cat, sepol_cat->s.value - 1, 1)) {
+				goto exit;
+			}
+		}
+	}
+
+	rc = SEPOL_OK;
+exit:
+	return rc;
+}
+
+int __cil_sens_to_mls_level(policydb_t *pdb, struct cil_sens *cil_sens, mls_level_t *mls_level)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
@@ -1968,38 +2006,44 @@ int __cil_mls_level_build(policydb_t *pdb, struct cil_sens *cil_sens, mls_level_
 
 	for (curr = catsets->head; curr != NULL; curr = curr->next) {
 		struct cil_catset *catset = curr->data;
-		struct cil_list *cats = catset->cat_list;
-		struct cil_list_item *curr_cat = NULL;
 
-		for (curr_cat = cats->head; curr_cat != NULL; curr_cat = curr_cat->next)  {
-			if (curr_cat->flavor == CIL_CATRANGE) {
-				struct cil_catrange *catrange = curr_cat->data;
-				struct cil_cat *start_cat = catrange->cat_low;
-				struct cil_cat *end_cat = catrange->cat_high;
-
-				rc = __cil_catrange_expand_to_bitmap(pdb, start_cat, end_cat, &mls_level->cat);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
-			} else {
-				struct cil_cat *cil_cat = curr_cat->data;
-				cat_datum_t *sepol_cat = NULL;
-
-				key = cil_cat->datum.name;
-				sepol_cat = hashtab_search(pdb->p_cats.table, key);
-				if (sepol_cat == NULL) {
-					goto exit;
-				}
-
-				if (ebitmap_set_bit(&mls_level->cat, sepol_cat->s.value - 1, 1)) {
-					goto exit;
-				}
-			}
+		rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failure while inserting catset into sepol mls level\n");
+			goto exit;
 		}
 	}
 
 	return SEPOL_OK;
 
+exit:
+	return rc;
+}
+
+int __cil_level_to_mls_level(policydb_t *pdb, struct cil_level *cil_level, mls_level_t *mls_level)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	struct cil_sens *cil_sens = cil_level->sens;
+	struct cil_catset *catset = cil_level->catset;
+	level_datum_t *sepol_level = NULL;
+
+	key = cil_sens->datum.name;
+	sepol_level = hashtab_search(pdb->p_levels.table, key);
+	if (sepol_level == NULL) {
+		goto exit;
+	}
+	mls_level->sens = sepol_level->level->sens;
+
+	ebitmap_init(&mls_level->cat);
+
+	rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failure while inserting catset into sepol mls level\n");
+		goto exit;
+	}
+
+	rc = SEPOL_OK;
 exit:
 	return rc;
 }
@@ -2019,7 +2063,7 @@ int cil_sepol_level_define(policydb_t *pdb, struct cil_tree_node *node)
 	}
 	mls_level = sepol_level->level;
 
-	rc = __cil_mls_level_build(pdb, cil_sens, mls_level);
+	rc = __cil_sens_to_mls_level(pdb, cil_sens, mls_level);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2035,20 +2079,20 @@ exit:
 int __cil_levelrange_to_mls_range(policydb_t *pdb, struct cil_levelrange *cil_lvlrange, mls_range_t *mls_range)
 {
 	int rc = SEPOL_ERR;
-	struct cil_sens *low = cil_lvlrange->low->sens;
-	struct cil_sens *high = cil_lvlrange->high->sens;
+	struct cil_level *low = cil_lvlrange->low;
+	struct cil_level *high = cil_lvlrange->high;
 	mls_level_t *mls_level = NULL;
 
 	mls_level = &mls_range->level[0];
 
-	rc = __cil_mls_level_build(pdb, low, mls_level);
+	rc = __cil_level_to_mls_level(pdb, low, mls_level);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
 	mls_level = &mls_range->level[1];
 
-	rc = __cil_mls_level_build(pdb, high, mls_level);
+	rc = __cil_level_to_mls_level(pdb, high, mls_level);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2075,7 +2119,7 @@ int cil_userlevel_userrange_to_policydb(policydb_t *pdb, struct cil_tree_node *n
 		goto exit;
 	}
 
-	rc = __cil_mls_level_build(pdb, cil_level->sens, &sepol_user->exp_dfltlevel);
+	rc = __cil_level_to_mls_level(pdb, cil_level, &sepol_user->exp_dfltlevel);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
