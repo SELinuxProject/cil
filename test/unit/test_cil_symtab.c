@@ -50,7 +50,7 @@ void test_cil_symtab_insert(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	cil_symtab_array_init(test_block->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init(test_block->symtab, cil_sym_sizes[CIL_SYM_ARRAY_BLOCK]);
 
 	test_block->is_abstract = 0;
 

@@ -39,7 +39,7 @@ void test_cil_symtab_array_init(CuTest *tc) {
 	struct cil_db *test_new_db;
 	test_new_db = malloc(sizeof(*test_new_db));
 
-	cil_symtab_array_init(test_new_db->symtab, CIL_SYM_NUM);
+	cil_symtab_array_init(test_new_db->symtab, cil_sym_sizes[CIL_SYM_ARRAY_ROOT]);
 	CuAssertPtrNotNull(tc, test_new_db->symtab);
 
 	free(test_new_db);

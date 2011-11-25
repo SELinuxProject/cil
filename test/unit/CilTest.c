@@ -135,8 +135,8 @@ void test_symtab_init(CuTest *tc) {
 
 	uint32_t rc = 0, i =0;
 	
-	for (i=0; i<CIL_SYM_NUM; i++) {
-	    rc = symtab_init(&test_new_db->symtab[i], CIL_SYM_SIZE);
+	for (i = 0; i < CIL_SYM_NUM; i++) {
+	    rc = symtab_init(&test_new_db->symtab[i], cil_sym_sizes[CIL_SYM_ARRAY_ROOT][i]);
 	    CuAssertIntEquals(tc, 0, rc);
 	    // TODO CDS add checks to make sure the symtab looks correct
 	}

@@ -35,6 +35,8 @@
 #include "../../src/cil_build_ast.h"
 #include "../../src/cil_resolve_ast.h"
 
+#define CIL_TEST_SYM_SIZE	1
+
 int __cil_copy_node_helper(struct cil_tree_node *orig, uint32_t *finished, void *extra_args);
 
 struct cil_args_copy {
@@ -160,7 +162,7 @@ void test_cil_copy_block(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, cil_sym_sizes[CIL_SYM_ARRAY_BLOCK][CIL_SYM_BLOCKS]);
 
 	int rc = cil_copy_block(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -193,7 +195,7 @@ void test_cil_copy_perm(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_CLASS_SYM_SIZE);
 
 	cil_gen_perm(test_db, test_tree->root->cl_head->cl_head->next->next->cl_head, test_ast_node);
 	int rc = cil_copy_perm(test_db, test_ast_node->data, &test_copy->data, &sym);
@@ -228,7 +230,7 @@ void test_cil_copy_class(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_CLASS_SYM_SIZE);
 
 	int rc = cil_copy_class(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -255,7 +257,7 @@ void test_cil_copy_common(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_CLASS_SYM_SIZE);
 
 	int rc = cil_copy_common(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -291,7 +293,7 @@ void test_cil_copy_classcommon(CuTest *tc) {
 	cil_classcommon_init(&test_copy);
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_CLASS_SYM_SIZE);
 
 	int rc = cil_copy_classcommon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -320,7 +322,7 @@ void test_cil_copy_sid(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_sid(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -347,7 +349,7 @@ void test_cil_copy_sidcontext(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_sidcontext(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -376,7 +378,7 @@ void test_cil_copy_user(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_user(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -403,7 +405,7 @@ void test_cil_copy_role(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_role(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -430,7 +432,7 @@ void test_cil_copy_userrole(CuTest *tc) {
 	cil_userrole_init(&test_copy);
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_userrole(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -459,7 +461,7 @@ void test_cil_copy_type(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_type(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -486,7 +488,7 @@ void test_cil_copy_typealias(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_typealias(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -513,7 +515,7 @@ void test_cil_copy_typeattribute(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_typeattribute(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -540,7 +542,7 @@ void test_cil_copy_bool(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_bool(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -569,7 +571,7 @@ void test_cil_copy_type_rule(CuTest *tc) {
 	cil_type_rule_init(&test_copy);
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_type_rule(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -603,7 +605,7 @@ void test_cil_copy_avrule(CuTest *tc) {
 	cil_avrule_init(&test_copy);
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_avrule(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -638,7 +640,7 @@ void test_cil_copy_sens(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_sens(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -665,7 +667,7 @@ void test_cil_copy_sensalias(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_sensalias(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -694,7 +696,7 @@ void test_cil_copy_cat(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_cat(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -721,7 +723,7 @@ void test_cil_copy_catalias(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_catalias(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -756,7 +758,7 @@ void test_cil_copy_senscat(CuTest *tc) {
 	cil_senscat_init(&test_copy);
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_senscat(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -790,7 +792,7 @@ void test_cil_copy_catorder(CuTest *tc) {
 	cil_catorder_init(&test_copy);
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_catorder(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -822,7 +824,7 @@ void test_cil_copy_dominance(CuTest *tc) {
 	cil_sens_dominates_init(&test_copy);
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_dominance(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -851,7 +853,7 @@ void test_cil_copy_level(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_level(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -879,7 +881,7 @@ void test_cil_copy_fill_level(CuTest *tc) {
 	cil_level_init((struct cil_level**)&test_copy->data);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_fill_level((struct cil_level*)test_ast_node->data, (struct cil_level*)test_copy->data);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -908,7 +910,7 @@ void test_cil_copy_context(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_context(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -934,7 +936,7 @@ void test_cil_copy_netifcon(CuTest *tc) {
 	struct cil_netifcon *test_copy;
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_netifcon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -968,7 +970,7 @@ void test_cil_copy_netifcon_nested(CuTest *tc) {
 	struct cil_netifcon *test_copy;
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_netifcon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1010,7 +1012,7 @@ void test_cil_copy_fill_context(CuTest *tc) {
 	cil_context_init((struct cil_context**)&test_copy->data);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_fill_context((struct cil_context*)test_ast_node->data, (struct cil_context*)test_copy->data);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1046,7 +1048,7 @@ void test_cil_copy_fill_context_anonrange(CuTest *tc) {
 	cil_context_init((struct cil_context**)&test_copy->data);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_fill_context((struct cil_context*)test_ast_node->data, (struct cil_context*)test_copy->data);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1080,7 +1082,7 @@ void test_cil_copy_call(CuTest *tc) {
 	struct cil_call *test_copy;
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_call(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1108,7 +1110,7 @@ void test_cil_copy_optional(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_optional(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1134,7 +1136,7 @@ void test_cil_copy_nodecon(CuTest *tc) {
 	struct cil_nodecon *test_copy;
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_nodecon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1166,7 +1168,7 @@ void test_cil_copy_nodecon_anon(CuTest *tc) {
 	struct cil_nodecon *test_copy;
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_nodecon(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1196,7 +1198,7 @@ void test_cil_copy_fill_ipaddr(CuTest *tc) {
         cil_gen_ipaddr(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	struct cil_ipaddr *new;
 	cil_ipaddr_init(&new);
@@ -1231,7 +1233,7 @@ void test_cil_copy_ipaddr(CuTest *tc) {
 	cil_tree_node_init(&test_copy);
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_ipaddr(test_db, test_ast_node->data, &test_copy->data, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1262,7 +1264,7 @@ void test_cil_copy_conditional(CuTest *tc) {
 	struct cil_conditional *cond_new;
 
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_conditional(test_db, curr_old->data, (void**)&cond_new, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1293,7 +1295,7 @@ void test_cil_copy_boolif(CuTest *tc) {
 	struct cil_booleanif *test_copy;
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_boolif(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
@@ -1319,7 +1321,7 @@ void test_cil_copy_constrain(CuTest *tc) {
 	struct cil_constrain *test_copy;
 	
 	symtab_t sym;
-	symtab_init(&sym, CIL_SYM_SIZE);
+	symtab_init(&sym, CIL_TEST_SYM_SIZE);
 
 	int rc = cil_copy_constrain(test_db, test_ast_node->data, (void**)&test_copy, &sym);
 	CuAssertIntEquals(tc, rc, SEPOL_OK);
