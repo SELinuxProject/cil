@@ -37,34 +37,40 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+void test_integration(CuTest *tc) {
+	int status = 0, status1 = 0, status2 = 0;
+
+	status = system("./secilc -M -c 24 test/integration.cil");
+
+	if (WIFSIGNALED(status) && (WTERMSIG(status) == SIGINT || WTERMSIG(status) == SIGQUIT))
+		printf("Call to system for secilc failed.\n");
+	
+	status1 = system("checkpolicy -M -c 24 -o policy.conf.24 test/policy.conf");
+
+	if (WIFSIGNALED(status1) && (WTERMSIG(status1) == SIGINT || WTERMSIG(status1) == SIGQUIT))
+		printf("Call to checkpolicy failed.\n");
+	
+	status2 = system("sediff -q policy.24 \\; policy.conf.24 > /dev/null");
+
+	if (WIFSIGNALED(status2) && (WTERMSIG(status2) == SIGINT || WTERMSIG(status2) == SIGQUIT))
+		printf("Call to sediff for secilc failed.\n");
+	
+	CuAssertIntEquals(tc, 1, WIFEXITED(status));
+	CuAssertIntEquals(tc, 0, WEXITSTATUS(status));
+	CuAssertIntEquals(tc, 1, WIFEXITED(status1));
+	CuAssertIntEquals(tc, 0, WEXITSTATUS(status1));
+	CuAssertIntEquals(tc, 1, WIFEXITED(status2));
+	CuAssertIntEquals(tc, 0, WEXITSTATUS(status2));
+}
+
 void test_min_policy(CuTest *tc) {
-	pid_t pid;
-	int status, ex;
-	int fd;
+	int status = 0;
+
+	status = system("./secilc -M -c 24 test/policy.cil");
+
+	if (WIFSIGNALED(status) && (WTERMSIG(status) == SIGINT || WTERMSIG(status) == SIGQUIT))
+		printf("Call to system for secilc failed.\n");
 	
-	pid = fork();
-
-	if (pid == 0) {
-		fd = open("/dev/null", O_RDWR);
-		dup2(fd, STDIN_FILENO);
-		dup2(fd, STDOUT_FILENO);
-		dup2(fd, STDERR_FILENO);
-
-		ex = execl("./secilc", "./secilc", "test/policy.cil", (char*)NULL);
-		if (ex == -1) {
-			printf("Execl error\n");
-			exit(EXIT_FAILURE);	
-		}
-	} else {
-		wait(&status);
-
-		if (!WIFEXITED(status)) {
-			printf("Exec terminated abruptly.\n");
-		} else if (WEXITSTATUS(status)) {
-			printf("Exec failed.\n");
-		}
-	}
-	
-	CuAssertIntEquals(tc, WIFEXITED(status), 1);
-	CuAssertIntEquals(tc, WEXITSTATUS(status), 0);
+	CuAssertIntEquals(tc, 1, WIFEXITED(status));
+	CuAssertIntEquals(tc, 0, WEXITSTATUS(status));
 }

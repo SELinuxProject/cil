@@ -33,5 +33,6 @@
 #include "CuTest.h"
 
 void test_min_policy(CuTest *);
+void test_integration(CuTest *);
 
 #endif

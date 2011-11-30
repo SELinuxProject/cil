@@ -1968,6 +1968,7 @@ CuSuite* CilTreeGetSuite(void) {
 CuSuite* CilTestFullCil(void) {
 	CuSuite* suite = CuSuiteNew();
 	SUITE_ADD_TEST(suite, test_min_policy);
+	SUITE_ADD_TEST(suite, test_integration);
 
 	return suite;
 }
