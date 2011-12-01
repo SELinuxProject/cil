@@ -6112,13 +6112,18 @@ int __cil_build_ast_first_child_helper(__attribute__((unused)) struct cil_tree_n
 		goto exit;
 	}
 
+	if (parse_current->data == NULL) {
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
 	args = extra_args;
 
-	if (args->ast->flavor == CIL_MACRO) {
+	if (!strcmp(parse_current->data, CIL_KEY_MACRO)) {
 		args->macro = args->ast; 
 	}
 
-	if (args->ast->flavor == CIL_TUNABLEIF) {
+	if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
 		struct cil_tree_node *new;
 		cil_tree_node_init(&new);
 		new->data = args->ast->data;
