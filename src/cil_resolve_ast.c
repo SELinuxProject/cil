@@ -2697,10 +2697,13 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
-	rc = cil_copy_ast(db, macro_node, current);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to copy macro, rc: %d\n", rc);
-		goto exit;
+	if (new_call->copied == 0) {
+		new_call->copied = 1;
+		rc = cil_copy_ast(db, macro_node, current);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to copy macro, rc: %d\n", rc);
+			goto exit;
+		}
 	}
 
 	return SEPOL_OK;

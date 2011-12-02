@@ -2009,6 +2009,8 @@ int cil_copy_call(struct cil_db *db, void *data, void **copy, __attribute__((unu
 			goto exit;
 		}
 	}
+	
+	new->copied = orig->copied;
 
 	*copy = new;
 

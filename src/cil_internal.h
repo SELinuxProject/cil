@@ -870,6 +870,7 @@ struct cil_call {
 	struct cil_macro *macro;
 	struct cil_tree *args_tree;
 	struct cil_list *args;
+	int copied;
 };
 
 #define CIL_TRUE	1

@@ -2007,6 +2007,7 @@ void cil_call_init(struct cil_call **call)
 	(*call)->macro = NULL;
 	(*call)->args_tree = NULL;
 	(*call)->args = NULL;
+	(*call)->copied = 0;
 }
 
 void cil_optional_init(struct cil_optional **optional)
