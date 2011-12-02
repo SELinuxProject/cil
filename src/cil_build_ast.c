@@ -5559,6 +5559,23 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	ast_node->line = parse_current->line;
 	ast_node->path = parse_current->path;
 	if (ast_current->cl_head == NULL) {
+
+		if (ast_current->flavor == CIL_MACRO) {
+			args->macro = ast_current;
+		}
+
+		if (ast_current->flavor == CIL_TUNABLEIF) {
+			struct cil_tree_node *new;
+			cil_tree_node_init(&new);
+			new->data = ast_current->data;
+			new->flavor = ast_current->flavor;
+			if (args->tifstack != NULL) {
+				args->tifstack->parent = new;
+				new->cl_head = args->tifstack;
+			}
+			args->tifstack = new;
+		}
+		
 		ast_current->cl_head = ast_node;
 	} else {
 		ast_current->cl_tail->next = ast_node;
@@ -6103,44 +6120,6 @@ exit:
 	return rc;
 }
 
-int __cil_build_ast_first_child_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *extra_args)
-{
-	int rc = SEPOL_ERR;
-	struct cil_args_build *args = NULL;
-
-	if (extra_args == NULL) {
-		goto exit;
-	}
-
-	if (parse_current->data == NULL) {
-		rc = SEPOL_OK;
-		goto exit;
-	}
-
-	args = extra_args;
-
-	if (!strcmp(parse_current->data, CIL_KEY_MACRO)) {
-		args->macro = args->ast; 
-	}
-
-	if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
-		struct cil_tree_node *new;
-		cil_tree_node_init(&new);
-		new->data = args->ast->data;
-		new->flavor = args->ast->flavor;
-		if (args->tifstack != NULL) {
-			args->tifstack->parent = new;
-			new->cl_head = args->tifstack;
-		}
-		args->tifstack = new;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -6168,12 +6147,12 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 
 	if (ast->flavor == CIL_TUNABLEIF) {
 		/* pop off the stack */
-                tifstack = args->tifstack;
-                args->tifstack = tifstack->cl_head;
-                if (tifstack->cl_head) {
-                        tifstack->cl_head->parent = NULL;
-                }
-                free(tifstack);
+		tifstack = args->tifstack;
+		args->tifstack = tifstack->cl_head;
+		if (tifstack->cl_head) {
+			tifstack->cl_head->parent = NULL;
+		}
+		free(tifstack);
 	}
 
 	return SEPOL_OK;
@@ -6196,7 +6175,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	extra_args.macro = NULL;
 	extra_args.tifstack = NULL;
 
-	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, __cil_build_ast_first_child_helper, __cil_build_ast_last_child_helper, &extra_args);
+	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, NULL, __cil_build_ast_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "cil_tree_walk failed, rc: %d\n", rc);
 		goto exit;
