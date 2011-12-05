@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	int i;
 
 	while (1) {
-		opt_char = getopt_long(argc, argv, "hvt:MDc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "U:hvt:MDc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
