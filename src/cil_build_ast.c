@@ -676,13 +676,13 @@ void cil_destroy_classpermset(struct cil_classpermset *cps)
 	if (cps->class_str != NULL) {
 		free(cps->class_str);
 	}
-
-	if (cps->permset_str != NULL) {
-		free(cps->permset_str);
+	
+	if (cps->permset != NULL && cps->permset_str == NULL) {
+		cil_destroy_permset(cps->permset);
 	}
 
-	if (cps->permset != NULL) {
-		cil_destroy_permset(cps->permset);
+	if (cps->permset_str != NULL) {
+		free(cps->permset_str);	
 	}
 
 	if (cps->perms != NULL) {
