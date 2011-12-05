@@ -508,6 +508,9 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 	case CIL_CLASS:
 		*sym_index = CIL_SYM_CLASSES;
 		break;
+	case CIL_PERMSET:
+		*sym_index = CIL_SYM_PERMSETS;
+		break;
 	case CIL_PERM:
 	case CIL_CLASSMAPPERM:
 		*sym_index = CIL_SYM_PERMS;
