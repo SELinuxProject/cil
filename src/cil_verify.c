@@ -35,6 +35,7 @@
 #include <ctype.h>
 
 #include <sepol/policydb/conditional.h>
+#include <sepol/policydb/polcaps.h>
 #include <sepol/errcodes.h>
 
 #include "cil_internal.h"
@@ -1653,6 +1654,24 @@ exit:
 	return rc;
 }
 
+int __cil_verify_policycap(struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+
+	struct cil_policycap *polcap = node->data;
+
+	rc = sepol_polcap_getnum((const char*)polcap->datum.name);
+	if (rc < 0) {
+		cil_log(CIL_ERR, "Invalid policycap: %s (%s:%d)\n", polcap->datum.name, node->path, node->line);
+		goto exit;
+	}
+
+	rc = SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -1754,6 +1773,9 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 		break;
 	case CIL_CLASS:
 		rc = __cil_verify_class(node);
+		break;
+	case CIL_POLICYCAP:
+		rc = __cil_verify_policycap(node);
 		break;
 	default:
 		rc = SEPOL_OK;
