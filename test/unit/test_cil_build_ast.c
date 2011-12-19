@@ -2935,8 +2935,8 @@ void test_cil_gen_typepermissive_astnull_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", "foobar", "str", ")", NULL};
+void test_cil_gen_nametypetransition(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "file", "foobar", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2950,12 +2950,12 @@ void test_cil_gen_filetransition(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_OK, rc);
 }
 
-void test_cil_gen_filetransition_notype1_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", ")", NULL};
+void test_cil_gen_nametypetransition_strinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "(", "str", ")", "foo", "bar", "file", "foobar", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2969,12 +2969,12 @@ void test_cil_gen_filetransition_notype1_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_type1inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "(", "foo", ")", "bar", "file", "foobar", "str", ")", NULL};
+void test_cil_gen_nametypetransition_nostr_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -2988,12 +2988,12 @@ void test_cil_gen_filetransition_type1inparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_notype2_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", ")", NULL};
+void test_cil_gen_nametypetransition_srcinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "(", "foo", ")", "bar", "file", "foobar", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3007,12 +3007,12 @@ void test_cil_gen_filetransition_notype2_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_type2inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "(", "bar", ")", "file", "foobar", "str", ")", NULL};
+void test_cil_gen_nametypetransition_nosrc_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3026,12 +3026,12 @@ void test_cil_gen_filetransition_type2inparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_noclass_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", ")", NULL};
+void test_cil_gen_nametypetransition_tgtinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "(", "bar", ")", "file", "foobar", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3045,12 +3045,12 @@ void test_cil_gen_filetransition_noclass_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_classinparens_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "(", "file", ")", "foobar", "str", ")", NULL};
+void test_cil_gen_nametypetransition_notgt_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3064,12 +3064,12 @@ void test_cil_gen_filetransition_classinparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_notype3_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", ")", NULL};
+void test_cil_gen_nametypetransition_classinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "(", "file", ")", "foobar", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3083,12 +3083,12 @@ void test_cil_gen_filetransition_notype3_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_type3inparens_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", "(", "foobar", ")", "str", ")", NULL};
+void test_cil_gen_nametypetransition_noclass_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3102,12 +3102,12 @@ void test_cil_gen_filetransition_type3inparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_nostr_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", "foobar", ")", NULL};
+void test_cil_gen_nametypetransition_destinparens_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "file", "(", "foobar", ")", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3121,12 +3121,12 @@ void test_cil_gen_filetransition_nostr_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_strinparens_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", "foobar", "(", "str", ")", ")", NULL};
+void test_cil_gen_nametypetransition_nodest_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "file", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3140,12 +3140,13 @@ void test_cil_gen_filetransition_strinparens_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_extra_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", "foobar", "str", "extra", ")", NULL};
+
+void test_cil_gen_nametypetransition_extra_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "file", "foobar", "extra", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3159,12 +3160,12 @@ void test_cil_gen_filetransition_extra_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_dbnull_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", "foobar", "str", "extra", ")", NULL};
+void test_cil_gen_nametypetransition_dbnull_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "file", "foobar", "extra", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3174,11 +3175,11 @@ void test_cil_gen_filetransition_dbnull_neg(CuTest *tc) {
 
 	struct cil_db *test_db = NULL;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_currnull_neg(CuTest *tc) {
+void test_cil_gen_nametypetransition_currnull_neg(CuTest *tc) {
 	char *line[] = {"(", ")", NULL};
 
 	struct cil_tree *test_tree;
@@ -3193,12 +3194,12 @@ void test_cil_gen_filetransition_currnull_neg(CuTest *tc) {
 	test_ast_node->parent = test_db->ast->root;
 	test_ast_node->line = 1;
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
-void test_cil_gen_filetransition_astnull_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", "foobar", "str", "extra", ")", NULL};
+void test_cil_gen_nametypetransition_astnull_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "file", "foobar", ")", NULL};
 
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -3208,7 +3209,7 @@ void test_cil_gen_filetransition_astnull_neg(CuTest *tc) {
 	struct cil_db *test_db;
 	cil_db_init(&test_db);
 
-	int rc = cil_gen_filetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
+	int rc = cil_gen_nametypetransition(test_db, test_tree->root->cl_head->cl_head, test_ast_node);
 	CuAssertIntEquals(tc, SEPOL_ERR, rc);
 }
 
@@ -17058,8 +17059,8 @@ void test_cil_build_ast_node_helper_typepermissive_neg(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }	
 
-void test_cil_build_ast_node_helper_filetransition(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "file", "foobar", "str", ")", NULL};
+void test_cil_build_ast_node_helper_nametypetransition(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "file", "foobar", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);
@@ -17076,8 +17077,8 @@ void test_cil_build_ast_node_helper_filetransition(CuTest *tc) {
 	CuAssertIntEquals(tc, 0, finished);
 }
 
-void test_cil_build_ast_node_helper_filetransition_neg(CuTest *tc) {
-	char *line[] = {"(", "filetransition", "foo", "bar", "foobar", "str", ")", NULL};
+void test_cil_build_ast_node_helper_nametypetransition_neg(CuTest *tc) {
+	char *line[] = {"(", "nametypetransition", "str", "foo", "bar", "foobar", ")", NULL};
 	
 	struct cil_tree *test_tree;
 	gen_test_tree(&test_tree, line);

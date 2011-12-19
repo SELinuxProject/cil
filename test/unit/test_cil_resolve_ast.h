@@ -138,11 +138,11 @@ void test_cil_resolve_typebounds_type2_neg(CuTest *);
 void test_cil_resolve_typepermissive(CuTest *);
 void test_cil_resolve_typepermissive_neg(CuTest *);
 
-void test_cil_resolve_filetransition(CuTest *);
-void test_cil_resolve_filetransition_type1_neg(CuTest *);
-void test_cil_resolve_filetransition_type2_neg(CuTest *);
-void test_cil_resolve_filetransition_class_neg(CuTest *);
-void test_cil_resolve_filetransition_type3_neg(CuTest *);
+void test_cil_resolve_nametypetransition(CuTest *);
+void test_cil_resolve_nametypetransition_src_neg(CuTest *);
+void test_cil_resolve_nametypetransition_tgt_neg(CuTest *);
+void test_cil_resolve_nametypetransition_class_neg(CuTest *);
+void test_cil_resolve_nametypetransition_dest_neg(CuTest *);
 
 void test_cil_resolve_rangetransition(CuTest *);
 void test_cil_resolve_rangetransition_namedrange(CuTest *);
@@ -521,8 +521,8 @@ void test_cil_resolve_ast_node_helper_typebounds_neg(CuTest *);
 void test_cil_resolve_ast_node_helper_typepermissive(CuTest *);
 void test_cil_resolve_ast_node_helper_typepermissive_neg(CuTest *);
 
-void test_cil_resolve_ast_node_helper_filetransition(CuTest *);
-void test_cil_resolve_ast_node_helper_filetransition_neg(CuTest *);
+void test_cil_resolve_ast_node_helper_nametypetransition(CuTest *);
+void test_cil_resolve_ast_node_helper_nametypetransition_neg(CuTest *);
 
 void test_cil_resolve_ast_node_helper_rangetransition(CuTest *);
 void test_cil_resolve_ast_node_helper_rangetransition_neg(CuTest *);

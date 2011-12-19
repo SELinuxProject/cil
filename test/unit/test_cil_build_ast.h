@@ -218,21 +218,21 @@ void test_cil_gen_typepermissive_dbnull_neg(CuTest *);
 void test_cil_gen_typepermissive_currnull_neg(CuTest *);
 void test_cil_gen_typepermissive_astnull_neg(CuTest *);
 
-void test_cil_gen_filetransition(CuTest *);
-void test_cil_gen_filetransition_notype1_neg(CuTest *);
-void test_cil_gen_filetransition_type1inparens_neg(CuTest *);
-void test_cil_gen_filetransition_notype2_neg(CuTest *);
-void test_cil_gen_filetransition_type2inparens_neg(CuTest *);
-void test_cil_gen_filetransition_noclass_neg(CuTest *);
-void test_cil_gen_filetransition_classinparens_neg(CuTest *);
-void test_cil_gen_filetransition_notype3_neg(CuTest *);
-void test_cil_gen_filetransition_type3inparens_neg(CuTest *);
-void test_cil_gen_filetransition_nostr_neg(CuTest *);
-void test_cil_gen_filetransition_strinparens_neg(CuTest *);
-void test_cil_gen_filetransition_extra_neg(CuTest *);
-void test_cil_gen_filetransition_dbnull_neg(CuTest *);
-void test_cil_gen_filetransition_currnull_neg(CuTest *);
-void test_cil_gen_filetransition_astnull_neg(CuTest *);
+void test_cil_gen_nametypetransition(CuTest *);
+void test_cil_gen_nametypetransition_nostr_neg(CuTest *);
+void test_cil_gen_nametypetransition_strinparens_neg(CuTest *);
+void test_cil_gen_nametypetransition_nosrc_neg(CuTest *);
+void test_cil_gen_nametypetransition_srcinparens_neg(CuTest *);
+void test_cil_gen_nametypetransition_notgt_neg(CuTest *);
+void test_cil_gen_nametypetransition_tgtinparens_neg(CuTest *);
+void test_cil_gen_nametypetransition_noclass_neg(CuTest *);
+void test_cil_gen_nametypetransition_classinparens_neg(CuTest *);
+void test_cil_gen_nametypetransition_nodest_neg(CuTest *);
+void test_cil_gen_nametypetransition_destinparens_neg(CuTest *);
+void test_cil_gen_nametypetransition_extra_neg(CuTest *);
+void test_cil_gen_nametypetransition_dbnull_neg(CuTest *);
+void test_cil_gen_nametypetransition_currnull_neg(CuTest *);
+void test_cil_gen_nametypetransition_astnull_neg(CuTest *);
 
 void test_cil_gen_rangetransition(CuTest *);
 void test_cil_gen_rangetransition_namedtransition(CuTest *);
@@ -1040,8 +1040,8 @@ void test_cil_build_ast_node_helper_typebounds_neg(CuTest *);
 void test_cil_build_ast_node_helper_typepermissive(CuTest *);
 void test_cil_build_ast_node_helper_typepermissive_neg(CuTest *);
 
-void test_cil_build_ast_node_helper_filetransition(CuTest *);
-void test_cil_build_ast_node_helper_filetransition_neg(CuTest *);
+void test_cil_build_ast_node_helper_nametypetransition(CuTest *);
+void test_cil_build_ast_node_helper_nametypetransition_neg(CuTest *);
 
 void test_cil_build_ast_node_helper_rangetransition(CuTest *);
 void test_cil_build_ast_node_helper_rangetransition_neg(CuTest *);

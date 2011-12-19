@@ -85,7 +85,7 @@
 
 (rangetransition typea_t typeb_t fooclass low high)
 
-(filetransition typea_t typeb_t fooclass foo_t string)
+(nametypetransition string typea_t typeb_t fooclass foo_t)
 
 (typepermissive foo_t)
 
