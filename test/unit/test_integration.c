@@ -40,17 +40,17 @@
 void test_integration(CuTest *tc) {
 	int status = 0, status1 = 0, status2 = 0;
 
-	status = system("./secilc -M -c 24 test/integration.cil");
+	status = system("./secilc -M -c 24 test/integration.cil &> /dev/null");
 
 	if (WIFSIGNALED(status) && (WTERMSIG(status) == SIGINT || WTERMSIG(status) == SIGQUIT))
 		printf("Call to system for secilc failed.\n");
 	
-	status1 = system("checkpolicy -M -c 24 -o policy.conf.24 test/policy.conf");
+	status1 = system("checkpolicy -M -c 24 -o policy.conf.24 test/policy.conf &> /dev/null");
 
 	if (WIFSIGNALED(status1) && (WTERMSIG(status1) == SIGINT || WTERMSIG(status1) == SIGQUIT))
 		printf("Call to checkpolicy failed.\n");
 	
-	status2 = system("sediff -q policy.24 \\; policy.conf.24 > /dev/null");
+	status2 = system("sediff -q policy.24 \\; policy.conf.24 &> /dev/null");
 
 	if (WIFSIGNALED(status2) && (WTERMSIG(status2) == SIGINT || WTERMSIG(status2) == SIGQUIT))
 		printf("Call to sediff for secilc failed.\n");
@@ -66,7 +66,7 @@ void test_integration(CuTest *tc) {
 void test_min_policy(CuTest *tc) {
 	int status = 0;
 
-	status = system("./secilc -M -c 24 test/policy.cil");
+	status = system("./secilc -M -c 24 test/policy.cil &> /dev/null");
 
 	if (WIFSIGNALED(status) && (WTERMSIG(status) == SIGINT || WTERMSIG(status) == SIGQUIT))
 		printf("Call to system for secilc failed.\n");
