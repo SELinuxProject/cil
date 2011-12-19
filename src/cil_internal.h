@@ -104,7 +104,7 @@ enum cil_flavor {
 	CIL_TYPEATTRIBUTESET,
 	CIL_TYPE_RULE,
 	CIL_TYPEBOUNDS,
-	CIL_FILETRANSITION,
+	CIL_NAMETYPETRANSITION,
 	CIL_RANGETRANSITION,
 	CIL_TYPEPERMISSIVE,
 	CIL_ROLETRANSITION,
@@ -228,7 +228,7 @@ enum cil_flavor {
 #define CIL_KEY_NEVERALLOW		"neverallow"
 #define CIL_KEY_TYPETRANS		"typetransition"
 #define CIL_KEY_RANGETRANSITION		"rangetransition"
-#define CIL_KEY_FILETRANSITION		"filetransition"
+#define CIL_KEY_NAMETYPETRANSITION		"nametypetransition"
 #define CIL_KEY_TYPECHANGE		"typechange"
 #define CIL_KEY_TYPEMEMBER		"typemember"
 #define CIL_KEY_TYPEATTRIBUTESET	"typeattributeset"
@@ -572,7 +572,7 @@ struct cil_typepermissive {
 	void *type; /* type or alias */
 };
 
-struct cil_filetransition {
+struct cil_nametypetransition {
 	char *src_str;
 	void *src; /* type, alias, or attribute */
 	char *exec_str;
@@ -945,7 +945,7 @@ void cil_typeattributeset_init(struct cil_typeattributeset **attrset);
 void cil_typealias_init(struct cil_typealias **typealias);
 void cil_typebounds_init(struct cil_typebounds **typebnds);
 void cil_typepermissive_init(struct cil_typepermissive **typeperm);
-void cil_filetransition_init(struct cil_filetransition **filetrans);
+void cil_nametypetransition_init(struct cil_nametypetransition **nametypetrans);
 void cil_rangetransition_init(struct cil_rangetransition **rangetrans);
 void cil_bool_init(struct cil_bool **cilbool);
 void cil_boolif_init(struct cil_booleanif **bif);

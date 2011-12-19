@@ -304,11 +304,11 @@ int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  * Insert cil file transition structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the file transition into.
- * @param[in] node The tree node that contains the cil_filetransition.
+ * @param[in] node The tree node that contains the cil_nametypetransition.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_nametypetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
 
 /**
  * Insert cil constrain/mlsconstrain structure(s) into sepol policydb.

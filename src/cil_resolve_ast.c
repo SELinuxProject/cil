@@ -456,43 +456,43 @@ exit:
 	return rc;
 }
 
-int cil_resolve_filetransition(struct cil_tree_node *current, void *extra_args)
+int cil_resolve_nametypetransition(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_filetransition *filetrans = (struct cil_filetransition*)current->data;
+	struct cil_nametypetransition *nametypetrans = (struct cil_nametypetransition*)current->data;
 	struct cil_tree_node *src_node = NULL;
 	struct cil_tree_node *exec_node = NULL;
 	struct cil_tree_node *proc_node = NULL;
 	struct cil_tree_node *dest_node = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, filetrans->src_str, CIL_SYM_TYPES, extra_args, &src_node);
+	rc = cil_resolve_name(current, nametypetrans->src_str, CIL_SYM_TYPES, extra_args, &src_node);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	filetrans->src = src_node->data;
+	nametypetrans->src = src_node->data;
 
-	rc = cil_resolve_name(current, filetrans->exec_str, CIL_SYM_TYPES, extra_args, &exec_node);
+	rc = cil_resolve_name(current, nametypetrans->exec_str, CIL_SYM_TYPES, extra_args, &exec_node);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	filetrans->exec = exec_node->data;
+	nametypetrans->exec = exec_node->data;
 
-	rc = cil_resolve_name(current, filetrans->proc_str, CIL_SYM_CLASSES, extra_args, &proc_node);
+	rc = cil_resolve_name(current, nametypetrans->proc_str, CIL_SYM_CLASSES, extra_args, &proc_node);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	filetrans->proc = proc_node->data;
+	nametypetrans->proc = proc_node->data;
 
-	rc = cil_resolve_name(current, filetrans->dest_str, CIL_SYM_TYPES, extra_args, &dest_node);
+	rc = cil_resolve_name(current, nametypetrans->dest_str, CIL_SYM_TYPES, extra_args, &dest_node);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 	if (dest_node->flavor != CIL_TYPE && dest_node->flavor != CIL_TYPEALIAS) {
-		cil_log(CIL_ERR, "File transition result is not a type or type alias\n");
+		cil_log(CIL_ERR, "nametransition result is not a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	filetrans->dest = dest_node->data;
+	nametypetrans->dest = dest_node->data;
 
 	return SEPOL_OK;
 
@@ -3192,8 +3192,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_TYPEPERMISSIVE:
 			rc = cil_resolve_typepermissive(node, args);
 			break;
-		case CIL_FILETRANSITION:
-			rc = cil_resolve_filetransition(node, args);
+		case CIL_NAMETYPETRANSITION:
+			rc = cil_resolve_nametypetransition(node, args);
 			break;
 		case CIL_RANGETRANSITION:
 			rc = cil_resolve_rangetransition(node, args);

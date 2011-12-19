@@ -682,14 +682,14 @@ int cil_typerule_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t fil
 	return SEPOL_OK;
 }
 
-int cil_filetransition_to_policy(FILE **file_arr, uint32_t file_index, struct cil_filetransition *filetrans)
+int cil_nametypetransition_to_policy(FILE **file_arr, uint32_t file_index, struct cil_nametypetransition *nametypetrans)
 {
-	char *src_str = ((struct cil_symtab_datum*)filetrans->src)->name;
-	char *exec_str = ((struct cil_symtab_datum*)filetrans->exec)->name;
-	char *proc_str = ((struct cil_symtab_datum*)filetrans->proc)->name;
-	char *dest_str = ((struct cil_symtab_datum*)filetrans->dest)->name;
+	char *src_str = ((struct cil_symtab_datum*)nametypetrans->src)->name;
+	char *exec_str = ((struct cil_symtab_datum*)nametypetrans->exec)->name;
+	char *proc_str = ((struct cil_symtab_datum*)nametypetrans->proc)->name;
+	char *dest_str = ((struct cil_symtab_datum*)nametypetrans->dest)->name;
 
-	fprintf(file_arr[file_index], "type_transition %s %s : %s %s %s;\n", src_str, exec_str, proc_str, dest_str, filetrans->path_str);
+	fprintf(file_arr[file_index], "type_transition %s %s : %s %s %s;\n", src_str, exec_str, proc_str, dest_str, nametypetrans->path_str);
 	return SEPOL_OK;
 }
 
@@ -999,11 +999,11 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		}
 		break;
 	}
-	case CIL_FILETRANSITION: {
-		struct cil_filetransition *filetrans = (struct cil_filetransition*)current->data;
-		rc = cil_filetransition_to_policy(file_arr, ALLOWS, filetrans);
+	case CIL_NAMETYPETRANSITION: {
+		struct cil_nametypetransition *nametypetrans = (struct cil_nametypetransition*)current->data;
+		rc = cil_nametypetransition_to_policy(file_arr, ALLOWS, nametypetrans);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failed to write filetransition to policy\n");
+			cil_log(CIL_INFO, "Failed to write nametypetransition to policy\n");
 			return rc;
 		}
 	}

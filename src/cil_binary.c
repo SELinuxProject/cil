@@ -1526,62 +1526,62 @@ exit:
 	return rc;
 }
 
-int cil_filetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
+int cil_nametypetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_filetransition *cil_filetrans = node->data;
+	struct cil_nametypetransition *cil_nametypetrans = node->data;
 	type_datum_t *sepol_src = NULL;
 	type_datum_t *sepol_exec = NULL;
 	class_datum_t *sepol_proc = NULL;
 	type_datum_t *sepol_dest = NULL;
-	filename_trans_t *sepol_filetrans = cil_malloc(sizeof(*sepol_filetrans));
-	memset(sepol_filetrans, 0, sizeof(filename_trans_t));
+	filename_trans_t *sepol_nametypetrans = cil_malloc(sizeof(*sepol_nametypetrans));
+	memset(sepol_nametypetrans, 0, sizeof(filename_trans_t));
 
-	key = ((struct cil_symtab_datum *)cil_filetrans->src)->name;
+	key = ((struct cil_symtab_datum *)cil_nametypetrans->src)->name;
 	sepol_src = hashtab_search(pdb->p_types.table, key);
 	if (sepol_src == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_filetrans->stype = sepol_src->s.value;
+	sepol_nametypetrans->stype = sepol_src->s.value;
 
-	key = ((struct cil_symtab_datum *)cil_filetrans->exec)->name;
+	key = ((struct cil_symtab_datum *)cil_nametypetrans->exec)->name;
 	sepol_exec = hashtab_search(pdb->p_types.table, key);
 	if (sepol_exec == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_filetrans->ttype = sepol_exec->s.value;
+	sepol_nametypetrans->ttype = sepol_exec->s.value;
 
-	key = ((struct cil_symtab_datum *)cil_filetrans->proc)->name;
+	key = ((struct cil_symtab_datum *)cil_nametypetrans->proc)->name;
 	sepol_proc = hashtab_search(pdb->p_classes.table, key);
 	if (sepol_proc == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_filetrans->tclass = sepol_proc->s.value;
+	sepol_nametypetrans->tclass = sepol_proc->s.value;
 
-	key = ((struct cil_symtab_datum *)cil_filetrans->dest)->name;
+	key = ((struct cil_symtab_datum *)cil_nametypetrans->dest)->name;
 	sepol_dest = hashtab_search(pdb->p_types.table, key);
 	if (sepol_dest == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_filetrans->otype = sepol_dest->s.value;
+	sepol_nametypetrans->otype = sepol_dest->s.value;
 
-	sepol_filetrans->name = cil_strdup(cil_filetrans->path_str);
+	sepol_nametypetrans->name = cil_strdup(cil_nametypetrans->path_str);
 
 	if (pdb->filename_trans == NULL) {
-		pdb->filename_trans = sepol_filetrans;
+		pdb->filename_trans = sepol_nametypetrans;
 	} else {
-		pdb->filename_trans->next = sepol_filetrans;
+		pdb->filename_trans->next = sepol_nametypetrans;
 	}
 
 	return SEPOL_OK;
 
 exit:
-	free(sepol_filetrans);
+	free(sepol_nametypetrans);
 	return rc;
 
 }
@@ -2780,8 +2780,8 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 		case CIL_ROLEALLOW:
 			rc = cil_roleallow_to_policydb(pdb, node);
 			break;
-		case CIL_FILETRANSITION:
-			rc = cil_filetransition_to_policydb(pdb, node);
+		case CIL_NAMETYPETRANSITION:
+			rc = cil_nametypetransition_to_policydb(pdb, node);
 			break;
 		case CIL_CONSTRAIN:
 			rc = cil_constrain_to_policydb(pdb, node);

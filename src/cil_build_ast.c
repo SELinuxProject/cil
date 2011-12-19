@@ -2854,7 +2854,7 @@ void cil_destroy_typepermissive(struct cil_typepermissive *typeperm)
 	free(typeperm);
 }
 
-int cil_gen_filetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_nametypetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -2866,7 +2866,7 @@ int cil_gen_filetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_filetransition *filetrans = NULL;
+	struct cil_nametypetransition *nametypetrans = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL ) {
@@ -2875,51 +2875,51 @@ int cil_gen_filetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 
 	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Invalid filetransition declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
+		cil_log(CIL_ERR, "Invalid nametypetransition declaration (%s, line: %d)\n", parse_current->path, parse_current->line);
 		goto exit;
 	}
 
-	cil_filetransition_init(&filetrans);
+	cil_nametypetransition_init(&nametypetrans);
 
-	filetrans->src_str = cil_strdup(parse_current->next->data);
-	filetrans->exec_str = cil_strdup(parse_current->next->next->data);
-	filetrans->proc_str = cil_strdup(parse_current->next->next->next->data);
-	filetrans->dest_str = cil_strdup(parse_current->next->next->next->next->data);
-	filetrans->path_str = cil_strdup(parse_current->next->next->next->next->next->data);
+	nametypetrans->path_str = cil_strdup(parse_current->next->data);
+	nametypetrans->src_str = cil_strdup(parse_current->next->next->data);
+	nametypetrans->exec_str = cil_strdup(parse_current->next->next->next->data);
+	nametypetrans->proc_str = cil_strdup(parse_current->next->next->next->next->data);
+	nametypetrans->dest_str = cil_strdup(parse_current->next->next->next->next->next->data);
 
-	ast_node->data = filetrans;
-	ast_node->flavor = CIL_FILETRANSITION;
+	ast_node->data = nametypetrans;
+	ast_node->flavor = CIL_NAMETYPETRANSITION;
 
 	return SEPOL_OK;
 
 exit:
-	cil_destroy_filetransition(filetrans);
+	cil_destroy_nametypetransition(nametypetrans);
 	return rc;
 }
 
-void cil_destroy_filetransition(struct cil_filetransition *filetrans)
+void cil_destroy_nametypetransition(struct cil_nametypetransition *nametypetrans)
 {
-	if (filetrans == NULL) {
+	if (nametypetrans == NULL) {
 		return;
 	}
 
-	if (filetrans->src_str != NULL) {
-		free(filetrans->src_str);
+	if (nametypetrans->src_str != NULL) {
+		free(nametypetrans->src_str);
 	}
-	if (filetrans->exec_str != NULL) {
-		free(filetrans->exec_str);
+	if (nametypetrans->exec_str != NULL) {
+		free(nametypetrans->exec_str);
 	}
-	if (filetrans->proc_str != NULL) {
-		free(filetrans->proc_str);
+	if (nametypetrans->proc_str != NULL) {
+		free(nametypetrans->proc_str);
 	}
-	if (filetrans->dest_str != NULL) {
-		free(filetrans->dest_str);
+	if (nametypetrans->dest_str != NULL) {
+		free(nametypetrans->dest_str);
 	}
-	if (filetrans->path_str != NULL) {
-		free(filetrans->path_str);
+	if (nametypetrans->path_str != NULL) {
+		free(nametypetrans->path_str);
 	}
 
-	free(filetrans);
+	free(nametypetrans);
 }
 
 int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -5745,10 +5745,10 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			cil_log(CIL_ERR, "cil_gen_typepermissive failed, rc: %d\n", rc);
 			goto exit;
 		}
-	} else if (!strcmp(parse_current->data, CIL_KEY_FILETRANSITION)) {
-		rc = cil_gen_filetransition(db, parse_current, ast_node);
+	} else if (!strcmp(parse_current->data, CIL_KEY_NAMETYPETRANSITION)) {
+		rc = cil_gen_nametypetransition(db, parse_current, ast_node);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "cil_gen_filetransition failed, rc: %d\n", rc);
+			cil_log(CIL_ERR, "cil_gen_nametypetransition failed, rc: %d\n", rc);
 			goto exit;
 		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_RANGETRANSITION)) {

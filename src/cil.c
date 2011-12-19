@@ -364,8 +364,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPEPERMISSIVE:
 		cil_destroy_typepermissive(*data);
 		break;
-	case CIL_FILETRANSITION:
-		cil_destroy_filetransition(*data);
+	case CIL_NAMETYPETRANSITION:
+		cil_destroy_nametypetransition(*data);
 		break;
 	case CIL_RANGETRANSITION:
 		cil_destroy_rangetransition(*data);
@@ -658,8 +658,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		break;
 	case CIL_TYPEBOUNDS:
 		return CIL_KEY_TYPEBOUNDS;
-	case CIL_FILETRANSITION:
-		return CIL_KEY_FILETRANSITION;
+	case CIL_NAMETYPETRANSITION:
+		return CIL_KEY_NAMETYPETRANSITION;
 	case CIL_RANGETRANSITION:
 		return CIL_KEY_RANGETRANSITION;
 	case CIL_TYPEPERMISSIVE:
@@ -1600,19 +1600,19 @@ void cil_typepermissive_init(struct cil_typepermissive **typeperm)
 	(*typeperm)->type = NULL;
 }
 
-void cil_filetransition_init(struct cil_filetransition **filetrans)
+void cil_nametypetransition_init(struct cil_nametypetransition **nametypetrans)
 {
-	*filetrans = cil_malloc(sizeof(**filetrans));
+	*nametypetrans = cil_malloc(sizeof(**nametypetrans));
 
-	(*filetrans)->src_str = NULL;
-	(*filetrans)->src = NULL;
-	(*filetrans)->exec_str = NULL;
-	(*filetrans)->exec = NULL;
-	(*filetrans)->proc_str = NULL;
-	(*filetrans)->proc = NULL;
-	(*filetrans)->dest_str = NULL;
-	(*filetrans)->dest = NULL;
-	(*filetrans)->path_str = NULL;
+	(*nametypetrans)->src_str = NULL;
+	(*nametypetrans)->src = NULL;
+	(*nametypetrans)->exec_str = NULL;
+	(*nametypetrans)->exec = NULL;
+	(*nametypetrans)->proc_str = NULL;
+	(*nametypetrans)->proc = NULL;
+	(*nametypetrans)->dest_str = NULL;
+	(*nametypetrans)->dest = NULL;
+	(*nametypetrans)->path_str = NULL;
 }
 
 void cil_rangetransition_init(struct cil_rangetransition **rangetrans)

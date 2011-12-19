@@ -858,29 +858,29 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 				return;
 			}
-			case CIL_FILETRANSITION: {
-				struct cil_filetransition *filetrans = node->data;
-				cil_log(CIL_INFO, "FILETRANSITION:");
+			case CIL_NAMETYPETRANSITION: {
+				struct cil_nametypetransition *nametypetrans = node->data;
+				cil_log(CIL_INFO, "NAMETYPETRANSITION:");
 
-				if (filetrans->src != NULL) {
-					cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)filetrans->src)->name);
+				if (nametypetrans->src != NULL) {
+					cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)nametypetrans->src)->name);
 				} else {
-					cil_log(CIL_INFO, " %s", filetrans->src_str);
+					cil_log(CIL_INFO, " %s", nametypetrans->src_str);
 				}
 
-				if (filetrans->exec != NULL) {
-					cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)filetrans->exec)->name);
+				if (nametypetrans->exec != NULL) {
+					cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)nametypetrans->exec)->name);
 				} else {
-					cil_log(CIL_INFO, " %s", filetrans->exec_str);
+					cil_log(CIL_INFO, " %s", nametypetrans->exec_str);
 				}
 
-				if (filetrans->proc != NULL) {
-					cil_log(CIL_INFO, " %s", filetrans->proc->datum.name);
+				if (nametypetrans->proc != NULL) {
+					cil_log(CIL_INFO, " %s", nametypetrans->proc->datum.name);
 				} else {
-					cil_log(CIL_INFO, " %s", filetrans->proc_str);
+					cil_log(CIL_INFO, " %s", nametypetrans->proc_str);
 				}
 
-				cil_log(CIL_INFO, " %s\n", filetrans->path_str);
+				cil_log(CIL_INFO, " %s\n", nametypetrans->path_str);
 				return;
 			}
 			case CIL_RANGETRANSITION: {

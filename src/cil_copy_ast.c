@@ -956,12 +956,12 @@ int cil_copy_roletransition(__attribute__((unused)) struct cil_db *db, void *dat
 	return SEPOL_OK;
 }
 
-int cil_copy_filetransition(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+int cil_copy_nametypetransition(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
-	struct cil_filetransition *orig = data;
-	struct cil_filetransition *new = NULL;
+	struct cil_nametypetransition *orig = data;
+	struct cil_nametypetransition *new = NULL;
 
-	cil_filetransition_init(&new);
+	cil_nametypetransition_init(&new);
 
 	new->src_str = cil_strdup(orig->src_str);
 	new->exec_str = cil_strdup(orig->exec_str);
@@ -2365,8 +2365,8 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_ROLETRANSITION:
 		copy_func = &cil_copy_roletransition;
 		break;
-	case CIL_FILETRANSITION:
-		copy_func = &cil_copy_filetransition;
+	case CIL_NAMETYPETRANSITION:
+		copy_func = &cil_copy_nametypetransition;
 		break;
 	case CIL_RANGETRANSITION:
 		copy_func = &cil_copy_rangetransition;
