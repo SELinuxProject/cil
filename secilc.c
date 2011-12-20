@@ -39,7 +39,7 @@
 
 void usage(char *prog)
 {
-	printf("Usage: %s [-v|--verbose] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown]<files> [-D|--disable-dontaudit]...\n", prog);
+	printf("Usage: %s [-v|--verbose] [-o|--output=<filename>] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown=<action>] [-D|--disable-dontaudit] <files>\n", prog);
 	exit(1);
 }
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	char *buffer = NULL;
 	struct stat filedata;
 	uint32_t file_size;
-	char output[10];
+	char *output = NULL;
 	struct cil_db *db = NULL;
 	int target = SEPOL_TARGET_SELINUX;
 	int mls = 0;
@@ -74,12 +74,13 @@ int main(int argc, char *argv[])
 		{"policyversion", required_argument, 0, 'c'},
 		{"handle-unknown", required_argument, 0, 'U'},
 		{"disable-dontaudit", no_argument, 0, 'D'},
+		{"output", required_argument, 0, 'o'},
 		{0, 0, 0, 0}
 	};
 	int i;
 
 	while (1) {
-		opt_char = getopt_long(argc, argv, "U:hvt:MDc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "o:U:hvt:MDc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
@@ -127,6 +128,9 @@ int main(int argc, char *argv[])
 				}
 			case 'D':
 				disable_dontaudit = 1;
+				break;
+			case 'o':
+				output = strdup(optarg);
 				break;
 			case 'h':
 				usage(argv[0]);
@@ -209,11 +213,25 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
+	if (output == NULL) {
+		int size = snprintf(NULL, 0, "policy.%d", policyvers);
+		output = malloc((size + 1) * sizeof(char));
+		if (output == NULL) {
+			fprintf(stderr, "Failed to create output filename\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		if (snprintf(output, size + 1, "policy.%d", policyvers) != size) {
+			fprintf(stderr, "Failed to create output filename\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	}
+
 	if (log_level >= CIL_INFO) {
 		fprintf(stderr, "Writing Binary: %s...\n", output);
 	}
 
-	snprintf(output, 10, "policy.%d", policyvers);
 	binary = fopen(output, "w");
 	if (binary == NULL) {
 		fprintf(stderr, "Failure opening binary file for writing\n");
@@ -271,6 +289,7 @@ exit:
 		fclose(file);
 	}
 	free(buffer);
+	free(output);
 	cil_db_destroy(&db);
 	sepol_policydb_free(pdb);
 	sepol_policy_file_free(pf);
