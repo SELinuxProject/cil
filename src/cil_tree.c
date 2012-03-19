@@ -35,6 +35,16 @@
 #include "cil_list.h"
 #include "cil_parser.h"
 
+void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
+void cil_tree_print_permset(struct cil_permset *permset);
+void cil_tree_print_classpermset(struct cil_classpermset *csp);
+void cil_tree_print_level(struct cil_level *level);
+void cil_tree_print_levelrange(struct cil_levelrange *lvlrange);
+void cil_tree_print_context(struct cil_context *context);
+void cil_tree_print_expr_tree(struct cil_tree_node *expr_root);
+void cil_tree_print_constrain(struct cil_constrain *cons);
+void cil_tree_print_node(struct cil_tree_node *node);
+
 int cil_tree_init(struct cil_tree **tree)
 {
 	struct cil_tree *new_tree = cil_malloc(sizeof(*new_tree));
@@ -115,7 +125,15 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
 		return;
 	}
 
-	cil_destroy_data(&(*node)->data, (*node)->flavor);
+	if ((*node)->flavor >= CIL_MIN_DECLARATIVE) {
+		cil_symtab_datum_remove((*node)->data, *node);
+		struct cil_symtab_datum *datum = (*node)->data;
+		if (datum->nodes != NULL && datum->nodes->head == NULL) {
+			cil_destroy_data(&(*node)->data, (*node)->flavor);
+		}
+	} else {
+		cil_destroy_data(&(*node)->data, (*node)->flavor);
+	}
 	free(*node);
 	*node = NULL;
 }
@@ -1425,8 +1443,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					cil_log(CIL_INFO, ", args: ( ");
 					struct cil_list_item *item = call->args->head;
 					while(item != NULL) {
-						if (((struct cil_args*)item->data)->arg != NULL) {
-							cil_tree_print_node(((struct cil_args*)item->data)->arg);
+						struct cil_symtab_datum *datum = ((struct cil_args*)item->data)->arg;
+						if (datum != NULL) {
+							if (datum->nodes != NULL && datum->nodes->head != NULL) {
+								cil_tree_print_node((struct cil_tree_node*)datum->nodes->head->data);
+							}
 						} else if (((struct cil_args*)item->data)->arg_str != NULL) {
 							switch (item->flavor) {
 							case CIL_TYPE: cil_log(CIL_INFO, "type:"); break;

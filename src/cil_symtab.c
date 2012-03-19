@@ -34,6 +34,7 @@
 #include <sepol/policydb/hashtab.h>
 #include <sepol/policydb/symtab.h>
 
+#include "cil_internal.h"
 #include "cil_tree.h"
 #include "cil_symtab.h"
 #include "cil_mem.h"
@@ -49,13 +50,16 @@ void cil_symtab_init(symtab_t *symtab, unsigned int size)
 void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 {
 	datum->name = NULL;
-	datum->node = NULL;
+	cil_list_init(&datum->nodes);
 	datum->state = CIL_STATE_ENABLED;
 }
 
 void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
 {
-	free(datum.name);
+	if (datum.nodes != NULL && datum.nodes->head == NULL) {
+		free(datum.name);
+		cil_list_destroy(&datum.nodes, 0);
+	}
 }
 
 /* This both initializes the datum and inserts it into the symtab.
@@ -63,17 +67,26 @@ void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node)
 {
 	char *newkey = cil_strdup(key);
+	struct cil_list_item *item = NULL;
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
-	if (rc != SEPOL_OK) {
+	int rc2 = SEPOL_ERR;
+	if (rc != SEPOL_OK && rc != SEPOL_EEXIST) {
 		free(newkey);
 		goto exit;
 	} else {
-		datum->node = node;
+		cil_list_item_init(&item);
+		item->flavor = CIL_AST_NODE;
+		item->data = node;
+		rc2 = cil_list_append_item(datum->nodes, item);
+		if (rc2 != SEPOL_OK) {
+			free(newkey);
+			cil_list_item_destroy(&item, CIL_FALSE);
+			rc = rc2;
+			goto exit;
+		}
 		datum->name = newkey;
 	}
 	
-	return SEPOL_OK;
-
 exit:
 	return rc;
 }
@@ -84,34 +97,40 @@ void cil_symtab_remove_datum_destroy(__attribute__((unused))hashtab_key_t key, h
 	free(datum);
 }
 
-int cil_symtab_remove(symtab_t *symtab, hashtab_key_t key)
+void cil_symtab_datum_remove(struct cil_symtab_datum *datum, struct cil_tree_node *node)
 {
-	int rc = hashtab_remove(symtab->table, key, &cil_symtab_remove_datum_destroy, NULL);
-	if (rc != SEPOL_OK) {
-		goto exit;
+	if (datum->nodes != NULL) {
+		struct cil_list_item *item = datum->nodes->head;
+		struct cil_list_item *previous = item;
+		while (item != NULL) {
+			if (item->data == node) {
+				if (previous != item) {
+					previous->next = item->next;
+				} else {
+					datum->nodes->head = item->next;
+				}
+				cil_list_item_destroy(&item, 0);
+				break;
+			}
+			previous = item;
+			item = item->next;
+		}
 	}
-
-	rc = SEPOL_OK;
-exit:
-	return rc;
 }
 
-int cil_symtab_get_node(symtab_t *symtab, char *key, struct cil_tree_node **node)
+int cil_symtab_get_datum(symtab_t *symtab, char *key, struct cil_symtab_datum **datum)
 {
-	struct cil_symtab_datum *datum = NULL;
 	int rc = SEPOL_ERR;
 
-	if (symtab == NULL || symtab->table == NULL || key == NULL || node == NULL) {
+	if (symtab == NULL || symtab->table == NULL || key == NULL || datum == NULL) {
 		goto exit;
 	}
 
-	datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
-	if (datum == NULL || datum->state != CIL_STATE_ENABLED) {
+	*datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
+	if (*datum == NULL || (*datum)->state != CIL_STATE_ENABLED) {
 		rc = SEPOL_ENOENT;
 		goto exit;
 	}
-
-	*node = datum->node;
 
 	return SEPOL_OK;
 

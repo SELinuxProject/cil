@@ -54,7 +54,7 @@ struct cil_args_resolve {
 
 static int __cil_resolve_perm_list(void *class, struct cil_list *perm_list_str, struct cil_list *res_list_perms)
 {
-	struct cil_tree_node *perm_node = NULL;
+	struct cil_symtab_datum *perm_datum = NULL;
 	struct cil_list_item *perm = perm_list_str->head;
 	struct cil_list_item *list_item = NULL;
 	struct cil_list_item *list_tail = NULL;
@@ -62,7 +62,7 @@ static int __cil_resolve_perm_list(void *class, struct cil_list *perm_list_str, 
 	symtab_t *perms_symtab = NULL;
 	int rc = SEPOL_ERR;
 
-	class_node = ((struct cil_symtab_datum*)class)->node;
+	class_node = ((struct cil_symtab_datum*)class)->nodes->head->data;
 	if (class_node->flavor == CIL_CLASS) {
 		perms_symtab = &((struct cil_class*)class)->perms;
 	} else {
@@ -70,11 +70,11 @@ static int __cil_resolve_perm_list(void *class, struct cil_list *perm_list_str, 
 	}
 
 	while (perm != NULL) {
-		rc = cil_symtab_get_node(perms_symtab, (char*)perm->data, &perm_node);
+		rc = cil_symtab_get_datum(perms_symtab, (char*)perm->data, &perm_datum);
 		if (rc == SEPOL_ENOENT) {
 			if (class_node->flavor == CIL_CLASS && ((struct cil_class*)class)->common != NULL) {
 				symtab_t *com_perms_symtab = &((struct cil_class*)class)->common->perms;
-				rc = cil_symtab_get_node(com_perms_symtab, (char*)perm->data, &perm_node);
+				rc = cil_symtab_get_datum(com_perms_symtab, (char*)perm->data, &perm_datum);
 				if (rc != SEPOL_OK) {
 					cil_log(CIL_ERR, "Failed to find perm in class or common symtabs\n");
 					goto exit;
@@ -89,7 +89,7 @@ static int __cil_resolve_perm_list(void *class, struct cil_list *perm_list_str, 
 
 		cil_list_item_init(&list_item);
 		list_item->flavor = CIL_PERM;
-		list_item->data = perm_node->data;
+		list_item->data = perm_datum;
 		if (res_list_perms->head == NULL) {
 			res_list_perms->head = list_item;
 		} else {
@@ -108,16 +108,19 @@ exit:
 
 int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classpermset *cps, void *extra_args)
 {
+	struct cil_symtab_datum *class_datum = NULL;
 	struct cil_tree_node *class_node = NULL;
-	struct cil_tree_node *permset_node = NULL;
+	struct cil_symtab_datum *permset_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, cps->class_str, CIL_SYM_CLASSES, extra_args, &class_node);
+	rc = cil_resolve_name(current, cps->class_str, CIL_SYM_CLASSES, extra_args, &class_datum);
 	if (rc != SEPOL_OK) {
 		goto resolve_classpermset_out;
 	}
 
-	cps->class = class_node->data;
+	class_node = class_datum->nodes->head->data;
+
+	cps->class = class_datum;
 	cps->flavor = class_node->flavor;
 
 	/* Reset for re-resolve */
@@ -126,11 +129,12 @@ int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classperm
 	}
 
 	if (cps->permset_str != NULL) {
-		rc = cil_resolve_name(current, cps->permset_str, CIL_SYM_PERMSETS, extra_args, &permset_node);
+		rc = cil_resolve_name(current, cps->permset_str, CIL_SYM_PERMSETS, extra_args, &permset_datum);
 		if (rc != SEPOL_OK) {
 			goto resolve_classpermset_out;
 		}
-		cps->permset = (struct cil_permset*)permset_node->data;
+
+		cps->permset = (struct cil_permset*)permset_datum;
 	}
 
 	cil_list_init(&cps->perms);
@@ -151,41 +155,41 @@ int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
 
-	struct cil_avrule *rule = (struct cil_avrule*)current->data;
-	struct cil_tree_node *src_node = NULL;
-	struct cil_tree_node *tgt_node = NULL;
-	struct cil_tree_node *cps_node = NULL;
+	struct cil_avrule *rule = current->data;
+	struct cil_symtab_datum *src_datum = NULL;
+	struct cil_symtab_datum *tgt_datum = NULL;
+	struct cil_symtab_datum *cps_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (args != NULL) {
 		db = args->db;
 	}
 
-	rc = cil_resolve_name(current, rule->src_str, CIL_SYM_TYPES, args, &src_node);
+	rc = cil_resolve_name(current, rule->src_str, CIL_SYM_TYPES, args, &src_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	rule->src = src_node->data;
+	rule->src = src_datum;
 
 	if (!strcmp(rule->tgt_str, CIL_KEY_SELF)) {
 		rule->tgt = db->selftype;
 	} else {
-		rc = cil_resolve_name(current, rule->tgt_str, CIL_SYM_TYPES, args, &tgt_node);
+		rc = cil_resolve_name(current, rule->tgt_str, CIL_SYM_TYPES, args, &tgt_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		rule->tgt = tgt_node->data;
+		rule->tgt = tgt_datum;
 	}
 
 	if (rule->classpermset_str != NULL) {
-		rc = cil_resolve_name(current, rule->classpermset_str, CIL_SYM_CLASSPERMSETS, args, &cps_node);
+		rc = cil_resolve_name(current, rule->classpermset_str, CIL_SYM_CLASSPERMSETS, args, &cps_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		rule->classpermset = (struct cil_classpermset*)cps_node->data;
+		rule->classpermset = (struct cil_classpermset*)cps_datum;
 
 		/* This could still be an anonymous classpermset even if classpermset_str is set, if classpermset_str is a param_str*/
-		if (rule->classpermset->datum.name == NULL) {
+		if (cps_datum->name == NULL) {
 			rc = cil_resolve_classpermset(current, rule->classpermset, args);
 			if (rc != SEPOL_OK) {
 				goto exit;
@@ -206,41 +210,45 @@ exit:
 
 int cil_resolve_type_rule(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_type_rule *rule = (struct cil_type_rule*)current->data;
-	struct cil_tree_node *src_node = NULL;
-	struct cil_tree_node *tgt_node = NULL;
-	struct cil_tree_node *obj_node = NULL;
+	struct cil_type_rule *rule = current->data;
+	struct cil_symtab_datum *src_datum = NULL;
+	struct cil_symtab_datum *tgt_datum = NULL;
+	struct cil_symtab_datum *obj_datum = NULL;
+	struct cil_symtab_datum *result_datum = NULL;
 	struct cil_tree_node *result_node = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, rule->src_str, CIL_SYM_TYPES, extra_args, &src_node);
+	rc = cil_resolve_name(current, rule->src_str, CIL_SYM_TYPES, extra_args, &src_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	rule->src = src_node->data;
+	rule->src = src_datum;
 
-	rc = cil_resolve_name(current, rule->tgt_str, CIL_SYM_TYPES, extra_args, &tgt_node);
+	rc = cil_resolve_name(current, rule->tgt_str, CIL_SYM_TYPES, extra_args, &tgt_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	rule->tgt = tgt_node->data;
+	rule->tgt = tgt_datum;
 
-	rc = cil_resolve_name(current, rule->obj_str, CIL_SYM_CLASSES, extra_args, &obj_node);
+	rc = cil_resolve_name(current, rule->obj_str, CIL_SYM_CLASSES, extra_args, &obj_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	rule->obj = (struct cil_class*)(obj_node->data);
+	rule->obj = (struct cil_class*)obj_datum;
 
-	rc = cil_resolve_name(current, rule->result_str, CIL_SYM_TYPES, extra_args, &result_node);
+	rc = cil_resolve_name(current, rule->result_str, CIL_SYM_TYPES, extra_args, &result_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	result_node = result_datum->nodes->head->data;
+
 	if (result_node->flavor != CIL_TYPE && result_node->flavor != CIL_TYPEALIAS) {
 		cil_log(CIL_ERR, "Type rule result must be a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	rule->result = result_node->data;
+	rule->result = result_datum;
 
 	return SEPOL_OK;
 
@@ -252,6 +260,7 @@ int cil_resolve_list(struct cil_list *str_list, struct cil_list *res_list, struc
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr_str = NULL;
+	struct cil_symtab_datum *res_datum = NULL;
 	struct cil_tree_node *res_node = NULL;
 	struct cil_list_item *new_item = NULL;
 
@@ -261,13 +270,15 @@ int cil_resolve_list(struct cil_list *str_list, struct cil_list *res_list, struc
 	}
 
 	for (curr_str = str_list->head; curr_str != NULL; curr_str = curr_str->next) {
-		rc = cil_resolve_name(current, (char*)curr_str->data, sym_index, extra_args, &res_node);
+		rc = cil_resolve_name(current, (char*)curr_str->data, sym_index, extra_args, &res_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 
+		res_node = res_datum->nodes->head->data;
+
 		cil_list_item_init(&new_item);
-		new_item->data = res_node->data;
+		new_item->data = res_datum;
 		new_item->flavor = res_node->flavor;
 
 		cil_list_append_item(res_list, new_item);
@@ -281,22 +292,27 @@ exit:
 
 int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_typeattributeset *attrtypes = (struct cil_typeattributeset*)current->data;
+	struct cil_typeattributeset *attrtypes = current->data;
+	struct cil_symtab_datum *attr_datum = NULL;
 	struct cil_tree_node *attr_node = NULL;
 	struct cil_typeattribute *attr = NULL;
 	struct cil_list_item *item = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, attrtypes->attr_str, CIL_SYM_TYPES, extra_args, &attr_node);
+	rc = cil_resolve_name(current, attrtypes->attr_str, CIL_SYM_TYPES, extra_args, &attr_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	attr_node = attr_datum->nodes->head->data;
+
 	if (attr_node->flavor != CIL_TYPEATTRIBUTE) {
 		rc = SEPOL_ERR;
 		cil_log(CIL_ERR, "Attribute type not an attribute\n");
 		goto exit;
 	}
-	attr = attr_node->data;
+
+	attr = (struct cil_typeattribute*)attr_datum;
 
 	rc = cil_resolve_expr_stack(attrtypes->expr_stack, current, extra_args);
 	if (rc != SEPOL_OK) {
@@ -323,20 +339,24 @@ exit:
 
 int cil_resolve_typealias(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_typealias *alias = (struct cil_typealias*)current->data;
+	struct cil_typealias *alias = current->data;
+	struct cil_symtab_datum *type_datum = NULL;
 	struct cil_tree_node *type_node = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, alias->type_str, CIL_SYM_TYPES, extra_args, &type_node);
+	rc = cil_resolve_name(current, alias->type_str, CIL_SYM_TYPES, extra_args, &type_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	type_node = type_datum->nodes->head->data;
+
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
 		cil_log(CIL_ERR, "Typealias must resolve to a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	alias->type = type_node->data;
+	alias->type = type_datum;
 
 	return SEPOL_OK;
 
@@ -354,7 +374,7 @@ int cil_resolve_typealias_to_type(struct cil_tree_node *current)
 	struct cil_tree_node *a1_node = NULL;
 	enum cil_flavor flavor;
 
-	a1_node = a1->datum.node;
+	a1_node = a1->datum.nodes->head->data;
 	flavor = a1_node->flavor;
 
 	while (1) {
@@ -362,7 +382,7 @@ int cil_resolve_typealias_to_type(struct cil_tree_node *current)
 			break;
 		}
 		a1 = a1->type;
-		a1_node = a1->datum.node;
+		a1_node = a1->datum.nodes->head->data;
 		flavor = a1_node->flavor;
 
 		steps += 1;
@@ -390,40 +410,48 @@ exit:
 
 int cil_resolve_typebounds(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_typebounds *typebnds = (struct cil_typebounds*)current->data;
+	struct cil_typebounds *typebnds = current->data;
+	struct cil_symtab_datum *type_datum = NULL;
 	struct cil_tree_node *type_node = NULL;
 	struct cil_type *type = NULL;
+	struct cil_symtab_datum *bounds_datum = NULL;
 	struct cil_tree_node *bounds_node = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, typebnds->type_str, CIL_SYM_TYPES, extra_args, &type_node);
+	rc = cil_resolve_name(current, typebnds->type_str, CIL_SYM_TYPES, extra_args, &type_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	type_node = type_datum->nodes->head->data;
+
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
 		cil_log(CIL_ERR, "Typebounds must be a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 	
-	rc = cil_resolve_name(current, typebnds->bounds_str, CIL_SYM_TYPES, extra_args, &bounds_node);
+	rc = cil_resolve_name(current, typebnds->bounds_str, CIL_SYM_TYPES, extra_args, &bounds_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	bounds_node = bounds_datum->nodes->head->data;
+
 	if (bounds_node->flavor != CIL_TYPE && bounds_node->flavor != CIL_TYPEALIAS) {
 		cil_log(CIL_ERR, "Typebounds must be a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	type = type_node->data;
+	type = (struct cil_type*)type_datum;
 	if (type->bounds != NULL) {
 		cil_log(CIL_ERR, "Type cannot bind more than one type\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	type->bounds = bounds_node->data;
+	type->bounds = bounds_datum;
 
 	return SEPOL_OK;
 
@@ -433,14 +461,17 @@ exit:
 
 int cil_resolve_typepermissive(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_typepermissive *typeperm = (struct cil_typepermissive*)current->data;
+	struct cil_typepermissive *typeperm = current->data;
+	struct cil_symtab_datum *type_datum = NULL;
 	struct cil_tree_node *type_node = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, typeperm->type_str, CIL_SYM_TYPES, extra_args, &type_node);
+	rc = cil_resolve_name(current, typeperm->type_str, CIL_SYM_TYPES, extra_args, &type_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	type_node = type_datum->nodes->head->data;
 
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
 		cil_log(CIL_ERR, "Typepermissive must be a type or type alias\n");
@@ -448,7 +479,7 @@ int cil_resolve_typepermissive(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
-	typeperm->type = type_node->data;
+	typeperm->type = type_datum;
 
 	return SEPOL_OK;
 
@@ -458,41 +489,45 @@ exit:
 
 int cil_resolve_nametypetransition(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_nametypetransition *nametypetrans = (struct cil_nametypetransition*)current->data;
-	struct cil_tree_node *src_node = NULL;
-	struct cil_tree_node *exec_node = NULL;
-	struct cil_tree_node *proc_node = NULL;
+	struct cil_nametypetransition *nametypetrans = current->data;
+	struct cil_symtab_datum *src_datum = NULL;
+	struct cil_symtab_datum *exec_datum = NULL;
+	struct cil_symtab_datum *proc_datum = NULL;
+	struct cil_symtab_datum *dest_datum = NULL;
 	struct cil_tree_node *dest_node = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, nametypetrans->src_str, CIL_SYM_TYPES, extra_args, &src_node);
+	rc = cil_resolve_name(current, nametypetrans->src_str, CIL_SYM_TYPES, extra_args, &src_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	nametypetrans->src = src_node->data;
+	nametypetrans->src = src_datum;
 
-	rc = cil_resolve_name(current, nametypetrans->exec_str, CIL_SYM_TYPES, extra_args, &exec_node);
+	rc = cil_resolve_name(current, nametypetrans->exec_str, CIL_SYM_TYPES, extra_args, &exec_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	nametypetrans->exec = exec_node->data;
+	nametypetrans->exec = exec_datum;
 
-	rc = cil_resolve_name(current, nametypetrans->proc_str, CIL_SYM_CLASSES, extra_args, &proc_node);
+	rc = cil_resolve_name(current, nametypetrans->proc_str, CIL_SYM_CLASSES, extra_args, &proc_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	nametypetrans->proc = proc_node->data;
+	nametypetrans->proc = (struct cil_class*)proc_datum;
 
-	rc = cil_resolve_name(current, nametypetrans->dest_str, CIL_SYM_TYPES, extra_args, &dest_node);
+	rc = cil_resolve_name(current, nametypetrans->dest_str, CIL_SYM_TYPES, extra_args, &dest_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	dest_node = dest_datum->nodes->head->data;
+
 	if (dest_node->flavor != CIL_TYPE && dest_node->flavor != CIL_TYPEALIAS) {
 		cil_log(CIL_ERR, "nametransition result is not a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	nametypetrans->dest = dest_node->data;
+	nametypetrans->dest = dest_datum;
 
 	return SEPOL_OK;
 
@@ -502,37 +537,37 @@ exit:
 
 int cil_resolve_rangetransition(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_rangetransition *rangetrans = (struct cil_rangetransition*)current->data;
-	struct cil_tree_node *src_node = NULL;
-	struct cil_tree_node *exec_node = NULL;
-	struct cil_tree_node *obj_node = NULL;
-	struct cil_tree_node *range_node = NULL;
+	struct cil_rangetransition *rangetrans = current->data;
+	struct cil_symtab_datum *src_datum = NULL;
+	struct cil_symtab_datum *exec_datum = NULL;
+	struct cil_symtab_datum *obj_datum = NULL;
+	struct cil_symtab_datum *range_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, rangetrans->src_str, CIL_SYM_TYPES, extra_args, &src_node);
+	rc = cil_resolve_name(current, rangetrans->src_str, CIL_SYM_TYPES, extra_args, &src_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	rangetrans->src = src_node->data;
+	rangetrans->src = src_datum;
 
-	rc = cil_resolve_name(current, rangetrans->exec_str, CIL_SYM_TYPES, extra_args, &exec_node);
+	rc = cil_resolve_name(current, rangetrans->exec_str, CIL_SYM_TYPES, extra_args, &exec_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	rangetrans->exec = exec_node->data;
+	rangetrans->exec = exec_datum;
 
-	rc = cil_resolve_name(current, rangetrans->obj_str, CIL_SYM_CLASSES, extra_args, &obj_node);
+	rc = cil_resolve_name(current, rangetrans->obj_str, CIL_SYM_CLASSES, extra_args, &obj_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	rangetrans->obj = (struct cil_class*)obj_node->data;
+	rangetrans->obj = (struct cil_class*)obj_datum;
 
 	if (rangetrans->range_str != NULL) {
-		rc = cil_resolve_name(current, rangetrans->range_str, CIL_SYM_LEVELRANGES, extra_args, &range_node);
+		rc = cil_resolve_name(current, rangetrans->range_str, CIL_SYM_LEVELRANGES, extra_args, &range_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		rangetrans->range = (struct cil_levelrange*)range_node->data;
+		rangetrans->range = (struct cil_levelrange*)range_datum;
 
 		/* This could still be an anonymous levelrange even if range_str is set, if range_str is a param_str*/
 		if (rangetrans->range->datum.name == NULL) {
@@ -556,28 +591,28 @@ exit:
 
 int cil_resolve_classcommon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_classcommon *clscom = (struct cil_classcommon*)current->data;
-	struct cil_tree_node *class_node = NULL;
-	struct cil_tree_node *common_node = NULL;
+	struct cil_classcommon *clscom = current->data;
+	struct cil_symtab_datum *class_datum = NULL;
+	struct cil_symtab_datum *common_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, clscom->class_str, CIL_SYM_CLASSES, extra_args, &class_node);
+	rc = cil_resolve_name(current, clscom->class_str, CIL_SYM_CLASSES, extra_args, &class_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	rc = cil_resolve_name(current, clscom->common_str, CIL_SYM_COMMONS, extra_args, &common_node);
+	rc = cil_resolve_name(current, clscom->common_str, CIL_SYM_COMMONS, extra_args, &common_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	if (((struct cil_class*)class_node->data)->common != NULL) {
+	if (((struct cil_class*)class_datum)->common != NULL) {
 		cil_log(CIL_ERR, "class cannot be associeated with more than one common\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	((struct cil_class*)class_node->data)->common = common_node->data;
+	((struct cil_class*)class_datum)->common = (struct cil_common*)common_datum;
 
 	return SEPOL_OK;
 
@@ -587,25 +622,25 @@ exit:
 
 int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_classmapping *mapping = (struct cil_classmapping*)current->data;
+	struct cil_classmapping *mapping = current->data;
 	struct cil_classmap *map = NULL;
 	struct cil_classmap_perm *cmp = NULL;
-	struct cil_tree_node *tmp = NULL;
 	struct cil_list_item *curr_cps = NULL;
 	struct cil_list_item *new_item = NULL;
+	struct cil_symtab_datum *datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, mapping->classmap_str, CIL_SYM_CLASSES, extra_args, &tmp);
+	rc = cil_resolve_name(current, mapping->classmap_str, CIL_SYM_CLASSES, extra_args, &datum);
 	if (rc != SEPOL_OK) {
 		goto resolve_classmapping_out;
 	}
-	map = tmp->data;
+	map = (struct cil_classmap*)datum;
 
-	rc = cil_symtab_get_node(&map->perms, mapping->classmap_perm_str, &tmp);
+	rc = cil_symtab_get_datum(&map->perms, mapping->classmap_perm_str, &datum);
 	if (rc != SEPOL_OK) {
 		goto resolve_classmapping_out;
 	}
-	cmp = tmp->data;
+	cmp = (struct cil_classmap_perm*)datum;
 
 	curr_cps = mapping->classpermsets_str->head;
 
@@ -618,20 +653,20 @@ int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 		new_item->flavor = CIL_CLASSPERMSET;
 
 		if (curr_cps->flavor == CIL_AST_STR) {
-			rc = cil_resolve_name(current, (char*)curr_cps->data, CIL_SYM_CLASSPERMSETS, extra_args, &tmp);
+			rc = cil_resolve_name(current, (char*)curr_cps->data, CIL_SYM_CLASSPERMSETS, extra_args, &datum);
 			if (rc != SEPOL_OK) {
 				goto resolve_classmapping_out;
 			}
 
 			/* This could still be an anonymous classpermset even if the flavor is CIL_AST_STR, if it is a param_str*/
-			if (((struct cil_classpermset*)tmp->data)->datum.name == NULL) {
-				rc = cil_resolve_classpermset(current, (struct cil_classpermset*)tmp->data, extra_args);
+			if (datum->name == NULL) {
+				rc = cil_resolve_classpermset(current, (struct cil_classpermset*)datum, extra_args);
 				if (rc != SEPOL_OK) {
 					goto resolve_classmapping_out;
 				}
 			}
 
-			new_item->data = tmp->data;
+			new_item->data = datum;
 
 		} else if (curr_cps->flavor == CIL_CLASSPERMSET) {
 			rc = cil_resolve_classpermset(current, (struct cil_classpermset*)curr_cps->data, extra_args);
@@ -654,7 +689,7 @@ resolve_classmapping_out:
 
 int cil_reset_class(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_class *class = (struct cil_class *)current->data;
+	struct cil_class *class = current->data;
 
 	/* during a re-resolve, we need to reset the common, so a classcommon
 	 * statement isn't seen as a duplicate */
@@ -678,7 +713,7 @@ int cil_reset_classmap_perm(struct cil_tree_node *current, __attribute__((unused
 
 int cil_reset_sens(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_sens *sens = (struct cil_sens *)current->data;
+	struct cil_sens *sens = current->data;
 	/* during a re-resolve, we need to reset the categories associated with
 	 * this sensitivity from a (sensitivitycategory) statement */
 	cil_list_destroy(&sens->catsets, CIL_FALSE);
@@ -689,7 +724,7 @@ int cil_reset_sens(struct cil_tree_node *current, __attribute__((unused)) void *
 
 int cil_reset_typeattr(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_typeattribute *attr = (struct cil_typeattribute*)current->data;
+	struct cil_typeattribute *attr = current->data;
 
 	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributetypes statement */
 	if (attr->expr_stack_list != NULL) {
@@ -711,7 +746,7 @@ int cil_reset_typeattr(struct cil_tree_node *current, __attribute__((unused)) vo
 
 int cil_reset_type(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_type *type = (struct cil_type*)current->data;
+	struct cil_type *type = current->data;
 
 	/* reset the bounds to NULL during a re-resolve */
 	type->bounds = NULL;
@@ -721,7 +756,7 @@ int cil_reset_type(struct cil_tree_node *current, __attribute__((unused)) void *
 
 int cil_reset_user(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_user *user = (struct cil_user*)current->data;
+	struct cil_user *user = current->data;
 
 	/* reset the bounds to NULL during a re-resolve */
 	user->bounds = NULL;
@@ -733,7 +768,7 @@ int cil_reset_user(struct cil_tree_node *current, __attribute__((unused)) void *
 
 int cil_reset_roleattr(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_roleattribute *attr = (struct cil_roleattribute*)current->data;
+	struct cil_roleattribute *attr = current->data;
 
 	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributeroles statement */
 	if (attr->expr_stack_list != NULL) {
@@ -755,7 +790,7 @@ int cil_reset_roleattr(struct cil_tree_node *current, __attribute__((unused)) vo
 
 int cil_reset_role(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_role *role = (struct cil_role*)current->data;
+	struct cil_role *role = current->data;
 
 	/* reset the bounds to NULL during a re-resolve */
 	role->bounds = NULL;
@@ -765,7 +800,7 @@ int cil_reset_role(struct cil_tree_node *current, __attribute__((unused)) void *
 
 int cil_reset_sid(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_sid *sid = (struct cil_sid *)current->data;
+	struct cil_sid *sid = current->data;
 	/* reset the context to NULL during a re-resolve */
 	sid->context = NULL;
 
@@ -774,23 +809,23 @@ int cil_reset_sid(struct cil_tree_node *current, __attribute__((unused)) void *e
 
 int cil_resolve_userrole(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_userrole *userrole = (struct cil_userrole*)current->data;
-	struct cil_tree_node *user_node = NULL;
-	struct cil_tree_node *role_node = NULL;
+	struct cil_userrole *userrole = current->data;
+	struct cil_symtab_datum *user_datum = NULL;
+	struct cil_symtab_datum *role_datum = NULL;
 	struct cil_list_item *role = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, userrole->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	rc = cil_resolve_name(current, userrole->user_str, CIL_SYM_USERS, extra_args, &user_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	userrole->user = user_node->data;
+	userrole->user = (struct cil_user*)user_datum;
 
-	rc = cil_resolve_name(current, userrole->role_str, CIL_SYM_ROLES, extra_args, &role_node);
+	rc = cil_resolve_name(current, userrole->role_str, CIL_SYM_ROLES, extra_args, &role_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	userrole->role = role_node->data;
+	userrole->role = (struct cil_role*)role_datum;
 
 	cil_list_item_init(&role);
 	role->flavor = CIL_ROLE;
@@ -811,24 +846,24 @@ exit:
 
 int cil_resolve_userlevel(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_userlevel *usrlvl = (struct cil_userlevel*)current->data;
-	struct cil_tree_node *user_node = NULL;
-	struct cil_tree_node *lvl_node = NULL;
+	struct cil_userlevel *usrlvl = current->data;
+	struct cil_symtab_datum *user_datum = NULL;
+	struct cil_symtab_datum *lvl_datum = NULL;
 	struct cil_user *user = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, usrlvl->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	rc = cil_resolve_name(current, usrlvl->user_str, CIL_SYM_USERS, extra_args, &user_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	user = user_node->data;
+	user = (struct cil_user*)user_datum;
 
 	if (usrlvl->level_str != NULL) {
-		rc = cil_resolve_name(current, usrlvl->level_str, CIL_SYM_LEVELS, extra_args, &lvl_node);
+		rc = cil_resolve_name(current, usrlvl->level_str, CIL_SYM_LEVELS, extra_args, &lvl_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		usrlvl->level = (struct cil_level*)lvl_node->data;
+		usrlvl->level = (struct cil_level*)lvl_datum;
 		user->dftlevel = usrlvl->level;
 
 		/* This could still be an anonymous level even if level_str is set, if level_str is a param_str*/
@@ -854,24 +889,24 @@ exit:
 
 int cil_resolve_userrange(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_userrange *userrange = (struct cil_userrange*)current->data;
-	struct cil_tree_node *user_node = NULL;
-	struct cil_tree_node *range_node = NULL;
+	struct cil_userrange *userrange = current->data;
+	struct cil_symtab_datum *user_datum = NULL;
+	struct cil_symtab_datum *range_datum = NULL;
 	struct cil_user *user = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, userrange->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	rc = cil_resolve_name(current, userrange->user_str, CIL_SYM_USERS, extra_args, &user_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	user = user_node->data;
+	user = (struct cil_user*)user_datum;
 
 	if (userrange->range_str != NULL) {
-		rc = cil_resolve_name(current, userrange->range_str, CIL_SYM_LEVELRANGES, extra_args, &range_node);
+		rc = cil_resolve_name(current, userrange->range_str, CIL_SYM_LEVELRANGES, extra_args, &range_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		userrange->range = (struct cil_levelrange*)range_node->data;
+		userrange->range = (struct cil_levelrange*)range_datum;
 		user->range = userrange->range;
 
 		/* This could still be an anonymous levelrange even if levelrange_str is set, if levelrange_str is a param_str*/
@@ -897,28 +932,28 @@ exit:
 
 int cil_resolve_userbounds(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_userbounds *userbnds = (struct cil_userbounds*)current->data;
-	struct cil_tree_node *user_node = NULL;
-	struct cil_tree_node *bounds_node = NULL;
+	struct cil_userbounds *userbnds = current->data;
+	struct cil_symtab_datum *user_datum = NULL;
+	struct cil_symtab_datum *bounds_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, userbnds->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	rc = cil_resolve_name(current, userbnds->user_str, CIL_SYM_USERS, extra_args, &user_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	rc = cil_resolve_name(current, userbnds->bounds_str, CIL_SYM_USERS, extra_args, &bounds_node);
+	rc = cil_resolve_name(current, userbnds->bounds_str, CIL_SYM_USERS, extra_args, &bounds_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	if (((struct cil_user*)user_node->data)->bounds != NULL) {
+	if (((struct cil_user*)user_datum)->bounds != NULL) {
 		cil_log(CIL_ERR, "user cannot bind more than one user\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	((struct cil_user*)user_node->data)->bounds = bounds_node->data;
+	((struct cil_user*)user_datum)->bounds = (struct cil_user*)bounds_datum;
 
 	return SEPOL_OK;
 
@@ -929,14 +964,14 @@ exit:
 int cil_resolve_userprefix(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_userprefix *userprefix = current->data;
-	struct cil_tree_node *user_node = NULL;
+	struct cil_symtab_datum *user_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, userprefix->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	rc = cil_resolve_name(current, userprefix->user_str, CIL_SYM_USERS, extra_args, &user_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	userprefix->user = user_node->data;
+	userprefix->user = (struct cil_user*)user_datum;
 
 exit:
 	return rc;
@@ -945,23 +980,23 @@ exit:
 int cil_resolve_selinuxuser(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_selinuxuser *selinuxuser = current->data;
-	struct cil_tree_node *user_node = NULL;
-	struct cil_tree_node *lvlrange_node = NULL;
+	struct cil_symtab_datum *user_datum = NULL;
+	struct cil_symtab_datum *lvlrange_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, selinuxuser->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	rc = cil_resolve_name(current, selinuxuser->user_str, CIL_SYM_USERS, extra_args, &user_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	selinuxuser->user = user_node->data;
+	selinuxuser->user = (struct cil_user*)user_datum;
 
 	if (selinuxuser->range_str != NULL) {
-		rc = cil_resolve_name(current, selinuxuser->range_str, CIL_SYM_LEVELRANGES, extra_args, &lvlrange_node);
+		rc = cil_resolve_name(current, selinuxuser->range_str, CIL_SYM_LEVELRANGES, extra_args, &lvlrange_datum);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Unable to resolve name: %s\n", selinuxuser->range_str);
 			goto exit;
 		}
-		selinuxuser->range = (struct cil_levelrange*)lvlrange_node->data;
+		selinuxuser->range = (struct cil_levelrange*)lvlrange_datum;
 
 		/* This could still be an anonymous levelrange even if range_str is set, if range_str is a param_str*/
 		if (selinuxuser->range->datum.name == NULL) {
@@ -984,22 +1019,22 @@ exit:
 
 int cil_resolve_roletype(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_roletype *roletype = (struct cil_roletype*)current->data;
-	struct cil_tree_node *role_node = NULL;
-	struct cil_tree_node *type_node = NULL;
+	struct cil_roletype *roletype = current->data;
+	struct cil_symtab_datum *role_datum = NULL;
+	struct cil_symtab_datum *type_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, roletype->role_str, CIL_SYM_ROLES, extra_args, &role_node);
+	rc = cil_resolve_name(current, roletype->role_str, CIL_SYM_ROLES, extra_args, &role_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	roletype->role = role_node->data;
+	roletype->role = (struct cil_role*)role_datum;
 
-	rc = cil_resolve_name(current, roletype->type_str, CIL_SYM_TYPES, extra_args, &type_node);
+	rc = cil_resolve_name(current, roletype->type_str, CIL_SYM_TYPES, extra_args, &type_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	roletype->type = type_node->data;
+	roletype->type = (struct cil_type*)type_datum;
 
 	return SEPOL_OK;
 
@@ -1009,36 +1044,36 @@ exit:
 
 int cil_resolve_roletransition(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_roletransition *roletrans = (struct cil_roletransition*)current->data;
-	struct cil_tree_node *src_node = NULL;
-	struct cil_tree_node *tgt_node = NULL;
-	struct cil_tree_node *obj_node = NULL;
-	struct cil_tree_node *result_node = NULL;
+	struct cil_roletransition *roletrans = current->data;
+	struct cil_symtab_datum *src_datum = NULL;
+	struct cil_symtab_datum *tgt_datum = NULL;
+	struct cil_symtab_datum *obj_datum = NULL;
+	struct cil_symtab_datum *result_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, roletrans->src_str, CIL_SYM_ROLES, extra_args, &src_node);
+	rc = cil_resolve_name(current, roletrans->src_str, CIL_SYM_ROLES, extra_args, &src_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	roletrans->src = (struct cil_role*)(src_node->data);
+	roletrans->src = (struct cil_role*)src_datum;
 
-	rc = cil_resolve_name(current, roletrans->tgt_str, CIL_SYM_TYPES, extra_args, &tgt_node);
+	rc = cil_resolve_name(current, roletrans->tgt_str, CIL_SYM_TYPES, extra_args, &tgt_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	roletrans->tgt = tgt_node->data;
+	roletrans->tgt = tgt_datum;
 
-	rc = cil_resolve_name(current, roletrans->obj_str, CIL_SYM_CLASSES, extra_args, &obj_node);
+	rc = cil_resolve_name(current, roletrans->obj_str, CIL_SYM_CLASSES, extra_args, &obj_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	roletrans->obj = (struct cil_class*)(obj_node->data);
+	roletrans->obj = (struct cil_class*)obj_datum;
 
-	rc = cil_resolve_name(current, roletrans->result_str, CIL_SYM_ROLES, extra_args, &result_node);
+	rc = cil_resolve_name(current, roletrans->result_str, CIL_SYM_ROLES, extra_args, &result_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	roletrans->result = (struct cil_role*)(result_node->data);
+	roletrans->result = (struct cil_role*)result_datum;
 
 	return SEPOL_OK;
 
@@ -1048,22 +1083,22 @@ exit:
 
 int cil_resolve_roleallow(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_roleallow *roleallow = (struct cil_roleallow*)current->data;
-	struct cil_tree_node *src_node = NULL;
-	struct cil_tree_node *tgt_node = NULL;
+	struct cil_roleallow *roleallow = current->data;
+	struct cil_symtab_datum *src_datum = NULL;
+	struct cil_symtab_datum *tgt_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, roleallow->src_str, CIL_SYM_ROLES, extra_args, &src_node);
+	rc = cil_resolve_name(current, roleallow->src_str, CIL_SYM_ROLES, extra_args, &src_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	roleallow->src = (struct cil_role*)(src_node->data);
+	roleallow->src = (struct cil_role*)src_datum;
 
-	rc = cil_resolve_name(current, roleallow->tgt_str, CIL_SYM_ROLES, extra_args, &tgt_node);
+	rc = cil_resolve_name(current, roleallow->tgt_str, CIL_SYM_ROLES, extra_args, &tgt_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	roleallow->tgt = (struct cil_role*)(tgt_node->data);
+	roleallow->tgt = (struct cil_role*)tgt_datum;
 
 	return SEPOL_OK;
 
@@ -1073,14 +1108,17 @@ exit:
 
 int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_roleattributeset *attrroles = (struct cil_roleattributeset*)current->data;
+	struct cil_roleattributeset *attrroles = current->data;
+	struct cil_symtab_datum *attr_datum = NULL;
 	struct cil_tree_node *attr_node = NULL;
 	struct cil_roleattribute *attr = NULL;
 	struct cil_list_item *item = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, attrroles->attr_str, CIL_SYM_ROLES, extra_args, &attr_node);
-	if (rc != SEPOL_OK) {
+	rc = cil_resolve_name(current, attrroles->attr_str, CIL_SYM_ROLES, extra_args, &attr_datum);
+	if (rc == SEPOL_OK) {
+		attr_node = attr_datum->nodes->head->data;
+	} else {
 		goto exit;
 	}
 	if (attr_node->flavor != CIL_ROLEATTRIBUTE) {
@@ -1088,7 +1126,7 @@ int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args
 		cil_log(CIL_ERR, "Attribute role not an attribute\n");
 		goto exit;
 	}
-	attr = attr_node->data;
+	attr = (struct cil_roleattribute*)attr_datum;
 
 	rc = cil_resolve_expr_stack(attrroles->expr_stack, current, extra_args);
 	if (rc != SEPOL_OK) {
@@ -1115,28 +1153,28 @@ exit:
 
 int cil_resolve_rolebounds(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_rolebounds *rolebnds = (struct cil_rolebounds*)current->data;
-	struct cil_tree_node *role_node = NULL;
-	struct cil_tree_node *bounds_node = NULL;
+	struct cil_rolebounds *rolebnds = current->data;
+	struct cil_symtab_datum *role_datum = NULL;
+	struct cil_symtab_datum *bounds_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, rolebnds->role_str, CIL_SYM_ROLES, extra_args, &role_node);
+	rc = cil_resolve_name(current, rolebnds->role_str, CIL_SYM_ROLES, extra_args, &role_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	rc = cil_resolve_name(current, rolebnds->bounds_str, CIL_SYM_ROLES, extra_args, &bounds_node);
+	rc = cil_resolve_name(current, rolebnds->bounds_str, CIL_SYM_ROLES, extra_args, &bounds_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	if (((struct cil_role*)role_node->data)->bounds != NULL) {
+	if (((struct cil_role*)role_datum)->bounds != NULL) {
 		cil_log(CIL_ERR, "role cannot bind more than one role\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	((struct cil_role*)role_node->data)->bounds = bounds_node->data;
+	((struct cil_role*)role_datum)->bounds = (struct cil_role*)bounds_datum;
 
 	return SEPOL_OK;
 
@@ -1146,15 +1184,15 @@ exit:
 
 int cil_resolve_sensalias(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_sensalias *alias = (struct cil_sensalias*)current->data;
-	struct cil_tree_node *sens_node = NULL;
+	struct cil_sensalias *alias = current->data;
+	struct cil_symtab_datum *sens_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, alias->sens_str, CIL_SYM_SENS, extra_args, &sens_node);
+	rc = cil_resolve_name(current, alias->sens_str, CIL_SYM_SENS, extra_args, &sens_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	alias->sens = (struct cil_sens*)(sens_node->data);
+	alias->sens = (struct cil_sens*)sens_datum;
 
 	return SEPOL_OK;
 
@@ -1164,15 +1202,15 @@ exit:
 
 int cil_resolve_catalias(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_catalias *alias = (struct cil_catalias*)current->data;
-	struct cil_tree_node *cat_node = NULL;
+	struct cil_catalias *alias = current->data;
+	struct cil_symtab_datum *cat_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, alias->cat_str, CIL_SYM_CATS, extra_args, &cat_node);
+	rc = cil_resolve_name(current, alias->cat_str, CIL_SYM_CATS, extra_args, &cat_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	alias->cat = (struct cil_cat*)(cat_node->data);
+	alias->cat = (struct cil_cat*)cat_datum;
 
 	return SEPOL_OK;
 
@@ -1391,6 +1429,7 @@ exit:
 
 int __cil_create_edge_list(struct cil_tree_node *current, struct cil_list *order, uint32_t sym_flavor, struct cil_list *edge_list, void *extra_args)
 {
+	struct cil_symtab_datum *datum = NULL;
 	struct cil_tree_node *node = NULL;
 	struct cil_list *edge_nodes = NULL;
 	struct cil_list_item *edge = NULL;
@@ -1408,10 +1447,13 @@ int __cil_create_edge_list(struct cil_tree_node *current, struct cil_list *order
 	curr = order->head;
 
 	while (curr != NULL) {
-		rc = cil_resolve_name(current, (char*)curr->data, sym_flavor, extra_args, &node);
+		rc = cil_resolve_name(current, (char*)curr->data, sym_flavor, extra_args, &datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+
+		node = datum->nodes->head->data;
+
 		cil_list_item_init(&edge_node);
 		edge_node->flavor = node->flavor;
 		edge_node->data = node->data;
@@ -1454,7 +1496,7 @@ int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
-	struct cil_catorder *catorder = (struct cil_catorder*)current->data;
+	struct cil_catorder *catorder = current->data;
 	struct cil_list_item *list_item = NULL;
 	struct cil_list *edge_list = NULL;
 	int rc = SEPOL_ERR;
@@ -1492,7 +1534,7 @@ int cil_resolve_dominance(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
-	struct cil_sens_dominates *dom = (struct cil_sens_dominates*)current->data;
+	struct cil_sens_dominates *dom = current->data;
 	struct cil_list_item *list_item = NULL;
 	struct cil_list *edge_list = NULL;
 	int rc = SEPOL_ERR;
@@ -1584,6 +1626,7 @@ int cil_resolve_cat_list(struct cil_tree_node *current, struct cil_list *cat_lis
 {
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
+	struct cil_symtab_datum *cat_datum = NULL;
 	struct cil_tree_node *cat_node = NULL;
 	struct cil_list_item *new_item = NULL;
 	struct cil_list_item *list_tail = NULL;
@@ -1610,10 +1653,13 @@ int cil_resolve_cat_list(struct cil_tree_node *current, struct cil_list *cat_lis
 			}
 			new_item = sub_list.head;
 		} else {
-			rc = cil_resolve_name(current, (char*)curr->data, CIL_SYM_CATS, extra_args, &cat_node);
+			rc = cil_resolve_name(current, (char*)curr->data, CIL_SYM_CATS, extra_args, &cat_datum);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
+
+			cat_node = cat_datum->nodes->head->data;
+
 			if (cat_node->flavor == CIL_CATSET) {
 				cil_log(CIL_ERR, "categorysets are not allowed inside category lists\n");
 				rc = SEPOL_ERR;
@@ -1647,6 +1693,7 @@ int cil_resolve_catset(struct cil_tree_node *current, struct cil_catset *catset,
 	struct cil_list *res_cat_list = NULL;
 	struct cil_list_item *res_cat_item = NULL;
 	struct cil_list_item *cat_item = NULL;
+	struct cil_symtab_datum *cat_datum = NULL;
 	struct cil_tree_node *cat_node = NULL;
 	int rc = SEPOL_ERR;
 
@@ -1657,12 +1704,13 @@ int cil_resolve_catset(struct cil_tree_node *current, struct cil_catset *catset,
 
 		switch (cat_item->flavor) {
 		case CIL_AST_STR: {
-			rc = cil_resolve_name(current, (char*)cat_item->data, CIL_SYM_CATS, extra_args, &cat_node);
+			rc = cil_resolve_name(current, (char*)cat_item->data, CIL_SYM_CATS, extra_args, &cat_datum);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
+			cat_node = cat_datum->nodes->head->data;
 			res_cat_item->flavor = cat_node->flavor;
-			res_cat_item->data = cat_node->data;
+			res_cat_item->data = cat_datum;
 			break;
 		}
 		case CIL_CATRANGE: {
@@ -1702,8 +1750,8 @@ int cil_resolve_catrange(struct cil_tree_node *current, struct cil_catrange *cat
 {
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
-	struct cil_tree_node *cat_low_node = NULL;
-	struct cil_tree_node *cat_high_node = NULL;
+	struct cil_symtab_datum *cat_low_datum = NULL;
+	struct cil_symtab_datum *cat_high_datum = NULL;
 	struct cil_list_item *cat;
 	int rc = SEPOL_ERR;
 
@@ -1711,14 +1759,14 @@ int cil_resolve_catrange(struct cil_tree_node *current, struct cil_catrange *cat
 		db = args->db;
 	}
 
-	rc = cil_resolve_name(current, catrange->cat_low_str, CIL_SYM_CATS, args, &cat_low_node);
+	rc = cil_resolve_name(current, catrange->cat_low_str, CIL_SYM_CATS, args, &cat_low_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	catrange->cat_low = cat_low_node->data;
+	catrange->cat_low = (struct cil_cat*)cat_low_datum;
 
 	for (cat = db->catorder->head; cat != NULL; cat = cat->next) {
-		if (cat->data == cat_low_node->data) {
+		if (cat->data == cat_low_datum) {
 			break;
 		}
 	}
@@ -1729,14 +1777,14 @@ int cil_resolve_catrange(struct cil_tree_node *current, struct cil_catrange *cat
 		goto exit;
 	}
 
-	rc = cil_resolve_name(current, catrange->cat_high_str, CIL_SYM_CATS, args, &cat_high_node);
+	rc = cil_resolve_name(current, catrange->cat_high_str, CIL_SYM_CATS, args, &cat_high_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	catrange->cat_high = cat_high_node->data;
+	catrange->cat_high = (struct cil_cat*)cat_high_datum;
 
 	for (cat = cat->next; cat != NULL; cat = cat->next) {
-		if (cat->data == cat_high_node->data) {
+		if (cat->data == cat_high_datum) {
 			break;
 		}
 	}
@@ -1755,29 +1803,35 @@ exit:
 
 int cil_resolve_senscat(struct cil_tree_node *current, void *extra_args)
 {
+	struct cil_senscat *senscat = current->data;
+	struct cil_symtab_datum *sens_datum = NULL;
 	struct cil_tree_node *sens_node = NULL;
-	struct cil_senscat *senscat = (struct cil_senscat*)current->data;
 	struct cil_sens *sens = NULL;
+	struct cil_symtab_datum *cat_datum = NULL;
 	struct cil_tree_node *cat_node = NULL;
 	struct cil_list_item *catset_item = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, (char*)senscat->sens_str, CIL_SYM_SENS, extra_args, &sens_node);
+	rc = cil_resolve_name(current, (char*)senscat->sens_str, CIL_SYM_SENS, extra_args, &sens_datum);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to get sensitivity node\n");
 		goto exit;
 	}
 
+	sens_node = sens_datum->nodes->head->data;
+
 	if (sens_node->flavor == CIL_SENSALIAS) {
-		sens_node = ((struct cil_sensalias*)sens_node->data)->sens->datum.node;
+		sens_node = ((struct cil_sensalias*)sens_datum)->sens->datum.nodes->head->data;
 	}
-	sens = sens_node->data;
+	sens = (struct cil_sens*)sens_node->data;
 
 	if (senscat->catset_str != NULL) {
-		rc = cil_resolve_name(current, (char*)senscat->catset_str, CIL_SYM_CATS, extra_args, &cat_node);
+		rc = cil_resolve_name(current, (char*)senscat->catset_str, CIL_SYM_CATS, extra_args, &cat_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+
+		cat_node = cat_datum->nodes->head->data;
 
 		if (cat_node->flavor != CIL_CATSET) {
 			cil_log(CIL_ERR, "Named object is not a category set\n");
@@ -1813,33 +1867,36 @@ int cil_resolve_level(struct cil_tree_node *current, struct cil_level *level, vo
 {
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
+	struct cil_symtab_datum *sens_datum = NULL;
 	struct cil_tree_node *sens_node = NULL;
-	struct cil_tree_node *catset_node = NULL;
+	struct cil_symtab_datum *catset_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (args != NULL) {
 		db = args->db;
 	}
 
-	rc = cil_resolve_name(current, (char*)level->sens_str, CIL_SYM_SENS, extra_args, &sens_node);
+	rc = cil_resolve_name(current, (char*)level->sens_str, CIL_SYM_SENS, extra_args, &sens_datum);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to get sensitivity node\n");
 		goto exit;
 	}
 
+	sens_node = sens_datum->nodes->head->data;
+
 	if (sens_node->flavor == CIL_SENSALIAS) {
-		sens_node = ((struct cil_sensalias*)sens_node->data)->sens->datum.node;
+		sens_node = ((struct cil_sensalias*)sens_datum)->sens->datum.nodes->head->data;
 	}
 
 	level->sens = (struct cil_sens*)sens_node->data;
 
 	if (level->catset_str != NULL || level->catset != NULL) {
 		if (level->catset_str != NULL) {
-			rc = cil_resolve_name(current, level->catset_str, CIL_SYM_CATS, extra_args, &catset_node);
+			rc = cil_resolve_name(current, level->catset_str, CIL_SYM_CATS, extra_args, &catset_datum);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-			level->catset = catset_node->data;
+			level->catset = (struct cil_catset*)catset_datum;
 		} else {
 			rc = cil_resolve_catset(current, level->catset, extra_args);
 			if (rc != SEPOL_OK) {
@@ -1862,16 +1919,16 @@ exit:
 
 int cil_resolve_levelrange(struct cil_tree_node *current, struct cil_levelrange *lvlrange, void *extra_args)
 {
-	struct cil_tree_node *low_node = NULL;
-	struct cil_tree_node *high_node = NULL;
+	struct cil_symtab_datum *low_datum = NULL;
+	struct cil_symtab_datum *high_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (lvlrange->low_str != NULL) {
-		rc = cil_resolve_name(current, lvlrange->low_str, CIL_SYM_LEVELS, extra_args, &low_node);
+		rc = cil_resolve_name(current, lvlrange->low_str, CIL_SYM_LEVELS, extra_args, &low_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		lvlrange->low = (struct cil_level*)low_node->data;
+		lvlrange->low = (struct cil_level*)low_datum;
 
 		/* This could still be an anonymous level even if low_str is set, if low_str is a param_str */
 		if (lvlrange->low->datum.name == NULL) {
@@ -1888,11 +1945,11 @@ int cil_resolve_levelrange(struct cil_tree_node *current, struct cil_levelrange 
 	}
 
 	if (lvlrange->high_str != NULL) {
-		rc = cil_resolve_name(current, lvlrange->high_str, CIL_SYM_LEVELS, extra_args, &high_node);
+		rc = cil_resolve_name(current, lvlrange->high_str, CIL_SYM_LEVELS, extra_args, &high_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		lvlrange->high = (struct cil_level*)high_node->data;
+		lvlrange->high = (struct cil_level*)high_datum;
 
 		/* This could still be an anonymous level even if high_str is set, if high_str is a param_str */
 		if (lvlrange->high->datum.name == NULL) {
@@ -1916,21 +1973,20 @@ exit:
 
 int cil_resolve_constrain(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_constrain *cons = (struct cil_constrain*)current->data;
+	struct cil_constrain *cons = current->data;
 	struct cil_args_resolve *args = extra_args;
-	struct cil_tree_node *cps_node = NULL;
+	struct cil_symtab_datum *cps_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (cons->classpermset_str != NULL) {
-		rc = cil_resolve_name(current, cons->classpermset_str, CIL_SYM_CLASSPERMSETS, args, &cps_node);
+		rc = cil_resolve_name(current, cons->classpermset_str, CIL_SYM_CLASSPERMSETS, args, &cps_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		cons->classpermset = (struct cil_classpermset*)cps_node->data;
+		cons->classpermset = (struct cil_classpermset*)cps_datum;
 
 		/* This could still be an anonymous classpermset even if classpermset_str is set, if classpermset_str is a param_str*/
 		if (cons->classpermset->datum.name == NULL) {
-
 			rc = cil_resolve_classpermset(current, cons->classpermset, args);
 			if (rc != SEPOL_OK) {
 				goto exit;
@@ -1958,14 +2014,14 @@ int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_validatetrans *validtrans = current->data;
 	struct cil_args_resolve *args = extra_args;
-	struct cil_tree_node *class_node = NULL;
+	struct cil_symtab_datum *class_datum = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, validtrans->class_str, CIL_SYM_CLASSES, args, &class_node);
+	rc = cil_resolve_name(current, validtrans->class_str, CIL_SYM_CLASSES, args, &class_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	validtrans->class = (struct cil_class*)class_node->data;
+	validtrans->class = (struct cil_class*)class_datum;
 
 	rc = cil_resolve_expr_stack(validtrans->expr, current, extra_args);
 	if (rc != SEPOL_OK) {
@@ -1980,46 +2036,50 @@ exit:
 
 int cil_resolve_context(struct cil_tree_node *current, struct cil_context *context, void *extra_args)
 {
-	struct cil_tree_node *user_node = NULL;
-	struct cil_tree_node *role_node = NULL;
+	struct cil_symtab_datum *user_datum = NULL;
+	struct cil_symtab_datum *role_datum = NULL;
+	struct cil_symtab_datum *type_datum = NULL;
 	struct cil_tree_node *type_node = NULL;
-	struct cil_tree_node *lvlrange_node = NULL;
+	struct cil_symtab_datum *lvlrange_datum = NULL;
 
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, context->user_str, CIL_SYM_USERS, extra_args, &user_node);
+	rc = cil_resolve_name(current, context->user_str, CIL_SYM_USERS, extra_args, &user_datum);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Unable to resolve name: %s\n", context->user_str);
 		goto exit;
 	}
-	context->user = (struct cil_user*)user_node->data;
+	context->user = (struct cil_user*)user_datum;
 
-	rc = cil_resolve_name(current, context->role_str, CIL_SYM_ROLES, extra_args, &role_node);
+	rc = cil_resolve_name(current, context->role_str, CIL_SYM_ROLES, extra_args, &role_datum);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Unable to resolve name: %s\n", context->role_str);
 		goto exit;
 	}
-	context->role = (struct cil_role*)role_node->data;
+	context->role = (struct cil_role*)role_datum;
 
-	rc = cil_resolve_name(current, context->type_str, CIL_SYM_TYPES, extra_args, &type_node);
+	rc = cil_resolve_name(current, context->type_str, CIL_SYM_TYPES, extra_args, &type_datum);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Unable to resolve name: %s\n", context->type_str);
 		goto exit;
 	}
+
+	type_node = type_datum->nodes->head->data;
+
 	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
 		rc = SEPOL_ERR;
 		cil_log(CIL_ERR, "Type not a type or type alias\n");
 		goto exit;
 	}
-	context->type = type_node->data;
+	context->type = type_datum;
 
 	if (context->range_str != NULL) {
-		rc = cil_resolve_name(current, context->range_str, CIL_SYM_LEVELRANGES, extra_args, &lvlrange_node);
+		rc = cil_resolve_name(current, context->range_str, CIL_SYM_LEVELRANGES, extra_args, &lvlrange_datum);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Unable to resolve name: %s\n", context->range_str);
 			goto exit;
 		}
-		context->range = (struct cil_levelrange*)lvlrange_node->data;
+		context->range = (struct cil_levelrange*)lvlrange_datum;
 
 		/* This could still be an anonymous levelrange even if levelrange_str is set, if levelrange_str is a param_str*/
 		if (context->range->datum.name == NULL) {
@@ -2043,16 +2103,16 @@ exit:
 
 int cil_resolve_filecon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_filecon *filecon = (struct cil_filecon*)current->data;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_filecon *filecon = current->data;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (filecon->context_str != NULL) {
-		rc = cil_resolve_name(current, filecon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, filecon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			return rc;
 		}
-		filecon->context = (struct cil_context*)context_node->data;
+		filecon->context = (struct cil_context*)context_datum;
 	} else if (filecon->context != NULL) {
 		rc = cil_resolve_context(current, filecon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2065,16 +2125,16 @@ int cil_resolve_filecon(struct cil_tree_node *current, void *extra_args)
 
 int cil_resolve_portcon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_portcon *portcon = (struct cil_portcon*)current->data;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_portcon *portcon = current->data;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (portcon->context_str != NULL) {
-		rc = cil_resolve_name(current, portcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, portcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		portcon->context = (struct cil_context*)context_node->data;
+		portcon->context = (struct cil_context*)context_datum;
 	} else {
 		rc = cil_resolve_context(current, portcon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2090,16 +2150,16 @@ exit:
 
 int cil_resolve_genfscon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_genfscon *genfscon = (struct cil_genfscon*)current->data;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_genfscon *genfscon = current->data;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (genfscon->context_str != NULL) {
-		rc = cil_resolve_name(current, genfscon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, genfscon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		genfscon->context = (struct cil_context*)context_node->data;
+		genfscon->context = (struct cil_context*)context_datum;
 	} else {
 		rc = cil_resolve_context(current, genfscon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2115,34 +2175,34 @@ exit:
 
 int cil_resolve_nodecon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_nodecon *nodecon = (struct cil_nodecon*)current->data;
-	struct cil_tree_node *addr_node = NULL;
-	struct cil_tree_node *mask_node = NULL;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_nodecon *nodecon = current->data;
+	struct cil_symtab_datum *addr_datum = NULL;
+	struct cil_symtab_datum *mask_datum = NULL;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (nodecon->addr_str != NULL) {
-		rc = cil_resolve_name(current, nodecon->addr_str, CIL_SYM_IPADDRS, extra_args, &addr_node);
+		rc = cil_resolve_name(current, nodecon->addr_str, CIL_SYM_IPADDRS, extra_args, &addr_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		nodecon->addr = (struct cil_ipaddr*)addr_node->data;
+		nodecon->addr = (struct cil_ipaddr*)addr_datum;
 	}
 
 	if (nodecon->mask_str != NULL) {
-		rc = cil_resolve_name(current, nodecon->mask_str, CIL_SYM_IPADDRS, extra_args, &mask_node);
+		rc = cil_resolve_name(current, nodecon->mask_str, CIL_SYM_IPADDRS, extra_args, &mask_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		nodecon->mask = (struct cil_ipaddr*)mask_node->data;
+		nodecon->mask = (struct cil_ipaddr*)mask_datum;
 	}
 
 	if (nodecon->context_str != NULL) {
-		rc = cil_resolve_name(current, nodecon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, nodecon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		nodecon->context = (struct cil_context*)context_node->data;
+		nodecon->context = (struct cil_context*)context_datum;
 	} else {
 		rc = cil_resolve_context(current, nodecon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2165,18 +2225,18 @@ exit:
 
 int cil_resolve_netifcon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_netifcon *netifcon = (struct cil_netifcon*)current->data;
-	struct cil_tree_node *ifcon_node = NULL;
-	struct cil_tree_node *packcon_node = NULL;
+	struct cil_netifcon *netifcon = current->data;
+	struct cil_symtab_datum *ifcon_datum = NULL;
+	struct cil_symtab_datum *packcon_datum = NULL;
 
 	int rc = SEPOL_ERR;
 
 	if (netifcon->if_context_str != NULL) {
-		rc = cil_resolve_name(current, netifcon->if_context_str, CIL_SYM_CONTEXTS, extra_args, &ifcon_node);
+		rc = cil_resolve_name(current, netifcon->if_context_str, CIL_SYM_CONTEXTS, extra_args, &ifcon_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		netifcon->if_context = (struct cil_context*)ifcon_node->data;
+		netifcon->if_context = (struct cil_context*)ifcon_datum;
 	} else {
 		rc = cil_resolve_context(current, netifcon->if_context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2185,11 +2245,11 @@ int cil_resolve_netifcon(struct cil_tree_node *current, void *extra_args)
 	}
 
 	if (netifcon->packet_context_str != NULL) {
-		rc = cil_resolve_name(current, netifcon->packet_context_str, CIL_SYM_CONTEXTS, extra_args, &packcon_node);
+		rc = cil_resolve_name(current, netifcon->packet_context_str, CIL_SYM_CONTEXTS, extra_args, &packcon_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		netifcon->packet_context = (struct cil_context*)packcon_node->data;
+		netifcon->packet_context = (struct cil_context*)packcon_datum;
 	} else {
 		rc = cil_resolve_context(current, netifcon->packet_context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2204,16 +2264,16 @@ exit:
 
 int cil_resolve_pirqcon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_pirqcon *pirqcon = (struct cil_pirqcon*)current->data;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_pirqcon *pirqcon = current->data;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (pirqcon->context_str != NULL) {
-		rc = cil_resolve_name(current, pirqcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, pirqcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		pirqcon->context = (struct cil_context*)context_node->data;
+		pirqcon->context = (struct cil_context*)context_datum;
 	} else {
 		rc = cil_resolve_context(current, pirqcon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2229,16 +2289,16 @@ exit:
 
 int cil_resolve_iomemcon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_iomemcon *iomemcon = (struct cil_iomemcon*)current->data;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_iomemcon *iomemcon = current->data;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (iomemcon->context_str != NULL) {
-		rc = cil_resolve_name(current, iomemcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, iomemcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		iomemcon->context = (struct cil_context*)context_node->data;
+		iomemcon->context = (struct cil_context*)context_datum;
 	} else {
 		rc = cil_resolve_context(current, iomemcon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2254,16 +2314,16 @@ exit:
 
 int cil_resolve_ioportcon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_ioportcon *ioportcon = (struct cil_ioportcon*)current->data;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_ioportcon *ioportcon = current->data;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (ioportcon->context_str != NULL) {
-		rc = cil_resolve_name(current, ioportcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, ioportcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		ioportcon->context = (struct cil_context*)context_node->data;
+		ioportcon->context = (struct cil_context*)context_datum;
 	} else {
 		rc = cil_resolve_context(current, ioportcon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2279,16 +2339,16 @@ exit:
 
 int cil_resolve_pcidevicecon(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_pcidevicecon *pcidevicecon = (struct cil_pcidevicecon*)current->data;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_pcidevicecon *pcidevicecon = current->data;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (pcidevicecon->context_str != NULL) {
-		rc = cil_resolve_name(current, pcidevicecon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, pcidevicecon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		pcidevicecon->context = (struct cil_context*)context_node->data;
+		pcidevicecon->context = (struct cil_context*)context_datum;
 	} else {
 		rc = cil_resolve_context(current, pcidevicecon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2304,16 +2364,16 @@ exit:
 
 int cil_resolve_fsuse(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_fsuse *fsuse = (struct cil_fsuse*)current->data;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_fsuse *fsuse = current->data;
+	struct cil_symtab_datum *context_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (fsuse->context_str != NULL) {
-		rc = cil_resolve_name(current, fsuse->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, fsuse->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		fsuse->context = (struct cil_context*)context_node->data;
+		fsuse->context = (struct cil_context*)context_datum;
 	} else {
 		rc = cil_resolve_context(current, fsuse->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2329,26 +2389,25 @@ exit:
 
 int cil_resolve_sidcontext(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_sidcontext *sidcon = (struct cil_sidcontext*)current->data;
+	struct cil_sidcontext *sidcon = current->data;
 	struct cil_sid *sid = NULL;
-	struct cil_tree_node *sid_node = NULL;
-	struct cil_tree_node *context_node = NULL;
+	struct cil_symtab_datum *sid_datum = NULL;
+	struct cil_symtab_datum *context_datum = NULL;
 
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, sidcon->sid_str, CIL_SYM_SIDS, extra_args, &sid_node);
+	rc = cil_resolve_name(current, sidcon->sid_str, CIL_SYM_SIDS, extra_args, &sid_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	sid = sid_node->data;
-
+	sid = (struct cil_sid*)sid_datum;
 
 	if (sidcon->context_str != NULL) {
-		rc = cil_resolve_name(current, sidcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_node);
+		rc = cil_resolve_name(current, sidcon->context_str, CIL_SYM_CONTEXTS, extra_args, &context_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		sidcon->context = (struct cil_context*)context_node->data;
+		sidcon->context = (struct cil_context*)context_datum;
 	} else if (sidcon->context != NULL) {
 		rc = cil_resolve_context(current, sidcon->context, extra_args);
 		if (rc != SEPOL_OK) {
@@ -2372,9 +2431,10 @@ exit:
 
 int cil_resolve_blockinherit(struct cil_tree_node *current, void *extra_args)
 {
+	struct cil_blockinherit *inherit = current->data;
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
-	struct cil_blockinherit *inherit = (struct cil_blockinherit*)current->data;
+	struct cil_symtab_datum *block_datum = NULL;
 	struct cil_tree_node *block_node = NULL;
 	int rc = SEPOL_ERR;
 
@@ -2382,10 +2442,12 @@ int cil_resolve_blockinherit(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	rc = cil_resolve_name(current, inherit->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
+	rc = cil_resolve_name(current, inherit->block_str, CIL_SYM_BLOCKS, extra_args, &block_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	block_node = block_datum->nodes->head->data;
 
 	rc = cil_copy_ast(db, block_node, current);
 	if (rc != SEPOL_OK) {
@@ -2401,17 +2463,18 @@ exit:
 
 int cil_resolve_blockabstract(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_blockabstract *abstract = (struct cil_blockabstract*)current->data;
+	struct cil_blockabstract *abstract = current->data;
+	struct cil_symtab_datum *block_datum = NULL;
 	struct cil_tree_node *block_node = NULL;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, abstract->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
+	rc = cil_resolve_name(current, abstract->block_str, CIL_SYM_BLOCKS, extra_args, &block_datum);
 	if (rc != SEPOL_OK || block_node->flavor != CIL_BLOCK) {
 		cil_log(CIL_ERR, "Failed to resolve block, rc: %d\n", rc);
 		goto exit;
 	}
 
-	((struct cil_block*)block_node->data)->is_abstract = CIL_TRUE;
+	((struct cil_block*)block_datum)->is_abstract = CIL_TRUE;
 
 	return SEPOL_OK;
 
@@ -2421,9 +2484,10 @@ exit:
 
 int cil_resolve_in(struct cil_tree_node *current, void *extra_args)
 {
+	struct cil_in *in = current->data;
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
-	struct cil_in *in = (struct cil_in*)current->data;
+	struct cil_symtab_datum *block_datum = NULL;
 	struct cil_tree_node *block_node = NULL;
 	int rc = SEPOL_ERR;
 
@@ -2431,10 +2495,12 @@ int cil_resolve_in(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	rc = cil_resolve_name(current, in->block_str, CIL_SYM_BLOCKS, extra_args, &block_node);
+	rc = cil_resolve_name(current, in->block_str, CIL_SYM_BLOCKS, extra_args, &block_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	block_node = block_datum->nodes->head->data;
 
 	rc = cil_copy_ast(db, current, block_node);
 	if (rc != SEPOL_OK) {
@@ -2453,20 +2519,24 @@ exit:
 
 int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 {
+	struct cil_call *new_call = current->data;
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
-	struct cil_call *new_call = (struct cil_call*)current->data;
 	struct cil_tree_node *macro_node = NULL;
+	struct cil_symtab_datum *macro_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	if (args != NULL) {
 		db = args->db;
 	}
 
-	rc = cil_resolve_name(current, new_call->macro_str, CIL_SYM_BLOCKS, extra_args, &macro_node);
+	rc = cil_resolve_name(current, new_call->macro_str, CIL_SYM_BLOCKS, extra_args, &macro_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	macro_node = macro_datum->nodes->head->data;
+
 	if (macro_node->flavor != CIL_MACRO) {
 		printf("Failed to resolve macro %s\n", new_call->macro_str);
 		rc = SEPOL_ERR;
@@ -2526,6 +2596,8 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			case CIL_CATSET: {
 				if (pc->cl_head != NULL) {
 					struct cil_catset *catset = NULL;
+					struct cil_tree_node *cat_node = NULL;
+					struct cil_list_item *cat_item = NULL;
 					cil_catset_init(&catset);
 					rc = cil_fill_catset(pc->cl_head, catset);
 					if (rc != SEPOL_OK) {
@@ -2533,11 +2605,18 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 						cil_destroy_catset(catset);
 						goto exit;
 					}
-					struct cil_tree_node *cat_node;
 					cil_tree_node_init(&cat_node);
+					cil_list_item_init(&cat_item);
 					cat_node->flavor = CIL_CATSET;
 					cat_node->data = catset;
-					new_arg->arg = cat_node;
+					cat_item->data = cat_node;
+					rc = cil_list_append_item(((struct cil_symtab_datum*)catset)->nodes, cat_item);
+					if (rc != SEPOL_OK) {
+						cil_destroy_catset(catset);
+						cil_list_item_destroy(&cat_item, CIL_TRUE);
+						goto exit;
+					}
+					new_arg->arg = (struct cil_symtab_datum*)catset;
 				} else {
 					new_arg->arg_str = cil_strdup(pc->data);
 				}
@@ -2547,7 +2626,8 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			case CIL_LEVEL: {
 				if (pc->cl_head != NULL) {
 					struct cil_level *level = NULL;
-					struct cil_tree_node *lvl = NULL;
+					struct cil_list_item *lvl_item = NULL;
+					struct cil_tree_node *lvl_node = NULL;
 					cil_level_init(&level);
 
 					rc = cil_fill_level(pc->cl_head, level);
@@ -2556,10 +2636,18 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 						cil_destroy_level(level);
 						goto exit;
 					}
-					cil_tree_node_init(&lvl);
-					lvl->flavor = CIL_LEVEL;
-					lvl->data = level;
-					new_arg->arg = lvl;
+					cil_tree_node_init(&lvl_node);
+					cil_list_item_init(&lvl_item);
+					lvl_node->flavor = CIL_LEVEL;
+					lvl_node->data = level;
+					lvl_item->data = lvl_node;
+					rc = cil_list_append_item(((struct cil_symtab_datum*)level)->nodes, lvl_item);
+					if (rc != SEPOL_OK) {
+						cil_destroy_level(level);
+						cil_list_item_destroy(&lvl_item, CIL_TRUE);
+						goto exit;
+					}
+					new_arg->arg = (struct cil_symtab_datum*)level;
 				} else {
 					new_arg->arg_str = cil_strdup(pc->data);
 				}
@@ -2569,7 +2657,8 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			case CIL_LEVELRANGE: {
 				if (pc->cl_head != NULL) {
 					struct cil_levelrange *range = NULL;
-					struct cil_tree_node *range_node =NULL;
+					struct cil_tree_node *range_node = NULL;
+					struct cil_list_item *range_item = NULL;
 					cil_levelrange_init(&range);
 
 					rc = cil_fill_levelrange(pc->cl_head, range);
@@ -2579,9 +2668,17 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 						goto exit;
 					}
 					cil_tree_node_init(&range_node);
+					cil_list_item_init(&range_item);
 					range_node->flavor = CIL_LEVELRANGE;
 					range_node->data = range;
-					new_arg->arg = range_node;
+					range_item->data = range_node;
+					rc = cil_list_append_item(((struct cil_symtab_datum*)range)->nodes, range_item);
+					if (rc != SEPOL_OK) {
+						cil_destroy_levelrange(range);
+						cil_list_item_destroy(&range_item, CIL_TRUE);
+						goto exit;
+					}
+					new_arg->arg = (struct cil_symtab_datum*)range;
 				} else {
 					new_arg->arg_str = cil_strdup(pc->data);
 				}
@@ -2592,7 +2689,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 				if (pc->cl_head != NULL) {
 					struct cil_ipaddr *ipaddr = NULL;
 					struct cil_tree_node *addr_node = NULL;
-
+					struct cil_list_item *addr_item = NULL;
 					cil_ipaddr_init(&ipaddr);
 
 					rc = cil_fill_ipaddr(pc->cl_head, ipaddr);
@@ -2601,11 +2698,18 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 						cil_destroy_ipaddr(ipaddr);
 						goto exit;
 					}
-
 					cil_tree_node_init(&addr_node);
+					cil_list_item_init(&addr_item);
 					addr_node->flavor = CIL_IPADDR;
 					addr_node->data = ipaddr;
-					new_arg->arg = addr_node;
+					addr_item->data = addr_node;
+					rc = cil_list_append_item(((struct cil_symtab_datum*)ipaddr)->nodes, addr_item);
+					if (rc != SEPOL_OK) {
+						cil_destroy_ipaddr(ipaddr);
+						cil_list_item_destroy(&addr_item, CIL_TRUE);
+						goto exit;
+					}
+					new_arg->arg = (struct cil_symtab_datum*)ipaddr;
 				} else {
 					new_arg->arg_str = cil_strdup(pc->data);
 				}
@@ -2622,6 +2726,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 				if (pc->cl_head != NULL) {
 					struct cil_permset *permset = NULL;
 					struct cil_tree_node *permset_node = NULL;
+					struct cil_list_item *permset_item = NULL;
 					cil_permset_init(&permset);
 					cil_list_init(&permset->perms_list_str);
 					rc = cil_parse_to_list(pc->cl_head, permset->perms_list_str, CIL_AST_STR);
@@ -2630,9 +2735,17 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 						goto exit;
 					}
 					cil_tree_node_init(&permset_node);
+					cil_list_item_init(&permset_item);
 					permset_node->flavor = CIL_PERMSET;
 					permset_node->data = permset;
-					new_arg->arg = permset_node;
+					permset_item->data = permset_node;
+					rc = cil_list_append_item(((struct cil_symtab_datum*)permset)->nodes, permset_item);
+					if (rc != SEPOL_OK) {
+						cil_destroy_permset(permset);
+						cil_list_item_destroy(&permset_item, CIL_TRUE);
+						goto exit;
+					}
+					new_arg->arg = (struct cil_symtab_datum*)permset;
 				} else {
 					new_arg->arg_str = cil_strdup(pc->data);
 				}
@@ -2642,6 +2755,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 				if (pc->cl_head != NULL) {
 					struct cil_classpermset *cps = NULL;
 					struct cil_tree_node *cps_node = NULL;
+					struct cil_list_item *cps_item = NULL;
 
 					cil_classpermset_init(&cps);
 					rc = cil_fill_classpermset(pc->cl_head, cps);
@@ -2651,9 +2765,17 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 						goto exit;
 					}
 					cil_tree_node_init(&cps_node);
+					cil_list_item_init(&cps_item);
 					cps_node->flavor = CIL_CLASSPERMSET;
 					cps_node->data = cps;
-					new_arg->arg = cps_node;
+					cps_item->data = cps_node;
+					rc = cil_list_append_item(((struct cil_symtab_datum*)cps)->nodes, cps_item);
+					if (rc != SEPOL_OK) {
+						cil_destroy_classpermset(cps);
+						cil_list_item_destroy(&cps_item, CIL_TRUE);
+						goto exit;
+					}
+					new_arg->arg = (struct cil_symtab_datum*)cps;
 				} else {
 					new_arg->arg_str = cil_strdup(pc->data);
 				}
@@ -2714,7 +2836,7 @@ exit:
 
 int cil_resolve_call2(struct cil_tree_node *current, void *extra_args)
 {
-	struct cil_call *new_call = (struct cil_call*)current->data;
+	struct cil_call *new_call = current->data;
 	int rc = SEPOL_ERR;
 	enum cil_sym_index sym_index = CIL_SYM_UNKNOWN;
 	struct cil_list_item *item = NULL;
@@ -2821,7 +2943,7 @@ exit:
 	return rc;
 }
 
-int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_index sym_index, struct cil_tree_node **node)
+int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_index sym_index, struct cil_symtab_datum **datum)
 {
 	struct cil_list_item *item = NULL;
 	enum cil_sym_index param_index = CIL_SYM_UNKNOWN;
@@ -2841,7 +2963,7 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_i
 		rc = cil_flavor_to_symtab_index(((struct cil_args*)item->data)->flavor, &param_index);
 		if (param_index == sym_index) {
 			if (!strcmp(name, ((struct cil_args*)item->data)->param_str)) {
-				*node = ((struct cil_args*)item->data)->arg;
+				*datum = ((struct cil_args*)item->data)->arg;
 				rc = SEPOL_OK;
 				goto exit;
 			}
@@ -2859,7 +2981,7 @@ int cil_resolve_expr_stack(struct cil_list *expr_stack, struct cil_tree_node *pa
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr_expr = expr_stack->head;
-	struct cil_tree_node *res_node = NULL;
+	struct cil_symtab_datum *res_datum = NULL;
 
 
 	while (curr_expr != NULL) {
@@ -2894,11 +3016,11 @@ int cil_resolve_expr_stack(struct cil_list *expr_stack, struct cil_tree_node *pa
 			goto exit;
 		}
 
-		rc = cil_resolve_name(parent, cond->str, sym_index, extra_args, &res_node);
+		rc = cil_resolve_name(parent, cond->str, sym_index, extra_args, &res_datum);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		cond->data = res_node->data;
+		cond->data = res_datum;
 
 		curr_expr = curr_expr->next;
 	}
@@ -3610,7 +3732,7 @@ exit:
 	return rc;
 }
 
-static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, void *extra_args, struct cil_tree_node **node)
+static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, void *extra_args, struct cil_symtab_datum **datum)
 {
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
@@ -3623,7 +3745,8 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 	char *tok_current = strtok(name_dup, ".");
 	char *tok_next = strtok(NULL, ".");
 	symtab_t *symtab = NULL;
-	struct cil_tree_node *tmp_node = NULL;
+	struct cil_symtab_datum *tmp_datum = NULL;
+	enum cil_flavor flavor = CIL_AST_NODE;
 
 	if (args != NULL) {
 		db = args->db;
@@ -3640,9 +3763,10 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 		if (call != NULL) {
 			// check macro symtab
 			symtab = &call->macro->symtab[CIL_SYM_BLOCKS];
-			rc = cil_symtab_get_node(symtab, tok_current, node);
+			rc = cil_symtab_get_datum(symtab, tok_current, datum);
 			if (rc == SEPOL_OK) {
-				if ((*node)->flavor != CIL_BLOCK) {
+				flavor = ((struct cil_tree_node*)(*datum)->nodes->head->data)->flavor;
+				if (flavor != CIL_BLOCK) {
 					printf("Failed to get block from symtab\n");
 					rc = SEPOL_ERR;
 					goto exit;
@@ -3650,11 +3774,12 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 				// if in macro, check call parent to verify successful copy to call
 				rc = cil_get_symtab(db, ast_node->parent->parent, &symtab, CIL_SYM_BLOCKS);
 				if (rc == SEPOL_OK) {
-					rc = cil_symtab_get_node(symtab, tok_current, node);
+					rc = cil_symtab_get_datum(symtab, tok_current, datum);
+					flavor = ((struct cil_tree_node*)(*datum)->nodes->head->data)->flavor;
 					if (rc != SEPOL_OK) {
-						cil_log(CIL_ERR, "Failed to get node from parent symtab of call\n");
+						cil_log(CIL_ERR, "Failed to get datum from parent symtab of call\n");
 						goto exit;
-					} else if ((*node)->flavor != CIL_BLOCK) {
+					} else if (flavor != CIL_BLOCK) {
 						printf("Failed to get block from symtab\n");
 						rc = SEPOL_ERR;
 						goto exit;
@@ -3664,9 +3789,9 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 					goto exit;
 				}
 			} else if (rc == SEPOL_ENOENT) {
-				rc = cil_get_symtab(db, call->macro->datum.node->parent, &symtab, CIL_SYM_BLOCKS);
+				rc = cil_get_symtab(db, ((struct cil_tree_node*)call->macro->datum.nodes->head->data)->parent, &symtab, CIL_SYM_BLOCKS);
 				if (rc != SEPOL_OK) {
-					cil_log(CIL_ERR, "Failed to get node from parent symtab of macro\n");
+					cil_log(CIL_ERR, "Failed to get datum from parent symtab of macro\n");
 					goto exit;
 				} else {
 					symtab = &(db->symtab[CIL_SYM_BLOCKS]);
@@ -3696,20 +3821,24 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 
 	while (tok_current != NULL) {
 		if (tok_next != NULL) {
-			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
-			if (rc != SEPOL_OK) {
+			rc = cil_symtab_get_datum(symtab, tok_current, &tmp_datum);
+			if (rc == SEPOL_OK) {
+				flavor = ((struct cil_tree_node*)tmp_datum->nodes->head->data)->flavor;
+			} else {
 				goto exit;
-			} else if ((tmp_node->flavor != CIL_BLOCK && ast_node->flavor != CIL_IN) ||
-					(tmp_node->flavor == CIL_BLOCK && (((struct cil_block*)tmp_node->data)->is_abstract == CIL_TRUE && pass > CIL_PASS_BLKABS ))) {
+			}
+ 
+			if ((flavor != CIL_BLOCK && ast_node->flavor != CIL_IN) ||
+					(flavor == CIL_BLOCK && (((struct cil_block*)tmp_datum)->is_abstract == CIL_TRUE && pass > CIL_PASS_BLKABS ))) {
 				printf("Failed to resolve block: %s\n", tok_current);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
-			symtab = &(((struct cil_block*)tmp_node->data)->symtab[CIL_SYM_BLOCKS]);
+			symtab = &(((struct cil_block*)tmp_datum)->symtab[CIL_SYM_BLOCKS]);
 		} else {
 			//cil_log(CIL_ERR, "type key: %s\n", tok_current);
-			symtab = &(((struct cil_block*)tmp_node->data)->symtab[sym_index]);
-			rc = cil_symtab_get_node(symtab, tok_current, &tmp_node);
+			symtab = &(((struct cil_block*)tmp_datum)->symtab[sym_index]);
+			rc = cil_symtab_get_datum(symtab, tok_current, &tmp_datum);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_ERR, "Failed to resolve name, current: %s\n", tok_current);
 				goto exit;
@@ -3718,7 +3847,7 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 		tok_current = tok_next;
 		tok_next = strtok(NULL, ".");
 	}
-	*node = tmp_node;
+	*datum = tmp_datum;
 	free(name_dup);
 
 	return SEPOL_OK;
@@ -3728,7 +3857,7 @@ exit:
 	return rc;
 }
 
-int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, void *extra_args, struct cil_tree_node **node)
+int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, void *extra_args, struct cil_symtab_datum **datum)
 {
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
@@ -3771,7 +3900,7 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 					}
 				} else {
 					symtab = &call->macro->symtab[sym_index];
-					rc = cil_symtab_get_node(symtab, name, node);
+					rc = cil_symtab_get_datum(symtab, name, datum);
 					if (rc == SEPOL_OK) {
 						rc = cil_get_symtab(db, namespace, &symtab, sym_index);
 						if (rc != SEPOL_OK) {
@@ -3781,19 +3910,19 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 					}
 				}
 
-				rc = cil_symtab_get_node(symtab, name, node);
+				rc = cil_symtab_get_datum(symtab, name, datum);
 				if (rc != SEPOL_OK) {
-					rc = cil_resolve_name_call_args(call, name, sym_index, node);
+					rc = cil_resolve_name_call_args(call, name, sym_index, datum);
 					if (rc == SEPOL_OK) {
 						goto exit;
 					}
 
-					rc = cil_get_symtab(db, call->macro->datum.node->parent, &symtab, sym_index);
+					rc = cil_get_symtab(db, ((struct cil_tree_node*)call->macro->datum.nodes->head->data)->parent, &symtab, sym_index);
 					if (rc != SEPOL_OK) {
 						goto exit;
 					}
 
-					rc = cil_symtab_get_node(symtab, name, node);
+					rc = cil_symtab_get_datum(symtab, name, datum);
 					if (rc == SEPOL_OK) {
 						goto exit;
 					}
@@ -3812,7 +3941,7 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 					cil_log(CIL_ERR, "Failed to get parent symtab, rc: %d\n", rc);
 					goto exit;
 				}
-				rc = cil_symtab_get_node(symtab, name, node);
+				rc = cil_symtab_get_datum(symtab, name, datum);
 				if (rc != SEPOL_OK) {
 					global_symtab_name = cil_malloc(strlen(name)+2);
 					strcpy(global_symtab_name, ".");
@@ -3820,7 +3949,7 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 				}
 			}
 		} else {
-			rc = __cil_resolve_name_helper(ast_node, name, sym_index, args, node);
+			rc = __cil_resolve_name_helper(ast_node, name, sym_index, args, datum);
 			if (rc != SEPOL_OK) {
 				global_symtab_name = cil_malloc(strlen(name)+2);
 				strcpy(global_symtab_name, ".");
@@ -3833,13 +3962,13 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 
 	if (first == '.') {
 		if (strrchr(global_symtab_name, '.') == global_symtab_name) { //Only one dot in name, check global symtabs
-			rc = cil_symtab_get_node(&db->symtab[sym_index], global_symtab_name+1, node);
+			rc = cil_symtab_get_datum(&db->symtab[sym_index], global_symtab_name+1, datum);
 			if (rc != SEPOL_OK) {
 				free(global_symtab_name);
 				goto exit;
 			}
 		} else {
-			rc = __cil_resolve_name_helper(db->ast->root, global_symtab_name, sym_index, args, node);
+			rc = __cil_resolve_name_helper(db->ast->root, global_symtab_name, sym_index, args, datum);
 			if (rc != SEPOL_OK) {
 				free(global_symtab_name);
 				goto exit;

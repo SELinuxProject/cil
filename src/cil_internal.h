@@ -36,6 +36,8 @@
 #include <arpa/inet.h>
 
 #include <cil/cil.h>
+
+#include "cil_tree.h"
 #include "cil_symtab.h"
 #include "cil_mem.h"
 
@@ -860,7 +862,7 @@ struct cil_macro {
 
 struct cil_args {
 	char *arg_str;
-	struct cil_tree_node *arg;
+	struct cil_symtab_datum *arg;
 	char *param_str;
 	enum cil_flavor flavor;
 };

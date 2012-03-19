@@ -65,6 +65,7 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 	struct cil_list *param_list = NULL;
 	struct cil_list_item *item = NULL;
 	struct cil_param *param = NULL;
+	struct cil_tree_node *node = NULL;
 
 	rc = __cil_verify_name((const char*)key);
 	if (rc != SEPOL_OK) {
@@ -82,10 +83,16 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 	if (symtab != NULL) {
 		rc = cil_symtab_insert(symtab, (hashtab_key_t)key, datum, ast_node);
 		if (rc == SEPOL_EEXIST) {
-			struct cil_tree_node *dup;
 			cil_log(CIL_ERR, "Re-declaration of %s %s (%s:%d)\n", cil_node_to_string(ast_node), key, ast_node->path, ast_node->line);
-			if (cil_symtab_get_node(symtab, key, &dup) == SEPOL_OK) {
-				cil_log(CIL_ERR, "Note: Previous declaration (%s:%d)\n", dup->path, dup->line);
+			if (cil_symtab_get_datum(symtab, key, &datum) == SEPOL_OK) {
+				if (sflavor == CIL_SYM_BLOCKS) {
+					node = (struct cil_tree_node*)datum->nodes->head->data;
+					if (datum->nodes != NULL) {
+						cil_log(CIL_ERR, "Note: Previous declaration (%s:%d)\n", node->path, node->line);
+					} else {
+						cil_log(CIL_ERR, "Note: Previous declaration (%s:%d)\n", node->path, node->line);
+					}
+				}
 			}
 			goto exit;
 		} else if (rc != SEPOL_OK) {
@@ -5105,19 +5112,22 @@ void cil_destroy_args(struct cil_args *args)
 
 	args->param_str = NULL;
 	if (args->arg_str == NULL) {
-		switch (args->arg->flavor) {
-		case CIL_LEVEL:
-			cil_tree_node_destroy(&args->arg);
-			args->arg = NULL;
-			break;
-		case CIL_CATSET:
-			cil_tree_node_destroy(&args->arg);
-			args->arg = NULL;
-			break;
-		case CIL_IPADDR:
-			cil_tree_node_destroy(&args->arg);
-			args->arg = NULL;
-			break;
+		if (args->arg != NULL && args->arg->nodes != NULL && args->arg->nodes->head != NULL) {
+			switch (args->arg->nodes->head->flavor) {
+			struct cil_tree_node *node = args->arg->nodes->head->data;
+			case CIL_LEVEL:
+				cil_tree_node_destroy(&node);
+				args->arg = NULL;
+				break;
+			case CIL_CATSET:
+				cil_tree_node_destroy(&node);
+				args->arg = NULL;
+				break;
+			case CIL_IPADDR:
+				cil_tree_node_destroy(&node);
+				args->arg = NULL;
+				break;
+			}
 		}
 	}
 

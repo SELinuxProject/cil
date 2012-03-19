@@ -384,7 +384,7 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 	while (current_user != NULL) {
 		struct cil_list_item *current_role = NULL;
 		if (((struct cil_multimap_item*)current_user->data)->values->head == NULL) {
-			cil_log(CIL_INFO, "No roles associated with user %s (line %d)\n",  ((struct cil_multimap_item*)current_user->data)->key->name,  ((struct cil_multimap_item*)current_user->data)->key->node->line);
+			cil_log(CIL_INFO, "No roles associated with user %s (line %d)\n",  ((struct cil_multimap_item*)current_user->data)->key->name,  ((struct cil_tree_node*)((struct cil_multimap_item*)current_user->data)->key->nodes->head->data)->line);
 			return SEPOL_ERR;
 		}
 

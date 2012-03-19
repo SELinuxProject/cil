@@ -86,14 +86,14 @@ int cil_resolve_blockinherit(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_in(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_call1(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_call2(struct cil_tree_node *, void *extra_args);
-int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_index sym_index, struct cil_tree_node **node);
+int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_index sym_index, struct cil_symtab_datum **datum);
 int cil_resolve_expr_stack(struct cil_list *expr_stack, struct cil_tree_node *parent, void *extra_args);
 int cil_resolve_boolif(struct cil_tree_node *current, void *extra_args);
 int cil_evaluate_expr_stack(struct cil_list *expr_stack, uint16_t *result);
 int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args);
 
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current);
-int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, void *extra_args, struct cil_tree_node **node);
+int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, void *extra_args, struct cil_symtab_datum **datum);
 
 int cil_reset_class(struct cil_tree_node *current, void *extra_args);
 int cil_reset_role(struct cil_tree_node *current, void *extra_args);

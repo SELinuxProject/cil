@@ -161,6 +161,10 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 	case CIL_TYPE:
 	case CIL_TYPEALIAS:
 	case CIL_USER:
+		if (node != ((struct cil_symtab_datum*)node->data)->nodes->head->data) {
+			break;
+		}
+
 		if (args->len == 0) {
 			rc = SEPOL_OK;
 			goto exit;

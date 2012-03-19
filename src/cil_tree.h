@@ -32,7 +32,6 @@
 
 #include <stdint.h>
 
-#include "cil_internal.h"
 #include "cil_list.h"
 
 struct cil_tree {
@@ -58,23 +57,14 @@ void cil_tree_children_destroy(struct cil_tree_node *node);
 void cil_tree_node_init(struct cil_tree_node **node);
 void cil_tree_node_destroy(struct cil_tree_node **node);
 
+void cil_tree_print(struct cil_tree_node *tree, uint32_t depth);
+
 //finished values
 #define CIL_TREE_SKIP_NOTHING	0
 #define CIL_TREE_SKIP_NEXT	1
 #define CIL_TREE_SKIP_HEAD	2
 #define CIL_TREE_SKIP_ALL	(CIL_TREE_SKIP_NOTHING | CIL_TREE_SKIP_NEXT | CIL_TREE_SKIP_HEAD)
 int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args), int (*first_child)(struct cil_tree_node *node, void *extra_args), int (*last_child)(struct cil_tree_node *node, void *extra_args), void *extra_args);
-
-void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
-void cil_tree_print_permset(struct cil_permset *permset);
-void cil_tree_print_classpermset(struct cil_classpermset *csp);
-void cil_tree_print_level(struct cil_level *level);
-void cil_tree_print_levelrange(struct cil_levelrange *lvlrange);
-void cil_tree_print_context(struct cil_context *context);
-void cil_tree_print_expr_tree(struct cil_tree_node *expr_root);
-void cil_tree_print_constrain(struct cil_constrain *cons);
-void cil_tree_print_node(struct cil_tree_node *node);
-void cil_tree_print(struct cil_tree_node *tree, uint32_t depth);
 
 #endif /* CIL_TREE_H_ */
 

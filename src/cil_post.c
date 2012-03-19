@@ -564,6 +564,7 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_li
 	ebitmap_t bitmap_stack[COND_EXPR_MAXDEPTH];
 
 	if (expr_stack_list == NULL) {
+		rc = SEPOL_OK;
 		goto exit;
 	}
 
@@ -578,9 +579,10 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_li
 			switch (cond->flavor) {
 			case CIL_TYPE: {
 				struct cil_symtab_datum *datum = cond->data;
+				struct cil_tree_node *node = datum->nodes->head->data;
 
 				ebitmap_init(&bitmap_tmp);
-				if (datum->node->flavor == CIL_TYPEATTRIBUTE) {
+				if (node->flavor == CIL_TYPEATTRIBUTE) {
 					struct cil_typeattribute *attr = cond->data;
 					rc = __cil_expr_stack_to_bitmap(db, attr->expr_stack_list, &bitmap_tmp);
 					if (rc != SEPOL_OK) {
@@ -588,7 +590,7 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_li
 						cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
 						goto exit;
 					}
-				} else if (datum->node->flavor == CIL_TYPEALIAS) {
+				} else if (node->flavor == CIL_TYPEALIAS) {
 					struct cil_typealias *alias = cond->data;
 					struct cil_type *type = alias->type;
 					if (ebitmap_set_bit(&bitmap_tmp, type->value, 1)) {
@@ -610,9 +612,10 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_li
 			}
 			case CIL_ROLE: {
 				struct cil_symtab_datum *datum = cond->data;
+				struct cil_tree_node *node = datum->nodes->head->data;
 
 				ebitmap_init(&bitmap_tmp);
-				if (datum->node->flavor == CIL_ROLEATTRIBUTE) {
+				if (node->flavor == CIL_ROLEATTRIBUTE) {
 					struct cil_roleattribute *attr = cond->data;
 					rc = __cil_expr_stack_to_bitmap(db, attr->expr_stack_list, &bitmap_tmp);
 					if (rc != SEPOL_OK) {
@@ -708,7 +711,7 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 
 		rc = __cil_expr_stack_to_bitmap(db, expr_list, attr->types);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
+			cil_log(CIL_ERR, "Failure while expanding expression stack to bitmap\n");
 			goto exit;
 		}
 		break;
@@ -722,7 +725,7 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 
 		rc = __cil_expr_stack_to_bitmap(db, expr_list, attr->roles);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
+			cil_log(CIL_ERR, "Failure while expanding expression stack to bitmap\n");
 			goto exit;
 		}
 		break;
@@ -742,26 +745,27 @@ int __cil_role_assign_types(struct cil_role *role, struct cil_symtab_datum *datu
 {
 	int rc = SEPOL_ERR;
 	ebitmap_t bitmap_tmp;
+	struct cil_tree_node *node = datum->nodes->head->data;
 
 	if (role->types == NULL) {
 		role->types = cil_malloc(sizeof(*role->types));
 		ebitmap_init(role->types);
 	}
 
-	if (datum->node->flavor == CIL_TYPE) {
+	if (node->flavor == CIL_TYPE) {
 		struct cil_type *type = (struct cil_type *)datum;
 		if (ebitmap_set_bit(role->types, type->value, 1)) {
 			cil_log(CIL_INFO, "Failure while setting bit in role types bitmap\n");
 			goto exit;
 		}
-	} else if (datum->node->flavor == CIL_TYPEALIAS) {
+	} else if (node->flavor == CIL_TYPEALIAS) {
 		struct cil_typealias *typealias = (struct cil_typealias *)datum;
 		struct cil_type *type = typealias->type;
 		if (ebitmap_set_bit(role->types, type->value, 1)) {
 			cil_log(CIL_INFO, "Failure while setting bit in role types bitmap\n");
 			goto exit;
 		}
-	} else if (datum->node->flavor == CIL_TYPEATTRIBUTE) {
+	} else if (node->flavor == CIL_TYPEATTRIBUTE) {
 		struct cil_typeattribute *attr = (struct cil_typeattribute *)datum;
 		if (ebitmap_or(&bitmap_tmp, attr->types, role->types)) {
 			cil_log(CIL_INFO, "Failure ORing role attribute bitmaps\n");
@@ -790,8 +794,9 @@ int __cil_post_db_roletype_helper(struct cil_tree_node *node, __attribute__((unu
 		struct cil_roletype *roletype = node->data;
 		struct cil_symtab_datum *role_datum = roletype->role;
 		struct cil_symtab_datum *type_datum = roletype->type;
+		struct cil_tree_node *role_node = role_datum->nodes->head->data;
 
-		if (role_datum->node->flavor == CIL_ROLEATTRIBUTE) {
+		if (role_node->flavor == CIL_ROLEATTRIBUTE) {
 			struct cil_roleattribute *attr = roletype->role;
 			ebitmap_node_t *rnode;
 			unsigned int i;

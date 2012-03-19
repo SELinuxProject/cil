@@ -33,6 +33,8 @@
 #include <sepol/policydb/policydb.h>
 
 #include "cil_internal.h"
+#include "cil_tree.h"
+#include "cil_list.h"
 
 struct cil_neverallow {
 	struct cil_tree_node *node;
@@ -58,55 +60,43 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *pdb);
  * Insert cil common structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the common into.
- * @param[in] node The tree node that contains the cil_common.
+ * @param[in] datum The cil_common datum.
  * @param[out] common_out The sepol common to send back.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_common_to_policydb(policydb_t *pdb, struct cil_tree_node *node, common_datum_t **common_out);
+int cil_common_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum, common_datum_t **common_out);
 
 /**
  * Insert cil class structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the class into.
- * @param[in] node The tree node that contains the cil_class.
+ * @param[in] datum The cil_class datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_class_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
-
-/**
- * Insert cil class common structure into sepol policydb.
- * Each cil_class has a common property which, if defined, contains the
- * common associated with that class.
- *
- * @param[in] pdb The policy database to insert the classcommon into.
- * @param[in] node The tree node that contains the cil_class.
- *
- * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
- */
-int cil_classcommon_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_class_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil role structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the role into.
- * @param[in] node The tree node that contains the cil_role.
+ * @param[in] datum The cil_role datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_role_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_role_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil roletype structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the roletype into.
  * @param[in] db The cil database
- * @param[in] node The tree node that contains the cil_roletype.
+ * @param[in] datum The cil_roletype datum.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
-int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_tree_node *node);
+int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil role bounds structure into sepol policydb.
@@ -114,31 +104,31 @@ int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct ci
  * the role bounds associated with that role.
  *
  * @param[in] pdb The policy database to insert the rolebounds into.
- * @param[in] node The tree node that contains the cil_role.
+ * @param[in] datum The cil_role datum.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
-int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil type structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the type into.
- * @param[in] node The tree node that contains the cil_type.
+ * @param[in] datum The cil_type datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_type_to_policydb(policydb_t *pdb, struct cil_tree_node *node, ebitmap_t *types_bitmap);
+int cil_type_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum, ebitmap_t *types_bitmap);
 
 /**
  * Insert cil typealias structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the typealias into.
- * @param[in] node The tree node that contains the cil_typealias.
+ * @param[in] datum The cil_typealias datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_typealias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil typepermissive structure into sepol policydb.
@@ -146,21 +136,21 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  * in the permssive types bitmap that corresponds to that type's value.
  *
  * @param[in] pdb The policy database to insert the typepermissive into.
- * @param[in] node The tree node that contains the cil_typepermissive.
+ * @param[in] datum The cil_typepermissive datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typepermissive_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_typepermissive_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil attribute structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the attribute into.
- * @param[in] node The tree node that contains the cil_attribute.
+ * @param[in] datum The cil_attribute datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil attribute structure into sepol type->attribute bitmap.
@@ -175,7 +165,7 @@ int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typeattribute_to_bitmap(policydb_t *pdb, const struct cil_db *cdb, struct cil_tree_node *node);
+int cil_typeattribute_to_bitmap(policydb_t *pdb, const struct cil_db *cdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil policycap structure into sepol policydb.
@@ -185,7 +175,7 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, const struct cil_db *cdb, struc
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_policycap_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_policycap_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil user structure into sepol policydb.
@@ -195,27 +185,27 @@ int cil_policycap_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_user_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_user_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil userrole structure into sepol policydb.
  *
  * @param[in] pdb THe policy database to insert the userrole into.
- * @param[in] node The tree node that contains the cil_userrole.
+ * @param[in] datum The cil_userrole datum.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
-int cil_userrole_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_userrole_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil bool structure into sepol policydb.
  *
  * @param[in] pdb THe policy database to insert the bool into.
- * @param[in] node The tree node that contains the cil_bool.
+ * @param[in] datum The cil_bool datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_bool_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_bool_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert all ordered cil category structures into sepol policydb.
@@ -231,11 +221,11 @@ int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db);
  * Insert cil category alias structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the category alias into.
- * @param[in] node The tree node that contains the cil_catalias.
+ * @param[in] datum The cil_catalias datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_catalias_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_catalias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert the cil dominance order into sepol policydb.
@@ -252,17 +242,17 @@ int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db);
  * typetransition, typechange, and typemember.
  *
  * @param[in] pdb The policy database to insert the type rule into.
- * @param[in] node The tree node that contains the cil_type_rule.
+ * @param[in] datum The cil_type_rule datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil avrule structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the avrule into.
- * @param[in] node The tree node that contains the cil_avrule.
+ * @param[in] datum The cil_avrule datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
@@ -274,7 +264,7 @@ int cil_avrule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_
  * and true/false avtab_ptr lists that point into te_cond_avtab.
  *
  * @param[in] pdb The policy database to insert the booleanif into.
- * @param[in] node The tree node that contains the cil_booleanif.
+ * @param[in] node The cil_booleanif node.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
@@ -284,41 +274,41 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
  * Insert cil role transition structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the role transition into.
- * @param[in] node The tree node that contains the cil_role_trans.
+ * @param[in] datum The cil_role_trans datum.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil role allow structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the role allow into.
- * @param[in] node The tree node that contains the cil_role_allow.
+ * @param[in] datum The cil_role_allow datum.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil file transition structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the file transition into.
- * @param[in] node The tree node that contains the cil_nametypetransition.
+ * @param[in] datum The cil_nametypetransition datum.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_nametypetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_nametypetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil constrain/mlsconstrain structure(s) into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the (mls)constrain into.
- * @param[in] node The tree node that contains the cil_(mls)constrain.
+ * @param[in] datum The cil_(mls)constrain datum.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Define sepol level.
@@ -328,31 +318,31 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
  * Sets the sepol level as defined in the sepol policy database.
  *
  * @param[in] pdb The policy database that holds the sepol level.
- * @param[in] node The tree node that contains the cil_sens.
+ * @param[in] datum The cil_sens datum.
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_sepol_level_define(policydb_t *pdb, struct cil_tree_node *node);
+int cil_sepol_level_define(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil sid structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the sid into.
- * @param[in] node The tree node that contains the cil_sid.
+ * @param[in] datum The cil_sid datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_sid_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_sid_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil rangetransition structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the rangetransition into.
- * @param[in] node The tree node that contains the cil_rangetransition.
+ * @param[in] datum The cil_rangetransition datum.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_rangetransition_to_policydb(policydb_t *pdb, struct cil_tree_node *node);
+int cil_rangetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil portcon structure into sepol policydb.
