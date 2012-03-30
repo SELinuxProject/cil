@@ -51,6 +51,7 @@ struct cil_args_verify {
 	symtab_t *senstab;
 	int *avrule_cnt;
 	int *nseuserdflt;
+	int *pass;
 };
 
 struct cil_args_verify_order {

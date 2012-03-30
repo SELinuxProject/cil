@@ -1278,23 +1278,25 @@ exit:
 int __cil_verify_booleanif_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, __attribute__((unused)) void *extra_args)
 {
 	int rc = SEPOL_ERR;
-	struct cil_avrule *avrule = NULL;
-	struct cil_type_rule *typerule = NULL;
-	struct cil_tree_node *temp_node = NULL;
 	struct cil_tree_node *rule_node = node;
-	struct cil_complex_symtab *symtab = extra_args;
-	struct cil_complex_symtab_key ckey;
-	struct cil_complex_symtab_datum datum;
 
 	switch (rule_node->flavor) {
-	case CIL_AVRULE:
+	case CIL_AVRULE: {
+		struct cil_avrule *avrule = NULL;
 		avrule = rule_node->data;
 		if (avrule->rule_kind == CIL_AVRULE_NEVERALLOW) {
 			cil_log(CIL_ERR, "Neverallow within booleanif block (line: %d)\n", node->line);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
-	case CIL_TYPE_RULE:
+		break;
+	}
+	case CIL_TYPE_RULE: /*
+	struct cil_type_rule *typerule = NULL;
+	struct cil_tree_node *temp_node = NULL;
+	struct cil_complex_symtab *symtab = extra_args;
+	struct cil_complex_symtab_key ckey;
+	struct cil_complex_symtab_datum datum;
 		typerule = rule_node->data;
 
 		ckey.key1 = (intptr_t)typerule->src;
@@ -1319,15 +1321,24 @@ int __cil_verify_booleanif_helper(struct cil_tree_node *node, __attribute__((unu
 					(intptr_t)typerule->tgt == ckey.key2 &&
 					(intptr_t)typerule->obj == ckey.key3 &&
 					(intptr_t)typerule->rule_kind == ckey.key4) {
-						cil_log(CIL_ERR, "Duplicate type rule found (line: %d)\n", node->line);
-						rc = SEPOL_ERR;
-						goto exit;
-					}
+					cil_log(CIL_ERR, "Duplicate type rule found (line: %d)\n", node->line);
+					rc = SEPOL_ERR;
+					goto exit;
 				}
 			}
+		}
+		break;*/
+
+		//TODO Fix duplicate type_rule detection
+		break;
+	case CIL_CALL:
+		//Fall through to check content of call
+		break;
+	case CIL_TUNABLEIF:
+		//Fall through
 		break;
 	default:
-		cil_log(CIL_ERR, "Invalid statement within booleanif (line: %d)\n", node->line);
+		cil_log(CIL_ERR, "Invalid statement within booleanif (%s, line: %d)\n", node->path, node->line);
 		goto exit;
 	}
 
@@ -1344,7 +1355,7 @@ int __cil_verify_booleanif(struct cil_tree_node *node, struct cil_complex_symtab
 	while (cond_block != NULL) {
 		rc = cil_tree_walk(cond_block->cl_head, __cil_verify_booleanif_helper, NULL, NULL, symtab);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to verify category order\n");
+			cil_log(CIL_ERR, "Failed to verify booleanif\n");
 			goto exit;
 		}
 		cond_block = cond_block->next;
@@ -1678,6 +1689,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	int *avrule_cnt = 0;
 	int *nseuserdflt = 0;
 	int state = 0;
+	int *pass = 0;
 	struct cil_args_verify *args = extra_args;
 	struct cil_complex_symtab *csymtab = NULL;
 	struct cil_db *db = NULL;
@@ -1692,94 +1704,121 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	avrule_cnt = args->avrule_cnt;
 	nseuserdflt = args->nseuserdflt;
 	csymtab = args->csymtab;
+	pass = args->pass;
 
-	switch (node->flavor) {
-	case CIL_USER:
-		rc = __cil_verify_user(db, node, senstab);
-		break;
-	case CIL_SELINUXUSERDEFAULT:
-		(*nseuserdflt)++;
-		rc = SEPOL_OK;
-		break;
-	case CIL_ROLE:
-		rc = __cil_verify_role(node);
-		break;
-	case CIL_TYPE:
-		rc = __cil_verify_type(node);
-		break;
-	case CIL_AVRULE:
-		(*avrule_cnt)++;
-		rc = SEPOL_OK;
-		break;
-	case CIL_ROLETRANSITION:
-		rc = __cil_verify_rule(node, csymtab);
-		break;
-	case CIL_TYPE_RULE:
-		rc = __cil_verify_rule(node, csymtab);
-		break;
-	case CIL_BOOLEANIF:
-		rc = __cil_verify_booleanif(node, csymtab);
-		*finished = CIL_TREE_SKIP_HEAD;
-		break;
-	case CIL_OPTIONAL:
+	if (node->flavor == CIL_OPTIONAL) {
 		state = ((struct cil_symtab_datum *)node->data)->state;
 		if (state == CIL_STATE_DISABLED) {
 			*finished = CIL_TREE_SKIP_HEAD;
 		}
 		rc = SEPOL_OK;
-		break;
-	case CIL_MACRO:
+		goto exit;
+	} else if (node->flavor == CIL_MACRO) {
 		*finished = CIL_TREE_SKIP_HEAD;
 		rc = SEPOL_OK;
-		break;
-	case CIL_CONTEXT:
-		rc = __cil_verify_named_context(db, node);
-		break;
-	case CIL_LEVELRANGE:
-		rc = __cil_verify_named_levelrange(db, node);
-		break;
-	case CIL_NETIFCON:
-		rc = __cil_verify_netifcon(db, node, senstab);
-		break;
-	case CIL_GENFSCON:
-		rc = __cil_verify_genfscon(db, node, senstab);
-		break;
-	case CIL_FILECON:
-		rc = __cil_verify_filecon(db, node, senstab);
-		break;
-	case CIL_NODECON:
-		rc = __cil_verify_nodecon(db, node, senstab);
-		break;
-	case CIL_PORTCON:
-		rc = __cil_verify_portcon(db, node, senstab);
-		break;
-	case CIL_PIRQCON:
-		rc = __cil_verify_pirqcon(db, node, senstab);
-		break;
-	case CIL_IOMEMCON:
-		rc = __cil_verify_iomemcon(db, node, senstab);
-		break;
-	case CIL_IOPORTCON:
-		rc = __cil_verify_ioportcon(db, node, senstab);
-		break;
-	case CIL_PCIDEVICECON:
-		rc = __cil_verify_pcidevicecon(db, node, senstab);
-		break;
-	case CIL_FSUSE:
-		rc = __cil_verify_fsuse(db, node, senstab);
-		break;
-	case CIL_RANGETRANSITION:
-		rc = __cil_verify_rangetransition(node, senstab);
-		break;
-	case CIL_CLASS:
-		rc = __cil_verify_class(node);
-		break;
-	case CIL_POLICYCAP:
-		rc = __cil_verify_policycap(node);
-		break;
-	default:
+		goto exit;
+	} else if (node->flavor == CIL_BLOCK) {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
 		rc = SEPOL_OK;
+		goto exit;
+	}
+
+	switch (*pass) {
+	case 0: {
+		switch (node->flavor) {
+		case CIL_USER:
+			rc = __cil_verify_user(db, node, senstab);
+			break;
+		case CIL_SELINUXUSERDEFAULT:
+			(*nseuserdflt)++;
+			rc = SEPOL_OK;
+			break;
+		case CIL_ROLE:
+			rc = __cil_verify_role(node);
+			break;
+		case CIL_TYPE:
+			rc = __cil_verify_type(node);
+			break;
+		case CIL_AVRULE:
+			(*avrule_cnt)++;
+			rc = SEPOL_OK;
+			break;
+		case CIL_ROLETRANSITION:
+			rc = SEPOL_OK; //TODO __cil_verify_rule doesn't work quite right
+			//rc = __cil_verify_rule(node, csymtab);
+			break;
+		case CIL_TYPE_RULE:
+			rc = SEPOL_OK; //TODO __cil_verify_rule doesn't work quite right
+			//rc = __cil_verify_rule(node, csymtab);
+			break;
+		case CIL_BOOLEANIF:
+			rc = __cil_verify_booleanif(node, csymtab);
+			*finished = CIL_TREE_SKIP_HEAD;
+			break;
+		case CIL_LEVELRANGE:
+			rc = __cil_verify_named_levelrange(db, node);
+			break;
+		case CIL_CLASS:
+			rc = __cil_verify_class(node);
+			break;
+		case CIL_POLICYCAP:
+			rc = __cil_verify_policycap(node);
+			break;
+		default:
+			rc = SEPOL_OK;
+			break;
+		}
 		break;
+	}
+	case 1:	{
+		switch (node->flavor) {
+		case CIL_CONTEXT:
+			rc = __cil_verify_named_context(db, node);
+			break;
+		case CIL_NETIFCON:
+			rc = __cil_verify_netifcon(db, node, senstab);
+			break;
+		case CIL_GENFSCON:
+			rc = __cil_verify_genfscon(db, node, senstab);
+			break;
+		case CIL_FILECON:
+			rc = __cil_verify_filecon(db, node, senstab);
+			break;
+		case CIL_NODECON:
+			rc = __cil_verify_nodecon(db, node, senstab);
+			break;
+		case CIL_PORTCON:
+			rc = __cil_verify_portcon(db, node, senstab);
+			break;
+		case CIL_PIRQCON:
+			rc = __cil_verify_pirqcon(db, node, senstab);
+			break;
+		case CIL_IOMEMCON:
+			rc = __cil_verify_iomemcon(db, node, senstab);
+			break;
+		case CIL_IOPORTCON:
+			rc = __cil_verify_ioportcon(db, node, senstab);
+			break;
+		case CIL_PCIDEVICECON:
+			rc = __cil_verify_pcidevicecon(db, node, senstab);
+			break;
+		case CIL_FSUSE:
+			rc = __cil_verify_fsuse(db, node, senstab);
+			break;
+		case CIL_RANGETRANSITION:
+			rc = __cil_verify_rangetransition(node, senstab);
+			break;
+		default:
+			rc = SEPOL_OK;
+			break;
+		}
+		break;
+	}
+	default:
+		rc = SEPOL_ERR;
 	}
 
 exit:

@@ -968,7 +968,7 @@ int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj,
 				&& tgt == never_key->target_type
 				&& obj == never_key->target_class
 				&& (ndata->types & data) != 0) {
-					cil_log(CIL_ERR, "Neverallow found that matches avrule (line: %d)\n", node->line);
+					cil_log(CIL_ERR, "Neverallow found that matches avrule (%s line: %d)\n", node->path, node->line);
 					rc = SEPOL_ERR;
 					goto exit;
 				}
@@ -1253,9 +1253,15 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 			cil_log(CIL_ERR, "Failed to insert avrule into avtab (line: %d)\n", curr_rule->line);
 		}
 		break;
+	case CIL_CALL:
+		rc = SEPOL_OK;
+		goto exit;
+	case CIL_TUNABLEIF:
+		rc = SEPOL_OK;
+		goto exit;
 	default:
 		rc = SEPOL_ERR;
-		cil_log(CIL_ERR, "Invalid statement within booleanif (line: %d)\n", curr_rule->line);
+		cil_log(CIL_ERR, "Invalid statement within booleanif (%s, line: %d)\n", curr_rule->path, curr_rule->line);
 		break;
 	}
 	if (rc != SEPOL_OK) {
@@ -1406,7 +1412,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
 		bool_args.cond_block = true_node;
 		rc = cil_tree_walk(true_node, __cil_cond_to_policydb_helper, NULL, NULL, &bool_args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while walking true conditional block (line: %d)", true_node->line);
+			cil_log(CIL_INFO, "Failure while walking true conditional block (%s line: %d)\n", true_node->path, true_node->line);
 			goto exit;
 		}
 	}
@@ -1415,7 +1421,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
 		bool_args.cond_block = false_node;
 		rc = cil_tree_walk(false_node, __cil_cond_to_policydb_helper, NULL, NULL, &bool_args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while walking false conditional block (line: %d)", false_node->line);
+			cil_log(CIL_INFO, "Failure while walking false conditional block (%s line: %d)\n", false_node->path, false_node->line);
 			goto exit;
 		}
 	}

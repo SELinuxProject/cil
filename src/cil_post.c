@@ -296,6 +296,13 @@ int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *finished, v
 	db = (struct cil_db*)extra_args;
 
 	switch(node->flavor) {
+	case CIL_BLOCK: {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
 	case CIL_TYPE: {
 		struct cil_type *type = node->data;
 		type->value = db->num_types;
@@ -371,6 +378,13 @@ int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused
 	db = extra_args;
 
 	switch(node->flavor) {
+	case CIL_BLOCK: {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
 	case CIL_TYPE: {
 		struct cil_type *type = node->data;
 		if (db->val_to_type == NULL) {
@@ -702,6 +716,24 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 	db = extra_args;
 
 	switch (node->flavor) {
+	case CIL_BLOCK: {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_OPTIONAL: {
+		struct cil_optional *opt = node->data;
+		if (opt->datum.state != CIL_STATE_ENABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_MACRO: {
+		*finished = CIL_TREE_SKIP_HEAD;
+		break;
+	}
 	case CIL_TYPEATTRIBUTE: {
 		struct cil_typeattribute *attr = node->data;
 		struct cil_list *expr_list = attr->expr_stack_list;
@@ -790,6 +822,24 @@ int __cil_post_db_roletype_helper(struct cil_tree_node *node, __attribute__((unu
 	}
 
 	switch (node->flavor) {
+	case CIL_BLOCK: {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_OPTIONAL: {
+		struct cil_optional *opt = node->data;
+		if (opt->datum.state != CIL_STATE_ENABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_MACRO: {
+		*finished = CIL_TREE_SKIP_HEAD;
+		break;
+	}
 	case CIL_ROLETYPE: {
 		struct cil_roletype *roletype = node->data;
 		struct cil_symtab_datum *role_datum = roletype->role;
@@ -863,6 +913,7 @@ int cil_post_db(struct cil_db *db)
 		goto exit;
 	}
 
+
 	qsort(db->netifcon->array, db->netifcon->count, sizeof(db->netifcon->array), cil_post_netifcon_compare);
 	qsort(db->genfscon->array, db->genfscon->count, sizeof(db->genfscon->array), cil_post_genfscon_compare);
 	qsort(db->portcon->array, db->portcon->count, sizeof(db->portcon->array), cil_post_portcon_compare);
@@ -883,6 +934,7 @@ int cil_post_verify(struct cil_db *db)
 	int rc = SEPOL_ERR;
 	int avrule_cnt = 0;
 	int nseuserdflt = 0;
+	int pass = 0;
 	struct cil_list_item *curr = NULL;
 	struct cil_args_verify extra_args;
 	struct cil_complex_symtab csymtab;
@@ -896,11 +948,14 @@ int cil_post_verify(struct cil_db *db)
 	extra_args.senstab = &senstab;
 	extra_args.avrule_cnt = &avrule_cnt;
 	extra_args.nseuserdflt = &nseuserdflt;
+	extra_args.pass = &pass;
 
-	rc = cil_tree_walk(db->ast->root, __cil_verify_helper, NULL, NULL, &extra_args);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to verify cil database\n");
-		goto exit;
+	for (pass = 0; pass < 2; pass++) {
+		rc = cil_tree_walk(db->ast->root, __cil_verify_helper, NULL, NULL, &extra_args);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to verify cil database\n");
+			goto exit;
+		}
 	}
 
 	if (avrule_cnt == 0) {
