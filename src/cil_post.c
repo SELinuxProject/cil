@@ -935,7 +935,6 @@ int cil_post_verify(struct cil_db *db)
 	int avrule_cnt = 0;
 	int nseuserdflt = 0;
 	int pass = 0;
-	struct cil_list_item *curr = NULL;
 	struct cil_args_verify extra_args;
 	struct cil_complex_symtab csymtab;
 	symtab_t senstab;
@@ -968,22 +967,6 @@ int cil_post_verify(struct cil_db *db)
 		cil_log(CIL_ERR, "Policy cannot contain more than one selinuxuserdefault, found: %d\n", nseuserdflt);
 		rc = SEPOL_ERR;
 		goto exit;
-	}
-
-	for (curr = db->dominance->head; curr != NULL; curr = curr->next) {
-		struct cil_symtab_datum *datum = NULL;
-		struct cil_sens *sens = curr->data;
-		char *key = NULL;
-
-		key = sens->datum.name;
-		datum = (struct cil_symtab_datum *)hashtab_search(senstab.table, key);
-		if (datum == NULL) {
-			cil_log(CIL_ERR, "Sensitivity not used in a level: %s\n", key);
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-		cil_symtab_datum_destroy(*datum);
-		free(datum);
 	}
 
 exit:
