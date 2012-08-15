@@ -207,13 +207,14 @@ int __cil_type_to_role(policydb_t *pdb, const struct cil_db *db, role_datum_t *s
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 	type_datum_t *sepol_type = NULL;
-	enum cil_flavor flavor = ((struct cil_tree_node*)type_datum->nodes->head->data)->flavor;
+	struct cil_tree_node *node = type_datum->nodes->head->data;
+	enum cil_flavor flavor = node->flavor;
 
 	if (flavor == CIL_TYPE) {
 		key = type_datum->name;
 		sepol_type = hashtab_search(pdb->p_types.table, key);
 		if (sepol_type == NULL) {
-			cil_log(CIL_INFO, "Failure while searching sepol hashtab for type: %s\n", key);
+			cil_log(CIL_INFO, "Failed to find type %s in sepol hashtab for node at line %d of %s\n", key, node->line, node->path);
 			goto exit;
 		}
 
@@ -236,7 +237,7 @@ int __cil_type_to_role(policydb_t *pdb, const struct cil_db *db, role_datum_t *s
 			key = cil_type->datum.name;
 			sepol_type = hashtab_search(pdb->p_types.table, key);
 			if (sepol_type == NULL) {
-				cil_log(CIL_INFO, "Failure while searching sepol hashtab for type: %s\n", key);
+				cil_log(CIL_INFO, "Failed to find type %s in sepol hashtab\n",key);
 				goto exit;
 			}
 
@@ -968,7 +969,7 @@ int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj,
 				&& tgt == never_key->target_type
 				&& obj == never_key->target_class
 				&& (ndata->types & data) != 0) {
-					cil_log(CIL_ERR, "Neverallow found that matches avrule (%s line: %d)\n", node->path, node->line);
+					cil_log(CIL_ERR, "Neverallow found that matches avrule at line %d of %s\n", node->line, node->path);
 					rc = SEPOL_ERR;
 					goto exit;
 				}
@@ -1209,7 +1210,7 @@ int cil_avrule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_
 
 	rc = __cil_avrule_to_avtab(pdb, db, cil_avrule, &pdb->te_avtab, &avtab_ptr, neverallows, 1);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to insert avrule into avtab (line: %d)\n", node->line);
+		cil_log(CIL_ERR, "Failed to insert avrule into avtab at line %d of %s\n", node->line, node->path);
 		goto exit;
 	}
 
@@ -1243,14 +1244,14 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 		cil_type_rule = curr_rule->data;
 		rc = __cil_type_rule_to_avtab(pdb, cil_type_rule, &pdb->te_cond_avtab, &avtab_ptr);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to insert typerule into avtab (line: %d)\n", curr_rule->line);
+			cil_log(CIL_ERR, "Failed to insert typerule into avtab at line %d of %s\n", curr_rule->line, curr_rule->path);
 		}
 		break;
 	case CIL_AVRULE:
 		cil_avrule = curr_rule->data;
 		rc = __cil_avrule_to_avtab(pdb, db, cil_avrule, &pdb->te_cond_avtab, &avtab_ptr, args->neverallows, 0);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to insert avrule into avtab (line: %d)\n", curr_rule->line);
+			cil_log(CIL_ERR, "Failed to insert typerule into avtab at line %d of %s\n", curr_rule->line, curr_rule->path);
 		}
 		break;
 	case CIL_CALL:
@@ -1261,7 +1262,8 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 		goto exit;
 	default:
 		rc = SEPOL_ERR;
-		cil_log(CIL_ERR, "Invalid statement within booleanif (%s, line: %d)\n", curr_rule->path, curr_rule->line);
+		cil_log(CIL_ERR, "Invalid statement within booleanif at line %d of %s\n", 
+			curr_rule->line, curr_rule->path);
 		break;
 	}
 	if (rc != SEPOL_OK) {
@@ -1296,7 +1298,8 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 		break;
 	default:
 		rc = SEPOL_ERR;
-		cil_log(CIL_ERR, "Invalid block type within booleanif (line: %d)\n", curr_rule->line);
+		cil_log(CIL_ERR, "Invalid block type within booleanif at line %d of %s\n", 
+			curr_rule->line, curr_rule->path);
 		goto exit;
 	}
 
@@ -1327,7 +1330,8 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
 	cond_node = cond_node_create(pdb, NULL);
 	if (cond_node == NULL) {
 		rc = SEPOL_ERR;
-		cil_log(CIL_INFO, "Failure while creating sepol conditional node\n");
+		cil_log(CIL_INFO, "Failed to create sepol conditional node at line %d of %s\n", 
+			node->line, node->path);
 		goto exit;
 	}
 
@@ -1346,7 +1350,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
 			sepol_bool = hashtab_search(pdb->p_bools.table, key);
 			if (sepol_bool == NULL) {
 				rc = SEPOL_ERR;
-				cil_log(CIL_INFO, "Failure while searching hashtab for sepol boolean\n");
+				cil_log(CIL_INFO, "Failed to find boolean in sepol at line %d of %s\n", node->line, node->path);
 				goto exit;
 			}
 			cond_expr->bool = sepol_bool->s.value;
@@ -1371,7 +1375,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
 			break;
 		default:
 			rc = SEPOL_ERR;
-			cil_log(CIL_INFO, "Unknown booleanif operator (line: %d)\n", node->line);
+			cil_log(CIL_INFO, "Unknown booleanif operator at line %d of %s\n", node->line, node->path);
 			goto exit;
 		}
 
@@ -1412,7 +1416,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
 		bool_args.cond_block = true_node;
 		rc = cil_tree_walk(true_node, __cil_cond_to_policydb_helper, NULL, NULL, &bool_args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while walking true conditional block (%s line: %d)\n", true_node->path, true_node->line);
+			cil_log(CIL_INFO, "Failure while walking true conditional block at line %d of %s\n", true_node->line, true_node->path);
 			goto exit;
 		}
 	}
@@ -1421,7 +1425,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
 		bool_args.cond_block = false_node;
 		rc = cil_tree_walk(false_node, __cil_cond_to_policydb_helper, NULL, NULL, &bool_args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while walking false conditional block (%s line: %d)\n", false_node->path, false_node->line);
+			cil_log(CIL_INFO, "Failure while walking false conditional block at line %d of %s\n", false_node->line, false_node->path);
 			goto exit;
 		}
 	}
@@ -2013,7 +2017,7 @@ int __cil_sens_to_mls_level(policydb_t *pdb, struct cil_sens *cil_sens, mls_leve
 
 		rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while inserting catset into sepol mls level\n");
+			cil_log(CIL_INFO, "Failed to insert category set into sepol mls level\n");
 			goto exit;
 		}
 	}
@@ -2043,7 +2047,7 @@ int __cil_level_to_mls_level(policydb_t *pdb, struct cil_level *cil_level, mls_l
 
 	rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failure while inserting catset into sepol mls level\n");
+		cil_log(CIL_INFO, "Failed to insert category set into sepol mls level\n");
 		goto exit;
 	}
 

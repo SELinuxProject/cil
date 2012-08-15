@@ -153,7 +153,12 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
    last_child:		Function to call when finished with the last child of a node's children
    extra_args:               any additional data to be passed to the helper functions
 */
-int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args), int (*first_child)(struct cil_tree_node *node, void *extra_args), int (*last_child)(struct cil_tree_node *node, void *extra_args), void *extra_args)
+int cil_tree_walk(struct cil_tree_node *start_node, 
+		  int (*process_node)(struct cil_tree_node *node, uint32_t *finished, 
+				      void *extra_args), 
+		  int (*first_child)(struct cil_tree_node *node, void *extra_args), 
+		  int (*last_child)(struct cil_tree_node *node, void *extra_args), 
+		  void *extra_args)
 {
 	struct cil_tree_node *node = NULL;
 	uint32_t reverse = 0;
@@ -174,7 +179,8 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 	if (first_child != NULL) {
 		rc = (*first_child)(node, extra_args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failed to process first child\n");
+			cil_log(CIL_INFO, "Failed to process first child at line %d of %s\n",
+				node->line, node->path);
 			return rc;
 		}
 	}
@@ -184,7 +190,7 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 			if (process_node != NULL) {
 				rc = (*process_node)(node, &finished, extra_args);
 				if (rc != SEPOL_OK) {
-					cil_log(CIL_INFO, "Failed to process node\n");
+					cil_log(CIL_INFO, "Failed to process node at line %d of %s\n", node->line, node->path);
 					return rc;
 				}
 			}
@@ -195,7 +201,7 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 			if (first_child != NULL) {
 				rc = (*first_child)(node, extra_args);
 				if (rc != SEPOL_OK) {
-					cil_log(CIL_INFO, "Failed to process first child\n");
+					cil_log(CIL_INFO, "Failed to process first child at line %d of %s\n", node->line, node->path);
 					return rc;
 				}
 			}
@@ -211,7 +217,7 @@ int cil_tree_walk(struct cil_tree_node *start_node, int (*process_node)(struct c
 			if (last_child != NULL) {
 				rc = (*last_child)(node, extra_args);
 				if (rc != SEPOL_OK) {
-					cil_log(CIL_INFO, "Failed to process last child\n");
+					cil_log(CIL_INFO, "Failed to process last child at line %d of %s\n",node->line, node->path);
 					return rc;
 				}
 			}
@@ -1543,7 +1549,6 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 			if ((current->parent != NULL) && (current->parent->parent == NULL))
 				cil_log(CIL_INFO, "\n\n");
 		} else {
-//			cil_log(CIL_INFO, "cil_tree_print: current->next is not null\n");
 			cil_tree_print(current->next, depth);
 		}
 	} else {

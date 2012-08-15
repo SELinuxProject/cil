@@ -129,7 +129,7 @@ int cil_add_file(cil_db_t *db, char *name, char *data, size_t size)
 	char *buffer = NULL;
 	int rc;
 
-	cil_log(CIL_INFO, "Parsing %s...\n", name);
+	cil_log(CIL_INFO, "Parsing %s\n", name);
 
 	buffer = cil_malloc(size + 2);
 	memcpy(buffer, data, size);
@@ -137,16 +137,12 @@ int cil_add_file(cil_db_t *db, char *name, char *data, size_t size)
 
 	rc = cil_parser(name, buffer, size + 2, &db->parse);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to parse %s, exiting\n", name);
+		cil_log(CIL_ERR, "Failed to parse %s\n", name);
 		goto exit;
 	}
 
 	free(buffer);
 	buffer = NULL;
-
-#ifdef DEBUG
-	cil_tree_print(db->parse->root, 0);
-#endif
 
 	rc = SEPOL_OK;
 
@@ -164,61 +160,43 @@ int cil_compile(struct cil_db *db, sepol_policydb_t *sepol_db)
 		goto exit;
 	}
 
-	cil_log(CIL_INFO, "Building AST from Parse Tree...\n");
+	cil_log(CIL_INFO, "Building AST from Parse Tree\n");
 	rc = cil_build_ast(db, db->parse->root, db->ast->root);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to build ast, exiting\n");
+		cil_log(CIL_ERR, "Failed to build ast\n");
 		goto exit;
 	}
 
-#ifdef DEBUG
-	cil_tree_print(db->ast->root, 0);
-#endif
-
-	cil_log(CIL_INFO, "Destroying Parse Tree...\n");
+	cil_log(CIL_INFO, "Destroying Parse Tree\n");
 	cil_tree_destroy(&db->parse);
 
-	cil_log(CIL_INFO, "Resolving AST...\n");
+	cil_log(CIL_INFO, "Resolving AST\n");
 	rc = cil_resolve_ast(db, db->ast->root);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failed to resolve ast, exiting\n");
+		cil_log(CIL_ERR, "Failed to resolve ast\n");
 		goto exit;
 	}
 
-#ifdef DEBUG
-	cil_tree_print(db->ast->root, 0);
-#endif
-
-	cil_log(CIL_INFO, "Destroying AST Symtabs...\n");
+	cil_log(CIL_INFO, "Destroying AST Symtabs\n");
 	rc = cil_destroy_ast_symtabs(db->ast->root);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to destroy ast symtabs, exiting\n");
+		cil_log(CIL_ERR, "Failed to destroy ast symtabs\n");
 		goto exit;
 	}
 
-	cil_log(CIL_INFO, "Qualifying Names...\n");
+	cil_log(CIL_INFO, "Qualifying Names\n");
 	rc = cil_fqn_qualify(db->ast->root);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to qualify names, exiting\n");
+		cil_log(CIL_ERR, "Failed to qualify names\n");
 		goto exit;
 	}
 
-	cil_log(CIL_INFO, "Post process...\n");
+	cil_log(CIL_INFO, "Compile post process\n");
 	rc = cil_post_process(db);
 	if (rc != SEPOL_OK ) {
-		cil_log(CIL_ERR, "Post process failed, exiting\n");
+		cil_log(CIL_ERR, "Post process failed\n");
 		goto exit;
 	}
-
-#ifdef DEBUG
-	rc = cil_gen_policy(db);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to print to policy.conf file\n");
-		goto exit;
-	}
-	cil_tree_print(db->ast->root, 0);
-#endif
-	cil_log(CIL_INFO, "Generating Binary...\n");
 
 exit:
 
@@ -228,9 +206,11 @@ exit:
 int cil_build_policydb(cil_db_t *db, sepol_policydb_t *sepol_db)
 {
 	int rc;
+
+	cil_log(CIL_INFO, "Building policy binary\n");
 	rc = cil_binary_create(db, sepol_db);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to generate binary, exiting\n");
+		cil_log(CIL_ERR, "Failed to generate binary\n");
 		goto exit;
 	}
 
@@ -576,7 +556,7 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		break;
 	default:
 		*sym_index = CIL_SYM_UNKNOWN;
-		cil_log(CIL_INFO, "cil_flavor_to_symtab_index: Failed to find flavor: %d\n", flavor);
+		cil_log(CIL_INFO, "Failed to find flavor: %d\n", flavor);
 		return SEPOL_ERR;
 	}
 
@@ -1306,18 +1286,21 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 		} else if (ast_node->flavor == CIL_ROOT && sym_index < CIL_SYM_NUM) {
 			*symtab = &db->symtab[sym_index];
 		} else if (sym_index >= CIL_SYM_NUM) {
-			cil_log(CIL_INFO, "Invalid index passed to cil_get_symtab\n");
+			cil_log(CIL_INFO, "Invalid symtab index at line %d of %s\n",
+				ast_node->line, ast_node->path);
 			rc = SEPOL_ERR;
 			goto exit;
 		} else {
-			cil_log(CIL_INFO, "Failed to get symtab from node\n");
+			cil_log(CIL_INFO, "Failed to get symtab from node at line %d of %s\n",
+				ast_node->line, ast_node->path);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 	}
 
 	if (ast_node == NULL || *symtab == NULL) {
-		cil_log(CIL_INFO, "Failed to get symtab\n");
+		cil_log(CIL_INFO, "Failed to get symtab at line %d of %s\n",
+			ast_node->line, ast_node->path);
 		rc = SEPOL_ERR;
 		goto exit;
 	}

@@ -35,7 +35,7 @@
 
 __attribute__((noreturn)) void cil_default_malloc_error_handler(void)
 {
-	cil_log(CIL_ERR, "Unable to proceed, failed to allocate memory\n");
+	cil_log(CIL_ERR, "Failed to allocate memory\n");
 	exit(1);
 }
 

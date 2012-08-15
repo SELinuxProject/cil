@@ -384,7 +384,8 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 	while (current_user != NULL) {
 		struct cil_list_item *current_role = NULL;
 		if (((struct cil_multimap_item*)current_user->data)->values->head == NULL) {
-			cil_log(CIL_INFO, "No roles associated with user %s (line %d)\n",  ((struct cil_multimap_item*)current_user->data)->key->name,  ((struct cil_tree_node*)((struct cil_multimap_item*)current_user->data)->key->nodes->head->data)->line);
+			cil_log(CIL_INFO, "No roles associated with user %s\n",  
+				((struct cil_multimap_item*)current_user->data)->key->name);
 			return SEPOL_ERR;
 		}
 
@@ -632,7 +633,7 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 			fprintf(file_arr[file_index], "neverallow");
 			break;
 		default :
-			cil_log(CIL_INFO, "Unknown avrule kind: %d\n", rule->rule_kind);
+			cil_log(CIL_INFO, "Unknown avrule\n");
 			return SEPOL_ERR;
 		}
 
@@ -675,7 +676,7 @@ int cil_typerule_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t fil
 		fprintf(file_arr[ALLOWS], "type_member %s %s : %s %s;\n", src_str, tgt_str, obj_str, result_str);
 		break;
 	default:
-		cil_log(CIL_INFO, "Unknown type_rule kind: %d\n", rule->rule_kind);
+		cil_log(CIL_INFO, "Unknown type_rule\n");
 		return SEPOL_ERR;
 	}
 

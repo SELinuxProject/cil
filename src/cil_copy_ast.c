@@ -2513,8 +2513,8 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 						param = item->data;
 						if (param->flavor == new->flavor) {
 							if (!strcmp(param->str, ((struct cil_symtab_datum*)new->data)->name)) {
-								cil_log(CIL_ERR, "%s %s shadows a macro parameter (%s:%d)\n", cil_node_to_string(new), ((struct cil_symtab_datum*)orig->data)->name, orig->path, orig->line);
-								cil_log(CIL_ERR, "Note: macro declaration (%s:%d)\n", namespace->path, namespace->line);
+								cil_log(CIL_ERR, "%s %s shadows a macro parameter (%s line:%d)\n", cil_node_to_string(new), ((struct cil_symtab_datum*)orig->data)->name, orig->path, orig->line);
+								cil_log(CIL_ERR, "Note: macro declaration (%s line:%d)\n", namespace->path, namespace->line);
 								rc = SEPOL_ERR;
 								goto exit;
 							}

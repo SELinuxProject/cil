@@ -88,7 +88,8 @@ int __cil_fqn_qualify_first_child_helper(struct cil_tree_node *node, void *extra
 	datum = node->parent->data;
 
 	if (args->len + strlen(datum->name) + 1 >= CIL_MAX_NAME_LENGTH) {
-		cil_log(CIL_INFO, "Fully qualified name too long\n");
+		cil_log(CIL_INFO, "Fully qualified name too long at line %d of %s\n",
+			node->line, node->path);
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -172,7 +173,8 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 
 		newlen = args->len + strlen(datum->name);
 		if (newlen >= CIL_MAX_NAME_LENGTH) {
-			cil_log(CIL_INFO, "Fully qualified name too long\n");
+			cil_log(CIL_INFO, "Fully qualified name too long at line %d of %s\n",
+				node->line, node->path);
 			rc = SEPOL_ERR;
 			goto exit;
 		}

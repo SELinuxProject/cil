@@ -1116,11 +1116,11 @@ int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, attrroles->attr_str, CIL_SYM_ROLES, extra_args, &attr_datum);
-	if (rc == SEPOL_OK) {
-		attr_node = attr_datum->nodes->head->data;
-	} else {
+	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+	attr_node = attr_datum->nodes->head->data;
+
 	if (attr_node->flavor != CIL_ROLEATTRIBUTE) {
 		rc = SEPOL_ERR;
 		cil_log(CIL_ERR, "Attribute role not an attribute\n");
@@ -1906,7 +1906,6 @@ int cil_resolve_level(struct cil_tree_node *current, struct cil_level *level, vo
 
 		rc = __cil_verify_senscatset(db, level->sens, level->catset);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to verify sensitivitycategory relationship\n");
 			goto exit;
 		}
 	}
@@ -2814,7 +2813,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			goto exit;
 		}
 	} else if (new_call->args_tree != NULL) {
-		cil_log(CIL_ERR, "Rnexpected arguments (%s, line: %d)\n", current->path, current->line);
+		cil_log(CIL_ERR, "Unexpected arguments (%s, line: %d)\n", current->path, current->line);
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -3662,9 +3661,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.macro = NULL;
 
 	for (pass = CIL_PASS_TIF; pass < CIL_PASS_NUM; pass++) {
-#ifdef DEBUG
-		cil_log(CIL_INFO, "---------- Pass %i ----------\n", pass);
-#endif
 		extra_args.pass = pass;
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_first_child_helper, __cil_resolve_ast_last_child_helper, &extra_args);
 		if (rc != SEPOL_OK) {
@@ -3672,22 +3668,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			goto exit;
 		}
 
-#ifdef DEBUG
-		cil_tree_print(db->ast->root, 0);
-#endif
-
 		if (pass == CIL_PASS_MISC1) {
-#ifdef DEBUG
-			cil_log(CIL_INFO, "----- Verify Catorder ------\n");
-#endif
 			rc = __cil_verify_order(db->catorder, current, CIL_CAT);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_ERR, "Failed to verify categoryorder\n");
 				goto exit;
 			}
-#ifdef DEBUG
-			cil_log(CIL_INFO, "----- Verify Dominance -----\n");
-#endif
+
 			rc = __cil_verify_order(db->dominance, current, CIL_SENS);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_ERR, "Failed to verify dominance\n");
@@ -3696,9 +3683,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		}
 
 		if (changed) {
-#ifdef DEBUG
-			cil_log(CIL_INFO, "----- Redoing resolve passes -----\n");
-#endif
 			/* Need to re-resolve because an optional was disabled. We only
 			 * need to reset to the call1 pass because things done in the preceeding
 			 * passes aren't allowed in optionals, and thus can't be disabled.
@@ -3984,7 +3968,8 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 
 exit:
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_WARN, "Failed to resolve %s in %s-statement (%s:%d)\n", name, cil_node_to_string(ast_node), ast_node->path, ast_node->line);
+		cil_log(CIL_WARN, "Failed to resolve %s in %s statement on line %d of %s\n", 
+			name, cil_node_to_string(ast_node), ast_node->line, ast_node->path);
 	}
 	return rc;
 }
