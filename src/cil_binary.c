@@ -954,7 +954,7 @@ int __cil_insert_avrule(uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj,
 		break;
 	}
 
-	if (neverallows != NULL) {
+	if (neverallows != NULL && kind == CIL_AVRULE_ALLOWED) {
 		for (curr = neverallows->head; curr != NULL; curr = curr->next) {
 			struct cil_neverallow *neverallow = curr->data;
 			struct cil_list *ndata_list = neverallow->data;
