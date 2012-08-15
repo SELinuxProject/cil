@@ -632,13 +632,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				cil_log(CIL_INFO, "ROLEALLOW:");
 
 				if (roleallow->src != NULL) {
-					cil_log(CIL_INFO, " %s", roleallow->src->datum.name);
+					cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum*)roleallow->src)->name);
 				} else {
 					cil_log(CIL_INFO, " %s", roleallow->src_str);
 				}
 
 				if (roleallow->tgt != NULL) {
-					cil_log(CIL_INFO, " %s", roleallow->tgt->datum.name);
+					cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum*)roleallow->tgt)->name);
 				} else {
 					cil_log(CIL_INFO, " %s", roleallow->tgt_str);
 				}

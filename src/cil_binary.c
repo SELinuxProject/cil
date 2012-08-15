@@ -1495,31 +1495,27 @@ exit:
 
 }
 
-int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
+int __cil_roleallow_to_policydb_helper(policydb_t *pdb, char *src_key, char *tgt_key)
 {
 	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_roleallow *cil_roleallow = (struct cil_roleallow*)datum;
-	role_datum_t *sepol_role = NULL;
-	role_datum_t *sepol_new_role = NULL;
+	role_datum_t *sepol_src_role = NULL;
+	role_datum_t *sepol_tgt_role = NULL;
 	role_allow_t *sepol_roleallow = cil_malloc(sizeof(*sepol_roleallow));
 	memset(sepol_roleallow, 0, sizeof(role_allow_t));
 
-	key = ((struct cil_symtab_datum *)cil_roleallow->src)->name;
-	sepol_role = hashtab_search(pdb->p_roles.table, key);
-	if (sepol_role == NULL) {
+	sepol_src_role = hashtab_search(pdb->p_roles.table, src_key);
+	if (sepol_src_role == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_roleallow->role = sepol_role->s.value;
+	sepol_roleallow->role = sepol_src_role->s.value;
 
-	key = ((struct cil_symtab_datum *)cil_roleallow->tgt)->name;
-	sepol_new_role = hashtab_search(pdb->p_roles.table, key);
-	if (sepol_new_role == NULL) {
+	sepol_tgt_role = hashtab_search(pdb->p_roles.table, tgt_key);
+	if (sepol_tgt_role == NULL) {
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_roleallow->new_role = sepol_new_role->s.value;
+	sepol_roleallow->new_role = sepol_tgt_role->s.value;
 
 	if (pdb->role_allow == NULL) {
 		pdb->role_allow = sepol_roleallow;
@@ -1531,6 +1527,82 @@ int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 
 exit:
 	free(sepol_roleallow);
+	return rc;
+}
+
+int cil_roleallow_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum)
+{
+	int rc = SEPOL_ERR;
+	char *src_key = NULL;
+	char *tgt_key = NULL;
+	struct cil_roleallow *cil_roleallow = (struct cil_roleallow*)datum;
+	struct cil_symtab_datum *cil_src_role_datum = NULL;
+	struct cil_symtab_datum *cil_tgt_role_datum = NULL;
+	enum cil_flavor src_flavor, tgt_flavor;
+
+	cil_src_role_datum = cil_roleallow->src;
+	src_flavor = ((struct cil_tree_node*)cil_src_role_datum->nodes->head->data)->flavor;
+	cil_tgt_role_datum = cil_roleallow->tgt;
+	tgt_flavor = ((struct cil_tree_node*)cil_tgt_role_datum->nodes->head->data)->flavor;
+	if (src_flavor == CIL_ROLE && tgt_flavor == CIL_ROLE) {
+		src_key = ((struct cil_symtab_datum *)cil_roleallow->src)->name;
+		tgt_key = ((struct cil_symtab_datum *)cil_roleallow->tgt)->name;
+		rc = __cil_roleallow_to_policydb_helper(pdb, src_key, tgt_key);
+		if (rc != SEPOL_OK)
+			goto exit;
+	} else if (src_flavor == CIL_ROLE && tgt_flavor == CIL_ROLEATTRIBUTE) {
+		struct cil_roleattribute *cil_tgt_attr = cil_roleallow->tgt;
+		ebitmap_node_t *tgt_rnode;
+		unsigned int j;
+		src_key = ((struct cil_symtab_datum *)cil_roleallow->src)->name;
+		ebitmap_for_each_bit(cil_tgt_attr->roles, tgt_rnode, j) {
+			struct cil_role *cil_tgt_role = NULL;
+			if (!ebitmap_get_bit(cil_tgt_attr->roles, j))
+				continue;
+			cil_tgt_role = db->val_to_role[j];
+			rc = __cil_roleallow_to_policydb_helper(pdb, src_key, cil_tgt_role->datum.name);
+			if (rc != SEPOL_OK)
+				goto exit;
+		}
+	} else if (src_flavor == CIL_ROLEATTRIBUTE && tgt_flavor == CIL_ROLE) {
+		struct cil_roleattribute *cil_src_attr = cil_roleallow->src;
+		ebitmap_node_t *src_rnode;
+		unsigned int i;
+		tgt_key = ((struct cil_symtab_datum *)cil_roleallow->tgt)->name;
+		ebitmap_for_each_bit(cil_src_attr->roles, src_rnode, i) {
+			struct cil_role *cil_src_role = NULL;
+			if (!ebitmap_get_bit(cil_src_attr->roles, i))
+				continue;
+			cil_src_role = db->val_to_role[i];
+			rc = __cil_roleallow_to_policydb_helper(pdb, cil_src_role->datum.name, tgt_key);
+			if (rc != SEPOL_OK)
+				goto exit;
+		}
+	} else {
+		struct cil_roleattribute *cil_src_attr = cil_roleallow->src;
+		struct cil_roleattribute *cil_tgt_attr = cil_roleallow->tgt;
+		ebitmap_node_t *src_rnode, *tgt_rnode;
+		unsigned int i, j;
+		ebitmap_for_each_bit(cil_src_attr->roles, src_rnode, i) {
+			struct cil_role *cil_src_role = NULL;
+			if (!ebitmap_get_bit(cil_src_attr->roles, i))
+				continue;
+			cil_src_role = db->val_to_role[i];
+			src_key = cil_src_role->datum.name;
+			ebitmap_for_each_bit(cil_tgt_attr->roles, tgt_rnode, j) {
+				struct cil_role *cil_tgt_role = NULL;
+				if (!ebitmap_get_bit(cil_tgt_attr->roles, j))
+					continue;
+				cil_tgt_role = db->val_to_role[j];
+				rc = __cil_roleallow_to_policydb_helper(pdb, src_key, cil_tgt_role->datum.name);
+				if (rc != SEPOL_OK)
+					goto exit;
+			}
+		}
+	}
+
+	return SEPOL_OK;
+exit:
 	return rc;
 }
 
@@ -2791,8 +2863,8 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 		case CIL_ROLETRANSITION:
 			rc = cil_roletrans_to_policydb(pdb, node->data);
 			break;
-		case CIL_ROLEALLOW:
-			rc = cil_roleallow_to_policydb(pdb, node->data);
+		case CIL_ROLEATTRIBUTESET:
+		  /*rc = cil_roleattributeset_to_policydb(pdb, node->data);*/
 			break;
 		case CIL_NAMETYPETRANSITION:
 			rc = cil_nametypetransition_to_policydb(pdb, node->data);
@@ -2836,6 +2908,9 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 					rc = cil_avrule_to_policydb(pdb, db, node, args->neverallows);
 				}
 			}
+			break;
+		case CIL_ROLEALLOW:
+			rc = cil_roleallow_to_policydb(pdb, db, node->data);
 			break;
 		}
 	default:

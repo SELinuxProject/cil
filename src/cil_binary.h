@@ -288,7 +288,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_roleallow_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_roleallow_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil file transition structure into sepol policydb.

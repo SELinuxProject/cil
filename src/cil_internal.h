@@ -646,9 +646,9 @@ struct cil_roletransition {
 
 struct cil_roleallow {
 	char *src_str;
-	struct cil_role *src;
+	void *src; /* role or attribute */
 	char *tgt_str;
-	struct cil_role *tgt;
+	void *tgt; /* role or attribute */
 };
 
 struct cil_sens {
