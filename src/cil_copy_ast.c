@@ -762,18 +762,28 @@ exit:
 	return rc;
 }
 
-int cil_copy_roleattributeset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+int cil_copy_roleattributeset(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_roleattributeset *orig = data;
 	struct cil_roleattributeset *new = NULL;
+	int rc = SEPOL_ERR;
 
 	cil_roleattributeset_init(&new);
 
 	new->attr_str = cil_strdup(orig->attr_str);
+	
+	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
 
 	*copy = new;
 
 	return SEPOL_OK;
+
+exit:
+	cil_destroy_roleattributeset(new);
+	return rc;
 }
 
 int cil_copy_roleallow(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
