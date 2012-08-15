@@ -568,9 +568,10 @@ exit:
 	return rc;
 }
 
-int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_list, ebitmap_t *out)
+int __cil_expr_stack_to_bitmap(struct cil_db *db, enum cil_flavor flavor, struct cil_list *expr_stack_list, ebitmap_t *out)
 {
 	int rc = SEPOL_ERR;
+	int max = 0;
 	uint16_t pos;
 	struct cil_list_item *expr_stack = NULL;
 	struct cil_list_item *expr = NULL;
@@ -580,6 +581,12 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_li
 	if (expr_stack_list == NULL) {
 		rc = SEPOL_OK;
 		goto exit;
+	}
+
+	if (flavor == CIL_ROLE) {
+		max = db->num_roles;
+	} else {
+		max = db->num_types;
 	}
 
 	expr_stack = expr_stack_list->head;
@@ -598,7 +605,7 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_li
 				ebitmap_init(&bitmap_tmp);
 				if (node->flavor == CIL_TYPEATTRIBUTE) {
 					struct cil_typeattribute *attr = cond->data;
-					rc = __cil_expr_stack_to_bitmap(db, attr->expr_stack_list, &bitmap_tmp);
+					rc = __cil_expr_stack_to_bitmap(db, CIL_TYPE, attr->expr_stack_list, &bitmap_tmp);
 					if (rc != SEPOL_OK) {
 						rc = SEPOL_ERR;
 						cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
@@ -631,7 +638,7 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_li
 				ebitmap_init(&bitmap_tmp);
 				if (node->flavor == CIL_ROLEATTRIBUTE) {
 					struct cil_roleattribute *attr = cond->data;
-					rc = __cil_expr_stack_to_bitmap(db, attr->expr_stack_list, &bitmap_tmp);
+					rc = __cil_expr_stack_to_bitmap(db, CIL_ROLE, attr->expr_stack_list, &bitmap_tmp);
 					if (rc != SEPOL_OK) {
 						rc = SEPOL_ERR;
 						cil_log(CIL_INFO, "Failure while expanding expression stack to bitmap\n");
@@ -650,7 +657,7 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, struct cil_list *expr_stack_li
 				break;
 			}
 			case CIL_NOT:
-				if (ebitmap_not(&bitmap_tmp, &bitmap_stack[pos - 1], db->num_types)) {
+				if (ebitmap_not(&bitmap_tmp, &bitmap_stack[pos - 1], max)) {
 					rc = SEPOL_ERR;
 					cil_log(CIL_INFO, "Failure NOTing bitmap\n");
 					goto exit;
@@ -741,7 +748,7 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 		attr->types = cil_malloc(sizeof(*attr->types));
 		ebitmap_init(attr->types);
 
-		rc = __cil_expr_stack_to_bitmap(db, expr_list, attr->types);
+		rc = __cil_expr_stack_to_bitmap(db, CIL_TYPE, expr_list, attr->types);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failure while expanding expression stack to bitmap\n");
 			goto exit;
@@ -755,7 +762,7 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 		attr->roles = cil_malloc(sizeof(*attr->roles));
 		ebitmap_init(attr->roles);
 
-		rc = __cil_expr_stack_to_bitmap(db, expr_list, attr->roles);
+		rc = __cil_expr_stack_to_bitmap(db, CIL_ROLE, expr_list, attr->roles);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failure while expanding expression stack to bitmap\n");
 			goto exit;
