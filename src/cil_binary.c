@@ -1311,7 +1311,7 @@ exit:
 
 }
 
-int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struct cil_list *neverallows)
+int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_tree_node *node, struct cil_list *neverallows)
 {
 	int rc = SEPOL_ERR;
 	enum cil_flavor flavor;
@@ -1409,6 +1409,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, struct cil_tree_node *node, struc
 		cb_node = cb_node->next;
 	}
 
+	bool_args.db = db;
 	bool_args.pdb = pdb;
 	bool_args.neverallows = neverallows;
 
@@ -2900,7 +2901,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 	case 3:
 		switch (node->flavor) {
 		case CIL_BOOLEANIF:
-			rc = cil_booleanif_to_policydb(pdb, node, args->neverallows);
+			rc = cil_booleanif_to_policydb(pdb, db, node, args->neverallows);
 			break;
 		case CIL_AVRULE: {
 				struct cil_avrule *rule = node->data;
