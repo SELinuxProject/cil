@@ -896,6 +896,29 @@ int __cil_insert_type_rule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_
 exit:
 	return rc;
 }
+
+int has_types_assigned(struct cil_symtab_datum *datum)
+{
+   enum cil_flavor flavor = ((struct cil_tree_node*)datum->nodes->head->data)->flavor;
+   struct cil_typeattribute *cil_attr = NULL;
+   unsigned int i;
+   ebitmap_node_t *tnode;
+
+   if (flavor != CIL_TYPEATTRIBUTE) {
+      return CIL_TRUE;
+   }
+
+   cil_attr = (struct cil_typeattribute*)datum;
+
+   ebitmap_for_each_bit(cil_attr->types, tnode, i) {
+      if (!ebitmap_get_bit(cil_attr->types, i)) {
+         continue;
+      }
+      return CIL_TRUE;
+   }
+   return CIL_FALSE;
+}
+
 int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_OK;
@@ -906,6 +929,14 @@ int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule, co
 	type_datum_t *sepol_result = NULL;
 	class_datum_t *sepol_obj = NULL;
 
+   /* Don't add rule that is not going to be used */
+   if (!has_types_assigned(cil_rule->src)) {
+      return rc;
+   }
+
+   if (!has_types_assigned(cil_rule->tgt)) {
+      return rc;
+   }
 	
 	key = ((struct cil_symtab_datum *)cil_rule->src)->name;
 	sepol_src = hashtab_search(pdb->p_types.table, key);
@@ -913,7 +944,7 @@ int __cil_type_rule_to_avtab(policydb_t *pdb, struct cil_type_rule *cil_rule, co
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	
+
 	key = ((struct cil_symtab_datum *)cil_rule->tgt)->name;
 	sepol_tgt = hashtab_search(pdb->p_types.table, key);
 	if (sepol_tgt == NULL) {
