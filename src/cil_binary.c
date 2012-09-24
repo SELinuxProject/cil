@@ -1555,11 +1555,8 @@ int __cil_roleallow_to_policydb_helper(policydb_t *pdb, char *src_key, char *tgt
 	}
 	sepol_roleallow->new_role = sepol_tgt_role->s.value;
 
-	if (pdb->role_allow == NULL) {
-		pdb->role_allow = sepol_roleallow;
-	} else {
-		pdb->role_allow->next = sepol_roleallow;
-	}
+	sepol_roleallow->next = pdb->role_allow;
+   pdb->role_allow = sepol_roleallow;
 
 	return SEPOL_OK;
 
