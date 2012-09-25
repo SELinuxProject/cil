@@ -811,19 +811,11 @@ int __cil_cond_insert_rule(avtab_t *avtab, avtab_key_t *avtab_key, avtab_datum_t
 	cond_list->node = avtab_ptr;
 
 	if (cond_flavor == CIL_CONDTRUE) {
-		if (cond_node->true_list == NULL) {
-			cond_node->true_list = cond_list;
-		} else {
-			cond_list->next = cond_node->true_list;
-			cond_node->true_list = cond_list;
-		}
+      cond_list->next = cond_node->true_list;
+      cond_node->true_list = cond_list;
 	} else {
-		if (cond_node->false_list == NULL) {
-			cond_node->false_list = cond_list;
-		} else {
-			cond_list->next = cond_node->false_list;
-			cond_node->false_list = cond_list;
-		}
+      cond_list->next = cond_node->false_list;
+      cond_node->false_list = cond_list;
 	}
 
 exit:
@@ -1106,12 +1098,8 @@ int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t d
 
 	new_item->data = new_data;
 
-	if (neverallow_data->head == NULL) {
-		neverallow_data->head = new_item;
-	} else {
-		new_item->next = neverallow_data->head;
-		neverallow_data->head = new_item;
-	}
+   new_item->next = neverallow_data->head;
+   neverallow_data->head = new_item;
 
 	return rc;
 }
@@ -1425,12 +1413,8 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 		curr_expr = curr_expr->next;
 	}
 
-	if (pdb->cond_list == NULL) {
-		pdb->cond_list = cond_node;
-	} else {
-		cond_node->next = pdb->cond_list;
-		pdb->cond_list = cond_node;
-	}
+   cond_node->next = pdb->cond_list;
+   pdb->cond_list = cond_node;
 
 	cb_node = node->cl_head;
 	while (cb_node != NULL) {
@@ -1519,11 +1503,8 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 	}
 	sepol_roletrans->new_role = sepol_result->s.value;
 
-	if (pdb->role_tr == NULL) {
-		pdb->role_tr = sepol_roletrans;
-	} else {
-		pdb->role_tr->next = sepol_roletrans;
-	}
+   sepol_roletrans->next = pdb->role_tr;
+   pdb->role_tr = sepol_roletrans;
 
 	return SEPOL_OK;
 
@@ -1687,11 +1668,8 @@ int cil_nametypetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum 
 
 	sepol_nametypetrans->name = cil_strdup(cil_nametypetrans->path_str);
 
-	if (pdb->filename_trans == NULL) {
-		pdb->filename_trans = sepol_nametypetrans;
-	} else {
-		pdb->filename_trans->next = sepol_nametypetrans;
-	}
+   sepol_nametypetrans->next = pdb->filename_trans;
+	pdb->filename_trans = sepol_nametypetrans;
 
 	return SEPOL_OK;
 
@@ -1930,12 +1908,9 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 		}
 		sepol_constrain->expr = sepol_expr;
 
-		if (sepol_class->constraints == NULL) {
-			sepol_class->constraints = sepol_constrain;
-		} else {
-			sepol_constrain->next = sepol_class->constraints;
-			sepol_class->constraints = sepol_constrain;
-		}
+      sepol_constrain->next = sepol_class->constraints;
+      sepol_class->constraints = sepol_constrain;
+
 	} else if (cil_constrain->classpermset->flavor == CIL_CLASSMAP) {
 		curr_cmp = cil_constrain->classpermset->perms->head;
 		while (curr_cmp != NULL) {
@@ -1964,13 +1939,8 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 				}
 				sepol_constrain->expr = sepol_expr;
 
-				if (sepol_class->constraints == NULL) {
-					sepol_class->constraints = sepol_constrain;
-				} else {
-					sepol_constrain->next = sepol_class->constraints;
-					sepol_class->constraints = sepol_constrain;
-				}
-
+            sepol_constrain->next = sepol_class->constraints;
+            sepol_class->constraints = sepol_constrain;
 				curr_cps = curr_cps->next;
 			}
 
@@ -2014,12 +1984,8 @@ int cil_validatetrans_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datu
 	}
 	sepol_validatetrans->expr = sepol_expr;
 
-	if (sepol_class->validatetrans == NULL) {
-		sepol_class->validatetrans = sepol_validatetrans;
-	} else {
-		sepol_validatetrans->next = sepol_class->validatetrans;
-		sepol_class->validatetrans = sepol_validatetrans;
-	}
+	sepol_validatetrans->next = sepol_class->validatetrans;
+   sepol_class->validatetrans = sepol_validatetrans;
 
 	return SEPOL_OK;
 
@@ -2885,12 +2851,9 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 				new_rule->node = node;
 				new_item->data = new_rule;
 
-				if (neverallows->head == NULL) {
-					neverallows->head = new_item;
-				} else {
-					new_item->next = neverallows->head;
-					neverallows->head = new_item;
-				}
+            new_item->next = neverallows->head;
+            neverallows->head = new_item;
+
 				rc = cil_avrule_to_policydb(pdb, db, node, neverallows);
 			}
 			break;
