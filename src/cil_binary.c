@@ -2118,11 +2118,13 @@ int __cil_level_to_mls_level(policydb_t *pdb, struct cil_level *cil_level, mls_l
 
 	ebitmap_init(&mls_level->cat);
 
-	rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failed to insert category set into sepol mls level\n");
-		goto exit;
-	}
+   if (catset) {
+      rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
+      if (rc != SEPOL_OK) {
+         cil_log(CIL_INFO, "Failed to insert category set into sepol mls level\n");
+         goto exit;
+      }
+   }
 
 	rc = SEPOL_OK;
 exit:
