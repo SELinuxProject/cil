@@ -55,6 +55,8 @@ struct cil_args_stack {
 	struct cil_list *expr_stack;
 	enum cil_flavor flavor;
 	int depth;
+	int maxdepth;
+	int isconstraint;
 	int nbools; // Number of bools in an expression stack
 };
 
@@ -2296,61 +2298,45 @@ void cil_destroy_bool(struct cil_bool *boolean)
 	free(boolean);
 }
 
-int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+int __cil_gen_expr_stack_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_args_stack *args = extra_args;
-	int *depth = &args->depth;
-	int *nbools = &args->nbools;
 	struct cil_list *stack = args->expr_stack;
-	enum cil_flavor flavor = args->flavor;
+	enum cil_flavor expr_flavor = args->flavor;
+	int *depth = &args->depth;
+	int maxdepth = args->maxdepth;
+	int isconstraint = args->isconstraint;
+	int *nbools = &args->nbools;
 	struct cil_list_item *new = NULL;
 	struct cil_conditional *cond = NULL;
 
+	if (node == node->parent->cl_head && !isconstraint) {
+		return SEPOL_OK;
+	}
+
 	if (node->data == NULL) {
-		if (node == node->parent->cl_head &&
-			    node->parent->data == NULL) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-		rc = SEPOL_OK;
-		goto exit;
+		return SEPOL_OK;
 	}
 
 	cil_conditional_init(&cond);
 
-	if (node == node->parent->cl_head) {
-		rc = __cil_verify_expr_oper_flavor(node->data, cond, flavor);
+	if (isconstraint) {
+		rc = __cil_verify_expr_oper_flavor(node->data, &cond->flavor, expr_flavor);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-
-		rc = __cil_verify_expr_syntax(node, flavor, cond->flavor);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		if (cond->flavor == CIL_AND || cond->flavor == CIL_OR
-		 || cond->flavor == CIL_NOT || cond->flavor == CIL_XOR) {
-			(*depth)++;
-			if (*depth > COND_EXPR_MAXDEPTH) {
-				cil_log(CIL_ERR, "Expression exceeds max depth (%d)\n", COND_EXPR_MAXDEPTH);
-				rc = SEPOL_ERR;
+		if (cond->flavor != CIL_AND && cond->flavor != CIL_OR && cond->flavor != CIL_NOT) {
+			/* op == eq, neq, dom, domby, or incomp */
+			rc = __cil_verify_constrain_expr(node, expr_flavor, cond, stack);
+			if (rc != SEPOL_OK) {
 				goto exit;
 			}
+			(*depth)++;
+			*finished = CIL_TREE_SKIP_ALL;
 		}
 	} else {
-		cond->flavor = flavor;
-	}
-
-	if (cond->flavor != CIL_AND && cond->flavor != CIL_OR && cond->flavor != CIL_NOT &&
-		(flavor == CIL_MLSCONSTRAIN  || flavor == CIL_CONSTRAIN || flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS)) {
-		rc = __cil_verify_constrain_expr(node, flavor, cond, stack);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-		*finished = CIL_TREE_SKIP_ALL;
-	} else {
+		cond->flavor = expr_flavor;
 		if (cond->flavor == CIL_BOOL) {
 			(*nbools)++;
 			if (*nbools > COND_MAX_BOOLS) {
@@ -2367,10 +2353,17 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, __attribute__((unuse
 		new->data = cond;
 		new->flavor = CIL_COND;
 
-		rc = cil_list_prepend_item(stack, new);
+		rc = cil_list_append_item(stack, new);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+		(*depth)++;
+	}
+
+	if (*depth > maxdepth) {
+		cil_log(CIL_ERR, "Max depth (%d) exceeded for expression\n", maxdepth);
+		rc = SEPOL_ERR;
+		goto exit;
 	}
 
 	return SEPOL_OK;
@@ -2381,11 +2374,86 @@ exit:
 	return rc;
 }
 
-int __cil_gen_expr_stack_last_helper(__attribute__((unused)) struct cil_tree_node *node, void *extra_args)
+int __cil_gen_expr_stack_first_helper(struct cil_tree_node *node, __attribute__((unused))void *extra_args)
 {
+	int rc = SEPOL_ERR;
 	struct cil_args_stack *args = extra_args;
-	args->depth--;
+	enum cil_flavor expr_flavor = args->flavor;
+	enum cil_flavor op_flavor;
+
+	if (node->data == NULL) {
+		if (node == node->parent->cl_head && node->parent->data == NULL) {
+			goto exit;
+		}
+		return SEPOL_OK;
+	}
+
+	rc = __cil_verify_expr_oper_flavor(node->data, &op_flavor, expr_flavor);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_verify_expr_syntax(node, expr_flavor, op_flavor);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
 	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int __cil_gen_expr_stack_last_helper(struct cil_tree_node *node, void *extra_args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_tree_node *first;
+	struct cil_args_stack *args = extra_args;
+	struct cil_list *stack = args->expr_stack;
+	enum cil_flavor expr_flavor = args->flavor;
+	int *depth = &args->depth;
+	int isconstraint = args->isconstraint;
+	struct cil_list_item *new = NULL;
+	struct cil_conditional *cond = NULL;
+
+	first = node->parent->cl_head;
+
+	if (first->data == NULL) {
+		return SEPOL_OK;
+	}
+
+	cil_conditional_init(&cond);
+
+	rc = __cil_verify_expr_oper_flavor(first->data, &cond->flavor, expr_flavor);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	if ((cond->flavor == CIL_AND || cond->flavor == CIL_OR || cond->flavor == CIL_NOT) ||
+		(!isconstraint && cond->flavor == CIL_XOR) ||
+		((expr_flavor == CIL_BOOL || expr_flavor == CIL_TUNABLE) &&
+		 (cond->flavor == CIL_EQ || cond->flavor == CIL_NEQ))) {
+		/* Constraint expressions with eq and neq are handled above. */
+		(*depth)--;
+
+		cond->str = cil_strdup(first->data);
+
+		cil_list_item_init(&new);
+
+		new->data = cond;
+		new->flavor = CIL_COND;
+
+		rc = cil_list_append_item(stack, new);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	free(cond);
+	return rc;
 }
 
 int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **stack)
@@ -2393,18 +2461,18 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 	int rc = SEPOL_ERR;
 	struct cil_args_stack extra_args;
 	struct cil_list *new_stack;
+	int isconstraint;
 
 	if (current == NULL || stack == NULL) {
 		goto exit;
 	}
+	isconstraint = (flavor == CIL_CONSTRAIN || flavor == CIL_VALIDATETRANS || flavor == CIL_MLSCONSTRAIN || flavor == CIL_MLSVALIDATETRANS);
 
 	cil_list_init(&new_stack);
 	if (current->cl_head == NULL) {
 		struct cil_conditional *cond = NULL;
 		struct cil_list_item *stack_item = NULL;
-		if (current->data == NULL || flavor == CIL_CONSTRAIN 
-		    || flavor == CIL_VALIDATETRANS || flavor == CIL_MLSCONSTRAIN
-		    || flavor == CIL_MLSVALIDATETRANS) {
+		if (current->data == NULL || isconstraint) {
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -2419,8 +2487,10 @@ int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, st
 		extra_args.expr_stack = new_stack;
 		extra_args.flavor = flavor;
 		extra_args.depth = 0;
+		extra_args.maxdepth = isconstraint ? CEXPR_MAXDEPTH : COND_EXPR_MAXDEPTH;
+		extra_args.isconstraint = isconstraint;
 		extra_args.nbools = 0;
-		rc = cil_tree_walk(current, __cil_gen_expr_stack_helper, NULL, __cil_gen_expr_stack_last_helper, &extra_args);
+		rc = cil_tree_walk(current, __cil_gen_expr_stack_helper, __cil_gen_expr_stack_first_helper, __cil_gen_expr_stack_last_helper, &extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2470,7 +2540,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 	/* Destroying expr tree after stack is created*/
 	if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
-	    (strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+		(strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
 		rc = SEPOL_ERR;
 		cil_log(CIL_ERR, "Conditional neither true nor false\n");
 		goto exit;
@@ -2479,7 +2549,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	if (cond->next != NULL) {
 		cond = cond->next;
 		if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
-		    (strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+			(strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Conditional neither true nor false\n");
 			goto exit;
@@ -3294,7 +3364,7 @@ int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl
 	return SEPOL_OK;
 
 exit:
-	
+
 	return rc;
 }
 
@@ -3686,7 +3756,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 
 	rc = __cil_verify_syntax(low, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
-	
+
 		goto exit;
 	}
 
