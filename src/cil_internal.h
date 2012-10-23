@@ -130,6 +130,7 @@ enum cil_flavor {
 	CIL_TUNABLEIFDEF,
 	CIL_TUNABLEIFNDEF,
 
+	CIL_STAR,
 	CIL_AND,
 	CIL_OR,
 	CIL_XOR,
@@ -273,6 +274,7 @@ enum cil_flavor {
 #define CIL_KEY_CONDFALSE		"false"
 #define CIL_KEY_TUNABLEIFDEF		"tunableifdef"
 #define CIL_KEY_TUNABLEIFNDEF		"tunableifndef"
+#define CIL_KEY_STAR        "*"
 #define CIL_KEY_AND			"and"
 #define CIL_KEY_OR			"or"
 #define CIL_KEY_XOR			"xor"

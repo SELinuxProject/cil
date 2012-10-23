@@ -445,6 +445,9 @@ int __cil_verify_expr_oper_flavor(const char *key, enum cil_flavor *op_flavor, e
 		}
 	} else if (!strcmp(key, CIL_KEY_XOR)) {
 		*op_flavor = CIL_XOR;
+	} else if (!strcmp(key, CIL_KEY_STAR) && 
+			   (expr_flavor == CIL_TYPE || expr_flavor == CIL_ROLE)) {
+		*op_flavor = CIL_STAR;
 	} else {
 		goto exit;
 	}
@@ -503,7 +506,17 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor
 			}
 		}
 	} else {
-		if (eflavor == CIL_NOT) {
+		if (eflavor == CIL_STAR) {
+			enum cil_syntax syntax[] = {
+				SYM_STRING,
+				SYM_END
+			};
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		} else if (eflavor == CIL_NOT) {
 			enum cil_syntax syntax[] = {
 				SYM_STRING,
 				SYM_STRING | SYM_LIST,

@@ -656,6 +656,18 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, enum cil_flavor flavor, struct
 				pos++;
 				break;
 			}
+			case CIL_STAR: {
+				ebitmap_t all_zeros;
+				ebitmap_init(&all_zeros);
+				if (ebitmap_not(&bitmap_tmp, &all_zeros, max)) {
+					rc = SEPOL_ERR;
+					cil_log(CIL_INFO, "Failure Expanding *\n");
+					goto exit;
+				}
+				bitmap_stack[pos] = bitmap_tmp;
+				pos++;
+			}
+				break;
 			case CIL_NOT:
 				if (ebitmap_not(&bitmap_tmp, &bitmap_stack[pos - 1], max)) {
 					rc = SEPOL_ERR;

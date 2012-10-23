@@ -840,6 +840,9 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				}
 				return;
 			}
+		    case CIL_STAR:
+				cil_log(CIL_INFO, "*");
+				return;
 			case CIL_AND:
 				cil_log(CIL_INFO, "&&");
 				return;
