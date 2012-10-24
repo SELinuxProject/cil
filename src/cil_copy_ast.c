@@ -323,44 +323,6 @@ exit:
 	return rc;
 }
 
-int cil_copy_permset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
-{
-	struct cil_permset *orig = data;
-	struct cil_permset *new = NULL;
-	int rc = SEPOL_ERR;
-	char *key = orig->datum.name;
-	struct cil_symtab_datum *datum = NULL;
-
-	cil_permset_init(&new);
-
-	if (key != NULL) {
-		rc = cil_symtab_get_datum(symtab, key, &datum);
-		if (rc != SEPOL_OK && rc != SEPOL_ENOENT) {
-			cil_log(CIL_INFO, "cil_copy_permset: cil_symtab_get_datum failed, rc: %d\n", rc);
-			goto exit;
-		} else if (datum != NULL) {
-			cil_log(CIL_INFO, "cil_copy_permset: permset cannot be redefined\n");
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-	}
-
-	if (orig->perms_list_str != NULL) {
-		rc = cil_copy_list(orig->perms_list_str, &new->perms_list_str);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	}
-
-	*copy = new;
-
-	return SEPOL_OK;
-
-exit:
-	cil_destroy_permset(new);
-	return rc;
-}
-
 int cil_copy_class(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
 	struct cil_class *orig = data;
@@ -398,12 +360,9 @@ int cil_copy_fill_classpermset(struct cil_classpermset *data, struct cil_classpe
 	int rc = SEPOL_ERR;
 
 	new->class_str = cil_strdup(data->class_str);
-	new->permset_str = cil_strdup(data->permset_str);
 
-	if (data->permset != NULL && data->permset_str == NULL) {
-		cil_permset_init(&new->permset);
-
-		rc = cil_copy_list(data->permset->perms_list_str, &new->permset->perms_list_str);
+	if (data->perm_strs != NULL) {
+		rc = cil_copy_list(data->perm_strs, &new->perm_strs);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2282,9 +2241,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_CLASSMAPPING:
 		copy_func = &cil_copy_classmapping;
-		break;
-	case CIL_PERMSET:
-		copy_func = &cil_copy_permset;
 		break;
 	case CIL_CLASS:
 		copy_func = &cil_copy_class;

@@ -52,10 +52,10 @@ struct cil_args_resolve {
 	struct cil_tree_node *macro;
 };
 
-static int __cil_resolve_perm_list(void *class, struct cil_list *perm_list_str, struct cil_list *res_list_perms)
+static int __cil_resolve_perm_list(void *class, struct cil_list *perm_strs, struct cil_list *res_list_perms)
 {
 	struct cil_symtab_datum *perm_datum = NULL;
-	struct cil_list_item *perm = perm_list_str->head;
+	struct cil_list_item *perm = perm_strs->head;
 	struct cil_list_item *list_item = NULL;
 	struct cil_list_item *list_tail = NULL;
 	struct cil_tree_node *class_node = NULL;
@@ -110,12 +110,11 @@ int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classperm
 {
 	struct cil_symtab_datum *class_datum = NULL;
 	struct cil_tree_node *class_node = NULL;
-	struct cil_symtab_datum *permset_datum = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, cps->class_str, CIL_SYM_CLASSES, extra_args, &class_datum);
 	if (rc != SEPOL_OK) {
-		goto resolve_classpermset_out;
+		goto exit;
 	}
 
 	class_node = class_datum->nodes->head->data;
@@ -128,25 +127,16 @@ int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classperm
 		cil_list_destroy(&cps->perms, 0);
 	}
 
-	if (cps->permset_str != NULL) {
-		rc = cil_resolve_name(current, cps->permset_str, CIL_SYM_PERMSETS, extra_args, &permset_datum);
-		if (rc != SEPOL_OK) {
-			goto resolve_classpermset_out;
-		}
-
-		cps->permset = (struct cil_permset*)permset_datum;
-	}
-
 	cil_list_init(&cps->perms);
 
-	rc = __cil_resolve_perm_list(cps->class, cps->permset->perms_list_str, cps->perms);
+	rc = __cil_resolve_perm_list(cps->class, cps->perm_strs, cps->perms);
 	if (rc != SEPOL_OK) {
-		goto resolve_classpermset_out;
+		goto exit;
 	}
 
 	return SEPOL_OK;
 
-resolve_classpermset_out:
+exit:
 	return rc;
 }
 
@@ -2721,35 +2711,6 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			case CIL_CLASSMAP:
 				new_arg->arg_str = cil_strdup(pc->data);
 				break;
-			case CIL_PERMSET: {
-				if (pc->cl_head != NULL) {
-					struct cil_permset *permset = NULL;
-					struct cil_tree_node *permset_node = NULL;
-					struct cil_list_item *permset_item = NULL;
-					cil_permset_init(&permset);
-					cil_list_init(&permset->perms_list_str);
-					rc = cil_parse_to_list(pc->cl_head, permset->perms_list_str, CIL_AST_STR);
-					if (rc != SEPOL_OK) {
-						cil_log(CIL_ERR, "Failed to parse perms\n");
-						goto exit;
-					}
-					cil_tree_node_init(&permset_node);
-					cil_list_item_init(&permset_item);
-					permset_node->flavor = CIL_PERMSET;
-					permset_node->data = permset;
-					permset_item->data = permset_node;
-					rc = cil_list_append_item(((struct cil_symtab_datum*)permset)->nodes, permset_item);
-					if (rc != SEPOL_OK) {
-						cil_destroy_permset(permset);
-						cil_list_item_destroy(&permset_item, CIL_TRUE);
-						goto exit;
-					}
-					new_arg->arg = (struct cil_symtab_datum*)permset;
-				} else {
-					new_arg->arg_str = cil_strdup(pc->data);
-				}
-				break;
-			}
 			case CIL_CLASSPERMSET: {
 				if (pc->cl_head != NULL) {
 					struct cil_classpermset *cps = NULL;
@@ -2879,13 +2840,6 @@ int cil_resolve_call2(struct cil_tree_node *current, void *extra_args)
 				continue; // anonymous, no need to resolve
 			} else {
 				sym_index = CIL_SYM_IPADDRS;
-			}
-			break;
-		case CIL_PERMSET:
-			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
-				continue; // anonymous, no need to resolve
-			} else {
-				sym_index = CIL_SYM_PERMSETS;
 			}
 			break;
 		case CIL_CLASSPERMSET:

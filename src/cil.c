@@ -50,11 +50,11 @@
 #include "cil_policy.h"
 
 int cil_sym_sizes[CIL_SYM_ARRAY_NUM][CIL_SYM_NUM] = {
-	{64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64},
-	{64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+	{64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64},
+	{64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
 
 void cil_db_init(struct cil_db **db)
@@ -259,9 +259,6 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_PERM:
 		cil_destroy_perm(*data);
-		break;
-	case CIL_PERMSET:
-		cil_destroy_permset(*data);
 		break;
 	case CIL_CLASSPERMSET:
 		cil_destroy_classpermset(*data);
@@ -487,9 +484,6 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		break;
 	case CIL_CLASS:
 		*sym_index = CIL_SYM_CLASSES;
-		break;
-	case CIL_PERMSET:
-		*sym_index = CIL_SYM_PERMSETS;
 		break;
 	case CIL_PERM:
 	case CIL_CLASSMAPPERM:
@@ -740,8 +734,6 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_TYPEATTRIBUTE;
 	case CIL_BOOL:
 		return CIL_KEY_BOOL;
-	case CIL_PERMSET:
-		return CIL_KEY_PERMSET;
 	case CIL_CLASSPERMSET:
 		return CIL_KEY_CLASSPERMSET;
 	case CIL_TUNABLE:
@@ -1865,14 +1857,6 @@ void cil_perm_init(struct cil_perm **perm)
 	cil_symtab_datum_init(&(*perm)->datum);
 }
 
-void cil_permset_init(struct cil_permset **permset)
-{
-	*permset = cil_malloc(sizeof(**permset));
-
-	cil_symtab_datum_init(&(*permset)->datum);
-	(*permset)->perms_list_str = NULL;
-}
-
 void cil_classpermset_init(struct cil_classpermset **cps)
 {
 	*cps = cil_malloc(sizeof(**cps));
@@ -1881,8 +1865,7 @@ void cil_classpermset_init(struct cil_classpermset **cps)
 	(*cps)->class_str = NULL;
 	(*cps)->class = NULL;
 	(*cps)->flavor = CIL_AST_STR;
-	(*cps)->permset_str = NULL;
-	(*cps)->permset = NULL;
+	(*cps)->perm_strs = NULL;
 	(*cps)->perms = NULL;
 }
 

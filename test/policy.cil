@@ -6,8 +6,6 @@
 (policycap open_perms)
 
 (block policy
-	(permissionset file_perms (execute_no_trans entrypoint execmod open
-					audit_access))
 	(class file (execute_no_trans entrypoint execmod open audit_access))
 	(common file (ioctl read write create getattr setattr lock relabelfrom
 			relabelto append unlink link rename execute swapon

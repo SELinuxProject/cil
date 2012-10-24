@@ -36,7 +36,6 @@
 #include "cil_parser.h"
 
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
-void cil_tree_print_permset(struct cil_permset *permset);
 void cil_tree_print_classpermset(struct cil_classpermset *csp);
 void cil_tree_print_level(struct cil_level *level);
 void cil_tree_print_levelrange(struct cil_levelrange *lvlrange);
@@ -304,26 +303,24 @@ void cil_tree_print_catset(struct cil_catset *catset)
 	cil_log(CIL_INFO, " )");
 }
 
-void cil_tree_print_permset(struct cil_permset *permset)
+void cil_tree_print_perm_strs(struct cil_list *perm_strs)
 {
 	struct cil_list_item *curr = NULL;
 
-	if (permset == NULL) {
+	if (perm_strs == NULL) {
 		return;
 	}
 
-	if (permset->perms_list_str != NULL) {
-		curr = permset->perms_list_str->head;
+	curr = perm_strs->head;
 
-		cil_log(CIL_INFO, " (");
+	cil_log(CIL_INFO, " (");
 
-		while (curr != NULL) {
-			cil_log(CIL_INFO, " %s", (char*)curr->data);
-			curr = curr->next;
-		}
-
-		cil_log(CIL_INFO, " )");
+	while (curr != NULL) {
+		cil_log(CIL_INFO, " %s", (char*)curr->data);
+		curr = curr->next;
 	}
+
+	cil_log(CIL_INFO, " )");
 }
 
 void cil_tree_print_classpermset(struct cil_classpermset *cps)
@@ -342,12 +339,8 @@ void cil_tree_print_classpermset(struct cil_classpermset *cps)
 		}
 	}
 
-	cil_log(CIL_INFO, ", permset:");
-	if (cps->permset != NULL) {
-		cil_tree_print_permset(cps->permset);
-	} else {
-		cil_log(CIL_INFO, " %s", cps->permset_str);
-	}
+	cil_log(CIL_INFO, ", perm_strs:");
+	cil_tree_print_perm_strs(cps->perm_strs);
 }
 
 void cil_tree_print_level(struct cil_level *level)
@@ -704,16 +697,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				struct cil_classcommon *clscom = node->data;
 
 				cil_log(CIL_INFO, "CLASSCOMMON: class: %s, common: %s\n", clscom->class_str, clscom->common_str);
-
-				return;
-			}
-			case CIL_PERMSET: {
-				struct cil_permset *permset = node->data;
-				cil_log(CIL_INFO, "PERMSET: %s", permset->datum.name);
-
-				cil_tree_print_permset(permset);
-
-				cil_log(CIL_INFO, "\n");
 
 				return;
 			}

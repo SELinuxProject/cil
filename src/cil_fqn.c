@@ -152,7 +152,6 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 	case CIL_IPADDR:
 	case CIL_LEVEL:
 	case CIL_LEVELRANGE:
-	case CIL_PERMSET:
 	case CIL_POLICYCAP:
 	case CIL_ROLE:
 	case CIL_SENS:

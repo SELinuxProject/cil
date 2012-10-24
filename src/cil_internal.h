@@ -167,7 +167,6 @@ enum cil_flavor {
 	CIL_TYPE,
 	CIL_TYPEATTRIBUTE,
 	CIL_BOOL,
-	CIL_PERMSET,
 	CIL_CLASSPERMSET,
 	CIL_TUNABLE,
 	CIL_TYPEALIAS,
@@ -198,7 +197,6 @@ enum cil_flavor {
 #define CIL_KEY_IN			"in"
 #define CIL_KEY_CLASS			"class"
 #define CIL_KEY_PERM			"perm"
-#define CIL_KEY_PERMSET			"permissionset"
 #define CIL_KEY_CLASSPERMSET		"classpermissionset"
 #define CIL_KEY_CLASSMAP		"classmap"
 #define CIL_KEY_CLASSMAPPING		"classmapping"
@@ -316,7 +314,6 @@ enum cil_sym_index {
 	CIL_SYM_TYPES,
 	CIL_SYM_COMMONS,
 	CIL_SYM_CLASSES,
-	CIL_SYM_PERMSETS,
 	CIL_SYM_CLASSPERMSETS,
 	CIL_SYM_BOOLS,
 	CIL_SYM_TUNABLES,
@@ -415,18 +412,12 @@ struct cil_perm {
 	struct cil_symtab_datum datum;
 };
 
-struct cil_permset {
-	struct cil_symtab_datum datum;
-	struct cil_list *perms_list_str;
-};
-
 struct cil_classpermset {
 	struct cil_symtab_datum datum;
 	char *class_str;
 	void *class;
 	enum cil_flavor flavor;
-	char *permset_str;
-	struct cil_permset *permset;
+	struct cil_list *perm_strs;
 	struct cil_list *perms;
 };
 
@@ -978,7 +969,6 @@ void cil_constrain_init(struct cil_constrain **constrain);
 void cil_validatetrans_init(struct cil_validatetrans **validtrans);
 void cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 void cil_perm_init(struct cil_perm **perm);
-void cil_permset_init(struct cil_permset **permset);
 void cil_classpermset_init(struct cil_classpermset **cps);
 void cil_classmap_perm_init(struct cil_classmap_perm **cmp);
 void cil_classmap_init(struct cil_classmap **map);
