@@ -1765,12 +1765,11 @@ exit:
 
 int __cil_verify_policycap(struct cil_tree_node *node)
 {
-	int rc = SEPOL_ERR;
-
+	int rc;
 	struct cil_policycap *polcap = node->data;
 
 	rc = sepol_polcap_getnum((const char*)polcap->datum.name);
-	if (rc != SEPOL_OK) {
+	if (rc == SEPOL_ERR) {
 		goto exit;
 	}
 
