@@ -5226,33 +5226,6 @@ void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr)
 	free(ipaddr);
 }
 
-int cil_fill_cat_list(struct cil_tree_node *start, struct cil_list *list)
-{
-	int rc = SEPOL_ERR;
-
-	if (start == NULL || list == NULL) {
-		goto exit;
-	}
-
-	rc = cil_set_to_list(start, list, 1);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to create category list\n");
-		goto exit;
-	}
-
-	rc = __cil_verify_ranges(list);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Error verifying range syntax\n");
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-
 int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer)
 {
 	int rc = SEPOL_ERR;
