@@ -28,27 +28,26 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
-
-#include <sepol/policydb/policydb.h>
-#include <sepol/policydb/symtab.h>
 
 #include "cil_internal.h"
 #include "cil_log.h"
 #include "cil_mem.h"
-#include "cil_tree.h"
-#include "cil_symtab.h"
-#include "cil_build_ast.h"
+
+__attribute__((noreturn)) void cil_list_error(const char* msg)
+{
+	cil_log(CIL_ERR, "%s\n",msg);
+	exit(1);
+}
 
 void cil_list_init(struct cil_list **list)
 {
 	struct cil_list *new_list = cil_malloc(sizeof(*new_list));
 	new_list->head = NULL;
-
+	new_list->tail = NULL;
 	*list = new_list;
 }
 
-void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
+void cil_list_destroy(struct cil_list **list, unsigned destroy_data)
 {
 	if (*list == NULL) {
 		return;
@@ -58,15 +57,15 @@ void cil_list_destroy(struct cil_list **list, uint8_t destroy_data)
 	struct cil_list_item *next = NULL;
 	while (item != NULL)
 	{
+		next = item->next;
 		if (item->flavor == CIL_LIST) {
 			cil_list_destroy((struct cil_list**)&(item->data), destroy_data);
 		}
-		next = item->next;
 		cil_list_item_destroy(&item, destroy_data);
 		item = next;
 	}
 	free(*list);
-	*list = NULL;	
+	*list = NULL;
 }
 
 void cil_list_item_init(struct cil_list_item **item)
@@ -79,7 +78,7 @@ void cil_list_item_init(struct cil_list_item **item)
 	*item = new_item;
 }
 
-void cil_list_item_destroy(struct cil_list_item **item, uint8_t destroy_data)
+void cil_list_item_destroy(struct cil_list_item **item, unsigned destroy_data)
 {
 	if (destroy_data) {
 		cil_destroy_data(&(*item)->data, (*item)->flavor);
@@ -88,98 +87,99 @@ void cil_list_item_destroy(struct cil_list_item **item, uint8_t destroy_data)
 	*item = NULL;
 }
 
-
-int cil_list_get_tail(struct cil_list *list, struct cil_list_item **tail)
+void cil_list_append(struct cil_list *list, unsigned flavor, void *data)
 {
-	struct cil_list_item *curr = NULL;
-	int rc = SEPOL_ERR;
+	struct cil_list_item *item;
 
-	if (list == NULL || tail == NULL) {
-		goto exit;
+	if (list == NULL) {
+		cil_list_error("Attempt to append data to a NULL list");
 	}
 
-	curr = list->head;
-	while (curr->next != NULL) {
-		curr = curr->next;
-	}
+	cil_list_item_init(&item);
+	item->flavor = flavor;
+	item->data = data;
 
-	*tail = curr;
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int cil_list_append_item(struct cil_list *list, struct cil_list_item *item)
-{
-	struct cil_list_item *curr_item = NULL;
-	int rc = SEPOL_ERR;
-
-	if (list == NULL || item == NULL) {
-		goto exit;
-	}
-
-	if (list->head == NULL) {
+	if (list->tail == NULL) {
 		list->head = item;
-		rc = SEPOL_OK;
-		goto exit;
+		list->tail = item;
+		return;
 	}
 
-	curr_item = list->head;
-
-	while (curr_item->next != NULL) {
-		curr_item = curr_item->next;
-	}
-	
-	curr_item->next = item;
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
+	list->tail->next = item;
+	list->tail = item;
 }
 
-int cil_list_prepend_item(struct cil_list *list, struct cil_list_item *item) 
+void cil_list_prepend(struct cil_list *list, unsigned flavor, void *data)
 {
-	struct cil_list_item *old_head = NULL;
-	struct cil_list_item *new_head = NULL;
-	int rc = SEPOL_ERR;
+	struct cil_list_item *item;
 
-	if (list == NULL || item == NULL) {
-		goto exit;
+	if (list == NULL) {
+		cil_list_error("Attempt to prepend data to a NULL list");
 	}
 
-	if (item->next != NULL) {
-		cil_log(CIL_INFO, "Error: List item to prepend has next\n");
-		goto exit;
+	cil_list_item_init(&item);
+	item->flavor = flavor;
+	item->data = data;
+
+	if (list->tail == NULL) {
+		list->head = item;
+		list->tail = item;
+		return;
 	}
 
-	old_head = list->head;
-	new_head = item;
-
-	list->head = new_head;
-	new_head->next = old_head;
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
+	item->next = list->head;
+	list->head = item;
 }
 
-void cil_print_list_lists(struct cil_list *list_list)
+void cil_list_append_item(struct cil_list *list, struct cil_list_item *item)
 {
-	struct cil_list_item *list_item = NULL;
-	struct cil_list_item *sub_list_item = NULL;
-	
-	list_item = list_list->head;
-	while (list_item != NULL) {
-		sub_list_item = ((struct cil_list*)list_item->data)->head;
-		cil_log(CIL_INFO, "(");
-		while (sub_list_item != NULL) {
-			cil_log(CIL_INFO, " %p:%s ", sub_list_item->data, ((struct cil_symtab_datum*)sub_list_item->data)->name);
-			sub_list_item = sub_list_item->next;
-		}
-		cil_log(CIL_INFO, ")\n");
-		list_item = list_item->next;
+	struct cil_list_item *last = item;
+
+	if (list == NULL) {
+		cil_list_error("Attempt to append an item to a NULL list");
 	}
+
+	if (item == NULL) {
+		cil_list_error("Attempt to append a NULL item to a list");
+	}
+
+	while (last->next != NULL) {
+		last = last->next;
+	}
+
+	if (list->tail == NULL) {
+		list->head = item;
+		list->tail = last;
+		return;
+	}
+
+	list->tail->next = item;
+	list->tail = last;
+
+}
+
+void cil_list_prepend_item(struct cil_list *list, struct cil_list_item *item)
+{
+	struct cil_list_item *last = item;
+
+	if (list == NULL) {
+		cil_list_error("Attempt to prepend an item to a NULL list");
+	}
+
+	if (item == NULL) {
+		cil_list_error("Attempt to prepend a NULL item to a list");
+	}
+
+	while (last->next != NULL) {
+		last = last->next;
+	}
+
+	if (list->tail == NULL) {
+		list->head = item;
+		list->tail = last;
+		return;
+	}
+
+	last->next = list->head;
+	list->head = item;
 }

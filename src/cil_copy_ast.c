@@ -47,38 +47,26 @@ struct cil_args_copy {
 
 int cil_copy_list(struct cil_list *data, struct cil_list **copy)
 {
-	struct cil_list *new = NULL;
-	struct cil_list *new_sub = NULL;
-	struct cil_list_item *new_item = NULL;
-	struct cil_list_item *orig_item = NULL;
 	int rc = SEPOL_ERR;
+	struct cil_list *new;
+	struct cil_list_item *orig_item;
 
 	if (data == NULL) {
 		goto exit;
 	}
 
-	orig_item = data->head;
 	cil_list_init(&new);
-	while(orig_item != NULL) {
-		if (new_item == NULL) {
-			cil_list_item_init(&new_item);
-			new->head = new_item;
-		} else {
-			cil_list_item_init(&new_item->next);
-			new_item = new_item->next;
-		}
-
+	cil_list_for_each(orig_item, data) {
 		if (orig_item->flavor == CIL_AST_STR) {
-			new_item->data = cil_strdup(orig_item->data);
+			cil_list_append(new, CIL_AST_STR, cil_strdup(orig_item->data));
 		} else if (orig_item->flavor == CIL_LIST) {
+			struct cil_list *new_sub = NULL;
 			rc = cil_copy_list((struct cil_list*)orig_item->data, &new_sub);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-			new_item->data = new_sub;
+			cil_list_append(new, CIL_LIST, new_sub);
 		}
-		new_item->flavor = orig_item->flavor;
-		orig_item = orig_item->next;
 	}
 
 	*copy = new;
@@ -279,40 +267,30 @@ exit:
 
 int cil_copy_classmapping(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
+	int rc = SEPOL_ERR;
 	struct cil_classmapping *orig = data;
 	struct cil_classmapping *new = NULL;
-	struct cil_list_item *curr = NULL;
-	struct cil_list_item *new_item = NULL;
-	int rc = SEPOL_ERR;
+	struct cil_list_item *curr;
 
 	cil_classmapping_init(&new);
 
 	new->classmap_str = cil_strdup(orig->classmap_str);
 	new->classmap_perm_str = cil_strdup(orig->classmap_perm_str);
 
-	curr = orig->classpermsets_str->head;
-
 	cil_list_init(&new->classpermsets_str);
 
-	while (curr != NULL) {
-		cil_list_item_init(&new_item);
-		new_item->flavor = curr->flavor;
+	cil_list_for_each(curr, new->classpermsets_str) {
 		if (curr->flavor == CIL_AST_STR) {
-			new_item->data = cil_strdup(curr->data);
+			cil_list_append(new->classpermsets_str, CIL_AST_STR, cil_strdup(curr->data));
 		} else if (curr->flavor == CIL_CLASSPERMSET) {
-			cil_classpermset_init((struct cil_classpermset**)&new_item->data);
-			rc = cil_copy_fill_classpermset((struct cil_classpermset*)curr->data, (struct cil_classpermset*)new_item->data);
+			struct cil_classpermset *cps;
+			cil_classpermset_init(&cps);
+			rc = cil_copy_fill_classpermset((struct cil_classpermset*)curr->data, cps);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
+			cil_list_prepend(new->classpermsets_str, CIL_CLASSPERMSET, cps);
 		}
-
-		rc = cil_list_prepend_item(new->classpermsets_str, new_item);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		curr = curr->next;
 	}
 
 	*copy = new;
@@ -725,24 +703,16 @@ int cil_copy_roleattributeset(struct cil_db *db, void *data, void **copy, __attr
 {
 	struct cil_roleattributeset *orig = data;
 	struct cil_roleattributeset *new = NULL;
-	int rc = SEPOL_ERR;
 
 	cil_roleattributeset_init(&new);
 
 	new->attr_str = cil_strdup(orig->attr_str);
 	
-	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
 
 	*copy = new;
 
 	return SEPOL_OK;
-
-exit:
-	cil_destroy_roleattributeset(new);
-	return rc;
 }
 
 int cil_copy_roleallow(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
@@ -847,24 +817,16 @@ int cil_copy_typeattributeset(struct cil_db *db, void *data, void **copy, __attr
 {
 	struct cil_typeattributeset *orig = data;
 	struct cil_typeattributeset *new = NULL;
-	int rc = SEPOL_ERR;
 
 	cil_typeattributeset_init(&new);
 
 	new->attr_str = cil_strdup(orig->attr_str);
 
-	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
 
 	*copy = new;
 
 	return SEPOL_OK;
-
-exit:
-	cil_destroy_typeattributeset(new);
-	return rc;
 }
 
 int cil_copy_typealias(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
@@ -1195,15 +1157,12 @@ exit:
 
 int cil_copy_fill_catset(struct cil_catset *data, struct cil_catset *new)
 {
-	struct cil_list_item *orig_item;
-	struct cil_list_item *new_item;
 	int rc = SEPOL_ERR;
+	struct cil_list_item *orig_item;
 
 	cil_list_init(&new->cat_list_str);
 
-	for (orig_item = data->cat_list_str->head; orig_item != NULL; orig_item = orig_item->next) {
-		cil_list_item_init(&new_item);
-
+	cil_list_for_each(orig_item, data->cat_list_str) {
 		switch (orig_item->flavor) {
 		case CIL_CATRANGE: {
 			struct cil_catrange *catrange = NULL;
@@ -1212,22 +1171,15 @@ int cil_copy_fill_catset(struct cil_catset *data, struct cil_catset *new)
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-			new_item->flavor = CIL_CATRANGE;
-			new_item->data = catrange;
+			cil_list_append(new->cat_list_str, CIL_CATRANGE, catrange);
 			break;
 		}
 		case CIL_AST_STR: {
-			new_item->flavor = CIL_AST_STR;
-			new_item->data = cil_strdup(orig_item->data);
+			cil_list_append(new->cat_list_str, CIL_AST_STR, cil_strdup(orig_item->data));
 			break;
 		}
 		default:
 			break;
-		}
-
-		rc = cil_list_append_item(new->cat_list_str, new_item);
-		if (rc != SEPOL_OK) {
-			goto exit;
 		}
 	}
 
@@ -1848,39 +1800,21 @@ exit:
 
 int cil_copy_expr(struct cil_db *db, struct cil_list *orig, struct cil_list **new)
 {
-	struct cil_list_item *curr_old = NULL;
-	struct cil_list_item *curr_new = NULL;
-	struct cil_conditional *cond_new = NULL;
-	int rc = SEPOL_ERR;
+	struct cil_list_item *curr_old;
 
 	if (orig == NULL) {
 		return SEPOL_OK;
 	}
 
-	curr_old = orig->head;
-
 	cil_list_init(new);
 
-	while (curr_old != NULL) {
-		cil_list_item_init(&curr_new);
-
+	cil_list_for_each(curr_old, orig) {
+		struct cil_conditional *cond_new = NULL;
 		cil_copy_conditional(db, curr_old->data, ((void**)&cond_new), NULL);
-		curr_new->data = cond_new;
-		curr_new->flavor = curr_old->flavor;
-
-		rc = cil_list_append_item(*new, curr_new);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		curr_old = curr_old->next;
+		cil_list_append(*new, curr_old->flavor, cond_new);
 	}
 
 	return SEPOL_OK;
-
-exit:
-	cil_list_destroy(new, 1);
-	return rc;
 }
 
 int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
@@ -1903,11 +1837,7 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 		}
 	}
 
-	rc = cil_copy_expr(db, orig->expr, &new_list);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failed to copy expression stack\n");
-		goto exit;
-	}
+	cil_copy_expr(db, orig->expr, &new_list);
 
 	new->expr = new_list;
 
@@ -1925,26 +1855,18 @@ int cil_copy_validatetrans(struct cil_db *db, void *data, void **copy, __attribu
 	struct cil_validatetrans *orig = data;
 	struct cil_validatetrans *new = NULL;
 	struct cil_list *new_list = NULL;
-	int rc = SEPOL_ERR;
 
 	cil_validatetrans_init(&new);
 
 	new->class_str = cil_strdup(orig->class_str);
 
-	rc = cil_copy_expr(db, orig->expr, &new_list);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cil_copy_expr(db, orig->expr, &new_list);
 
 	new->expr = new_list;
 
 	*copy = new;
 
 	return SEPOL_OK;
-
-exit:
-	cil_destroy_validatetrans(new);
-	return rc;
 }
 
 int cil_copy_call(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
@@ -2149,46 +2071,28 @@ int cil_copy_boolif(struct cil_db *db, void *data, void **copy, __attribute__((u
 {
 	struct cil_booleanif *orig = data;
 	struct cil_booleanif *new = NULL;
-	int rc = SEPOL_ERR;
 
 	cil_boolif_init(&new);
 
-	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "cil_copy_boolif: Failed to copy expression\n");
-		goto exit;
-	}
+	cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
 
 	*copy = new;
 
 	return SEPOL_OK;
-
-exit:
-	cil_destroy_boolif(new);
-	return rc;
 }
 
 int cil_copy_tunif(struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_tunableif *orig = data;
 	struct cil_tunableif *new = NULL;
-	int rc = SEPOL_ERR;
 
 	cil_tunif_init(&new);
 
-	rc = cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "cil_copy_tunif: Failed to copy expression\n");
-		goto exit;
-	}
+	cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
 
 	*copy = new;
 
 	return SEPOL_OK;
-
-exit:
-	cil_destroy_tunif(new);
-	return rc;
 }
 
 int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, void *extra_args)
@@ -2199,9 +2103,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	struct cil_db *db = NULL;
 	struct cil_args_copy *args = NULL;
 	struct cil_tree_node *namespace = NULL;
-	struct cil_macro *macro = NULL;
-	struct cil_list *param_list = NULL;
-	struct cil_list_item *item = NULL;
 	struct cil_param *param = NULL;
 	enum cil_sym_index sym_index = CIL_SYM_UNKNOWN;
 	symtab_t *symtab = NULL;
@@ -2471,11 +2372,11 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 			}
 
 			if (namespace->flavor == CIL_MACRO) {
-				macro = namespace->data;
-				param_list = macro->params;
+				struct cil_macro *macro = namespace->data;
+				struct cil_list *param_list = macro->params;
 				if (param_list != NULL) {
-					item = param_list->head;
-					while (item != NULL) {
+					struct cil_list_item *item;
+					cil_list_for_each(item, param_list) {
 						param = item->data;
 						if (param->flavor == new->flavor) {
 							if (!strcmp(param->str, ((struct cil_symtab_datum*)new->data)->name)) {
@@ -2485,7 +2386,6 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 								goto exit;
 							}
 						}
-						item = item->next;
 					}
 				}
 			}

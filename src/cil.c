@@ -777,7 +777,7 @@ int cil_userprefixes_to_string(struct cil_db *db, __attribute__((unused)) sepol_
 	size_t str_len = 0;
 	int buf_pos = 0;
 	char *str_tmp = NULL;
-	struct cil_list_item *curr = NULL;
+	struct cil_list_item *curr;
 	struct cil_userprefix *userprefix = NULL;
 	struct cil_user *user = NULL;
 
@@ -789,7 +789,7 @@ int cil_userprefixes_to_string(struct cil_db *db, __attribute__((unused)) sepol_
 		goto exit;
 	}
 
-	for (curr = db->userprefixes->head; curr != NULL; curr = curr->next) {
+	cil_list_for_each(curr, db->userprefixes) {
 		userprefix = curr->data;
 		user = userprefix->user;
 		str_len += strlen("user ") + strlen(user->datum.name) + strlen(" prefix ") + strlen(userprefix->prefix_str) + 2;
@@ -800,7 +800,7 @@ int cil_userprefixes_to_string(struct cil_db *db, __attribute__((unused)) sepol_
 	str_tmp = cil_malloc(str_len * sizeof(char));
 	*out = str_tmp;
 
-	for (curr = db->userprefixes->head; curr != NULL; curr = curr->next) {
+	cil_list_for_each(curr, db->userprefixes) {
 		userprefix = curr->data;
 		user = userprefix->user;
 
@@ -818,7 +818,7 @@ exit:
 
 int __cil_level_to_string(struct cil_level *lvl, char **out)
 {
-	struct cil_list_item *curr_cat = NULL;
+	struct cil_list_item *curr_cat;
 	struct cil_catset *catset = lvl->catset;
 	int str_len = 0;
 	int buf_pos = 0;
@@ -827,8 +827,7 @@ int __cil_level_to_string(struct cil_level *lvl, char **out)
 	str_len += strlen(lvl->sens->datum.name) + 1;
 
 	if (catset != NULL) {
-		for (curr_cat = catset->cat_list->head; curr_cat != NULL; 
-						curr_cat = curr_cat->next) {
+		cil_list_for_each(curr_cat, catset->cat_list) {
 			switch (curr_cat->flavor) {
 			case CIL_CATRANGE: {
 				struct cil_catrange *catrange = curr_cat->data;
@@ -901,7 +900,7 @@ int cil_selinuxusers_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, ch
 	size_t str_len = 0;
 	int buf_pos = 0;
 	char *str_tmp = NULL;
-	struct cil_list_item *curr = NULL;
+	struct cil_list_item *curr;
 	struct cil_selinuxuser *selinuxuser = NULL;
 	struct cil_user *user = NULL;
 
@@ -913,7 +912,7 @@ int cil_selinuxusers_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, ch
 		goto exit;
 	}
 
-	for(curr = db->selinuxusers->head; curr != NULL; curr = curr->next) {
+	cil_list_for_each(curr, db->selinuxusers) {
 		selinuxuser = curr->data;
 		user = selinuxuser->user;
 		str_len += strlen(selinuxuser->name_str) + strlen(user->datum.name) + 1;

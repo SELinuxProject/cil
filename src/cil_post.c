@@ -402,39 +402,15 @@ int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused
 		break;
 	}
 	case CIL_USERPREFIX: {
-		struct cil_userprefix *userprefix =  node->data;
-		struct cil_list_item *new = NULL;
-		cil_list_item_init(&new);
-		new->data = userprefix;
-		new->flavor = CIL_USERPREFIX;
-		rc = cil_list_append_item(db->userprefixes, new);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+		cil_list_append(db->userprefixes, CIL_USERPREFIX, node->data);
 		break;
 	}
 	case CIL_SELINUXUSER: {
-		struct cil_selinuxuser *selinuxuser = node->data;
-		struct cil_list_item *new = NULL;
-		cil_list_item_init(&new);
-		new->data = selinuxuser;
-		new->flavor = CIL_SELINUXUSER;
-		rc = cil_list_prepend_item(db->selinuxusers, new);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+		cil_list_prepend(db->selinuxusers, CIL_SELINUXUSER, node->data);
 		break;
 	}
 	case CIL_SELINUXUSERDEFAULT: {
-		struct cil_selinuxuser *selinuxuser = node->data;
-		struct cil_list_item *new = NULL;
-		cil_list_item_init(&new);
-		new->data = selinuxuser;
-		new->flavor = CIL_SELINUXUSERDEFAULT;
-		rc = cil_list_append_item(db->selinuxusers, new);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+		cil_list_append(db->selinuxusers, CIL_SELINUXUSERDEFAULT, node->data);
 		break;
 	}
 	case CIL_OPTIONAL: {
@@ -573,8 +549,7 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, enum cil_flavor flavor, struct
 	int rc = SEPOL_ERR;
 	int max = 0;
 	uint16_t pos;
-	struct cil_list_item *expr_stack = NULL;
-	struct cil_list_item *expr = NULL;
+	struct cil_list_item *expr_stack;
 	ebitmap_t bitmap_tmp;
 	ebitmap_t bitmap_stack[COND_EXPR_MAXDEPTH];
 
@@ -589,12 +564,10 @@ int __cil_expr_stack_to_bitmap(struct cil_db *db, enum cil_flavor flavor, struct
 		max = db->num_types;
 	}
 
-	expr_stack = expr_stack_list->head;
-	for (; expr_stack != NULL; expr_stack = expr_stack->next) {
+	cil_list_for_each(expr_stack, expr_stack_list) {
+		struct cil_list_item *expr;
 		pos = 0;
-
-		expr = ((struct cil_list *)expr_stack->data)->head;
-		for (; expr != NULL; expr = expr->next) {
+		cil_list_for_each(expr, (struct cil_list *)expr_stack->data) {
 			struct cil_conditional *cond = expr->data;
 
 			switch (cond->flavor) {

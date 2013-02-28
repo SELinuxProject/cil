@@ -271,7 +271,7 @@ void cil_tree_print_catset(struct cil_catset *catset)
 
 	cil_log(CIL_INFO, " (");
 	if (catset->cat_list != NULL) {
-		for (cat_item = catset->cat_list->head; cat_item != NULL; cat_item = cat_item->next) {
+		cil_list_for_each(cat_item, catset->cat_list) {
 			switch (cat_item->flavor) {
 			case CIL_CATRANGE:
 				cil_tree_print_catrange(cat_item->data);
@@ -286,7 +286,7 @@ void cil_tree_print_catset(struct cil_catset *catset)
 			}
 		}
 	} else {
-		for (cat_item = catset->cat_list_str->head; cat_item != NULL; cat_item = cat_item->next) {
+		cil_list_for_each(cat_item, catset->cat_list_str) {
 			switch (cat_item->flavor) {
 			case CIL_CATRANGE:
 				cil_tree_print_catrange(cat_item->data);
@@ -305,19 +305,16 @@ void cil_tree_print_catset(struct cil_catset *catset)
 
 void cil_tree_print_perm_strs(struct cil_list *perm_strs)
 {
-	struct cil_list_item *curr = NULL;
+	struct cil_list_item *curr;
 
 	if (perm_strs == NULL) {
 		return;
 	}
 
-	curr = perm_strs->head;
-
 	cil_log(CIL_INFO, " (");
 
-	while (curr != NULL) {
+	cil_list_for_each(curr, perm_strs) {
 		cil_log(CIL_INFO, " %s", (char*)curr->data);
-		curr = curr->next;
 	}
 
 	cil_log(CIL_INFO, " )");
@@ -415,7 +412,7 @@ void cil_tree_print_context(struct cil_context *context)
 
 void cil_tree_print_constrain(struct cil_constrain *cons)
 {
-	struct cil_list_item *expr_curr = NULL;
+	struct cil_list_item *expr_curr;
 
 	if (cons->classpermset != NULL) {
 		cil_tree_print_classpermset(cons->classpermset);
@@ -423,15 +420,13 @@ void cil_tree_print_constrain(struct cil_constrain *cons)
 		 cil_log(CIL_INFO, "%s", cons->classpermset_str);
 	}
 
-	expr_curr = cons->expr->head;
-	while (expr_curr != NULL) {
+	cil_list_for_each(expr_curr, cons->expr) {
 		struct cil_conditional *cond = expr_curr->data;
 		if (cond->data != NULL) {
 			cil_log(CIL_INFO, "%s:%i ", ((struct cil_symtab_datum *)cond->data)->name, cond->flavor);
 		} else {
 			cil_log(CIL_INFO, "-%s:%i ", cond->str, cond->flavor);
 		}
-		expr_curr = expr_curr->next;
 	}
 	cil_log(CIL_INFO, ")\n");
 	cil_log(CIL_INFO, "\n");
@@ -476,19 +471,17 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_TYPEATTRIBUTESET: {
 				struct cil_typeattributeset *attrtypes = node->data;
-				struct cil_list_item *curr = NULL;
+				struct cil_list_item *curr;
 				cil_log(CIL_INFO, "TYPEATTRIBUTESET: attr: %s, stack: ", attrtypes->attr_str);
 
 				cil_log(CIL_INFO, " stack: (");
-				curr = attrtypes->expr_stack->head;
-				while (curr != NULL) {
+				cil_list_for_each(curr, attrtypes->expr_stack) {
 					struct cil_conditional *cond = curr->data;
 					if (cond->data != NULL) {
 						cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)cond->data)->name);
 					} else if (cond->str != NULL) {
 						cil_log(CIL_INFO, "%s ", cond->str);
 					}
-					curr = curr->next;
 				}
 				cil_log(CIL_INFO, " )");
 
@@ -641,19 +634,17 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_ROLEATTRIBUTESET: {
 				struct cil_roleattributeset *attrroles = node->data;
-				struct cil_list_item *curr = NULL;
+				struct cil_list_item *curr;
 				cil_log(CIL_INFO, "ROLEATTRIBUTESET: attr: %s, stack: ", attrroles->attr_str);
 
 				cil_log(CIL_INFO, " stack: (");
-				curr = attrroles->expr_stack->head;
-				while (curr != NULL) {
+				cil_list_for_each(curr, attrroles->expr_stack) {
 					struct cil_conditional *cond = curr->data;
 					if (cond->data != NULL) {
 						cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)cond->data)->name);
 					} else if (cond->str != NULL) {
 						cil_log(CIL_INFO, "%s ", cond->str);
 					}
-					curr = curr->next;
 				}
 				cil_log(CIL_INFO, " )");
 
@@ -722,19 +713,19 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_CLASSMAPPERM: {
 				struct cil_classmap_perm *cmp = node->data;
-				struct cil_list_item *curr = NULL;
+				struct cil_list_item *curr;
 
 				cil_log(CIL_INFO, "CLASSMAPPERM: %s", cmp->datum.name);
 
-				if (cmp->classperms != NULL) {
-					curr = cmp->classperms->head;
+				if (cmp->classperms == NULL) {
+					cil_log(CIL_INFO, " perms: ()");
+					return;
 				}
 
 				cil_log(CIL_INFO, " perms: (");
 
-				while (curr != NULL) {
+				cil_list_for_each(curr, cmp->classperms) {
 					cil_tree_print_classpermset(curr->data);
-					curr = curr->next;
 				}
 
 				cil_log(CIL_INFO, " )\n");
@@ -743,12 +734,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_CLASSMAPPING: {
 				struct cil_classmapping *mapping = node->data;
-				struct cil_list_item *curr = mapping->classpermsets_str->head;
+				struct cil_list_item *curr;
 
 				cil_log(CIL_INFO, "CLASSMAPPING: classmap: %s, classmap_perm: %s,", mapping->classmap_str, mapping->classmap_perm_str);
 
 				cil_log(CIL_INFO, " (");
-				while (curr != NULL) {
+				cil_list_for_each(curr, mapping->classpermsets_str) {
 					if (curr->flavor == CIL_AST_STR) {
 						cil_log(CIL_INFO, " %s", (char*)curr->data);
 					} else if (curr->flavor == CIL_CLASSPERMSET) {
@@ -756,7 +747,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 						cil_tree_print_classpermset((struct cil_classpermset*)curr->data);
 						cil_log(CIL_INFO, " )");
 					}
-					curr = curr->next;
 				}
 
 				cil_log(CIL_INFO, " )\n");
@@ -774,18 +764,17 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_BOOLEANIF: {
 				struct cil_booleanif *bif = node->data;
-				struct cil_list_item *current = bif->expr_stack->head;
+				struct cil_list_item *curr;
 				cil_log(CIL_INFO, "BOOLEANIF: expression stack: ( ");
 
-				while (current != NULL) {
-					struct cil_conditional *cond = current->data;
+				cil_list_for_each(curr, bif->expr_stack) {
+					struct cil_conditional *cond = curr->data;
 					if (cond->data != NULL) {
 						struct cil_bool *bool = cond->data;
 						cil_log(CIL_INFO, "(bool %s, value: %d) ", bool->datum.name, bool->value);
 					} else if (cond->str != NULL) {
 						cil_log(CIL_INFO, "%s ", cond->str);
 					}
-					current = current->next;
 				}
 
 				cil_log(CIL_INFO, ")\n");
@@ -793,22 +782,22 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_TUNABLEIF: {
 				struct cil_tunableif *tif = node->data;
-				struct cil_list_item *current = tif->expr_stack->head;
+				struct cil_list_item *curr = tif->expr_stack->head;
 				cil_log(CIL_INFO, "TUNABLEIF: expression stack: ( ");
 
-				if (current->flavor != CIL_INT) {
-					while (current != NULL && current->data != NULL) {
-						struct cil_conditional *cond = current->data;
+				if (curr->flavor != CIL_INT) {
+					while (curr != NULL && curr->data != NULL) {
+						struct cil_conditional *cond = curr->data;
 						if (cond->data != NULL) {
 							struct cil_bool *bool = cond->data;
 							cil_log(CIL_INFO, "(tunable %s, value: %d) ", bool->datum.name, bool->value);
 						} else if (cond->str != NULL) {
 							cil_log(CIL_INFO, "%s ", cond->str);
 						}
-						current = current->next;
+						curr = curr->next;
 					}
 				} else {
-					cil_log(CIL_INFO, "%d", *(uint16_t*)current->data);
+					cil_log(CIL_INFO, "%d", *(uint16_t*)curr->data);
 				}
 
 				cil_log(CIL_INFO, ")\n");
@@ -1038,28 +1027,20 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_CATSET: {
 				struct cil_catset *catset = node->data;
-				struct cil_list_item *cat = NULL;
-				struct cil_list_item *parent = NULL;
+				struct cil_list *cat_list;
+				struct cil_list_item *cat;
 
 				cil_log(CIL_INFO, "CATSET: %s (",catset->datum.name);
 
-				if (catset->cat_list != NULL) {
-					cat = catset->cat_list->head;
-				} else {
-					cat = catset->cat_list_str->head;
-				}
-
-				while (cat != NULL) {
+				cat_list = catset->cat_list ? catset->cat_list : catset->cat_list_str;
+				cil_list_for_each(cat, cat_list) {
 					if (cat->flavor == CIL_LIST) {
-						parent = cat;
-						cat = ((struct cil_list*)cat->data)->head;
+						struct cil_list_item *sub;
 						cil_log(CIL_INFO, " (");
-						while (cat != NULL) {
-							cil_log(CIL_INFO, " %s", ((struct cil_cat*)cat->data)->datum.name);
-							cat = cat->next;
+						cil_list_for_each(sub, (struct cil_list*)cat->data) {
+							cil_log(CIL_INFO, " %s", ((struct cil_cat*)sub->data)->datum.name);
 						}
 						cil_log(CIL_INFO, " )");
-						cat = parent;
 					} else {
 						if (cat->flavor == CIL_CAT) {
 							cil_log(CIL_INFO, " %s", ((struct cil_cat*)cat->data)->datum.name);
@@ -1067,7 +1048,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 							cil_log(CIL_INFO, " %s", (char*)cat->data);
 						}
 					}
-					cat = cat->next;
 				}
 
 				cil_log(CIL_INFO, " )\n");
@@ -1075,21 +1055,17 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_CATORDER: {
 				struct cil_catorder *catorder = node->data;
-				struct cil_list_item *cat = NULL;
+				struct cil_list_item *cat;
 
-				cil_log(CIL_INFO, "CATORDER: (");
-
-				if (catorder->cat_list_str != NULL) {
-					cat = catorder->cat_list_str->head;
-				} else {
+				if (catorder->cat_list_str == NULL) {
+					cil_log(CIL_INFO, "CATORDER: ()\n");
 					return;
 				}
 
-				while (cat != NULL) {
+				cil_log(CIL_INFO, "CATORDER: (");
+				cil_list_for_each(cat, catorder->cat_list_str) {
 					cil_log(CIL_INFO, " %s", (char*)cat->data);
-					cat = cat->next;
 				}
-
 				cil_log(CIL_INFO, " )\n");
 				return;
 			}
@@ -1115,32 +1091,23 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			case CIL_DOMINANCE: {
 				struct cil_sens_dominates *dom = node->data;
-				struct cil_list_item *sens = NULL;
-				struct cil_list_item *parent = NULL;
+				struct cil_list_item *sens;
 
 				cil_log(CIL_INFO, "DOMINANCE: (");
 
 				if (dom->sens_list_str != NULL) {
-					sens = dom->sens_list_str->head;
-					while(sens != NULL) {
+					cil_list_for_each(sens, dom->sens_list_str) {
 						if (sens->flavor == CIL_LIST) {
-							parent = sens;
-							sens = ((struct cil_list*)sens->data)->head;
+							struct cil_list_item *sub;
 							cil_log(CIL_INFO, " (");
-							while (sens != NULL) {
-								cil_log(CIL_INFO, " %s", (char*)sens->data);
-								sens = sens->next;
+							cil_list_for_each(sub, (struct cil_list*)sens->data) {
+								cil_log(CIL_INFO, " %s", (char*)sub->data);
 							}
 							cil_log(CIL_INFO, " )");
-							sens = parent;
 						} else {
 							cil_log(CIL_INFO, " %s", (char*)sens->data);
 						}
-						sens = sens->next;
 					}
-				} else {
-					cil_log(CIL_INFO, "\n");
-					return;
 				}
 
 				cil_log(CIL_INFO, " )\n");
@@ -1175,7 +1142,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			case CIL_VALIDATETRANS:
 			case CIL_MLSVALIDATETRANS: {
 				struct cil_validatetrans *vt = node->data;
-				struct cil_list_item *expr_curr = NULL;
+				struct cil_list_item *expr_curr;
 
 				cil_log(CIL_INFO, "VALIDATETRANS: class: ");
 				if (vt->class != NULL) {
@@ -1184,15 +1151,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 					cil_log(CIL_INFO, "%s ", vt->class_str);
 				}
 
-				expr_curr = vt->expr->head;
-				while (expr_curr != NULL) {
+				cil_list_for_each(expr_curr, vt->expr) {
 					struct cil_conditional *cond = expr_curr->data;
 					if (cond->data != NULL) {
 						cil_log(CIL_INFO, "%s:%i ", ((struct cil_symtab_datum *)cond->data)->name, cond->flavor);
 					} else {
 						cil_log(CIL_INFO, "-%s:%i ", cond->str, cond->flavor);
 					}
-					expr_curr = expr_curr->next;
 				}
 				cil_log(CIL_INFO, ")\n");
 				cil_log(CIL_INFO, "\n");
@@ -1408,12 +1373,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				cil_log(CIL_INFO, "MACRO %s:", macro->datum.name);
 
 				if (macro->params != NULL && macro->params->head != NULL) {
-					struct cil_list_item *curr_param = macro->params->head;
+					struct cil_list_item *curr_param;
 					cil_log(CIL_INFO, " parameters: (");
-					while (curr_param != NULL) {
+					cil_list_for_each(curr_param, macro->params) {
 						cil_log(CIL_INFO, " flavor: %d, string: %s;", ((struct cil_param*)curr_param->data)->flavor, ((struct cil_param*)curr_param->data)->str);
 
-						curr_param = curr_param->next;
 					}
 					cil_log(CIL_INFO, " )");
 				}
@@ -1433,8 +1397,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 				if (call->args != NULL) {
 					cil_log(CIL_INFO, ", args: ( ");
-					struct cil_list_item *item = call->args->head;
-					while(item != NULL) {
+					struct cil_list_item *item;
+					cil_list_for_each(item, call->args) {
 						struct cil_symtab_datum *datum = ((struct cil_args*)item->data)->arg;
 						if (datum != NULL) {
 							if (datum->nodes != NULL && datum->nodes->head != NULL) {
@@ -1453,7 +1417,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 							}
 							cil_log(CIL_INFO, "%s ", ((struct cil_args*)item->data)->arg_str);
 						}
-						item = item->next;
 					}
 					cil_log(CIL_INFO, ")");
 				}

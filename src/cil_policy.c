@@ -292,112 +292,67 @@ int cil_fsuse_to_policy(FILE **file_arr, struct cil_sort *sort)
 	return SEPOL_OK;
 }
 
-static int __cil_multimap_insert_key(struct cil_list_item **curr_key, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
-{
-	struct cil_list_item *new_key = NULL;
-	struct cil_multimap_item *new_data = cil_malloc(sizeof(*new_data));
-
-	cil_list_item_init(&new_key);
-	new_data->key = key;
-	cil_list_init(&new_data->values);
-	if (value != NULL) {
-		cil_list_item_init(&new_data->values->head);
-		new_data->values->head->data = value;
-		new_data->values->head->flavor = val_flavor;
-	}
-	new_key->flavor = key_flavor;
-	new_key->data = new_data;
-	if (*curr_key == NULL) {
-		*curr_key = new_key;
-	} else {
-		(*curr_key)->next = new_key;
-	}
-
-	return SEPOL_OK;
-}
-
 int cil_multimap_insert(struct cil_list *list, struct cil_symtab_datum *key, struct cil_symtab_datum *value, uint32_t key_flavor, uint32_t val_flavor)
 {
-	struct cil_list_item *curr_key = NULL;
-	struct cil_list_item *curr_value = NULL;
+	struct cil_list_item *curr_key;
+	struct cil_multimap_item *new_data;
 
 	if (list == NULL || key == NULL) {
 		return SEPOL_ERR;
 	}
 
-	curr_key = list->head;
-
-	if (curr_key == NULL) {
-		__cil_multimap_insert_key(&list->head, key, value, key_flavor, val_flavor);
-	}
-
-	while(curr_key != NULL) {
-		if ((struct cil_multimap_item*)curr_key->data != NULL) {
-			if (((struct cil_multimap_item*)curr_key->data)->key != NULL && ((struct cil_multimap_item*)curr_key->data)->key == key) {
-				struct cil_list_item *new_value = NULL;
-				cil_list_item_init(&new_value);
-				new_value->data = value;
-				new_value->flavor = val_flavor;
-
-				curr_value = ((struct cil_multimap_item*)curr_key->data)->values->head;
-
-				if (curr_value == NULL) {
-					((struct cil_multimap_item*)curr_key->data)->values->head = new_value;
-					return SEPOL_OK;
-				}
-
-				while (curr_value != NULL) {
+	cil_list_for_each(curr_key, list) {
+		struct cil_multimap_item *curr_multimap_item = curr_key->data;
+		if (curr_multimap_item != NULL) {
+			if (curr_multimap_item->key != NULL && curr_multimap_item->key == key) {
+				struct cil_list_item *curr_value;
+				cil_list_for_each(curr_value, curr_multimap_item->values) {
 					if (curr_value == (struct cil_list_item*)value) {
-						free(new_value);
-						break;
+						return SEPOL_OK;;
 					}
-					if (curr_value->next == NULL) {
-						curr_value->next = new_value;
-						return SEPOL_OK;
-					}
-					curr_value = curr_value->next;
 				}
-			} else if (curr_key->next == NULL) {
-				__cil_multimap_insert_key(&curr_key, key, value, key_flavor, val_flavor);
-				return SEPOL_OK;
+				cil_list_append(curr_multimap_item->values, val_flavor, value);
 			}
 		} else {
 			cil_log(CIL_INFO, "No data in list item\n");
 			return SEPOL_ERR;
 		}
-		curr_key = curr_key->next;
 	}
+
+	new_data = cil_malloc(sizeof(*new_data));
+	new_data->key = key;
+	cil_list_init(&new_data->values);
+	if (value != NULL) {
+		cil_list_append(new_data->values, val_flavor, value);
+	}
+	cil_list_append(list, key_flavor, new_data);
 
 	return SEPOL_OK;
 }
 
 int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 {
-	struct cil_list_item *current_user = NULL;
+	struct cil_list_item *current_user;
 
 	if (userroles == NULL) {
 		return SEPOL_OK;
 	}
 	
-	current_user = userroles->head;
-
-	while (current_user != NULL) {
-		struct cil_list_item *current_role = NULL;
-		if (((struct cil_multimap_item*)current_user->data)->values->head == NULL) {
+	cil_list_for_each(current_user, userroles) {
+		struct cil_multimap_item *user_multimap_item = current_user->data;
+		struct cil_list_item *current_role;
+		if (user_multimap_item->values->head == NULL) {
 			cil_log(CIL_INFO, "No roles associated with user %s\n",  
-				((struct cil_multimap_item*)current_user->data)->key->name);
+					user_multimap_item->key->name);
 			return SEPOL_ERR;
 		}
 
-		fprintf(file_arr[USERROLES], "user %s roles {", ((struct cil_multimap_item*)current_user->data)->key->name);
+		fprintf(file_arr[USERROLES], "user %s roles {", user_multimap_item->key->name);
 
-		current_role = ((struct cil_multimap_item*)current_user->data)->values->head;
-		while (current_role != NULL) {
-			fprintf(file_arr[USERROLES], " %s",  ((struct cil_role*)current_role->data)->datum.name);
-			current_role = current_role->next;
+		cil_list_for_each(current_role, user_multimap_item->values) {
+			fprintf(file_arr[USERROLES], " %s", ((struct cil_role*)current_role->data)->datum.name);
 		}
 		fprintf(file_arr[USERROLES], " };\n"); 
-		current_user = current_user->next;
 	}
 
 	return SEPOL_OK;
@@ -405,26 +360,25 @@ int cil_userrole_to_policy(FILE **file_arr, struct cil_list *userroles)
 
 int cil_cat_to_policy(FILE **file_arr, struct cil_list *cats)
 {
-	struct cil_list_item *curr_cat = NULL;
+	struct cil_list_item *curr_cat;
 
 	if (cats == NULL) {
 		return SEPOL_OK;
 	}
-	
-	curr_cat = cats->head;
-	while (curr_cat != NULL) {
-		if (((struct cil_multimap_item*)curr_cat->data)->values->head == NULL) {
-			fprintf(file_arr[CATS], "category %s;\n", ((struct cil_multimap_item*)curr_cat->data)->key->name);
+
+	cil_list_for_each(curr_cat, cats) {
+		struct cil_multimap_item *cat_multimap_item = curr_cat->data;
+		fprintf(file_arr[CATS], "category %s", cat_multimap_item->key->name);
+		if (cat_multimap_item->values->head == NULL) {
+			fprintf(file_arr[CATS], ";\n");
 		} else {
-			struct cil_list_item *curr_catalias = ((struct cil_multimap_item*)curr_cat->data)->values->head;
-			fprintf(file_arr[CATS], "category %s alias", ((struct cil_multimap_item*)curr_cat->data)->key->name);
-			while (curr_catalias != NULL) {
-				fprintf(file_arr[CATS], " %s",  ((struct cil_cat*)curr_catalias->data)->datum.name);
-				curr_catalias = curr_catalias->next;
+			struct cil_list_item *curr_catalias;
+			fprintf(file_arr[CATS], " alias");
+			cil_list_for_each(curr_catalias, cat_multimap_item->values) {
+				fprintf(file_arr[CATS], " %s", ((struct cil_cat*)curr_catalias->data)->datum.name);
 			}
 			fprintf(file_arr[CATS], ";\n"); 
 		}
-		curr_cat = curr_cat->next;
 	}
 
 	return SEPOL_OK;
@@ -432,26 +386,25 @@ int cil_cat_to_policy(FILE **file_arr, struct cil_list *cats)
 
 int cil_sens_to_policy(FILE **file_arr, struct cil_list *sens)
 {
-	struct cil_list_item *curr_sens = NULL;
+	struct cil_list_item *curr_sens;
 
 	if (sens == NULL) {
 		return SEPOL_OK;
 	}
-	
-	curr_sens = sens->head;
-	while (curr_sens != NULL) {
-		if (((struct cil_multimap_item*)curr_sens->data)->values->head == NULL) 
-			fprintf(file_arr[SENS], "sensitivity %s;\n", ((struct cil_multimap_item*)curr_sens->data)->key->name);
+
+	cil_list_for_each(curr_sens, sens) {
+		struct cil_multimap_item *sens_multimap_item = curr_sens->data;
+		fprintf(file_arr[SENS], "sensitivity %s", sens_multimap_item->key->name);
+		if (sens_multimap_item->values->head == NULL) 
+			fprintf(file_arr[SENS], ";\n");
 		else {
-			struct cil_list_item *curr_sensalias = ((struct cil_multimap_item*)curr_sens->data)->values->head;
-			fprintf(file_arr[SENS], "sensitivity %s alias", ((struct cil_multimap_item*)curr_sens->data)->key->name);
-			while (curr_sensalias != NULL) {
-				fprintf(file_arr[SENS], " %s",  ((struct cil_sens*)curr_sensalias->data)->datum.name);
-				curr_sensalias = curr_sensalias->next;
+			struct cil_list_item *curr_sensalias;
+			fprintf(file_arr[SENS], " alias");
+			cil_list_for_each(curr_sensalias, sens_multimap_item->values) {
+				fprintf(file_arr[SENS], " %s", ((struct cil_sens*)curr_sensalias->data)->datum.name);
 			}
 			fprintf(file_arr[SENS], ";\n"); 
 		}
-		curr_sens = curr_sens->next;
 	}
 
 	return SEPOL_OK;
@@ -465,8 +418,7 @@ void cil_catrange_to_policy(FILE **file_arr, uint32_t file_index, struct cil_cat
 void cil_catset_to_policy(FILE **file_arr, uint32_t file_index, struct cil_catset *catset)
 {
 	struct cil_list_item *cat_item;
-
-	for (cat_item = catset->cat_list->head; cat_item != NULL; cat_item = cat_item->next) {
+	cil_list_for_each(cat_item, catset->cat_list) {
 		switch (cat_item->flavor) {
 		case CIL_CATRANGE: {
 			cil_catrange_to_policy(file_arr, file_index, cat_item->data);
@@ -520,10 +472,8 @@ void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_cont
 
 void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_constrain *cons, enum cil_flavor flavor)
 {
-	struct cil_list_item *curr_cmp = NULL;
-	struct cil_list_item *curr_cps = NULL;
 	char *obj_str = NULL;
-	struct cil_list_item *perm = NULL;
+	struct cil_list_item *perm;
 	char *statement = NULL;
 
 	if (flavor == CIL_CONSTRAIN) {
@@ -536,10 +486,8 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 		fprintf(file_arr[CONSTRAINS], "%s", statement);
 		fprintf(file_arr[CONSTRAINS], " %s {", ((struct cil_class*)cons->classpermset->class)->datum.name);
 
-		perm = cons->classpermset->perms->head;
-		while (perm != NULL) {
+		cil_list_for_each(perm, cons->classpermset->perms) { 
 			fprintf(file_arr[CONSTRAINS], " %s", ((struct cil_perm*)(perm->data))->datum.name);
-			perm = perm->next;
 		}
 		fprintf(file_arr[CONSTRAINS], " };\n\t");
 
@@ -547,110 +495,77 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 		fprintf(file_arr[CONSTRAINS], ";\n");
 
 	} else if (cons->classpermset->flavor == CIL_CLASSMAP) {
-		curr_cmp = cons->classpermset->perms->head;
-		while (curr_cmp != NULL) {
-			curr_cps = ((struct cil_classmap_perm*)curr_cmp->data)->classperms->head;
-			while(curr_cps != NULL) {
+		struct cil_list_item *curr_cmp;
+		cil_list_for_each(curr_cmp, cons->classpermset->perms) {
+			struct cil_list_item *curr_cps;
+			cil_list_for_each(curr_cps, ((struct cil_classmap_perm*)curr_cmp->data)->classperms) {
 				fprintf(file_arr[CONSTRAINS], "%s", statement);
 				obj_str = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
 				fprintf(file_arr[CONSTRAINS], " %s {", obj_str);
 
-				perm = ((struct cil_classpermset*)curr_cps->data)->perms->head;
-
-				while (perm != NULL) {
+				cil_list_for_each(perm, ((struct cil_classpermset*)curr_cps->data)->perms) {
 					fprintf(file_arr[CONSTRAINS], " %s", ((struct cil_perm*)(perm->data))->datum.name);
-					perm = perm->next;
 				}
 				fprintf(file_arr[CONSTRAINS], " };\n\t");
 				cil_expr_stack_to_policy(file_arr, CONSTRAINS, cons->expr);
 				fprintf(file_arr[CONSTRAINS], ";\n");
-
-				curr_cps = curr_cps->next;
 			}
-
-			curr_cmp = curr_cmp->next;
 		}
 	}
 }
 
 int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule *rule)
 {
+	char *kind_str = NULL;
 	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
 	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
 	char *obj_str = NULL;
-	struct cil_list *classperms = NULL;
-	struct cil_list_item *new = NULL;
-	struct cil_list_item *curr_cmp = NULL;
-	struct cil_list_item *curr_cps = NULL;
-	struct cil_list_item *tail = NULL;
-	struct cil_list_item *perm = NULL;
+	struct cil_list *classperms;
+	struct cil_list_item *curr_cps;
+	struct cil_list_item *perm;
 
 	cil_list_init(&classperms);
 
 	if (rule->classpermset->flavor == CIL_CLASS) {
-		cil_list_item_init(&new);
-		new->data = rule->classpermset;
-		new->flavor = CIL_CLASSPERMSET;
-		classperms->head = new;
+		cil_list_append(classperms, CIL_CLASSPERMSET, rule->classpermset);
 	} else if (rule->classpermset->flavor == CIL_CLASSMAP) {
-		curr_cmp = rule->classpermset->perms->head;
-		while (curr_cmp != NULL) {
-			curr_cps = ((struct cil_classmap_perm*)curr_cmp->data)->classperms->head;
-			while(curr_cps != NULL) {
-				cil_list_item_init(&new);
-				new->data = curr_cps->data;
-				new->flavor = curr_cps->flavor;
-
-				if (classperms->head == NULL) {
-					classperms->head = new;
-				} else {
-					tail->next = new;
-				}
-				tail = new;
-
-				curr_cps = curr_cps->next;
+		struct cil_list_item *curr_cmp;
+		cil_list_for_each(curr_cmp, rule->classpermset->perms) {
+			cil_list_for_each(curr_cps, ((struct cil_classmap_perm*)curr_cmp->data)->classperms) {
+				cil_list_append(classperms, curr_cps->flavor, curr_cps->data);
 			}
-
-			curr_cmp = curr_cmp->next;
 		}
 	}
 
-	curr_cps = classperms->head;
+	switch (rule->rule_kind) {
+	case CIL_AVRULE_ALLOWED:
+		kind_str = "allow";
+		break;
+	case CIL_AVRULE_AUDITALLOW:
+		kind_str = "auditallow";
+		break;
+	case CIL_AVRULE_DONTAUDIT:
+		kind_str = "dontaudit";
+		break;
+	case CIL_AVRULE_NEVERALLOW:
+		kind_str = "neverallow";
+		break;
+	default :
+		cil_log(CIL_INFO, "Unknown avrule with kind=%d src=%s tgt=%s\n",
+				rule->rule_kind, src_str, tgt_str);
+		return SEPOL_ERR;
+	}
 
-	while (curr_cps != NULL) {
-
-		switch (rule->rule_kind) {
-		case CIL_AVRULE_ALLOWED:
-			fprintf(file_arr[file_index], "allow");
-			break;
-		case CIL_AVRULE_AUDITALLOW:
-			fprintf(file_arr[file_index], "auditallow");
-			break;
-		case CIL_AVRULE_DONTAUDIT:
-			fprintf(file_arr[file_index], "dontaudit");
-			break;
-		case CIL_AVRULE_NEVERALLOW:
-			fprintf(file_arr[file_index], "neverallow");
-			break;
-		default :
-			cil_log(CIL_INFO, "Unknown avrule\n");
-			return SEPOL_ERR;
-		}
-
-		fprintf(file_arr[file_index], " %s %s:", src_str, tgt_str);
+	cil_list_for_each(curr_cps, classperms) {
+		fprintf(file_arr[file_index], "%s %s %s:", kind_str, src_str, tgt_str);
 
 		obj_str = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
 		fprintf(file_arr[file_index], " %s {", obj_str);
 
-		perm = ((struct cil_classpermset*)curr_cps->data)->perms->head;
-
-		while (perm != NULL) {
+		cil_list_for_each(perm, ((struct cil_classpermset*)curr_cps->data)->perms) {
 			fprintf(file_arr[file_index], " %s", ((struct cil_perm*)(perm->data))->datum.name);
-			perm = perm->next;
 		}
 		fprintf(file_arr[file_index], " };\n");
-
-		curr_cps = curr_cps->next;
 	}
 
 	cil_list_destroy(&classperms, 0);
@@ -698,7 +613,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 {
 	int rc = SEPOL_ERR;
 	struct cil_conditional *cond = NULL;
-	struct cil_list_item *curr = stack->head;
+	struct cil_list_item *curr;
 	char *str_stack[COND_EXPR_MAXDEPTH] = {};
 	char *expr_str = NULL;
 	char *oper_str = NULL;
@@ -706,7 +621,7 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 	int len = 0;
 	int i;
 
-	while (curr != NULL) {
+	cil_list_for_each(curr, stack) {
 		cond = curr->data;
 		if ((cond->flavor == CIL_AND) || (cond->flavor == CIL_OR)
 		|| (cond->flavor == CIL_XOR) || (cond->flavor == CIL_NOT)
@@ -765,7 +680,6 @@ int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_li
 			str_stack[pos] = cil_strdup(oper_str);
 			pos++;
 		}
-		curr = curr->next;
 	}
 	fprintf(file_arr[file_index], "%s", str_stack[0]);
 	free(str_stack[0]);
@@ -1250,20 +1164,14 @@ int cil_gen_policy(struct cil_db *db)
 
 	policy_file = fopen("policy.conf", "w+");
 
-	if (db->catorder->head != NULL) {
-		catorder = db->catorder->head;
-		while (catorder != NULL) {
-			cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
-			catorder = catorder->next;
-		}
+	cil_list_for_each(catorder, db->catorder) {
+		cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
 	}
 
 	if (db->dominance->head != NULL) {
-		dominance = db->dominance->head;
 		fprintf(file_arr[SENS], "dominance { ");
-		while (dominance != NULL) { 
+		cil_list_for_each(dominance, db->dominance) {
 			fprintf(file_arr[SENS], "%s ", ((struct cil_sens*)dominance->data)->datum.name);
-			dominance = dominance->next;
 		}
 		fprintf(file_arr[SENS], "};\n");
 	}

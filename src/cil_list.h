@@ -30,27 +30,27 @@
 #ifndef CIL_LIST_H_
 #define CIL_LIST_H_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-
 struct cil_list {
 	struct cil_list_item *head;
+	struct cil_list_item *tail;
 };
 
 struct cil_list_item {
 	struct cil_list_item *next;
-	uint32_t flavor;
+	unsigned flavor;
 	void *data;
 };
 
+#define cil_list_for_each(item, list) \
+	for (item = (list)->head; item != NULL; item = item->next)
+
 void cil_list_init(struct cil_list **list);
-void cil_list_destroy (struct cil_list **list, uint8_t destroy_data);
+void cil_list_destroy (struct cil_list **list, unsigned destroy_data);
 void cil_list_item_init(struct cil_list_item **item);
-void cil_list_item_destroy(struct cil_list_item **item, uint8_t destroy_data);
-int cil_list_get_tail(struct cil_list *list, struct cil_list_item **tail);
-int cil_list_append_item(struct cil_list *list, struct cil_list_item *item);
-int cil_list_prepend_item(struct cil_list *list, struct cil_list_item *item);
-void cil_print_list_lists(struct cil_list *list_list);
+void cil_list_item_destroy(struct cil_list_item **item, unsigned destroy_data);
+void cil_list_append(struct cil_list *list, unsigned flavor, void *data);
+void cil_list_prepend(struct cil_list *list, unsigned flavor, void *data);
+void cil_list_append_item(struct cil_list *list, struct cil_list_item *item);
+void cil_list_prepend_item(struct cil_list *list, struct cil_list_item *item);
 
 #endif

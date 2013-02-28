@@ -645,11 +645,11 @@ int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
 	char *key = NULL;
-	struct cil_list_item *curr_cat = db->catorder->head;
+	struct cil_list_item *curr_cat;
 	struct cil_cat *cil_cat = NULL;
 	cat_datum_t *sepol_cat = NULL;
 
-	while (curr_cat != NULL) {
+	cil_list_for_each(curr_cat, db->catorder) {
 		cil_cat = curr_cat->data;
 		sepol_cat = cil_malloc(sizeof(*sepol_cat));
 		cat_datum_init(sepol_cat);
@@ -660,8 +660,6 @@ int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 			goto exit;
 		}
 		sepol_cat->s.value = value;
-
-		curr_cat = curr_cat->next;
 	}
 
 	return SEPOL_OK;
@@ -711,12 +709,12 @@ int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db)
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
 	char *key = NULL;
-	struct cil_list_item *curr = db->dominance->head;
+	struct cil_list_item *curr;
 	struct cil_sens *cil_sens = NULL;
 	level_datum_t *sepol_level = NULL;
 	mls_level_t *mls_level = NULL;
 
-	while (curr != NULL) {
+	cil_list_for_each(curr, db->dominance) {
 		cil_sens = curr->data;
 		sepol_level = cil_malloc(sizeof(*sepol_level));
 		mls_level = cil_malloc(sizeof(*mls_level));
@@ -730,8 +728,6 @@ int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db)
 		}
 		mls_level->sens = value;
 		sepol_level->level = mls_level;
-
-		curr = curr->next;
 	}
 
 	return SEPOL_OK;
@@ -975,11 +971,11 @@ int __cil_perms_to_datum(struct cil_list *perms, class_datum_t *sepol_class, uin
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_list_item *curr_perm = perms->head;
+	struct cil_list_item *curr_perm;
 	struct cil_perm *cil_perm;
 	uint32_t data = 0;
 
-	while (curr_perm != NULL) {
+	cil_list_for_each(curr_perm, perms) {
 		perm_datum_t *sepol_perm;
 		cil_perm = curr_perm->data;
 		key = cil_perm->datum.name;
@@ -993,8 +989,6 @@ int __cil_perms_to_datum(struct cil_list *perms, class_datum_t *sepol_class, uin
 			}
 		}
 		data |= 1 << (sepol_perm->s.value - 1);
-
-		curr_perm = curr_perm->next;
 	}
 
 	*datum = data;
@@ -1014,13 +1008,11 @@ int __cil_insert_avrule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_t t
 	struct cil_list_item *curr = NULL;
 
 	if (neverallows != NULL && kind == CIL_AVRULE_ALLOWED) {
-		for (curr = neverallows->head; curr != NULL; curr = curr->next) {
+		cil_list_for_each(curr, neverallows) {
 			struct cil_neverallow *neverallow = curr->data;
 			struct cil_list *ndata_list = neverallow->data;
 			struct cil_list_item *curr_data = NULL;
-
-			for (curr_data = ndata_list->head; curr_data != NULL;
-			     curr_data = curr_data->next) {
+			cil_list_for_each(curr_data, ndata_list) {
 				struct cil_tree_node *node = neverallow->node;
 				struct cil_neverallow_data *ndata = curr_data->data;
 				avtab_key_t *never_key = ndata->key;
@@ -1082,10 +1074,8 @@ int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t d
 	struct cil_neverallow *neverallow = neverallows->head->data;
 	struct cil_list *neverallow_data = neverallow->data;
 	struct cil_neverallow_data *new_data = NULL;
-	struct cil_list_item *new_item = NULL;
-	cil_list_item_init(&new_item);
-
 	avtab_key_t *never_key = NULL;
+
 	never_key = cil_malloc(sizeof(*never_key));
 	never_key->source_type = src;
 	never_key->target_type = tgt;
@@ -1096,10 +1086,7 @@ int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t d
 	new_data->key = never_key;
 	new_data->types = data;
 
-	new_item->data = new_data;
-
-   new_item->next = neverallow_data->head;
-   neverallow_data->head = new_item;
+	cil_list_prepend(neverallow_data, CIL_LIST_ITEM, new_data);
 
 	return rc;
 }
@@ -1342,7 +1329,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 	struct cil_args_booleanif bool_args;
 	struct cil_booleanif *cil_boolif = (struct cil_booleanif*)node->data;
 	struct cil_list *expr_stack = cil_boolif->expr_stack;
-	struct cil_list_item *curr_expr = expr_stack->head;
+	struct cil_list_item *curr_expr;
 	struct cil_tree_node *cb_node = NULL;
 	struct cil_tree_node *true_node = NULL;
 	struct cil_tree_node *false_node = NULL;
@@ -1359,7 +1346,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 		goto exit;
 	}
 
-	while (curr_expr != NULL) {
+	cil_list_for_each(curr_expr, expr_stack) {
 		char *key = NULL;
 		struct cil_conditional *cil_cond = curr_expr->data;
 		cond_bool_datum_t *sepol_bool = NULL;
@@ -1409,8 +1396,6 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 			cond_expr_tail->next = cond_expr;
 		}
 		cond_expr_tail = cond_expr;
-
-		curr_expr = curr_expr->next;
 	}
 
    cond_node->next = pdb->cond_list;
@@ -1686,7 +1671,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 	uint32_t value = 0;
-	struct cil_list_item *curr = cil_expr->head;
+	struct cil_list_item *curr;
 	struct cil_conditional *rnode = NULL;
 	struct cil_conditional *lnode = NULL;
 	constraint_expr_t *new_expr = NULL;
@@ -1696,7 +1681,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 	role_datum_t *sepol_role = NULL;
 	type_datum_t *sepol_type = NULL;
 
-	while (curr != NULL) {
+	cil_list_for_each(curr, cil_expr) {
 		struct cil_conditional *cond = curr->data;
 
 		if (cond->flavor == CIL_NOT || cond->flavor == CIL_AND
@@ -1852,8 +1837,6 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 
 		lnode = rnode;
 		rnode = cond;
-
-		curr = curr->next;
 	}
 
 	*sepol_expr = new_expr;
@@ -1876,8 +1859,6 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 	struct cil_constrain *cil_constrain = (struct cil_constrain*)datum;
 	struct cil_class *class = NULL;
 	struct cil_list *perms = NULL;
-	struct cil_list_item *curr_cmp = NULL;
-	struct cil_list_item *curr_cps = NULL;
 	struct cil_list *expr = cil_constrain->expr;
 	class_datum_t *sepol_class = NULL;
 	constraint_node_t *sepol_constrain = NULL;
@@ -1912,10 +1893,10 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
       sepol_class->constraints = sepol_constrain;
 
 	} else if (cil_constrain->classpermset->flavor == CIL_CLASSMAP) {
-		curr_cmp = cil_constrain->classpermset->perms->head;
-		while (curr_cmp != NULL) {
-			curr_cps = ((struct cil_classmap_perm*)curr_cmp->data)->classperms->head;
-			while (curr_cps != NULL) {
+		struct cil_list_item *curr_cmp;
+		struct cil_list_item *curr_cps;
+		cil_list_for_each(curr_cmp, cil_constrain->classpermset->perms) {
+			cil_list_for_each(curr_cps, ((struct cil_classmap_perm*)curr_cmp->data)->classperms) {
 				key = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
 				sepol_class = hashtab_search(pdb->p_classes.table, key);
 				if (sepol_class == NULL) {
@@ -1939,13 +1920,9 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 				}
 				sepol_constrain->expr = sepol_expr;
 
-            sepol_constrain->next = sepol_class->constraints;
-            sepol_class->constraints = sepol_constrain;
-				curr_cps = curr_cps->next;
+				sepol_constrain->next = sepol_class->constraints;
+				sepol_class->constraints = sepol_constrain;
 			}
-
-
-			curr_cmp = curr_cmp->next;
 		}
 	}
 
@@ -2034,9 +2011,9 @@ int __cil_catset_to_mls_level(policydb_t *pdb, struct cil_catset *catset, mls_le
 {
 	int rc = SEPOL_ERR;
 	struct cil_list *cats = catset->cat_list;
-	struct cil_list_item *curr_cat = NULL;
+	struct cil_list_item *curr_cat;
 
-	for (curr_cat = cats->head; curr_cat != NULL; curr_cat = curr_cat->next)  {
+	cil_list_for_each(curr_cat, cats) {
 		if (curr_cat->flavor == CIL_CATRANGE) {
 			struct cil_catrange *catrange = curr_cat->data;
 			struct cil_cat *start_cat = catrange->cat_low;
@@ -2073,7 +2050,7 @@ int __cil_sens_to_mls_level(policydb_t *pdb, struct cil_sens *cil_sens, mls_leve
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 	struct cil_list *catsets = cil_sens->catsets;
-	struct cil_list_item *curr = NULL;
+	struct cil_list_item *curr;
 	level_datum_t *sepol_level = NULL;
 
 	key = cil_sens->datum.name;
@@ -2085,7 +2062,7 @@ int __cil_sens_to_mls_level(policydb_t *pdb, struct cil_sens *cil_sens, mls_leve
 
 	ebitmap_init(&mls_level->cat);
 
-	for (curr = catsets->head; curr != NULL; curr = curr->next) {
+	cil_list_for_each(curr, catsets) {
 		struct cil_catset *catset = curr->data;
 
 		rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
@@ -2843,18 +2820,13 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			struct cil_avrule *rule = node->data;
 			struct cil_list *neverallows = args->neverallows;
 			if (rule->rule_kind == CIL_AVRULE_NEVERALLOW) {
-				struct cil_list_item *new_item = NULL;
 				struct cil_neverallow *new_rule = NULL;
 
-				cil_list_item_init(&new_item);
 				new_rule = cil_malloc(sizeof(*new_rule));
 				cil_list_init(&new_rule->data);
-
 				new_rule->node = node;
-				new_item->data = new_rule;
 
-            new_item->next = neverallows->head;
-            neverallows->head = new_item;
+				cil_list_prepend(neverallows, CIL_LIST_ITEM, new_rule);
 
 				rc = cil_avrule_to_policydb(pdb, db, node, neverallows);
 			}

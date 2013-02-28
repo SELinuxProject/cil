@@ -143,49 +143,17 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 	struct cil_conditional *opcond = cond;
 	struct cil_conditional *lcond = NULL;
 	struct cil_conditional *rcond = NULL;
-	struct cil_list_item *opnode = NULL;
-	struct cil_list_item *lnode = NULL;
-	struct cil_list_item *rnode = NULL;
 	char * lstr = NULL;
 	char * rstr = NULL;
 	int riskeyword = 0;
 
 	opcond->str = cil_strdup(current->data);
 
-	cil_list_item_init(&opnode);
-
-	opnode->data = opcond;
-	opnode->flavor = CIL_COND;
-
-	cil_list_item_init(&lnode);
-
 	cil_conditional_init(&lcond);
-
-	cil_list_item_init(&rnode);
-
 	cil_conditional_init(&rcond);
 
 	lstr = current->next->data;
 	rstr = current->next->next->data;
-
-	lnode->data = lcond;
-	rnode->data = rcond;
-	lnode->flavor = CIL_COND;
-	rnode->flavor = CIL_COND;
-
-	rc = cil_list_append_item(stack, lnode);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	rc = cil_list_append_item(stack, rnode);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-	rc = cil_list_append_item(stack, opnode);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
 
 	if (strcmp(lstr, CIL_KEY_CONS_T1) && strcmp(lstr, CIL_KEY_CONS_T2) &&
 		strcmp(lstr, CIL_KEY_CONS_R1) && strcmp(lstr, CIL_KEY_CONS_R2) &&
@@ -408,6 +376,10 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 	lcond->str = cil_strdup(lstr);
 	rcond->str = cil_strdup(rstr);
 
+	cil_list_append(stack, CIL_COND, lcond);
+	cil_list_append(stack, CIL_COND, rcond);
+	cil_list_append(stack, CIL_COND, opcond);
+
 	return SEPOL_OK;
 
 exit:
@@ -552,16 +524,14 @@ exit:
 int __cil_verify_ranges(struct cil_list *list)
 {
 	int rc = SEPOL_ERR;
-	struct cil_list_item *curr = NULL;
+	struct cil_list_item *curr;
 	struct cil_list_item *range = NULL;
 
 	if (list == NULL || list->head == NULL) {
 		goto exit;
 	}
 
-	curr = list->head;
-
-	while (curr != NULL) {
+	cil_list_for_each(curr, list) {
 		/* range */
 		if (curr->flavor == CIL_LIST) {
 			range = ((struct cil_list*)curr->data)->head;
@@ -569,7 +539,6 @@ int __cil_verify_ranges(struct cil_list *list)
 				goto exit;
 			}
 		}
-		curr = curr->next;
 	}
 
 	return SEPOL_OK;
@@ -582,8 +551,6 @@ exit:
 int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	struct cil_args_verify_order *args;
-	struct cil_list *order = NULL;
-	struct cil_list_item *ordered = NULL;
 	uint32_t *found = NULL;
 	uint32_t *empty = NULL;
 	uint32_t *flavor = NULL;
@@ -594,8 +561,6 @@ int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finishe
 	}
 
 	args = extra_args;
-	order = args->order;
-	ordered = args->ordered;
 	found = args->found;
 	empty = args->empty;
 	flavor = args->flavor;
@@ -614,17 +579,17 @@ int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finishe
         }
 
 	if (node->flavor == *flavor) {
+		struct cil_list *order = args->order;
+		struct cil_list_item *ordered;
 		if (*empty) {
 			cil_log(CIL_ERR, "Ordering is empty\n");
 			goto exit;
 		}
-		ordered = order->head;
-		while (ordered != NULL) {
+		cil_list_for_each(ordered, order) {
 			if (ordered->data == node->data) {
 				*found = 1;
 				break;
 			}
-			ordered = ordered->next;
 		}
 		if (!(*found)) {
 			cil_log(CIL_ERR, "Item %s not ordered\n", 
@@ -690,7 +655,7 @@ exit:
 
 int __cil_verify_catrange(struct cil_db *db, struct cil_catrange *catrange, struct cil_cat *cat)
 {
-	struct cil_list_item *cat_item = NULL;
+	struct cil_list_item *cat_item;
 	int rc = SEPOL_ERR;
 
 	if (catrange->cat_low == cat || catrange->cat_high == cat) {
@@ -698,7 +663,7 @@ int __cil_verify_catrange(struct cil_db *db, struct cil_catrange *catrange, stru
 		goto exit;
 	}
 
-	for (cat_item = db->catorder->head; cat_item != NULL; cat_item = cat_item->next) {
+	cil_list_for_each(cat_item, db->catorder) {
 		if (cat_item->data == catrange->cat_low) {
 			break;
 		}
@@ -709,6 +674,7 @@ int __cil_verify_catrange(struct cil_db *db, struct cil_catrange *catrange, stru
 		cil_log(CIL_ERR,"Could not find category range\n");
 		goto exit;
 	}
+
 
 	for (cat_item = cat_item->next; cat_item != NULL; cat_item = cat_item->next) {
 		if (cat_item->data == catrange->cat_high) {
@@ -730,13 +696,13 @@ exit:
 
 int __cil_verify_senscat(struct cil_db *db, struct cil_sens *sens, struct cil_cat *cat)
 {
-	struct cil_list_item *cat_item = NULL;
-	struct cil_list_item *catset_item = NULL;
+	struct cil_list_item *catset_item;
 	int rc = SEPOL_ERR;
 
-	for (catset_item = sens->catsets->head; catset_item != NULL; catset_item = catset_item->next) {
+	cil_list_for_each(catset_item, sens->catsets) {
 		struct cil_catset *catset = catset_item->data;
-		for (cat_item = catset->cat_list->head; cat_item != NULL; cat_item = cat_item->next) {
+		struct cil_list_item *cat_item;
+		cil_list_for_each(cat_item, catset->cat_list) {
 			switch (cat_item->flavor) {
 			case CIL_CAT: {
 				if (cat_item->data == cat) {
@@ -771,10 +737,10 @@ exit:
 
 int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil_catset *catset)
 {
-	struct cil_list_item *catset_item = NULL;
+	struct cil_list_item *catset_item;
 	int rc = SEPOL_OK;
 
-	for (catset_item = catset->cat_list->head; catset_item != NULL; catset_item = catset_item->next) {
+	cil_list_for_each(catset_item, catset->cat_list) {
 		switch (catset_item->flavor) {
 		case CIL_CAT: {
 			struct cil_cat *cat = catset_item->data;
@@ -786,9 +752,9 @@ int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil
 		}
 		case CIL_CATRANGE: {
 			struct cil_catrange *catrange = catset_item->data;
-			struct cil_list_item *catorder = NULL;
+			struct cil_list_item *catorder;
 
-			for (catorder = db->catorder->head; catorder != NULL; catorder = catorder->next) {
+			cil_list_for_each(catorder, db->catorder) { 
 				if (catorder->data == catrange->cat_low) {
 					break;
 				}
@@ -832,11 +798,11 @@ exit:
 
 int __cil_verify_levelrange_dominance(struct cil_db *db, struct cil_sens *low, struct cil_sens *high)
 {
-	struct cil_list_item *curr = db->dominance->head;
+	struct cil_list_item *curr;
 	int found = CIL_FALSE;
 	int rc = SEPOL_ERR;
 
-	while (curr != NULL) {
+	cil_list_for_each(curr, db->dominance) {
 		if (curr->data == low) {
 			found = CIL_TRUE;
 		}
@@ -844,8 +810,6 @@ int __cil_verify_levelrange_dominance(struct cil_db *db, struct cil_sens *low, s
 		if ((found == CIL_TRUE) && (curr->data == high)) {
 			break;
 		}
-
-		curr = curr->next;
 	}
 
 	if (found != CIL_TRUE || curr == NULL) {
@@ -864,43 +828,36 @@ exit:
 int __cil_verify_cat_in_catset(struct cil_db *db, struct cil_cat *cat, struct cil_catset *set)
 {
 	int rc = SEPOL_ERR;
-	struct cil_list_item *set_curr = NULL;
-	int found = CIL_FALSE;
+	struct cil_list_item *set_curr;
 
-	for (set_curr = set->cat_list->head; set_curr != NULL && found != CIL_TRUE; set_curr = set_curr->next) {
+	cil_list_for_each(set_curr, set->cat_list) {
 		switch (set_curr->flavor) {
 		case CIL_CAT:
 			if (cat == set_curr->data) {
-				found = CIL_TRUE;
+				return SEPOL_OK;
 			}
 			break;
 		case CIL_CATRANGE:
 			rc = __cil_verify_catrange(db, set_curr->data, cat);
 			if (rc == SEPOL_OK) {
-				found = CIL_TRUE;
+				return SEPOL_OK;
 			}
 			break;
 		default:
-			rc = SEPOL_ERR;
 			goto exit;
 		}
 	}
 
-	if (found != CIL_TRUE) {
-		goto exit;
-	}
-
-	return SEPOL_OK;
 exit:
 	cil_log(CIL_ERR, "Failed to find %s in category set\n", cat->datum.name);
-	return rc;
+	return SEPOL_ERR;
 }
 
 int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, struct cil_catset *high)
 {
 	int rc = SEPOL_ERR;
-	struct cil_list_item *low_curr = NULL;
-	struct cil_list_item *order_curr = NULL;
+	struct cil_list_item *low_curr;
+	struct cil_list_item *order_curr;
 	struct cil_cat *range_low = NULL;
 	struct cil_cat *range_high = NULL;
 	int found = CIL_FALSE;
@@ -913,8 +870,8 @@ int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, stru
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	
-	for (low_curr = low->cat_list->head; low_curr != NULL; low_curr = low_curr->next) {
+
+	cil_list_for_each(low_curr, low->cat_list) {
 		switch (low_curr->flavor) {
 		case CIL_CAT:
 			rc = __cil_verify_cat_in_catset(db, low_curr->data, high);
@@ -925,10 +882,11 @@ int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, stru
 		case CIL_CATRANGE:
 			range_low = ((struct cil_catrange*)low_curr->data)->cat_low;
 			range_high = ((struct cil_catrange*)low_curr->data)->cat_high;
-			order_curr = db->catorder->head;
-			while (order_curr != NULL && order_curr->data != range_high) {
+			cil_list_for_each(order_curr, db->catorder) {
 				if (order_curr->data == range_low) {
 					found = CIL_TRUE;
+				} else if (order_curr->data == range_high) {
+					break;
 				}
 
 				if (found == CIL_TRUE) {
@@ -937,8 +895,6 @@ int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, stru
 						goto exit;
 					}
 				}
-
-				order_curr = order_curr->next;
 			}
 			break;
 		default:
@@ -1176,11 +1132,11 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 	struct cil_level *ctx_low = ctx->range->low;
 	struct cil_level *ctx_high = ctx->range->high;
 	struct cil_list *dominance = db->dominance;
-	struct cil_list_item *curr = NULL;
+	struct cil_list_item *curr;
 	int found = CIL_FALSE;
 
 	if (user->roles != NULL) {
-		for (curr = user->roles->head; curr != NULL; curr = curr->next) {
+		cil_list_for_each(curr, user->roles) {
 			struct cil_role *userrole = curr->data;
 			if (userrole == role) {
 				break;
@@ -1189,7 +1145,7 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 
 		if (curr == NULL) {
 			cil_log(CIL_ERR, "Role %s is invalid for user %s\n",
-				ctx->role_str, ctx->user_str);
+					ctx->role_str, ctx->user_str);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
