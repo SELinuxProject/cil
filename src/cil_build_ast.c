@@ -3190,46 +3190,28 @@ void cil_destroy_catalias(struct cil_catalias *alias)
 	free(alias);
 }
 
-int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl, uint8_t sublists)
+int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl)
 {
-	struct cil_list *sub_list = NULL;
-	struct cil_tree_node *curr = parse_current;
 	int rc = SEPOL_ERR;
-
-	if (parse_current == NULL || ast_cl == NULL) {
-		cil_log(CIL_ERR, "Failed to create list\n");
+	struct cil_tree_node *curr = parse_current;
+	enum cil_syntax syntax[] = {
+		SYM_N_STRINGS,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+ 
+	rc = __cil_verify_syntax(parse_current->cl_head, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		goto exit;
-	}
+ 	}
 
-	if (parse_current->cl_head == NULL) {
-		cil_log(CIL_ERR, "Failed to create list\n");
-		goto exit;
-	}
-
-	curr = curr->cl_head;
-	while (curr != NULL) {
-		if (curr->cl_head == NULL) {
-			cil_list_append(ast_cl, CIL_AST_STR, cil_strdup(curr->data));
-		} else if (sublists) {
-			cil_list_init(&sub_list);
-			rc = cil_set_to_list(curr, sub_list, sublists);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_ERR, "Failed to create list\n");
-				goto exit;
-			}
-			cil_list_append(ast_cl, CIL_LIST, sub_list);
-		} else {
-			cil_log(CIL_ERR, "Failed to create list\n");
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-		curr = curr->next;
+	for (curr = curr->cl_head; curr != NULL; curr = curr->next) {
+		cil_list_append(ast_cl, CIL_AST_STR, cil_strdup(curr->data));
 	}
 
 	return SEPOL_OK;
 
 exit:
-
 	return rc;
 }
 
@@ -3385,7 +3367,7 @@ int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	cil_list_init(&catorder->cat_list_str);
 
-	rc = cil_set_to_list(parse_current->next, catorder->cat_list_str, 0);
+	rc = cil_set_to_list(parse_current->next, catorder->cat_list_str);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3438,7 +3420,7 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	cil_list_init(&dom->sens_list_str);
 
-	rc = cil_set_to_list(parse_current->next, dom->sens_list_str, 0);
+	rc = cil_set_to_list(parse_current->next, dom->sens_list_str);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}

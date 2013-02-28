@@ -138,7 +138,7 @@ int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, str
 void cil_destroy_category(struct cil_cat *cat);
 int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_catalias(struct cil_catalias *alias);
-int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl, uint8_t sublists);
+int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl);
 int cil_gen_catrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_catrange(struct cil_catrange *catrange);
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
