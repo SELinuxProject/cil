@@ -137,20 +137,12 @@ exit:
 	return rc;
 }
 
-int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_conditional *cond, struct cil_list *stack)
+int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor eflavor, enum cil_flavor oflavor)
 {
 	int rc = SEPOL_ERR;
-	struct cil_conditional *opcond = cond;
-	struct cil_conditional *lcond = NULL;
-	struct cil_conditional *rcond = NULL;
 	char * lstr = NULL;
 	char * rstr = NULL;
-	int riskeyword = 0;
-
-	opcond->str = cil_strdup(current->data);
-
-	cil_conditional_init(&lcond);
-	cil_conditional_init(&rcond);
+	int cons_token = CIL_FALSE;
 
 	lstr = current->next->data;
 	rstr = current->next->next->data;
@@ -160,12 +152,10 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 		strcmp(lstr, CIL_KEY_CONS_U1) && strcmp(lstr, CIL_KEY_CONS_U2) &&
 		strcmp(lstr, CIL_KEY_CONS_L1) && strcmp(lstr, CIL_KEY_CONS_L2) &&
 		strcmp(lstr, CIL_KEY_CONS_H1) &&
-		((flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS) &&
+		((eflavor == CIL_VALIDATETRANS || eflavor == CIL_MLSVALIDATETRANS) &&
 		 strcmp(lstr, CIL_KEY_CONS_T3) && strcmp(lstr, CIL_KEY_CONS_R3) &&
 		 strcmp(lstr, CIL_KEY_CONS_U3))) {
-		cil_log(CIL_ERR, "Left hand side must be valid keyword (line: %d)\n",
-				current->line);
-		rc = SEPOL_ERR;
+		cil_log(CIL_ERR, "Token %s not allowed on left side\n", lstr);
 		goto exit;
 	}
 
@@ -174,216 +164,118 @@ int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor f
 		!strcmp(rstr, CIL_KEY_CONS_U1) || !strcmp(rstr, CIL_KEY_CONS_U2) ||
 		!strcmp(rstr, CIL_KEY_CONS_L1) || !strcmp(rstr, CIL_KEY_CONS_L2) ||
 		!strcmp(rstr, CIL_KEY_CONS_H1) || !strcmp(rstr, CIL_KEY_CONS_H2) ||
-		((flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS) &&
+		((eflavor == CIL_VALIDATETRANS || eflavor == CIL_MLSVALIDATETRANS) &&
 		 (!strcmp(rstr, CIL_KEY_CONS_T3) || !strcmp(rstr, CIL_KEY_CONS_R3) ||
 		  !strcmp(rstr, CIL_KEY_CONS_U3)))) {
-		riskeyword = 1;
+		cons_token = CIL_TRUE;
 	}
 
-	/* t1 op something */
 	if (!strcmp(lstr, CIL_KEY_CONS_T1)) {
-		lcond->flavor = CIL_CONS_T1;
-		if (!strcmp(rstr, CIL_KEY_CONS_T2)) {
-			rcond->flavor = CIL_CONS_T2;
-		} else {
-			if (riskeyword) {
-				cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			rcond->flavor = CIL_TYPE;
-		}
-		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-			rc = SEPOL_ERR;
+		if (strcmp(rstr, CIL_KEY_CONS_T2) != 0 && cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
 			goto exit;
 		}
-
-	/* t2 op something */
 	} else if (!strcmp(lstr, CIL_KEY_CONS_T2)) {
-		lcond->flavor = CIL_CONS_T2;
-		if (riskeyword) {
-			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-			rc = SEPOL_ERR;
+		if (cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
 			goto exit;
 		}
-		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-			rc = SEPOL_ERR;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_T3)) {
+		if ((eflavor != CIL_VALIDATETRANS) && (eflavor != CIL_MLSVALIDATETRANS)) {
+			cil_log(CIL_ERR, "Token %s only allowed in VALIDATETRANS and MLSVALIDATETRANS expressions\n");
 			goto exit;
 		}
-		rcond->flavor = CIL_TYPE;
-
-	/* t3 op something */
-	} else if (!strcmp(lstr, CIL_KEY_CONS_T3) &&
-		  (flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS)) {
-		lcond->flavor = CIL_CONS_T3;
-		if (riskeyword) {
-			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-			rc = SEPOL_ERR;
+		if (cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
 			goto exit;
 		}
-		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-		rcond->flavor = CIL_TYPE;
-
-	/* r1 op something */
 	} else if (!strcmp(lstr, CIL_KEY_CONS_R1)) {
-		lcond->flavor = CIL_CONS_R1;
-		if (!strcmp(rstr, CIL_KEY_CONS_R2)) {
-			rcond->flavor = CIL_CONS_R2;
-		} else {
-			if (riskeyword) {
-				cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			rcond->flavor = CIL_ROLE;
-			if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
+		if (strcmp(rstr, CIL_KEY_CONS_R2) != 0 && cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
+			goto exit;
 		}
-
-	/* r2 op something */
 	} else if (!strcmp(lstr, CIL_KEY_CONS_R2)) {
-		lcond->flavor = CIL_CONS_R2;
-		if (riskeyword) {
-			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-			rc = SEPOL_ERR;
+		if (cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right siden", rstr);
 			goto exit;
 		}
-		rcond->flavor = CIL_ROLE;
-		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-			rc = SEPOL_ERR;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_R3)) {
+		if ((eflavor != CIL_VALIDATETRANS) && (eflavor != CIL_MLSVALIDATETRANS)) {
+			cil_log(CIL_ERR, "Token %s only allowed in VALIDATETRANS and MLSVALIDATETRANS expressions\n");
 			goto exit;
 		}
-
-	/* r3 op something */
-	} else if (!strcmp(lstr, CIL_KEY_CONS_R3) &&
-		  (flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS)) {
-		lcond->flavor = CIL_CONS_R3;
-		if (riskeyword) {
-			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-			rc = SEPOL_ERR;
+		if (cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
 			goto exit;
 		}
-		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-		rcond->flavor = CIL_ROLE;
-
-	/* u1 op something */
 	} else if (!strcmp(lstr, CIL_KEY_CONS_U1)) {
-		lcond->flavor = CIL_CONS_U1;
-		if (!strcmp(rstr, CIL_KEY_CONS_U2)) {
-			rcond->flavor = CIL_CONS_U2;
-		} else {
-			if (riskeyword) {
-				cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			rcond->flavor = CIL_USER;
-		}
-		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-			rc = SEPOL_ERR;
+		if (strcmp(rstr, CIL_KEY_CONS_U2) != 0 && cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
 			goto exit;
 		}
-
-	/* u2 op something */
 	} else if (!strcmp(lstr, CIL_KEY_CONS_U2)) {
-		lcond->flavor = CIL_CONS_U2;
-		if (riskeyword) {
-			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-			rc = SEPOL_ERR;
+		if (cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
 			goto exit;
 		}
-		rcond->flavor = CIL_USER;
-		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-			rc = SEPOL_ERR;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_U3)) {
+		if ((eflavor != CIL_VALIDATETRANS) && (eflavor != CIL_MLSVALIDATETRANS)) {
+			cil_log(CIL_ERR, "Token %s only allowed in VALIDATETRANS and MLSVALIDATETRANS expressions\n");
 			goto exit;
 		}
-
-	/* u3 op something */
-	} else if (!strcmp(lstr, CIL_KEY_CONS_U3) &&
-		  (flavor == CIL_VALIDATETRANS || flavor == CIL_MLSVALIDATETRANS)) {
-		lcond->flavor = CIL_CONS_U3;
-		if (riskeyword) {
-			cil_log(CIL_ERR, "Keyword %s not allowed on right side of expression\n", rstr);
-			rc = SEPOL_ERR;
+		if (cons_token) {
+			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
 			goto exit;
 		}
-		if (opcond->flavor != CIL_EQ && opcond->flavor != CIL_NEQ) {
-			rc = SEPOL_ERR;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_L1)) {
+		if ((eflavor != CIL_MLSCONSTRAIN) && (eflavor != CIL_MLSVALIDATETRANS)) {
+			cil_log(CIL_ERR, "Token %s only allowed in MLSCONSTRAIN and MLSVALIDATETRANS expressions\n");
 			goto exit;
 		}
-		rcond->flavor = CIL_USER;
-
-	/* mls specific levels */
-	} else if (flavor == CIL_MLSCONSTRAIN || flavor == CIL_MLSVALIDATETRANS) {
-
-		/* l1 op something */
-		if (!strcmp(lstr, CIL_KEY_CONS_L1)) {
-			lcond->flavor = CIL_CONS_L1;
-			if (!strcmp(rstr, CIL_KEY_CONS_L2)) {
-				rcond->flavor = CIL_CONS_L2;
-			} else if (!strcmp(rstr, CIL_KEY_CONS_H1)) {
-				rcond->flavor = CIL_CONS_H1;
-			} else if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
-				rcond->flavor = CIL_CONS_H2;
-			} else {
-				cil_log(CIL_ERR, "Right side expression %s is invalid\n", rstr);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-		/* l2 op something */
-		} else if (!strcmp(lstr, CIL_KEY_CONS_L2)) {
-			lcond->flavor = CIL_CONS_L2;
-			if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
-				rcond->flavor = CIL_CONS_H2;
-			} else {
-				cil_log(CIL_ERR, "Right side expression %s is invalid\n", rstr);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-		/* h1 op something */
-		} else if (!strcmp(lstr, CIL_KEY_CONS_H1)) {
-			lcond->flavor = CIL_CONS_H1;
-			if (!strcmp(rstr, CIL_KEY_CONS_L2)) {
-				rcond->flavor = CIL_CONS_L2;
-			} else if (!strcmp(rstr, CIL_KEY_CONS_H2)) {
-				rcond->flavor = CIL_CONS_H2;
-			} else {
-				cil_log(CIL_ERR, "Right side expression %s is invalid\n", rstr);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-		} else {
-			cil_log(CIL_ERR, "Left side expression %s is invalid\n", lstr);
-			rc = SEPOL_ERR;
+		if (strcmp(rstr, CIL_KEY_CONS_L2) != 0 && 
+			strcmp(rstr, CIL_KEY_CONS_H1) != 0 && 
+			strcmp(rstr, CIL_KEY_CONS_H2) != 0) {
+			cil_log(CIL_ERR, "Token %s is invalid on right side\n", rstr);
+			goto exit;
+		}
+	} else if (!strcmp(lstr, CIL_KEY_CONS_L2)) {
+		if ((eflavor != CIL_MLSCONSTRAIN) && (eflavor != CIL_MLSVALIDATETRANS)) {
+			cil_log(CIL_ERR, "Token %s only allowed in MLSCONSTRAIN and MLSVALIDATETRANS expressions\n");
+			goto exit;
+		}
+		if (strcmp(rstr, CIL_KEY_CONS_H2) != 0) {
+			cil_log(CIL_ERR, "Token %s is invalid on right side\n", rstr);
+			goto exit;
+		}
+	} else if (!strcmp(lstr, CIL_KEY_CONS_H1)) {
+		if ((eflavor != CIL_MLSCONSTRAIN) && (eflavor != CIL_MLSVALIDATETRANS)) {
+			cil_log(CIL_ERR, "Token %s only allowed in MLSCONSTRAIN and MLSVALIDATETRANS expressions\n");
+			goto exit;
+		}
+		if (strcmp(rstr, CIL_KEY_CONS_L2) != 0 && 
+			strcmp(rstr, CIL_KEY_CONS_H2) != 0) {
+			cil_log(CIL_ERR, "Token %s is invalid on right side\n", rstr);
 			goto exit;
 		}
 	} else {
-		cil_log(CIL_ERR, "Left side expression %s is invalid\n", lstr);
-		rc = SEPOL_ERR;
+		cil_log(CIL_ERR, "Token %s is invalid on left side\n", lstr);
 		goto exit;
 	}
 
-	lcond->str = cil_strdup(lstr);
-	rcond->str = cil_strdup(rstr);
-
-	cil_list_append(stack, CIL_COND, lcond);
-	cil_list_append(stack, CIL_COND, rcond);
-	cil_list_append(stack, CIL_COND, opcond);
+	if (oflavor != CIL_EQ && oflavor != CIL_NEQ) {
+		if ((strcmp(lstr, CIL_KEY_CONS_R1) != 0 || strcmp(rstr, CIL_KEY_CONS_R2) != 0) && 
+			eflavor != CIL_MLSCONSTRAIN &&
+			eflavor != CIL_MLSVALIDATETRANS) {
+			cil_log(CIL_ERR, "Invalid operation\n");
+			goto exit;
+		}
+	}
 
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Invalid constrain expression syntax\n");
+	cil_log(CIL_ERR, "Invalid constrain expression syntax at line %d of %s\n",
+			current->line, current->path);
 	return rc;
 }
 

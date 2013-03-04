@@ -2197,6 +2197,88 @@ void cil_destroy_bool(struct cil_bool *boolean)
 	free(boolean);
 }
 
+void __cil_gen_constrain_expr(struct cil_tree_node *current, struct cil_conditional *opcond, struct cil_list *stack)
+{
+	struct cil_conditional *lcond = NULL;
+	struct cil_conditional *rcond = NULL;
+	char * lstr = NULL;
+	char * rstr = NULL;
+
+	opcond->str = cil_strdup(current->data);
+
+	cil_conditional_init(&lcond);
+	cil_conditional_init(&rcond);
+
+	lstr = current->next->data;
+	rstr = current->next->next->data;
+
+	if (!strcmp(lstr, CIL_KEY_CONS_T1)) {
+		lcond->flavor = CIL_CONS_T1;
+		if (!strcmp(rstr, CIL_KEY_CONS_T2)) {
+			rcond->flavor = CIL_CONS_T2;
+		} else {
+			rcond->flavor = CIL_TYPE;
+		}
+	} else if (!strcmp(lstr, CIL_KEY_CONS_T2)) {
+		lcond->flavor = CIL_CONS_T2;
+		rcond->flavor = CIL_TYPE;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_T3)) {
+		lcond->flavor = CIL_CONS_T3;
+		rcond->flavor = CIL_TYPE;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_R1)) {
+		lcond->flavor = CIL_CONS_R1;
+		if (!strcmp(rstr, CIL_KEY_CONS_R2)) {
+			rcond->flavor = CIL_CONS_R2;
+		} else {
+			rcond->flavor = CIL_ROLE;
+		}
+	} else if (!strcmp(lstr, CIL_KEY_CONS_R2)) {
+		lcond->flavor = CIL_CONS_R2;
+		rcond->flavor = CIL_ROLE;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_R3)) {
+		lcond->flavor = CIL_CONS_R3;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_U1)) {
+		lcond->flavor = CIL_CONS_U1;
+		if (!strcmp(rstr, CIL_KEY_CONS_U2)) {
+			rcond->flavor = CIL_CONS_U2;
+		} else {
+			rcond->flavor = CIL_USER;
+		}
+	} else if (!strcmp(lstr, CIL_KEY_CONS_U2)) {
+		lcond->flavor = CIL_CONS_U2;
+		rcond->flavor = CIL_USER;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_U3)) {
+		lcond->flavor = CIL_CONS_U3;
+		rcond->flavor = CIL_USER;
+	} else if (!strcmp(lstr, CIL_KEY_CONS_L1)) {
+		lcond->flavor = CIL_CONS_L1;
+		if (!strcmp(rstr, CIL_KEY_CONS_L2)) {
+			rcond->flavor = CIL_CONS_L2;
+		} else if (!strcmp(rstr, CIL_KEY_CONS_H1)) {
+			rcond->flavor = CIL_CONS_H1;
+		} else {
+			rcond->flavor = CIL_CONS_H2;
+		}
+	} else if (!strcmp(lstr, CIL_KEY_CONS_L2)) {
+		lcond->flavor = CIL_CONS_L2;
+		rcond->flavor = CIL_CONS_H2;
+	} else {
+		lcond->flavor = CIL_CONS_H1;
+		if (!strcmp(rstr, CIL_KEY_CONS_L2)) {
+			rcond->flavor = CIL_CONS_L2;
+		} else {
+			rcond->flavor = CIL_CONS_H2;
+		}
+	}
+
+	lcond->str = cil_strdup(lstr);
+	rcond->str = cil_strdup(rstr);
+
+	cil_list_append(stack, CIL_COND, lcond);
+	cil_list_append(stack, CIL_COND, rcond);
+	cil_list_append(stack, CIL_COND, opcond);
+}
+
 int __cil_gen_expr_stack_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -2226,10 +2308,11 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, uint32_t *finished, 
 		}
 		if (cond->flavor != CIL_AND && cond->flavor != CIL_OR && cond->flavor != CIL_NOT) {
 			/* op == eq, neq, dom, domby, or incomp */
-			rc = __cil_verify_constrain_expr(node, expr_flavor, cond, stack);
+			rc = __cil_verify_constrain_expr(node, expr_flavor, cond->flavor);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
+			__cil_gen_constrain_expr(node, cond, stack);
 			(*depth)++;
 			*finished = CIL_TREE_SKIP_ALL;
 		}
