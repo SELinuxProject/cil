@@ -2197,6 +2197,32 @@ void cil_destroy_bool(struct cil_bool *boolean)
 	free(boolean);
 }
 
+enum cil_flavor __cil_get_operator_flavor(const char *op)
+{
+	if (!strcmp(op, CIL_KEY_AND))
+		return CIL_AND;
+	else if (!strcmp(op, CIL_KEY_OR))
+		return CIL_OR;
+	else if (!strcmp(op, CIL_KEY_NOT))
+		return CIL_NOT;
+	else if (!strcmp(op, CIL_KEY_STAR))
+		return CIL_STAR;
+	else if (!strcmp(op, CIL_KEY_EQ))
+		return CIL_EQ;
+	else if (!strcmp(op, CIL_KEY_NEQ))
+		return CIL_NEQ;
+	else if (!strcmp(op, CIL_KEY_XOR))
+		return CIL_XOR;
+	else if (!strcmp(op, CIL_KEY_CONS_DOM))
+		return CIL_CONS_DOM;
+	else if (!strcmp(op, CIL_KEY_CONS_DOMBY))
+		return CIL_CONS_DOMBY;
+	else if (!strcmp(op, CIL_KEY_CONS_INCOMP))
+		return CIL_CONS_INCOMP;
+
+	return 0;
+}
+
 void __cil_gen_constrain_expr(struct cil_tree_node *current, struct cil_conditional *opcond, struct cil_list *stack)
 {
 	struct cil_conditional *lcond = NULL;
@@ -2302,10 +2328,13 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, uint32_t *finished, 
 	cil_conditional_init(&cond);
 
 	if (isconstraint) {
-		rc = __cil_verify_expr_oper_flavor(node->data, &cond->flavor, expr_flavor);
+		rc = __cil_verify_expr_operator(node->data, expr_flavor);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+
+		cond->flavor = __cil_get_operator_flavor(node->data);
+
 		if (cond->flavor != CIL_AND && cond->flavor != CIL_OR && cond->flavor != CIL_NOT) {
 			/* op == eq, neq, dom, domby, or incomp */
 			rc = __cil_verify_constrain_expr(node, expr_flavor, cond->flavor);
@@ -2361,10 +2390,12 @@ int __cil_gen_expr_stack_first_helper(struct cil_tree_node *node, __attribute__(
 		return SEPOL_OK;
 	}
 
-	rc = __cil_verify_expr_oper_flavor(node->data, &op_flavor, expr_flavor);
+	rc = __cil_verify_expr_operator(node->data, expr_flavor);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	op_flavor = __cil_get_operator_flavor(node->data);
 
 	rc = __cil_verify_expr_syntax(node, expr_flavor, op_flavor);
 	if (rc != SEPOL_OK) {
@@ -2396,10 +2427,12 @@ int __cil_gen_expr_stack_last_helper(struct cil_tree_node *node, void *extra_arg
 
 	cil_conditional_init(&cond);
 
-	rc = __cil_verify_expr_oper_flavor(first->data, &cond->flavor, expr_flavor);
+	rc = __cil_verify_expr_operator(first->data, expr_flavor);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	cond->flavor = __cil_get_operator_flavor(first->data);
 
 	if ((cond->flavor == CIL_AND || cond->flavor == CIL_OR || cond->flavor == CIL_NOT) ||
 		(!isconstraint && cond->flavor == CIL_XOR) ||

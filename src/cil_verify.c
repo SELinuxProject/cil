@@ -279,47 +279,79 @@ exit:
 	return rc;
 }
 
-int __cil_verify_expr_oper_flavor(const char *key, enum cil_flavor *op_flavor, enum cil_flavor expr_flavor)
+int __cil_verify_expr_operator(const char *op, enum cil_flavor expr_flavor)
 {
-	if (!strcmp(key, CIL_KEY_AND)) {
-		*op_flavor = CIL_AND;
-	} else if (!strcmp(key, CIL_KEY_OR)) {
-		*op_flavor = CIL_OR;
-	} else if (!strcmp(key, CIL_KEY_NOT)) {
-		*op_flavor = CIL_NOT;
-   } else if (!strcmp(key, CIL_KEY_EQ)) {
-      if (expr_flavor == CIL_TYPE || expr_flavor == CIL_ROLE) {
-         goto exit;
-      }
-      *op_flavor = CIL_EQ;
-   } else if (!strcmp(key, CIL_KEY_NEQ)) {
-      if (expr_flavor == CIL_TYPE || expr_flavor == CIL_ROLE) {
-         goto exit;
-      }
-      *op_flavor = CIL_NEQ;
-	} else if (expr_flavor == CIL_CONSTRAIN || expr_flavor == CIL_VALIDATETRANS || expr_flavor == CIL_MLSCONSTRAIN || expr_flavor == CIL_MLSVALIDATETRANS) {
-		if (!strcmp(key, CIL_KEY_CONS_DOM)) {
-			*op_flavor = CIL_CONS_DOM;
-		} else if (!strcmp(key, CIL_KEY_CONS_DOMBY)) {
-			*op_flavor = CIL_CONS_DOMBY;
-		} else if (!strcmp(key, CIL_KEY_CONS_INCOMP)) {
-			*op_flavor = CIL_CONS_INCOMP;
-		} else 	{
+	if (!strcmp(op, CIL_KEY_AND)) {
+		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
+		    expr_flavor != CIL_PERM && expr_flavor != CIL_CONSTRAIN && 
+		    expr_flavor != CIL_VALIDATETRANS && expr_flavor != CIL_MLSCONSTRAIN &&
+		    expr_flavor != CIL_MLSVALIDATETRANS && expr_flavor != CIL_BOOL &&
+		    expr_flavor != CIL_TUNABLE) {
 			goto exit;
 		}
-	} else if (!strcmp(key, CIL_KEY_XOR)) {
-		*op_flavor = CIL_XOR;
-	} else if (!strcmp(key, CIL_KEY_STAR) && 
-			   (expr_flavor == CIL_TYPE || expr_flavor == CIL_ROLE)) {
-		*op_flavor = CIL_STAR;
+	} else if (!strcmp(op, CIL_KEY_OR)) {
+		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
+		    expr_flavor != CIL_PERM && expr_flavor != CIL_CONSTRAIN && 
+		    expr_flavor != CIL_VALIDATETRANS && expr_flavor != CIL_MLSCONSTRAIN &&
+		    expr_flavor != CIL_MLSVALIDATETRANS && expr_flavor != CIL_BOOL &&
+		    expr_flavor != CIL_TUNABLE) {
+			goto exit;
+		}
+	} else if (!strcmp(op, CIL_KEY_NOT)) {
+		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
+		    expr_flavor != CIL_PERM && expr_flavor != CIL_CONSTRAIN && 
+		    expr_flavor != CIL_VALIDATETRANS && expr_flavor != CIL_MLSCONSTRAIN &&
+		    expr_flavor != CIL_MLSVALIDATETRANS && expr_flavor != CIL_BOOL &&
+		    expr_flavor != CIL_TUNABLE) {
+			goto exit;
+		}
+	} else if (!strcmp(op, CIL_KEY_STAR)) {
+		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
+		    expr_flavor != CIL_PERM) {
+			goto exit;
+		}
+	} else if (!strcmp(op, CIL_KEY_EQ)) {
+		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
+		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS &&
+		    expr_flavor != CIL_BOOL && expr_flavor != CIL_TUNABLE) {
+			goto exit;
+		}
+	} else if (!strcmp(op, CIL_KEY_NEQ)) {
+		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
+		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS &&
+		    expr_flavor != CIL_BOOL && expr_flavor != CIL_TUNABLE) {
+			goto exit;
+		}
+	} else if (!strcmp(op, CIL_KEY_XOR)) {
+		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
+		    expr_flavor != CIL_PERM && expr_flavor != CIL_BOOL &&
+		    expr_flavor != CIL_TUNABLE) {
+			goto exit;
+		}
+	} else if (!strcmp(op, CIL_KEY_CONS_DOM)) {
+		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
+		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS) {
+			goto exit;
+		}
+	} else if (!strcmp(op, CIL_KEY_CONS_DOMBY)) {
+		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
+		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS) {
+			goto exit;
+		}
+	} else if (!strcmp(op, CIL_KEY_CONS_INCOMP)) {
+		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
+		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS) {
+			goto exit;
+		}
 	} else {
-		goto exit;
+		cil_log(CIL_ERR, "Token %s is not an operator\n",op);
+		return SEPOL_ERR;
 	}
 
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Invalid expression operator: %s\n", key);
+	cil_log(CIL_ERR, "Operator %s is invalid in the expression\n", op);
 	return SEPOL_ERR;
 }
 
