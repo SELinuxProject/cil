@@ -871,46 +871,7 @@ exit:
 	return rc;
 }
 
-int __cil_add_level_sens_to_symtab(struct cil_level *lvl, symtab_t *senstab)
-{
-	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_symtab_datum *sensdatum = NULL;
-
-	sensdatum = cil_malloc(sizeof(*sensdatum));
-	cil_symtab_datum_init(sensdatum);
-
-	key = lvl->sens->datum.name;
-	rc = cil_symtab_insert(senstab, key, sensdatum, NULL);
-	if (rc == SEPOL_EEXIST) {
-		cil_symtab_datum_destroy(*sensdatum);
-		free(sensdatum);
-	}
-
-	return SEPOL_OK;
-}
-
-int __cil_add_levelrange_sens_to_symtab(struct cil_levelrange *lvlrange, symtab_t *senstab)
-{
-	int rc = SEPOL_ERR;
-
-	rc = __cil_add_level_sens_to_symtab(lvlrange->low, senstab);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to add low level sensitivity to symtab\n");
-		goto exit;
-	}
-
-	rc = __cil_add_level_sens_to_symtab(lvlrange->high, senstab);
-	if (rc !=  SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to add high level sensitivity to symtab\n");
-		goto exit;
-	}
-
-exit:
-	return rc;
-}
-
-int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_user *user = node->data;
@@ -942,17 +903,6 @@ int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node, symtab_t *s
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-	}
-
-	rc = __cil_add_level_sens_to_symtab(user->dftlevel, senstab);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to add user default level sensitivty to symtab\n");
-		goto exit;
-	}
-
-	rc = __cil_add_levelrange_sens_to_symtab(user->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
 	}
 
 	return SEPOL_OK;
@@ -1291,7 +1241,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_netifcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_netifcon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_netifcon *netif = node->data;
@@ -1314,16 +1264,6 @@ int __cil_verify_netifcon(struct cil_db *db, struct cil_tree_node *node, symtab_
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(if_ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	rc = __cil_add_levelrange_sens_to_symtab(pkt_ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -1331,7 +1271,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_genfscon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_genfscon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_genfscon *genfs = node->data;
@@ -1345,11 +1285,6 @@ int __cil_verify_genfscon(struct cil_db *db, struct cil_tree_node *node, symtab_
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -1357,7 +1292,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_filecon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_filecon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_filecon *file = node->data;
@@ -1378,20 +1313,13 @@ int __cil_verify_filecon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Invalid filecon at line %d of %s\n", 
-			node->line, node->path);
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
 	return rc;
 }
 
-int __cil_verify_nodecon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_nodecon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_nodecon *nodecon = node->data;
@@ -1405,11 +1333,6 @@ int __cil_verify_nodecon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -1417,7 +1340,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_portcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_portcon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_portcon *port = node->data;
@@ -1431,11 +1354,6 @@ int __cil_verify_portcon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -1443,7 +1361,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_pirqcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_pirqcon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_pirqcon *pirq = node->data;
@@ -1457,11 +1375,6 @@ int __cil_verify_pirqcon(struct cil_db *db, struct cil_tree_node *node, symtab_t
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -1469,7 +1382,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_iomemcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_iomemcon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_iomemcon *iomem = node->data;
@@ -1483,11 +1396,6 @@ int __cil_verify_iomemcon(struct cil_db *db, struct cil_tree_node *node, symtab_
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -1495,7 +1403,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_ioportcon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_ioportcon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_ioportcon *ioport = node->data;
@@ -1509,11 +1417,6 @@ int __cil_verify_ioportcon(struct cil_db *db, struct cil_tree_node *node, symtab
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -1521,7 +1424,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_pcidevicecon(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_pcidevicecon(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_pcidevicecon *pcidev = node->data;
@@ -1535,11 +1438,6 @@ int __cil_verify_pcidevicecon(struct cil_db *db, struct cil_tree_node *node, sym
 		}
 	}
 
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	return SEPOL_OK;
 
 exit:
@@ -1547,7 +1445,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_fsuse(struct cil_db *db, struct cil_tree_node *node, symtab_t *senstab)
+int __cil_verify_fsuse(struct cil_db *db, struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
 	struct cil_fsuse *fsuse = node->data;
@@ -1559,29 +1457,6 @@ int __cil_verify_fsuse(struct cil_db *db, struct cil_tree_node *node, symtab_t *
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-	}
-
-	rc = __cil_add_levelrange_sens_to_symtab(ctx->range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Invalid fsuse at line %d of %s\n", node->line, node->path);
-	return rc;
-}
-
-int __cil_verify_rangetransition(struct cil_tree_node *node, symtab_t *senstab)
-{
-	int rc = SEPOL_ERR;
-	struct cil_rangetransition *rangetrans = node->data;
-	struct cil_levelrange *range = rangetrans->range;
-
-	rc = __cil_add_levelrange_sens_to_symtab(range, senstab);
-	if (rc != SEPOL_OK) {
-		goto exit;
 	}
 
 	return SEPOL_OK;
@@ -1655,14 +1530,12 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	struct cil_args_verify *args = extra_args;
 	struct cil_complex_symtab *csymtab = NULL;
 	struct cil_db *db = NULL;
-	symtab_t *senstab = NULL;
 
 	if (node == NULL || extra_args == NULL) {
 		goto exit;
 	}
 
 	db = args->db;
-	senstab = args->senstab;
 	avrule_cnt = args->avrule_cnt;
 	nseuserdflt = args->nseuserdflt;
 	csymtab = args->csymtab;
@@ -1692,7 +1565,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	case 0: {
 		switch (node->flavor) {
 		case CIL_USER:
-			rc = __cil_verify_user(db, node, senstab);
+			rc = __cil_verify_user(db, node);
 			break;
 		case CIL_SELINUXUSERDEFAULT:
 			(*nseuserdflt)++;
@@ -1741,37 +1614,37 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 			rc = __cil_verify_named_context(db, node);
 			break;
 		case CIL_NETIFCON:
-			rc = __cil_verify_netifcon(db, node, senstab);
+			rc = __cil_verify_netifcon(db, node);
 			break;
 		case CIL_GENFSCON:
-			rc = __cil_verify_genfscon(db, node, senstab);
+			rc = __cil_verify_genfscon(db, node);
 			break;
 		case CIL_FILECON:
-			rc = __cil_verify_filecon(db, node, senstab);
+			rc = __cil_verify_filecon(db, node);
 			break;
 		case CIL_NODECON:
-			rc = __cil_verify_nodecon(db, node, senstab);
+			rc = __cil_verify_nodecon(db, node);
 			break;
 		case CIL_PORTCON:
-			rc = __cil_verify_portcon(db, node, senstab);
+			rc = __cil_verify_portcon(db, node);
 			break;
 		case CIL_PIRQCON:
-			rc = __cil_verify_pirqcon(db, node, senstab);
+			rc = __cil_verify_pirqcon(db, node);
 			break;
 		case CIL_IOMEMCON:
-			rc = __cil_verify_iomemcon(db, node, senstab);
+			rc = __cil_verify_iomemcon(db, node);
 			break;
 		case CIL_IOPORTCON:
-			rc = __cil_verify_ioportcon(db, node, senstab);
+			rc = __cil_verify_ioportcon(db, node);
 			break;
 		case CIL_PCIDEVICECON:
-			rc = __cil_verify_pcidevicecon(db, node, senstab);
+			rc = __cil_verify_pcidevicecon(db, node);
 			break;
 		case CIL_FSUSE:
-			rc = __cil_verify_fsuse(db, node, senstab);
+			rc = __cil_verify_fsuse(db, node);
 			break;
 		case CIL_RANGETRANSITION:
-			rc = __cil_verify_rangetransition(node, senstab);
+			rc = SEPOL_OK;
 			break;
 		default:
 			rc = SEPOL_OK;

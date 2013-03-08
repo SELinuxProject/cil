@@ -929,14 +929,11 @@ int cil_post_verify(struct cil_db *db)
 	int pass = 0;
 	struct cil_args_verify extra_args;
 	struct cil_complex_symtab csymtab;
-	symtab_t senstab;
-	cil_symtab_init(&senstab, CIL_CLASS_SYM_SIZE);
 
 	cil_complex_symtab_init(&csymtab, CIL_CLASS_SYM_SIZE);
 
 	extra_args.db = db;
 	extra_args.csymtab = &csymtab;
-	extra_args.senstab = &senstab;
 	extra_args.avrule_cnt = &avrule_cnt;
 	extra_args.nseuserdflt = &nseuserdflt;
 	extra_args.pass = &pass;
@@ -962,7 +959,6 @@ int cil_post_verify(struct cil_db *db)
 	}
 
 exit:
-	cil_symtab_destroy(&senstab);
 	cil_complex_symtab_destroy(&csymtab);
 	return rc;
 }
