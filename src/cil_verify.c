@@ -882,20 +882,12 @@ int __cil_add_level_sens_to_symtab(struct cil_level *lvl, symtab_t *senstab)
 
 	key = lvl->sens->datum.name;
 	rc = cil_symtab_insert(senstab, key, sensdatum, NULL);
-	if (rc != SEPOL_OK) {
-		if ( rc == SEPOL_EEXIST) {
-			cil_symtab_datum_destroy(*sensdatum);
-			free(sensdatum);
-		} else {
-			cil_log(CIL_ERR, "Failed to insert sensitivity %s into symtab\n",
-				key);
-			goto exit;
-		}
+	if (rc == SEPOL_EEXIST) {
+		cil_symtab_datum_destroy(*sensdatum);
+		free(sensdatum);
 	}
 
-	rc = SEPOL_OK;
-exit:
-	return rc;
+	return SEPOL_OK;
 }
 
 int __cil_add_levelrange_sens_to_symtab(struct cil_levelrange *lvlrange, symtab_t *senstab)
@@ -1189,19 +1181,15 @@ int __cil_verify_rule(struct cil_tree_node *node, struct cil_complex_symtab *sym
 
 
 	rc = cil_complex_symtab_insert(symtab, &ckey, NULL);
-	if (rc != SEPOL_OK) {
-		if (rc == SEPOL_EEXIST) {
-			struct cil_complex_symtab_datum *datum = NULL;
-			cil_complex_symtab_search(symtab, &ckey, &datum);
-			if (datum == NULL) {
-				cil_log(CIL_ERR, "Duplicate rule defined on line %d of %s\n", 
-					node->line, node->path);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
+	if (rc == SEPOL_EEXIST) {
+		struct cil_complex_symtab_datum *datum = NULL;
+		cil_complex_symtab_search(symtab, &ckey, &datum);
+		if (datum == NULL) {
+			cil_log(CIL_ERR, "Duplicate rule defined on line %d of %s\n", 
+				node->line, node->path);
+			rc = SEPOL_ERR;
+			goto exit;
 		}
-		cil_log(CIL_INFO, "Failure inserting rule into complex symtab\n");
-		goto exit;
 	}
 
 	return SEPOL_OK;

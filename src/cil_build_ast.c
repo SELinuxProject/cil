@@ -91,10 +91,6 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 				}
 			}
 			goto exit;
-		} else if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to insert %s %s\n", 
-				cil_node_to_string(ast_node), key);
-			goto exit;
 		}
 	}
 

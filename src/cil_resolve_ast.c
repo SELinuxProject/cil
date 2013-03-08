@@ -81,8 +81,6 @@ static int __cil_resolve_perm_list(void *class, struct cil_list *perm_strs, stru
 				cil_log(CIL_ERR, "Failed to find perm '%s' in %s symtab\n", (char*)perm->data, cil_node_to_string(class_node));
 				goto exit;
 			}
-		} else if (rc != SEPOL_OK) {
-			goto exit;
 		}
 
 		cil_list_append(res_list_perms, CIL_PERM, perm_datum);
