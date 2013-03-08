@@ -39,11 +39,17 @@
 #include "cil_symtab.h"
 #include "cil_mem.h"
 
+__attribute__((noreturn)) void cil_symtab_error(const char* msg)
+{
+	cil_log(CIL_ERR, "%s\n",msg);
+	exit(1);
+}
+
 void cil_symtab_init(symtab_t *symtab, unsigned int size)
 {
 	int rc = symtab_init(symtab, size);
 	if (rc != SEPOL_OK) {
-		(*cil_mem_error_handler)();
+		cil_symtab_error("Failed to create symtab\n");
 	}
 }
 
@@ -70,13 +76,12 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
 	if (rc != SEPOL_OK && rc != SEPOL_EEXIST) {
 		free(newkey);
-		goto exit;
+		cil_symtab_error("Failed to insert datum into hashtab\n");
 	} else {
 		cil_list_append(datum->nodes, CIL_AST_NODE, node);
 		datum->name = newkey;
 	}
-	
-exit:
+
 	return rc;
 }
 
@@ -108,22 +113,12 @@ void cil_symtab_datum_remove(struct cil_symtab_datum *datum, struct cil_tree_nod
 
 int cil_symtab_get_datum(symtab_t *symtab, char *key, struct cil_symtab_datum **datum)
 {
-	int rc = SEPOL_ERR;
-
-	if (symtab == NULL || symtab->table == NULL || key == NULL || datum == NULL) {
-		goto exit;
-	}
-
 	*datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
 	if (*datum == NULL || (*datum)->state != CIL_STATE_ENABLED) {
-		rc = SEPOL_ENOENT;
-		goto exit;
+		return SEPOL_ENOENT;
 	}
 
 	return SEPOL_OK;
-
-exit:
-	return rc;
 }
 
 void cil_symtab_destroy(symtab_t *symtab)
@@ -134,57 +129,29 @@ void cil_symtab_destroy(symtab_t *symtab)
 	}
 }
 
-int cil_complex_symtab_hash(struct cil_complex_symtab_key *ckey, int mask, intptr_t *hash)
+void cil_complex_symtab_hash(struct cil_complex_symtab_key *ckey, int mask, intptr_t *hash)
 {
-	int rc = SEPOL_ERR;
-	intptr_t sum;
-
-	if (ckey == NULL) {
-		goto exit;
-	}
-
-	sum = ckey->key1 + ckey->key2 + ckey->key3 + ckey->key4;
-
+	intptr_t sum = ckey->key1 + ckey->key2 + ckey->key3 + ckey->key4;
 	*hash = (intptr_t)((sum >> 2) & mask);
-
-	rc = SEPOL_OK;
-exit:
-	return rc;
 }
 
-int cil_complex_symtab_init(struct cil_complex_symtab *symtab, unsigned int size)
+void cil_complex_symtab_init(struct cil_complex_symtab *symtab, unsigned int size)
 {
-	int rc = SEPOL_ERR;
-
 	symtab->htable = cil_calloc(size, sizeof(struct cil_complex_symtab *));
-	if (symtab->htable == NULL) {
-		goto exit;
-	}
 
 	symtab->nelems = 0;
 	symtab->nslots = size;
 	symtab->mask = size - 1;
-
-	rc = SEPOL_OK;
-exit:
-	return rc;
 }
 
 int cil_complex_symtab_insert(struct cil_complex_symtab *symtab,
 			struct cil_complex_symtab_key *ckey,
 			struct cil_complex_symtab_datum *datum)
 {
-	int rc = SEPOL_ERR;
-	intptr_t hash = 0;
+	intptr_t hash;
 	struct cil_complex_symtab_node *node = NULL;
 	struct cil_complex_symtab_node *prev = NULL;
 	struct cil_complex_symtab_node *curr = NULL;
-	struct cil_complex_symtab_key *_ckey = NULL;
-	struct cil_complex_symtab_datum *_datum = NULL;
-
-	if (symtab == NULL || symtab->htable == NULL) {
-		goto exit;
-	}
 
 	node = cil_malloc(sizeof(*node));
 	memset(node, 0, sizeof(*node));
@@ -192,13 +159,7 @@ int cil_complex_symtab_insert(struct cil_complex_symtab *symtab,
 	node->ckey = ckey;
 	node->datum = datum;
 
-	rc = cil_complex_symtab_hash(ckey, symtab->mask, &hash);
-	if (rc != SEPOL_OK) {
-		free(_ckey);
-		free(_datum);
-		free(node);
-		goto exit;
-	}
+	cil_complex_symtab_hash(ckey, symtab->mask, &hash);
 
 	for (prev = NULL, curr = symtab->htable[hash]; curr != NULL;
 		prev = curr, curr = curr->next) {
@@ -206,8 +167,7 @@ int cil_complex_symtab_insert(struct cil_complex_symtab *symtab,
 			ckey->key2 == curr->ckey->key2 &&
 			ckey->key3 == curr->ckey->key3 &&
 			ckey->key4 == curr->ckey->key4) {
-			rc = SEPOL_EEXIST;
-			goto exit;
+			return SEPOL_EEXIST;
 		}
 
 		if (ckey->key1 == curr->ckey->key1 &&
@@ -239,30 +199,24 @@ int cil_complex_symtab_insert(struct cil_complex_symtab *symtab,
 
 	symtab->nelems++;
 
-	rc = SEPOL_OK;
-exit:
-	return rc;
+	return SEPOL_OK;
 }
 
-int cil_complex_symtab_search(struct cil_complex_symtab *symtab,
-			struct cil_complex_symtab_key *ckey,
-			struct cil_complex_symtab_datum **out)
+void cil_complex_symtab_search(struct cil_complex_symtab *symtab,
+			       struct cil_complex_symtab_key *ckey,
+			       struct cil_complex_symtab_datum **out)
 {
-	int rc = SEPOL_ERR;
-	intptr_t hash = 0;
+	intptr_t hash;
 	struct cil_complex_symtab_node *curr = NULL;
 
-	if (symtab == NULL || symtab->htable == NULL || *out != NULL) {
-		goto exit;
-	}
-
-	hash = cil_complex_symtab_hash(ckey, symtab->mask, &hash);
+	cil_complex_symtab_hash(ckey, symtab->mask, &hash);
 	for (curr = symtab->htable[hash]; curr != NULL; curr = curr->next) {
 		if (ckey->key1 == curr->ckey->key1 &&
 			ckey->key2 == curr->ckey->key2 &&
 			ckey->key3 == curr->ckey->key3 &&
 			ckey->key4 == curr->ckey->key4) {
 			*out = curr->datum;
+			return;
 		}
 
 		if (ckey->key1 == curr->ckey->key1 &&
@@ -284,20 +238,17 @@ int cil_complex_symtab_search(struct cil_complex_symtab *symtab,
 		}
 	}
 
-	rc = SEPOL_OK;
-exit:
-	return rc;
+	*out = NULL;
 }
 
-int cil_complex_symtab_destroy(struct cil_complex_symtab *symtab)
+void cil_complex_symtab_destroy(struct cil_complex_symtab *symtab)
 {
-	int rc = SEPOL_ERR;
 	struct cil_complex_symtab_node *curr = NULL;
 	struct cil_complex_symtab_node *temp = NULL;
 	unsigned int i;
 
 	if (symtab == NULL) {
-		goto exit;
+		return;
 	}
 
 	for (i = 0; i < symtab->nslots; i++) {
@@ -314,8 +265,4 @@ int cil_complex_symtab_destroy(struct cil_complex_symtab *symtab)
 	symtab->nelems = 0;
 	symtab->nslots = 0;
 	symtab->mask = 0;
-
-	rc = SEPOL_OK;
-exit:
-	return rc;
 }

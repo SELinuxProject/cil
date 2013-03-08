@@ -1192,11 +1192,7 @@ int __cil_verify_rule(struct cil_tree_node *node, struct cil_complex_symtab *sym
 	if (rc != SEPOL_OK) {
 		if (rc == SEPOL_EEXIST) {
 			struct cil_complex_symtab_datum *datum = NULL;
-			rc = cil_complex_symtab_search(symtab, &ckey, &datum);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_INFO, "Failure searching complex symtab during rule verification\n");
-				goto exit;
-			}
+			cil_complex_symtab_search(symtab, &ckey, &datum);
 			if (datum == NULL) {
 				cil_log(CIL_ERR, "Duplicate rule defined on line %d of %s\n", 
 					node->line, node->path);
