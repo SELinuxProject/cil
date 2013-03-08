@@ -43,7 +43,7 @@ void cil_symtab_init(symtab_t *symtab, unsigned int size)
 {
 	int rc = symtab_init(symtab, size);
 	if (rc != SEPOL_OK) {
-		(*cil_malloc_error_handler)();
+		(*cil_mem_error_handler)();
 	}
 }
 
@@ -156,7 +156,7 @@ int cil_complex_symtab_init(struct cil_complex_symtab *symtab, unsigned int size
 {
 	int rc = SEPOL_ERR;
 
-	symtab->htable = calloc(size, sizeof(struct cil_complex_symtab *));
+	symtab->htable = cil_calloc(size, sizeof(struct cil_complex_symtab *));
 	if (symtab->htable == NULL) {
 		goto exit;
 	}
