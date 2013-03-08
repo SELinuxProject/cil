@@ -34,7 +34,7 @@
 #include "cil_tree.h"
 #include "cil_symtab.h"
 
-int cil_copy_list(struct cil_list *orig, struct cil_list **copy);
+void cil_copy_list(struct cil_list *orig, struct cil_list **copy);
 int cil_copy_expr(struct cil_db *db, struct cil_list *orig, struct cil_list **new);
 
 int cil_copy_block(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
@@ -46,7 +46,7 @@ int cil_copy_classmap_perm(struct cil_db *db, void *data, void **copy, symtab_t 
 int cil_copy_classmap(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_classmapping(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_permset(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new);
+void cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new);
 int cil_copy_classpermset(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_common(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_classcommon(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
@@ -84,11 +84,11 @@ int cil_copy_catset(struct cil_db *db, void *data, void **copy, symtab_t *symtab
 int cil_copy_senscat(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_catorder(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_dominance(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_fill_level(struct cil_level *orig, struct cil_level *new);
+void cil_copy_fill_level(struct cil_level *orig, struct cil_level *new);
 int cil_copy_level(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_fill_levelrange(struct cil_levelrange *orig, struct cil_levelrange *new);
+void cil_copy_fill_levelrange(struct cil_levelrange *orig, struct cil_levelrange *new);
 int cil_copy_levelrange(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_fill_context(struct cil_context *orig, struct cil_context *new);
+void cil_copy_fill_context(struct cil_context *orig, struct cil_context *new);
 int cil_copy_context(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_netifcon(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_genfscon(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
@@ -105,7 +105,7 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, symtab_t *sym
 int cil_copy_validatetrans(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_call(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_optional(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_fill_ipaddr(struct cil_ipaddr *orig, struct cil_ipaddr *new);
+void cil_copy_fill_ipaddr(struct cil_ipaddr *orig, struct cil_ipaddr *new);
 int cil_copy_ipaddr(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_conditional(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_boolif(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
