@@ -39,11 +39,12 @@ __attribute__((noreturn)) void cil_list_error(const char* msg)
 	exit(1);
 }
 
-void cil_list_init(struct cil_list **list)
+void cil_list_init(struct cil_list **list, unsigned flavor)
 {
 	struct cil_list *new_list = cil_malloc(sizeof(*new_list));
 	new_list->head = NULL;
 	new_list->tail = NULL;
+	new_list->flavor = flavor;
 	*list = new_list;
 }
 

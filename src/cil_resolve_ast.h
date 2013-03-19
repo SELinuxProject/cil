@@ -87,9 +87,9 @@ int cil_resolve_in(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_call1(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_call2(struct cil_tree_node *, void *extra_args);
 int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_index sym_index, struct cil_symtab_datum **datum);
-int cil_resolve_expr_stack(struct cil_list *expr_stack, struct cil_tree_node *parent, void *extra_args);
+int cil_resolve_expr(struct cil_list *str_expr, struct cil_list **datum_expr, struct cil_tree_node *parent, void *extra_args);
 int cil_resolve_boolif(struct cil_tree_node *current, void *extra_args);
-int cil_evaluate_expr_stack(struct cil_list *expr_stack, uint16_t *result);
+int cil_evaluate_expr(struct cil_list *datum_expr, uint16_t *result);
 int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args);
 
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current);

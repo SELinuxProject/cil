@@ -72,6 +72,7 @@ enum cil_flavor {
 	CIL_AST_NODE,
 	CIL_PARSE_NODE,
 	CIL_AST_STR,
+	CIL_DATUM,
 	CIL_LIST,
 	CIL_LIST_ITEM,
 	CIL_INT,
@@ -130,6 +131,7 @@ enum cil_flavor {
 	CIL_TUNABLEIFDEF,
 	CIL_TUNABLEIFNDEF,
 
+	CIL_OP,
 	CIL_STAR,
 	CIL_AND,
 	CIL_OR,
@@ -142,6 +144,7 @@ enum cil_flavor {
 	CIL_CONS_DOM,
 	CIL_CONS_DOMBY,
 	CIL_CONS_INCOMP,
+	CIL_CONS_OPERAND,
 	CIL_CONS_U1,
 	CIL_CONS_U2,
 	CIL_CONS_U3,
@@ -513,13 +516,14 @@ struct cil_role {
 
 struct cil_roleattribute {
 	struct cil_symtab_datum datum;
-	struct cil_list *expr_stack_list;
+	struct cil_list *expr_list;
 	ebitmap_t *roles;
 };
 
 struct cil_roleattributeset {
 	char *attr_str;
-	struct cil_list *expr_stack;
+	struct cil_list *str_expr;
+	struct cil_list *datum_expr;
 };
 
 struct cil_roletype {
@@ -542,13 +546,14 @@ struct cil_type	{
 
 struct cil_typeattribute {
 	struct cil_symtab_datum datum;
-	struct cil_list *expr_stack_list;
+	struct cil_list *expr_list;
 	ebitmap_t *types;
 };
 
 struct cil_typeattributeset {
 	char *attr_str;
-	struct cil_list *expr_stack;
+	struct cil_list *str_expr;
+	struct cil_list *datum_expr;
 };
 
 struct cil_typealias {
@@ -833,13 +838,15 @@ struct cil_fsuse {
 struct cil_constrain {
 	char *classpermset_str;
 	struct cil_classpermset *classpermset;
-	struct cil_list *expr;
+	struct cil_list *str_expr;
+	struct cil_list *datum_expr;
 };
 
 struct cil_validatetrans {
 	char *class_str;
 	struct cil_class *class;
-	struct cil_list *expr;
+	struct cil_list *str_expr;
+	struct cil_list *datum_expr;
 };
 
 struct cil_param {
@@ -877,17 +884,13 @@ struct cil_condblock {
 };
 
 struct cil_booleanif {
-	struct cil_list *expr_stack;
+	struct cil_list *str_expr;
+	struct cil_list *datum_expr;
 };
 
 struct cil_tunableif {
-	struct cil_list *expr_stack;
-};
-
-struct cil_conditional {
-	char *str;
-	void *data;
-	enum cil_flavor flavor;
+	struct cil_list *str_expr;
+	struct cil_list *datum_expr;
 };
 
 struct cil_policycap {
@@ -945,7 +948,6 @@ void cil_rangetransition_init(struct cil_rangetransition **rangetrans);
 void cil_bool_init(struct cil_bool **cilbool);
 void cil_boolif_init(struct cil_booleanif **bif);
 void cil_condblock_init(struct cil_condblock **cb);
-void cil_conditional_init(struct cil_conditional **cond);
 void cil_tunif_init(struct cil_tunableif **tif);
 void cil_avrule_init(struct cil_avrule **avrule);
 void cil_type_rule_init(struct cil_type_rule **type_rule);

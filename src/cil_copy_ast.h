@@ -107,7 +107,6 @@ int cil_copy_call(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_optional(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 void cil_copy_fill_ipaddr(struct cil_ipaddr *orig, struct cil_ipaddr *new);
 int cil_copy_ipaddr(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_conditional(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_boolif(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 
 int cil_copy_ast(struct cil_db *db, struct cil_tree_node *orig, struct cil_tree_node *dest);

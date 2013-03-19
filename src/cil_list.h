@@ -33,6 +33,7 @@
 struct cil_list {
 	struct cil_list_item *head;
 	struct cil_list_item *tail;
+	unsigned flavor;
 };
 
 struct cil_list_item {
@@ -44,7 +45,7 @@ struct cil_list_item {
 #define cil_list_for_each(item, list) \
 	for (item = (list)->head; item != NULL; item = item->next)
 
-void cil_list_init(struct cil_list **list);
+void cil_list_init(struct cil_list **list, unsigned flavor);
 void cil_list_destroy (struct cil_list **list, unsigned destroy_data);
 void cil_list_item_init(struct cil_list_item **item);
 void cil_list_item_destroy(struct cil_list_item **item, unsigned destroy_data);

@@ -113,7 +113,7 @@ int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classperm
 		cil_list_destroy(&cps->perms, 0);
 	}
 
-	cil_list_init(&cps->perms);
+	cil_list_init(&cps->perms, CIL_LIST_ITEM);
 
 	rc = __cil_resolve_perm_list(cps->class, cps->perm_strs, cps->perms);
 	if (rc != SEPOL_OK) {
@@ -284,16 +284,16 @@ int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args
 
 	attr = (struct cil_typeattribute*)attr_datum;
 
-	rc = cil_resolve_expr_stack(attrtypes->expr_stack, current, extra_args);
+	rc = cil_resolve_expr(attrtypes->str_expr, &attrtypes->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	if (attr->expr_stack_list == NULL) {
-		cil_list_init(&attr->expr_stack_list);
+	if (attr->expr_list == NULL) {
+		cil_list_init(&attr->expr_list, CIL_TYPEATTRIBUTE);
 	}
 
-	cil_list_append(attr->expr_stack_list, CIL_LIST, attrtypes->expr_stack);
+	cil_list_append(attr->expr_list, CIL_LIST, attrtypes->datum_expr);
 
 	return SEPOL_OK;
 
@@ -607,7 +607,7 @@ int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 
 	cil_list_for_each(curr_cps, mapping->classpermsets_str) {
 		if (cmp->classperms == NULL) {
-			cil_list_init(&cmp->classperms);
+			cil_list_init(&cmp->classperms, CIL_LIST_ITEM);
 		}
 
 		if (curr_cps->flavor == CIL_AST_STR) {
@@ -669,7 +669,7 @@ int cil_reset_sens(struct cil_tree_node *current, __attribute__((unused)) void *
 	/* during a re-resolve, we need to reset the categories associated with
 	 * this sensitivity from a (sensitivitycategory) statement */
 	cil_list_destroy(&sens->catsets, CIL_FALSE);
-	cil_list_init(&sens->catsets);
+	cil_list_init(&sens->catsets, CIL_LIST_ITEM);
 
 	return SEPOL_OK;
 }
@@ -679,18 +679,18 @@ int cil_reset_typeattr(struct cil_tree_node *current, __attribute__((unused)) vo
 	struct cil_typeattribute *attr = current->data;
 
 	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributetypes statement */
-	if (attr->expr_stack_list != NULL) {
+	if (attr->expr_list != NULL) {
 		/* we don't want to destroy the expression stacks (cil_list) inside
 		 * this list cil_list_destroy destroys sublists, so we need to do it
 		 * manually */
-		struct cil_list_item *expr_stack = attr->expr_stack_list->head;
-		while (expr_stack != NULL) {
-			struct cil_list_item *next = expr_stack->next;
-			cil_list_item_destroy(&expr_stack, CIL_FALSE);
-			expr_stack = next;
+		struct cil_list_item *expr = attr->expr_list->head;
+		while (expr != NULL) {
+			struct cil_list_item *next = expr->next;
+			cil_list_item_destroy(&expr, CIL_FALSE);
+			expr = next;
 		}
-		free(attr->expr_stack_list);
-		attr->expr_stack_list = NULL;
+		free(attr->expr_list);
+		attr->expr_list = NULL;
 	}
 
 	return SEPOL_OK;
@@ -723,18 +723,18 @@ int cil_reset_roleattr(struct cil_tree_node *current, __attribute__((unused)) vo
 	struct cil_roleattribute *attr = current->data;
 
 	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributeroles statement */
-	if (attr->expr_stack_list != NULL) {
+	if (attr->expr_list != NULL) {
 		/* we don't want to destroy the expression stacks (cil_list) inside
 		 * this list cil_list_destroy destroys sublists, so we need to do it
 		 * manually */
-		struct cil_list_item *expr_stack = attr->expr_stack_list->head;
-		while (expr_stack != NULL) {
-			struct cil_list_item *next = expr_stack->next;
-			cil_list_item_destroy(&expr_stack, CIL_FALSE);
-			expr_stack = next;
+		struct cil_list_item *expr = attr->expr_list->head;
+		while (expr != NULL) {
+			struct cil_list_item *next = expr->next;
+			cil_list_item_destroy(&expr, CIL_FALSE);
+			expr = next;
 		}
-		free(attr->expr_stack_list);
-		attr->expr_stack_list = NULL;
+		free(attr->expr_list);
+		attr->expr_list = NULL;
 	}
 
 	return SEPOL_OK;
@@ -779,7 +779,7 @@ int cil_resolve_userrole(struct cil_tree_node *current, void *extra_args)
 	userrole->role = (struct cil_role*)role_datum;
 
 	if (userrole->user->roles == NULL) {
-		cil_list_init(&userrole->user->roles);
+		cil_list_init(&userrole->user->roles, CIL_LIST_ITEM);
 	}
 
 	cil_list_append(userrole->user->roles, CIL_ROLE, userrole->role);
@@ -1073,16 +1073,16 @@ int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args
 	}
 	attr = (struct cil_roleattribute*)attr_datum;
 
-	rc = cil_resolve_expr_stack(attrroles->expr_stack, current, extra_args);
+	rc = cil_resolve_expr(attrroles->str_expr, &attrroles->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	if (attr->expr_stack_list == NULL) {
-		cil_list_init(&attr->expr_stack_list);
+	if (attr->expr_list == NULL) {
+		cil_list_init(&attr->expr_list, CIL_ROLEATTRIBUTE);
 	}
 
-	cil_list_append(attr->expr_stack_list, CIL_LIST, attrroles->expr_stack);
+	cil_list_append(attr->expr_list, CIL_LIST, attrroles->datum_expr);
 
 	return SEPOL_OK;
 
@@ -1391,7 +1391,7 @@ int __cil_create_edge_list(struct cil_tree_node *current, struct cil_list *order
 		edge_node->data = node->data;
 		if (edge_nodes == NULL) {
 			/* 1st, 3rd, 4th */
-			cil_list_init(&edge_nodes);
+			cil_list_init(&edge_nodes, CIL_LIST_ITEM);
 			cil_list_item_init(&edge);
 			edge->flavor = CIL_LIST;
 			edge->data = edge_nodes;
@@ -1439,7 +1439,7 @@ int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	cil_list_init(&edge_list);
+	cil_list_init(&edge_list, CIL_LIST_ITEM);
 
 	rc = __cil_create_edge_list(current, catorder->cat_list_str, CIL_SYM_CATS, edge_list, extra_args);
 	if (rc != SEPOL_OK) {
@@ -1477,7 +1477,7 @@ int cil_resolve_dominance(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	cil_list_init(&edge_list);
+	cil_list_init(&edge_list, CIL_LIST_ITEM);
 
 	rc = __cil_create_edge_list(current, dom->sens_list_str, CIL_SYM_SENS, edge_list, args);
 	if (rc != SEPOL_OK) {
@@ -1608,7 +1608,7 @@ int cil_resolve_catset(struct cil_tree_node *current, struct cil_catset *catset,
 	struct cil_tree_node *cat_node = NULL;
 	int rc = SEPOL_ERR;
 
-	cil_list_init(&res_cat_list);
+	cil_list_init(&res_cat_list, CIL_LIST_ITEM);
 
 	cil_list_for_each(cat_item, catset->cat_list_str) {
 		switch (cat_item->flavor) {
@@ -1894,7 +1894,7 @@ int cil_resolve_constrain(struct cil_tree_node *current, void *extra_args)
 		}
 	}
 
-	rc = cil_resolve_expr_stack(cons->expr, current, extra_args);
+	rc = cil_resolve_expr(cons->str_expr, &cons->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1918,7 +1918,7 @@ int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args)
 	}
 	validtrans->class = (struct cil_class*)class_datum;
 
-	rc = cil_resolve_expr_stack(validtrans->expr, current, extra_args);
+	rc = cil_resolve_expr(validtrans->str_expr, &validtrans->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2453,7 +2453,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 
 		pc = new_call->args_tree->root->cl_head;
 
-		cil_list_init(&new_call->args);
+		cil_list_init(&new_call->args, CIL_LIST_ITEM);
 
 		cil_list_for_each(item, new_call->macro->params) {
 			if (pc == NULL) {
@@ -2783,51 +2783,60 @@ exit:
 	return rc;
 }
 
-int cil_resolve_expr_stack(struct cil_list *expr_stack, struct cil_tree_node *parent, void *extra_args)
+int cil_resolve_expr(struct cil_list *str_expr, struct cil_list **datum_expr, struct cil_tree_node *parent, void *extra_args)
 {
 	int rc = SEPOL_ERR;
-	struct cil_list_item *curr_expr;
+	struct cil_list_item *curr;
 	struct cil_symtab_datum *res_datum = NULL;
+	enum cil_sym_index sym_index =  CIL_SYM_UNKNOWN;
 
-	cil_list_for_each(curr_expr, expr_stack) {
-		struct cil_conditional *cond = curr_expr->data;
-		enum cil_flavor flavor = cond->flavor;
-		enum cil_sym_index sym_index =  CIL_SYM_UNKNOWN;
-
-		switch (flavor) {
-		case CIL_BOOL:
-			sym_index = CIL_SYM_BOOLS;
-			break;
-		case CIL_TUNABLE:
-			sym_index = CIL_SYM_TUNABLES;
-			break;
-		case CIL_TYPE:
-			sym_index = CIL_SYM_TYPES;
-			break;
-		case CIL_ROLE:
-			sym_index = CIL_SYM_ROLES;
-			break;
-		case CIL_USER:
-			sym_index = CIL_SYM_USERS;
-			break;
-		default:
-			continue;
-		}
-
-		if (cond->str == NULL) {
-			cil_log(CIL_ERR, "Invalid expression\n");
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-
-		rc = cil_resolve_name(parent, cond->str, sym_index, extra_args, &res_datum);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		cond->data = res_datum;
+	switch (str_expr->flavor) {
+	case CIL_BOOL:
+		sym_index = CIL_SYM_BOOLS;
+		break;
+	case CIL_TUNABLE:
+		sym_index = CIL_SYM_TUNABLES;
+		break;
+	case CIL_TYPE:
+		sym_index = CIL_SYM_TYPES;
+		break;
+	case CIL_ROLE:
+		sym_index = CIL_SYM_ROLES;
+		break;
+	case CIL_USER:
+		sym_index = CIL_SYM_USERS;
+		break;
+	default:
+		break;
 	}
 
+	cil_list_init(datum_expr, str_expr->flavor);
+
+	cil_list_for_each(curr, str_expr) {
+		switch (curr->flavor) {
+		case CIL_AST_STR:
+			rc = cil_resolve_name(parent, curr->data, sym_index, extra_args, &res_datum);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			cil_list_append(*datum_expr, CIL_DATUM, res_datum);
+			break;
+		case CIL_LIST: {
+			struct cil_list *datum_sub_expr;
+			rc = cil_resolve_expr(curr->data, &datum_sub_expr, parent, extra_args);
+			if (rc != SEPOL_OK) {
+				cil_list_destroy(&datum_sub_expr, CIL_TRUE);
+				goto exit;
+			}
+			cil_list_append(*datum_expr, CIL_LIST, datum_sub_expr);
+			break;
+		}
+		default:
+			cil_list_append(*datum_expr, curr->flavor, curr->data);
+			break;
+		}				
+	}
 	return SEPOL_OK;
 
 exit:
@@ -2839,7 +2848,7 @@ int cil_resolve_boolif(struct cil_tree_node *current, void *extra_args)
 	int rc = SEPOL_ERR;
 	struct cil_booleanif *bif = (struct cil_booleanif*)current->data;
 
-	rc = cil_resolve_expr_stack(bif->expr_stack, current, extra_args);
+	rc = cil_resolve_expr(bif->str_expr, &bif->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2851,57 +2860,52 @@ exit:
 }
 
 /* This modifies/destroys the original stack */
-int cil_evaluate_expr_stack(struct cil_list *expr_stack, uint16_t *result)
+int cil_evaluate_expr(struct cil_list *datum_expr, uint16_t *result)
 {
-	struct cil_conditional *cond = NULL;
+	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;
 	uint16_t eval_stack[COND_EXPR_MAXDEPTH];
 	uint16_t value1 = CIL_FALSE;
 	uint16_t value2 = CIL_FALSE;
 	uint16_t pos = 0;
-	int rc = SEPOL_ERR;
 
-	if (expr_stack == NULL || result == NULL) {
-		rc = SEPOL_ERR;
+	if (datum_expr == NULL) {
 		goto exit;
 	}
 
-	cil_list_for_each(curr, expr_stack) {
-		cond = curr->data;
-		if ((cond->flavor == CIL_AND) || (cond->flavor == CIL_OR) 
-		|| (cond->flavor == CIL_XOR) || (cond->flavor == CIL_NOT) 
-		|| (cond->flavor == CIL_EQ) || (cond->flavor == CIL_NEQ)) {
-
-			if (cond->flavor != CIL_NOT) {
+	cil_list_for_each(curr, datum_expr) {
+		if (curr->flavor == CIL_OP) {
+			enum cil_flavor op_flavor = *((enum cil_flavor *)curr->data);
+			if (op_flavor == CIL_NOT) {
+				if (pos == 0) {
+					cil_log(CIL_ERR, "Not enough operands for NOT operation\n");
+					goto exit;
+				}
+				eval_stack[pos - 1] = !eval_stack[pos - 1];
+			} else {
 				if (pos <= 1) {
-					rc = SEPOL_ERR;
+					cil_log(CIL_ERR, "Not enough operands for operation\n");
 					goto exit;
 				}
 				value1 = eval_stack[pos - 1];
 				value2 = eval_stack[pos - 2];
-				if (cond->flavor == CIL_AND) {
+				if (op_flavor == CIL_AND) {
 					eval_stack[pos - 2] = (value1 && value2);
-				} else if (cond->flavor == CIL_OR) {
+				} else if (op_flavor == CIL_OR) {
 					eval_stack[pos - 2] = (value1 || value2);
-				} else if (cond->flavor == CIL_XOR) {
+				} else if (op_flavor == CIL_XOR) {
 					eval_stack[pos - 2] = (value1 ^ value2);
-				} else if (cond->flavor == CIL_EQ) {
+				} else if (op_flavor == CIL_EQ) {
 					eval_stack[pos - 2] = (value1 == value2);
-				} else if (cond->flavor == CIL_NEQ) {
+				} else if (op_flavor == CIL_NEQ) {
 					eval_stack[pos - 2] = (value1 != value2);
 				}
 				pos--;
-			} else {
-				if (pos == 0) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-				eval_stack[pos - 1] = !eval_stack[pos - 1];
 			}
 		} else {
-			struct cil_bool *bool = cond->data;
+			struct cil_bool *bool = curr->data;
 			if (pos >= COND_EXPR_MAXDEPTH) {
-				rc = SEPOL_ERR;
+				cil_log(CIL_ERR, "Exceeded max depth for boolean expression\n");
 				goto exit;
 			}
 			eval_stack[pos] = bool->value;
@@ -2932,14 +2936,15 @@ int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	rc = cil_resolve_expr_stack(tif->expr_stack, current, extra_args);
+	rc = cil_resolve_expr(tif->str_expr, &tif->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	rc = cil_evaluate_expr_stack(tif->expr_stack, &result);
+	rc = cil_evaluate_expr(tif->datum_expr, &result);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to evaluate expr stack\n");
+		cil_log(CIL_ERR, "Failed to evaluate expr stack at line %d of %s\n",
+				current->line, current->path);
 		goto exit;
 	}
 
@@ -3294,7 +3299,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		*changed = 1;
 		rc = SEPOL_OK;
 	} else if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to resolve %s-statement (%s:%d)\n", cil_node_to_string(node), node->path, node->line);
+		cil_log(CIL_ERR, "Failed to resolve %s statement (%s:%d)\n", cil_node_to_string(node), node->path, node->line);
 		goto exit;
 	}
 
@@ -3493,8 +3498,8 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			/* reset the global data */
 			cil_list_destroy(&db->catorder, 0);
 			cil_list_destroy(&db->dominance, 0);
-			cil_list_init(&db->catorder);
-			cil_list_init(&db->dominance);
+			cil_list_init(&db->catorder, CIL_LIST_ITEM);
+			cil_list_init(&db->dominance, CIL_LIST_ITEM);
 		}
 
 		/* reset the arguments */

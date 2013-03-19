@@ -78,7 +78,7 @@ struct cil_args_booleanif {
 };
 
 
-int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *stack);
+int cil_expr_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *expr);
 
 int cil_combine_policy(FILE **file_arr, FILE *policy_file)
 {
@@ -321,7 +321,7 @@ int cil_multimap_insert(struct cil_list *list, struct cil_symtab_datum *key, str
 
 	new_data = cil_malloc(sizeof(*new_data));
 	new_data->key = key;
-	cil_list_init(&new_data->values);
+	cil_list_init(&new_data->values, CIL_LIST_ITEM);
 	if (value != NULL) {
 		cil_list_append(new_data->values, val_flavor, value);
 	}
@@ -491,7 +491,7 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 		}
 		fprintf(file_arr[CONSTRAINS], " };\n\t");
 
-		cil_expr_stack_to_policy(file_arr, CONSTRAINS, cons->expr);
+		cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
 		fprintf(file_arr[CONSTRAINS], ";\n");
 
 	} else if (cons->classpermset->flavor == CIL_CLASSMAP) {
@@ -507,7 +507,7 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 					fprintf(file_arr[CONSTRAINS], " %s", ((struct cil_perm*)(perm->data))->datum.name);
 				}
 				fprintf(file_arr[CONSTRAINS], " };\n\t");
-				cil_expr_stack_to_policy(file_arr, CONSTRAINS, cons->expr);
+				cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
 				fprintf(file_arr[CONSTRAINS], ";\n");
 			}
 		}
@@ -524,7 +524,7 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 	struct cil_list_item *curr_cps;
 	struct cil_list_item *perm;
 
-	cil_list_init(&classperms);
+	cil_list_init(&classperms, CIL_LIST_ITEM);
 
 	if (rule->classpermset->flavor == CIL_CLASS) {
 		cil_list_append(classperms, CIL_CLASSPERMSET, rule->classpermset);
@@ -609,87 +609,191 @@ int cil_nametypetransition_to_policy(FILE **file_arr, uint32_t file_index, struc
 	return SEPOL_OK;
 }
 
-int cil_expr_stack_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *stack)
+int cil_expr_to_string(struct cil_list *expr, char **out)
 {
 	int rc = SEPOL_ERR;
-	struct cil_conditional *cond = NULL;
 	struct cil_list_item *curr;
-	char *str_stack[COND_EXPR_MAXDEPTH] = {};
-	char *expr_str = NULL;
-	char *oper_str = NULL;
+	char *stack[COND_EXPR_MAXDEPTH] = {};
 	int pos = 0;
-	int len = 0;
 	int i;
 
-	cil_list_for_each(curr, stack) {
-		cond = curr->data;
-		if ((cond->flavor == CIL_AND) || (cond->flavor == CIL_OR)
-		|| (cond->flavor == CIL_XOR) || (cond->flavor == CIL_NOT)
-		|| (cond->flavor == CIL_EQ) || (cond->flavor == CIL_NEQ)
-		|| (cond->flavor == CIL_CONS_DOM) || (cond->flavor == CIL_CONS_DOMBY)
-		|| (cond->flavor == CIL_CONS_INCOMP)) {
-
-			oper_str = cond->str;
-			if (cond->flavor != CIL_NOT) {
-				if (pos <= 1) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-
-				len = strlen(str_stack[pos - 1]) + strlen(str_stack[pos - 2]) + strlen(oper_str) + 5;
-				expr_str = cil_malloc(len);
-				rc = snprintf(expr_str, len, "(%s %s %s)", str_stack[pos - 1], oper_str, str_stack[pos - 2]);
-				if (rc < 0) {
-					free(expr_str);
-					goto exit;
-				}
-				free(str_stack[pos - 2]);
-				free(str_stack[pos - 1]);
-				str_stack[pos - 2] = expr_str;
-				str_stack[pos - 1] = 0;
-				pos--;
-			} else {
-				if (pos == 0) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-
-				len = strlen(str_stack[pos - 1]) + strlen(oper_str) + 4;
-				expr_str = cil_malloc(len);
-				rc = snprintf(expr_str, len, "(%s %s)", oper_str, str_stack[pos - 1]);
-				if (rc < 0) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-				free(str_stack[pos - 1]);
-				str_stack[pos - 1] = expr_str;
+	cil_list_for_each(curr, expr) {
+		if (pos > COND_EXPR_MAXDEPTH) {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		switch (curr->flavor) {
+		case CIL_LIST:
+			rc = cil_expr_to_string(curr->data, &stack[pos]);
+			if (rc != SEPOL_OK) {
+				goto exit;
 			}
-		} else {
-			if (pos >= COND_EXPR_MAXDEPTH) {
+			pos++;
+			break;
+		case CIL_AST_STR:
+			stack[pos] = cil_strdup(curr->data);
+			pos++;
+			break;
+		case CIL_DATUM:
+			stack[pos] = cil_strdup(((struct cil_symtab_datum *)curr->data)->name);
+			pos++;
+			break;
+		case CIL_OP: {
+			int len;
+			char *expr_str;
+			enum cil_flavor op_flavor = *((enum cil_flavor *)curr->data);
+			char *op_str = NULL;
+
+			if (pos == 0) {
 				rc = SEPOL_ERR;
 				goto exit;
 			}
-
-			if (cond->flavor == CIL_BOOL || (cond->flavor == CIL_TYPE)
-				|| (cond->flavor == CIL_ROLE) || (cond->flavor == CIL_USER)) {
-
-				oper_str = ((struct cil_symtab_datum *)cond->data)->name;
-			} else {
-				oper_str = cond->str;
+			switch (op_flavor) {
+			case CIL_AND:
+				op_str = CIL_KEY_AND;
+				break;
+			case CIL_OR:
+				op_str = CIL_KEY_OR;
+				break;
+			case CIL_NOT:
+				op_str = CIL_KEY_NOT;
+				break;
+			case CIL_STAR:
+				op_str = CIL_KEY_STAR;
+				break;
+			case CIL_EQ:
+				op_str = CIL_KEY_EQ;
+				break;
+			case CIL_NEQ:
+				op_str = CIL_KEY_NEQ;
+				break;
+			case CIL_XOR:
+				op_str = CIL_KEY_XOR;
+				break;
+			case CIL_CONS_DOM:
+				op_str = CIL_KEY_CONS_DOM;
+				break;
+			case CIL_CONS_DOMBY:
+				op_str = CIL_KEY_CONS_DOMBY;
+				break;
+			case CIL_CONS_INCOMP:
+				op_str = CIL_KEY_CONS_INCOMP;
+				break;
+			default:
+				cil_log(CIL_ERR, "Unknown operator in expression\n");
+				goto exit;
+				break;
 			}
-			str_stack[pos] = cil_strdup(oper_str);
+			if (op_flavor == CIL_NOT) {
+				len = strlen(stack[pos-1]) + strlen(op_str) + 4;
+				expr_str = cil_malloc(len);
+				snprintf(expr_str, len, "(%s %s)", op_str, stack[pos-1]);
+				free(stack[pos-1]);
+				stack[pos-1] = NULL;
+				pos--;
+			} else {
+				if (pos < 2) {
+					rc = SEPOL_ERR;
+					goto exit;
+				}
+				len = strlen(stack[pos-1]) + strlen(stack[pos-2]) + strlen(op_str) + 5;
+				expr_str = cil_malloc(len);
+				snprintf(expr_str, len, "(%s %s %s)", stack[pos-1], op_str, stack[pos-2]);
+				free(stack[pos-2]);
+				free(stack[pos-1]);
+				stack[pos-2] = NULL;
+				stack[pos-1] = NULL;
+				pos -= 2;
+			}
+			stack[pos] = expr_str;
 			pos++;
+			break;
+		}
+		case CIL_CONS_OPERAND: {
+			enum cil_flavor operand_flavor = *((enum cil_flavor *)curr->data);
+			char *operand_str = NULL;
+			switch (operand_flavor) {
+			case CIL_CONS_U1:
+				operand_str = CIL_KEY_CONS_U1;
+				break;
+			case CIL_CONS_U2:
+				operand_str = CIL_KEY_CONS_U2;
+				break;
+			case CIL_CONS_U3:
+				operand_str = CIL_KEY_CONS_U3;
+				break;
+			case CIL_CONS_T1:
+				operand_str = CIL_KEY_CONS_T1;
+				break;
+			case CIL_CONS_T2:
+				operand_str = CIL_KEY_CONS_T2;
+				break;
+			case CIL_CONS_T3:
+				operand_str = CIL_KEY_CONS_T3;
+				break;
+			case CIL_CONS_R1:
+				operand_str = CIL_KEY_CONS_R1;
+				break;
+			case CIL_CONS_R2:
+				operand_str = CIL_KEY_CONS_R2;
+				break;
+			case CIL_CONS_R3:
+				operand_str = CIL_KEY_CONS_R3;
+				break;
+			case CIL_CONS_L1:
+				operand_str = CIL_KEY_CONS_L1;
+				break;
+			case CIL_CONS_L2:
+				operand_str = CIL_KEY_CONS_L2;
+				break;
+			case CIL_CONS_H1:
+				operand_str = CIL_KEY_CONS_H1;
+				break;
+			case CIL_CONS_H2:
+				operand_str = CIL_KEY_CONS_H2;
+				break;
+			default:
+				cil_log(CIL_ERR, "Unknown operand in expression\n");
+				goto exit;
+				break;
+			}
+			stack[pos] = cil_strdup(operand_str);
+			pos++;
+			break;
+		}
+		default:
+			cil_log(CIL_ERR, "Unknown flavor in expression\n");
+			goto exit;
+			break;
 		}
 	}
-	fprintf(file_arr[file_index], "%s", str_stack[0]);
-	free(str_stack[0]);
+
+	*out = stack[0];
 
 	return SEPOL_OK;
 
 exit:
 	for (i = 0; i < pos; i++) {
-		free(str_stack[i]);
+		free(stack[i]);
 	}
+	return rc;
+}
+
+int cil_expr_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *expr)
+{
+	int rc = SEPOL_ERR;
+	char *str_out;
+
+	rc = cil_expr_to_string(expr, &str_out);
+	if (rc != SEPOL_OK) {
+		goto out;
+	}
+	fprintf(file_arr[file_index], "%s", str_out);
+	free(str_out);
+
+	return SEPOL_OK;
+
+out:
 	return rc;
 }
 
@@ -752,7 +856,7 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 {
 	int rc = SEPOL_ERR;
 	struct cil_booleanif *bif = node->data;
-	struct cil_list *stack = bif->expr_stack;
+	struct cil_list *expr = bif->str_expr;
 	struct cil_args_booleanif extra_args;
 	struct cil_tree_node *true_node = NULL;
 	struct cil_tree_node *false_node = NULL;
@@ -763,9 +867,9 @@ int cil_booleanif_to_policy(FILE **file_arr, uint32_t file_index, struct cil_tre
 
 	fprintf(file_arr[file_index], "if ");
 
-	rc = cil_expr_stack_to_policy(file_arr, file_index, stack);
+	rc = cil_expr_to_policy(file_arr, file_index, expr);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "cil_expr_stack_to_policy failed, rc: %d\n", rc);
+		cil_log(CIL_ERR, "Failed to write expression\n");
 		return rc;
 	}
 
@@ -963,7 +1067,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		struct cil_validatetrans *vt = current->data;
 		fprintf(file_arr[CONSTRAINS], "validatetrans");
 		fprintf(file_arr[CONSTRAINS], " %s ", ((struct cil_class*)vt->class)->datum.name);
-		cil_expr_stack_to_policy(file_arr, CONSTRAINS, vt->expr);
+		cil_expr_to_policy(file_arr, CONSTRAINS, vt->str_expr);
 		fprintf(file_arr[CONSTRAINS], ";\n");
 		break;
 	}
@@ -971,7 +1075,7 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		struct cil_validatetrans *vt = current->data;
 		fprintf(file_arr[CONSTRAINS], "mlsvalidatetrans");
 		fprintf(file_arr[CONSTRAINS], " %s " , ((struct cil_class*)vt->class)->datum.name);
-		cil_expr_stack_to_policy(file_arr, CONSTRAINS, vt->expr);
+		cil_expr_to_policy(file_arr, CONSTRAINS, vt->str_expr);
 		fprintf(file_arr[CONSTRAINS], ";\n");
 		break;
 	}
@@ -1054,7 +1158,7 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 	} else {
 		switch (node->flavor) {
 		case CIL_USER:
-			cil_multimap_insert(users, node->data, NULL, CIL_USERROLE, 0);
+			cil_multimap_insert(users, node->data, NULL, CIL_USERROLE, CIL_ROOT);
 			break;
 		case CIL_USERROLE:
 			cil_multimap_insert(users, &((struct cil_userrole*)node->data)->user->datum, &((struct cil_userrole*)node->data)->role->datum, CIL_USERROLE, CIL_ROLE);
@@ -1094,9 +1198,9 @@ int cil_gen_policy(struct cil_db *db)
 	struct cil_list *sens = NULL;
 	struct cil_args_genpolicy extra_args;
 
-	cil_list_init(&users);
-	cil_list_init(&cats);
-	cil_list_init(&sens);
+	cil_list_init(&users, CIL_LIST_ITEM);
+	cil_list_init(&cats, CIL_LIST_ITEM);
+	cil_list_init(&sens, CIL_LIST_ITEM);
 
 	strcpy(temp, "/tmp/cil_classdecl-XXXXXX");
 	file_arr[CLASS_DECL] = fdopen(mkstemp(temp), "w+");

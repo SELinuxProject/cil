@@ -50,7 +50,7 @@ void cil_copy_list(struct cil_list *data, struct cil_list **copy)
 	struct cil_list *new;
 	struct cil_list_item *orig_item;
 
-	cil_list_init(&new);
+	cil_list_init(&new, CIL_LIST_ITEM);
 	cil_list_for_each(orig_item, data) {
 		if (orig_item->flavor == CIL_AST_STR) {
 			cil_list_append(new, CIL_AST_STR, cil_strdup(orig_item->data));
@@ -210,7 +210,7 @@ int cil_copy_classmapping(__attribute__((unused)) struct cil_db *db, void *data,
 	new->classmap_str = cil_strdup(orig->classmap_str);
 	new->classmap_perm_str = cil_strdup(orig->classmap_perm_str);
 
-	cil_list_init(&new->classpermsets_str);
+	cil_list_init(&new->classpermsets_str, CIL_LIST_ITEM);
 
 	cil_list_for_each(curr, new->classpermsets_str) {
 		if (curr->flavor == CIL_AST_STR) {
@@ -532,7 +532,8 @@ int cil_copy_roleattributeset(struct cil_db *db, void *data, void **copy, __attr
 
 	new->attr_str = cil_strdup(orig->attr_str);
 	
-	cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
+	cil_copy_expr(db, orig->str_expr, &new->str_expr);
+	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
 
 	*copy = new;
 
@@ -628,7 +629,8 @@ int cil_copy_typeattributeset(struct cil_db *db, void *data, void **copy, __attr
 
 	new->attr_str = cil_strdup(orig->attr_str);
 
-	cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
+	cil_copy_expr(db, orig->str_expr, &new->str_expr);
+	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
 
 	*copy = new;
 
@@ -879,7 +881,7 @@ void cil_copy_fill_catset(struct cil_catset *data, struct cil_catset *new)
 {
 	struct cil_list_item *orig_item;
 
-	cil_list_init(&new->cat_list_str);
+	cil_list_init(&new->cat_list_str, CIL_LIST_ITEM);
 
 	cil_list_for_each(orig_item, data->cat_list_str) {
 		switch (orig_item->flavor) {
@@ -1307,18 +1309,42 @@ int cil_copy_fsuse(__attribute__((unused)) struct cil_db *db, void *data, void *
 
 int cil_copy_expr(struct cil_db *db, struct cil_list *orig, struct cil_list **new)
 {
-	struct cil_list_item *curr_old;
+	struct cil_list_item *curr;
 
 	if (orig == NULL) {
+		*new = NULL;
 		return SEPOL_OK;
 	}
 
-	cil_list_init(new);
+	cil_list_init(new, orig->flavor);
 
-	cil_list_for_each(curr_old, orig) {
-		struct cil_conditional *cond_new = NULL;
-		cil_copy_conditional(db, curr_old->data, ((void**)&cond_new), NULL);
-		cil_list_append(*new, curr_old->flavor, cond_new);
+	cil_list_for_each(curr, orig) {
+		switch (curr->flavor) {
+		case CIL_LIST: {
+			struct cil_list *sub_list;
+			cil_copy_expr(db, curr->data, &sub_list);
+			cil_list_append(*new, CIL_LIST, sub_list);
+			break;
+		}
+		case CIL_AST_STR:
+			cil_list_append(*new, CIL_AST_STR, cil_strdup(curr->data));
+			break;
+		case CIL_DATUM:
+			cil_list_append(*new, curr->flavor, curr->data);
+			break;
+		case CIL_OP:
+			cil_list_append(*new, curr->flavor,
+							cil_flavordup(*((enum cil_flavor *)curr->data)));
+			break;
+		case CIL_CONS_OPERAND:
+			cil_list_append(*new, curr->flavor,
+							cil_flavordup(*((enum cil_flavor *)curr->data)));
+			break;
+		default:
+			cil_log(CIL_INFO, "Unknown flavor %d in expression being copied\n",curr->flavor);
+			cil_list_append(*new, curr->flavor, curr->data);
+			break;
+		}
 	}
 
 	return SEPOL_OK;
@@ -1328,7 +1354,6 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 {
 	struct cil_constrain *orig = data;
 	struct cil_constrain *new = NULL;
-	struct cil_list *new_list = NULL;
 
 	cil_constrain_init(&new);
 
@@ -1339,9 +1364,8 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 		cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
 	}
 
-	cil_copy_expr(db, orig->expr, &new_list);
-
-	new->expr = new_list;
+	cil_copy_expr(db, orig->str_expr, &new->str_expr);
+	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
 
 	*copy = new;
 
@@ -1352,15 +1376,13 @@ int cil_copy_validatetrans(struct cil_db *db, void *data, void **copy, __attribu
 {
 	struct cil_validatetrans *orig = data;
 	struct cil_validatetrans *new = NULL;
-	struct cil_list *new_list = NULL;
 
 	cil_validatetrans_init(&new);
 
 	new->class_str = cil_strdup(orig->class_str);
 
-	cil_copy_expr(db, orig->expr, &new_list);
-
-	new->expr = new_list;
+	cil_copy_expr(db, orig->str_expr, &new->str_expr);
+	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
 
 	*copy = new;
 
@@ -1506,21 +1528,6 @@ int cil_copy_ipaddr(__attribute__((unused)) struct cil_db *db, void *data, void 
 	return SEPOL_OK;
 }
 
-int cil_copy_conditional(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
-{
-	struct cil_conditional *orig = data;
-	struct cil_conditional *new = NULL;
-
-	cil_conditional_init(&new);
-
-	new->str = cil_strdup(orig->str);
-	new->flavor = orig->flavor;
-
-	*copy = new;
-
-	return SEPOL_OK;
-}
-
 int cil_copy_condblock(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_condblock *orig = data;
@@ -1539,7 +1546,8 @@ int cil_copy_boolif(struct cil_db *db, void *data, void **copy, __attribute__((u
 
 	cil_boolif_init(&new);
 
-	cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
+	cil_copy_expr(db, orig->str_expr, &new->str_expr);
+	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
 
 	*copy = new;
 
@@ -1553,7 +1561,8 @@ int cil_copy_tunif(struct cil_db *db, void *data, void **copy, __attribute__((un
 
 	cil_tunif_init(&new);
 
-	cil_copy_expr(db, orig->expr_stack, &new->expr_stack);
+	cil_copy_expr(db, orig->str_expr, &new->str_expr);
+	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
 
 	*copy = new;
 

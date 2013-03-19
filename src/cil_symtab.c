@@ -56,7 +56,7 @@ void cil_symtab_init(symtab_t *symtab, unsigned int size)
 void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 {
 	datum->name = NULL;
-	cil_list_init(&datum->nodes);
+	cil_list_init(&datum->nodes, CIL_LIST_ITEM);
 	datum->state = CIL_STATE_ENABLED;
 }
 

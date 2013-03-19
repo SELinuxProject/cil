@@ -34,7 +34,6 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#include <sepol/policydb/conditional.h>
 #include <sepol/policydb/polcaps.h>
 #include <sepol/errcodes.h>
 

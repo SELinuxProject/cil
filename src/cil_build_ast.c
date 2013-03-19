@@ -51,8 +51,8 @@ struct cil_args_build {
 	struct cil_tree_node *tifstack;
 };
 
-struct cil_args_stack {
-	struct cil_list *expr_stack;
+struct cil_expr_args {
+	struct cil_list *expr;
 	enum cil_flavor flavor;
 	int depth;
 	int maxdepth;
@@ -495,7 +495,7 @@ int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perm_strs
 		goto exit;
 	}
 
-	cil_list_init(perm_strs);
+	cil_list_init(perm_strs, CIL_LIST_ITEM);
 	rc = cil_parse_to_list(start_perm, *perm_strs, CIL_AST_STR);
 	if (rc != SEPOL_OK) {
 		goto exit;
@@ -732,7 +732,7 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 	mapping->classmap_str = cil_strdup(parse_current->next->data);
 	mapping->classmap_perm_str = cil_strdup(parse_current->next->next->data);
 
-	cil_list_init(&mapping->classpermsets_str);
+	cil_list_init(&mapping->classpermsets_str, CIL_LIST_ITEM);
 
 	curr_cps = parse_current->next->next->next;
 
@@ -1733,18 +1733,18 @@ void cil_destroy_roleattribute(struct cil_roleattribute *attr)
 		return;
 	}
 
-	if (attr->expr_stack_list != NULL) {
+	if (attr->expr_list != NULL) {
 		/* we don't want to destroy the expression stacks (cil_list) inside
 		 * this list cil_list_destroy destroys sublists, so we need to do it
 		 * manually */
-		struct cil_list_item *expr_stack = attr->expr_stack_list->head;
-		while (expr_stack != NULL) {
-			struct cil_list_item *next = expr_stack->next;
-			cil_list_item_destroy(&expr_stack, CIL_FALSE);
-			expr_stack = next;
+		struct cil_list_item *expr = attr->expr_list->head;
+		while (expr != NULL) {
+			struct cil_list_item *next = expr->next;
+			cil_list_item_destroy(&expr, CIL_FALSE);
+			expr = next;
 		}
-		free(attr->expr_stack_list);
-		attr->expr_stack_list = NULL;
+		free(attr->expr_list);
+		attr->expr_list = NULL;
 	}
 
 	cil_symtab_datum_destroy(attr->datum);
@@ -1778,7 +1778,7 @@ int cil_gen_roleattributeset(struct cil_db *db, struct cil_tree_node *parse_curr
 
 	attrset->attr_str = cil_strdup(parse_current->next->data);
 
-	rc = cil_gen_expr_stack(parse_current->next->next, CIL_ROLE, &attrset->expr_stack);
+	rc = cil_gen_expr(parse_current->next->next, CIL_ROLE, &attrset->str_expr);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1801,7 +1801,7 @@ void cil_destroy_roleattributeset(struct cil_roleattributeset *attrset)
 		return;
 	}
 
-	cil_list_destroy(&attrset->expr_stack, CIL_TRUE);
+	cil_list_destroy(&attrset->str_expr, CIL_TRUE);
 	free(attrset->attr_str);
 	free(attrset);
 }
@@ -2110,18 +2110,18 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 
 	cil_symtab_datum_destroy(attr->datum);
 
-	if (attr->expr_stack_list != NULL) {
+	if (attr->expr_list != NULL) {
 		/* we don't want to destroy the expression stacks (cil_list) inside
 		 * this list cil_list_destroy destroys sublists, so we need to do it
 		 * manually */
-		struct cil_list_item *expr_stack = attr->expr_stack_list->head;
-		while (expr_stack != NULL) {
-			struct cil_list_item *next = expr_stack->next;
-			cil_list_item_destroy(&expr_stack, CIL_FALSE);
-			expr_stack = next;
+		struct cil_list_item *expr = attr->expr_list->head;
+		while (expr != NULL) {
+			struct cil_list_item *next = expr->next;
+			cil_list_item_destroy(&expr, CIL_FALSE);
+			expr = next;
 		}
-		free(attr->expr_stack_list);
-		attr->expr_stack_list = NULL;
+		free(attr->expr_list);
+		attr->expr_list = NULL;
 	}
 	ebitmap_destroy(attr->types);
 	free(attr->types);
@@ -2195,123 +2195,139 @@ void cil_destroy_bool(struct cil_bool *boolean)
 
 enum cil_flavor __cil_get_operator_flavor(const char *op)
 {
-	if (!strcmp(op, CIL_KEY_AND))
-		return CIL_AND;
-	else if (!strcmp(op, CIL_KEY_OR))
-		return CIL_OR;
-	else if (!strcmp(op, CIL_KEY_NOT))
-		return CIL_NOT;
-	else if (!strcmp(op, CIL_KEY_STAR))
-		return CIL_STAR;
-	else if (!strcmp(op, CIL_KEY_EQ))
-		return CIL_EQ;
-	else if (!strcmp(op, CIL_KEY_NEQ))
-		return CIL_NEQ;
-	else if (!strcmp(op, CIL_KEY_XOR))
-		return CIL_XOR;
-	else if (!strcmp(op, CIL_KEY_CONS_DOM))
-		return CIL_CONS_DOM;
-	else if (!strcmp(op, CIL_KEY_CONS_DOMBY))
-		return CIL_CONS_DOMBY;
-	else if (!strcmp(op, CIL_KEY_CONS_INCOMP))
-		return CIL_CONS_INCOMP;
+	enum cil_flavor op_flavor = CIL_ROOT;
 
-	return 0;
+	if (!strcmp(op, CIL_KEY_AND))
+		op_flavor = CIL_AND;
+	else if (!strcmp(op, CIL_KEY_OR))
+		op_flavor = CIL_OR;
+	else if (!strcmp(op, CIL_KEY_NOT))
+		op_flavor = CIL_NOT;
+	else if (!strcmp(op, CIL_KEY_STAR))
+		op_flavor = CIL_STAR;
+	else if (!strcmp(op, CIL_KEY_EQ))
+		op_flavor = CIL_EQ;
+	else if (!strcmp(op, CIL_KEY_NEQ))
+		op_flavor = CIL_NEQ;
+	else if (!strcmp(op, CIL_KEY_XOR))
+		op_flavor = CIL_XOR;
+	else if (!strcmp(op, CIL_KEY_CONS_DOM))
+		op_flavor = CIL_CONS_DOM;
+	else if (!strcmp(op, CIL_KEY_CONS_DOMBY))
+		op_flavor = CIL_CONS_DOMBY;
+	else if (!strcmp(op, CIL_KEY_CONS_INCOMP))
+		op_flavor = CIL_CONS_INCOMP;
+	else
+		cil_log(CIL_ERR, "operator %s is unknown\n",op);
+
+	return op_flavor;
 }
 
-void __cil_gen_constrain_expr(struct cil_tree_node *current, struct cil_conditional *opcond, struct cil_list *stack)
+void __cil_gen_constrain_expr(struct cil_tree_node *current, enum cil_flavor op_flavor, struct cil_list **sub_expr)
 {
-	struct cil_conditional *lcond = NULL;
-	struct cil_conditional *rcond = NULL;
 	char * lstr = NULL;
 	char * rstr = NULL;
-
-	opcond->str = cil_strdup(current->data);
-
-	cil_conditional_init(&lcond);
-	cil_conditional_init(&rcond);
+	enum cil_flavor sub_expr_flavor = CIL_ROOT;
+	enum cil_flavor l_flavor = CIL_ROOT;
+	enum cil_flavor r_flavor = CIL_ROOT;
 
 	lstr = current->next->data;
 	rstr = current->next->next->data;
 
 	if (!strcmp(lstr, CIL_KEY_CONS_T1)) {
-		lcond->flavor = CIL_CONS_T1;
+		sub_expr_flavor = CIL_TYPE;
+		l_flavor = CIL_CONS_T1;
 		if (!strcmp(rstr, CIL_KEY_CONS_T2)) {
-			rcond->flavor = CIL_CONS_T2;
+			r_flavor = CIL_CONS_T2;
 		} else {
-			rcond->flavor = CIL_TYPE;
+			r_flavor = CIL_TYPE;
 		}
 	} else if (!strcmp(lstr, CIL_KEY_CONS_T2)) {
-		lcond->flavor = CIL_CONS_T2;
-		rcond->flavor = CIL_TYPE;
+		sub_expr_flavor = CIL_TYPE;
+		l_flavor = CIL_CONS_T2;
+		r_flavor = CIL_TYPE;
 	} else if (!strcmp(lstr, CIL_KEY_CONS_T3)) {
-		lcond->flavor = CIL_CONS_T3;
-		rcond->flavor = CIL_TYPE;
+		sub_expr_flavor = CIL_TYPE;
+		l_flavor = CIL_CONS_T3;
+		r_flavor = CIL_TYPE;
 	} else if (!strcmp(lstr, CIL_KEY_CONS_R1)) {
-		lcond->flavor = CIL_CONS_R1;
+		sub_expr_flavor = CIL_ROLE;
+		l_flavor = CIL_CONS_R1;
 		if (!strcmp(rstr, CIL_KEY_CONS_R2)) {
-			rcond->flavor = CIL_CONS_R2;
+			r_flavor = CIL_CONS_R2;
 		} else {
-			rcond->flavor = CIL_ROLE;
+			r_flavor = CIL_ROLE;
 		}
 	} else if (!strcmp(lstr, CIL_KEY_CONS_R2)) {
-		lcond->flavor = CIL_CONS_R2;
-		rcond->flavor = CIL_ROLE;
+		sub_expr_flavor = CIL_ROLE;
+		l_flavor = CIL_CONS_R2;
+		r_flavor = CIL_ROLE;
 	} else if (!strcmp(lstr, CIL_KEY_CONS_R3)) {
-		lcond->flavor = CIL_CONS_R3;
+		sub_expr_flavor = CIL_ROLE;
+		l_flavor = CIL_CONS_R3;
 	} else if (!strcmp(lstr, CIL_KEY_CONS_U1)) {
-		lcond->flavor = CIL_CONS_U1;
+		sub_expr_flavor = CIL_USER;
+		l_flavor = CIL_CONS_U1;
 		if (!strcmp(rstr, CIL_KEY_CONS_U2)) {
-			rcond->flavor = CIL_CONS_U2;
+			r_flavor = CIL_CONS_U2;
 		} else {
-			rcond->flavor = CIL_USER;
+			r_flavor = CIL_USER;
 		}
 	} else if (!strcmp(lstr, CIL_KEY_CONS_U2)) {
-		lcond->flavor = CIL_CONS_U2;
-		rcond->flavor = CIL_USER;
+		sub_expr_flavor = CIL_USER;
+		l_flavor = CIL_CONS_U2;
+		r_flavor = CIL_USER;
 	} else if (!strcmp(lstr, CIL_KEY_CONS_U3)) {
-		lcond->flavor = CIL_CONS_U3;
-		rcond->flavor = CIL_USER;
+		sub_expr_flavor = CIL_USER;
+		l_flavor = CIL_CONS_U3;
+		r_flavor = CIL_USER;
 	} else if (!strcmp(lstr, CIL_KEY_CONS_L1)) {
-		lcond->flavor = CIL_CONS_L1;
+		sub_expr_flavor = CIL_LEVEL;
+		l_flavor = CIL_CONS_L1;
 		if (!strcmp(rstr, CIL_KEY_CONS_L2)) {
-			rcond->flavor = CIL_CONS_L2;
+			r_flavor = CIL_CONS_L2;
 		} else if (!strcmp(rstr, CIL_KEY_CONS_H1)) {
-			rcond->flavor = CIL_CONS_H1;
+			r_flavor = CIL_CONS_H1;
 		} else {
-			rcond->flavor = CIL_CONS_H2;
+			r_flavor = CIL_CONS_H2;
 		}
 	} else if (!strcmp(lstr, CIL_KEY_CONS_L2)) {
-		lcond->flavor = CIL_CONS_L2;
-		rcond->flavor = CIL_CONS_H2;
+		sub_expr_flavor = CIL_LEVEL;
+		l_flavor = CIL_CONS_L2;
+		r_flavor = CIL_CONS_H2;
 	} else {
-		lcond->flavor = CIL_CONS_H1;
+		sub_expr_flavor = CIL_LEVEL;
+		l_flavor = CIL_CONS_H1;
 		if (!strcmp(rstr, CIL_KEY_CONS_L2)) {
-			rcond->flavor = CIL_CONS_L2;
+			r_flavor = CIL_CONS_L2;
 		} else {
-			rcond->flavor = CIL_CONS_H2;
+			r_flavor = CIL_CONS_H2;
 		}
 	}
 
-	lcond->str = cil_strdup(lstr);
-	rcond->str = cil_strdup(rstr);
+	cil_list_init(sub_expr, sub_expr_flavor);
 
-	cil_list_append(stack, CIL_COND, lcond);
-	cil_list_append(stack, CIL_COND, rcond);
-	cil_list_append(stack, CIL_COND, opcond);
+	cil_list_append(*sub_expr, CIL_CONS_OPERAND, cil_flavordup(l_flavor));
+
+	if (r_flavor == CIL_TYPE || r_flavor == CIL_ROLE || r_flavor == CIL_USER) {
+		cil_list_append(*sub_expr, CIL_AST_STR, cil_strdup(rstr));
+	} else {
+		cil_list_append(*sub_expr, CIL_CONS_OPERAND, cil_flavordup(r_flavor));
+	}
+
+	cil_list_append(*sub_expr, CIL_OP, cil_flavordup(op_flavor));
 }
 
-int __cil_gen_expr_stack_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
+int __cil_gen_expr_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
-	struct cil_args_stack *args = extra_args;
-	struct cil_list *stack = args->expr_stack;
+	struct cil_expr_args *args = extra_args;
+	struct cil_list *expr = args->expr;
 	enum cil_flavor expr_flavor = args->flavor;
 	int *depth = &args->depth;
 	int maxdepth = args->maxdepth;
 	int isconstraint = args->isconstraint;
 	int *nbools = &args->nbools;
-	struct cil_conditional *cond = NULL;
 
 	if (node == node->parent->cl_head && !isconstraint) {
 		return SEPOL_OK;
@@ -2321,29 +2337,31 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, uint32_t *finished, 
 		return SEPOL_OK;
 	}
 
-	cil_conditional_init(&cond);
-
 	if (isconstraint) {
+		enum cil_flavor op_flavor;
+
 		rc = __cil_verify_expr_operator(node->data, expr_flavor);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 
-		cond->flavor = __cil_get_operator_flavor(node->data);
+		op_flavor = __cil_get_operator_flavor(node->data);
 
-		if (cond->flavor != CIL_AND && cond->flavor != CIL_OR && cond->flavor != CIL_NOT) {
+		if (op_flavor != CIL_AND && op_flavor != CIL_OR && op_flavor != CIL_NOT) {
 			/* op == eq, neq, dom, domby, or incomp */
-			rc = __cil_verify_constrain_expr(node, expr_flavor, cond->flavor);
+			struct cil_list *sub_expr;
+
+			rc = __cil_verify_constrain_expr(node, expr_flavor, op_flavor);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-			__cil_gen_constrain_expr(node, cond, stack);
+			__cil_gen_constrain_expr(node, op_flavor, &sub_expr);
+			cil_list_append(expr, CIL_LIST, sub_expr);
 			(*depth)++;
 			*finished = CIL_TREE_SKIP_ALL;
 		}
 	} else {
-		cond->flavor = expr_flavor;
-		if (cond->flavor == CIL_BOOL) {
+		if (expr_flavor == CIL_BOOL) {
 			(*nbools)++;
 			if (*nbools > COND_MAX_BOOLS) {
 				cil_log(CIL_ERR, "Expression exceeds max number of bools (%d)\n", COND_MAX_BOOLS);
@@ -2352,9 +2370,7 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, uint32_t *finished, 
 			}
 		}
 
-		cond->str = cil_strdup(node->data);
-
-		cil_list_append(stack, CIL_COND, cond);
+		cil_list_append(expr, CIL_AST_STR, cil_strdup(node->data));
 
 		(*depth)++;
 	}
@@ -2368,14 +2384,13 @@ int __cil_gen_expr_stack_helper(struct cil_tree_node *node, uint32_t *finished, 
 	return SEPOL_OK;
 
 exit:
-	free(cond);
 	return rc;
 }
 
-int __cil_gen_expr_stack_first_helper(struct cil_tree_node *node, __attribute__((unused))void *extra_args)
+int __cil_gen_expr_first_helper(struct cil_tree_node *node, __attribute__((unused))void *extra_args)
 {
 	int rc = SEPOL_ERR;
-	struct cil_args_stack *args = extra_args;
+	struct cil_expr_args *args = extra_args;
 	enum cil_flavor expr_flavor = args->flavor;
 	enum cil_flavor op_flavor;
 
@@ -2404,16 +2419,16 @@ exit:
 	return rc;
 }
 
-int __cil_gen_expr_stack_last_helper(struct cil_tree_node *node, void *extra_args)
+int __cil_gen_expr_last_helper(struct cil_tree_node *node, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *first;
-	struct cil_args_stack *args = extra_args;
-	struct cil_list *stack = args->expr_stack;
+	struct cil_expr_args *args = extra_args;
+	struct cil_list *expr = args->expr;
 	enum cil_flavor expr_flavor = args->flavor;
+	enum cil_flavor op_flavor;
 	int *depth = &args->depth;
 	int isconstraint = args->isconstraint;
-	struct cil_conditional *cond = NULL;
 
 	first = node->parent->cl_head;
 
@@ -2421,71 +2436,66 @@ int __cil_gen_expr_stack_last_helper(struct cil_tree_node *node, void *extra_arg
 		return SEPOL_OK;
 	}
 
-	cil_conditional_init(&cond);
-
 	rc = __cil_verify_expr_operator(first->data, expr_flavor);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	cond->flavor = __cil_get_operator_flavor(first->data);
+	op_flavor = __cil_get_operator_flavor(first->data);
 
-	if ((cond->flavor == CIL_AND || cond->flavor == CIL_OR || cond->flavor == CIL_NOT) ||
-		(!isconstraint && cond->flavor == CIL_XOR) ||
+	if ((op_flavor == CIL_AND || op_flavor == CIL_OR || op_flavor == CIL_NOT) ||
+		(!isconstraint && op_flavor == CIL_XOR) ||
 		((expr_flavor == CIL_BOOL || expr_flavor == CIL_TUNABLE) &&
-		 (cond->flavor == CIL_EQ || cond->flavor == CIL_NEQ))) {
+		 (op_flavor == CIL_EQ || op_flavor == CIL_NEQ))) {
 		/* Constraint expressions with eq and neq are handled above. */
+		enum cil_flavor *flavor;
+
+		flavor = cil_malloc(sizeof(enum cil_flavor));
+		*flavor = op_flavor;
+
 		(*depth)--;
 
-		cond->str = cil_strdup(first->data);
-
-		cil_list_append(stack, CIL_COND, cond);
+		cil_list_append(expr, CIL_OP, flavor);
 	}
 
 	return SEPOL_OK;
 
 exit:
-	free(cond);
 	return rc;
 }
 
-int cil_gen_expr_stack(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **stack)
+int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **expr)
 {
 	int rc = SEPOL_ERR;
-	struct cil_args_stack extra_args;
-	struct cil_list *new_stack;
+	struct cil_expr_args extra_args;
+	struct cil_list *new_expr;
 	int isconstraint;
 
-	if (current == NULL || stack == NULL) {
+	if (current == NULL || expr == NULL) {
 		goto exit;
 	}
 	isconstraint = (flavor == CIL_CONSTRAIN || flavor == CIL_VALIDATETRANS || flavor == CIL_MLSCONSTRAIN || flavor == CIL_MLSVALIDATETRANS);
 
-	cil_list_init(&new_stack);
+	cil_list_init(&new_expr, flavor);
 	if (current->cl_head == NULL) {
-		struct cil_conditional *cond = NULL;
 		if (current->data == NULL || isconstraint) {
-			rc = SEPOL_ERR;
 			goto exit;
 		}
-		cil_conditional_init(&cond);
-		cond->str = cil_strdup(current->data);
-		cond->flavor = flavor;
-		cil_list_prepend(new_stack, CIL_COND, cond);
+		cil_list_append(new_expr, CIL_AST_STR, cil_strdup(current->data));
 	} else {
-		extra_args.expr_stack = new_stack;
+		extra_args.expr = new_expr;
 		extra_args.flavor = flavor;
 		extra_args.depth = 0;
 		extra_args.maxdepth = isconstraint ? CEXPR_MAXDEPTH : COND_EXPR_MAXDEPTH;
 		extra_args.isconstraint = isconstraint;
 		extra_args.nbools = 0;
-		rc = cil_tree_walk(current, __cil_gen_expr_stack_helper, __cil_gen_expr_stack_first_helper, __cil_gen_expr_stack_last_helper, &extra_args);
+		rc = cil_tree_walk(current, __cil_gen_expr_helper, __cil_gen_expr_first_helper, __cil_gen_expr_last_helper, &extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 	}
 
-	*stack = new_stack;
+	*expr = new_expr;
 
 	return SEPOL_OK;
 
@@ -2520,7 +2530,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 	cil_boolif_init(&bif);
 
-	rc = cil_gen_expr_stack(parse_current->next, CIL_BOOL, &bif->expr_stack);
+	rc = cil_gen_expr(parse_current->next, CIL_BOOL, &bif->str_expr);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2568,24 +2578,9 @@ void cil_destroy_boolif(struct cil_booleanif *bif)
 		return;
 	}
 
-	if (bif->expr_stack != NULL) {
-		cil_list_destroy(&bif->expr_stack, CIL_TRUE);
-	}
+	cil_list_destroy(&bif->str_expr, CIL_TRUE);
 
 	free(bif);
-}
-
-void cil_destroy_conditional(struct cil_conditional *cond)
-{
-	if (cond == NULL) {
-		return;
-	}
-
-	if (cond->str != NULL) {
-		free(cond->str);
-	}
-
-	free(cond);
 }
 
 int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -2614,7 +2609,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	cil_tunif_init(&tif);
 
-	rc = cil_gen_expr_stack(parse_current->next, CIL_TUNABLE, &tif->expr_stack);
+	rc = cil_gen_expr(parse_current->next, CIL_TUNABLE, &tif->str_expr);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2662,9 +2657,7 @@ void cil_destroy_tunif(struct cil_tunableif *tif)
 		return;
 	}
 
-	if (tif->expr_stack != NULL) {
-		cil_list_destroy(&tif->expr_stack, CIL_TRUE);
-	}
+	cil_list_destroy(&tif->str_expr, CIL_TRUE);
 
 	free(tif);
 }
@@ -2802,7 +2795,7 @@ int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_curr
 
 	attrset->attr_str = cil_strdup(parse_current->next->data);
 
-	rc = cil_gen_expr_stack(parse_current->next->next, CIL_TYPE, &attrset->expr_stack);
+	rc = cil_gen_expr(parse_current->next->next, CIL_TYPE, &attrset->str_expr);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2824,9 +2817,7 @@ void cil_destroy_typeattributeset(struct cil_typeattributeset *attrset)
 		return;
 	}
 
-	if (attrset->expr_stack != NULL) {
-		cil_list_destroy(&attrset->expr_stack, CIL_TRUE);
-	}
+	cil_list_destroy(&attrset->str_expr, CIL_TRUE);
 
 	if (attrset->attr_str != NULL) {
 		free(attrset->attr_str);
@@ -3477,7 +3468,7 @@ int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	cil_catorder_init(&catorder);
 
-	cil_list_init(&catorder->cat_list_str);
+	cil_list_init(&catorder->cat_list_str, CIL_LIST_ITEM);
 
 	rc = cil_set_to_list(parse_current->next, catorder->cat_list_str);
 	if (rc != SEPOL_OK) {
@@ -3530,7 +3521,7 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	cil_sens_dominates_init(&dom);
 
-	cil_list_init(&dom->sens_list_str);
+	cil_list_init(&dom->sens_list_str, CIL_LIST_ITEM);
 
 	rc = cil_set_to_list(parse_current->next, dom->sens_list_str);
 	if (rc != SEPOL_OK) {
@@ -3850,7 +3841,7 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 		}
 	}
 
-	rc = cil_gen_expr_stack(parse_current->next->next, flavor, &cons->expr);
+	rc = cil_gen_expr(parse_current->next->next, flavor, &cons->str_expr);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3881,9 +3872,7 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 		cil_destroy_classpermset(cons->classpermset);
 	}
 
-	if (cons->expr != NULL) {
-		cil_list_destroy(&cons->expr, CIL_TRUE);
-	}
+	cil_list_destroy(&cons->str_expr, CIL_TRUE);
 
 	free(cons);
 }
@@ -3913,7 +3902,7 @@ int cil_gen_validatetrans(struct cil_db *db, struct cil_tree_node *parse_current
 
 	validtrans->class_str = cil_strdup(parse_current->next->data);
 
-	rc = cil_gen_expr_stack(parse_current->next->next, flavor, &validtrans->expr);
+	rc = cil_gen_expr(parse_current->next->next, flavor, &validtrans->str_expr);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3940,7 +3929,7 @@ void cil_destroy_validatetrans(struct cil_validatetrans *validtrans)
 
 	free(validtrans->class_str);
 
-	cil_list_destroy(&validtrans->expr, CIL_TRUE);
+	cil_list_destroy(&validtrans->str_expr, CIL_TRUE);
 
 	free(validtrans);
 }
@@ -4971,7 +4960,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		}
 
 		if (macro->params == NULL) {
-			cil_list_init(&macro->params);
+			cil_list_init(&macro->params, CIL_LIST_ITEM);
 		}
 
 		kind = current_item->cl_head->data;
@@ -5469,7 +5458,7 @@ int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset)
 		goto exit;
 	}
 
-	cil_list_init(&cat_list);
+	cil_list_init(&cat_list, CIL_LIST_ITEM);
 
 	for (curr = cats; curr != NULL; curr = curr->next) {
 		if (curr->data != NULL) {

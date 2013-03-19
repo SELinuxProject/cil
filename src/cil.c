@@ -65,8 +65,8 @@ void cil_db_init(struct cil_db **db)
 
 	cil_tree_init(&(*db)->parse);
 	cil_tree_init(&(*db)->ast);
-	cil_list_init(&(*db)->catorder);
-	cil_list_init(&(*db)->dominance);
+	cil_list_init(&(*db)->catorder, CIL_LIST_ITEM);
+	cil_list_init(&(*db)->dominance, CIL_LIST_ITEM);
 	cil_sort_init(&(*db)->netifcon);
 	cil_sort_init(&(*db)->genfscon);
 	cil_sort_init(&(*db)->filecon);
@@ -77,8 +77,8 @@ void cil_db_init(struct cil_db **db)
 	cil_sort_init(&(*db)->ioportcon);
 	cil_sort_init(&(*db)->pcidevicecon);
 	cil_sort_init(&(*db)->fsuse);
-	cil_list_init(&(*db)->userprefixes);
-	cil_list_init(&(*db)->selinuxusers);
+	cil_list_init(&(*db)->userprefixes, CIL_LIST_ITEM);
+	cil_list_init(&(*db)->selinuxusers, CIL_LIST_ITEM);
 
 	cil_type_init(&(*db)->selftype);
 	(*db)->selftype->datum.name = cil_strdup(CIL_KEY_SELF);
@@ -323,9 +323,6 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_BOOLEANIF:
 		cil_destroy_boolif(*data);
 		break;
-	case CIL_COND:
-		cil_destroy_conditional(*data);
-		break;
 	case CIL_TUNABLEIF:
 		cil_destroy_tunif(*data);
 		break;
@@ -463,7 +460,14 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_IPADDR:
 		cil_destroy_ipaddr(*data);
 		break;
-	case CIL_INT: break;
+	case CIL_INT:
+		break;
+	case CIL_OP:
+		free(*data);
+		break;
+	case CIL_CONS_OPERAND:
+		free(*data);
+		break;
 	default:
 		cil_log(CIL_INFO, "Unknown data flavor: %d\n", flavor);
 		break;
@@ -1379,7 +1383,7 @@ void cil_sens_init(struct cil_sens **sens)
 	*sens = cil_malloc(sizeof(**sens));
 
 	cil_symtab_datum_init(&(*sens)->datum);
-	cil_list_init(&(*sens)->catsets);
+	cil_list_init(&(*sens)->catsets, CIL_LIST_ITEM);
 }
 
 void cil_block_init(struct cil_block **block)
@@ -1519,7 +1523,7 @@ void cil_roleattribute_init(struct cil_roleattribute **attr)
 
 	cil_symtab_datum_init(&(*attr)->datum);
 
-	(*attr)->expr_stack_list = NULL;
+	(*attr)->expr_list = NULL;
 	(*attr)->roles = NULL;
 }
 
@@ -1528,7 +1532,8 @@ void cil_roleattributeset_init(struct cil_roleattributeset **attrset)
 	*attrset = cil_malloc(sizeof(**attrset));
 
 	(*attrset)->attr_str = NULL;
-	(*attrset)->expr_stack = NULL;
+	(*attrset)->str_expr = NULL;
+	(*attrset)->datum_expr = NULL;
 }
 
 void cil_typeattribute_init(struct cil_typeattribute **attr)
@@ -1537,7 +1542,7 @@ void cil_typeattribute_init(struct cil_typeattribute **attr)
 
 	cil_symtab_datum_init(&(*attr)->datum);
 
-	(*attr)->expr_stack_list = NULL;
+	(*attr)->expr_list = NULL;
 	(*attr)->types = NULL;
 }
 
@@ -1546,7 +1551,8 @@ void cil_typeattributeset_init(struct cil_typeattributeset **attrset)
 	*attrset = cil_malloc(sizeof(**attrset));
 
 	(*attrset)->attr_str = NULL;
-	(*attrset)->expr_stack = NULL;
+	(*attrset)->str_expr = NULL;
+	(*attrset)->datum_expr = NULL;
 }
 
 void cil_typealias_init(struct cil_typealias **typealias)
@@ -1622,23 +1628,16 @@ void cil_boolif_init(struct cil_booleanif **bif)
 {
 	*bif = cil_malloc(sizeof(**bif));
 
-	(*bif)->expr_stack = NULL;
-}
-
-void cil_conditional_init(struct cil_conditional **cond)
-{
-	*cond = cil_malloc(sizeof(**cond));
-
-	(*cond)->str = NULL;
-	(*cond)->data = NULL;
-	(*cond)->flavor = CIL_AST_NODE;
+	(*bif)->str_expr = NULL;
+	(*bif)->datum_expr = NULL;
 }
 
 void cil_tunif_init(struct cil_tunableif **tif)
 {
 	*tif = cil_malloc(sizeof(**tif));
 
-	(*tif)->expr_stack = NULL;
+	(*tif)->str_expr = NULL;
+	(*tif)->datum_expr = NULL;
 }
 
 void cil_avrule_init(struct cil_avrule **avrule)
@@ -1829,7 +1828,8 @@ void cil_constrain_init(struct cil_constrain **constrain)
 
 	(*constrain)->classpermset_str = NULL;
 	(*constrain)->classpermset = NULL;
-	(*constrain)->expr = NULL;
+	(*constrain)->str_expr = NULL;
+	(*constrain)->datum_expr = NULL;
 }
 
 void cil_validatetrans_init(struct cil_validatetrans **validtrans)
@@ -1838,7 +1838,8 @@ void cil_validatetrans_init(struct cil_validatetrans **validtrans)
 
 	(*validtrans)->class_str = NULL;
 	(*validtrans)->class = NULL;
-	(*validtrans)->expr = NULL;
+	(*validtrans)->str_expr = NULL;
+	(*validtrans)->datum_expr = NULL;
 }
 
 void cil_ipaddr_init(struct cil_ipaddr **ipaddr)
