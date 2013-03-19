@@ -227,7 +227,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_PARSE_NODE:
 		free(*data);
 		break;
-	case CIL_AST_STR:
+	case CIL_STRING:
 		free(*data);
 		break;
 	case CIL_LIST:
@@ -1864,7 +1864,7 @@ void cil_classpermset_init(struct cil_classpermset **cps)
 	cil_symtab_datum_init(&(*cps)->datum);
 	(*cps)->class_str = NULL;
 	(*cps)->class = NULL;
-	(*cps)->flavor = CIL_AST_STR;
+	(*cps)->flavor = CIL_STRING;
 	(*cps)->perm_strs = NULL;
 	(*cps)->perms = NULL;
 }
@@ -1965,7 +1965,7 @@ void cil_args_init(struct cil_args **args)
 	(*args)->arg_str = NULL;
 	(*args)->arg = NULL;
 	(*args)->param_str = NULL;
-	(*args)->flavor = CIL_AST_STR;
+	(*args)->flavor = CIL_STRING;
 }
 
 void cil_call_init(struct cil_call **call)
@@ -1990,7 +1990,7 @@ void cil_param_init(struct cil_param **param)
 	*param = cil_malloc(sizeof(**param));
 
 	(*param)->str = NULL;
-	(*param)->flavor = CIL_AST_STR;
+	(*param)->flavor = CIL_STRING;
 }
 
 void cil_macro_init(struct cil_macro **macro)

@@ -610,13 +610,13 @@ int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 			cil_list_init(&cmp->classperms, CIL_LIST_ITEM);
 		}
 
-		if (curr_cps->flavor == CIL_AST_STR) {
+		if (curr_cps->flavor == CIL_STRING) {
 			rc = cil_resolve_name(current, (char*)curr_cps->data, CIL_SYM_CLASSPERMSETS, extra_args, &datum);
 			if (rc != SEPOL_OK) {
 				goto out;
 			}
 
-			/* This could still be an anonymous classpermset even if the flavor is CIL_AST_STR, if it is a param_str*/
+			/* This could still be an anonymous classpermset even if the flavor is CIL_STRING, if it is a param_str*/
 			if (datum->name == NULL) {
 				rc = cil_resolve_classpermset(current, (struct cil_classpermset*)datum, extra_args);
 				if (rc != SEPOL_OK) {
@@ -1612,7 +1612,7 @@ int cil_resolve_catset(struct cil_tree_node *current, struct cil_catset *catset,
 
 	cil_list_for_each(cat_item, catset->cat_list_str) {
 		switch (cat_item->flavor) {
-		case CIL_AST_STR: {
+		case CIL_STRING: {
 			rc = cil_resolve_name(current, (char*)cat_item->data, CIL_SYM_CATS, extra_args, &cat_datum);
 			if (rc != SEPOL_OK) {
 				goto exit;
@@ -2814,7 +2814,7 @@ int cil_resolve_expr(struct cil_list *str_expr, struct cil_list **datum_expr, st
 
 	cil_list_for_each(curr, str_expr) {
 		switch (curr->flavor) {
-		case CIL_AST_STR:
+		case CIL_STRING:
 			rc = cil_resolve_name(parent, curr->data, sym_index, extra_args, &res_datum);
 			if (rc != SEPOL_OK) {
 				goto exit;

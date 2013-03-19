@@ -630,7 +630,7 @@ int cil_expr_to_string(struct cil_list *expr, char **out)
 			}
 			pos++;
 			break;
-		case CIL_AST_STR:
+		case CIL_STRING:
 			stack[pos] = cil_strdup(curr->data);
 			pos++;
 			break;

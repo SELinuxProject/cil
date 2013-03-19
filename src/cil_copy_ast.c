@@ -52,8 +52,8 @@ void cil_copy_list(struct cil_list *data, struct cil_list **copy)
 
 	cil_list_init(&new, CIL_LIST_ITEM);
 	cil_list_for_each(orig_item, data) {
-		if (orig_item->flavor == CIL_AST_STR) {
-			cil_list_append(new, CIL_AST_STR, cil_strdup(orig_item->data));
+		if (orig_item->flavor == CIL_STRING) {
+			cil_list_append(new, CIL_STRING, cil_strdup(orig_item->data));
 		} else if (orig_item->flavor == CIL_LIST) {
 			struct cil_list *new_sub = NULL;
 			cil_copy_list((struct cil_list*)orig_item->data, &new_sub);
@@ -213,8 +213,8 @@ int cil_copy_classmapping(__attribute__((unused)) struct cil_db *db, void *data,
 	cil_list_init(&new->classpermsets_str, CIL_LIST_ITEM);
 
 	cil_list_for_each(curr, new->classpermsets_str) {
-		if (curr->flavor == CIL_AST_STR) {
-			cil_list_append(new->classpermsets_str, CIL_AST_STR, cil_strdup(curr->data));
+		if (curr->flavor == CIL_STRING) {
+			cil_list_append(new->classpermsets_str, CIL_STRING, cil_strdup(curr->data));
 		} else if (curr->flavor == CIL_CLASSPERMSET) {
 			struct cil_classpermset *cps;
 			cil_classpermset_init(&cps);
@@ -892,8 +892,8 @@ void cil_copy_fill_catset(struct cil_catset *data, struct cil_catset *new)
 			cil_list_append(new->cat_list_str, CIL_CATRANGE, catrange);
 			break;
 		}
-		case CIL_AST_STR: {
-			cil_list_append(new->cat_list_str, CIL_AST_STR, cil_strdup(orig_item->data));
+		case CIL_STRING: {
+			cil_list_append(new->cat_list_str, CIL_STRING, cil_strdup(orig_item->data));
 			break;
 		}
 		default:
@@ -1326,8 +1326,8 @@ int cil_copy_expr(struct cil_db *db, struct cil_list *orig, struct cil_list **ne
 			cil_list_append(*new, CIL_LIST, sub_list);
 			break;
 		}
-		case CIL_AST_STR:
-			cil_list_append(*new, CIL_AST_STR, cil_strdup(curr->data));
+		case CIL_STRING:
+			cil_list_append(*new, CIL_STRING, cil_strdup(curr->data));
 			break;
 		case CIL_DATUM:
 			cil_list_append(*new, curr->flavor, curr->data);

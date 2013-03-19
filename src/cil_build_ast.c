@@ -496,7 +496,7 @@ int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perm_strs
 	}
 
 	cil_list_init(perm_strs, CIL_LIST_ITEM);
-	rc = cil_parse_to_list(start_perm, *perm_strs, CIL_AST_STR);
+	rc = cil_parse_to_list(start_perm, *perm_strs, CIL_STRING);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -738,7 +738,7 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 
 	while (curr_cps != NULL) {
 		if (curr_cps->cl_head == NULL) {
-			cil_list_append(mapping->classpermsets_str, CIL_AST_STR, 
+			cil_list_append(mapping->classpermsets_str, CIL_STRING, 
 							cil_strdup(curr_cps->data));
 		} else {
 			struct cil_classpermset *new_cps = NULL;
@@ -2310,7 +2310,7 @@ void __cil_gen_constrain_expr(struct cil_tree_node *current, enum cil_flavor op_
 	cil_list_append(*sub_expr, CIL_CONS_OPERAND, cil_flavordup(l_flavor));
 
 	if (r_flavor == CIL_TYPE || r_flavor == CIL_ROLE || r_flavor == CIL_USER) {
-		cil_list_append(*sub_expr, CIL_AST_STR, cil_strdup(rstr));
+		cil_list_append(*sub_expr, CIL_STRING, cil_strdup(rstr));
 	} else {
 		cil_list_append(*sub_expr, CIL_CONS_OPERAND, cil_flavordup(r_flavor));
 	}
@@ -2370,7 +2370,7 @@ int __cil_gen_expr_helper(struct cil_tree_node *node, uint32_t *finished, void *
 			}
 		}
 
-		cil_list_append(expr, CIL_AST_STR, cil_strdup(node->data));
+		cil_list_append(expr, CIL_STRING, cil_strdup(node->data));
 
 		(*depth)++;
 	}
@@ -2481,7 +2481,7 @@ int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct c
 		if (current->data == NULL || isconstraint) {
 			goto exit;
 		}
-		cil_list_append(new_expr, CIL_AST_STR, cil_strdup(current->data));
+		cil_list_append(new_expr, CIL_STRING, cil_strdup(current->data));
 	} else {
 		extra_args.expr = new_expr;
 		extra_args.flavor = flavor;
@@ -3309,7 +3309,7 @@ int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl
  	}
 
 	for (curr = curr->cl_head; curr != NULL; curr = curr->next) {
-		cil_list_append(ast_cl, CIL_AST_STR, cil_strdup(curr->data));
+		cil_list_append(ast_cl, CIL_STRING, cil_strdup(curr->data));
 	}
 
 	return SEPOL_OK;
@@ -5463,7 +5463,7 @@ int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset)
 	for (curr = cats; curr != NULL; curr = curr->next) {
 		if (curr->data != NULL) {
 			/* named category or categoryrange */
-			cil_list_append(cat_list, CIL_AST_STR, cil_strdup(curr->data));
+			cil_list_append(cat_list, CIL_STRING, cil_strdup(curr->data));
 		} else {
 			/* anonymous category range */
 			cil_catrange_init(&catrange);

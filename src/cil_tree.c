@@ -253,7 +253,7 @@ int cil_expr_to_string(struct cil_list *expr, char **out)
 			}
 			pos++;
 			break;
-		case CIL_AST_STR:
+		case CIL_STRING:
 			stack[pos] = cil_strdup(curr->data);
 			pos++;
 			break;
@@ -479,7 +479,7 @@ void cil_tree_print_catset(struct cil_catset *catset)
 			case CIL_CATRANGE:
 				cil_tree_print_catrange(cat_item->data);
 				break;
-			case CIL_AST_STR: {
+			case CIL_STRING: {
 				cil_log(CIL_INFO, " %s", (char *)cat_item->data);
 				break;
 			}
@@ -900,7 +900,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 			cil_log(CIL_INFO, " (");
 			cil_list_for_each(curr, mapping->classpermsets_str) {
-				if (curr->flavor == CIL_AST_STR) {
+				if (curr->flavor == CIL_STRING) {
 					cil_log(CIL_INFO, " %s", (char*)curr->data);
 				} else if (curr->flavor == CIL_CLASSPERMSET) {
 					cil_log(CIL_INFO, " (");
