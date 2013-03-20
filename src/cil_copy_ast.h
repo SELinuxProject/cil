@@ -42,8 +42,8 @@ int cil_copy_blockabstract(struct cil_db *db, void *data, void **copy, symtab_t 
 int cil_copy_blockinherit(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_perm(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_class(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_classmap_perm(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_classmap(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_map_perm(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_map_class(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_classmapping(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_permset(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 void cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new);

@@ -96,7 +96,7 @@ enum cil_flavor {
 	CIL_MLSCONSTRAIN,
 	CIL_VALIDATETRANS,
 	CIL_MLSVALIDATETRANS,
-	CIL_CLASSMAPPERM,
+	CIL_MAP_PERM,
 	CIL_CLASSMAPPING,
 	CIL_USERROLE,
 	CIL_USERLEVEL,
@@ -160,17 +160,17 @@ enum cil_flavor {
 	CIL_CONS_H2,
 
 	CIL_BLOCK = CIL_MIN_DECLARATIVE,
-	CIL_CLASS,
 	CIL_PERM,
-	CIL_CLASSMAP,
 	CIL_COMMON,
+	CIL_CLASS,
+	CIL_MAP_CLASS,
+	CIL_CLASSPERMSET,
 	CIL_SID,
 	CIL_USER,
 	CIL_ROLE,
 	CIL_TYPE,
 	CIL_TYPEATTRIBUTE,
 	CIL_BOOL,
-	CIL_CLASSPERMSET,
 	CIL_TUNABLE,
 	CIL_TYPEALIAS,
 	CIL_CONTEXT,
@@ -201,7 +201,8 @@ enum cil_flavor {
 #define CIL_KEY_CLASS			"class"
 #define CIL_KEY_PERM			"perm"
 #define CIL_KEY_CLASSPERMSET		"classpermissionset"
-#define CIL_KEY_CLASSMAP		"classmap"
+#define CIL_KEY_CLASSMAP        "classmap"
+#define CIL_KEY_MAP_CLASS		"classmap"
 #define CIL_KEY_CLASSMAPPING		"classmapping"
 #define CIL_KEY_COMMON			"common"
 #define CIL_KEY_CLASSCOMMON		"classcommon"
@@ -405,14 +406,29 @@ struct cil_optional {
 	struct cil_symtab_datum datum;
 };
 
+struct cil_perm {
+	struct cil_symtab_datum datum;
+};
+
+struct cil_common {
+	struct cil_symtab_datum datum;
+	symtab_t perms;
+};
+
 struct cil_class {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
 	struct cil_common *common;
 };
 
-struct cil_perm {
+struct cil_map_perm {
 	struct cil_symtab_datum datum;
+	struct cil_list *classperms;
+};
+
+struct cil_map_class {
+	struct cil_symtab_datum datum;
+	symtab_t perms;
 };
 
 struct cil_classpermset {
@@ -424,25 +440,10 @@ struct cil_classpermset {
 	struct cil_list *perms;
 };
 
-struct cil_classmap_perm {
-	struct cil_symtab_datum datum;
-	struct cil_list *classperms;
-};
-
-struct cil_classmap {
-	struct cil_symtab_datum datum;
-	symtab_t perms;
-};
-
 struct cil_classmapping {
-	char *classmap_str;
-	char *classmap_perm_str;
+	char *map_class_str;
+	char *map_perm_str;
 	struct cil_list *classpermsets_str;
-};
-
-struct cil_common {
-	struct cil_symtab_datum datum;
-	symtab_t perms;
 };
 
 struct cil_classcommon {
@@ -972,8 +973,8 @@ void cil_validatetrans_init(struct cil_validatetrans **validtrans);
 void cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 void cil_perm_init(struct cil_perm **perm);
 void cil_classpermset_init(struct cil_classpermset **cps);
-void cil_classmap_perm_init(struct cil_classmap_perm **cmp);
-void cil_classmap_init(struct cil_classmap **map);
+void cil_map_perm_init(struct cil_map_perm **cmp);
+void cil_map_class_init(struct cil_map_class **map);
 void cil_classmapping_init(struct cil_classmapping **mapping);
 void cil_user_init(struct cil_user **user);
 void cil_userlevel_init(struct cil_userlevel **usrlvl);

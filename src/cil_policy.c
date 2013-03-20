@@ -494,11 +494,11 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 		cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
 		fprintf(file_arr[CONSTRAINS], ";\n");
 
-	} else if (cons->classpermset->flavor == CIL_CLASSMAP) {
+	} else if (cons->classpermset->flavor == CIL_MAP_CLASS) {
 		struct cil_list_item *curr_cmp;
 		cil_list_for_each(curr_cmp, cons->classpermset->perms) {
 			struct cil_list_item *curr_cps;
-			cil_list_for_each(curr_cps, ((struct cil_classmap_perm*)curr_cmp->data)->classperms) {
+			cil_list_for_each(curr_cps, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
 				fprintf(file_arr[CONSTRAINS], "%s", statement);
 				obj_str = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
 				fprintf(file_arr[CONSTRAINS], " %s {", obj_str);
@@ -528,10 +528,10 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 
 	if (rule->classpermset->flavor == CIL_CLASS) {
 		cil_list_append(classperms, CIL_CLASSPERMSET, rule->classpermset);
-	} else if (rule->classpermset->flavor == CIL_CLASSMAP) {
+	} else if (rule->classpermset->flavor == CIL_MAP_CLASS) {
 		struct cil_list_item *curr_cmp;
 		cil_list_for_each(curr_cmp, rule->classpermset->perms) {
-			cil_list_for_each(curr_cps, ((struct cil_classmap_perm*)curr_cmp->data)->classperms) {
+			cil_list_for_each(curr_cps, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
 				cil_list_append(classperms, curr_cps->flavor, curr_cps->data);
 			}
 		}

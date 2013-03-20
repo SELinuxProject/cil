@@ -64,7 +64,7 @@ static int __cil_resolve_perm_list(void *class, struct cil_list *perm_strs, stru
 	if (class_node->flavor == CIL_CLASS) {
 		perms_symtab = &((struct cil_class*)class)->perms;
 	} else {
-		perms_symtab = &((struct cil_classmap*)class)->perms;
+		perms_symtab = &((struct cil_map_class*)class)->perms;
 	}
 
 	cil_list_for_each(perm, perm_strs) {
@@ -588,22 +588,22 @@ int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_classmapping *mapping = current->data;
-	struct cil_classmap *map = NULL;
-	struct cil_classmap_perm *cmp = NULL;
+	struct cil_map_class *map = NULL;
+	struct cil_map_perm *cmp = NULL;
 	struct cil_list_item *curr_cps = NULL;
 	struct cil_symtab_datum *datum = NULL;
 
-	rc = cil_resolve_name(current, mapping->classmap_str, CIL_SYM_CLASSES, extra_args, &datum);
+	rc = cil_resolve_name(current, mapping->map_class_str, CIL_SYM_CLASSES, extra_args, &datum);
 	if (rc != SEPOL_OK) {
 		goto out;
 	}
-	map = (struct cil_classmap*)datum;
+	map = (struct cil_map_class*)datum;
 
-	rc = cil_symtab_get_datum(&map->perms, mapping->classmap_perm_str, &datum);
+	rc = cil_symtab_get_datum(&map->perms, mapping->map_perm_str, &datum);
 	if (rc != SEPOL_OK) {
 		goto out;
 	}
-	cmp = (struct cil_classmap_perm*)datum;
+	cmp = (struct cil_map_perm*)datum;
 
 	cil_list_for_each(curr_cps, mapping->classpermsets_str) {
 		if (cmp->classperms == NULL) {
@@ -650,9 +650,9 @@ int cil_reset_class(struct cil_tree_node *current, __attribute__((unused)) void 
 	return SEPOL_OK;
 }
 
-int cil_reset_classmap_perm(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+int cil_reset_map_perm(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
-	struct cil_classmap_perm *cmp = current->data;
+	struct cil_map_perm *cmp = current->data;
 
 	/* during a re-resolve the classperms list needs to be reset to avoid
 	   duplicate entries
@@ -2585,7 +2585,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			case CIL_CLASS:
 				new_arg->arg_str = cil_strdup(pc->data);
 				break;
-			case CIL_CLASSMAP:
+			case CIL_MAP_CLASS:
 				new_arg->arg_str = cil_strdup(pc->data);
 				break;
 			case CIL_CLASSPERMSET: {
@@ -2727,7 +2727,7 @@ int cil_resolve_call2(struct cil_tree_node *current, void *extra_args)
 		case CIL_CLASS:
 			sym_index = CIL_SYM_CLASSES;
 			break;
-		case CIL_CLASSMAP:
+		case CIL_MAP_CLASS:
 			sym_index = CIL_SYM_CLASSES;
 			break;
 		case CIL_BOOL:
@@ -3051,8 +3051,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_CLASS:
 			rc = cil_reset_class(node, args);
 			break;
-		case CIL_CLASSMAPPERM:
-			rc = cil_reset_classmap_perm(node, args);
+		case CIL_MAP_PERM:
+			rc = cil_reset_map_perm(node, args);
 			break;
 		case CIL_ROLE:
 			rc = cil_reset_role(node, args);

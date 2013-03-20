@@ -423,8 +423,8 @@ void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 	while (current_perm != NULL) {
 		if (current_perm->flavor == CIL_PERM) {
 			cil_log(CIL_INFO, " %s", ((struct cil_perm *)current_perm->data)->datum.name);
-		} else if (current_perm->flavor == CIL_CLASSMAPPERM) {
-			cil_log(CIL_INFO, " %s", ((struct cil_classmap_perm*)current_perm->data)->datum.name);
+		} else if (current_perm->flavor == CIL_MAP_PERM) {
+			cil_log(CIL_INFO, " %s", ((struct cil_map_perm*)current_perm->data)->datum.name);
 		} else {
 			cil_log(CIL_INFO, "\n\n perms list contained unexpected data type: %d\n", current_perm->flavor);
 			break;
@@ -520,7 +520,7 @@ void cil_tree_print_classpermset(struct cil_classpermset *cps)
 		if (cps->flavor == CIL_CLASS) {
 			cil_log(CIL_INFO, " class: %s", ((struct cil_class*)cps->class)->datum.name);
 		} else {
-			cil_log(CIL_INFO, " classmap: %s", ((struct cil_classmap*)cps->class)->datum.name);
+			cil_log(CIL_INFO, " map_class: %s", ((struct cil_map_class*)cps->class)->datum.name);
 		}
 	}
 
@@ -861,9 +861,9 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 			return;
 		}
-		case CIL_CLASSMAP: {
-			struct cil_classmap *cm = node->data;
-			cil_log(CIL_INFO, "CLASSMAP: %s", cm->datum.name);
+		case CIL_MAP_CLASS: {
+			struct cil_map_class *cm = node->data;
+			cil_log(CIL_INFO, "MAP_CLASS: %s", cm->datum.name);
 
 			cil_log(CIL_INFO, " (");
 			cil_tree_print_perms_list(node->cl_head);
@@ -871,11 +871,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 			return;
 		}
-		case CIL_CLASSMAPPERM: {
-			struct cil_classmap_perm *cmp = node->data;
+		case CIL_MAP_PERM: {
+			struct cil_map_perm *cmp = node->data;
 			struct cil_list_item *curr;
 
-			cil_log(CIL_INFO, "CLASSMAPPERM: %s", cmp->datum.name);
+			cil_log(CIL_INFO, "MAP_CLASSPERM: %s", cmp->datum.name);
 
 			if (cmp->classperms == NULL) {
 				cil_log(CIL_INFO, " perms: ()");
@@ -896,7 +896,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			struct cil_classmapping *mapping = node->data;
 			struct cil_list_item *curr;
 
-			cil_log(CIL_INFO, "CLASSMAPPING: classmap: %s, classmap_perm: %s,", mapping->classmap_str, mapping->classmap_perm_str);
+			cil_log(CIL_INFO, "CLASSMAPPING: map class: %s, map perm: %s,", mapping->map_class_str, mapping->map_perm_str);
 
 			cil_log(CIL_INFO, " (");
 			cil_list_for_each(curr, mapping->classpermsets_str) {

@@ -1091,7 +1091,7 @@ int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t d
 	return rc;
 }
 
-/* Before inserting, expand out avrule classpermset if it is a classmap */
+/* Before inserting, expand out avrule classpermset if it is a map class */
 int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_avrule *cil_avrule, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_ERR;
@@ -1131,11 +1131,11 @@ int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_
 				goto exit;
 			}
 		}
-	} else if (classpermset->flavor == CIL_CLASSMAP) {
+	} else if (classpermset->flavor == CIL_MAP_CLASS) {
 		struct cil_list_item *i = NULL;
 
 		for (i = cil_perms->head; i != NULL; i = i->next) {
-			struct cil_classmap_perm *cmp = i->data;
+			struct cil_map_perm *cmp = i->data;
 			struct cil_list_item *j = NULL;
 
 			for (j = cmp->classperms->head; j != NULL; j = j->next) {
@@ -1926,11 +1926,11 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
       sepol_constrain->next = sepol_class->constraints;
       sepol_class->constraints = sepol_constrain;
 
-	} else if (cil_constrain->classpermset->flavor == CIL_CLASSMAP) {
+	} else if (cil_constrain->classpermset->flavor == CIL_MAP_CLASS) {
 		struct cil_list_item *curr_cmp;
 		struct cil_list_item *curr_cps;
 		cil_list_for_each(curr_cmp, cil_constrain->classpermset->perms) {
-			cil_list_for_each(curr_cps, ((struct cil_classmap_perm*)curr_cmp->data)->classperms) {
+			cil_list_for_each(curr_cps, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
 				key = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
 				sepol_class = hashtab_search(pdb->p_classes.table, key);
 				if (sepol_class == NULL) {

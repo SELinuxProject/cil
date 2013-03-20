@@ -157,20 +157,20 @@ int cil_copy_perm(__attribute__((unused)) struct cil_db *db, void *data, void **
 	return SEPOL_OK;
 }
 
-int cil_copy_classmap_perm(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
+int cil_copy_map_perm(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
-	struct cil_classmap_perm *orig = data;
-	struct cil_classmap_perm *new = NULL;
+	struct cil_map_perm *orig = data;
+	struct cil_map_perm *new = NULL;
 	char *key = orig->datum.name;
 	struct cil_symtab_datum *datum = NULL;
 
 	cil_symtab_get_datum(symtab, key, &datum);
 	if (datum != NULL) {
-		cil_log(CIL_INFO, "cil_copy_classmap_perm: classmap permissions cannot be redefined\n");
+		cil_log(CIL_INFO, "Map permissions cannot be redefined\n");
 		return SEPOL_ERR;
 	}
 
-	cil_classmap_perm_init(&new);
+	cil_map_perm_init(&new);
 	cil_copy_list(orig->classperms, &new->classperms);
 
 	*copy = new;
@@ -178,20 +178,20 @@ int cil_copy_classmap_perm(__attribute__((unused)) struct cil_db *db, void *data
 	return SEPOL_OK;
 }
 
-int cil_copy_classmap(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
+int cil_copy_map_class(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
-	struct cil_classmap *orig = data;
-	struct cil_classmap *new = NULL;
+	struct cil_map_class *orig = data;
+	struct cil_map_class *new = NULL;
 	char *key = orig->datum.name;
 	struct cil_symtab_datum *datum = NULL;
 
 	cil_symtab_get_datum(symtab, key, &datum);
 	if (datum != NULL) {
-		cil_log(CIL_INFO, "cil_copy_classmap: classmap cannot be redefined\n");
+		cil_log(CIL_INFO, "Map class cannot be redefined\n");
 		return SEPOL_ERR;
 	}
 
-	cil_classmap_init(&new);
+	cil_map_class_init(&new);
 	cil_symtab_init(&new->perms, CIL_CLASS_SYM_SIZE);
 
 	*copy = new;
@@ -207,8 +207,8 @@ int cil_copy_classmapping(__attribute__((unused)) struct cil_db *db, void *data,
 
 	cil_classmapping_init(&new);
 
-	new->classmap_str = cil_strdup(orig->classmap_str);
-	new->classmap_perm_str = cil_strdup(orig->classmap_perm_str);
+	new->map_class_str = cil_strdup(orig->map_class_str);
+	new->map_perm_str = cil_strdup(orig->map_perm_str);
 
 	cil_list_init(&new->classpermsets_str, CIL_LIST_ITEM);
 
@@ -1608,11 +1608,11 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_PERM:
 		copy_func = &cil_copy_perm;
 		break;
-	case CIL_CLASSMAPPERM:
-		copy_func =  &cil_copy_classmap_perm;
+	case CIL_MAP_PERM:
+		copy_func =  &cil_copy_map_perm;
 		break;
-	case CIL_CLASSMAP:
-		copy_func = &cil_copy_classmap;
+	case CIL_MAP_CLASS:
+		copy_func = &cil_copy_map_class;
 		break;
 	case CIL_CLASSMAPPING:
 		copy_func = &cil_copy_classmapping;

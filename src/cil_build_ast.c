@@ -453,8 +453,8 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 		new_ast->path = current_perm->path;
 		if (flavor == CIL_PERM) {
 			rc = cil_gen_perm(db, current_perm, new_ast);
-		} else if (flavor == CIL_CLASSMAPPERM) {
-			rc = cil_gen_classmap_perm(db, current_perm, new_ast);
+		} else if (flavor == CIL_MAP_PERM) {
+			rc = cil_gen_map_perm(db, current_perm, new_ast);
 		}
 		if (rc != SEPOL_OK) {
 			goto exit;
@@ -610,18 +610,18 @@ void cil_destroy_classpermset(struct cil_classpermset *cps)
 	free(cps);
 }
 
-int cil_gen_classmap_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_map_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	int rc = SEPOL_ERR;
-	struct cil_classmap_perm *cmp = NULL;
+	struct cil_map_perm *cmp = NULL;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
 		goto exit;
 	}
 
-	cil_classmap_perm_init(&cmp);
+	cil_map_perm_init(&cmp);
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cmp, (hashtab_key_t)parse_current->data, CIL_SYM_UNKNOWN, CIL_CLASSMAPPERM);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cmp, (hashtab_key_t)parse_current->data, CIL_SYM_UNKNOWN, CIL_MAP_PERM);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -629,12 +629,12 @@ int cil_gen_classmap_perm(struct cil_db *db, struct cil_tree_node *parse_current
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad classmap permissions\n");
-	cil_destroy_classmap_perm(cmp);
+	cil_log(CIL_ERR, "Bad map permissions\n");
+	cil_destroy_map_perm(cmp);
 	return rc;
 }
 
-void cil_destroy_classmap_perm(struct cil_classmap_perm *cmp)
+void cil_destroy_map_perm(struct cil_map_perm *cmp)
 {
 	if (cmp == NULL) {
 		return;
@@ -648,7 +648,7 @@ void cil_destroy_classmap_perm(struct cil_classmap_perm *cmp)
 	free(cmp);
 }
 
-int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_map_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -658,7 +658,7 @@ int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, str
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
-	struct cil_classmap *map = NULL;
+	struct cil_map_class *map = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -670,16 +670,16 @@ int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	cil_classmap_init(&map);
+	cil_map_class_init(&map);
 
 	key = parse_current->next->data;
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)map, (hashtab_key_t)key, CIL_SYM_CLASSES, CIL_CLASSMAP);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)map, (hashtab_key_t)key, CIL_SYM_CLASSES, CIL_MAP_CLASS);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_CLASSMAPPERM);
+	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_MAP_PERM);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -687,13 +687,13 @@ int cil_gen_classmap(struct cil_db *db, struct cil_tree_node *parse_current, str
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad classmap declaration at line %d of %s\n", 
+	cil_log(CIL_ERR, "Bad map class declaration at line %d of %s\n", 
 		parse_current->line, parse_current->path);
-	cil_destroy_classmap(map);
+	cil_destroy_map_class(map);
 	return rc;
 }
 
-void cil_destroy_classmap(struct cil_classmap *map)
+void cil_destroy_map_class(struct cil_map_class *map)
 {
 	if (map == NULL) {
 		return;
@@ -729,8 +729,8 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 
 	cil_classmapping_init(&mapping);
 
-	mapping->classmap_str = cil_strdup(parse_current->next->data);
-	mapping->classmap_perm_str = cil_strdup(parse_current->next->next->data);
+	mapping->map_class_str = cil_strdup(parse_current->next->data);
+	mapping->map_perm_str = cil_strdup(parse_current->next->next->data);
 
 	cil_list_init(&mapping->classpermsets_str, CIL_LIST_ITEM);
 
@@ -770,8 +770,8 @@ void cil_destroy_classmapping(struct cil_classmapping *mapping)
 		return;
 	}
 
-	free(mapping->classmap_str);
-	free(mapping->classmap_perm_str);
+	free(mapping->map_class_str);
+	free(mapping->map_perm_str);
 	cil_list_destroy(&mapping->classpermsets_str, 1);
 
 	free(mapping);
@@ -4986,8 +4986,8 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			param->flavor = CIL_CLASS;
 		} else if (!strcmp(kind, CIL_KEY_IPADDR)) {
 			param->flavor = CIL_IPADDR;
-		} else if (!strcmp(kind, CIL_KEY_CLASSMAP)) {
-			param->flavor = CIL_CLASSMAP;
+		} else if (!strcmp(kind, CIL_KEY_MAP_CLASS)) {
+			param->flavor = CIL_MAP_CLASS;
 		} else if (!strcmp(kind, CIL_KEY_CLASSPERMSET)) {
 			param->flavor = CIL_CLASSPERMSET;
 		} else if (!strcmp(kind, CIL_KEY_BOOL)) {
@@ -5593,7 +5593,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		// To avoid parsing list of perms again
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSMAP)) {
-		rc = cil_gen_classmap(db, parse_current, ast_node);
+		rc = cil_gen_map_class(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSMAPPING)) {
 		rc = cil_gen_classmapping(db, parse_current, ast_node);
