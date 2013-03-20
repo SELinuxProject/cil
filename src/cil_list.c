@@ -73,7 +73,7 @@ void cil_list_item_init(struct cil_list_item **item)
 {
 	struct cil_list_item *new_item = cil_malloc(sizeof(*new_item));
 	new_item->next = NULL;
-	new_item->flavor = 0;
+	new_item->flavor = CIL_NONE;
 	new_item->data = NULL;
 
 	*item = new_item;

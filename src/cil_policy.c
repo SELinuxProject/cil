@@ -1158,7 +1158,7 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 	} else {
 		switch (node->flavor) {
 		case CIL_USER:
-			cil_multimap_insert(users, node->data, NULL, CIL_USERROLE, CIL_ROOT);
+			cil_multimap_insert(users, node->data, NULL, CIL_USERROLE, CIL_NONE);
 			break;
 		case CIL_USERROLE:
 			cil_multimap_insert(users, &((struct cil_userrole*)node->data)->user->datum, &((struct cil_userrole*)node->data)->role->datum, CIL_USERROLE, CIL_ROLE);

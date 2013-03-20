@@ -67,7 +67,8 @@ enum cil_pass {
 };
 
 enum cil_flavor {
-	CIL_ROOT = 0,
+	CIL_NONE = 0,
+	CIL_ROOT,
 	CIL_DB,
 	CIL_AST_NODE,
 	CIL_PARSE_NODE,

@@ -3537,7 +3537,7 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 	char *tok_next = strtok(NULL, ".");
 	symtab_t *symtab = NULL;
 	struct cil_symtab_datum *tmp_datum = NULL;
-	enum cil_flavor flavor = CIL_AST_NODE;
+	enum cil_flavor flavor = CIL_NONE;
 
 	if (args != NULL) {
 		db = args->db;

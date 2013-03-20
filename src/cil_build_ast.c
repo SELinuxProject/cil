@@ -2195,7 +2195,7 @@ void cil_destroy_bool(struct cil_bool *boolean)
 
 enum cil_flavor __cil_get_operator_flavor(const char *op)
 {
-	enum cil_flavor op_flavor = CIL_ROOT;
+	enum cil_flavor op_flavor = CIL_NONE;
 
 	if (!strcmp(op, CIL_KEY_AND))
 		op_flavor = CIL_AND;
@@ -2227,9 +2227,9 @@ void __cil_gen_constrain_expr(struct cil_tree_node *current, enum cil_flavor op_
 {
 	char * lstr = NULL;
 	char * rstr = NULL;
-	enum cil_flavor sub_expr_flavor = CIL_ROOT;
-	enum cil_flavor l_flavor = CIL_ROOT;
-	enum cil_flavor r_flavor = CIL_ROOT;
+	enum cil_flavor sub_expr_flavor = CIL_NONE;
+	enum cil_flavor l_flavor = CIL_NONE;
+	enum cil_flavor r_flavor = CIL_NONE;
 
 	lstr = current->next->data;
 	rstr = current->next->next->data;

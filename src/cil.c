@@ -221,6 +221,8 @@ exit:
 void cil_destroy_data(void **data, enum cil_flavor flavor)
 {
 	switch(flavor) {
+		case CIL_NONE:
+		break;
 	case CIL_ROOT:
 		free(*data);
 		break;
@@ -1310,7 +1312,7 @@ void cil_sort_init(struct cil_sort **sort)
 {
 	*sort = cil_malloc(sizeof(**sort));
 
-	(*sort)->flavor = 0;
+	(*sort)->flavor = CIL_NONE;
 	(*sort)->count = 0;
 	(*sort)->index = 0;
 	(*sort)->array = NULL;
@@ -1318,7 +1320,7 @@ void cil_sort_init(struct cil_sort **sort)
 
 void cil_sort_destroy(struct cil_sort **sort)
 {
-	(*sort)->flavor = 0;
+	(*sort)->flavor = CIL_NONE;
 	(*sort)->count = 0;
 	(*sort)->index = 0;
 	if ((*sort)->array != NULL) {
@@ -1644,7 +1646,7 @@ void cil_avrule_init(struct cil_avrule **avrule)
 {
 	*avrule = cil_malloc(sizeof(**avrule));
 
-	(*avrule)->rule_kind = 0;
+	(*avrule)->rule_kind = CIL_NONE;
 	(*avrule)->src_str = NULL;
 	(*avrule)->src = NULL;
 	(*avrule)->tgt_str = NULL;
@@ -1657,7 +1659,7 @@ void cil_type_rule_init(struct cil_type_rule **type_rule)
 {
 	*type_rule = cil_malloc(sizeof(**type_rule));
 
-	(*type_rule)->rule_kind = 0;
+	(*type_rule)->rule_kind = CIL_NONE;
 	(*type_rule)->src_str = NULL;
 	(*type_rule)->src = NULL;
 	(*type_rule)->tgt_str = NULL;
