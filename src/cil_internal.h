@@ -140,7 +140,6 @@ enum cil_flavor {
 	CIL_NOT,
 	CIL_EQ,
 	CIL_NEQ,
-	CIL_COND,
 	CIL_PARAM,
 	CIL_CONS_DOM,
 	CIL_CONS_DOMBY,
