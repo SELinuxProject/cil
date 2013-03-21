@@ -5,22 +5,27 @@ INCLUDEDIR ?= $(PREFIX)/include
 SRCDIR ?= ./src
 TESTDIR ?= ./test
 UNITDIR ?= $(TESTDIR)/unit
+LIBCILDIR ?= $(SRCDIR)
 
 LEX = flex
 
-DEBUG=0
+DEBUG = 0
 
 SECILC = secilc
 
 UNIT = unit_tests
 
-SECILC_SRCS = secilc.c
-SECILC_OBJS = $(patsubst %.c,%.o,$(SECILC_SRCS))
+SECILC_SRCS := secilc.c
+SECILC_OBJS := $(patsubst %.c,%.o,$(SECILC_SRCS))
 
-TEST_SRCS = $(wildcard $(UNITDIR)/*.c)
-TEST_OBJS = $(patsubst %.c,%.o,$(TEST_SRCS))
+TEST_SRCS := $(wildcard $(UNITDIR)/*.c)
+TEST_OBJS := $(patsubst %.c,%.o,$(TEST_SRCS))
 
-LIBCIL_STATIC = $(SRCDIR)/libcil.a
+LIBCIL_GENERATED := $(LIBCILDIR)/cil_lexer.c
+LIBCIL_SRCS  := $(wildcard $(LIBCILDIR)/*.c) $(LIBCIL_GENERATED)
+LIBCIL_OBJS := $(patsubst %.c,%.o,$(LIBCIL_SRCS))
+
+LIBCIL_STATIC := $(SRCDIR)/libcil.a
 
 LIBSEPOL_STATIC = /usr/lib/libsepol.a
 
@@ -53,8 +58,12 @@ all: $(SECILC)
 %.o:  %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(LIBCIL_STATIC):
-	make -C src/ CFLAGS="$(CFLAGS)" libcil.a
+$(LIBCIL_STATIC): $(LIBCIL_OBJS)
+	$(AR) rcs $@ $^
+	ranlib $@
+
+$(LIBCIL_GENERATED): $(LIBCILDIR)/cil_lexer.l
+	$(LEX) -t $< > $@
 
 $(UNIT): $(TEST_OBJS) $(LIBCIL_STATIC)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBCIL_STATIC) $(LIBSEPOL_STATIC) $(LDFLAGS)
@@ -77,12 +86,14 @@ test: $(SECILC)
 	./$(SECILC) test/policy.cil
 
 clean:
-	-rm -f $(TEST_OBJS) $(SECILC_OBJS)
-	-rm -rf cov src/*.gcda src/*.gcno *.gcda *.gcno
-	make -C src clean
+	rm -f $(TEST_OBJS) $(SECILC_OBJS)
+	rm -rf cov src/*.gcda src/*.gcno *.gcda *.gcno
+	rm -f $(LIBCIL_OBJS)
 
 bare: clean
 	rm -f $(SECILC)
+	rm -f $(LIBCIL_STATIC)
+	rm -f $(LIBCIL_GENERATED)
 	rm -f $(UNIT)
 	rm -f policy.*
 	rm -f file_contexts
