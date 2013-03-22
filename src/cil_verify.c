@@ -343,8 +343,10 @@ int __cil_verify_expr_operator(const char *op, enum cil_flavor expr_flavor)
 			goto exit;
 		}
 	} else {
-		cil_log(CIL_ERR, "Token %s is not an operator\n",op);
-		return SEPOL_ERR;
+		if (expr_flavor != CIL_PERM) {
+			cil_log(CIL_ERR, "Token %s is not an operator\n",op);
+			return SEPOL_ERR;
+		}
 	}
 
 	return SEPOL_OK;
@@ -399,6 +401,16 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
+		}
+	} else if (nflavor == CIL_PERM) {
+		enum cil_syntax syntax[] = {
+			SYM_N_STRINGS,
+			SYM_END
+		};
+		int syntax_len = sizeof(syntax)/sizeof(*syntax);
+		rc = __cil_verify_syntax(node, syntax, syntax_len);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
 	} else {
 		if (eflavor == CIL_STAR) {

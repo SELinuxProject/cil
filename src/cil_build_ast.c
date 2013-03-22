@@ -118,27 +118,6 @@ exit:
 	return rc;
 }
 
-int cil_parse_to_list(struct cil_tree_node *parse_cl_head, struct cil_list *ast_cl, enum cil_flavor flavor)
-{
-	int rc = SEPOL_ERR;
-	struct cil_tree_node *parse_current = parse_cl_head;
-
-	if (parse_current == NULL || ast_cl == NULL) {
-		goto exit;
-	}
-
-	while(parse_current != NULL) {
-		cil_list_append(ast_cl, flavor, cil_strdup(parse_current->data));
-		parse_current = parse_current->next;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Failed to parse list\n");
-	return rc;
-}
-
 int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract)
 {
 	enum cil_syntax syntax[] = {
@@ -477,51 +456,16 @@ exit:
 	return rc;
 }
 
-int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perm_strs)
-{
-	enum cil_syntax syntax[] = {
-		SYM_N_STRINGS
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	int rc = SEPOL_ERR;
-
-	if (start_perm == NULL || perm_strs == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(start_perm, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		
-		goto exit;
-	}
-
-	cil_list_init(perm_strs, CIL_LIST_ITEM);
-	rc = cil_parse_to_list(start_perm, *perm_strs, CIL_STRING);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad permission set\n");
-	return rc;
-}
-
 /* fills in classpermset starting with class */
 int cil_fill_classpermset(struct cil_tree_node *class_node, struct cil_classpermset *cps)
 {
+	int rc = SEPOL_ERR;
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_LIST,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	int rc = SEPOL_ERR;
-
-	if (class_node == NULL || cps == NULL) {
-		goto exit;
-	}
 
 	rc = __cil_verify_syntax(class_node, syntax, syntax_len);
 	if (rc != SEPOL_OK) {
@@ -530,7 +474,7 @@ int cil_fill_classpermset(struct cil_tree_node *class_node, struct cil_classperm
 
 	cps->class_str = cil_strdup(class_node->data);
 
-	rc = cil_fill_perms(class_node->next->cl_head, &cps->perm_strs);
+	rc = cil_gen_expr(class_node->next, CIL_PERM, &cps->perm_strs);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -538,7 +482,7 @@ int cil_fill_classpermset(struct cil_tree_node *class_node, struct cil_classperm
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad class permission set\n");
+	cil_log(CIL_ERR, "Bad class permissions\n");
 	return rc;
 }
 
@@ -2217,8 +2161,6 @@ enum cil_flavor __cil_get_operator_flavor(const char *op)
 		op_flavor = CIL_CONS_DOMBY;
 	else if (!strcmp(op, CIL_KEY_CONS_INCOMP))
 		op_flavor = CIL_CONS_INCOMP;
-	else
-		cil_log(CIL_ERR, "operator %s is unknown\n",op);
 
 	return op_flavor;
 }
@@ -2372,7 +2314,9 @@ int __cil_gen_expr_helper(struct cil_tree_node *node, uint32_t *finished, void *
 
 		cil_list_append(expr, CIL_STRING, cil_strdup(node->data));
 
-		(*depth)++;
+		if (expr_flavor != CIL_PERM) {
+			(*depth)++;
+		}
 	}
 
 	if (*depth > maxdepth) {
