@@ -24,6 +24,7 @@ TEST_OBJS := $(patsubst %.c,%.o,$(TEST_SRCS))
 LIBCIL_GENERATED := $(LIBCILDIR)/cil_lexer.c
 LIBCIL_SRCS  := $(wildcard $(LIBCILDIR)/*.c) $(LIBCIL_GENERATED)
 LIBCIL_OBJS := $(patsubst %.c,%.o,$(LIBCIL_SRCS))
+LIBCIL_INCLUDES := $(wildcard $(LIBCILDIR)/*.h)
 
 LIBCIL_STATIC := $(SRCDIR)/libcil.a
 
@@ -55,7 +56,7 @@ endif
 
 all: $(SECILC)
 
-%.o:  %.c %.h
+%.o: %.c $(LIBCIL_INCLUDES)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(LIBCIL_STATIC): $(LIBCIL_OBJS)
@@ -86,13 +87,13 @@ test: $(SECILC)
 	./$(SECILC) test/policy.cil
 
 clean:
+	rm -f $(SECILC)
+	rm -f $(LIBCIL_STATIC)
 	rm -f $(TEST_OBJS) $(SECILC_OBJS)
 	rm -rf cov src/*.gcda src/*.gcno *.gcda *.gcno
 	rm -f $(LIBCIL_OBJS)
 
 bare: clean
-	rm -f $(SECILC)
-	rm -f $(LIBCIL_STATIC)
 	rm -f $(LIBCIL_GENERATED)
 	rm -f $(UNIT)
 	rm -f policy.*
