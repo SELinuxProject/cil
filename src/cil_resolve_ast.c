@@ -52,38 +52,38 @@ struct cil_args_resolve {
 	struct cil_tree_node *macro;
 };
 
-static int __cil_resolve_perm_list(void *class, struct cil_list *perm_strs, struct cil_list *res_list_perms)
+static int __cil_resolve_perms(symtab_t *class_symtab, symtab_t *common_symtab, struct cil_list *perm_strs, struct cil_list **perm_datums)
 {
-	struct cil_symtab_datum *perm_datum = NULL;
-	struct cil_list_item *perm;
-	struct cil_tree_node *class_node = NULL;
-	symtab_t *perms_symtab = NULL;
 	int rc = SEPOL_ERR;
+	struct cil_list_item *curr;
 
-	class_node = ((struct cil_symtab_datum*)class)->nodes->head->data;
-	if (class_node->flavor == CIL_CLASS) {
-		perms_symtab = &((struct cil_class*)class)->perms;
-	} else {
-		perms_symtab = &((struct cil_map_class*)class)->perms;
-	}
+	cil_list_init(perm_datums, perm_strs->flavor);
 
-	cil_list_for_each(perm, perm_strs) {
-		rc = cil_symtab_get_datum(perms_symtab, (char*)perm->data, &perm_datum);
-		if (rc == SEPOL_ENOENT) {
-			if (class_node->flavor == CIL_CLASS && ((struct cil_class*)class)->common != NULL) {
-				symtab_t *com_perms_symtab = &((struct cil_class*)class)->common->perms;
-				rc = cil_symtab_get_datum(com_perms_symtab, (char*)perm->data, &perm_datum);
-				if (rc != SEPOL_OK) {
-					cil_log(CIL_ERR, "Failed to find perm in class or common symtabs\n");
-					goto exit;
-				}
-			} else {
-				cil_log(CIL_ERR, "Failed to find perm '%s' in %s symtab\n", (char*)perm->data, cil_node_to_string(class_node));
+	cil_list_for_each(curr, perm_strs) {
+		if (curr->flavor == CIL_LIST) {
+			struct cil_list *sub_list;
+			rc = __cil_resolve_perms(class_symtab, common_symtab, curr->data, &sub_list);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_ERR, "Failed to resolve permission list\n");
 				goto exit;
 			}
+			cil_list_append(*perm_datums, CIL_LIST, sub_list);
+		} else if (curr->flavor == CIL_STRING) {
+			struct cil_symtab_datum *perm_datum = NULL;
+			rc = cil_symtab_get_datum(class_symtab, curr->data, &perm_datum);
+			if (rc == SEPOL_ENOENT) {
+				if (common_symtab) {
+					rc = cil_symtab_get_datum(common_symtab, curr->data, &perm_datum);
+				}
+			}
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_ERR, "Failed to resolve permission %s\n", curr->data);
+				goto exit;
+			}
+			cil_list_append(*perm_datums, CIL_DATUM, perm_datum);
+		} else {
+			cil_list_append(*perm_datums, curr->flavor, curr->data);
 		}
-
-		cil_list_append(res_list_perms, CIL_PERM, perm_datum);
 	}
 
 	return SEPOL_OK;
@@ -96,6 +96,8 @@ int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classperm
 {
 	struct cil_symtab_datum *class_datum = NULL;
 	struct cil_tree_node *class_node = NULL;
+	symtab_t *class_symtab = NULL;
+	symtab_t *common_symtab = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, cps->class_str, CIL_SYM_CLASSES, extra_args, &class_datum);
@@ -113,9 +115,18 @@ int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classperm
 		cil_list_destroy(&cps->perms, 0);
 	}
 
-	cil_list_init(&cps->perms, CIL_LIST_ITEM);
+	if (class_node->flavor == CIL_CLASS) {
+		struct cil_class *kc = (struct cil_class *)class_datum;
+		class_symtab = &kc->perms;
+		if (kc->common != NULL) {
+			common_symtab = &kc->common->perms;
+		}
+	} else {
+		struct cil_map_class *mc = (struct cil_map_class *)class_datum;
+		class_symtab = &mc->perms;
+	}
 
-	rc = __cil_resolve_perm_list(cps->class, cps->perm_strs, cps->perms);
+	rc = __cil_resolve_perms(class_symtab, common_symtab, cps->perm_strs, &cps->perms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
