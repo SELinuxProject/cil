@@ -39,6 +39,7 @@
 
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
 void cil_tree_print_classpermset(struct cil_classpermset *csp);
+void cil_tree_print_classperms(struct cil_classperms *cp);
 void cil_tree_print_level(struct cil_level *level);
 void cil_tree_print_levelrange(struct cil_levelrange *lvlrange);
 void cil_tree_print_context(struct cil_context *context);
@@ -528,6 +529,19 @@ void cil_tree_print_classpermset(struct cil_classpermset *cps)
 	cil_tree_print_perm_strs(cps->perm_strs);
 }
 
+void cil_tree_print_classperms(struct cil_classperms *cp)
+{
+	if (cp == NULL) {
+		return;
+	}
+
+	if (cp->classpermset_str != NULL) {
+		cil_log(CIL_INFO, " %s", cp->classpermset_str);
+	} else {
+		cil_tree_print_classpermset(cp->classpermset);
+	}
+}
+
 void cil_tree_print_level(struct cil_level *level)
 {
 	if (level->sens != NULL) {
@@ -600,11 +614,7 @@ void cil_tree_print_context(struct cil_context *context)
 
 void cil_tree_print_constrain(struct cil_constrain *cons)
 {
-	if (cons->classpermset != NULL) {
-		cil_tree_print_classpermset(cons->classpermset);
-	} else {
-		 cil_log(CIL_INFO, "%s", cons->classpermset_str);
-	}
+	cil_tree_print_classperms(cons->classperms);
 
 	cil_tree_print_expr(cons->datum_expr, cons->str_expr);
 
@@ -1083,11 +1093,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				cil_log(CIL_INFO, " %s", rule->tgt_str);
 			}
 
-			if (rule->classpermset != NULL) {
-				cil_tree_print_classpermset(rule->classpermset);
-			} else {
-				cil_log(CIL_INFO, " %s", rule->classpermset_str);
-			}
+			cil_tree_print_classperms(rule->classperms);
 
 			cil_log(CIL_INFO, "\n");
 

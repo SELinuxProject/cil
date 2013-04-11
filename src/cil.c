@@ -265,6 +265,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_CLASSPERMSET:
 		cil_destroy_classpermset(*data);
 		break;
+	case CIL_CLASSPERMS:
+		cil_destroy_classperms(*data);
+		break;
 	case CIL_COMMON:
 		cil_destroy_common(*data);
 		break;
@@ -742,6 +745,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_BOOL;
 	case CIL_CLASSPERMSET:
 		return CIL_KEY_CLASSPERMSET;
+	case CIL_CLASSPERMS:
+		return CIL_KEY_CLASSPERMS;
 	case CIL_TUNABLE:
 		return CIL_KEY_TUNABLE;
 	case CIL_TYPEALIAS:
@@ -1651,8 +1656,7 @@ void cil_avrule_init(struct cil_avrule **avrule)
 	(*avrule)->src = NULL;
 	(*avrule)->tgt_str = NULL;
 	(*avrule)->tgt = NULL;
-	(*avrule)->classpermset_str = NULL;
-	(*avrule)->classpermset = NULL;
+	(*avrule)->classperms = NULL;
 }
 
 void cil_type_rule_init(struct cil_type_rule **type_rule)
@@ -1828,8 +1832,7 @@ void cil_constrain_init(struct cil_constrain **constrain)
 {
 	*constrain = cil_malloc(sizeof(**constrain));
 
-	(*constrain)->classpermset_str = NULL;
-	(*constrain)->classpermset = NULL;
+	(*constrain)->classperms = NULL;
 	(*constrain)->str_expr = NULL;
 	(*constrain)->datum_expr = NULL;
 }
@@ -1869,6 +1872,14 @@ void cil_classpermset_init(struct cil_classpermset **cps)
 	(*cps)->flavor = CIL_STRING;
 	(*cps)->perm_strs = NULL;
 	(*cps)->perms = NULL;
+}
+
+void cil_classperms_init(struct cil_classperms **cp)
+{
+	*cp = cil_malloc(sizeof(**cp));
+
+	(*cp)->classpermset_str = NULL;
+	(*cp)->classpermset = NULL;
 }
 
 void cil_map_perm_init(struct cil_map_perm **cmp)

@@ -98,6 +98,7 @@ enum cil_flavor {
 	CIL_MLSVALIDATETRANS,
 	CIL_MAP_PERM,
 	CIL_CLASSMAPPING,
+	CIL_CLASSPERMS,
 	CIL_USERROLE,
 	CIL_USERLEVEL,
 	CIL_USERRANGE,
@@ -201,6 +202,7 @@ enum cil_flavor {
 #define CIL_KEY_CLASS			"class"
 #define CIL_KEY_PERM			"perm"
 #define CIL_KEY_CLASSPERMSET		"classpermissionset"
+#define CIL_KEY_CLASSPERMS		"classpermissions"
 #define CIL_KEY_CLASSMAP        "classmap"
 #define CIL_KEY_MAP_CLASS		"classmap"
 #define CIL_KEY_CLASSMAPPING		"classmapping"
@@ -440,6 +442,11 @@ struct cil_classpermset {
 	struct cil_list *perms;
 };
 
+struct cil_classperms {
+	char *classpermset_str;
+	struct cil_classpermset *classpermset;
+};
+
 struct cil_classmapping {
 	char *map_class_str;
 	char *map_perm_str;
@@ -612,8 +619,7 @@ struct cil_avrule {
 	void *src; /* type, alias, or attribute */
 	char *tgt_str;	
 	void *tgt; /* type, alias, or attribute */
-	char *classpermset_str;
-	struct cil_classpermset *classpermset;
+	struct cil_classperms *classperms;
 };
 
 #define CIL_TYPE_TRANSITION 16
@@ -837,8 +843,7 @@ struct cil_fsuse {
 #define CIL_MLSCONSTRAIN_KEYS CIL_MLS_LEVELS CIL_CONSTRAIN_KEYS
 #define CIL_CONSTRAIN_OPER "== != eq dom domby incomp not and or"
 struct cil_constrain {
-	char *classpermset_str;
-	struct cil_classpermset *classpermset;
+	struct cil_classperms *classperms;
 	struct cil_list *str_expr;
 	struct cil_list *datum_expr;
 };
@@ -973,6 +978,7 @@ void cil_validatetrans_init(struct cil_validatetrans **validtrans);
 void cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 void cil_perm_init(struct cil_perm **perm);
 void cil_classpermset_init(struct cil_classpermset **cps);
+void cil_classperms_init(struct cil_classperms **cp);
 void cil_map_perm_init(struct cil_map_perm **cmp);
 void cil_map_class_init(struct cil_map_class **map);
 void cil_classmapping_init(struct cil_classmapping **mapping);

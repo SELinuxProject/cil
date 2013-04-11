@@ -1099,11 +1099,11 @@ int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_
 	char *obj = NULL;
 	uint16_t kind = cil_avrule->rule_kind;
 	class_datum_t *sepol_obj = NULL;
-	struct cil_classpermset *classpermset = cil_avrule->classpermset;
+	struct cil_classpermset *classpermset = cil_avrule->classperms->classpermset;
 	struct cil_list *cil_perms = classpermset->perms;
 
 	if (classpermset->flavor == CIL_CLASS) {
-		obj = ((struct cil_symtab_datum *)cil_avrule->classpermset->class)->name;
+		obj = ((struct cil_symtab_datum *)classpermset->class)->name;
 		sepol_obj = hashtab_search(pdb->p_classes.table, obj);
 		if (sepol_obj == NULL) {
 			rc = SEPOL_ERR;
@@ -1897,10 +1897,11 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 	class_datum_t *sepol_class = NULL;
 	constraint_node_t *sepol_constrain = NULL;
 	constraint_expr_t *sepol_expr = NULL;
+	struct cil_classpermset *classpermset = cil_constrain->classperms->classpermset;
 
-	if (cil_constrain->classpermset->flavor == CIL_CLASS) {
-		class = cil_constrain->classpermset->class;
-		perms = cil_constrain->classpermset->perms;
+	if (classpermset->flavor == CIL_CLASS) {
+		class = classpermset->class;
+		perms = classpermset->perms;
 
 		key = class->datum.name;
 		sepol_class = hashtab_search(pdb->p_classes.table, key);
@@ -1926,10 +1927,10 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
       sepol_constrain->next = sepol_class->constraints;
       sepol_class->constraints = sepol_constrain;
 
-	} else if (cil_constrain->classpermset->flavor == CIL_MAP_CLASS) {
+	} else if (classpermset->flavor == CIL_MAP_CLASS) {
 		struct cil_list_item *curr_cmp;
 		struct cil_list_item *curr_cps;
-		cil_list_for_each(curr_cmp, cil_constrain->classpermset->perms) {
+		cil_list_for_each(curr_cmp, classpermset->perms) {
 			cil_list_for_each(curr_cps, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
 				key = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
 				sepol_class = hashtab_search(pdb->p_classes.table, key);

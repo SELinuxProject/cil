@@ -282,6 +282,18 @@ int cil_copy_classpermset(__attribute__((unused)) struct cil_db *db, void *data,
 	return SEPOL_OK;
 }
 
+void cil_copy_fill_classperms(struct cil_classperms *orig, struct cil_classperms **new)
+{
+	cil_classperms_init(new);
+
+	(*new)->classpermset_str = cil_strdup(orig->classpermset_str);
+
+	if (orig->classpermset != NULL) {
+		cil_classpermset_init(&(*new)->classpermset);
+		cil_copy_fill_classpermset(orig->classpermset, (*new)->classpermset);
+	}
+}
+
 int cil_copy_common(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
 	struct cil_common *orig = data;
@@ -744,12 +756,8 @@ int cil_copy_avrule(__attribute__((unused)) struct cil_db *db, void *data, void 
 	new->rule_kind = orig->rule_kind;
 	new->src_str = cil_strdup(orig->src_str);
 	new->tgt_str = cil_strdup(orig->tgt_str);
-	new->classpermset_str = cil_strdup(orig->classpermset_str);
 
-	if (orig->classpermset != NULL && orig->classpermset_str == NULL) {
-		cil_classpermset_init(&new->classpermset);
-		cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
-	}
+	cil_copy_fill_classperms(orig->classperms, &new->classperms);
 
 	*copy = new;
 
@@ -1357,12 +1365,7 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 
 	cil_constrain_init(&new);
 
-	new->classpermset_str = cil_strdup(orig->classpermset_str);
-
-	if (orig->classpermset != NULL && orig->classpermset_str == NULL) {
-		cil_classpermset_init(&new->classpermset);
-		cil_copy_fill_classpermset(orig->classpermset, new->classpermset);
-	}
+	cil_copy_fill_classperms(orig->classperms, &new->classperms);
 
 	cil_copy_expr(db, orig->str_expr, &new->str_expr);
 	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
