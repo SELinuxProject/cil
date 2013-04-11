@@ -248,35 +248,6 @@ exit:
 	return rc;
 }
 
-int cil_resolve_list(struct cil_list *str_list, struct cil_list *res_list, struct cil_tree_node *current, enum cil_sym_index sym_index, void *extra_args)
-{
-	int rc = SEPOL_ERR;
-	struct cil_list_item *curr_str = NULL;
-	struct cil_symtab_datum *res_datum = NULL;
-	struct cil_tree_node *res_node = NULL;
-
-	if (str_list == NULL || res_list == NULL || current == NULL) {
-		cil_log(CIL_ERR, "Invalid call to cil_resolve_list\n");
-		goto exit;
-	}
-
-	cil_list_for_each(curr_str, str_list) {
-		rc = cil_resolve_name(current, (char*)curr_str->data, sym_index, extra_args, &res_datum);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		res_node = res_datum->nodes->head->data;
-
-		cil_list_append(res_list, res_node->flavor, res_datum);
-	}
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_typeattributeset *attrtypes = current->data;
