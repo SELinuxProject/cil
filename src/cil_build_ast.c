@@ -2386,6 +2386,11 @@ int __cil_gen_expr_first_helper(struct cil_tree_node *node, __attribute__((unuse
 		goto exit;
 	}
 
+	if (op_flavor == CIL_NONE) {
+		struct cil_list *expr = args->expr;
+		cil_list_append(expr, CIL_STRING, cil_strdup( node->data));
+	}
+
 	return SEPOL_OK;
 
 exit:
