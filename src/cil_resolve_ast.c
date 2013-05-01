@@ -3469,7 +3469,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			}
 		}
 
-		if (changed) {
+		if (changed && (pass > CIL_PASS_CALL1)) {
 			/* Need to re-resolve because an optional was disabled. We only
 			 * need to reset to the call1 pass because things done in the preceeding
 			 * passes aren't allowed in optionals, and thus can't be disabled.
@@ -3478,8 +3478,6 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			/* reset the global data */
 			cil_list_destroy(&db->catorder, 0);
 			cil_list_destroy(&db->dominance, 0);
-			cil_list_init(&db->catorder, CIL_LIST_ITEM);
-			cil_list_init(&db->dominance, CIL_LIST_ITEM);
 		}
 
 		/* reset the arguments */
