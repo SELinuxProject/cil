@@ -3225,18 +3225,12 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 {
 	int rc = SEPOL_ERR;
 	struct cil_args_resolve *args = extra_args;
-	enum cil_pass pass = 0;
-	struct cil_tree_node *optstack = NULL;
-	uint32_t *changed = NULL;
+	enum cil_pass pass = args->pass;
+	struct cil_tree_node *optstack = args->optstack;
+	uint32_t *changed = args->changed;
 
-	if (node == NULL || args == NULL) {
+	if (node == NULL) {
 		goto exit;
-	}
-
-	if (args != NULL) {
-		changed = args->changed;
-		optstack = args->optstack;
-		pass = args->pass;
 	}
 
 	if (optstack != NULL) {
@@ -3258,6 +3252,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 
 	if (node->flavor == CIL_OPTIONAL && ((struct cil_symtab_datum *)node->data)->state == CIL_STATE_DISABLED) {
 		/* don't try to resolve children of a disabled optional */
+		cil_log(CIL_INFO, "Optional disabled at %d of %s\n", node->line, node->path);
 		*finished = CIL_TREE_SKIP_HEAD;
 		rc = SEPOL_OK;
 		goto exit;
@@ -3272,14 +3267,14 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	rc = __cil_resolve_ast_node(node, extra_args);
 	if (rc == SEPOL_ENOENT && optstack != NULL) {
 		struct cil_optional *opt = (struct cil_optional *)optstack->data;
-		cil_log(CIL_WARN, "Disabling %s optional-statement (%s:%d)\n", opt->datum.name, node->parent->path, node->parent->line);
+		cil_log(CIL_WARN, "Disabling %s optional-statement at %d of %s\n", opt->datum.name, node->parent->line, node->parent->path);
 		/* disable an optional if something failed to resolve */
 		opt->datum.state = CIL_STATE_DISABLING;
 		/* let the resolve loop know something was changed */
 		*changed = 1;
 		rc = SEPOL_OK;
 	} else if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to resolve %s statement (%s:%d)\n", cil_node_to_string(node), node->path, node->line);
+		cil_log(CIL_ERR, "Failed to resolve %s statement at %d of %s\n", cil_node_to_string(node), node->line, node->path);
 		goto exit;
 	}
 
@@ -3347,10 +3342,10 @@ int __cil_resolve_ast_first_child_helper(struct cil_tree_node *current, void *ex
 		if (parent->flavor == CIL_CALL) {
 			if (callstack != NULL) {
 				struct cil_tree_node *curr = NULL;
+				struct cil_call *new_call = new->data;
 				for (curr = callstack->cl_head; curr != NULL;
 					curr = curr->cl_head) {
 					struct cil_call *curr_call = curr->data;
-					struct cil_call *new_call = new->data;
 					if (curr_call->macro == new_call->macro) {
 						cil_log(CIL_ERR, "Recursive macro call found\n");
 						rc = SEPOL_ERR;
@@ -3406,10 +3401,13 @@ int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *ext
 
 		if (((struct cil_optional *)parent->data)->datum.state == CIL_STATE_DISABLING) {
 			/* go into the optional, removing everything that it added */
-			rc = cil_tree_walk(parent, __cil_disable_children_helper, NULL, NULL, NULL);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_ERR, "Failed to disable optional children\n");
-				goto exit;
+			if (args->pass > CIL_PASS_CALL1) {
+				cil_log(CIL_WARN,"Disabling declarations in optional\n");
+				rc = cil_tree_walk(parent, __cil_disable_children_helper, NULL, NULL, NULL);
+				if (rc != SEPOL_OK) {
+					cil_log(CIL_ERR, "Failed to disable declarations in optional\n");
+					goto exit;
+				}
 			}
 			((struct cil_optional *)parent->data)->datum.state = CIL_STATE_DISABLED;
 		}
