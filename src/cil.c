@@ -1867,19 +1867,14 @@ void cil_classpermset_init(struct cil_classpermset **cps)
 	*cps = cil_malloc(sizeof(**cps));
 
 	cil_symtab_datum_init(&(*cps)->datum);
-	(*cps)->class_str = NULL;
-	(*cps)->class = NULL;
-	(*cps)->flavor = CIL_STRING;
-	(*cps)->perm_strs = NULL;
-	(*cps)->perms = NULL;
+	(*cps)->classperms = NULL;
 }
 
 void cil_classperms_init(struct cil_classperms **cp)
 {
 	*cp = cil_malloc(sizeof(**cp));
-
-	(*cp)->classpermset_str = NULL;
-	(*cp)->classpermset = NULL;
+	memset(*cp, 0, sizeof(struct cil_classperms));
+	(*cp)->flavor = CIL_NONE;
 }
 
 void cil_map_perm_init(struct cil_map_perm **cmp)
@@ -1904,7 +1899,7 @@ void cil_classmapping_init(struct cil_classmapping **mapping)
 
 	(*mapping)->map_class_str = NULL;
 	(*mapping)->map_perm_str = NULL;
-	(*mapping)->classpermsets_str = NULL;
+	(*mapping)->classperms = NULL;
 }
 
 void cil_user_init(struct cil_user **user)

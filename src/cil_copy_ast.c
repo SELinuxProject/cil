@@ -50,15 +50,23 @@ void cil_copy_list(struct cil_list *data, struct cil_list **copy)
 	struct cil_list *new;
 	struct cil_list_item *orig_item;
 
-	cil_list_init(&new, CIL_LIST_ITEM);
+	cil_list_init(&new, data->flavor);
+
 	cil_list_for_each(orig_item, data) {
-		if (orig_item->flavor == CIL_STRING) {
+		switch (orig_item->flavor) {
+		case CIL_STRING:
 			cil_list_append(new, CIL_STRING, cil_strdup(orig_item->data));
-		} else if (orig_item->flavor == CIL_LIST) {
+			break;
+		case CIL_LIST: {
 			struct cil_list *new_sub = NULL;
 			cil_copy_list((struct cil_list*)orig_item->data, &new_sub);
 			cil_list_append(new, CIL_LIST, new_sub);
+			break;
 		}
+		default:
+			cil_list_append(new, orig_item->flavor, orig_item->data);
+			break;
+		}	
 	}
 
 	*copy = new;
@@ -157,6 +165,48 @@ int cil_copy_perm(__attribute__((unused)) struct cil_db *db, void *data, void **
 	return SEPOL_OK;
 }
 
+void cil_copy_classperms(struct cil_classperms *orig, struct cil_classperms **new)
+{
+	cil_classperms_init(new);
+	(*new)->flavor = orig->flavor;
+	if (orig->flavor == CIL_CLASSPERMSET) {
+		(*new)->u.classpermset_str = cil_strdup(orig->u.classpermset_str);
+		if (orig->r.classpermset != NULL) {
+			cil_log(CIL_ERR, "Did not expect a classpermset datum\n");
+		}
+	} else {
+		(*new)->u.cp.class_str = cil_strdup(orig->u.cp.class_str);
+		cil_copy_list(orig->u.cp.perm_strs, &((*new)->u.cp.perm_strs));
+		if (orig->flavor == CIL_MAP_CLASS) {
+			if (orig->r.mcp.class != NULL) {
+				cil_log(CIL_ERR, "Did not expect a map class datum\n");
+			}
+			if (orig->r.mcp.perms != NULL) {
+				cil_log(CIL_ERR, "Did not expect a map perms datums\n");
+			}
+		} else {
+			if (orig->r.cp.class != NULL) {
+				cil_log(CIL_ERR, "Did not expect a class datum\n");
+			}
+			if (orig->r.cp.perms != NULL) {
+				cil_log(CIL_ERR, "Did not expect a perms datums\n");
+			}
+		}
+	}
+}
+
+void cil_copy_classperms_list(struct cil_list *orig, struct cil_list **new)
+{
+	struct cil_list_item *orig_item;
+
+	cil_list_init(new, CIL_LIST_ITEM);
+	cil_list_for_each(orig_item, orig) {
+		struct cil_classperms *classperms;
+		cil_copy_classperms(orig_item->data, &classperms);
+		cil_list_append(*new, CIL_CLASSPERMS, classperms);
+	}
+}
+
 int cil_copy_map_perm(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
 	struct cil_map_perm *orig = data;
@@ -169,9 +219,6 @@ int cil_copy_map_perm(__attribute__((unused)) struct cil_db *db, void *data, voi
 		cil_log(CIL_INFO, "Map permissions cannot be redefined\n");
 		return SEPOL_ERR;
 	}
-
-	cil_map_perm_init(&new);
-	cil_copy_list(orig->classperms, &new->classperms);
 
 	*copy = new;
 
@@ -203,25 +250,13 @@ int cil_copy_classmapping(__attribute__((unused)) struct cil_db *db, void *data,
 {
 	struct cil_classmapping *orig = data;
 	struct cil_classmapping *new = NULL;
-	struct cil_list_item *curr;
 
 	cil_classmapping_init(&new);
 
 	new->map_class_str = cil_strdup(orig->map_class_str);
 	new->map_perm_str = cil_strdup(orig->map_perm_str);
 
-	cil_list_init(&new->classpermsets_str, CIL_LIST_ITEM);
-
-	cil_list_for_each(curr, new->classpermsets_str) {
-		if (curr->flavor == CIL_STRING) {
-			cil_list_append(new->classpermsets_str, CIL_STRING, cil_strdup(curr->data));
-		} else if (curr->flavor == CIL_CLASSPERMSET) {
-			struct cil_classpermset *cps;
-			cil_classpermset_init(&cps);
-			cil_copy_fill_classpermset((struct cil_classpermset*)curr->data, cps);
-			cil_list_prepend(new->classpermsets_str, CIL_CLASSPERMSET, cps);
-		}
-	}
+	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
 	*copy = new;
 
@@ -250,16 +285,6 @@ int cil_copy_class(__attribute__((unused)) struct cil_db *db, void *data, void *
 	return SEPOL_OK;
 }
 
-void cil_copy_fill_classpermset(struct cil_classpermset *data, struct cil_classpermset *new)
-{
-	new->class_str = cil_strdup(data->class_str);
-
-	if (data->perm_strs != NULL) {
-		cil_copy_list(data->perm_strs, &new->perm_strs);
-
-	}
-}
-
 int cil_copy_classpermset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
 	struct cil_classpermset *orig = data;
@@ -275,23 +300,11 @@ int cil_copy_classpermset(__attribute__((unused)) struct cil_db *db, void *data,
 		}
 	}
 
-	cil_classpermset_init(&new);
-	cil_copy_fill_classpermset(orig, new);
+	cil_copy_classperms(orig->classperms, &new->classperms);
+
 	*copy = new;
 
 	return SEPOL_OK;
-}
-
-void cil_copy_fill_classperms(struct cil_classperms *orig, struct cil_classperms **new)
-{
-	cil_classperms_init(new);
-
-	(*new)->classpermset_str = cil_strdup(orig->classpermset_str);
-
-	if (orig->classpermset != NULL) {
-		cil_classpermset_init(&(*new)->classpermset);
-		cil_copy_fill_classpermset(orig->classpermset, (*new)->classpermset);
-	}
 }
 
 int cil_copy_common(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
@@ -756,8 +769,7 @@ int cil_copy_avrule(__attribute__((unused)) struct cil_db *db, void *data, void 
 	new->rule_kind = orig->rule_kind;
 	new->src_str = cil_strdup(orig->src_str);
 	new->tgt_str = cil_strdup(orig->tgt_str);
-
-	cil_copy_fill_classperms(orig->classperms, &new->classperms);
+	cil_copy_classperms(orig->classperms, &new->classperms);
 
 	*copy = new;
 
@@ -1364,8 +1376,7 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 	struct cil_constrain *new = NULL;
 
 	cil_constrain_init(&new);
-
-	cil_copy_fill_classperms(orig->classperms, &new->classperms);
+	cil_copy_classperms(orig->classperms, &new->classperms);
 
 	cil_copy_expr(db, orig->str_expr, &new->str_expr);
 	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);

@@ -99,6 +99,7 @@ enum cil_flavor {
 	CIL_MAP_PERM,
 	CIL_CLASSMAPPING,
 	CIL_CLASSPERMS,
+	CIL_MAP_CLASSPERMS,
 	CIL_USERROLE,
 	CIL_USERLEVEL,
 	CIL_USERRANGE,
@@ -433,24 +434,37 @@ struct cil_map_class {
 	symtab_t perms;
 };
 
-struct cil_classpermset {
-	struct cil_symtab_datum datum;
-	char *class_str;
-	void *class;
+struct cil_classperms {
 	enum cil_flavor flavor;
-	struct cil_list *perm_strs;
-	struct cil_list *perms;
+	union {
+		char *classpermset_str;
+		struct {
+			char *class_str;
+			struct cil_list *perm_strs;
+		} cp;
+	} u;
+	union {	
+		struct cil_classpermset *classpermset;
+		struct {
+			struct cil_class *class;
+			struct cil_list *perms;
+		} cp;
+		struct {
+			struct cil_map_class *class;
+			struct cil_list *perms;
+		} mcp;
+	} r;
 };
 
-struct cil_classperms {
-	char *classpermset_str;
-	struct cil_classpermset *classpermset;
+struct cil_classpermset {
+	struct cil_symtab_datum datum;
+	struct cil_classperms *classperms;
 };
 
 struct cil_classmapping {
 	char *map_class_str;
 	char *map_perm_str;
-	struct cil_list *classpermsets_str;
+	struct cil_list *classperms;
 };
 
 struct cil_classcommon {

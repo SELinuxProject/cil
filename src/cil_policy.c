@@ -470,12 +470,61 @@ void cil_context_to_policy(FILE **file_arr, uint32_t file_index, struct cil_cont
 	cil_levelrange_to_policy(file_arr, file_index, lvlrange);
 }
 
+void cil_perms_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *list)
+{
+	struct cil_list_item *curr;
+
+	fprintf(file_arr[file_index], " {");
+	cil_list_for_each(curr, list) {
+		switch (curr->flavor) {
+		case CIL_LIST:
+			cil_perms_to_policy(file_arr, file_index, curr->data);
+			break;
+		case CIL_STRING:
+			fprintf(file_arr[file_index], " %s", (char *)curr->data);
+			break;
+		case CIL_DATUM:
+			fprintf(file_arr[file_index], " %s", ((struct cil_symtab_datum *)curr->data)->name);
+			break;
+		case CIL_OP: {
+			enum cil_flavor op_flavor = *((enum cil_flavor *)curr->data);
+			char *op_str = NULL;
+
+			switch (op_flavor) {
+			case CIL_AND:
+				op_str = CIL_KEY_AND;
+				break;
+			case CIL_OR:
+				op_str = CIL_KEY_OR;
+				break;
+			case CIL_NOT:
+				op_str = CIL_KEY_NOT;
+				break;
+			case CIL_STAR:
+				op_str = CIL_KEY_STAR;
+				break;
+			case CIL_XOR:
+				op_str = CIL_KEY_XOR;
+				break;
+			default:
+				cil_log(CIL_ERR, "Unknown operator in expression\n");
+				break;
+			}
+			fprintf(file_arr[file_index], " %s", op_str);
+			break;
+		}
+		default:
+			cil_log(CIL_ERR, "Unknown flavor in expression\n");
+			break;
+		}
+	}
+	fprintf(file_arr[file_index], " }");
+}
+
 void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_constrain *cons, enum cil_flavor flavor)
 {
-	char *obj_str = NULL;
-	struct cil_list_item *perm;
 	char *statement = NULL;
-	struct cil_classpermset *cps = cons->classperms->classpermset;
+	struct cil_classperms *cp = cons->classperms;
 
 	if (flavor == CIL_CONSTRAIN) {
 		statement = CIL_KEY_CONSTRAIN;
@@ -483,31 +532,23 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 		statement = CIL_KEY_MLSCONSTRAIN;
 	}
 
-	if (cps->flavor == CIL_CLASS) {
+	if (cp->flavor == CIL_CLASS) {
 		fprintf(file_arr[CONSTRAINS], "%s", statement);
-		fprintf(file_arr[CONSTRAINS], " %s {", ((struct cil_class*)cps->class)->datum.name);
-
-		cil_list_for_each(perm, cps->perms) { 
-			fprintf(file_arr[CONSTRAINS], " %s", ((struct cil_perm*)(perm->data))->datum.name);
-		}
-		fprintf(file_arr[CONSTRAINS], " };\n\t");
-
+		fprintf(file_arr[CONSTRAINS], " %s", (cp->r.cp.class)->datum.name);
+		cil_perms_to_policy(file_arr, CONSTRAINS, cp->r.cp.perms);
+		fprintf(file_arr[CONSTRAINS], "\n\t");
 		cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
 		fprintf(file_arr[CONSTRAINS], ";\n");
-
-	} else if (cps->flavor == CIL_MAP_CLASS) {
+	} else if (cp->flavor == CIL_MAP_CLASS) {
 		struct cil_list_item *curr_cmp;
-		cil_list_for_each(curr_cmp, cps->perms) {
-			struct cil_list_item *curr_cps;
-			cil_list_for_each(curr_cps, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
+		cil_list_for_each(curr_cmp, cp->r.mcp.perms) {
+			struct cil_list_item *curr_cp;
+			cil_list_for_each(curr_cp, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
+				struct cil_classperms *cp2 = (struct cil_classperms *)curr_cp->data;
 				fprintf(file_arr[CONSTRAINS], "%s", statement);
-				obj_str = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
-				fprintf(file_arr[CONSTRAINS], " %s {", obj_str);
-
-				cil_list_for_each(perm, ((struct cil_classpermset*)curr_cps->data)->perms) {
-					fprintf(file_arr[CONSTRAINS], " %s", ((struct cil_perm*)(perm->data))->datum.name);
-				}
-				fprintf(file_arr[CONSTRAINS], " };\n\t");
+				fprintf(file_arr[CONSTRAINS], " %s", (cp2->r.cp.class)->datum.name);
+				cil_perms_to_policy(file_arr, CONSTRAINS, cp2->r.cp.perms);
+				fprintf(file_arr[CONSTRAINS], "\n\t");
 				cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
 				fprintf(file_arr[CONSTRAINS], ";\n");
 			}
@@ -520,24 +561,7 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 	char *kind_str = NULL;
 	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
 	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
-	char *obj_str = NULL;
-	struct cil_list *classperms;
-	struct cil_list_item *curr_cps;
-	struct cil_list_item *perm;
-	struct cil_classpermset *cps = rule->classperms->classpermset;
-
-	cil_list_init(&classperms, CIL_LIST_ITEM);
-
-	if (cps->flavor == CIL_CLASS) {
-		cil_list_append(classperms, CIL_CLASSPERMSET, cps);
-	} else if (cps->flavor == CIL_MAP_CLASS) {
-		struct cil_list_item *curr_cmp;
-		cil_list_for_each(curr_cmp, cps->perms) {
-			cil_list_for_each(curr_cps, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
-				cil_list_append(classperms, curr_cps->flavor, curr_cps->data);
-			}
-		}
-	}
+	struct cil_classperms *cp = rule->classperms;
 
 	switch (rule->rule_kind) {
 	case CIL_AVRULE_ALLOWED:
@@ -558,19 +582,24 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 		return SEPOL_ERR;
 	}
 
-	cil_list_for_each(curr_cps, classperms) {
+	if (cp->flavor == CIL_CLASS) {
 		fprintf(file_arr[file_index], "%s %s %s:", kind_str, src_str, tgt_str);
-
-		obj_str = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
-		fprintf(file_arr[file_index], " %s {", obj_str);
-
-		cil_list_for_each(perm, ((struct cil_classpermset*)curr_cps->data)->perms) {
-			fprintf(file_arr[file_index], " %s", ((struct cil_perm*)(perm->data))->datum.name);
+		fprintf(file_arr[file_index], " %s", (cp->r.cp.class)->datum.name);
+		cil_perms_to_policy(file_arr, file_index, cp->r.cp.perms);
+		fprintf(file_arr[CONSTRAINS], ";\n");
+	} else if (cp->flavor == CIL_MAP_CLASS) {
+		struct cil_list_item *curr_cmp;
+		cil_list_for_each(curr_cmp, cp->r.mcp.perms) {
+			struct cil_list_item *curr_cp;
+			cil_list_for_each(curr_cp, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
+				struct cil_classperms *cp2 = (struct cil_classperms *)curr_cp->data;
+				fprintf(file_arr[file_index], "%s %s %s:", kind_str, src_str, tgt_str);
+				fprintf(file_arr[file_index], " %s", (cp2->r.cp.class)->datum.name);
+				cil_perms_to_policy(file_arr, file_index, cp2->r.cp.perms);
+				fprintf(file_arr[CONSTRAINS], ";\n");
+			}
 		}
-		fprintf(file_arr[file_index], " };\n");
 	}
-
-	cil_list_destroy(&classperms, 0);
 
 	return SEPOL_OK;
 }

@@ -38,7 +38,6 @@
 #include "cil_parser.h"
 
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
-void cil_tree_print_classpermset(struct cil_classpermset *csp);
 void cil_tree_print_classperms(struct cil_classperms *cp);
 void cil_tree_print_level(struct cil_level *level);
 void cil_tree_print_levelrange(struct cil_levelrange *lvlrange);
@@ -509,25 +508,6 @@ void cil_tree_print_perm_strs(struct cil_list *perm_strs)
 	cil_log(CIL_INFO, " )");
 }
 
-void cil_tree_print_classpermset(struct cil_classpermset *cps)
-{
-	if (cps == NULL) {
-		return;
-	}
-
-	if (cps->class == NULL) {
-		cil_log(CIL_INFO, " class: %s", cps->class_str);
-	} else {
-		if (cps->flavor == CIL_CLASS) {
-			cil_log(CIL_INFO, " class: %s", ((struct cil_class*)cps->class)->datum.name);
-		} else {
-			cil_log(CIL_INFO, " map_class: %s", ((struct cil_map_class*)cps->class)->datum.name);
-		}
-	}
-
-	cil_log(CIL_INFO, ", perm_strs:");
-	cil_tree_print_perm_strs(cps->perm_strs);
-}
 
 void cil_tree_print_classperms(struct cil_classperms *cp)
 {
@@ -535,10 +515,24 @@ void cil_tree_print_classperms(struct cil_classperms *cp)
 		return;
 	}
 
-	if (cp->classpermset_str != NULL) {
-		cil_log(CIL_INFO, " %s", cp->classpermset_str);
-	} else {
-		cil_tree_print_classpermset(cp->classpermset);
+	switch (cp->flavor) {
+	case CIL_CLASSPERMSET:
+		cil_log(CIL_INFO, " %s", cp->u.classpermset_str);
+		break;
+	case CIL_CLASSPERMS:
+		cil_log(CIL_INFO, " class: %s", cp->u.cp.class_str);
+		cil_log(CIL_INFO, ", perm_strs:");
+		cil_tree_print_perm_strs(cp->u.cp.perm_strs);
+		break;
+	case CIL_MAP_CLASSPERMS:
+		cil_log(CIL_INFO, " class: %s", cp->u.cp.class_str);
+		cil_log(CIL_INFO, ", perm_strs:");
+		cil_tree_print_perm_strs(cp->u.cp.perm_strs);
+		break;
+	default:
+		cil_log(CIL_INFO, " class: ?");
+		cil_log(CIL_INFO, ", perm_strs: (?)");
+		break;
 	}
 }
 
@@ -865,7 +859,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			struct cil_classpermset *csp = node->data;
 			cil_log(CIL_INFO, "CLASSPERMSET: %s", csp->datum.name);
 
-			cil_tree_print_classpermset(csp);
+			cil_tree_print_classperms(csp->classperms);
 
 			cil_log(CIL_INFO, "\n");
 
@@ -892,10 +886,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				return;
 			}
 
-			cil_log(CIL_INFO, " perms: (");
+			cil_log(CIL_INFO, " kernel class perms: (");
 
 			cil_list_for_each(curr, cmp->classperms) {
-				cil_tree_print_classpermset(curr->data);
+				cil_tree_print_classperms(curr->data);
 			}
 
 			cil_log(CIL_INFO, " )\n");
@@ -909,14 +903,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			cil_log(CIL_INFO, "CLASSMAPPING: map class: %s, map perm: %s,", mapping->map_class_str, mapping->map_perm_str);
 
 			cil_log(CIL_INFO, " (");
-			cil_list_for_each(curr, mapping->classpermsets_str) {
-				if (curr->flavor == CIL_STRING) {
-					cil_log(CIL_INFO, " %s", (char*)curr->data);
-				} else if (curr->flavor == CIL_CLASSPERMSET) {
-					cil_log(CIL_INFO, " (");
-					cil_tree_print_classpermset((struct cil_classpermset*)curr->data);
-					cil_log(CIL_INFO, " )");
-				}
+			cil_list_for_each(curr, mapping->classperms) {
+				cil_tree_print_classperms(curr->data);
 			}
 
 			cil_log(CIL_INFO, " )\n");

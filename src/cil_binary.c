@@ -984,6 +984,7 @@ int __cil_perms_to_datum(struct cil_list *perms, class_datum_t *sepol_class, uin
 			common_datum_t *sepol_common = sepol_class->comdatum;
 			sepol_perm = hashtab_search(sepol_common->permissions.table, key);
 			if (sepol_perm == NULL) {
+				cil_log(CIL_ERR, "Failed to find datum for perm %s\n", key);
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -1068,9 +1069,8 @@ exit:
 	return rc;
 }
 
-int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, struct cil_list *neverallows)
+void __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, struct cil_list *neverallows)
 {
-	int rc = SEPOL_OK;
 	struct cil_neverallow *neverallow = neverallows->head->data;
 	struct cil_list *neverallow_data = neverallow->data;
 	struct cil_neverallow_data *new_data = NULL;
@@ -1087,7 +1087,46 @@ int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t d
 	new_data->types = data;
 
 	cil_list_prepend(neverallow_data, CIL_LIST_ITEM, new_data);
+}
 
+int __cil_avrule_expand_helper(policydb_t *pdb, struct cil_classperms *cp, uint16_t kind, uint32_t src, uint32_t tgt, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
+{
+	int rc = SEPOL_ERR;
+	char *key = NULL;
+	class_datum_t *sepol_class = NULL;
+	uint32_t data = 0;
+
+	key = ((struct cil_symtab_datum *)cp->r.cp.class)->name;
+	sepol_class = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_class == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_perms_to_datum(cp->r.cp.perms, sepol_class, &data);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	if (data == 0) {
+		cil_log(CIL_INFO, "No permissions for AV rule.\n");
+	}
+
+	if (kind == CIL_AVRULE_NEVERALLOW) {
+		__cil_neverallow_handle(src, tgt, sepol_class->s.value, data, neverallows);
+	} else {
+		if (kind == CIL_AVRULE_DONTAUDIT) {
+			data = ~data;
+		}
+
+		rc = __cil_insert_avrule(pdb, kind, src, tgt, sepol_class->s.value, data, neverallows, cond_node, cond_flavor);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
 	return rc;
 }
 
@@ -1095,87 +1134,37 @@ int __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t d
 int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_avrule *cil_avrule, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_ERR;
-	uint32_t data = 0;
-	char *obj = NULL;
 	uint16_t kind = cil_avrule->rule_kind;
-	class_datum_t *sepol_obj = NULL;
-	struct cil_classpermset *classpermset = cil_avrule->classperms->classpermset;
-	struct cil_list *cil_perms = classpermset->perms;
+	struct cil_classperms *classperms = cil_avrule->classperms;
 
-	if (classpermset->flavor == CIL_CLASS) {
-		obj = ((struct cil_symtab_datum *)classpermset->class)->name;
-		sepol_obj = hashtab_search(pdb->p_classes.table, obj);
-		if (sepol_obj == NULL) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
+	if (classperms->flavor == CIL_CLASSPERMSET) {
+		struct cil_classpermset *cps = classperms->r.classpermset;
 
-		rc = __cil_perms_to_datum(cil_perms, sepol_obj, &data);
+		rc = __cil_avrule_expand_helper(pdb, cps->classperms, kind, src, tgt, neverallows, cond_node, cond_flavor);
 		if (rc != SEPOL_OK) {
 			goto exit;
-		}
-
-		if (kind == CIL_AVRULE_DONTAUDIT) {
-			data = ~data;
-		}
-
-		if (kind == CIL_AVRULE_NEVERALLOW) {
-			rc = __cil_neverallow_handle(src, tgt, sepol_obj->s.value, data, neverallows);
-			if (rc != SEPOL_OK) {
-				cil_log(CIL_ERR, "Failure while handling neverallow statement\n");
-				goto exit;
-			}
-		} else {
-			rc = __cil_insert_avrule(pdb, kind, src, tgt, sepol_obj->s.value, data, neverallows, cond_node, cond_flavor);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-		}
-	} else if (classpermset->flavor == CIL_MAP_CLASS) {
+		}	
+	} else if (classperms->flavor == CIL_CLASSPERMS) {
+		rc = __cil_avrule_expand_helper(pdb, classperms, kind, src, tgt, neverallows, cond_node, cond_flavor);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}	
+	} else { /* CIL_MAP_CLASSPEMRS */
 		struct cil_list_item *i = NULL;
-
-		for (i = cil_perms->head; i != NULL; i = i->next) {
+		cil_list_for_each(i, classperms->r.mcp.perms) {
 			struct cil_map_perm *cmp = i->data;
 			struct cil_list_item *j = NULL;
-
-			for (j = cmp->classperms->head; j != NULL; j = j->next) {
-				struct cil_classpermset *cps = j->data;
-				struct cil_list *perms = cps->perms;
-
-				obj = ((struct cil_symtab_datum *)cps->class)->name;
-				sepol_obj = hashtab_search(pdb->p_classes.table, obj);
-				if (sepol_obj == NULL) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-
-				rc = __cil_perms_to_datum(perms, sepol_obj, &data);
+			cil_list_for_each(j, cmp->classperms) {
+				rc = __cil_avrule_expand_helper(pdb, j->data, kind, src, tgt, neverallows, cond_node, cond_flavor);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
-
-				if (kind == CIL_AVRULE_DONTAUDIT) {
-					data = ~data;
-				}
-
-				if (kind == CIL_AVRULE_NEVERALLOW) {
-					rc = __cil_neverallow_handle(src, tgt, sepol_obj->s.value, data, neverallows);
-					if (rc != SEPOL_OK) {
-						cil_log(CIL_ERR, "Failure while handling neverallow statement\n");
-						goto exit;
-					}
-				} else {
-					rc = __cil_insert_avrule(pdb, kind, src, tgt, sepol_obj->s.value, data, neverallows, cond_node, cond_flavor);
-					if (rc != SEPOL_OK) {
-						goto exit;
-					}
-				}
-				data = 0;
 			}
 		}
 	}
 
-	rc = SEPOL_OK;
+	return SEPOL_OK;
+
 exit:
 	return rc;
 }
@@ -1886,77 +1875,72 @@ exit:
 	return rc;
 }
 
+int cil_constrain_to_policydb_helper(policydb_t *pdb, char *key, struct cil_list *perms, struct cil_list *expr)
+{
+	int rc = SEPOL_ERR;
+	constraint_node_t *sepol_constrain = NULL;
+	constraint_expr_t *sepol_expr = NULL;
+	class_datum_t *sepol_class = NULL;
+
+	sepol_constrain = cil_malloc(sizeof(*sepol_constrain));
+	memset(sepol_constrain, 0, sizeof(constraint_node_t));
+
+	sepol_class = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_class == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = __cil_perms_to_datum(perms, sepol_class, &sepol_constrain->permissions);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	sepol_constrain->expr = sepol_expr;
+	sepol_constrain->next = sepol_class->constraints;
+	sepol_class->constraints = sepol_constrain;
+
+	return SEPOL_OK;
+
+exit:
+	free(sepol_constrain);
+	return rc;
+}
 int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 {
 	int rc = SEPOL_ERR;
-	char *key = NULL;
 	struct cil_constrain *cil_constrain = (struct cil_constrain*)datum;
-	struct cil_class *class = NULL;
-	struct cil_list *perms = NULL;
+	struct cil_classperms *classperms = cil_constrain->classperms;
 	struct cil_list *expr = cil_constrain->datum_expr;
-	class_datum_t *sepol_class = NULL;
-	constraint_node_t *sepol_constrain = NULL;
-	constraint_expr_t *sepol_expr = NULL;
-	struct cil_classpermset *classpermset = cil_constrain->classperms->classpermset;
+	char *key = NULL;
 
-	if (classpermset->flavor == CIL_CLASS) {
-		class = classpermset->class;
-		perms = classpermset->perms;
+	if (classperms->flavor == CIL_CLASS) {
+		key = ((struct cil_symtab_datum *)classperms->r.cp.class)->name;
 
-		key = class->datum.name;
-		sepol_class = hashtab_search(pdb->p_classes.table, key);
-		if (sepol_class == NULL) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-
-		sepol_constrain = cil_malloc(sizeof(*sepol_constrain));
-		memset(sepol_constrain, 0, sizeof(constraint_node_t));
-
-		rc = __cil_perms_to_datum(perms, sepol_class, &sepol_constrain->permissions);
+		rc = cil_constrain_to_policydb_helper(pdb, key, classperms->r.cp.perms, expr);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+	} else if (classperms->flavor == CIL_MAP_CLASS) {
+		struct cil_list_item *i = NULL;
+		cil_list_for_each(i, classperms->r.mcp.perms) {
+			struct cil_map_perm *cmp = i->data;
+			struct cil_list_item *j = NULL;
 
-		rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-		sepol_constrain->expr = sepol_expr;
+			cil_list_for_each(j, cmp->classperms) {
+				struct cil_classperms *cp = j->data;
 
-      sepol_constrain->next = sepol_class->constraints;
-      sepol_class->constraints = sepol_constrain;
+				key = ((struct cil_symtab_datum *)cp->r.cp.class)->name;
 
-	} else if (classpermset->flavor == CIL_MAP_CLASS) {
-		struct cil_list_item *curr_cmp;
-		struct cil_list_item *curr_cps;
-		cil_list_for_each(curr_cmp, classpermset->perms) {
-			cil_list_for_each(curr_cps, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
-				key = ((struct cil_class*)((struct cil_classpermset*)curr_cps->data)->class)->datum.name;
-				sepol_class = hashtab_search(pdb->p_classes.table, key);
-				if (sepol_class == NULL) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-
-				sepol_constrain = cil_malloc(sizeof(*sepol_constrain));
-				memset(sepol_constrain, 0, sizeof(constraint_node_t));
-
-				perms = ((struct cil_classpermset*)curr_cps->data)->perms;
-
-				rc = __cil_perms_to_datum(perms, sepol_class, &sepol_constrain->permissions);
+				rc = cil_constrain_to_policydb_helper(pdb, key, cp->r.cp.perms, expr);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
-
-				rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
-				sepol_constrain->expr = sepol_expr;
-
-				sepol_constrain->next = sepol_class->constraints;
-				sepol_class->constraints = sepol_constrain;
 			}
 		}
 	}
@@ -1964,7 +1948,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 	return SEPOL_OK;
 
 exit:
-	free(sepol_constrain);
+	cil_log(CIL_ERR, "Failed to insert constraint into policydb\n");
 	return rc;
 }
 
