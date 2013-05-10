@@ -352,7 +352,7 @@ int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	if (parse_current->next->next != NULL) {
 		perms = parse_current->next->next->cl_head;
-		rc = cil_gen_perm_nodes(db, perms, ast_node, CIL_PERM);
+		rc = cil_gen_perm_nodes(db, perms, ast_node, CIL_PERM, &class->num_perms);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -379,7 +379,7 @@ void cil_destroy_class(struct cil_class *class)
 	free(class);
 }
 
-int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, unsigned int *num_perms)
 {
 	char *key = NULL;
 	struct cil_perm *perm = NULL;
@@ -398,6 +398,9 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
+	(*num_perms)++;
+	perm->value = *num_perms;
+
 	return SEPOL_OK;
 
 exit:
@@ -415,7 +418,7 @@ void cil_destroy_perm(struct cil_perm *perm)
 	free(perm);
 }
 
-int cil_gen_map_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_map_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, unsigned int *num_perms)
 {
 	int rc = SEPOL_ERR;
 	struct cil_map_perm *cmp = NULL;
@@ -430,6 +433,9 @@ int cil_gen_map_perm(struct cil_db *db, struct cil_tree_node *parse_current, str
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+
+	(*num_perms)++;
+	cmp->value = *num_perms;
 
 	return SEPOL_OK;
 
@@ -453,7 +459,7 @@ void cil_destroy_map_perm(struct cil_map_perm *cmp)
 	free(cmp);
 }
 
-int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node, enum cil_flavor flavor)
+int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, struct cil_tree_node *ast_node, enum cil_flavor flavor, unsigned int *num_perms)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *new_ast = NULL;
@@ -469,9 +475,9 @@ int cil_gen_perm_nodes(struct cil_db *db, struct cil_tree_node *current_perm, st
 		new_ast->line = current_perm->line;
 		new_ast->path = current_perm->path;
 		if (flavor == CIL_PERM) {
-			rc = cil_gen_perm(db, current_perm, new_ast);
+			rc = cil_gen_perm(db, current_perm, new_ast, num_perms);
 		} else if (flavor == CIL_MAP_PERM) {
-			rc = cil_gen_map_perm(db, current_perm, new_ast);
+			rc = cil_gen_map_perm(db, current_perm, new_ast, num_perms);
 		}
 		if (rc != SEPOL_OK) {
 			goto exit;
@@ -728,7 +734,7 @@ int cil_gen_map_class(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_MAP_PERM);
+	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_MAP_PERM, &map->num_perms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -842,7 +848,7 @@ int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto exit;
 	}
 
-	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_PERM);
+	rc = cil_gen_perm_nodes(db, parse_current->next->next->cl_head, ast_node, CIL_PERM, &common->num_perms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}

@@ -411,27 +411,32 @@ struct cil_optional {
 
 struct cil_perm {
 	struct cil_symtab_datum datum;
+	unsigned int value;
 };
 
 struct cil_common {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
+	unsigned int num_perms;
 };
 
 struct cil_class {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
 	struct cil_common *common;
+	unsigned int num_perms;
 };
 
 struct cil_map_perm {
 	struct cil_symtab_datum datum;
 	struct cil_list *classperms;
+	unsigned int value;
 };
 
 struct cil_map_class {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
+	unsigned int num_perms;
 };
 
 struct cil_classperms {

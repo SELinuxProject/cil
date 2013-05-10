@@ -580,9 +580,19 @@ exit:
 	return rc;
 }
 
+int __class_update_perm_values(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
+{
+	struct cil_perm *perm = (struct cil_perm *)d;
+
+	perm->value += *((int *)args);
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_classcommon(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_class *class = NULL;
+	struct cil_common *common = NULL;
 	struct cil_classcommon *clscom = current->data;
 	struct cil_symtab_datum *class_datum = NULL;
 	struct cil_symtab_datum *common_datum = NULL;
@@ -599,13 +609,18 @@ int cil_resolve_classcommon(struct cil_tree_node *current, void *extra_args)
 	}
 
 	class = (struct cil_class *)class_datum;
+	common = (struct cil_common *)common_datum;
 	if (class->common != NULL) {
 		cil_log(CIL_ERR, "class cannot be associeated with more than one common\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	class->common = (struct cil_common *)common_datum;
+	class->common = common;
+
+	cil_symtab_map(&class->perms, __class_update_perm_values, &common->num_perms);
+
+	class->num_perms += common->num_perms;
 
 	return SEPOL_OK;
 
@@ -647,13 +662,27 @@ exit:
 	return rc;
 }
 
+int __class_reset_perm_values(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
+{
+	struct cil_perm *perm = (struct cil_perm *)d;
+
+	perm->value -= *((int *)args);
+
+	return SEPOL_OK;
+}
+
 int cil_reset_class(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
 {
 	struct cil_class *class = current->data;
 
-	/* during a re-resolve, we need to reset the common, so a classcommon
-	 * statement isn't seen as a duplicate */
-	class->common = NULL;
+	if (class->common != NULL) {
+		struct cil_common *common = class->common;
+		cil_symtab_map(&common->perms, __class_reset_perm_values, &common->num_perms);
+		/* during a re-resolve, we need to reset the common, so a classcommon
+		 * statement isn't seen as a duplicate */
+		class->num_perms -= common->num_perms;
+		class->common = NULL;
+	}
 
 	return SEPOL_OK;
 }

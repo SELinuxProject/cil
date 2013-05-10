@@ -177,13 +177,6 @@ int cil_compile(struct cil_db *db, sepol_policydb_t *sepol_db)
 		goto exit;
 	}
 
-	cil_log(CIL_INFO, "Destroying AST Symtabs\n");
-	rc = cil_destroy_ast_symtabs(db->ast->root);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to destroy ast symtabs\n");
-		goto exit;
-	}
-
 	cil_log(CIL_INFO, "Qualifying Names\n");
 	rc = cil_fqn_qualify(db->ast->root);
 	if (rc != SEPOL_OK) {
@@ -195,6 +188,13 @@ int cil_compile(struct cil_db *db, sepol_policydb_t *sepol_db)
 	rc = cil_post_process(db);
 	if (rc != SEPOL_OK ) {
 		cil_log(CIL_ERR, "Post process failed\n");
+		goto exit;
+	}
+
+	cil_log(CIL_INFO, "Destroying AST Symtabs\n");
+	rc = cil_destroy_ast_symtabs(db->ast->root);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to destroy ast symtabs\n");
 		goto exit;
 	}
 
@@ -1433,6 +1433,7 @@ void cil_class_init(struct cil_class **class)
 	cil_symtab_init(&(*class)->perms, CIL_CLASS_SYM_SIZE);
 
 	(*class)->common = NULL;
+	(*class)->num_perms = 0;
 }
 
 void cil_common_init(struct cil_common **common)
@@ -1441,6 +1442,7 @@ void cil_common_init(struct cil_common **common)
 
 	cil_symtab_datum_init(&(*common)->datum);
 	cil_symtab_init(&(*common)->perms, CIL_CLASS_SYM_SIZE);
+	(*common)->num_perms = 0;
 }
 
 void cil_classcommon_init(struct cil_classcommon **classcommon)
@@ -1860,6 +1862,7 @@ void cil_perm_init(struct cil_perm **perm)
 	*perm = cil_malloc(sizeof(**perm));
 
 	cil_symtab_datum_init(&(*perm)->datum);
+	(*perm)->value = 0;
 }
 
 void cil_classpermset_init(struct cil_classpermset **cps)
@@ -1883,6 +1886,7 @@ void cil_map_perm_init(struct cil_map_perm **cmp)
 
 	cil_symtab_datum_init(&(*cmp)->datum);
 	(*cmp)->classperms = NULL;
+	(*cmp)->value = 0;
 }
 
 void cil_map_class_init(struct cil_map_class **map)
@@ -1891,6 +1895,7 @@ void cil_map_class_init(struct cil_map_class **map)
 
 	cil_symtab_datum_init(&(*map)->datum);
 	cil_symtab_init(&(*map)->perms, CIL_CLASS_SYM_SIZE);
+	(*map)->num_perms = 0;
 }
 
 void cil_classmapping_init(struct cil_classmapping **mapping)

@@ -609,6 +609,34 @@ exit:
 	return rc;
 }
 
+int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, __attribute__((unused)) int max)
+{
+	int rc = SEPOL_ERR;
+	struct cil_tree_node *node = datum->nodes->head->data;
+	unsigned int value;
+
+	ebitmap_init(bitmap);
+	if (node->flavor == CIL_PERM) {
+		struct cil_perm *perm = (struct cil_perm *)datum;
+		value = perm->value;
+	} else {
+		struct cil_map_perm *perm = (struct cil_map_perm *)datum;
+		value = perm->value;
+	}
+
+	if (ebitmap_set_bit(bitmap, value, 1)) {
+		rc = SEPOL_ERR;
+		cil_log(CIL_INFO, "Failed to set perm bit\n");
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+/* Evaluates postfix expression */
 int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 {
 	int rc;
@@ -617,6 +645,8 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 	struct cil_list_item *item;
 	ebitmap_t bitmap;
 	ebitmap_t stack[COND_EXPR_MAXDEPTH];
+	unsigned is_list = CIL_TRUE;
+	unsigned consecutive = 0;
 
 	ebitmap_init(out);
 
@@ -627,6 +657,13 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 	expr_flavor = expr->flavor;
 
 	cil_list_for_each(item, expr) {
+		if (item->flavor == CIL_OP) {
+			is_list = CIL_FALSE;
+			break;
+		}	
+	}
+
+	cil_list_for_each(item, expr) {
 		switch (item->flavor) {
 		case CIL_LIST:
 			rc = __cil_expr_to_bitmap(item->data, &bitmap, max);
@@ -635,6 +672,7 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 			}
 			stack[pos] = bitmap;
 			pos++;
+			consecutive++;
 			break;
 		case CIL_DATUM:
 			switch (expr_flavor) {
@@ -644,8 +682,11 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 			case CIL_ROLE:
 				rc = __cil_role_to_bitmap(item->data, &bitmap, max);
 				break;
+			case CIL_PERM:
+				rc = __cil_perm_to_bitmap(item->data, &bitmap, max);
+				break;
 			default:
-				cil_log(CIL_ERR, "Unknown flavor for expression\n");
+				cil_log(CIL_ERR, "Unknown flavor (%d) for expression\n", expr_flavor);
 				goto exit;
 			}
 			if (rc != SEPOL_OK) {
@@ -653,9 +694,11 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 			}
 			stack[pos] = bitmap;
 			pos++;
+			consecutive++;
 			break;
 		case CIL_OP: {
 			enum cil_flavor op_flavor = *((enum cil_flavor *)item->data);
+			consecutive = 0;
 			switch (op_flavor) {
 			case CIL_STAR: {
 				ebitmap_t all_zeros;
@@ -729,6 +772,19 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 			cil_log(CIL_ERR, "Unrecognized flavor in expression\n");
 			goto exit;
 			break;
+		}
+
+		if (is_list && consecutive == 2) {
+			/* implicit OR for lists */
+			if (ebitmap_or(&bitmap, &stack[pos - 2], &stack[pos - 1])) {
+				cil_log(CIL_INFO, "Failed to OR attribute bitmaps\n");
+				goto exit;
+			}
+			ebitmap_destroy(&stack[pos - 2]);
+			ebitmap_destroy(&stack[pos - 1]);
+			stack[pos - 2] = bitmap;
+			pos--;
+			consecutive = 1;
 		}
 	}
 
@@ -944,6 +1000,224 @@ exit:
 	return rc;
 }
 
+int cil_verify_is_list(struct cil_list *list)
+{
+	struct cil_list_item *curr;
+
+	cil_list_for_each(curr, list) {
+		switch (curr->flavor) {
+		case CIL_LIST:
+			if (!cil_verify_is_list(curr->data)) {
+				return CIL_FALSE;
+			}
+			break;
+		case CIL_OP:
+			return CIL_FALSE;
+			break;
+		default:
+			break;
+		}	
+	}
+	return CIL_TRUE;
+}
+
+struct perm_to_list {
+	enum cil_flavor flavor;
+	ebitmap_t *perms;
+	struct cil_list *new_list;
+};
+
+int __perm_bits_to_list(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
+{
+	struct perm_to_list *perm_args = (struct perm_to_list *)args;
+	ebitmap_t *perms = perm_args->perms;
+	struct cil_list *new_list = perm_args->new_list;
+	enum cil_flavor flavor = perm_args->flavor;
+	unsigned int value;
+
+	if (flavor == CIL_PERM) {
+		struct cil_perm *perm = (struct cil_perm *)d;
+		value = perm->value;
+	} else {
+		struct cil_map_perm *perm = (struct cil_map_perm *)d;
+		value = perm->value;
+	}
+
+	if (!ebitmap_get_bit(perms, value)) {
+		return SEPOL_OK;
+	}
+
+	cil_list_append(new_list, CIL_DATUM, d);
+
+	return SEPOL_OK;
+}
+
+int __evaluate_perm_expression(struct cil_list *perms, symtab_t *class_symtab, symtab_t *common_symtab, unsigned int num_perms, struct cil_list **new_list)
+{
+	int rc = SEPOL_ERR;
+	struct perm_to_list args;
+	ebitmap_t bitmap;
+
+	if (cil_verify_is_list(perms)) {
+		return SEPOL_OK;
+	}
+
+	rc = __cil_expr_to_bitmap(perms, &bitmap, num_perms);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_list_init(new_list, CIL_PERM);
+
+	args.flavor = CIL_PERM;
+	args.perms = &bitmap;
+	args.new_list = *new_list;
+
+	cil_symtab_map(class_symtab, __perm_bits_to_list, &args);
+
+	if (common_symtab != NULL) {
+		cil_symtab_map(common_symtab, __perm_bits_to_list, &args);
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32_t *finished,  __attribute__((unused)) void *extra_args)
+{
+	int rc = SEPOL_ERR;
+
+	switch (node->flavor) {
+	case CIL_BLOCK: {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_OPTIONAL: {
+		struct cil_optional *opt = node->data;
+		if (opt->datum.state != CIL_STATE_ENABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_CLASSMAPPING: {
+		struct cil_classmapping *cm = node->data;
+		struct cil_list_item *curr;
+
+		cil_list_for_each(curr, cm->classperms) {
+			struct cil_classperms *cp = curr->data;
+			struct cil_class *class = cp->r.cp.class;
+			struct cil_common *common = class->common;
+			symtab_t *common_symtab = NULL;
+			struct cil_list *new_list = NULL;
+
+			if (common) {
+				common_symtab = &common->perms;
+			}
+
+			rc = __evaluate_perm_expression(cp->r.cp.perms, &class->perms, common_symtab, class->num_perms, &new_list);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			if (new_list == NULL) {
+				return SEPOL_OK;
+			}
+
+			cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
+
+			cp->r.cp.perms = new_list;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	return SEPOL_OK;
+exit:
+	return rc;
+}
+
+int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void *extra_args)
+{
+	int rc = SEPOL_ERR;
+
+	switch (node->flavor) {
+	case CIL_BLOCK: {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_OPTIONAL: {
+		struct cil_optional *opt = node->data;
+		if (opt->datum.state != CIL_STATE_ENABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_CLASSPERMSET: {
+		struct cil_classpermset *cps = node->data;
+		struct cil_classperms *cp = cps->classperms;
+
+		if (cp->flavor == CIL_CLASSPERMS) {
+			struct cil_class *class = cp->r.cp.class;
+			struct cil_common *common = class->common;
+			symtab_t *common_symtab = NULL;
+			struct cil_list *new_list = NULL;
+
+			if (common) {
+				common_symtab = &common->perms;
+			}
+
+			rc = __evaluate_perm_expression(cp->r.cp.perms, &class->perms, common_symtab, class->num_perms, &new_list);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			if (new_list == NULL) {
+				return SEPOL_OK;
+			}
+
+			cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
+
+			cp->r.cp.perms = new_list;
+		} else {
+			/* CIL_MAP_CLASS */
+			struct cil_map_class *class = cp->r.mcp.class;
+			struct cil_list *new_list = NULL;
+
+			rc = __evaluate_perm_expression(cp->r.mcp.perms, &class->perms, NULL, class->num_perms, &new_list);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			if (new_list == NULL) {
+				return SEPOL_OK;
+			}
+
+			cil_list_destroy(&cp->r.mcp.perms, CIL_FALSE);
+
+			cp->r.mcp.perms = new_list;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 int cil_post_db(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
@@ -971,7 +1245,16 @@ int cil_post_db(struct cil_db *db)
 		cil_log(CIL_INFO, "Failed during roletype association\n");
 		goto exit;
 	}
-
+	rc = cil_tree_walk(db->ast->root, __cil_post_db_class_mapping_helper, NULL, NULL, db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed to evaluate class mapping permissions expressions\n");
+		goto exit;
+	}
+	rc = cil_tree_walk(db->ast->root, __cil_post_db_classpermset_helper, NULL, NULL, db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed to evaluate class-permission sets expressions\n");
+		goto exit;
+	}
 
 	qsort(db->netifcon->array, db->netifcon->count, sizeof(db->netifcon->array), cil_post_netifcon_compare);
 	qsort(db->genfscon->array, db->genfscon->count, sizeof(db->genfscon->array), cil_post_genfscon_compare);

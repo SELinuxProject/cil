@@ -121,6 +121,13 @@ int cil_symtab_get_datum(symtab_t *symtab, char *key, struct cil_symtab_datum **
 	return SEPOL_OK;
 }
 
+int cil_symtab_map(symtab_t *symtab,
+				   int (*apply) (hashtab_key_t k, hashtab_datum_t d, void *args),
+				   void *args)
+{
+	return hashtab_map(symtab->table, apply, args);
+}
+
 void cil_symtab_destroy(symtab_t *symtab)
 {
 	if (symtab->table != NULL){
