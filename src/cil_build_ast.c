@@ -576,6 +576,7 @@ int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classper
 exit:
 	cil_log(CIL_ERR, "Bad class permissions\n");
 	cil_destroy_classperms(*cp);
+	*cp = NULL;
 	return rc;
 }
 
