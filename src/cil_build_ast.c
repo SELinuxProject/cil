@@ -51,15 +51,6 @@ struct cil_args_build {
 	struct cil_tree_node *tifstack;
 };
 
-struct cil_expr_args {
-	struct cil_list *expr;
-	enum cil_flavor flavor;
-	int depth;
-	int maxdepth;
-	int isconstraint;
-	int nbools; // Number of bools in an expression stack
-};
-
 int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_symtab_datum *datum, hashtab_key_t key, enum cil_sym_index sflavor, enum cil_flavor nflavor)
 {
 	int rc = SEPOL_ERR;
@@ -398,8 +389,8 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
-	(*num_perms)++;
 	perm->value = *num_perms;
+	(*num_perms)++;
 
 	return SEPOL_OK;
 
@@ -434,8 +425,8 @@ int cil_gen_map_perm(struct cil_db *db, struct cil_tree_node *parse_current, str
 		goto exit;
 	}
 
-	(*num_perms)++;
 	cmp->value = *num_perms;
+	(*num_perms)++;
 
 	return SEPOL_OK;
 
@@ -504,7 +495,7 @@ int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perms, in
 {
 	int rc = SEPOL_ERR;
 	enum cil_syntax syntax[] = {
-		SYM_N_STRINGS,
+		SYM_N_STRINGS | SYM_N_LISTS,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -514,16 +505,7 @@ int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perms, in
 		goto exit;
 	}
 
-	if (!allow_expr_ops) {
-		/* rc = __cil_verify_no_expr_ops(start_perm->cl_head);*/
-		rc = SEPOL_OK;
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Permission expression not allowed in this rule\n");
-			goto exit;
-		}
-	}
-
-	rc = cil_gen_expr(start_perm, CIL_PERM, perms);
+	rc = cil_gen_expr(start_perm, CIL_PERM, perms, allow_expr_ops);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1818,7 +1800,7 @@ int cil_gen_roleattributeset(struct cil_db *db, struct cil_tree_node *parse_curr
 
 	attrset->attr_str = cil_strdup(parse_current->next->data);
 
-	rc = cil_gen_expr(parse_current->next->next, CIL_ROLE, &attrset->str_expr);
+	rc = cil_gen_expr(parse_current->next->next, CIL_ROLE, &attrset->str_expr, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2346,6 +2328,19 @@ void __cil_gen_constrain_expr(struct cil_tree_node *current, enum cil_flavor op_
 	cil_list_append(*sub_expr, CIL_OP, cil_flavordup(op_flavor));
 }
 
+struct cil_expr_args {
+	struct cil_list *expr;
+	struct cil_list *expr_stack[32];
+	int n;
+	int first;
+	enum cil_flavor flavor;
+	int depth;
+	int maxdepth;
+	int isconstraint;
+	int nbools; // Number of bools in an expression stack
+	int allow_ops;
+};
+
 int __cil_gen_expr_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -2422,6 +2417,7 @@ int __cil_gen_expr_first_helper(struct cil_tree_node *node, __attribute__((unuse
 	int rc = SEPOL_ERR;
 	struct cil_expr_args *args = extra_args;
 	enum cil_flavor expr_flavor = args->flavor;
+	int allow_ops = args->allow_ops;
 	enum cil_flavor op_flavor;
 
 	if (node->data == NULL) {
@@ -2431,12 +2427,18 @@ int __cil_gen_expr_first_helper(struct cil_tree_node *node, __attribute__((unuse
 		return SEPOL_OK;
 	}
 
+	op_flavor = __cil_get_operator_flavor(node->data);
+
+	if (!allow_ops && op_flavor != CIL_NONE) {
+		cil_log(CIL_ERR, "Operators not allowed in this expression\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
 	rc = __cil_verify_expr_operator(node->data, expr_flavor);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-
-	op_flavor = __cil_get_operator_flavor(node->data);
 
 	rc = __cil_verify_expr_syntax(node, expr_flavor, op_flavor);
 	if (rc != SEPOL_OK) {
@@ -2444,9 +2446,18 @@ int __cil_gen_expr_first_helper(struct cil_tree_node *node, __attribute__((unuse
 	}
 
 	if (op_flavor == CIL_NONE) {
-		struct cil_list *expr = args->expr;
-		cil_list_append(expr, CIL_STRING, cil_strdup( node->data));
+		if (args->first == CIL_FALSE) {
+			struct cil_list *new;
+			cil_list_init(&new, expr_flavor);
+			cil_list_append(args->expr, CIL_LIST, new);
+			args->n++;
+			args->expr_stack[args->n] = new;
+			args->expr = new;
+		}
+		cil_list_append(args->expr, CIL_STRING, cil_strdup( node->data));
 	}
+
+	args->first = CIL_FALSE;
 
 	return SEPOL_OK;
 
@@ -2456,7 +2467,6 @@ exit:
 
 int __cil_gen_expr_last_helper(struct cil_tree_node *node, void *extra_args)
 {
-	int rc = SEPOL_ERR;
 	struct cil_tree_node *first;
 	struct cil_expr_args *args = extra_args;
 	struct cil_list *expr = args->expr;
@@ -2471,14 +2481,14 @@ int __cil_gen_expr_last_helper(struct cil_tree_node *node, void *extra_args)
 		return SEPOL_OK;
 	}
 
-	rc = __cil_verify_expr_operator(first->data, expr_flavor);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	op_flavor = __cil_get_operator_flavor(first->data);
 
-	if ((op_flavor == CIL_AND || op_flavor == CIL_OR || op_flavor == CIL_NOT) ||
+	if (op_flavor == CIL_NONE) {
+		if (args->n > 0) {
+			args->n--;
+			args->expr = args->expr_stack[args->n];
+		}
+	} else if ((op_flavor == CIL_AND || op_flavor == CIL_OR || op_flavor == CIL_NOT) ||
 		(!isconstraint && op_flavor == CIL_XOR) ||
 		((expr_flavor == CIL_BOOL || expr_flavor == CIL_TUNABLE) &&
 		 (op_flavor == CIL_EQ || op_flavor == CIL_NEQ))) {
@@ -2494,16 +2504,12 @@ int __cil_gen_expr_last_helper(struct cil_tree_node *node, void *extra_args)
 	}
 
 	return SEPOL_OK;
-
-exit:
-	return rc;
 }
 
-int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **expr)
+int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **expr, int allow_ops)
 {
 	int rc = SEPOL_ERR;
 	struct cil_expr_args extra_args;
-	struct cil_list *new_expr;
 	int isconstraint;
 
 	if (current == NULL || expr == NULL) {
@@ -2511,26 +2517,28 @@ int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct c
 	}
 	isconstraint = (flavor == CIL_CONSTRAIN || flavor == CIL_VALIDATETRANS || flavor == CIL_MLSCONSTRAIN || flavor == CIL_MLSVALIDATETRANS);
 
-	cil_list_init(&new_expr, flavor);
+	cil_list_init(expr, flavor);
 	if (current->cl_head == NULL) {
 		if (current->data == NULL || isconstraint) {
 			goto exit;
 		}
-		cil_list_append(new_expr, CIL_STRING, cil_strdup(current->data));
+		cil_list_append(*expr, CIL_STRING, cil_strdup(current->data));
 	} else {
-		extra_args.expr = new_expr;
+		extra_args.n = 0;
+		extra_args.expr_stack[0] = *expr;
+		extra_args.expr = *expr;
 		extra_args.flavor = flavor;
 		extra_args.depth = 0;
+		extra_args.first = CIL_TRUE;
 		extra_args.maxdepth = isconstraint ? CEXPR_MAXDEPTH : COND_EXPR_MAXDEPTH;
 		extra_args.isconstraint = isconstraint;
 		extra_args.nbools = 0;
+		extra_args.allow_ops = allow_ops;
 		rc = cil_tree_walk(current, __cil_gen_expr_helper, __cil_gen_expr_first_helper, __cil_gen_expr_last_helper, &extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 	}
-
-	*expr = new_expr;
 
 	return SEPOL_OK;
 
@@ -2565,7 +2573,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 	cil_boolif_init(&bif);
 
-	rc = cil_gen_expr(parse_current->next, CIL_BOOL, &bif->str_expr);
+	rc = cil_gen_expr(parse_current->next, CIL_BOOL, &bif->str_expr, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2644,7 +2652,7 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	cil_tunif_init(&tif);
 
-	rc = cil_gen_expr(parse_current->next, CIL_TUNABLE, &tif->str_expr);
+	rc = cil_gen_expr(parse_current->next, CIL_TUNABLE, &tif->str_expr, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2830,7 +2838,7 @@ int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_curr
 
 	attrset->attr_str = cil_strdup(parse_current->next->data);
 
-	rc = cil_gen_expr(parse_current->next->next, CIL_TYPE, &attrset->str_expr);
+	rc = cil_gen_expr(parse_current->next->next, CIL_TYPE, &attrset->str_expr, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3870,7 +3878,7 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	rc = cil_gen_expr(parse_current->next->next, flavor, &cons->str_expr);
+	rc = cil_gen_expr(parse_current->next->next, flavor, &cons->str_expr, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3925,7 +3933,7 @@ int cil_gen_validatetrans(struct cil_db *db, struct cil_tree_node *parse_current
 
 	validtrans->class_str = cil_strdup(parse_current->next->data);
 
-	rc = cil_gen_expr(parse_current->next->next, flavor, &validtrans->str_expr);
+	rc = cil_gen_expr(parse_current->next->next, flavor, &validtrans->str_expr, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}

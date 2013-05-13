@@ -343,8 +343,9 @@ int __cil_verify_expr_operator(const char *op, enum cil_flavor expr_flavor)
 			goto exit;
 		}
 	} else {
-		if (expr_flavor != CIL_PERM) {
-			cil_log(CIL_ERR, "Token %s is not an operator\n",op);
+		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
+			expr_flavor != CIL_PERM) {
+			cil_log(CIL_ERR, "Token %s is not an operator\n", op);
 			return SEPOL_ERR;
 		}
 	}
@@ -358,15 +359,15 @@ exit:
 
 /* Parameters:
  * node:	current node in tree
- * nflavor:	current node flavor
- * eflavor:	current expression item flavor
+ * expr_flavor:	current node flavor
+ * op_flavor:	Operator flavor
  * */
-int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor, enum cil_flavor eflavor)
+int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_flavor, enum cil_flavor op_flavor)
 {
 	int rc = SEPOL_ERR;
 
-	if (nflavor == CIL_CONSTRAIN || nflavor == CIL_MLSCONSTRAIN || nflavor == CIL_VALIDATETRANS || nflavor == CIL_MLSVALIDATETRANS) {
-		if (eflavor == CIL_NOT) {
+	if (expr_flavor == CIL_CONSTRAIN || expr_flavor == CIL_MLSCONSTRAIN || expr_flavor == CIL_VALIDATETRANS || expr_flavor == CIL_MLSVALIDATETRANS) {
+		if (op_flavor == CIL_NOT) {
 			enum cil_syntax syntax[] = {
 				SYM_STRING,
 				SYM_LIST,
@@ -377,7 +378,7 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-		} else if (eflavor == CIL_AND || eflavor == CIL_OR) {
+		} else if (op_flavor == CIL_AND || op_flavor == CIL_OR) {
 			enum cil_syntax syntax[] = {
 				SYM_STRING,
 				SYM_LIST,
@@ -402,18 +403,8 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor
 				goto exit;
 			}
 		}
-	} else if (nflavor == CIL_PERM) {
-		enum cil_syntax syntax[] = {
-			SYM_N_STRINGS,
-			SYM_END
-		};
-		int syntax_len = sizeof(syntax)/sizeof(*syntax);
-		rc = __cil_verify_syntax(node, syntax, syntax_len);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
 	} else {
-		if (eflavor == CIL_STAR) {
+		if (op_flavor == CIL_STAR) {
 			enum cil_syntax syntax[] = {
 				SYM_STRING,
 				SYM_END
@@ -423,10 +414,20 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-		} else if (eflavor == CIL_NOT) {
+		} else if (op_flavor == CIL_NOT) {
 			enum cil_syntax syntax[] = {
 				SYM_STRING,
 				SYM_STRING | SYM_LIST,
+				SYM_END
+			};
+			int syntax_len = sizeof(syntax)/sizeof(*syntax);
+			rc = __cil_verify_syntax(node, syntax, syntax_len);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		} else if (op_flavor == CIL_NONE) {
+			enum cil_syntax syntax[] = {
+				SYM_N_STRINGS | SYM_N_LISTS,
 				SYM_END
 			};
 			int syntax_len = sizeof(syntax)/sizeof(*syntax);
