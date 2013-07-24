@@ -138,6 +138,10 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 			*finished = CIL_TREE_SKIP_HEAD;
 		}
 		break;
+	case CIL_STRING:
+	case CIL_NAME:
+		/* Strings don't change */
+		break;
 	case CIL_TYPEATTRIBUTE:
 	case CIL_BOOL:
 	case CIL_CAT:

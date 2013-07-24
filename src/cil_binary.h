@@ -298,7 +298,7 @@ int cil_roleallow_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_nametypetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_typetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil constrain/mlsconstrain structure(s) into sepol policydb.

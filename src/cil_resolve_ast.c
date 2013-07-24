@@ -52,6 +52,46 @@ struct cil_args_resolve {
 	struct cil_tree_node *macro;
 };
 
+static struct cil_name * __cil_insert_name(struct cil_db *db, hashtab_key_t key, struct cil_tree_node *ast_node)
+{
+	/* Currently only used for typetransition file names.
+	   But could be used for any string that is passed as a parameter.
+	*/
+	struct cil_tree_node *parent = ast_node->parent;
+	struct cil_macro *macro = NULL;
+	struct cil_name *name;
+	symtab_t *symtab;
+	enum cil_sym_index sym_index;
+	struct cil_symtab_datum *datum = NULL;
+
+	cil_flavor_to_symtab_index(CIL_NAME, &sym_index);
+	symtab = &(db->symtab[sym_index]);
+
+	cil_symtab_get_datum(symtab, key, &datum);
+	if (datum != NULL) {
+		return (struct cil_name *)datum;
+	}
+
+	if (parent->flavor == CIL_CALL) {
+		struct cil_call *call = parent->data;
+		macro = call->macro;	
+	} else if (parent->flavor == CIL_MACRO) {
+		macro = parent->data;
+	}
+	if (macro != NULL) {
+		struct cil_list_item *item;
+		cil_list_for_each(item, macro->params) {
+			if (strcmp(((struct cil_param*)item->data)->str, key) == 0) {
+				return NULL;
+			}
+		}
+	}
+
+	cil_name_init(&name);
+	cil_symtab_insert(symtab, key, (struct cil_symtab_datum *)name, ast_node);
+	return name;
+}
+
 static int __cil_resolve_perms(symtab_t *class_symtab, symtab_t *common_symtab, struct cil_list *perm_strs, struct cil_list **perm_datums)
 {
 	int rc = SEPOL_ERR;
@@ -483,12 +523,14 @@ exit:
 
 int cil_resolve_nametypetransition(struct cil_tree_node *current, void *extra_args)
 {
+	struct cil_args_resolve *args = extra_args;
 	struct cil_nametypetransition *nametypetrans = current->data;
 	struct cil_symtab_datum *src_datum = NULL;
-	struct cil_symtab_datum *exec_datum = NULL;
-	struct cil_symtab_datum *proc_datum = NULL;
-	struct cil_symtab_datum *dest_datum = NULL;
-	struct cil_tree_node *dest_node = NULL;
+	struct cil_symtab_datum *tgt_datum = NULL;
+	struct cil_symtab_datum *obj_datum = NULL;
+	struct cil_symtab_datum *name_datum = NULL;
+	struct cil_symtab_datum *result_datum = NULL;
+	struct cil_tree_node *result_node = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, nametypetrans->src_str, CIL_SYM_TYPES, extra_args, &src_datum);
@@ -497,31 +539,40 @@ int cil_resolve_nametypetransition(struct cil_tree_node *current, void *extra_ar
 	}
 	nametypetrans->src = src_datum;
 
-	rc = cil_resolve_name(current, nametypetrans->exec_str, CIL_SYM_TYPES, extra_args, &exec_datum);
+	rc = cil_resolve_name(current, nametypetrans->tgt_str, CIL_SYM_TYPES, extra_args, &tgt_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	nametypetrans->exec = exec_datum;
+	nametypetrans->tgt = tgt_datum;
 
-	rc = cil_resolve_name(current, nametypetrans->proc_str, CIL_SYM_CLASSES, extra_args, &proc_datum);
+	rc = cil_resolve_name(current, nametypetrans->obj_str, CIL_SYM_CLASSES, extra_args, &obj_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	nametypetrans->proc = (struct cil_class*)proc_datum;
+	nametypetrans->obj = (struct cil_class*)obj_datum;
 
-	rc = cil_resolve_name(current, nametypetrans->dest_str, CIL_SYM_TYPES, extra_args, &dest_datum);
+	nametypetrans->name = __cil_insert_name(args->db, nametypetrans->name_str, current);
+	if (nametypetrans->name == NULL) {
+		rc = cil_resolve_name(current, nametypetrans->name_str, CIL_SYM_NAMES, extra_args, &name_datum);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		nametypetrans->name = (struct cil_name *)name_datum;
+	}
+
+	rc = cil_resolve_name(current, nametypetrans->result_str, CIL_SYM_TYPES, extra_args, &result_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	dest_node = dest_datum->nodes->head->data;
+	result_node = result_datum->nodes->head->data;
 
-	if (dest_node->flavor != CIL_TYPE && dest_node->flavor != CIL_TYPEALIAS) {
-		cil_log(CIL_ERR, "nametransition result is not a type or type alias\n");
+	if (result_node->flavor != CIL_TYPE && result_node->flavor != CIL_TYPEALIAS) {
+		cil_log(CIL_ERR, "typetransition result is not a type or type alias\n");
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	nametypetrans->dest = dest_datum;
+	nametypetrans->result = result_datum;
 
 	return SEPOL_OK;
 
@@ -2459,7 +2510,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 		rc = SEPOL_ERR;
 		goto exit;
 	}
-	new_call->macro = (struct cil_macro*)macro_node->data;
+	new_call->macro = (struct cil_macro*)macro_datum;
 
 	if (new_call->macro->params != NULL ) {
 
@@ -2491,6 +2542,16 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			cil_args_init(&new_arg);
 
 			switch (((struct cil_param*)item->data)->flavor) {
+			case CIL_NAME: {
+				struct cil_name *name;
+				name = __cil_insert_name(args->db, pc->data, current);
+				if (name != NULL) {
+					new_arg->arg = (struct cil_symtab_datum *)name;
+				} else {
+					new_arg->arg_str = cil_strdup(pc->data);
+				}
+			}
+				break;
 			case CIL_TYPE:
 				new_arg->arg_str = cil_strdup(pc->data);
 				break;
@@ -2634,7 +2695,8 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 				break;
 			}
 			default:
-				cil_log(CIL_ERR, "Unexpected flavor: %d\n", item->flavor);
+				cil_log(CIL_ERR, "Unexpected flavor: %d\n", 
+						(((struct cil_param*)item->data)->flavor));
 				rc = SEPOL_ERR;
 				goto exit;
 			}
@@ -2685,50 +2747,58 @@ int cil_resolve_call2(struct cil_tree_node *current, void *extra_args)
 	}
 
 	cil_list_for_each(item, new_call->args) {
-		if (((struct cil_args*)item->data)->arg == NULL && ((struct cil_args*)item->data)->arg_str == NULL) {
+		struct cil_args *arg = item->data;
+		if (arg->arg == NULL && arg->arg_str == NULL) {
 			cil_log(CIL_ERR, "Arguments not created correctly\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 
-		switch (((struct cil_args*)item->data)->flavor) {
+		switch (arg->flavor) {
+		case CIL_NAME:
+			if (arg->arg != NULL) {
+				continue; /* No need to resolve */
+			} else {
+				sym_index = CIL_SYM_NAMES;
+			}
+			break;
 		case CIL_LEVEL:
-			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+			if (arg->arg_str == NULL && arg->arg != NULL) {
 				continue; // anonymous, no need to resolve
 			} else {
 				sym_index = CIL_SYM_LEVELS;
 			}
 			break;
 		case CIL_LEVELRANGE:
-			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+			if (arg->arg_str == NULL && arg->arg != NULL) {
 				continue; // anonymous, no need to resolve
 			} else {
 				sym_index = CIL_SYM_LEVELRANGES;
 			}
 			break;
 		case CIL_CATSET:
-			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+			if (arg->arg_str == NULL && arg->arg != NULL) {
 				continue; // anonymous, no need to resolve
 			} else {
 				sym_index = CIL_SYM_CATS;
 			}
 			break;
 		case CIL_IPADDR:
-			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+			if (arg->arg_str == NULL && arg->arg != NULL) {
 				continue; // anonymous, no need to resolve
 			} else {
 				sym_index = CIL_SYM_IPADDRS;
 			}
 			break;
 		case CIL_CLASSPERMSET:
-			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+			if (arg->arg_str == NULL && arg->arg != NULL) {
 				continue;
 			} else {
 				sym_index = CIL_SYM_CLASSPERMSETS;
 			}
 			break;
 		case CIL_TYPE:
-			if ((((struct cil_args*)item->data)->arg_str == NULL) && ((struct cil_args*)item->data)->arg != NULL) {
+			if (arg->arg_str == NULL && arg->arg != NULL) {
 				continue; // anonymous, no need to resolve
 			} else {
 				sym_index = CIL_SYM_TYPES;
@@ -2761,7 +2831,7 @@ int cil_resolve_call2(struct cil_tree_node *current, void *extra_args)
 		}
 
 		if (sym_index != CIL_SYM_UNKNOWN) {
-			rc = cil_resolve_name(current, ((struct cil_args*)item->data)->arg_str, sym_index, extra_args, &(((struct cil_args*)item->data)->arg));
+			rc = cil_resolve_name(current, arg->arg_str, sym_index, extra_args, &(arg->arg));
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -2789,10 +2859,11 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_i
 	}
 
 	cil_list_for_each(item, call->args) {
-		rc = cil_flavor_to_symtab_index(((struct cil_args*)item->data)->flavor, &param_index);
+		struct cil_args * arg = item->data;
+		rc = cil_flavor_to_symtab_index(arg->flavor, &param_index);
 		if (param_index == sym_index) {
-			if (!strcmp(name, ((struct cil_args*)item->data)->param_str)) {
-				*datum = ((struct cil_args*)item->data)->arg;
+			if (!strcmp(name, arg->param_str)) {
+				*datum = arg->arg;
 				rc = SEPOL_OK;
 				goto exit;
 			}

@@ -707,10 +707,11 @@ int cil_copy_nametypetransition(__attribute__((unused)) struct cil_db *db, void 
 	cil_nametypetransition_init(&new);
 
 	new->src_str = cil_strdup(orig->src_str);
-	new->exec_str = cil_strdup(orig->exec_str);
-	new->proc_str = cil_strdup(orig->proc_str);
-	new->dest_str = cil_strdup(orig->dest_str);
-	new->path_str = cil_strdup(orig->path_str);
+	new->tgt_str = cil_strdup(orig->tgt_str);
+	new->obj_str = cil_strdup(orig->obj_str);
+	new->name_str = cil_strdup(orig->name_str);
+	new->result_str = cil_strdup(orig->result_str);
+
 
 	*copy = new;
 

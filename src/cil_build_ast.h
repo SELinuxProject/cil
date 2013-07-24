@@ -128,8 +128,9 @@ int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, s
 void cil_destroy_typebounds(struct cil_typebounds *typebnds);
 int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_typepermissive(struct cil_typepermissive *typeperm);
-int cil_gen_nametypetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_nametypetransition(struct cil_nametypetransition *nametypetrans);
+int cil_gen_typetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_name(struct cil_name *name);
+void cil_destroy_typetransition(struct cil_nametypetransition *nametypetrans);
 int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans);
 int cil_gen_sensitivity(struct cil_db *idb, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

@@ -662,11 +662,11 @@ int cil_typerule_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t fil
 int cil_nametypetransition_to_policy(FILE **file_arr, uint32_t file_index, struct cil_nametypetransition *nametypetrans)
 {
 	char *src_str = ((struct cil_symtab_datum*)nametypetrans->src)->name;
-	char *exec_str = ((struct cil_symtab_datum*)nametypetrans->exec)->name;
-	char *proc_str = ((struct cil_symtab_datum*)nametypetrans->proc)->name;
-	char *dest_str = ((struct cil_symtab_datum*)nametypetrans->dest)->name;
+	char *tgt_str = ((struct cil_symtab_datum*)nametypetrans->tgt)->name;
+	char *obj_str = ((struct cil_symtab_datum*)nametypetrans->obj)->name;
+	char *result_str = ((struct cil_symtab_datum*)nametypetrans->result)->name;
 
-	fprintf(file_arr[file_index], "type_transition %s %s : %s %s %s;\n", src_str, exec_str, proc_str, dest_str, nametypetrans->path_str);
+	fprintf(file_arr[file_index], "type_transition %s %s : %s %s %s;\n", src_str, tgt_str, obj_str, result_str, nametypetrans->name_str);
 	return SEPOL_OK;
 }
 

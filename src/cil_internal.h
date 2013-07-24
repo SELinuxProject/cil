@@ -187,7 +187,8 @@ enum cil_flavor {
 	CIL_MACRO,
 	CIL_OPTIONAL,
 	CIL_POLICYCAP,
-	CIL_IPADDR
+	CIL_IPADDR,
+	CIL_NAME,
 };
 
 /*
@@ -200,6 +201,7 @@ enum cil_flavor {
 #define CIL_KEY_BLOCKINHERIT		"blockinherit"
 #define CIL_KEY_BLOCKABSTRACT		"blockabstract"
 #define CIL_KEY_IN			"in"
+#define CIL_KEY_STRING          "string"
 #define CIL_KEY_CLASS			"class"
 #define CIL_KEY_PERM			"perm"
 #define CIL_KEY_CLASSPERMSET		"classpermissionset"
@@ -234,9 +236,9 @@ enum cil_flavor {
 #define CIL_KEY_AUDITALLOW		"auditallow"
 #define CIL_KEY_DONTAUDIT		"dontaudit"
 #define CIL_KEY_NEVERALLOW		"neverallow"
-#define CIL_KEY_TYPETRANS		"typetransition"
+#define CIL_KEY_NAME            "name"
+#define CIL_KEY_TYPETRANSITION		"typetransition"
 #define CIL_KEY_RANGETRANSITION		"rangetransition"
-#define CIL_KEY_NAMETYPETRANSITION		"nametypetransition"
 #define CIL_KEY_TYPECHANGE		"typechange"
 #define CIL_KEY_TYPEMEMBER		"typemember"
 #define CIL_KEY_TYPEATTRIBUTESET	"typeattributeset"
@@ -314,8 +316,7 @@ enum cil_flavor {
 	Symbol Table Array Indices
 */
 enum cil_sym_index {
-	CIL_SYM_FILENAMES = 0,
-	CIL_SYM_BLOCKS,
+	CIL_SYM_BLOCKS = 0,
 	CIL_SYM_USERS,
 	CIL_SYM_ROLES,
 	CIL_SYM_TYPES,
@@ -335,6 +336,7 @@ enum cil_sym_index {
 	CIL_SYM_LEVELRANGES,
 	CIL_SYM_POLICYCAPS,
 	CIL_SYM_IPADDRS,
+	CIL_SYM_NAMES,
 	CIL_SYM_NUM,
 	CIL_SYM_UNKNOWN,
 	CIL_SYM_PERMS	// Special case for permissions. This symtab is not included in arrays
@@ -599,16 +601,23 @@ struct cil_typepermissive {
 	void *type; /* type or alias */
 };
 
+struct cil_name {
+	struct cil_symtab_datum datum;
+	char *name_str;
+};
+
 struct cil_nametypetransition {
 	char *src_str;
 	void *src; /* type, alias, or attribute */
-	char *exec_str;
-	void *exec; /* type, alias, or attribute */
-	char *proc_str;
-	struct cil_class *proc;
-	char *dest_str;
-	void *dest; /* type or alias */
-	char *path_str;
+	char *tgt_str;
+	void *tgt; /* type, alias, or attribute */
+	char *obj_str;
+	struct cil_class *obj;
+	char *name_str;
+	struct cil_name *name;
+	char *result_str;
+	void *result; /* type or alias */
+
 };
 
 struct cil_rangetransition {
@@ -968,6 +977,7 @@ void cil_typeattributeset_init(struct cil_typeattributeset **attrset);
 void cil_typealias_init(struct cil_typealias **typealias);
 void cil_typebounds_init(struct cil_typebounds **typebnds);
 void cil_typepermissive_init(struct cil_typepermissive **typeperm);
+void cil_name_init(struct cil_name **name);
 void cil_nametypetransition_init(struct cil_nametypetransition **nametypetrans);
 void cil_rangetransition_init(struct cil_rangetransition **rangetrans);
 void cil_bool_init(struct cil_bool **cilbool);

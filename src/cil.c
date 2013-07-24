@@ -343,8 +343,11 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_TYPEPERMISSIVE:
 		cil_destroy_typepermissive(*data);
 		break;
+	case CIL_NAME:
+		cil_destroy_name(*data);
+		break;
 	case CIL_NAMETYPETRANSITION:
-		cil_destroy_nametypetransition(*data);
+		cil_destroy_typetransition(*data);
 		break;
 	case CIL_RANGETRANSITION:
 		cil_destroy_rangetransition(*data);
@@ -557,6 +560,9 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 	case CIL_IPADDR:
 		*sym_index = CIL_SYM_IPADDRS;
 		break;
+	case CIL_NAME:
+		*sym_index = CIL_SYM_NAMES;
+		break;
 	default:
 		*sym_index = CIL_SYM_UNKNOWN;
 		cil_log(CIL_INFO, "Failed to find flavor: %d\n", flavor);
@@ -632,7 +638,7 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 	case CIL_TYPE_RULE:
 		switch (((struct cil_type_rule *)node->data)->rule_kind) {
 		case CIL_TYPE_TRANSITION:
-			return CIL_KEY_TYPETRANS;
+			return CIL_KEY_TYPETRANSITION;
 		case CIL_TYPE_MEMBER:
 			return CIL_KEY_TYPEMEMBER;
 		case CIL_TYPE_CHANGE:
@@ -642,7 +648,7 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 	case CIL_TYPEBOUNDS:
 		return CIL_KEY_TYPEBOUNDS;
 	case CIL_NAMETYPETRANSITION:
-		return CIL_KEY_NAMETYPETRANSITION;
+		return CIL_KEY_TYPETRANSITION;
 	case CIL_RANGETRANSITION:
 		return CIL_KEY_RANGETRANSITION;
 	case CIL_TYPEPERMISSIVE:
@@ -1589,19 +1595,28 @@ void cil_typepermissive_init(struct cil_typepermissive **typeperm)
 	(*typeperm)->type = NULL;
 }
 
+void cil_name_init(struct cil_name **name)
+{
+	*name = cil_malloc(sizeof(**name));
+
+	cil_symtab_datum_init(&(*name)->datum);
+	(*name)->name_str = NULL;
+}
+
 void cil_nametypetransition_init(struct cil_nametypetransition **nametypetrans)
 {
 	*nametypetrans = cil_malloc(sizeof(**nametypetrans));
 
 	(*nametypetrans)->src_str = NULL;
 	(*nametypetrans)->src = NULL;
-	(*nametypetrans)->exec_str = NULL;
-	(*nametypetrans)->exec = NULL;
-	(*nametypetrans)->proc_str = NULL;
-	(*nametypetrans)->proc = NULL;
-	(*nametypetrans)->dest_str = NULL;
-	(*nametypetrans)->dest = NULL;
-	(*nametypetrans)->path_str = NULL;
+	(*nametypetrans)->tgt_str = NULL;
+	(*nametypetrans)->tgt = NULL;
+	(*nametypetrans)->obj_str = NULL;
+	(*nametypetrans)->obj = NULL;
+	(*nametypetrans)->name_str = NULL;
+	(*nametypetrans)->name = NULL;
+	(*nametypetrans)->result_str = NULL;
+	(*nametypetrans)->result = NULL;
 }
 
 void cil_rangetransition_init(struct cil_rangetransition **rangetrans)

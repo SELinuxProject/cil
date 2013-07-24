@@ -3017,20 +3017,20 @@ void cil_destroy_typepermissive(struct cil_typepermissive *typeperm)
 	free(typeperm);
 }
 
-int cil_gen_nametypetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_typetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
+	int rc = SEPOL_ERR;
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING,
 		SYM_STRING,
 		SYM_STRING,
 		SYM_STRING,
-		SYM_STRING,
+		SYM_STRING|SYM_END,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_nametypetransition *nametypetrans = NULL;
-	int rc = SEPOL_ERR;
+	char *s1, *s2, *s3, *s4, *s5;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL ) {
 		goto exit;
@@ -3041,47 +3041,77 @@ int cil_gen_nametypetransition(struct cil_db *db, struct cil_tree_node *parse_cu
 		goto exit;
 	}
 
-	cil_nametypetransition_init(&nametypetrans);
+	s1 = cil_strdup(parse_current->next->data);
+	s2 = cil_strdup(parse_current->next->next->data);
+	s3 = cil_strdup(parse_current->next->next->next->data);
+	s4 = cil_strdup(parse_current->next->next->next->next->data);
+	s5 = NULL;
 
-	nametypetrans->path_str = cil_strdup(parse_current->next->data);
-	nametypetrans->src_str = cil_strdup(parse_current->next->next->data);
-	nametypetrans->exec_str = cil_strdup(parse_current->next->next->next->data);
-	nametypetrans->proc_str = cil_strdup(parse_current->next->next->next->next->data);
-	nametypetrans->dest_str = cil_strdup(parse_current->next->next->next->next->next->data);
+	if (parse_current->next->next->next->next->next) {
+		if (strcmp(s4,"*") == 0) {
+			s4 = cil_strdup(parse_current->next->next->next->next->next->data);
+		} else {
+			s5 = cil_strdup(parse_current->next->next->next->next->next->data);
+		}
+	}
 
-	ast_node->data = nametypetrans;
-	ast_node->flavor = CIL_NAMETYPETRANSITION;
+	if (s5) {
+		struct cil_nametypetransition *nametypetrans = NULL;
+
+		cil_nametypetransition_init(&nametypetrans);
+
+		nametypetrans->src_str = s1;
+		nametypetrans->tgt_str = s2;
+		nametypetrans->obj_str = s3;
+		nametypetrans->result_str = s5;
+		nametypetrans->name_str = s4;
+
+		ast_node->data = nametypetrans;
+		ast_node->flavor = CIL_NAMETYPETRANSITION;
+	} else {
+		struct cil_type_rule *rule = NULL;
+
+		cil_type_rule_init(&rule);
+
+		rule->rule_kind = CIL_TYPE_TRANSITION;
+		rule->src_str = s1;
+		rule->tgt_str = s2;
+		rule->obj_str = s3;
+		rule->result_str = s4;
+
+		ast_node->data = rule;
+		ast_node->flavor = CIL_TYPE_RULE;
+	}
 
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad nametypetransition declaration at line %d of %s\n", 
+	cil_log(CIL_ERR, "Bad typetransition declaration at line %d of %s\n", 
 		parse_current->line, parse_current->path);
-	cil_destroy_nametypetransition(nametypetrans);
 	return rc;
 }
 
-void cil_destroy_nametypetransition(struct cil_nametypetransition *nametypetrans)
+void cil_destroy_name(struct cil_name *name)
+{
+	if (name == NULL) {
+		return;
+	}
+
+	free(name->name_str);
+	free(name);
+}
+
+void cil_destroy_typetransition(struct cil_nametypetransition *nametypetrans)
 {
 	if (nametypetrans == NULL) {
 		return;
 	}
 
-	if (nametypetrans->src_str != NULL) {
-		free(nametypetrans->src_str);
-	}
-	if (nametypetrans->exec_str != NULL) {
-		free(nametypetrans->exec_str);
-	}
-	if (nametypetrans->proc_str != NULL) {
-		free(nametypetrans->proc_str);
-	}
-	if (nametypetrans->dest_str != NULL) {
-		free(nametypetrans->dest_str);
-	}
-	if (nametypetrans->path_str != NULL) {
-		free(nametypetrans->path_str);
-	}
+	free(nametypetrans->src_str);
+	free(nametypetrans->tgt_str);
+	free(nametypetrans->obj_str);
+	free(nametypetrans->name_str);
+	free(nametypetrans->result_str);
 
 	free(nametypetrans);
 }
@@ -5065,6 +5095,10 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			param->flavor = CIL_CLASSPERMSET;
 		} else if (!strcmp(kind, CIL_KEY_BOOL)) {
 			param->flavor = CIL_BOOL;
+		} else if (!strcmp(kind, CIL_KEY_STRING)) {
+			param->flavor = CIL_NAME;
+		} else if (!strcmp(kind, CIL_KEY_NAME)) {
+			param->flavor = CIL_NAME;
 		} else {
 			cil_log(CIL_ERR, "The kind %s is not allowed as a parameter\n",kind);
 			cil_destroy_param(param);
@@ -5720,8 +5754,6 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_typebounds(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEPERMISSIVE)) {
 		rc = cil_gen_typepermissive(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_NAMETYPETRANSITION)) {
-		rc = cil_gen_nametypetransition(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_RANGETRANSITION)) {
 		rc = cil_gen_rangetransition(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
@@ -5767,8 +5799,8 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	} else if (!strcmp(parse_current->data, CIL_KEY_NEVERALLOW)) {
 		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_NEVERALLOW);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANS)) {
-		rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_TRANSITION);
+	} else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANSITION)) {
+		rc = cil_gen_typetransition(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPECHANGE)) {
 		rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_CHANGE);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEMEMBER)) {

@@ -1223,10 +1223,17 @@ int __cil_verify_booleanif_helper(struct cil_tree_node *node, __attribute__((unu
 	case CIL_TUNABLEIF:
 		//Fall through
 		break;
-	default:
-		cil_log(CIL_ERR, "Invalid statement in booleanif at line %d of %s\n", 
-			node->line, node->path);
+	case CIL_NAMETYPETRANSITION:
+		/* While type transitions with file component are not allowed in
+		   booleanif statements if they don't have "*" as the file. We
+		   can't check that here. Or at least we won't right now. */
+		break;
+	default: {
+		const char * flavor = cil_node_to_string(node);
+		cil_log(CIL_ERR, "Invalid %s statement in booleanif at line %d of %s\n", 
+				flavor, node->line, node->path);
 		goto exit;
+	}
 	}
 
 	rc = SEPOL_OK;

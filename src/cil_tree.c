@@ -1005,7 +1005,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_NAMETYPETRANSITION: {
 			struct cil_nametypetransition *nametypetrans = node->data;
-			cil_log(CIL_INFO, "NAMETYPETRANSITION:");
+			cil_log(CIL_INFO, "TYPETRANSITION:");
 
 			if (nametypetrans->src != NULL) {
 				cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)nametypetrans->src)->name);
@@ -1013,19 +1013,26 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				cil_log(CIL_INFO, " %s", nametypetrans->src_str);
 			}
 
-			if (nametypetrans->exec != NULL) {
-				cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)nametypetrans->exec)->name);
+			if (nametypetrans->tgt != NULL) {
+				cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)nametypetrans->tgt)->name);
 			} else {
-				cil_log(CIL_INFO, " %s", nametypetrans->exec_str);
+				cil_log(CIL_INFO, " %s", nametypetrans->tgt_str);
 			}
 
-			if (nametypetrans->proc != NULL) {
-				cil_log(CIL_INFO, " %s", nametypetrans->proc->datum.name);
+			if (nametypetrans->obj != NULL) {
+				cil_log(CIL_INFO, " %s", nametypetrans->obj->datum.name);
 			} else {
-				cil_log(CIL_INFO, " %s", nametypetrans->proc_str);
+				cil_log(CIL_INFO, " %s", nametypetrans->obj_str);
 			}
 
-			cil_log(CIL_INFO, " %s\n", nametypetrans->path_str);
+			cil_log(CIL_INFO, " %s\n", nametypetrans->name_str);
+
+			if (nametypetrans->result != NULL) {
+				cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)nametypetrans->result)->name);
+			} else {
+				cil_log(CIL_INFO, " %s", nametypetrans->result_str);
+			}
+
 			return;
 		}
 		case CIL_RANGETRANSITION: {

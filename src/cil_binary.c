@@ -983,6 +983,78 @@ int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 	return  __cil_type_rule_to_avtab(pdb, cil_rule, NULL, CIL_FALSE);
 }
 
+int __cil_typetransition_to_avtab(policydb_t *pdb, struct cil_nametypetransition *cil_typetrans, cond_node_t *cond_node, enum cil_flavor cond_flavor)
+{
+	char *key = NULL;
+	type_datum_t *sepol_src = NULL;
+	type_datum_t *sepol_tgt = NULL;
+	class_datum_t *sepol_obj = NULL;
+	char *name = NULL;
+	type_datum_t *sepol_result = NULL;
+
+	/* Don't add rule that is not going to be used */
+	if (!has_types_assigned(cil_typetrans->src)) {
+		return SEPOL_OK;
+	}
+
+	if (!has_types_assigned(cil_typetrans->tgt)) {
+		return SEPOL_OK;
+	}
+
+	key = ((struct cil_symtab_datum *)cil_typetrans->src)->name;
+	sepol_src = hashtab_search(pdb->p_types.table, key);
+	if (sepol_src == NULL) {
+		goto exit;
+	}
+
+	key = ((struct cil_symtab_datum *)cil_typetrans->tgt)->name;
+	sepol_tgt = hashtab_search(pdb->p_types.table, key);
+	if (sepol_tgt == NULL) {
+		goto exit;
+	}
+
+	key = ((struct cil_symtab_datum *)cil_typetrans->obj)->name;
+	sepol_obj = hashtab_search(pdb->p_classes.table, key);
+	if (sepol_obj == NULL) {
+		goto exit;
+	}
+
+	name = ((struct cil_symtab_datum *)cil_typetrans->name)->name;
+
+	key = ((struct cil_symtab_datum *)cil_typetrans->result)->name;
+	sepol_result = hashtab_search(pdb->p_types.table, key);
+	if (sepol_result == NULL) {
+		goto exit;
+	}
+
+	if (!strcmp(name, "*")) {
+		return __cil_insert_type_rule(pdb, CIL_TYPE_TRANSITION, sepol_src->s.value, sepol_tgt->s.value, sepol_obj->s.value, sepol_result->s.value, cond_node, cond_flavor);
+	} else {
+		filename_trans_t *sepol_nametypetrans = cil_malloc(sizeof(*sepol_nametypetrans));
+		memset(sepol_nametypetrans, 0, sizeof(filename_trans_t));
+		sepol_nametypetrans->stype = sepol_src->s.value;
+		sepol_nametypetrans->ttype = sepol_tgt->s.value;
+		sepol_nametypetrans->tclass = sepol_obj->s.value;
+		sepol_nametypetrans->otype = sepol_result->s.value;
+		sepol_nametypetrans->name = cil_strdup(name);
+
+		sepol_nametypetrans->next = pdb->filename_trans;
+		pdb->filename_trans = sepol_nametypetrans;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return SEPOL_ERR;
+}
+
+int cil_typetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
+{
+	struct cil_nametypetransition *typetrans = (struct cil_nametypetransition*)datum;
+
+	return  __cil_typetransition_to_avtab(pdb, typetrans, NULL, CIL_FALSE);
+}
+
 int __cil_perms_to_datum(struct cil_list *perms, class_datum_t *sepol_class, uint32_t *datum)
 {
 	int rc = SEPOL_ERR;
@@ -1288,7 +1360,7 @@ exit:
 
 int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
-	int rc = SEPOL_OK;
+	int rc;
 	enum cil_flavor flavor;
 	struct cil_args_booleanif *args = extra_args;
 	const struct cil_db *db = args->db;
@@ -1297,15 +1369,29 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 	enum cil_flavor cond_flavor = args->cond_flavor;
 	struct cil_type_rule *cil_type_rule;
 	struct cil_avrule *cil_avrule;
+	struct cil_nametypetransition *cil_typetrans;
 
 	flavor = node->flavor;
 	switch (flavor) {
+	case CIL_NAMETYPETRANSITION:
+		cil_typetrans = (struct cil_nametypetransition*)node->data;
+		if (strcmp(((struct cil_symtab_datum *)cil_typetrans->name)->name,"*") != 0) {
+			cil_log(CIL_ERR, "typetransition with file name not allowed within a booleanif block.\n");
+			cil_log(CIL_ERR,"Invalid typetransition statement at line %d of %s\n", 
+			node->line, node->path);
+			goto exit;
+		}
+		rc = __cil_typetransition_to_avtab(pdb, cil_typetrans, cond_node, cond_flavor);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to insert type transition into avtab at line %d of %s\n", node->line, node->path);
+			goto exit;
+		}
+		break;
 	case CIL_TYPE_RULE:
 		cil_type_rule = node->data;
 		rc = __cil_type_rule_to_avtab(pdb, cil_type_rule, cond_node, cond_flavor);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to insert typerule into avtab at line %d of %s\n", node->line, node->path);
-			rc = SEPOL_ERR;
 			goto exit;
 		}
 		break;
@@ -1314,7 +1400,6 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 		rc = __cil_avrule_to_avtab(pdb, db, cil_avrule, args->neverallows, cond_node, cond_flavor);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to insert typerule into avtab at line %d of %s\n", node->line, node->path);
-			rc = SEPOL_ERR;
 			goto exit;
 		}
 		break;
@@ -1324,13 +1409,13 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 	default:
 		cil_log(CIL_ERR, "Invalid statement within booleanif at line %d of %s\n", 
 			node->line, node->path);
-		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-exit:
-	return rc;
+	return SEPOL_OK;
 
+exit:
+	return SEPOL_ERR;
 }
 
 int cil_get_cond_expr(policydb_t *pdb, struct cil_list *expr, cond_node_t *cond_node, struct cil_tree_node *node)
@@ -1643,63 +1728,6 @@ int cil_roleallow_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 	return SEPOL_OK;
 exit:
 	return rc;
-}
-
-int cil_nametypetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
-{
-	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_nametypetransition *cil_nametypetrans = (struct cil_nametypetransition*)datum;
-	type_datum_t *sepol_src = NULL;
-	type_datum_t *sepol_exec = NULL;
-	class_datum_t *sepol_proc = NULL;
-	type_datum_t *sepol_dest = NULL;
-	filename_trans_t *sepol_nametypetrans = cil_malloc(sizeof(*sepol_nametypetrans));
-	memset(sepol_nametypetrans, 0, sizeof(filename_trans_t));
-
-	key = ((struct cil_symtab_datum *)cil_nametypetrans->src)->name;
-	sepol_src = hashtab_search(pdb->p_types.table, key);
-	if (sepol_src == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	sepol_nametypetrans->stype = sepol_src->s.value;
-
-	key = ((struct cil_symtab_datum *)cil_nametypetrans->exec)->name;
-	sepol_exec = hashtab_search(pdb->p_types.table, key);
-	if (sepol_exec == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	sepol_nametypetrans->ttype = sepol_exec->s.value;
-
-	key = ((struct cil_symtab_datum *)cil_nametypetrans->proc)->name;
-	sepol_proc = hashtab_search(pdb->p_classes.table, key);
-	if (sepol_proc == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	sepol_nametypetrans->tclass = sepol_proc->s.value;
-
-	key = ((struct cil_symtab_datum *)cil_nametypetrans->dest)->name;
-	sepol_dest = hashtab_search(pdb->p_types.table, key);
-	if (sepol_dest == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	sepol_nametypetrans->otype = sepol_dest->s.value;
-
-	sepol_nametypetrans->name = cil_strdup(cil_nametypetrans->path_str);
-
-   sepol_nametypetrans->next = pdb->filename_trans;
-	pdb->filename_trans = sepol_nametypetrans;
-
-	return SEPOL_OK;
-
-exit:
-	free(sepol_nametypetrans);
-	return rc;
-
 }
 
 int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
@@ -2883,7 +2911,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 		  /*rc = cil_roleattributeset_to_policydb(pdb, node->data);*/
 			break;
 		case CIL_NAMETYPETRANSITION:
-			rc = cil_nametypetransition_to_policydb(pdb, node->data);
+			rc = cil_typetransition_to_policydb(pdb, node->data);
 			break;
 		case CIL_CONSTRAIN:
 			rc = cil_constrain_to_policydb(pdb, node->data);
