@@ -2454,7 +2454,11 @@ int __cil_gen_expr_first_helper(struct cil_tree_node *node, __attribute__((unuse
 			args->expr_stack[args->n] = new;
 			args->expr = new;
 		}
-		cil_list_append(args->expr, CIL_STRING, cil_strdup( node->data));
+		cil_list_append(args->expr, CIL_STRING, cil_strdup(node->data));
+	} else if (op_flavor == CIL_STAR) {
+		enum cil_flavor *f = cil_malloc(sizeof(enum cil_flavor));
+		*f = CIL_STAR;
+		cil_list_append(args->expr, CIL_OP, f);
 	}
 
 	args->first = CIL_FALSE;
@@ -2522,7 +2526,13 @@ int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct c
 		if (current->data == NULL || isconstraint) {
 			goto exit;
 		}
-		cil_list_append(*expr, CIL_STRING, cil_strdup(current->data));
+		if (!strcmp("*",current->data)) {
+			enum cil_flavor *f = cil_malloc(sizeof(enum cil_flavor));
+			*f = CIL_STAR;
+			cil_list_append(*expr, CIL_OP, f);
+		} else {
+			cil_list_append(*expr, CIL_STRING, cil_strdup(current->data));
+		}
 	} else {
 		extra_args.n = 0;
 		extra_args.expr_stack[0] = *expr;
