@@ -818,6 +818,22 @@ exit:
 	return rc;
 }
 
+avtab_datum_t *cil_cond_av_list_search(avtab_key_t * key, cond_av_list_t * cond_list)
+{
+	cond_av_list_t *cur_av;
+
+	for (cur_av = cond_list; cur_av != NULL; cur_av = cur_av->next) {
+		if (cur_av->node->key.source_type == key->source_type &&
+		    cur_av->node->key.target_type == key->target_type &&
+		    cur_av->node->key.target_class == key->target_class &&
+			(cur_av->node->key.specified & key->specified))
+
+			return &cur_av->node->datum;
+
+	}
+	return NULL;
+}
+
 int __cil_insert_type_rule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t res, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_OK;
@@ -869,7 +885,7 @@ int __cil_insert_type_rule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_
 				cond_list = cond_node->false_list;
 			}
 
-			search_datum = cond_av_list_search(&avtab_key, cond_list);
+			search_datum = cil_cond_av_list_search(&avtab_key, cond_list);
 			if (search_datum) {
 				/* Don't add duplicate type rule.
 				 * A warning should have been previously given if there is a
