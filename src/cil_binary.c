@@ -1151,29 +1151,35 @@ int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_
 {
 	int rc = SEPOL_ERR;
 	uint16_t kind = cil_avrule->rule_kind;
-	struct cil_classperms *classperms = cil_avrule->classperms;
+	struct cil_list_item *curr;
 
-	if (classperms->flavor == CIL_CLASSPERMSET) {
-		struct cil_classpermset *cps = classperms->r.classpermset;
+	cil_list_for_each(curr, cil_avrule->classperms) {
+		struct cil_classperms *classperms = curr->data;
 
-		rc = __cil_avrule_expand_helper(pdb, cps->classperms, kind, src, tgt, neverallows, cond_node, cond_flavor);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}	
-	} else if (classperms->flavor == CIL_CLASSPERMS) {
-		rc = __cil_avrule_expand_helper(pdb, classperms, kind, src, tgt, neverallows, cond_node, cond_flavor);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}	
-	} else { /* CIL_MAP_CLASSPEMRS */
-		struct cil_list_item *i = NULL;
-		cil_list_for_each(i, classperms->r.mcp.perms) {
-			struct cil_map_perm *cmp = i->data;
-			struct cil_list_item *j = NULL;
-			cil_list_for_each(j, cmp->classperms) {
-				rc = __cil_avrule_expand_helper(pdb, j->data, kind, src, tgt, neverallows, cond_node, cond_flavor);
+		if (classperms->flavor == CIL_CLASSPERMSET) {
+			struct cil_classpermset *cps = classperms->r.classpermset;
+			struct cil_list_item *i = NULL;
+			cil_list_for_each(i, cps->classperms) {
+				rc = __cil_avrule_expand_helper(pdb, i->data, kind, src, tgt, neverallows, cond_node, cond_flavor);
 				if (rc != SEPOL_OK) {
 					goto exit;
+				}
+			}
+		} else if (classperms->flavor == CIL_CLASSPERMS) {
+			rc = __cil_avrule_expand_helper(pdb, classperms, kind, src, tgt, neverallows, cond_node, cond_flavor);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}	
+		} else { /* CIL_MAP_CLASSPEMRS */
+			struct cil_list_item *i = NULL;
+			cil_list_for_each(i, classperms->r.mcp.perms) {
+				struct cil_map_perm *cmp = i->data;
+				struct cil_list_item *j = NULL;
+				cil_list_for_each(j, cmp->classperms) {
+					rc = __cil_avrule_expand_helper(pdb, j->data, kind, src, tgt, neverallows, cond_node, cond_flavor);
+					if (rc != SEPOL_OK) {
+						goto exit;
+					}
 				}
 			}
 		}
@@ -1931,31 +1937,34 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 {
 	int rc = SEPOL_ERR;
 	struct cil_constrain *cil_constrain = (struct cil_constrain*)datum;
-	struct cil_classperms *classperms = cil_constrain->classperms;
 	struct cil_list *expr = cil_constrain->datum_expr;
+	struct cil_list_item *curr;
 	char *key = NULL;
 
-	if (classperms->flavor == CIL_CLASS) {
-		key = ((struct cil_symtab_datum *)classperms->r.cp.class)->name;
+	cil_list_for_each(curr, cil_constrain->classperms) {
+		struct cil_classperms *classperms = curr->data;
+		if (classperms->flavor == CIL_CLASS) {
+			key = ((struct cil_symtab_datum *)classperms->r.cp.class)->name;
 
-		rc = cil_constrain_to_policydb_helper(pdb, key, classperms->r.cp.perms, expr);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-	} else if (classperms->flavor == CIL_MAP_CLASS) {
-		struct cil_list_item *i = NULL;
-		cil_list_for_each(i, classperms->r.mcp.perms) {
-			struct cil_map_perm *cmp = i->data;
-			struct cil_list_item *j = NULL;
+			rc = cil_constrain_to_policydb_helper(pdb, key, classperms->r.cp.perms, expr);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		} else if (classperms->flavor == CIL_MAP_CLASS) {
+			struct cil_list_item *i = NULL;
+			cil_list_for_each(i, classperms->r.mcp.perms) {
+				struct cil_map_perm *cmp = i->data;
+				struct cil_list_item *j = NULL;
 
-			cil_list_for_each(j, cmp->classperms) {
-				struct cil_classperms *cp = j->data;
+				cil_list_for_each(j, cmp->classperms) {
+					struct cil_classperms *cp = j->data;
 
-				key = ((struct cil_symtab_datum *)cp->r.cp.class)->name;
+					key = ((struct cil_symtab_datum *)cp->r.cp.class)->name;
 
-				rc = cil_constrain_to_policydb_helper(pdb, key, cp->r.cp.perms, expr);
-				if (rc != SEPOL_OK) {
-					goto exit;
+					rc = cil_constrain_to_policydb_helper(pdb, key, cp->r.cp.perms, expr);
+					if (rc != SEPOL_OK) {
+						goto exit;
+					}
 				}
 			}
 		}

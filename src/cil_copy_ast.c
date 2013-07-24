@@ -300,7 +300,7 @@ int cil_copy_classpermset(__attribute__((unused)) struct cil_db *db, void *data,
 		}
 	}
 
-	cil_copy_classperms(orig->classperms, &new->classperms);
+	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
 	*copy = new;
 
@@ -769,7 +769,7 @@ int cil_copy_avrule(__attribute__((unused)) struct cil_db *db, void *data, void 
 	new->rule_kind = orig->rule_kind;
 	new->src_str = cil_strdup(orig->src_str);
 	new->tgt_str = cil_strdup(orig->tgt_str);
-	cil_copy_classperms(orig->classperms, &new->classperms);
+	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
 	*copy = new;
 
@@ -1376,7 +1376,7 @@ int cil_copy_constrain(struct cil_db *db, void *data, void **copy, __attribute__
 	struct cil_constrain *new = NULL;
 
 	cil_constrain_init(&new);
-	cil_copy_classperms(orig->classperms, &new->classperms);
+	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
 	cil_copy_expr(db, orig->str_expr, &new->str_expr);
 	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);

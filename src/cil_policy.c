@@ -524,7 +524,7 @@ void cil_perms_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *
 void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t file_index, struct cil_constrain *cons, enum cil_flavor flavor)
 {
 	char *statement = NULL;
-	struct cil_classperms *cp = cons->classperms;
+	struct cil_list_item *i;
 
 	if (flavor == CIL_CONSTRAIN) {
 		statement = CIL_KEY_CONSTRAIN;
@@ -532,25 +532,41 @@ void cil_constrain_to_policy(FILE **file_arr, __attribute__((unused)) uint32_t f
 		statement = CIL_KEY_MLSCONSTRAIN;
 	}
 
-	if (cp->flavor == CIL_CLASS) {
-		fprintf(file_arr[CONSTRAINS], "%s", statement);
-		fprintf(file_arr[CONSTRAINS], " %s", (cp->r.cp.class)->datum.name);
-		cil_perms_to_policy(file_arr, CONSTRAINS, cp->r.cp.perms);
-		fprintf(file_arr[CONSTRAINS], "\n\t");
-		cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
-		fprintf(file_arr[CONSTRAINS], ";\n");
-	} else if (cp->flavor == CIL_MAP_CLASS) {
-		struct cil_list_item *curr_cmp;
-		cil_list_for_each(curr_cmp, cp->r.mcp.perms) {
-			struct cil_list_item *curr_cp;
-			cil_list_for_each(curr_cp, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
-				struct cil_classperms *cp2 = (struct cil_classperms *)curr_cp->data;
+	cil_list_for_each(i, cons->classperms) {
+		struct cil_classperms *cp = i->data;
+
+		if (cp->flavor == CIL_CLASSPERMSET) {
+			struct cil_classpermset *cps = cp->r.classpermset;
+			struct cil_list_item *j = NULL;
+			cil_list_for_each(j, cps->classperms) {
+				struct cil_classperms *cp2 = j->data;
 				fprintf(file_arr[CONSTRAINS], "%s", statement);
 				fprintf(file_arr[CONSTRAINS], " %s", (cp2->r.cp.class)->datum.name);
 				cil_perms_to_policy(file_arr, CONSTRAINS, cp2->r.cp.perms);
 				fprintf(file_arr[CONSTRAINS], "\n\t");
 				cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
 				fprintf(file_arr[CONSTRAINS], ";\n");
+			}
+		} else if (cp->flavor == CIL_CLASSPERMS) {
+			fprintf(file_arr[CONSTRAINS], "%s", statement);
+			fprintf(file_arr[CONSTRAINS], " %s", (cp->r.cp.class)->datum.name);
+			cil_perms_to_policy(file_arr, CONSTRAINS, cp->r.cp.perms);
+			fprintf(file_arr[CONSTRAINS], "\n\t");
+			cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
+			fprintf(file_arr[CONSTRAINS], ";\n");
+		} else { /* CIL_MAP_CLASS_PERMS */
+			struct cil_list_item *curr_cmp;
+			cil_list_for_each(curr_cmp, cp->r.mcp.perms) {
+				struct cil_list_item *curr_cp;
+				cil_list_for_each(curr_cp, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
+					struct cil_classperms *cp2 = (struct cil_classperms *)curr_cp->data;
+					fprintf(file_arr[CONSTRAINS], "%s", statement);
+					fprintf(file_arr[CONSTRAINS], " %s", (cp2->r.cp.class)->datum.name);
+					cil_perms_to_policy(file_arr, CONSTRAINS, cp2->r.cp.perms);
+					fprintf(file_arr[CONSTRAINS], "\n\t");
+					cil_expr_to_policy(file_arr, CONSTRAINS, cons->str_expr);
+					fprintf(file_arr[CONSTRAINS], ";\n");
+				}
 			}
 		}
 	}
@@ -561,7 +577,7 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 	char *kind_str = NULL;
 	char *src_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->src)->name;
 	char *tgt_str = ((struct cil_symtab_datum*)(struct cil_type*)rule->tgt)->name;
-	struct cil_classperms *cp = rule->classperms;
+	struct cil_list_item *i;
 
 	switch (rule->rule_kind) {
 	case CIL_AVRULE_ALLOWED:
@@ -582,21 +598,35 @@ int cil_avrule_to_policy(FILE **file_arr, uint32_t file_index, struct cil_avrule
 		return SEPOL_ERR;
 	}
 
-	if (cp->flavor == CIL_CLASS) {
-		fprintf(file_arr[file_index], "%s %s %s:", kind_str, src_str, tgt_str);
-		fprintf(file_arr[file_index], " %s", (cp->r.cp.class)->datum.name);
-		cil_perms_to_policy(file_arr, file_index, cp->r.cp.perms);
-		fprintf(file_arr[CONSTRAINS], ";\n");
-	} else if (cp->flavor == CIL_MAP_CLASS) {
-		struct cil_list_item *curr_cmp;
-		cil_list_for_each(curr_cmp, cp->r.mcp.perms) {
-			struct cil_list_item *curr_cp;
-			cil_list_for_each(curr_cp, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
-				struct cil_classperms *cp2 = (struct cil_classperms *)curr_cp->data;
+	cil_list_for_each(i, rule->classperms) {
+		struct cil_classperms *cp = i->data;
+
+		if (cp->flavor == CIL_CLASSPERMSET) {
+			struct cil_classpermset *cps = cp->r.classpermset;
+			struct cil_list_item *j = NULL;
+			cil_list_for_each(j, cps->classperms) {
+				struct cil_classperms *cp2 = j->data;
 				fprintf(file_arr[file_index], "%s %s %s:", kind_str, src_str, tgt_str);
 				fprintf(file_arr[file_index], " %s", (cp2->r.cp.class)->datum.name);
 				cil_perms_to_policy(file_arr, file_index, cp2->r.cp.perms);
-				fprintf(file_arr[CONSTRAINS], ";\n");
+				fprintf(file_arr[CONSTRAINS], ";\n");	
+			}
+		} else if (cp->flavor == CIL_CLASSPERMS) {
+			fprintf(file_arr[file_index], "%s %s %s:", kind_str, src_str, tgt_str);
+			fprintf(file_arr[file_index], " %s", (cp->r.cp.class)->datum.name);
+			cil_perms_to_policy(file_arr, file_index, cp->r.cp.perms);
+			fprintf(file_arr[CONSTRAINS], ";\n");
+		} else { /* CIL_MAP_CLASS_PERMS */
+			struct cil_list_item *curr_cmp;
+			cil_list_for_each(curr_cmp, cp->r.mcp.perms) {
+				struct cil_list_item *curr_cp;
+				cil_list_for_each(curr_cp, ((struct cil_map_perm*)curr_cmp->data)->classperms) {
+					struct cil_classperms *cp2 = (struct cil_classperms *)curr_cp->data;
+					fprintf(file_arr[file_index], "%s %s %s:", kind_str, src_str, tgt_str);
+					fprintf(file_arr[file_index], " %s", (cp2->r.cp.class)->datum.name);
+					cil_perms_to_policy(file_arr, file_index, cp2->r.cp.perms);
+					fprintf(file_arr[CONSTRAINS], ";\n");
+				}
 			}
 		}
 	}

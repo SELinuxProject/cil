@@ -159,9 +159,12 @@ int cil_resolve_classperms(struct cil_tree_node *current, struct cil_classperms 
 		/* This could still be an anonymous classpermset even if classpermset_str is set, if classpermset_str is a param_str*/
 		if (cps_datum->name == NULL) {
 			struct cil_classpermset *cps = (struct cil_classpermset *)cps_datum;
-			rc = cil_resolve_classperms_helper(current, cps->classperms, extra_args);
-			if (rc != SEPOL_OK) {
-				goto exit;
+			struct cil_list_item *curr;
+			cil_list_for_each(curr, cps->classperms) {
+				rc = cil_resolve_classperms_helper(current, curr->data, extra_args);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
 			}
 		}
 	} else {
@@ -196,7 +199,7 @@ exit:
 
 int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classpermset *cps, void *extra_args)
 {
-	return cil_resolve_classperms(current, cps->classperms, extra_args);
+	return cil_resolve_classperms_list(current, cps->classperms, extra_args);
 }
 
 int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
@@ -229,7 +232,7 @@ int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
 		rule->tgt = tgt_datum;
 	}
 
-	rc = cil_resolve_classperms(current, rule->classperms, extra_args);
+	rc = cil_resolve_classperms_list(current, rule->classperms, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1908,7 +1911,7 @@ int cil_resolve_constrain(struct cil_tree_node *current, void *extra_args)
 	struct cil_constrain *cons = current->data;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_classperms(current, cons->classperms, extra_args);
+	rc = cil_resolve_classperms_list(current, cons->classperms, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2613,7 +2616,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 					struct cil_tree_node *cps_node = NULL;
 
 					cil_classpermset_init(&cps);
-					rc = cil_fill_classperms(pc, &cps->classperms, CIL_FALSE, CIL_TRUE);
+					rc = cil_fill_classperms_list(pc, &cps->classperms, CIL_FALSE, CIL_TRUE);
 					if (rc != SEPOL_OK) {
 						cil_log(CIL_ERR, "Failed to create anonymous classpermset, rc: %d\n", rc);
 						cil_destroy_classpermset(cps);

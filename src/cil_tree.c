@@ -536,6 +536,19 @@ void cil_tree_print_classperms(struct cil_classperms *cp)
 	}
 }
 
+void cil_tree_print_classperms_list(struct cil_list *cp_list)
+{
+	struct cil_list_item *i;
+
+	if (cp_list == NULL) {
+		return;
+	}
+
+	cil_list_for_each(i, cp_list) {
+		cil_tree_print_classperms(i->data);
+	}
+}
+
 void cil_tree_print_level(struct cil_level *level)
 {
 	if (level->sens != NULL) {
@@ -608,7 +621,7 @@ void cil_tree_print_context(struct cil_context *context)
 
 void cil_tree_print_constrain(struct cil_constrain *cons)
 {
-	cil_tree_print_classperms(cons->classperms);
+	cil_tree_print_classperms_list(cons->classperms);
 
 	cil_tree_print_expr(cons->datum_expr, cons->str_expr);
 
@@ -857,9 +870,10 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_CLASSPERMSET: {
 			struct cil_classpermset *csp = node->data;
+
 			cil_log(CIL_INFO, "CLASSPERMSET: %s", csp->datum.name);
 
-			cil_tree_print_classperms(csp->classperms);
+			cil_tree_print_classperms_list(csp->classperms);
 
 			cil_log(CIL_INFO, "\n");
 
@@ -877,7 +891,6 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_MAP_PERM: {
 			struct cil_map_perm *cmp = node->data;
-			struct cil_list_item *curr;
 
 			cil_log(CIL_INFO, "MAP_CLASSPERM: %s", cmp->datum.name);
 
@@ -888,9 +901,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 			cil_log(CIL_INFO, " kernel class perms: (");
 
-			cil_list_for_each(curr, cmp->classperms) {
-				cil_tree_print_classperms(curr->data);
-			}
+			cil_tree_print_classperms_list(cmp->classperms);
 
 			cil_log(CIL_INFO, " )\n");
 
@@ -898,14 +909,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_CLASSMAPPING: {
 			struct cil_classmapping *mapping = node->data;
-			struct cil_list_item *curr;
 
 			cil_log(CIL_INFO, "CLASSMAPPING: map class: %s, map perm: %s,", mapping->map_class_str, mapping->map_perm_str);
 
 			cil_log(CIL_INFO, " (");
-			cil_list_for_each(curr, mapping->classperms) {
-				cil_tree_print_classperms(curr->data);
-			}
+
+			cil_tree_print_classperms_list(mapping->classperms);
 
 			cil_log(CIL_INFO, " )\n");
 			return;
@@ -1081,7 +1090,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				cil_log(CIL_INFO, " %s", rule->tgt_str);
 			}
 
-			cil_tree_print_classperms(rule->classperms);
+			cil_tree_print_classperms_list(rule->classperms);
 
 			cil_log(CIL_INFO, "\n");
 

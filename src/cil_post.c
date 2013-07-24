@@ -1164,47 +1164,51 @@ int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *fini
 	}
 	case CIL_CLASSPERMSET: {
 		struct cil_classpermset *cps = node->data;
-		struct cil_classperms *cp = cps->classperms;
+		struct cil_list_item *curr;
 
-		if (cp->flavor == CIL_CLASSPERMS) {
-			struct cil_class *class = cp->r.cp.class;
-			struct cil_common *common = class->common;
-			symtab_t *common_symtab = NULL;
-			struct cil_list *new_list = NULL;
+		cil_list_for_each(curr, cps->classperms) {
+			struct cil_classperms *cp = curr->data;
 
-			if (common) {
-				common_symtab = &common->perms;
+			if (cp->flavor == CIL_CLASSPERMS) {
+				struct cil_class *class = cp->r.cp.class;
+				struct cil_common *common = class->common;
+				symtab_t *common_symtab = NULL;
+				struct cil_list *new_list = NULL;
+
+				if (common) {
+					common_symtab = &common->perms;
+				}
+
+				rc = __evaluate_perm_expression(cp->r.cp.perms, &class->perms, common_symtab, class->num_perms, &new_list);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				if (new_list == NULL) {
+					return SEPOL_OK;
+				}
+
+				cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
+
+				cp->r.cp.perms = new_list;
+			} else {
+				/* CIL_MAP_CLASS */
+				struct cil_map_class *class = cp->r.mcp.class;
+				struct cil_list *new_list = NULL;
+
+				rc = __evaluate_perm_expression(cp->r.mcp.perms, &class->perms, NULL, class->num_perms, &new_list);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+
+				if (new_list == NULL) {
+					return SEPOL_OK;
+				}
+
+				cil_list_destroy(&cp->r.mcp.perms, CIL_FALSE);
+
+				cp->r.mcp.perms = new_list;
 			}
-
-			rc = __evaluate_perm_expression(cp->r.cp.perms, &class->perms, common_symtab, class->num_perms, &new_list);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-
-			if (new_list == NULL) {
-				return SEPOL_OK;
-			}
-
-			cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
-
-			cp->r.cp.perms = new_list;
-		} else {
-			/* CIL_MAP_CLASS */
-			struct cil_map_class *class = cp->r.mcp.class;
-			struct cil_list *new_list = NULL;
-
-			rc = __evaluate_perm_expression(cp->r.mcp.perms, &class->perms, NULL, class->num_perms, &new_list);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-
-			if (new_list == NULL) {
-				return SEPOL_OK;
-			}
-
-			cil_list_destroy(&cp->r.mcp.perms, CIL_FALSE);
-
-			cp->r.mcp.perms = new_list;
 		}
 		break;
 	}

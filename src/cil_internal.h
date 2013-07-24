@@ -463,7 +463,7 @@ struct cil_classperms {
 
 struct cil_classpermset {
 	struct cil_symtab_datum datum;
-	struct cil_classperms *classperms;
+	struct cil_list *classperms;
 };
 
 struct cil_classmapping {
@@ -638,7 +638,7 @@ struct cil_avrule {
 	void *src; /* type, alias, or attribute */
 	char *tgt_str;	
 	void *tgt; /* type, alias, or attribute */
-	struct cil_classperms *classperms;
+	struct cil_list *classperms;
 };
 
 #define CIL_TYPE_TRANSITION 16
@@ -862,7 +862,7 @@ struct cil_fsuse {
 #define CIL_MLSCONSTRAIN_KEYS CIL_MLS_LEVELS CIL_CONSTRAIN_KEYS
 #define CIL_CONSTRAIN_OPER "== != eq dom domby incomp not and or"
 struct cil_constrain {
-	struct cil_classperms *classperms;
+	struct cil_list *classperms;
 	struct cil_list *str_expr;
 	struct cil_list *datum_expr;
 };
