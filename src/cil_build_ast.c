@@ -1109,7 +1109,7 @@ int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, st
 	} else {
 		cil_level_init(&usrlvl->level);
 
-		rc = cil_fill_level(parse_current->next->next->cl_head, usrlvl->level);
+		rc = cil_fill_level(parse_current->next->next, usrlvl->level);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -3679,7 +3679,7 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
 		SYM_STRING,
-		SYM_LIST,
+		SYM_STRING|SYM_LIST,
 		SYM_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -3705,7 +3705,7 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	rc = cil_fill_level(parse_current->next->next->cl_head, level);
+	rc = cil_fill_level(parse_current->next->next, level);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3767,8 +3767,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 		lvlrange->low_str = cil_strdup(low->data);
 	} else {
 		cil_level_init(&lvlrange->low);
-
-		rc = cil_fill_level(low->cl_head, lvlrange->low);
+		rc = cil_fill_level(low, lvlrange->low);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -3778,8 +3777,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 		lvlrange->high_str = cil_strdup(low->next->data);
 	} else {
 		cil_level_init(&lvlrange->high);
-
-		rc = cil_fill_level(low->next->cl_head, lvlrange->high);
+		rc = cil_fill_level(low->next, lvlrange->high);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -5409,34 +5407,40 @@ exit:
 
 int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 {
-	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING | SYM_LIST | SYM_END,
-		SYM_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
 
-	if (sens == NULL || level == NULL) {
+	if (sens == NULL) {
 		goto exit;
 	}
 
-	rc = __cil_verify_syntax(sens, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	if (sens->cl_head == NULL) {
+		level->sens_str = cil_strdup(sens->data);
+	} else {
+		enum cil_syntax syntax[] = {
+			SYM_STRING,
+			SYM_STRING | SYM_LIST | SYM_END,
+			SYM_END
+		};
+		int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
-	level->sens_str = cil_strdup(sens->data);
+		sens = sens->cl_head;
 
-	if (sens->next != NULL) {
-		if (sens->next->cl_head == NULL) {
-			level->catset_str = cil_strdup(sens->next->data);
-		} else {
-			cil_catset_init(&level->catset);
+		rc = __cil_verify_syntax(sens, syntax, syntax_len);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
 
-			rc = cil_fill_catset(sens->next->cl_head, level->catset);
-			if (rc != SEPOL_OK) {
-				goto exit;
+		level->sens_str = cil_strdup(sens->data);
+		if (sens->next != NULL) {
+			if (sens->next->cl_head == NULL) {
+				level->catset_str = cil_strdup(sens->next->data);
+			} else {
+				cil_catset_init(&level->catset);
+
+				rc = cil_fill_catset(sens->next->cl_head, level->catset);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
 			}
 		}
 	}
