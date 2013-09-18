@@ -39,7 +39,7 @@
 
 void usage(char *prog)
 {
-	printf("Usage: %s [-v|--verbose] [-o|--output=<filename>] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown=<action>] [-D|--disable-dontaudit] <files>\n", prog);
+	printf("Usage: %s [-v|--verbose] [-o|--output=<filename>] [-f|--filecontext=<filename>] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown=<action>] [-D|--disable-dontaudit] <files>\n", prog);
 	exit(1);
 }
 
@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 	struct stat filedata;
 	uint32_t file_size;
 	char *output = NULL;
+	char *filecontexts = NULL;
 	struct cil_db *db = NULL;
 	int target = SEPOL_TARGET_SELINUX;
 	int mls = 0;
@@ -75,12 +76,13 @@ int main(int argc, char *argv[])
 		{"handle-unknown", required_argument, 0, 'U'},
 		{"disable-dontaudit", no_argument, 0, 'D'},
 		{"output", required_argument, 0, 'o'},
+		{"filecontexts", required_argument, 0, 'f'},
 		{0, 0, 0, 0}
 	};
 	int i;
 
 	while (1) {
-		opt_char = getopt_long(argc, argv, "o:U:hvt:MDc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "o:f:U:hvt:MDc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
@@ -131,6 +133,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'o':
 				output = strdup(optarg);
+				break;
+			case 'f':
+				filecontexts = strdup(optarg);
 				break;
 			case 'h':
 				usage(argv[0]);
@@ -266,7 +271,12 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-	file_contexts = fopen("file_contexts", "w+");
+	if (filecontexts == NULL) {
+		file_contexts = fopen("file_contexts", "w+");
+	} else {
+		file_contexts = fopen(filecontexts, "w+");
+	}
+
 	if (file_contexts == NULL) {
 		cil_log(CIL_ERR, "Failed to open file_contexts file\n");
 		goto exit;
@@ -293,6 +303,7 @@ exit:
 	}
 	free(buffer);
 	free(output);
+	free(filecontexts);
 	cil_db_destroy(&db);
 	sepol_policydb_free(pdb);
 	sepol_policy_file_free(pf);
