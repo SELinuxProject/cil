@@ -156,7 +156,7 @@ void cil_destroy_block(struct cil_block *block)
 		return;
 	}
 
-	cil_symtab_datum_destroy(block->datum);
+	cil_symtab_datum_destroy(&block->datum);
 	cil_symtab_array_destroy(block->symtab);
 	free(block);
 }
@@ -364,7 +364,7 @@ void cil_destroy_class(struct cil_class *class)
 		return;
 	}
 
-	cil_symtab_datum_destroy(class->datum);
+	cil_symtab_datum_destroy(&class->datum);
 	cil_symtab_destroy(&class->perms);
 
 	free(class);
@@ -405,7 +405,7 @@ void cil_destroy_perm(struct cil_perm *perm)
 		return;
 	}
 
-	cil_symtab_datum_destroy(perm->datum);
+	cil_symtab_datum_destroy(&perm->datum);
 	free(perm);
 }
 
@@ -442,7 +442,7 @@ void cil_destroy_map_perm(struct cil_map_perm *cmp)
 		return;
 	}
 
-	cil_symtab_datum_destroy(cmp->datum);
+	cil_symtab_datum_destroy(&cmp->datum);
 	if (cmp->classperms != NULL) {
 		cil_list_destroy(&cmp->classperms, 0);
 	}
@@ -713,7 +713,7 @@ void cil_destroy_classpermset(struct cil_classpermset *cps)
 		return;
 	}
 
-	cil_symtab_datum_destroy(cps->datum);
+	cil_symtab_datum_destroy(&cps->datum);
 
 	cil_list_destroy(&cps->classperms, 1);
 
@@ -771,7 +771,7 @@ void cil_destroy_map_class(struct cil_map_class *map)
 		return;
 	}
 
-	cil_symtab_datum_destroy(map->datum);
+	cil_symtab_datum_destroy(&map->datum);
 	cil_symtab_destroy(&map->perms);
 
 	free(map);
@@ -886,7 +886,7 @@ void cil_destroy_common(struct cil_common *common)
 		return;
 	}
 
-	cil_symtab_datum_destroy(common->datum);
+	cil_symtab_datum_destroy(&common->datum);
 	cil_symtab_destroy(&common->perms);
 	free(common);
 }
@@ -992,7 +992,7 @@ void cil_destroy_sid(struct cil_sid *sid)
 		return;
 	}
 
-	cil_symtab_datum_destroy(sid->datum);
+	cil_symtab_datum_destroy(&sid->datum);
 	free(sid);
 }
 
@@ -1108,7 +1108,7 @@ void cil_destroy_user(struct cil_user *user)
 		return;
 	}
 
-	cil_symtab_datum_destroy(user->datum);
+	cil_symtab_datum_destroy(&user->datum);
 	cil_list_destroy(&user->roles, CIL_FALSE);
 	free(user);
 }
@@ -1502,7 +1502,7 @@ void cil_destroy_role(struct cil_role *role)
 		return;
 	}
 
-	cil_symtab_datum_destroy(role->datum);
+	cil_symtab_datum_destroy(&role->datum);
 	ebitmap_destroy(role->types);
 	free(role->types);
 	free(role);
@@ -1803,7 +1803,7 @@ void cil_destroy_roleattribute(struct cil_roleattribute *attr)
 		attr->expr_list = NULL;
 	}
 
-	cil_symtab_datum_destroy(attr->datum);
+	cil_symtab_datum_destroy(&attr->datum);
 	ebitmap_destroy(attr->roles);
 	free(attr->roles);
 	free(attr);
@@ -2100,7 +2100,7 @@ void cil_destroy_type(struct cil_type *type)
 		return;
 	}
 
-	cil_symtab_datum_destroy(type->datum);
+	cil_symtab_datum_destroy(&type->datum);
 	free(type);
 }
 
@@ -2154,7 +2154,7 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 		return;
 	}
 
-	cil_symtab_datum_destroy(attr->datum);
+	cil_symtab_datum_destroy(&attr->datum);
 
 	if (attr->expr_list != NULL) {
 		/* we don't want to destroy the expression stacks (cil_list) inside
@@ -2235,7 +2235,7 @@ void cil_destroy_bool(struct cil_bool *boolean)
 		return;
 	}
 
-	cil_symtab_datum_destroy(boolean->datum);
+	cil_symtab_datum_destroy(&boolean->datum);
 	free(boolean);
 }
 
@@ -2848,7 +2848,7 @@ void cil_destroy_typealias(struct cil_typealias *alias)
 		return;
 	}
 
-	cil_symtab_datum_destroy(alias->datum);
+	cil_symtab_datum_destroy(&alias->datum);
 
 	if (alias->type_str != NULL) {
 		free(alias->type_str);
@@ -3242,7 +3242,7 @@ void cil_destroy_sensitivity(struct cil_sens *sens)
 		return;
 	}
 
-	cil_symtab_datum_destroy(sens->datum);
+	cil_symtab_datum_destroy(&sens->datum);
 	cil_list_destroy(&sens->catsets, CIL_FALSE);
 	free(sens);
 }
@@ -3295,7 +3295,7 @@ void cil_destroy_sensalias(struct cil_sensalias *alias)
 		return;
 	}
 
-	cil_symtab_datum_destroy(alias->datum);
+	cil_symtab_datum_destroy(&alias->datum);
 
 	if (alias->sens_str != NULL) {
 		free(alias->sens_str);
@@ -3349,7 +3349,7 @@ void cil_destroy_category(struct cil_cat *cat)
 		return;
 	}
 
-	cil_symtab_datum_destroy(cat->datum);
+	cil_symtab_datum_destroy(&cat->datum);
 	free(cat);
 }
 
@@ -3401,7 +3401,7 @@ void cil_destroy_catalias(struct cil_catalias *alias)
 		return;
 	}
 
-	cil_symtab_datum_destroy(alias->datum);
+	cil_symtab_datum_destroy(&alias->datum);
 
 	if (alias->cat_str != NULL) {
 		free(alias->cat_str);
@@ -3486,7 +3486,7 @@ void cil_destroy_catrange(struct cil_catrange *catrange)
 		return;
 	}
 
-	cil_symtab_datum_destroy(catrange->datum);
+	cil_symtab_datum_destroy(&catrange->datum);
 
 	if (catrange->cat_low_str != NULL) {
 		free(catrange->cat_low_str);
@@ -3550,7 +3550,7 @@ void cil_destroy_catset(struct cil_catset *catset)
 		return;
 	}
 
-	cil_symtab_datum_destroy(catset->datum);
+	cil_symtab_datum_destroy(&catset->datum);
 
 	if (catset->cat_list_str != NULL) {
 		cil_list_destroy(&catset->cat_list_str, 1);
@@ -3789,7 +3789,7 @@ void cil_destroy_level(struct cil_level *level)
 		return;
 	}
 
-	cil_symtab_datum_destroy(level->datum);
+	cil_symtab_datum_destroy(&level->datum);
 
 	if (level->sens_str != NULL) {
 		free(level->sens_str);
@@ -3905,7 +3905,7 @@ void cil_destroy_levelrange(struct cil_levelrange *lvlrange)
 		return;
 	}
 
-	cil_symtab_datum_destroy(lvlrange->datum);
+	cil_symtab_datum_destroy(&lvlrange->datum);
 
 	if (lvlrange->low_str == NULL) {
 		cil_destroy_level(lvlrange->low);
@@ -4134,7 +4134,7 @@ void cil_destroy_context(struct cil_context *context)
 		return;
 	}
 
-	cil_symtab_datum_destroy(context->datum);;
+	cil_symtab_datum_destroy(&context->datum);;
 
 	if (context->user_str != NULL) {
 		free(context->user_str);
@@ -5156,7 +5156,7 @@ void cil_destroy_macro(struct cil_macro *macro)
 		return;
 	}
 
-	cil_symtab_datum_destroy(macro->datum);
+	cil_symtab_datum_destroy(&macro->datum);
 	cil_symtab_array_destroy(macro->symtab);
 
 	if (macro->params != NULL) {
@@ -5309,7 +5309,7 @@ void cil_destroy_optional(struct cil_optional *optional)
 		return;
 	}
 
-	cil_symtab_datum_destroy(optional->datum);
+	cil_symtab_datum_destroy(&optional->datum);
 	free(optional);
 }
 
@@ -5357,7 +5357,7 @@ void cil_destroy_policycap(struct cil_policycap *polcap)
 		return;
 	}
 
-	cil_symtab_datum_destroy(polcap->datum);
+	cil_symtab_datum_destroy(&polcap->datum);
 	free(polcap);
 }
 
@@ -5412,7 +5412,7 @@ void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr)
 		return;
 	}
 
-	cil_symtab_datum_destroy(ipaddr->datum);
+	cil_symtab_datum_destroy(&ipaddr->datum);
 	free(ipaddr);
 }
 

@@ -70,7 +70,7 @@ struct cil_complex_symtab {
 
 void cil_symtab_init(symtab_t *symtab, unsigned int size);
 void cil_symtab_datum_init(struct cil_symtab_datum *datum);
-void cil_symtab_datum_destroy(struct cil_symtab_datum datum);
+void cil_symtab_datum_destroy(struct cil_symtab_datum *datum);
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node);
 void cil_symtab_datum_remove(struct cil_symtab_datum *datum, struct cil_tree_node *node);
 int cil_symtab_get_datum(symtab_t *symtab, char *key, struct cil_symtab_datum **datum);

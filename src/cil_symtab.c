@@ -60,11 +60,11 @@ void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 	datum->state = CIL_STATE_ENABLED;
 }
 
-void cil_symtab_datum_destroy(struct cil_symtab_datum datum)
+void cil_symtab_datum_destroy(struct cil_symtab_datum *datum)
 {
-	if (datum.nodes != NULL && datum.nodes->head == NULL) {
-		free(datum.name);
-		cil_list_destroy(&datum.nodes, 0);
+	if (datum->nodes != NULL && datum->nodes->head == NULL) {
+		free(datum->name);
+		cil_list_destroy(&datum->nodes, 0);
 	}
 }
 
@@ -87,7 +87,7 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 
 void cil_symtab_remove_datum_destroy(__attribute__((unused))hashtab_key_t key, hashtab_datum_t datum, __attribute__((unused))void *args)
 {
-	cil_symtab_datum_destroy(*(struct cil_symtab_datum *)datum);
+	cil_symtab_datum_destroy((struct cil_symtab_datum *)datum);
 	free(datum);
 }
 
