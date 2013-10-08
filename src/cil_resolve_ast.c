@@ -3365,7 +3365,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 
 	if (node->flavor == CIL_OPTIONAL && ((struct cil_symtab_datum *)node->data)->state == CIL_STATE_DISABLED) {
 		/* don't try to resolve children of a disabled optional */
-		cil_log(CIL_INFO, "Optional disabled at %d of %s\n", node->line, node->path);
 		*finished = CIL_TREE_SKIP_HEAD;
 		rc = SEPOL_OK;
 		goto exit;
@@ -3380,7 +3379,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	rc = __cil_resolve_ast_node(node, extra_args);
 	if (rc == SEPOL_ENOENT && optstack != NULL) {
 		struct cil_optional *opt = (struct cil_optional *)optstack->data;
-		cil_log(CIL_WARN, "Disabling %s optional-statement at %d of %s\n", opt->datum.name, node->parent->line, node->parent->path);
+		cil_log(CIL_WARN, "Disabling optional %s at %d of %s\n", opt->datum.name, node->parent->line, node->parent->path);
 		/* disable an optional if something failed to resolve */
 		opt->datum.state = CIL_STATE_DISABLING;
 		/* let the resolve loop know something was changed */
@@ -3515,7 +3514,6 @@ int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *ext
 		if (((struct cil_optional *)parent->data)->datum.state == CIL_STATE_DISABLING) {
 			/* go into the optional, removing everything that it added */
 			if (args->pass > CIL_PASS_CALL1) {
-				cil_log(CIL_WARN,"Disabling declarations in optional\n");
 				rc = cil_tree_walk(parent, __cil_disable_children_helper, NULL, NULL, NULL);
 				if (rc != SEPOL_OK) {
 					cil_log(CIL_ERR, "Failed to disable declarations in optional\n");
