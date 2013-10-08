@@ -1971,14 +1971,14 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 
 	cil_list_for_each(curr, cil_constrain->classperms) {
 		struct cil_classperms *classperms = curr->data;
-		if (classperms->flavor == CIL_CLASS) {
+		if (classperms->flavor == CIL_CLASSPERMS) {
 			key = ((struct cil_symtab_datum *)classperms->r.cp.class)->name;
 
 			rc = cil_constrain_to_policydb_helper(pdb, key, classperms->r.cp.perms, expr);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-		} else if (classperms->flavor == CIL_MAP_CLASS) {
+		} else if (classperms->flavor == CIL_MAP_CLASSPERMS) {
 			struct cil_list_item *i = NULL;
 			cil_list_for_each(i, classperms->r.mcp.perms) {
 				struct cil_map_perm *cmp = i->data;
