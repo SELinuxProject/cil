@@ -89,7 +89,7 @@
 
 	(rangetransition device_t console_t file low_high)
 
-	(nametypetransition some_file device_t console_t file getty_t)
+	(typetransition device_t console_t file "some_file" getty_t)
 	
 	(allow foo_type self (file (execute)))
 	(allow bin_t device_t (file (execute)))
