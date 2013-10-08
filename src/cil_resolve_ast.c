@@ -3586,7 +3586,9 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			pass = CIL_PASS_CALL1;
 			/* reset the global data */
 			cil_list_destroy(&db->catorder, 0);
+			cil_list_init(&db->catorder, CIL_LIST_ITEM);
 			cil_list_destroy(&db->dominance, 0);
+			cil_list_init(&db->dominance, CIL_LIST_ITEM);
 		}
 
 		/* reset the arguments */
