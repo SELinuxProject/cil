@@ -155,20 +155,12 @@ int cil_resolve_classperms_helper(struct cil_tree_node *current, struct cil_clas
 		if (kc->common != NULL) {
 			common_symtab = &kc->common->perms;
 		}
-		/* Reset for re-resolve */
-		if (cp->r.cp.perms != NULL) {
-			cil_list_destroy(&cp->r.cp.perms, 0);
-		}
 		perms = &cp->r.cp.perms;
 	} else {
 		struct cil_map_class *mc = (struct cil_map_class *)class_datum;
 		cp->flavor = CIL_MAP_CLASSPERMS;
 		cp->r.mcp.class = mc;
 		class_symtab = &mc->perms;
-		/* Reset for re-resolve */
-		if (cp->r.mcp.perms != NULL) {
-			cil_list_destroy(&cp->r.mcp.perms, 0);
-		}
 		perms = &cp->r.mcp.perms;
 	}
 
@@ -220,6 +212,29 @@ exit:
 	return rc;
 }
 
+void cil_reset_classperms(struct cil_classperms *cp)
+{
+	if (cp == NULL) {
+		return;
+	}
+
+	switch (cp->flavor) {
+	case CIL_CLASSPERMSET:
+		cp->r.classpermset = NULL;
+		break;
+	case CIL_CLASSPERMS:
+		cp->r.cp.class = NULL;
+		cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
+		break;
+	case CIL_MAP_CLASSPERMS:
+		cp->r.mcp.class = NULL;
+		cil_list_destroy(&cp->r.mcp.perms, CIL_FALSE);
+		break;
+	default:
+		cil_log(CIL_ERR, "Invalid flavor found when resetting classperms\n");
+	}
+}
+
 int cil_resolve_classperms_list(struct cil_tree_node *current, struct cil_list *cp_list, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -237,9 +252,31 @@ exit:
 	return rc;
 }
 
+void cil_reset_classperms_list(struct cil_list *cp_list)
+{
+	struct cil_list_item *curr;
+
+	if (cp_list == NULL) {
+		return;
+	}
+
+	cil_list_for_each(curr, cp_list) {
+		cil_reset_classperms(curr->data);
+	}
+}
+
 int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classpermset *cps, void *extra_args)
 {
 	return cil_resolve_classperms_list(current, cps->classperms, extra_args);
+}
+
+int cil_reset_classpermset(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_classpermset *cps = current->data;
+
+	cil_reset_classperms_list(cps->classperms);
+
+	return SEPOL_OK;
 }
 
 int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
@@ -281,6 +318,15 @@ int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
 
 exit:
 	return rc;
+}
+
+int cil_reset_avrule(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_avrule *rule = current->data;
+
+	cil_reset_classperms_list(rule->classperms);
+
+	return SEPOL_OK;
 }
 
 int cil_resolve_type_rule(struct cil_tree_node *current, void *extra_args)
@@ -369,6 +415,15 @@ int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args
 
 exit:
 	return rc;
+}
+
+int cil_reset_typeattributeset(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_typeattributeset *tas = current->data;
+
+	cil_list_destroy(&tas->datum_expr, CIL_FALSE);
+
+	return SEPOL_OK;
 }
 
 int cil_resolve_typealias(struct cil_tree_node *current, void *extra_args)
@@ -716,6 +771,15 @@ exit:
 	return rc;
 }
 
+int cil_reset_classmapping(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_classmapping *cm = current->data;
+
+	cil_reset_classperms_list(cm->classperms);
+
+	return SEPOL_OK;
+}
+
 int __class_reset_perm_values(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
 {
 	struct cil_perm *perm = (struct cil_perm *)d;
@@ -745,11 +809,7 @@ int cil_reset_map_perm(struct cil_tree_node *current, __attribute__((unused)) vo
 {
 	struct cil_map_perm *cmp = current->data;
 
-	/* during a re-resolve the classperms list needs to be reset to avoid
-	   duplicate entries
-	*/
-
-	cil_list_destroy(&cmp->classperms, 0);
+	cmp->classperms = NULL;
 
 	return SEPOL_OK;
 }
@@ -803,6 +863,7 @@ int cil_reset_user(struct cil_tree_node *current, __attribute__((unused)) void *
 
 	/* reset the bounds to NULL during a re-resolve */
 	user->bounds = NULL;
+	cil_list_destroy(&user->roles, CIL_FALSE);
 	user->dftlevel = NULL;
 	user->range = NULL;
 
@@ -1179,6 +1240,15 @@ int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args
 
 exit:
 	return rc;
+}
+
+int cil_reset_roleattributeset(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_roleattributeset *ras = current->data;
+
+	cil_list_destroy(&ras->datum_expr, CIL_FALSE);
+
+	return SEPOL_OK;
 }
 
 int cil_resolve_rolebounds(struct cil_tree_node *current, void *extra_args)
@@ -1978,6 +2048,16 @@ exit:
 	return rc;
 }
 
+int cil_reset_constrain(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_constrain *con = current->data;
+
+	cil_reset_classperms_list(con->classperms);
+	cil_list_destroy(&con->datum_expr, CIL_FALSE);
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_validatetrans *validtrans = current->data;
@@ -2000,6 +2080,15 @@ int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args)
 
 exit:
 	return rc;
+}
+
+int cil_reset_validatetrans(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_validatetrans *vt = current->data;
+
+	cil_list_destroy(&vt->datum_expr, CIL_FALSE);
+
+	return SEPOL_OK;
 }
 
 int cil_resolve_context(struct cil_tree_node *current, struct cil_context *context, void *extra_args)
@@ -3170,6 +3259,29 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_BOOLEANIF:
 			rc = cil_resolve_boolif(node, args);
+			break;
+		case CIL_CLASSPERMSET:
+			rc = cil_reset_classpermset(node, args);
+			break;
+		case CIL_CLASSMAPPING:
+			rc = cil_reset_classmapping(node, args);
+			break;
+		case CIL_AVRULE:
+			rc = cil_reset_avrule(node, args);
+			break;
+		case CIL_TYPEATTRIBUTESET:
+			rc = cil_reset_typeattributeset(node, args);
+			break;
+		case CIL_ROLEATTRIBUTESET:
+			rc = cil_reset_roleattributeset(node, args);
+			break;
+		case CIL_CONSTRAIN:
+		case CIL_MLSCONSTRAIN:
+			rc = cil_reset_constrain(node, args);
+			break;
+		case CIL_VALIDATETRANS:
+		case CIL_MLSVALIDATETRANS:
+			rc = cil_reset_validatetrans(node, args);
 			break;
 		}
 		break;
