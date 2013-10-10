@@ -61,8 +61,9 @@ void cil_list_destroy(struct cil_list **list, unsigned destroy_data)
 		next = item->next;
 		if (item->flavor == CIL_LIST) {
 			cil_list_destroy((struct cil_list**)&(item->data), destroy_data);
+		} else {
+			cil_list_item_destroy(&item, destroy_data);
 		}
-		cil_list_item_destroy(&item, destroy_data);
 		item = next;
 	}
 	free(*list);
