@@ -443,9 +443,7 @@ void cil_destroy_map_perm(struct cil_map_perm *cmp)
 	}
 
 	cil_symtab_datum_destroy(&cmp->datum);
-	if (cmp->classperms != NULL) {
-		cil_list_destroy(&cmp->classperms, 0);
-	}
+	/* cmp->classperms points to classmapping and will be destroyed there */
 
 	free(cmp);
 }
@@ -577,7 +575,7 @@ void cil_destroy_classperms(struct cil_classperms *cp)
 	case CIL_CLASSPERMSET:
 		free(cp->u.classpermset_str);
 		break;
-	case CIL_CLASS:
+	case CIL_CLASSPERMS:
 		free(cp->u.cp.class_str);
 		cil_list_destroy(&cp->u.cp.perm_strs, CIL_TRUE);
 		cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
@@ -662,6 +660,21 @@ exit:
 	return rc;
 }
 
+void cil_destroy_classperms_list(struct cil_list **cp_list)
+{
+	struct cil_list_item *curr;
+
+	if (cp_list == NULL || *cp_list == NULL) {
+		return;
+	}
+
+	cil_list_for_each(curr, *cp_list) {
+		cil_destroy_classperms((struct cil_classperms *)curr->data);
+	}
+
+	cil_list_destroy(cp_list, CIL_FALSE);
+}
+
 int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	int rc = SEPOL_ERR;
@@ -714,8 +727,7 @@ void cil_destroy_classpermset(struct cil_classpermset *cps)
 	}
 
 	cil_symtab_datum_destroy(&cps->datum);
-
-	cil_list_destroy(&cps->classperms, 1);
+	cil_destroy_classperms_list(&cps->classperms);
 
 	free(cps);
 }
@@ -828,7 +840,7 @@ void cil_destroy_classmapping(struct cil_classmapping *mapping)
 
 	free(mapping->map_class_str);
 	free(mapping->map_perm_str);
-	cil_list_destroy(&mapping->classperms, 1);
+	cil_destroy_classperms_list(&mapping->classperms);
 
 	free(mapping);
 }
@@ -1977,7 +1989,7 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 		free(rule->tgt_str);
 	}
 
-	cil_list_destroy(&rule->classperms, 1);
+	cil_destroy_classperms_list(&rule->classperms);
 
 	free(rule);
 }
@@ -3973,9 +3985,9 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 		return;
 	}
 
-	cil_list_destroy(&cons->classperms, 1);
-
+	cil_destroy_classperms_list(&cons->classperms);
 	cil_list_destroy(&cons->str_expr, CIL_TRUE);
+	cil_list_destroy(&cons->datum_expr, CIL_FALSE);
 
 	free(cons);
 }
