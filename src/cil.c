@@ -320,7 +320,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		cil_destroy_bool(*data);
 		break;
 	case CIL_TUNABLE:
-		cil_destroy_bool(*data);
+		cil_destroy_tunable(*data);
 		break;
 	case CIL_CONDBLOCK:
 		cil_destroy_condblock(*data);
@@ -1639,6 +1639,14 @@ void cil_bool_init(struct cil_bool **cilbool)
 
 	cil_symtab_datum_init(&(*cilbool)->datum);
 	(*cilbool)->value = 0;
+}
+
+void cil_tunable_init(struct cil_tunable **ciltun)
+{
+	*ciltun = cil_malloc(sizeof(**ciltun));
+
+	cil_symtab_datum_init(&(*ciltun)->datum);
+	(*ciltun)->value = 0;
 }
 
 void cil_condblock_init(struct cil_condblock **cb)

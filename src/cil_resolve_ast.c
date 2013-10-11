@@ -3042,7 +3042,7 @@ exit:
 }
 
 /* This modifies/destroys the original stack */
-int cil_evaluate_expr(struct cil_list *datum_expr, uint16_t *result)
+int cil_evaluate_tunable_expr(struct cil_list *datum_expr, uint16_t *result)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;
@@ -3085,12 +3085,12 @@ int cil_evaluate_expr(struct cil_list *datum_expr, uint16_t *result)
 				pos--;
 			}
 		} else {
-			struct cil_bool *bool = curr->data;
+			struct cil_tunable *tun = curr->data;
 			if (pos >= COND_EXPR_MAXDEPTH) {
-				cil_log(CIL_ERR, "Exceeded max depth for boolean expression\n");
+				cil_log(CIL_ERR, "Exceeded max depth for tunable expression\n");
 				goto exit;
 			}
-			eval_stack[pos] = bool->value;
+			eval_stack[pos] = tun->value;
 			pos++;
 		}
 	}
@@ -3123,7 +3123,7 @@ int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
-	rc = cil_evaluate_expr(tif->datum_expr, &result);
+	rc = cil_evaluate_tunable_expr(tif->datum_expr, &result);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to evaluate expr stack at line %d of %s\n",
 				current->line, current->path);

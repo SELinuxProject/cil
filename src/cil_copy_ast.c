@@ -749,11 +749,31 @@ int cil_copy_bool(__attribute__((unused)) struct cil_db *db, void *data, void **
 
 	cil_symtab_get_datum(symtab, key, &datum);
 	if (datum != NULL) {
-		cil_log(CIL_INFO, "cil_copy_bool: boolean/tunable cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_bool: boolean cannot be redefined\n");
 		return SEPOL_ERR;
 	}
 
 	cil_bool_init(&new);
+	new->value = orig->value;
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
+int cil_copy_tunable(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
+{
+	struct cil_tunable *orig = data;
+	struct cil_tunable *new = NULL;
+	char *key = orig->datum.name;
+	struct cil_symtab_datum *datum = NULL;
+
+	cil_symtab_get_datum(symtab, key, &datum);
+	if (datum != NULL) {
+		cil_log(CIL_INFO, "cil_copy_tunable: tunable cannot be redefined\n");
+		return SEPOL_ERR;
+	}
+
+	cil_tunable_init(&new);
 	new->value = orig->value;
 	*copy = new;
 
@@ -1714,7 +1734,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		copy_func = &cil_copy_rangetransition;
 		break;
 	case CIL_TUNABLE:
-		copy_func = &cil_copy_bool;
+		copy_func = &cil_copy_tunable;
 		break;
 	case CIL_BOOL:
 		copy_func = &cil_copy_bool;

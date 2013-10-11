@@ -636,6 +636,11 @@ struct cil_bool {
 	uint16_t value;
 };
 
+struct cil_tunable {
+	struct cil_symtab_datum datum;
+	uint16_t value;
+};
+
 #define CIL_AVRULE_ALLOWED     1
 #define CIL_AVRULE_AUDITALLOW  2
 #define CIL_AVRULE_DONTAUDIT   8
@@ -983,6 +988,7 @@ void cil_rangetransition_init(struct cil_rangetransition **rangetrans);
 void cil_bool_init(struct cil_bool **cilbool);
 void cil_boolif_init(struct cil_booleanif **bif);
 void cil_condblock_init(struct cil_condblock **cb);
+void cil_tunable_init(struct cil_tunable **ciltun);
 void cil_tunif_init(struct cil_tunableif **tif);
 void cil_avrule_init(struct cil_avrule **avrule);
 void cil_type_rule_init(struct cil_type_rule **type_rule);

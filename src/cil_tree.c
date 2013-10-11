@@ -925,8 +925,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_TUNABLE: {
-			struct cil_bool *boolean = node->data;
-			cil_log(CIL_INFO, "TUNABLE: %s, value: %d\n", boolean->datum.name, boolean->value);
+			struct cil_tunable *tunable = node->data;
+			cil_log(CIL_INFO, "TUNABLE: %s, value: %d\n", tunable->datum.name, tunable->value);
 			return;
 		}
 		case CIL_BOOLEANIF: {

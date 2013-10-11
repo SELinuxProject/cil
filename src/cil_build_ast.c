@@ -2186,7 +2186,7 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 	free(attr);
 }
 
-int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
+int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -2222,12 +2222,7 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
-	if (flavor == CIL_BOOL)	{
-		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)boolean, (hashtab_key_t)key, CIL_SYM_BOOLS, CIL_BOOL);
-	} else {
-		rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)boolean, (hashtab_key_t)key, CIL_SYM_TUNABLES, CIL_TUNABLE);
-	}
-
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)boolean, (hashtab_key_t)key, CIL_SYM_BOOLS, CIL_BOOL);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2249,6 +2244,66 @@ void cil_destroy_bool(struct cil_bool *boolean)
 
 	cil_symtab_datum_destroy(&boolean->datum);
 	free(boolean);
+}
+
+int cil_gen_tunable(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		SYM_STRING,
+		SYM_STRING,
+		SYM_STRING,
+		SYM_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	char *key = NULL;
+	struct cil_tunable *tunable = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_tunable_init(&tunable);
+
+	key = parse_current->next->data;
+
+	if (!strcmp(parse_current->next->next->data, "true")) {
+		tunable->value = CIL_TRUE;
+	} else if (!strcmp(parse_current->next->next->data, "false")) {
+		tunable->value = CIL_FALSE;
+	} else {
+		cil_log(CIL_ERR, "Value must be either \'true\' or \'false\'");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)tunable, (hashtab_key_t)key, CIL_SYM_TUNABLES, CIL_TUNABLE);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad tunable declaration at line %d of %s\n", 
+		parse_current->line, parse_current->path);
+	cil_destroy_tunable(tunable);
+	return rc;
+}
+
+void cil_destroy_tunable(struct cil_tunable *tunable)
+{
+	if (tunable == NULL) {
+		return;
+	}
+
+	cil_symtab_datum_destroy(&tunable->datum);
+	free(tunable);
 }
 
 enum cil_flavor __cil_get_operator_flavor(const char *op)
@@ -5787,11 +5842,11 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEBOUNDS)) {
 		rc = cil_gen_rolebounds(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
-		rc = cil_gen_bool(db, parse_current, ast_node, CIL_BOOL);
+		rc = cil_gen_bool(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_BOOLEANIF)) {
 		rc = cil_gen_boolif(db, parse_current, ast_node);
 	} else if(!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
-		rc = cil_gen_bool(db, parse_current, ast_node, CIL_TUNABLE);
+		rc = cil_gen_tunable(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
 		rc = cil_gen_tunif(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_CONDTRUE)) {
