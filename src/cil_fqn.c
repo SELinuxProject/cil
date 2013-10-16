@@ -116,7 +116,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		goto exit;
 	}
 
-	if (node->flavor < CIL_MIN_DECLARATIVE || node->flavor == CIL_PERM) {
+	if (node->flavor < CIL_MIN_DECLARATIVE || node->flavor == CIL_PERM || node->flavor == CIL_MAP_PERM) {
 		rc = SEPOL_OK;
 		goto exit;
 	}
@@ -143,6 +143,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		/* Strings don't change */
 		break;
 	case CIL_TYPEATTRIBUTE:
+	case CIL_ROLEATTRIBUTE:
 	case CIL_BOOL:
 	case CIL_CAT:
 	case CIL_CATALIAS:
