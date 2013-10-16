@@ -1965,6 +1965,9 @@ void cil_role_init(struct cil_role **role)
 
 	cil_symtab_datum_init(&(*role)->datum);
 	(*role)->types = NULL;
+	(*role)->bounds = NULL;
+	(*role)->types = NULL;
+	(*role)->value = 0;
 }
 
 void cil_type_init(struct cil_type **type)

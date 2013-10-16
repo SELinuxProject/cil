@@ -3230,58 +3230,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_DOMINANCE:
 			rc = cil_resolve_dominance(node, args);
 			break;
-		case CIL_CLASS:
-			rc = cil_reset_class(node, args);
-			break;
-		case CIL_MAP_PERM:
-			rc = cil_reset_map_perm(node, args);
-			break;
-		case CIL_ROLE:
-			rc = cil_reset_role(node, args);
-			break;
-		case CIL_TYPE:
-			rc = cil_reset_type(node, args);
-			break;
-		case CIL_USER:
-			rc = cil_reset_user(node, args);
-			break;
-		case CIL_ROLEATTRIBUTE:
-			rc = cil_reset_roleattr(node, args);
-			break;
-		case CIL_TYPEATTRIBUTE:
-			rc = cil_reset_typeattr(node, args);
-			break;
-		case CIL_SENS:
-			rc = cil_reset_sens(node, args);
-			break;
-		case CIL_SID:
-			rc = cil_reset_sid(node, args);
-			break;
 		case CIL_BOOLEANIF:
 			rc = cil_resolve_boolif(node, args);
-			break;
-		case CIL_CLASSPERMSET:
-			rc = cil_reset_classpermset(node, args);
-			break;
-		case CIL_CLASSMAPPING:
-			rc = cil_reset_classmapping(node, args);
-			break;
-		case CIL_AVRULE:
-			rc = cil_reset_avrule(node, args);
-			break;
-		case CIL_TYPEATTRIBUTESET:
-			rc = cil_reset_typeattributeset(node, args);
-			break;
-		case CIL_ROLEATTRIBUTESET:
-			rc = cil_reset_roleattributeset(node, args);
-			break;
-		case CIL_CONSTRAIN:
-		case CIL_MLSCONSTRAIN:
-			rc = cil_reset_constrain(node, args);
-			break;
-		case CIL_VALIDATETRANS:
-		case CIL_MLSVALIDATETRANS:
-			rc = cil_reset_validatetrans(node, args);
 			break;
 		}
 		break;
@@ -3452,7 +3402,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	struct cil_args_resolve *args = extra_args;
 	enum cil_pass pass = args->pass;
 	struct cil_tree_node *optstack = args->optstack;
-	uint32_t *changed = args->changed;
 
 	if (node == NULL) {
 		goto exit;
@@ -3494,8 +3443,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		cil_log(CIL_WARN, "Disabling optional %s at %d of %s\n", opt->datum.name, node->parent->line, node->parent->path);
 		/* disable an optional if something failed to resolve */
 		opt->datum.state = CIL_STATE_DISABLING;
-		/* let the resolve loop know something was changed */
-		*changed = 1;
 		rc = SEPOL_OK;
 	} else if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to resolve %s statement at %d of %s\n", cil_node_to_string(node), node->line, node->path);
@@ -3508,9 +3455,75 @@ exit:
 	return rc;
 }
 
-int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void *extra_args)
+int __cil_reset_node(struct cil_tree_node *node,  __attribute__((unused)) uint32_t *finished, __attribute__((unused)) void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_args_resolve *args = extra_args;
+
+	switch (node->flavor) {
+	case CIL_CLASS:
+		rc = cil_reset_class(node, args);
+		break;
+	case CIL_MAP_PERM:
+		rc = cil_reset_map_perm(node, args);
+		break;
+	case CIL_ROLE:
+		rc = cil_reset_role(node, args);
+		break;
+	case CIL_TYPE:
+		rc = cil_reset_type(node, args);
+		break;
+	case CIL_USER:
+		rc = cil_reset_user(node, args);
+		break;
+	case CIL_ROLEATTRIBUTE:
+		rc = cil_reset_roleattr(node, args);
+		break;
+	case CIL_TYPEATTRIBUTE:
+		rc = cil_reset_typeattr(node, args);
+		break;
+	case CIL_SENS:
+		rc = cil_reset_sens(node, args);
+		break;
+	case CIL_SID:
+		rc = cil_reset_sid(node, args);
+		break;
+	case CIL_CLASSPERMSET:
+		rc = cil_reset_classpermset(node, args);
+		break;
+	case CIL_CLASSMAPPING:
+		rc = cil_reset_classmapping(node, args);
+		break;
+	case CIL_AVRULE:
+		rc = cil_reset_avrule(node, args);
+		break;
+	case CIL_TYPEATTRIBUTESET:
+		rc = cil_reset_typeattributeset(node, args);
+		break;
+	case CIL_ROLEATTRIBUTESET:
+		rc = cil_reset_roleattributeset(node, args);
+		break;
+	case CIL_CONSTRAIN:
+	case CIL_MLSCONSTRAIN:
+		rc = cil_reset_constrain(node, args);
+		break;
+	case CIL_VALIDATETRANS:
+	case CIL_MLSVALIDATETRANS:
+		rc = cil_reset_validatetrans(node, args);
+		break;
+	default:
+		rc = SEPOL_OK;
+		break;
+	}
+
+	return rc;
+}
+
+int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_args_resolve *args = extra_args;
+	uint32_t *changed = args->changed;
 
 	if (node == NULL || finished == NULL) {
 		goto exit;
@@ -3529,6 +3542,9 @@ int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished
 			rc = SEPOL_OK;
 			goto exit;
 		}
+	} else {
+		/* Do we need to reset for a block? */
+		*changed = 1;
 	}
 
 	((struct cil_symtab_datum *)node->data)->state = CIL_STATE_DISABLED;
@@ -3626,7 +3642,7 @@ int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *ext
 		if (((struct cil_optional *)parent->data)->datum.state == CIL_STATE_DISABLING) {
 			/* go into the optional, removing everything that it added */
 			if (args->pass > CIL_PASS_CALL1) {
-				rc = cil_tree_walk(parent, __cil_disable_children_helper, NULL, NULL, NULL);
+				rc = cil_tree_walk(parent, __cil_disable_children_helper, NULL, NULL, extra_args);
 				if (rc != SEPOL_OK) {
 					cil_log(CIL_ERR, "Failed to disable declarations in optional\n");
 					goto exit;
@@ -3691,16 +3707,25 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		}
 
 		if (changed && (pass > CIL_PASS_CALL1)) {
-			/* Need to re-resolve because an optional was disabled. We only
-			 * need to reset to the call1 pass because things done in the preceeding
-			 * passes aren't allowed in optionals, and thus can't be disabled.
-			 * Note: set pass to CIL_PASS_CALL1 because the pass++ will increment it to BLK_CALL1 */
+			/* Need to re-resolve because an optional was disabled that contained
+			 * one or more declarations. We only need to reset to the call1 pass 
+			 * because things done in the preceeding passes aren't allowed in 
+			 * optionals, and thus can't be disabled.
+			 * Note: set pass to CIL_PASS_CALL1 because the pass++ will increment 
+			 * it to BLK_CALL1
+			 */
+			cil_log(CIL_INFO, "Resetting declarations\n");
 			pass = CIL_PASS_CALL1;
 			/* reset the global data */
 			cil_list_destroy(&db->catorder, 0);
 			cil_list_init(&db->catorder, CIL_LIST_ITEM);
 			cil_list_destroy(&db->dominance, 0);
 			cil_list_init(&db->dominance, CIL_LIST_ITEM);
+			rc = cil_tree_walk(current, __cil_reset_node, NULL, NULL, NULL);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_ERR, "Failed to reset declarations\n");
+				goto exit;
+			}
 		}
 
 		/* reset the arguments */
