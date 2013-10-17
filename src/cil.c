@@ -1352,6 +1352,7 @@ void cil_netifcon_init(struct cil_netifcon **netifcon)
 	(*netifcon)->if_context = NULL;
 	(*netifcon)->packet_context_str = NULL;
 	(*netifcon)->packet_context = NULL;
+	(*netifcon)->context_str = NULL;
 }
 
 void cil_context_init(struct cil_context **context)
@@ -1492,6 +1493,7 @@ void cil_userbounds_init(struct cil_userbounds **userbounds)
 	*userbounds = cil_malloc(sizeof(**userbounds));
 
 	(*userbounds)->user_str = NULL;
+	(*userbounds)->user = NULL;
 	(*userbounds)->bounds_str = NULL;
 }
 
@@ -1653,6 +1655,7 @@ void cil_condblock_init(struct cil_condblock **cb)
 {
 	*cb = cil_malloc(sizeof(**cb));
 
+	(*cb)->flavor = CIL_NONE;
 	cil_symtab_array_init((*cb)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_CONDBLOCK]);
 }
 
@@ -1777,14 +1780,17 @@ void cil_filecon_init(struct cil_filecon **filecon)
 
 	(*filecon)->root_str = NULL;
 	(*filecon)->path_str = NULL;
-	(*filecon)->context_str =NULL;
+	(*filecon)->type = 0;
+	(*filecon)->context_str = NULL;
 	(*filecon)->context = NULL;
 }
 
 void cil_portcon_init(struct cil_portcon **portcon)
 {
 	*portcon = cil_malloc(sizeof(**portcon));
-
+	(*portcon)->proto = 0;
+	(*portcon)->port_low = 0;
+	(*portcon)->port_high = 0;
 	(*portcon)->context_str = NULL;
 	(*portcon)->context = NULL;
 }
@@ -1814,7 +1820,8 @@ void cil_genfscon_init(struct cil_genfscon **genfscon)
 void cil_pirqcon_init(struct cil_pirqcon **pirqcon)
 {
 	*pirqcon = cil_malloc(sizeof(**pirqcon));
-
+	
+	(*pirqcon)->pirq = 0;
 	(*pirqcon)->context_str = NULL;
 	(*pirqcon)->context = NULL;
 }
@@ -1823,6 +1830,8 @@ void cil_iomemcon_init(struct cil_iomemcon **iomemcon)
 {
 	*iomemcon = cil_malloc(sizeof(**iomemcon));
 
+	(*iomemcon)->iomem_low = 0;
+	(*iomemcon)->iomem_high = 0;
 	(*iomemcon)->context_str = NULL;
 	(*iomemcon)->context = NULL;
 }
@@ -1839,6 +1848,7 @@ void cil_pcidevicecon_init(struct cil_pcidevicecon **pcidevicecon)
 {
 	*pcidevicecon = cil_malloc(sizeof(**pcidevicecon));
 
+	(*pcidevicecon)->dev = 0;
 	(*pcidevicecon)->context_str = NULL;
 	(*pcidevicecon)->context = NULL;
 }
@@ -1964,7 +1974,6 @@ void cil_role_init(struct cil_role **role)
 	*role = cil_malloc(sizeof(**role));
 
 	cil_symtab_datum_init(&(*role)->datum);
-	(*role)->types = NULL;
 	(*role)->bounds = NULL;
 	(*role)->types = NULL;
 	(*role)->value = 0;
@@ -1975,6 +1984,8 @@ void cil_type_init(struct cil_type **type)
 	*type = cil_malloc(sizeof(**type));
 
 	cil_symtab_datum_init(&(*type)->datum);
+	(*type)->bounds = NULL;
+	(*type)->value = 0;
 }
 
 void cil_cat_init(struct cil_cat **cat)
@@ -2004,7 +2015,7 @@ void cil_args_init(struct cil_args **args)
 	(*args)->arg_str = NULL;
 	(*args)->arg = NULL;
 	(*args)->param_str = NULL;
-	(*args)->flavor = CIL_STRING;
+	(*args)->flavor = CIL_NONE;
 }
 
 void cil_call_init(struct cil_call **call)
@@ -2029,7 +2040,7 @@ void cil_param_init(struct cil_param **param)
 	*param = cil_malloc(sizeof(**param));
 
 	(*param)->str = NULL;
-	(*param)->flavor = CIL_STRING;
+	(*param)->flavor = CIL_NONE;
 }
 
 void cil_macro_init(struct cil_macro **macro)
