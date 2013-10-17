@@ -1730,7 +1730,7 @@ exit:
 	return rc;
 }
 
-int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
+int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb, const struct cil_db *db,
 					const struct cil_list *cil_expr,
 					constraint_expr_t **sepol_expr)
 {
@@ -1780,7 +1780,6 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				curr_expr->op = CEXPR_INCOMP;
 				break;
 			default:
-				rc = SEPOL_ERR;
 				goto exit;
 				break;
 			}
@@ -1838,14 +1837,16 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				break;
 			}
 			default:
-				rc = SEPOL_ERR;
 				goto exit;
 				break;
 			}
 
 			if (r_item->flavor == CIL_DATUM) {
 				uint32_t value = 0;
-				char *key = ((struct cil_symtab_datum *)r_item->data)->name;
+				struct cil_symtab_datum *datum = r_item->data;
+				struct cil_tree_node *node = datum->nodes->head->data;
+				char *key = datum->name;
+				enum cil_flavor flavor = node->flavor;
 
 				curr_expr->expr_type = CEXPR_NAMES;
 
@@ -1853,39 +1854,90 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				case CIL_USER: {
 					user_datum_t *sepol_user = hashtab_search(pdb->p_users.table, key);
 					if (sepol_user == NULL) {
-						rc = SEPOL_ERR;
 						goto exit;
 					}
 					value = sepol_user->s.value;
 					break;
 				}
 				case CIL_ROLE: {
-					role_datum_t *sepol_role = hashtab_search(pdb->p_roles.table, key);
-					if (sepol_role == NULL) {
-						rc = SEPOL_ERR;
-						goto exit;
+					type_datum_t *sepol_role;
+
+					if (flavor == CIL_ROLEATTRIBUTE) {
+						struct cil_roleattribute *cil_attr = (struct cil_roleattribute*)datum;
+						ebitmap_node_t *rnode;
+						unsigned int i;
+
+						ebitmap_for_each_bit(cil_attr->roles, rnode, i) {
+							struct cil_role *cil_role = NULL;
+
+							if (!ebitmap_get_bit(cil_attr->roles, i)) {
+								continue;
+							}
+
+							cil_role = db->val_to_role[i];
+							key = cil_role->datum.name;
+							sepol_role = hashtab_search(pdb->p_roles.table, key);
+							if (sepol_role == NULL) {
+								goto exit;
+							}
+							value = sepol_role->s.value;
+							if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
+								goto exit;
+							}
+						}
+					} else {
+						sepol_role = hashtab_search(pdb->p_roles.table, key);
+						if (sepol_role == NULL) {
+							goto exit;
+						}
+						value = sepol_role->s.value;
+						if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
+							goto exit;
+						}
 					}
-					value = sepol_role->s.value;
 					break;
 				}
 				case CIL_TYPE: {
-					type_datum_t *sepol_type = hashtab_search(pdb->p_types.table, key);
-					if (sepol_type == NULL) {
-						rc = SEPOL_ERR;
-						goto exit;
+					type_datum_t *sepol_type;
+
+					if (flavor == CIL_TYPEATTRIBUTE) {
+						struct cil_typeattribute *cil_attr = (struct cil_typeattribute*)datum;
+						ebitmap_node_t *tnode;
+						unsigned int i;
+
+						ebitmap_for_each_bit(cil_attr->types, tnode, i) {
+							struct cil_type *cil_type = NULL;
+
+							if (!ebitmap_get_bit(cil_attr->types, i)) {
+								continue;
+							}
+
+							cil_type = db->val_to_type[i];
+							key = cil_type->datum.name;
+							sepol_type = hashtab_search(pdb->p_types.table, key);
+							if (sepol_type == NULL) {
+								goto exit;
+							}
+							value = sepol_type->s.value;;
+							if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
+								goto exit;
+							}
+						}
+					} else {
+						sepol_type = hashtab_search(pdb->p_types.table, key);
+						if (sepol_type == NULL) {
+							goto exit;
+						}
+						value = sepol_type->s.value;
+						if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
+							goto exit;
+						}
 					}
-					value = sepol_type->s.value;
 					break;
 				}
 				default:
-					rc = SEPOL_ERR;
 					goto exit;
 					break;
-				}
-
-				if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
-					rc = SEPOL_ERR;
-					goto exit;
 				}
 			} else {
 				curr_expr->expr_type = CEXPR_ATTR;
@@ -1905,7 +1957,6 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb,
 				curr_expr->expr_type = CEXPR_OR;
 				break;
 			default:
-				rc = SEPOL_ERR;
 				goto exit;
 				break;
 			}
@@ -1922,10 +1973,10 @@ exit:
 		constraint_expr_destroy(new_expr);
 		new_expr = curr_expr;
 	}
-	return rc;
+	return SEPOL_ERR;
 }
 
-int cil_constrain_to_policydb_helper(policydb_t *pdb, char *key, struct cil_list *perms, struct cil_list *expr)
+int cil_constrain_to_policydb_helper(policydb_t *pdb, const struct cil_db *db, char *key, struct cil_list *perms, struct cil_list *expr)
 {
 	int rc = SEPOL_ERR;
 	constraint_node_t *sepol_constrain = NULL;
@@ -1946,7 +1997,7 @@ int cil_constrain_to_policydb_helper(policydb_t *pdb, char *key, struct cil_list
 		goto exit;
 	}
 
-	rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
+	rc = __cil_constrain_expr_to_sepol_expr(pdb, db, expr, &sepol_expr);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1961,7 +2012,7 @@ exit:
 	free(sepol_constrain);
 	return rc;
 }
-int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
+int cil_constrain_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum)
 {
 	int rc = SEPOL_ERR;
 	struct cil_constrain *cil_constrain = (struct cil_constrain*)datum;
@@ -1974,7 +2025,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 		if (classperms->flavor == CIL_CLASSPERMS) {
 			key = ((struct cil_symtab_datum *)classperms->r.cp.class)->name;
 
-			rc = cil_constrain_to_policydb_helper(pdb, key, classperms->r.cp.perms, expr);
+			rc = cil_constrain_to_policydb_helper(pdb, db, key, classperms->r.cp.perms, expr);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1989,7 +2040,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 
 					key = ((struct cil_symtab_datum *)cp->r.cp.class)->name;
 
-					rc = cil_constrain_to_policydb_helper(pdb, key, cp->r.cp.perms, expr);
+					rc = cil_constrain_to_policydb_helper(pdb, db, key, cp->r.cp.perms, expr);
 					if (rc != SEPOL_OK) {
 						goto exit;
 					}
@@ -2005,7 +2056,7 @@ exit:
 	return rc;
 }
 
-int cil_validatetrans_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
+int cil_validatetrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
@@ -2027,7 +2078,7 @@ int cil_validatetrans_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datu
 	sepol_validatetrans = cil_malloc(sizeof(*sepol_validatetrans));
 	memset(sepol_validatetrans, 0, sizeof(constraint_node_t));
 
-	rc = __cil_constrain_expr_to_sepol_expr(pdb, expr, &sepol_expr);
+	rc = __cil_constrain_expr_to_sepol_expr(pdb, db, expr, &sepol_expr);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2914,19 +2965,19 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			rc = cil_typetransition_to_policydb(pdb, node->data);
 			break;
 		case CIL_CONSTRAIN:
-			rc = cil_constrain_to_policydb(pdb, node->data);
+			rc = cil_constrain_to_policydb(pdb, db, node->data);
 			break;
 		case CIL_MLSCONSTRAIN:
 			if (pdb->mls == CIL_TRUE) {
-				rc = cil_constrain_to_policydb(pdb, node->data);
+				rc = cil_constrain_to_policydb(pdb, db, node->data);
 			}
 			break;
 		case CIL_VALIDATETRANS:
-			rc = cil_validatetrans_to_policydb(pdb, node->data);
+			rc = cil_validatetrans_to_policydb(pdb, db, node->data);
 			break;
 		case CIL_MLSVALIDATETRANS:
 			if (pdb->mls == CIL_TRUE) {
-				rc = cil_validatetrans_to_policydb(pdb, node->data);
+				rc = cil_validatetrans_to_policydb(pdb, db, node->data);
 			}
 			break;
 		case CIL_SID:
