@@ -2895,7 +2895,9 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			rc = cil_bool_to_policydb(pdb, node->data);
 			break;
 		case CIL_CATALIAS:
-			rc = cil_catalias_to_policydb(pdb, node->data);
+			if (pdb->mls == CIL_TRUE) {
+				rc = cil_catalias_to_policydb(pdb, node->data);
+			}
 			break;
 		case CIL_SENS:
 			if (pdb->mls == CIL_TRUE) {
@@ -3282,12 +3284,12 @@ int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 
-	rc = cil_catorder_to_policydb(pdb, db);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
 	if (pdb->mls == CIL_TRUE) {
+		rc = cil_catorder_to_policydb(pdb, db);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+
 		rc = cil_dominance_to_policydb(pdb, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
