@@ -298,7 +298,7 @@ enum cil_flavor {
 #define CIL_KEY_CONS_INCOMP		"incomp"
 #define CIL_KEY_CONS_U1			"u1"
 #define CIL_KEY_CONS_U2			"u2"
-#define CIL_KEY_CONS_U3			"us"
+#define CIL_KEY_CONS_U3			"u3"
 #define CIL_KEY_CONS_T1			"t1"
 #define CIL_KEY_CONS_T2			"t2"
 #define CIL_KEY_CONS_T3			"t3"
