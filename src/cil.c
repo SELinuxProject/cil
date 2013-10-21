@@ -1493,7 +1493,6 @@ void cil_userbounds_init(struct cil_userbounds **userbounds)
 	*userbounds = cil_malloc(sizeof(**userbounds));
 
 	(*userbounds)->user_str = NULL;
-	(*userbounds)->user = NULL;
 	(*userbounds)->bounds_str = NULL;
 }
 
@@ -1502,6 +1501,7 @@ void cil_userprefix_init(struct cil_userprefix **userprefix)
 	*userprefix = cil_malloc(sizeof(**userprefix));
 
 	(*userprefix)->user_str = NULL;
+	(*userprefix)->user = NULL;
 	(*userprefix)->prefix_str = NULL;
 }
 
