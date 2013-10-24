@@ -484,108 +484,43 @@ exit:
 	return rc;
 }
 
-int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
+struct cil_args_verify_order {
+	uint32_t *flavor;
+};
+
+int __cil_verify_ordered_node_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
-	struct cil_args_verify_order *args;
-	uint32_t *found = NULL;
-	uint32_t *empty = NULL;
-	uint32_t *flavor = NULL;
-	int rc = SEPOL_ERR;
-
-	if (node == NULL || extra_args == NULL) {
-		goto exit;
-	}
-
-	args = extra_args;
-	found = args->found;
-	empty = args->empty;
-	flavor = args->flavor;
-
-        if (node->flavor == CIL_OPTIONAL) {
-                struct cil_optional *opt = node->data;
-                if (opt->datum.state != CIL_STATE_ENABLED) {
-                        *finished = CIL_TREE_SKIP_HEAD;
-                        rc = SEPOL_OK;
-                        goto exit;
-                }
-        } else if (node->flavor == CIL_MACRO) {
-                *finished = CIL_TREE_SKIP_HEAD;
-                rc = SEPOL_OK;
-                goto exit;
-        }
+	struct cil_args_verify_order *args = extra_args;
+	uint32_t *flavor = args->flavor;
 
 	if (node->flavor == *flavor) {
-		struct cil_list *order = args->order;
-		struct cil_list_item *ordered;
-		if (*empty) {
-			cil_log(CIL_ERR, "Ordering is empty\n");
-			goto exit;
-		}
-		cil_list_for_each(ordered, order) {
-			if (ordered->data == node->data) {
-				*found = 1;
-				break;
+		if (node->flavor == CIL_CAT) {
+			struct cil_cat *cat = node->data;
+			if (cat->ordered == CIL_FALSE) {
+				cil_log(CIL_ERR, "Category %s not in categoryorder statement at line %d of %s\n", cat->datum.name, node->line, node->path);
+				return SEPOL_ERR;
+			}
+		} else if (node->flavor == CIL_SENS) {
+			struct cil_sens *sens = node->data;
+			if (sens->ordered == CIL_FALSE) {
+				cil_log(CIL_ERR, "Sensitivity %s not in dominance statement at line %d of %s\n", sens->datum.name, node->line, node->path);
+				return SEPOL_ERR;
 			}
 		}
-		if (!(*found)) {
-			cil_log(CIL_ERR, "Item %s not ordered\n", 
-				((struct cil_symtab_datum*)node->data)->name);
-			goto exit;
-		}
-		*found = 0;
 	}
 
 	return SEPOL_OK;
-
-exit:	
-	return rc;
 }
 
-int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, enum cil_flavor flavor)
+int __cil_verify_ordered(struct cil_tree_node *current, enum cil_flavor flavor)
 {
-
-	struct cil_list_item *ordered = NULL;
 	struct cil_args_verify_order extra_args;
-	uint32_t found = 0;
-	uint32_t empty = 0;
 	int rc = SEPOL_ERR;
 
-	if (order == NULL || current == NULL) {
-		goto exit;
-	}
-
-	if (order->head == NULL) {
-		empty = 1;
-	} else {
-		ordered = order->head;
-		if (ordered->next != NULL) {
-			cil_log(CIL_ERR, "Disjoint ordering exists\n");
-			goto exit;
-		}
-
-		if (ordered->data != NULL) {
-			struct cil_list_item *temp_item = NULL;
-			temp_item = ((struct cil_list *)order->head->data)->head;
-			((struct cil_list *)order->head->data)->head = NULL;
-			cil_list_item_destroy(&order->head, CIL_TRUE);
-			order->head = temp_item;
-		}
-	}
-
-	extra_args.order = order;
-	extra_args.found = &found;
-	extra_args.empty = &empty;
 	extra_args.flavor = &flavor;
 
-	rc = cil_tree_walk(current, __cil_verify_order_node_helper, NULL, NULL, &extra_args);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to verify order\n");
-		goto exit;
-	}
+	rc = cil_tree_walk(current, __cil_verify_ordered_node_helper, NULL, NULL, &extra_args);
 
-	return SEPOL_OK;
-exit:
-	cil_log(CIL_ERR,"Invalid ordering\n");
 	return rc;
 }
 

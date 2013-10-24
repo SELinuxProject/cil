@@ -133,6 +133,35 @@ void cil_list_prepend(struct cil_list *list, unsigned flavor, void *data)
 	list->head = item;
 }
 
+struct cil_list_item *cil_list_insert(struct cil_list *list, struct cil_list_item *curr, unsigned flavor, void *data)
+{
+	struct cil_list_item *item;
+
+	if (list == NULL) {
+		cil_list_error("Attempt to append data to a NULL list");
+	}
+
+	if (curr == NULL) {
+		/* Insert at the front of the list */
+		cil_list_prepend(list, flavor, data);
+		return list->head;
+	}
+
+	if (curr == list->tail) {
+		cil_list_append(list, flavor, data);
+		return list->tail;
+	}
+
+	cil_list_item_init(&item);
+	item->flavor = flavor;
+	item->data = data;
+	item->next = curr->next;
+
+	curr->next = item;
+
+	return item;
+}
+
 void cil_list_append_item(struct cil_list *list, struct cil_list_item *item)
 {
 	struct cil_list_item *last = item;

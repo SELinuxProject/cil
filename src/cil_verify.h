@@ -53,22 +53,14 @@ struct cil_args_verify {
 	int *pass;
 };
 
-struct cil_args_verify_order {
-	struct cil_list *order;
-	struct cil_list_item *ordered;
-	uint32_t *found;
-	uint32_t *empty;
-	uint32_t *flavor;
-};
-
 int __cil_verify_name(const char *name);
 int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[], int len);
 int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor nflavor, enum cil_flavor eflavor);
 int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor eflavor, enum cil_flavor oflavor);
 int __cil_verify_expr_operator(const char *op, enum cil_flavor flavor);
 int __cil_verify_ranges(struct cil_list *list);
-int __cil_verify_order_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args);
-int __cil_verify_order(struct cil_list *order, struct cil_tree_node *current, enum cil_flavor flavor);
+int __cil_verify_ordered_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args);
+int __cil_verify_ordered(struct cil_tree_node *current, enum cil_flavor flavor);
 int __cil_verify_catrange(struct cil_db *db, struct cil_catrange *catrange, struct cil_cat *cat);
 int __cil_verify_senscat(struct cil_db *db, struct cil_sens *sens, struct cil_cat *cat);
 int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil_catset *catset);

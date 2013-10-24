@@ -692,6 +692,7 @@ struct cil_roleallow {
 struct cil_sens {
 	struct cil_symtab_datum datum;
 	struct cil_list *catsets;
+	uint32_t ordered;
 };
 
 struct cil_sensalias {
@@ -706,6 +707,7 @@ struct cil_sens_dominates {
 
 struct cil_cat {
 	struct cil_symtab_datum datum;
+	uint32_t ordered;
 };
 
 struct cil_catalias {

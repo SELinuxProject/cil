@@ -1398,6 +1398,7 @@ void cil_sens_init(struct cil_sens **sens)
 
 	cil_symtab_datum_init(&(*sens)->datum);
 	cil_list_init(&(*sens)->catsets, CIL_LIST_ITEM);
+	(*sens)->ordered = CIL_FALSE;
 }
 
 void cil_block_init(struct cil_block **block)
@@ -1993,6 +1994,7 @@ void cil_cat_init(struct cil_cat **cat)
 	*cat = cil_malloc(sizeof(**cat));
 
 	cil_symtab_datum_init(&(*cat)->datum);
+	(*cat)->ordered = CIL_FALSE;
 }
 
 void cil_catorder_init(struct cil_catorder **catorder)
