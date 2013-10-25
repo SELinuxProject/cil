@@ -220,6 +220,10 @@ exit:
 
 void cil_destroy_data(void **data, enum cil_flavor flavor)
 {
+	if (*data == NULL) {
+		return;
+	}
+
 	switch(flavor) {
 		case CIL_NONE:
 		break;
