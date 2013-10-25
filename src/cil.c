@@ -65,8 +65,8 @@ void cil_db_init(struct cil_db **db)
 
 	cil_tree_init(&(*db)->parse);
 	cil_tree_init(&(*db)->ast);
-	cil_list_init(&(*db)->catorder, CIL_LIST_ITEM);
-	cil_list_init(&(*db)->dominance, CIL_LIST_ITEM);
+	(*db)->catorder = NULL;
+	(*db)->dominance = NULL;
 	cil_sort_init(&(*db)->netifcon);
 	cil_sort_init(&(*db)->genfscon);
 	cil_sort_init(&(*db)->filecon);

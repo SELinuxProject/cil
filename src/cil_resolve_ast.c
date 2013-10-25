@@ -3694,9 +3694,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				__cil_ordered_lists_reset(&extra_args.catorder_lists);
 				__cil_ordered_lists_reset(&extra_args.dominance_lists);
 				cil_list_destroy(&db->catorder, CIL_FALSE);
-				cil_list_init(&db->catorder, CIL_LIST_ITEM);
 				cil_list_destroy(&db->dominance, CIL_FALSE);
-				cil_list_init(&db->dominance, CIL_LIST_ITEM);
 			}
 
 			pass = CIL_PASS_CALL1;
