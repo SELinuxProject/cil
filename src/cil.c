@@ -237,7 +237,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		free(*data);
 		break;
 	case CIL_LIST:
-		free(*data);
+		cil_list_destroy(*data, CIL_FALSE);
 		break;
 	case CIL_BLOCK:
 		cil_destroy_block(*data);
