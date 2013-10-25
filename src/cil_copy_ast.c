@@ -1436,7 +1436,6 @@ int cil_copy_call(struct cil_db *db, void *data, void **copy, __attribute__((unu
 
 	if (orig->args_tree != NULL) {
 		cil_tree_init(&new->args_tree);
-		cil_tree_node_init(&new->args_tree->root);
 		rc = cil_copy_ast(db, orig->args_tree->root, new->args_tree->root);
 		if (rc != SEPOL_OK) {
 			goto exit;
