@@ -1891,8 +1891,10 @@ void cil_destroy_roleattributeset(struct cil_roleattributeset *attrset)
 		return;
 	}
 
-	cil_list_destroy(&attrset->str_expr, CIL_TRUE);
 	free(attrset->attr_str);
+	cil_list_destroy(&attrset->str_expr, CIL_TRUE);
+	cil_list_destroy(&attrset->datum_expr, CIL_FALSE);
+
 	free(attrset);
 }
 
@@ -2759,6 +2761,7 @@ void cil_destroy_boolif(struct cil_booleanif *bif)
 	}
 
 	cil_list_destroy(&bif->str_expr, CIL_TRUE);
+	cil_list_destroy(&bif->datum_expr, CIL_FALSE);
 
 	free(bif);
 }
@@ -2838,6 +2841,7 @@ void cil_destroy_tunif(struct cil_tunableif *tif)
 	}
 
 	cil_list_destroy(&tif->str_expr, CIL_TRUE);
+	cil_list_destroy(&tif->datum_expr, CIL_FALSE);
 
 	free(tif);
 }
@@ -4131,8 +4135,8 @@ void cil_destroy_validatetrans(struct cil_validatetrans *validtrans)
 	}
 
 	free(validtrans->class_str);
-
 	cil_list_destroy(&validtrans->str_expr, CIL_TRUE);
+	cil_list_destroy(&validtrans->datum_expr, CIL_FALSE);
 
 	free(validtrans);
 }
