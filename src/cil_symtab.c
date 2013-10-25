@@ -62,10 +62,8 @@ void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 
 void cil_symtab_datum_destroy(struct cil_symtab_datum *datum)
 {
-	if (datum->nodes != NULL && datum->nodes->head == NULL) {
-		free(datum->name);
-		cil_list_destroy(&datum->nodes, 0);
-	}
+	free(datum->name);
+	cil_list_destroy(&datum->nodes, 0);
 }
 
 /* This both initializes the datum and inserts it into the symtab.
