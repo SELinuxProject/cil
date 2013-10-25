@@ -60,6 +60,23 @@ struct cil_args_booleanif {
 	struct cil_list *neverallows;
 };
 
+void cil_neverallows_list_destroy(struct cil_list *neverallows)
+{
+	struct cil_list_item *i;
+	struct cil_list_item *j;
+
+	cil_list_for_each(i, neverallows) {
+		struct cil_neverallow *neverallow = i->data;
+		cil_list_for_each(j, neverallow->data) {
+			struct cil_neverallow_data *ndata = j->data;
+			free(ndata->key);
+			free(ndata);
+		}
+		cil_list_destroy(&neverallow->data, CIL_FALSE);
+	}
+	cil_list_destroy(&neverallows, CIL_FALSE);
+}
+		
 int cil_common_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum, common_datum_t **common_out)
 {
 	int rc = SEPOL_ERR;
@@ -3369,6 +3386,6 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 	rc = SEPOL_OK;
 exit:
 	ebitmap_destroy(&types_bitmap);
-	cil_list_destroy(&neverallows, CIL_FALSE);
+	cil_neverallows_list_destroy(neverallows);
 	return rc;
 }
