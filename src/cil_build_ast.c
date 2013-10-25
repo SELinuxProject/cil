@@ -2998,11 +2998,9 @@ void cil_destroy_typeattributeset(struct cil_typeattributeset *attrset)
 		return;
 	}
 
+	free(attrset->attr_str);
 	cil_list_destroy(&attrset->str_expr, CIL_TRUE);
-
-	if (attrset->attr_str != NULL) {
-		free(attrset->attr_str);
-	}
+	cil_list_destroy(&attrset->datum_expr, CIL_FALSE);
 
 	free(attrset);
 }
