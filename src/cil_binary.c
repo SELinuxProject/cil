@@ -73,6 +73,7 @@ void cil_neverallows_list_destroy(struct cil_list *neverallows)
 			free(ndata);
 		}
 		cil_list_destroy(&neverallow->data, CIL_FALSE);
+		free(neverallow);
 	}
 	cil_list_destroy(&neverallows, CIL_FALSE);
 }
