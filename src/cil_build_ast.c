@@ -3193,6 +3193,7 @@ void cil_destroy_name(struct cil_name *name)
 		return;
 	}
 
+	cil_symtab_datum_destroy(&name->datum);
 	free(name->name_str);
 	free(name);
 }

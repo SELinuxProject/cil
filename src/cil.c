@@ -79,6 +79,7 @@ void cil_db_init(struct cil_db **db)
 	cil_sort_init(&(*db)->fsuse);
 	cil_list_init(&(*db)->userprefixes, CIL_LIST_ITEM);
 	cil_list_init(&(*db)->selinuxusers, CIL_LIST_ITEM);
+	cil_list_init(&(*db)->names, CIL_LIST_ITEM);
 
 	cil_type_init(&(*db)->selftype);
 	(*db)->selftype->datum.name = cil_strdup(CIL_KEY_SELF);
@@ -114,7 +115,8 @@ void cil_db_destroy(struct cil_db **db)
 	cil_sort_destroy(&(*db)->fsuse);
 	cil_list_destroy(&(*db)->userprefixes, CIL_FALSE);
 	cil_list_destroy(&(*db)->selinuxusers, CIL_FALSE);
-	
+	cil_list_destroy(&(*db)->names, CIL_TRUE);
+
 	cil_destroy_type((*db)->selftype);
 
 	free((*db)->val_to_type);

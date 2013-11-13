@@ -91,6 +91,8 @@ static struct cil_name * __cil_insert_name(struct cil_db *db, hashtab_key_t key,
 
 	cil_name_init(&name);
 	cil_symtab_insert(symtab, key, (struct cil_symtab_datum *)name, ast_node);
+	cil_list_append(db->names, CIL_NAME, name);
+
 	return name;
 }
 

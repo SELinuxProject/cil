@@ -374,6 +374,7 @@ struct cil_db {
 	struct cil_sort *fsuse;
 	struct cil_list *userprefixes;
 	struct cil_list *selinuxusers;
+	struct cil_list *names;
 	int num_types;
 	int num_roles;
 	struct cil_type **val_to_type;
