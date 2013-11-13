@@ -648,8 +648,6 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 	unsigned is_list = CIL_TRUE;
 	unsigned consecutive = 0;
 
-	ebitmap_init(out);
-
 	if (expr == NULL) {
 		return SEPOL_OK;
 	}
@@ -712,6 +710,10 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 				break;
 			}
 			case CIL_NOT:
+				if (pos < 1) {
+					cil_log(CIL_INFO, "Not enough operands for NOT operation\n");
+					goto exit;
+				}
 				if (ebitmap_not(&bitmap, &stack[pos - 1], max)) {
 					cil_log(CIL_INFO, "Failed to NOT bitmap\n");
 					goto exit;
@@ -720,6 +722,10 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 				stack[pos - 1] = bitmap;
 				break;
 			case CIL_OR:
+				if (pos < 2) {
+					cil_log(CIL_INFO, "Not enough operands for OR operation\n");
+					goto exit;
+				}
 				if (ebitmap_or(&bitmap, &stack[pos - 2], &stack[pos - 1])) {
 					cil_log(CIL_INFO, "Failed to OR attribute bitmaps\n");
 					goto exit;
@@ -730,6 +736,10 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 				pos--;
 				break;
 			case CIL_AND:
+				if (pos < 2) {
+					cil_log(CIL_INFO, "Not enough operands for AND operation\n");
+					goto exit;
+				}
 				if (ebitmap_and(&bitmap, &stack[pos - 2], &stack[pos - 1])) {
 					cil_log(CIL_INFO, "Failed to AND attribute bitmaps\n");
 					goto exit;
@@ -740,6 +750,10 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 				pos--;
 				break;
 			case CIL_XOR:
+				if (pos < 2) {
+					cil_log(CIL_INFO, "Not enough operands for XOR operation\n");
+					goto exit;
+				}
 				if (ebitmap_xor(&bitmap, &stack[pos - 2], &stack[pos - 1])) {
 					cil_log(CIL_INFO, "Failed to XOR attribute bitmaps\n");
 					goto exit;
@@ -788,12 +802,22 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 		}
 	}
 
+	if (pos > 1) {
+		cil_log(CIL_INFO, "Not all operands were used in expression\n");
+		goto exit;
+	}
+
+	ebitmap_init(out);
 	ebitmap_union(out, &stack[0]);
 	ebitmap_destroy(&stack[0]);
 
 	return SEPOL_OK;
 
 exit:
+	while (pos > 0) {
+		ebitmap_destroy(&stack[pos-1]);
+		pos--;
+	}
 	return SEPOL_ERR;
 }
 
@@ -1079,6 +1103,7 @@ int __evaluate_perm_expression(struct cil_list *perms, symtab_t *class_symtab, s
 		cil_symtab_map(common_symtab, __perm_bits_to_list, &args);
 	}
 
+	ebitmap_destroy(&bitmap);
 	return SEPOL_OK;
 
 exit:
