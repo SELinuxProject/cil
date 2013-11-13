@@ -3145,6 +3145,7 @@ int cil_gen_typetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 
 	if (parse_current->next->next->next->next->next) {
 		if (strcmp(s4,"*") == 0) {
+			free(s4);
 			s4 = cil_strdup(parse_current->next->next->next->next->next->data);
 		} else {
 			s5 = cil_strdup(parse_current->next->next->next->next->next->data);
