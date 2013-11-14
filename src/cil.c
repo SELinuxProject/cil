@@ -475,12 +475,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		cil_destroy_ipaddr(*data);
 		break;
 	case CIL_INT:
-		break;
 	case CIL_OP:
-		free(*data);
-		break;
 	case CIL_CONS_OPERAND:
-		free(*data);
 		break;
 	default:
 		cil_log(CIL_INFO, "Unknown data flavor: %d\n", flavor);

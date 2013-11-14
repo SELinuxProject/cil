@@ -2446,15 +2446,15 @@ void __cil_gen_constrain_expr(struct cil_tree_node *current, enum cil_flavor op_
 
 	cil_list_init(sub_expr, sub_expr_flavor);
 
-	cil_list_append(*sub_expr, CIL_CONS_OPERAND, cil_flavordup(l_flavor));
+	cil_list_append(*sub_expr, CIL_CONS_OPERAND, (void *)l_flavor);
 
 	if (r_flavor == CIL_TYPE || r_flavor == CIL_ROLE || r_flavor == CIL_USER) {
 		cil_list_append(*sub_expr, CIL_STRING, cil_strdup(rstr));
 	} else {
-		cil_list_append(*sub_expr, CIL_CONS_OPERAND, cil_flavordup(r_flavor));
+		cil_list_append(*sub_expr, CIL_CONS_OPERAND, (void *)r_flavor);
 	}
 
-	cil_list_append(*sub_expr, CIL_OP, cil_flavordup(op_flavor));
+	cil_list_append(*sub_expr, CIL_OP, (void *)op_flavor);
 }
 
 struct cil_expr_args {
@@ -2585,9 +2585,7 @@ int __cil_gen_expr_first_helper(struct cil_tree_node *node, __attribute__((unuse
 		}
 		cil_list_append(args->expr, CIL_STRING, cil_strdup(node->data));
 	} else if (op_flavor == CIL_STAR) {
-		enum cil_flavor *f = cil_malloc(sizeof(enum cil_flavor));
-		*f = CIL_STAR;
-		cil_list_append(args->expr, CIL_OP, f);
+		cil_list_append(args->expr, CIL_OP, (void *)CIL_STAR);
 	}
 
 	args->first = CIL_FALSE;
@@ -2626,14 +2624,10 @@ int __cil_gen_expr_last_helper(struct cil_tree_node *node, void *extra_args)
 		((expr_flavor == CIL_BOOL || expr_flavor == CIL_TUNABLE) &&
 		 (op_flavor == CIL_EQ || op_flavor == CIL_NEQ))) {
 		/* Constraint expressions with eq and neq are handled above. */
-		enum cil_flavor *flavor;
-
-		flavor = cil_malloc(sizeof(enum cil_flavor));
-		*flavor = op_flavor;
 
 		(*depth)--;
 
-		cil_list_append(expr, CIL_OP, flavor);
+		cil_list_append(expr, CIL_OP, (void *)op_flavor);
 	}
 
 	return SEPOL_OK;
@@ -2656,9 +2650,7 @@ int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct c
 			goto exit;
 		}
 		if (!strcmp("*",current->data)) {
-			enum cil_flavor *f = cil_malloc(sizeof(enum cil_flavor));
-			*f = CIL_STAR;
-			cil_list_append(*expr, CIL_OP, f);
+			cil_list_append(*expr, CIL_OP, (void *)CIL_STAR);
 		} else {
 			cil_list_append(*expr, CIL_STRING, cil_strdup(current->data));
 		}

@@ -84,12 +84,3 @@ char *cil_strdup(char *str)
 
 	return mem;
 }
-
-unsigned *cil_flavordup(unsigned flavor)
-{
-	unsigned *mem = cil_malloc(sizeof(unsigned));
-
-	*mem = flavor;
-
-	return mem;
-}

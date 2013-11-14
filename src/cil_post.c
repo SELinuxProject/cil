@@ -695,7 +695,7 @@ int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 			consecutive++;
 			break;
 		case CIL_OP: {
-			enum cil_flavor op_flavor = *((enum cil_flavor *)item->data);
+			enum cil_flavor op_flavor = (enum cil_flavor)item->data;
 			consecutive = 0;
 			switch (op_flavor) {
 			case CIL_STAR: {

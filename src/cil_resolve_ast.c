@@ -3026,7 +3026,7 @@ int cil_evaluate_tunable_expr(struct cil_list *datum_expr, uint16_t *result)
 
 	cil_list_for_each(curr, datum_expr) {
 		if (curr->flavor == CIL_OP) {
-			enum cil_flavor op_flavor = *((enum cil_flavor *)curr->data);
+			enum cil_flavor op_flavor = (enum cil_flavor)curr->data;
 			if (op_flavor == CIL_NOT) {
 				if (pos == 0) {
 					cil_log(CIL_ERR, "Not enough operands for NOT operation\n");

@@ -1374,12 +1374,10 @@ int cil_copy_expr(struct cil_db *db, struct cil_list *orig, struct cil_list **ne
 			cil_list_append(*new, curr->flavor, curr->data);
 			break;
 		case CIL_OP:
-			cil_list_append(*new, curr->flavor,
-							cil_flavordup(*((enum cil_flavor *)curr->data)));
+			cil_list_append(*new, curr->flavor, curr->data);
 			break;
 		case CIL_CONS_OPERAND:
-			cil_list_append(*new, curr->flavor,
-							cil_flavordup(*((enum cil_flavor *)curr->data)));
+			cil_list_append(*new, curr->flavor, curr->data);
 			break;
 		default:
 			cil_log(CIL_INFO, "Unknown flavor %d in expression being copied\n",curr->flavor);

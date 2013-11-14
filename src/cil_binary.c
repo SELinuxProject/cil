@@ -1468,7 +1468,7 @@ int cil_get_cond_expr(policydb_t *pdb, struct cil_list *expr, cond_node_t *cond_
 			cond_expr->bool = sepol_bool->s.value;
 			break;
 		case CIL_OP: {
-			enum cil_flavor op_flavor = *((enum cil_flavor *)item->data);
+			enum cil_flavor op_flavor = (enum cil_flavor)item->data;
 			switch (op_flavor) {
 			case CIL_NOT:
 				cond_expr->expr_type = COND_NOT;
@@ -1778,8 +1778,8 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb, const struct cil_db *db,
 			struct cil_list_item *l_item = sub_expr->head;
 			struct cil_list_item *r_item = l_item->next;
 			struct cil_list_item *op_item = r_item->next;
-			enum cil_flavor l_flavor = *((enum cil_flavor *)l_item->data);
-			enum cil_flavor op_flavor = *((enum cil_flavor *)op_item->data);
+			enum cil_flavor l_flavor = (enum cil_flavor)l_item->data;
+			enum cil_flavor op_flavor = (enum cil_flavor)op_item->data;
 
 			switch (op_flavor) {
 			case CIL_EQ:
@@ -1831,7 +1831,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb, const struct cil_db *db,
 				curr_expr->attr = CEXPR_TYPE | CEXPR_XTARGET;
 				break;
 			case CIL_CONS_L1: {
-				enum cil_flavor r_flavor = *((enum cil_flavor *)r_item->data);
+				enum cil_flavor r_flavor = (enum cil_flavor)r_item->data;
 
 				if (r_flavor == CIL_CONS_L2) {
 					curr_expr->attr = CEXPR_L1L2;
@@ -1846,7 +1846,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb, const struct cil_db *db,
 				curr_expr->attr = CEXPR_L2H2;
 				break;
 			case CIL_CONS_H1: {
-				enum cil_flavor r_flavor = *((enum cil_flavor *)r_item->data);
+				enum cil_flavor r_flavor = (enum cil_flavor)r_item->data;
 				if (r_flavor == CIL_CONS_L2) {
 					curr_expr->attr = CEXPR_H1L2;
 				} else {
@@ -1962,7 +1962,7 @@ int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb, const struct cil_db *db,
 			}
 		} else {
 			struct cil_list_item *op_item = curr;
-			enum cil_flavor op_flavor = *((enum cil_flavor *)op_item->data);
+			enum cil_flavor op_flavor = (enum cil_flavor)op_item->data;
 
 			switch (op_flavor) {
 			case CIL_NOT:
