@@ -457,6 +457,28 @@ exit:
 	return rc;
 }
 
+int cil_verify_no_self_reference(struct cil_symtab_datum *datum, struct cil_list *datum_list)
+{
+	struct cil_list_item *i;
+
+	cil_list_for_each(i, datum_list) {
+		if (i->flavor == CIL_DATUM) {
+			struct cil_symtab_datum *d = i->data;
+			if (d == datum) {
+				cil_log(CIL_ERR,"Self-reference found for %s\n",datum->name);
+				return SEPOL_ERR;
+			}
+		} else if (i->flavor == CIL_LIST) {
+			int rc = cil_verify_no_self_reference(datum, i->data);
+			if (rc != SEPOL_OK) {
+				return SEPOL_ERR;
+			}
+		}
+	}
+
+	return SEPOL_OK;
+}
+
 int __cil_verify_ranges(struct cil_list *list)
 {
 	int rc = SEPOL_ERR;

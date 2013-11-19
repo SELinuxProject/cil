@@ -409,6 +409,11 @@ int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args
 		goto exit;
 	}
 
+	rc = cil_verify_no_self_reference(attr_datum, attrtypes->datum_expr);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
 	if (attr->expr_list == NULL) {
 		cil_list_init(&attr->expr_list, CIL_TYPEATTRIBUTE);
 	}
