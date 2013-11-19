@@ -2040,14 +2040,25 @@ int cil_constrain_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 
 	cil_list_for_each(curr, cil_constrain->classperms) {
 		struct cil_classperms *classperms = curr->data;
-		if (classperms->flavor == CIL_CLASSPERMS) {
+		if (classperms->flavor == CIL_CLASSPERMSET) {
+			struct cil_classpermset *cps = classperms->r.classpermset;
+			struct cil_list_item *i = NULL;
+			cil_list_for_each(i, cps->classperms) {
+				struct cil_classperms *cp = i->data;
+				key = ((struct cil_symtab_datum *)cp->r.cp.class)->name;
+				rc = cil_constrain_to_policydb_helper(pdb, db, key, cp->r.cp.perms, expr);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+			}
+		} else if (classperms->flavor == CIL_CLASSPERMS) {
 			key = ((struct cil_symtab_datum *)classperms->r.cp.class)->name;
 
 			rc = cil_constrain_to_policydb_helper(pdb, db, key, classperms->r.cp.perms, expr);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
-		} else if (classperms->flavor == CIL_MAP_CLASSPERMS) {
+		} else { /* CIL_MAP_CLASSPERMS */
 			struct cil_list_item *i = NULL;
 			cil_list_for_each(i, classperms->r.mcp.perms) {
 				struct cil_map_perm *cmp = i->data;
