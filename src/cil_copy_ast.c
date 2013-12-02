@@ -662,21 +662,21 @@ int cil_copy_typeattributeset(struct cil_db *db, void *data, void **copy, __attr
 	return SEPOL_OK;
 }
 
-int cil_copy_typealias(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
+int cil_copy_alias(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
-	struct cil_typealias *orig = data;
-	struct cil_typealias *new = NULL;
+	struct cil_alias *orig = data;
+	struct cil_alias *new = NULL;
 	char *key = orig->datum.name;
 	struct cil_symtab_datum *datum = NULL;
 
 	cil_symtab_get_datum(symtab, key, &datum);
 	if (datum != NULL) {
-		cil_log(CIL_INFO, "cil_copy_typealias: alias cannot be redefined\n");
+		cil_log(CIL_INFO, "cil_copy_alias: alias cannot be redefined\n");
 		return SEPOL_ERR;
 	}
 
-	cil_typealias_init(&new);
-	new->type_str = cil_strdup(orig->type_str);
+	cil_alias_init(&new);
+	new->actual_str = cil_strdup(orig->actual_str);
 	*copy = new;
 
 	return SEPOL_OK;
@@ -833,26 +833,6 @@ int cil_copy_sens(__attribute__((unused)) struct cil_db *db, void *data, void **
 	return SEPOL_OK;
 }
 
-int cil_copy_sensalias(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
-{
-	struct cil_sensalias *orig = data;
-	struct cil_sensalias *new = NULL;
-	char *key = orig->datum.name;
-	struct cil_symtab_datum *datum = NULL;
-
-	cil_symtab_get_datum(symtab, key, &datum);
-	if (datum != NULL) {
-		cil_log(CIL_INFO, "cil_copy_sensalias: sensitivityalias cannot be redefined\n");
-		return SEPOL_ERR;
-	}
-
-	cil_sensalias_init(&new);
-	new->sens_str = cil_strdup(orig->sens_str);
-	*copy = new;
-
-	return SEPOL_OK;
-}
-
 int cil_copy_cat(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
 	struct cil_cat *orig = data;
@@ -867,26 +847,6 @@ int cil_copy_cat(__attribute__((unused)) struct cil_db *db, void *data, void **c
 	} else {
 		*copy = datum;
 	}
-
-	return SEPOL_OK;
-}
-
-int cil_copy_catalias(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
-{
-	struct cil_catalias *orig = data;
-	struct cil_catalias *new = NULL;
-	char *key = orig->datum.name;
-	struct cil_symtab_datum *datum = NULL;
-
-	cil_symtab_get_datum(symtab, key, &datum);
-	if (datum != NULL) {
-		cil_log(CIL_INFO, "cil_copy_catalias: categoryalias cannot be redefined\n");
-		return SEPOL_ERR;
-	}
-
-	cil_catalias_init(&new);
-	new->cat_str = cil_strdup(orig->cat_str);
-	*copy = new;
 
 	return SEPOL_OK;
 }
@@ -1719,7 +1679,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		copy_func = &cil_copy_typeattributeset;
 		break;
 	case CIL_TYPEALIAS:
-		copy_func = &cil_copy_typealias;
+		copy_func = &cil_copy_alias;
 		break;
 	case CIL_ROLETRANSITION:
 		copy_func = &cil_copy_roletransition;
@@ -1746,13 +1706,13 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		copy_func = &cil_copy_sens;
 		break;
 	case CIL_SENSALIAS:
-		copy_func = &cil_copy_sensalias;
+		copy_func = &cil_copy_alias;
 		break;
 	case CIL_CAT:
 		copy_func = &cil_copy_cat;
 		break;
 	case CIL_CATALIAS:
-		copy_func = &cil_copy_catalias;
+		copy_func = &cil_copy_alias;
 		break;
 	case CIL_CATRANGE:
 		copy_func = &cil_copy_catrange;

@@ -123,8 +123,8 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 void cil_destroy_tunif(struct cil_tunableif *tif);
 int cil_gen_condblock(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_condblock(struct cil_condblock *cb);
-int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_typealias(struct cil_typealias *alias);
+int cil_gen_alias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
+void cil_destroy_alias(struct cil_alias *alias);
 int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_typeattributeset(struct cil_typeattributeset *attrtypes);
 int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
@@ -138,12 +138,8 @@ int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_curre
 void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans);
 int cil_gen_sensitivity(struct cil_db *idb, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_sensitivity(struct cil_sens *sens);
-int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_sensalias(struct cil_sensalias *alias);
 int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_category(struct cil_cat *cat);
-int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_catalias(struct cil_catalias *alias);
 int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl);
 int cil_gen_catrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_catrange(struct cil_catrange *catrange);

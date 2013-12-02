@@ -560,8 +560,8 @@ int __cil_type_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int 
 			goto exit;
 		}
 	} else if (node->flavor == CIL_TYPEALIAS) {
-		struct cil_typealias *alias = (struct cil_typealias *)datum;
-		struct cil_type *type = alias->type;
+		struct cil_alias *alias = (struct cil_alias *)datum;
+		struct cil_type *type = alias->actual;
 		ebitmap_init(bitmap);
 		if (ebitmap_set_bit(bitmap, type->value, 1)) {
 			cil_log(CIL_ERR, "Failed to set type bit\n");
@@ -930,8 +930,8 @@ int __cil_role_assign_types(struct cil_role *role, struct cil_symtab_datum *datu
 			goto exit;
 		}
 	} else if (node->flavor == CIL_TYPEALIAS) {
-		struct cil_typealias *typealias = (struct cil_typealias *)datum;
-		struct cil_type *type = typealias->type;
+		struct cil_alias *alias = (struct cil_alias *)datum;
+		struct cil_type *type = alias->actual;
 		if (ebitmap_set_bit(role->types, type->value, 1)) {
 			cil_log(CIL_INFO, "Failed to set bit in role types bitmap\n");
 			goto exit;

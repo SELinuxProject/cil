@@ -368,8 +368,8 @@ int cil_resolve_type_rule(struct cil_tree_node *current, void *extra_args)
 
 	result_node = result_datum->nodes->head->data;
 
-	if (result_node->flavor != CIL_TYPE && result_node->flavor != CIL_TYPEALIAS) {
-		cil_log(CIL_ERR, "Type rule result must be a type or type alias\n");
+	if (result_node->flavor != CIL_TYPE) {
+		cil_log(CIL_ERR, "Type rule result must be a type [%d]\n",result_node->flavor);
 		rc = SEPOL_ERR;
 		goto exit;
 	}
@@ -435,26 +435,25 @@ int cil_reset_typeattributeset(struct cil_tree_node *current, __attribute__((unu
 	return SEPOL_OK;
 }
 
-int cil_resolve_typealias(struct cil_tree_node *current, void *extra_args)
+int cil_resolve_alias(struct cil_tree_node *current, void *extra_args, 
+					  enum cil_flavor flavor)
 {
-	struct cil_typealias *alias = current->data;
-	struct cil_symtab_datum *type_datum = NULL;
-	struct cil_tree_node *type_node = NULL;
+	enum cil_sym_index sym_index;
+	struct cil_symtab_datum *datum = NULL;
+	struct cil_alias *alias = current->data;
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_name(current, alias->type_str, CIL_SYM_TYPES, extra_args, &type_datum);
+	rc = cil_flavor_to_symtab_index(flavor, &sym_index);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	type_node = type_datum->nodes->head->data;
-
-	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
-		cil_log(CIL_ERR, "Typealias must resolve to a type or type alias\n");
-		rc = SEPOL_ERR;
+	rc = cil_resolve_name(current, alias->actual_str, sym_index, extra_args, &datum);
+	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	alias->type = type_datum;
+
+	alias->actual = datum;
 
 	return SEPOL_OK;
 
@@ -462,33 +461,31 @@ exit:
 	return rc;
 }
 
-int cil_resolve_typealias_to_type(struct cil_tree_node *current)
+int cil_resolve_alias_to_actual(struct cil_tree_node *current, enum cil_flavor flavor)
 {
-	int rc = SEPOL_ERR;
+	struct cil_alias *alias = current->data;
+	struct cil_alias *a1 = current->data;
+	struct cil_alias *a2 = current->data;
+	struct cil_tree_node *a1_node = NULL;
 	int steps = 0;
 	int limit = 2;
-	struct cil_typealias *a1 = current->data;
-	struct cil_typealias *a2 = current->data;
-	struct cil_tree_node *a1_node = NULL;
-	enum cil_flavor flavor;
 
 	a1_node = a1->datum.nodes->head->data;
-	flavor = a1_node->flavor;
 
-	while (1) {
-		if (flavor == CIL_TYPE) {
-			break;
-		}
-		a1 = a1->type;
+	while (flavor != a1_node->flavor) {
+		a1 = a1->actual;
 		a1_node = a1->datum.nodes->head->data;
-		flavor = a1_node->flavor;
-
 		steps += 1;
 
 		if (a1 == a2) {
-			cil_log(CIL_ERR, "Circular typealias found: %s\n", a1->datum.name);
-			rc = SEPOL_ERR;
-			goto exit;
+			cil_log(CIL_ERR, "Circular alias found: %s ", a1->datum.name);
+			a1 = a1->actual;
+			while (a1 != a2) {
+				cil_log(CIL_ERR, "%s ", a1->datum.name);
+				a1 = a1->actual;
+			}
+			cil_log(CIL_ERR,"\n");
+			return SEPOL_ERR;
 		}
 
 		if (steps == limit) {
@@ -498,12 +495,9 @@ int cil_resolve_typealias_to_type(struct cil_tree_node *current)
 		}
 	}
 
-	a2 = current->data;
-	a2->type = (struct cil_type *)a1;
+	alias->actual = a1;
 
-	rc = SEPOL_OK;
-exit:
-	return rc;
+	return SEPOL_OK;
 }
 
 int cil_resolve_typebounds(struct cil_tree_node *current, void *extra_args)
@@ -1306,42 +1300,6 @@ exit:
 	return rc;
 }
 
-int cil_resolve_sensalias(struct cil_tree_node *current, void *extra_args)
-{
-	struct cil_sensalias *alias = current->data;
-	struct cil_symtab_datum *sens_datum = NULL;
-	int rc = SEPOL_ERR;
-
-	rc = cil_resolve_name(current, alias->sens_str, CIL_SYM_SENS, extra_args, &sens_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-	alias->sens = (struct cil_sens*)sens_datum;
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int cil_resolve_catalias(struct cil_tree_node *current, void *extra_args)
-{
-	struct cil_catalias *alias = current->data;
-	struct cil_symtab_datum *cat_datum = NULL;
-	int rc = SEPOL_ERR;
-
-	rc = cil_resolve_name(current, alias->cat_str, CIL_SYM_CATS, extra_args, &cat_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-	alias->cat = (struct cil_cat*)cat_datum;
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 struct cil_ordered_list {
 	int merged;
 	struct cil_list *list;
@@ -1862,9 +1820,11 @@ int cil_resolve_senscat(struct cil_tree_node *current, void *extra_args)
 	sens_node = sens_datum->nodes->head->data;
 
 	if (sens_node->flavor == CIL_SENSALIAS) {
-		sens_node = ((struct cil_sensalias*)sens_datum)->sens->datum.nodes->head->data;
+		struct cil_alias *alias = (struct cil_alias *)sens_datum;
+		sens = alias->actual;
+	} else {
+		sens = (struct cil_sens *)sens_datum;
 	}
-	sens = (struct cil_sens*)sens_node->data;
 
 	if (senscat->catset_str != NULL) {
 		rc = cil_resolve_name(current, (char*)senscat->catset_str, CIL_SYM_CATS, extra_args, &cat_datum);
@@ -1920,10 +1880,11 @@ int cil_resolve_level(struct cil_tree_node *current, struct cil_level *level, vo
 	sens_node = sens_datum->nodes->head->data;
 
 	if (sens_node->flavor == CIL_SENSALIAS) {
-		sens_node = ((struct cil_sensalias*)sens_datum)->sens->datum.nodes->head->data;
+		struct cil_alias *alias = (struct cil_alias *)sens_datum;
+		level->sens = alias->actual;
+	} else {
+		level->sens = (struct cil_sens *)sens_datum;
 	}
-
-	level->sens = (struct cil_sens*)sens_node->data;
 
 	if (level->catset_str != NULL || level->catset != NULL) {
 		if (level->catset_str != NULL) {
@@ -3201,6 +3162,32 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			rc = cil_resolve_call2(node, args);
 		}
 		break;
+	case CIL_PASS_ALIAS1:
+		switch (node->flavor) {
+		case CIL_TYPEALIAS:
+			rc = cil_resolve_alias(node, args, CIL_TYPE);
+			break;
+		case CIL_SENSALIAS:
+			rc = cil_resolve_alias(node, args, CIL_SENS);
+			break;
+		case CIL_CATALIAS:
+			rc = cil_resolve_alias(node, args, CIL_CAT);
+			break;
+		}
+		break;
+	case CIL_PASS_ALIAS2:
+		switch (node->flavor) {
+		case CIL_TYPEALIAS:
+			rc = cil_resolve_alias_to_actual(node, CIL_TYPE);
+			break;
+		case CIL_SENSALIAS:
+			rc = cil_resolve_alias_to_actual(node, CIL_SENS);
+			break;
+		case CIL_CATALIAS:
+			rc = cil_resolve_alias_to_actual(node, CIL_CAT);
+			break;
+		}
+		break;
 	case CIL_PASS_MISC1:
 		switch (node->flavor) {
 		case CIL_CATORDER:
@@ -3222,9 +3209,6 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_CATSET:
 			rc = cil_resolve_catset(node, (struct cil_catset*)node->data, args);
 			break;
-		case CIL_SENSALIAS:
-			rc = cil_resolve_sensalias(node, args);
-			break;
 		}
 		break;
 	case CIL_PASS_MISC2:
@@ -3235,18 +3219,12 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_CLASSCOMMON:
 			rc = cil_resolve_classcommon(node, args);
 			break;
-		case CIL_TYPEALIAS:
-			rc = cil_resolve_typealias(node, args);
-			break;
 		}
 		break;
 	case CIL_PASS_MISC3:
 		switch (node->flavor) {
 		case CIL_TYPEATTRIBUTESET:
 			rc = cil_resolve_typeattributeset(node, args);
-			break;
-		case CIL_TYPEALIAS:
-			rc = cil_resolve_typealias_to_type(node);
 			break;
 		case CIL_TYPEBOUNDS:
 			rc = cil_resolve_typebounds(node, args);
@@ -3305,9 +3283,6 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_ROLEBOUNDS:
 			rc = cil_resolve_rolebounds(node, args);
-			break;
-		case CIL_CATALIAS:
-			rc = cil_resolve_catalias(node, args);
 			break;
 		case CIL_LEVEL:
 			rc = cil_resolve_level(node, (struct cil_level*)node->data, args);
@@ -3870,6 +3845,7 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 	struct cil_args_resolve *args = extra_args;
 	struct cil_db *db = NULL;
 	struct cil_call *call = NULL;
+	struct cil_tree_node *node = NULL;
 	struct cil_tree_node *macro = NULL;
 	struct cil_tree_node *namespace = NULL;
 	int rc = SEPOL_ERR;
@@ -3987,13 +3963,28 @@ int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_in
 	if (global_symtab_name != name) {
 		free(global_symtab_name);
 	}
-
-	return SEPOL_OK;
+	
+	rc = SEPOL_OK;
 
 exit:
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_WARN, "Failed to resolve %s in %s statement on line %d of %s\n", 
 			name, cil_node_to_string(ast_node), ast_node->line, ast_node->path);
 	}
+
+	if (*datum != NULL) {
+		/* If this datum is an alias, then return the actual node
+		 * This depends on aliases already being processed
+		 */
+		node = (*datum)->nodes->head->data;
+		if (node->flavor == CIL_TYPEALIAS || node->flavor == CIL_SENSALIAS
+			|| node->flavor == CIL_CATALIAS) {
+			struct cil_alias *alias = (struct cil_alias *)(*datum);
+			if (alias->actual) {
+				*datum = alias->actual;
+			}
+		}
+	}
+
 	return rc;
 }

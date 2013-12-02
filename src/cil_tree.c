@@ -977,12 +977,13 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			cil_log(CIL_INFO, "!=");
 			return;
 		case CIL_TYPEALIAS: {
-			struct cil_typealias *alias = node->data;
+			struct cil_alias *alias = node->data;
 
-			if (alias->type != NULL) {
-				cil_log(CIL_INFO, "TYPEALIAS: %s, type: %s\n", alias->datum.name, ((struct cil_symtab_datum *)alias->type)->name);
+			if (alias->actual != NULL) {
+				struct cil_symtab_datum *datum = alias->actual;
+				cil_log(CIL_INFO, "TYPEALIAS: %s, type: %s\n", alias->datum.name, datum->name);
 			} else {
-				cil_log(CIL_INFO, "TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->type_str);
+				cil_log(CIL_INFO, "TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->actual_str);
 			}
 
 			return;
@@ -1149,11 +1150,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_SENSALIAS: {
-			struct cil_sensalias *alias = node->data;
-			if (alias->sens != NULL) {
-				cil_log(CIL_INFO, "SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens->datum.name);
+			struct cil_alias *alias = node->data;
+			if (alias->actual != NULL) {
+				struct cil_symtab_datum *datum = alias->actual;
+				cil_log(CIL_INFO, "SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, datum->name);
 			} else {
-				cil_log(CIL_INFO, "SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->sens_str);
+				cil_log(CIL_INFO, "SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->actual_str);
 			}
 
 			return;
@@ -1164,12 +1166,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_CATALIAS: {
-			struct cil_catalias *alias = node->data;
-
-			if (alias->cat != NULL) {
-				cil_log(CIL_INFO, "CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat->datum.name);
+			struct cil_alias *alias = node->data;
+			if (alias->actual != NULL) {
+				struct cil_symtab_datum *datum = alias->actual;
+				cil_log(CIL_INFO, "CATEGORYALIAS: %s, category: %s\n", alias->datum.name, datum->name);
 			} else {
-				cil_log(CIL_INFO, "CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->cat_str);
+				cil_log(CIL_INFO, "CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->actual_str);
 			}
 
 			return;

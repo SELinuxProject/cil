@@ -398,12 +398,12 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_typealias *cil_alias = (struct cil_typealias*)datum;
+	struct cil_alias *cil_alias = (struct cil_alias*)datum;
 	type_datum_t *sepol_type = NULL;
 	type_datum_t *sepol_alias = cil_malloc(sizeof(*sepol_alias));
 	type_datum_init(sepol_alias);
 
-	key = ((struct cil_symtab_datum *)cil_alias->type)->name;
+	key = ((struct cil_symtab_datum *)cil_alias->actual)->name;
 	sepol_type = hashtab_search(pdb->p_types.table, key);
 	if (sepol_type == NULL) {
 		rc = SEPOL_ERR;
@@ -693,12 +693,12 @@ int cil_catalias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_catalias *cil_alias = (struct cil_catalias*)datum;
+	struct cil_alias *cil_alias = (struct cil_alias*)datum;
 	cat_datum_t *sepol_cat;
 	cat_datum_t *sepol_alias = cil_malloc(sizeof(*sepol_cat));
 	cat_datum_init(sepol_alias);
 
-	key = cil_alias->cat->datum.name;
+	key = ((struct cil_symtab_datum *)cil_alias->actual)->name;
 	sepol_cat = hashtab_search(pdb->p_cats.table, key);
 	if (sepol_cat == NULL) {
 		goto exit;
@@ -763,13 +763,13 @@ int cil_sensalias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_sensalias *cil_alias = (struct cil_sensalias*)datum;
+	struct cil_alias *cil_alias = (struct cil_alias*)datum;
 	mls_level_t *mls_level = NULL;
 	level_datum_t *sepol_level = NULL;
 	level_datum_t *sepol_alias = cil_malloc(sizeof(*sepol_alias));
 	level_datum_init(sepol_alias);
 
-	key = ((struct cil_symtab_datum *)cil_alias->sens)->name;
+	key = ((struct cil_symtab_datum *)cil_alias->actual)->name;
 	sepol_level = hashtab_search(pdb->p_levels.table, key);
 	if (sepol_level == NULL) {
 		goto exit;

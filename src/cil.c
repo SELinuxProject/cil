@@ -338,7 +338,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		cil_destroy_tunif(*data);
 		break;
 	case CIL_TYPEALIAS:
-		cil_destroy_typealias(*data);
+	case CIL_SENSALIAS:
+	case CIL_CATALIAS:
+		cil_destroy_alias(*data);
 		break;
 	case CIL_TYPEATTRIBUTESET:
 		cil_destroy_typeattributeset(*data);
@@ -361,14 +363,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_SENS:
 		cil_destroy_sensitivity(*data);
 		break;
-	case CIL_SENSALIAS:
-		cil_destroy_sensalias(*data);
-		break;
 	case CIL_CAT:
 		cil_destroy_category(*data);
-		break;
-	case CIL_CATALIAS:
-		cil_destroy_catalias(*data);
 		break;
 	case CIL_CATRANGE:
 		cil_destroy_catrange(*data);
@@ -1575,13 +1571,13 @@ void cil_typeattributeset_init(struct cil_typeattributeset **attrset)
 	(*attrset)->datum_expr = NULL;
 }
 
-void cil_typealias_init(struct cil_typealias **typealias)
+void cil_alias_init(struct cil_alias **alias)
 {
-	*typealias = cil_malloc(sizeof(**typealias));
+	*alias = cil_malloc(sizeof(**alias));
 
-	cil_symtab_datum_init(&(*typealias)->datum);
-	(*typealias)->type_str = NULL;
-	(*typealias)->type = NULL;
+	cil_symtab_datum_init(&(*alias)->datum);
+	(*alias)->actual_str = NULL;
+	(*alias)->actual = NULL;
 }
 
 void cil_typebounds_init(struct cil_typebounds **typebnds)
@@ -1727,24 +1723,6 @@ void cil_roleallow_init(struct cil_roleallow **roleallow)
 	(*roleallow)->src = NULL;
 	(*roleallow)->tgt_str = NULL;
 	(*roleallow)->tgt = NULL;
-}
-
-void cil_sensalias_init(struct cil_sensalias **sensalias)
-{
-	*sensalias = cil_malloc(sizeof(**sensalias));
-
-	cil_symtab_datum_init(&(*sensalias)->datum);
-	(*sensalias)->sens_str = NULL;
-	(*sensalias)->sens = NULL;
-}
-
-void cil_catalias_init(struct cil_catalias **catalias)
-{
-	*catalias = cil_malloc(sizeof(**catalias));
-
-	cil_symtab_datum_init(&(*catalias)->datum);
-	(*catalias)->cat_str = NULL;
-	(*catalias)->cat = NULL;
 }
 
 void cil_catrange_init(struct cil_catrange **catrange)

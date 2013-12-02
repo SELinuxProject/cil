@@ -988,8 +988,8 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		fprintf(file_arr[TYPEATTRTYPES], "type %s;\n", ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	case CIL_TYPEALIAS: {
-		struct cil_typealias *alias = (struct cil_typealias*)current->data;
-		fprintf(file_arr[ALIASES], "typealias %s alias %s;\n", ((struct cil_symtab_datum*)alias->type)->name, ((struct cil_symtab_datum*)current->data)->name);
+		struct cil_alias *alias = current->data;
+		fprintf(file_arr[ALIASES], "typealias %s alias %s;\n", ((struct cil_symtab_datum*)alias->actual)->name, ((struct cil_symtab_datum*)current->data)->name);
 		break;
 	}
 	case CIL_TYPEBOUNDS: {
@@ -1224,11 +1224,17 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 		case CIL_USERROLE:
 			cil_multimap_insert(users, &((struct cil_userrole*)node->data)->user->datum, &((struct cil_userrole*)node->data)->role->datum, CIL_USERROLE, CIL_ROLE);
 			break;
-		case CIL_CATALIAS:
-			cil_multimap_insert(cats, &((struct cil_catalias*)node->data)->cat->datum, node->data, CIL_CAT, CIL_CATALIAS);
+		case CIL_CATALIAS: {
+			struct cil_alias *alias = node->data;
+			struct cil_symtab_datum *datum = alias->actual;
+			cil_multimap_insert(cats, datum, node->data, CIL_CAT, CIL_CATALIAS);
+		}
 			break;
-		case CIL_SENSALIAS:
-			cil_multimap_insert(sens, &((struct cil_sensalias*)node->data)->sens->datum, node->data, CIL_SENS, CIL_SENSALIAS);
+		case CIL_SENSALIAS: {
+			struct cil_alias *alias = node->data;
+			struct cil_symtab_datum *datum = alias->actual;
+			cil_multimap_insert(sens, datum, node->data, CIL_SENS, CIL_SENSALIAS);
+		}
 			break;
 		default:
 			rc = cil_name_to_policy(file_arr, node);

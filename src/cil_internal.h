@@ -58,6 +58,8 @@ enum cil_pass {
 	CIL_PASS_MACRO,
 	CIL_PASS_CALL1,
 	CIL_PASS_CALL2,
+	CIL_PASS_ALIAS1,
+	CIL_PASS_ALIAS2,
 	CIL_PASS_MISC1,
 	CIL_PASS_MLS,
 	CIL_PASS_MISC2,
@@ -480,6 +482,12 @@ struct cil_classcommon {
 	char *common_str;
 };
 
+struct cil_alias {
+	struct cil_symtab_datum datum;
+	char *actual_str;
+	void *actual;
+};
+
 struct cil_sid {
 	struct cil_symtab_datum datum;
 	struct cil_context *context;
@@ -586,12 +594,6 @@ struct cil_typeattributeset {
 	struct cil_list *datum_expr;
 };
 
-struct cil_typealias {
-	struct cil_symtab_datum datum;
-	char *type_str;
-	void *type; /* type or alias */
-};
-
 struct cil_typebounds {
 	char *type_str;
 	char *bounds_str;
@@ -696,12 +698,6 @@ struct cil_sens {
 	uint32_t ordered;
 };
 
-struct cil_sensalias {
-	struct cil_symtab_datum datum;
-	char *sens_str;
-	struct cil_sens *sens;
-};
-
 struct cil_sens_dominates {
 	struct cil_list *sens_list_str;
 };
@@ -709,12 +705,6 @@ struct cil_sens_dominates {
 struct cil_cat {
 	struct cil_symtab_datum datum;
 	uint32_t ordered;
-};
-
-struct cil_catalias {
-	struct cil_symtab_datum datum;
-	char *cat_str;
-	struct cil_cat *cat;
 };
 
 struct cil_catrange {
@@ -982,7 +972,7 @@ void cil_rolebounds_init(struct cil_rolebounds **rolebounds);
 void cil_roletype_init(struct cil_roletype **roletype);
 void cil_typeattribute_init(struct cil_typeattribute **attribute);
 void cil_typeattributeset_init(struct cil_typeattributeset **attrset);
-void cil_typealias_init(struct cil_typealias **typealias);
+void cil_alias_init(struct cil_alias **alias);
 void cil_typebounds_init(struct cil_typebounds **typebnds);
 void cil_typepermissive_init(struct cil_typepermissive **typeperm);
 void cil_name_init(struct cil_name **name);
@@ -997,8 +987,6 @@ void cil_avrule_init(struct cil_avrule **avrule);
 void cil_type_rule_init(struct cil_type_rule **type_rule);
 void cil_roletransition_init(struct cil_roletransition **roletrans);
 void cil_roleallow_init(struct cil_roleallow **role_allow);
-void cil_sensalias_init(struct cil_sensalias **sensalias);
-void cil_catalias_init(struct cil_catalias **catalias);
 void cil_catrange_init(struct cil_catrange **catrange);
 void cil_catset_init(struct cil_catset **catset);
 void cil_senscat_init(struct cil_senscat **senscat);

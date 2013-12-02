@@ -2883,7 +2883,7 @@ void cil_destroy_condblock(struct cil_condblock *cb)
 	free(cb);
 }
 
-int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_alias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
 		SYM_STRING,
@@ -2893,7 +2893,8 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
-	struct cil_typealias *alias = NULL;
+	struct cil_alias *alias = NULL;
+	enum cil_sym_index sym_index;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -2905,44 +2906,46 @@ int cil_gen_typealias(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+	if (flavor == CIL_TYPEALIAS && !strcmp(parse_current->next->data, CIL_KEY_SELF)) {
 		cil_log(CIL_ERR, "The keyword '%s' is reserved\n", CIL_KEY_SELF);
 		rc = SEPOL_ERR;
 		goto exit;
 	}
 
-	cil_typealias_init(&alias);
+	cil_alias_init(&alias);
 
 	key = parse_current->next->next->data;
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_TYPES, CIL_TYPEALIAS);
+	rc = cil_flavor_to_symtab_index(flavor, &sym_index);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	alias->type_str = cil_strdup(parse_current->next->data);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, sym_index, flavor);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	alias->actual_str = cil_strdup(parse_current->next->data);
 
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad typealias declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
-	cil_destroy_typealias(alias);
+	cil_log(CIL_ERR, "Bad %s declaration at line %d of %s\n", 
+			cil_node_to_string(parse_current),parse_current->line, parse_current->path);
+	cil_destroy_alias(alias);
 	cil_clear_node(ast_node);
 	return rc;
 }
 
-void cil_destroy_typealias(struct cil_typealias *alias)
+void cil_destroy_alias(struct cil_alias *alias)
 {
 	if (alias == NULL) {
 		return;
 	}
 
 	cil_symtab_datum_destroy(&alias->datum);
-
-	if (alias->type_str != NULL) {
-		free(alias->type_str);
-	}
+	free(alias->actual_str);
 
 	free(alias);
 }
@@ -3338,64 +3341,6 @@ void cil_destroy_sensitivity(struct cil_sens *sens)
 	free(sens);
 }
 
-int cil_gen_sensalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	char *key = NULL;
-	struct cil_sensalias *alias = NULL;
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	cil_sensalias_init(&alias);
-
-	key = parse_current->next->next->data;
-
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_SENS, CIL_SENSALIAS);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	alias->sens_str = cil_strdup(parse_current->next->data);
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad sensitivityalias declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
-	cil_destroy_sensalias(alias);
-	cil_clear_node(ast_node);
-	return rc;
-}
-
-void cil_destroy_sensalias(struct cil_sensalias *alias)
-{
-	if (alias == NULL) {
-		return;
-	}
-
-	cil_symtab_datum_destroy(&alias->datum);
-
-	if (alias->sens_str != NULL) {
-		free(alias->sens_str);
-	}
-
-	free(alias);
-}
-
 int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -3444,64 +3389,6 @@ void cil_destroy_category(struct cil_cat *cat)
 
 	cil_symtab_datum_destroy(&cat->datum);
 	free(cat);
-}
-
-int cil_gen_catalias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	char *key = NULL;
-	struct cil_catalias *alias = NULL;
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	cil_catalias_init(&alias);
-
-	key = parse_current->next->next->data;
-
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)alias, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CATALIAS);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	alias->cat_str = cil_strdup(parse_current->next->data);
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad categoryalias declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
-	cil_destroy_catalias(alias);
-	cil_clear_node(ast_node);
-	return rc;
-}
-
-void cil_destroy_catalias(struct cil_catalias *alias)
-{
-	if (alias == NULL) {
-		return;
-	}
-
-	cil_symtab_datum_destroy(&alias->datum);
-
-	if (alias->cat_str != NULL) {
-		free(alias->cat_str);
-	}
-
-	free(alias);
 }
 
 int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl)
@@ -5827,7 +5714,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_typeattributeset(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
-		rc = cil_gen_typealias(db, parse_current, ast_node);
+		rc = cil_gen_alias(db, parse_current, ast_node, CIL_TYPEALIAS);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEBOUNDS)) {
 		rc = cil_gen_typebounds(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEPERMISSIVE)) {
@@ -5886,11 +5773,11 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	} else if (!strcmp(parse_current->data, CIL_KEY_SENSITIVITY)) {
 		rc = cil_gen_sensitivity(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_SENSALIAS)) {
-		rc = cil_gen_sensalias(db, parse_current, ast_node);
+		rc = cil_gen_alias(db, parse_current, ast_node, CIL_SENSALIAS);
 	} else if (!strcmp(parse_current->data, CIL_KEY_CATEGORY)) {
 		rc = cil_gen_category(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_CATALIAS)) {
-		rc = cil_gen_catalias(db, parse_current, ast_node);
+		rc = cil_gen_alias(db, parse_current, ast_node, CIL_CATALIAS);
 	} else if (!strcmp(parse_current->data, CIL_KEY_CATRANGE)) {
 		rc = cil_gen_catrange(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
