@@ -18,6 +18,7 @@
 	(classcommon char file)
 
 	(classpermissionset char_w (char (write setattr)))
+	;;(classpermissionset char_w (file (open read getattr)))
 
 	(classmap files (read))
 	(classmapping files read
@@ -210,6 +211,13 @@
 	(mlsconstrain (file (open)) (incomp l1 l2))
 
 	(mlsvalidatetrans file (domby l1 h2))
+
+	(macro test_mapping ((classpermissionset cps))
+	       (allow bin_t auditadm_t cps))
+
+	(call test_mapping ((file (read))))
+	;;(call test_mapping ((files (read))))
+	(call test_mapping (char_w))
 )
 
 (macro all ((type x))
