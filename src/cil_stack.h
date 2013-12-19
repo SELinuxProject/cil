@@ -27,74 +27,36 @@
  * either expressed or implied, of Tresys Technology, LLC.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#ifndef CIL_STACK_H_
+#define CIL_STACK_H_
 
-#include "cil_log.h"
+struct cil_stack {
+	struct cil_stack_item *stack;
+	int size;
+	int pos;
+};
 
-__attribute__((noreturn)) void cil_default_mem_error_handler(void)
-{
-	cil_log(CIL_ERR, "Failed to allocate memory\n");
-	exit(1);
-}
+struct cil_stack_item {
+	enum cil_flavor flavor;
+	void *data;
+};
 
-void (*cil_mem_error_handler)(void) = &cil_default_mem_error_handler;
+#define cil_stack_for_each_starting_at(stack, start, pos, item) \
+	for (pos = start, item = cil_stack_peek_at(stack, pos); item != NULL; pos++, item = cil_stack_peek_at(stack, pos))
 
-void cil_set_mem_error_handler(void (*handler)(void))
-{
-	cil_mem_error_handler = handler;
-}
-
-void *cil_malloc(size_t size)
-{
-	void *mem = malloc(size);
-	if (mem == NULL){
-		if (size == 0) {
-			return NULL;
-		}
-		(*cil_mem_error_handler)();
-	}
-
-	return mem;
-}
-
-void *cil_calloc(size_t num_elements, size_t element_size)
-{
-	void *mem = calloc(num_elements, element_size);
-	if (mem == NULL){
-		(*cil_mem_error_handler)();
-	}
-
-	return mem;
-}
-
-void *cil_realloc(void *ptr, size_t size)
-{
-	void *mem = realloc(ptr, size);
-	if (mem == NULL){
-		if (size == 0) {
-			return NULL;
-		}
-		(*cil_mem_error_handler)();
-	}
-
-	return mem;
-}
+#define cil_stack_for_each(stack, pos, item) cil_stack_for_each_starting_at(stack, 0, pos, item)
 
 
-char *cil_strdup(char *str)
-{
-	char *mem = NULL;
+void cil_stack_init(struct cil_stack **stack);
+void cil_stack_destroy(struct cil_stack **stack);
 
-	if (str == NULL) {
-		return NULL;
-	}
+void cil_stack_empty(struct cil_stack *stack);
+int cil_stack_is_empty(struct cil_stack *stack);
 
-	mem = strdup(str);
-	if (mem == NULL) {
-		(*cil_mem_error_handler)();
-	}
+void cil_stack_push(struct cil_stack *stack, enum cil_flavor flavor, void *data);
+struct cil_stack_item *cil_stack_pop(struct cil_stack *stack);
+struct cil_stack_item *cil_stack_peek(struct cil_stack *stack);
+struct cil_stack_item *cil_stack_peek_at(struct cil_stack *stack, int pos);
 
-	return mem;
-}
+
+#endif

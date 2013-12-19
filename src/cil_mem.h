@@ -33,6 +33,7 @@
 /* Wrapped malloc that catches errors and calls the error callback */
 void *cil_malloc(size_t size);
 void *cil_calloc(size_t num_elements, size_t element_size);
+void *cil_realloc(void *ptr, size_t size);
 char *cil_strdup(char *str);
 void (*cil_mem_error_handler)(void);
 
