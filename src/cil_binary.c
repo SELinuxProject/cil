@@ -1195,7 +1195,7 @@ void __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t 
 	cil_list_prepend(neverallow_data, CIL_LIST_ITEM, new_data);
 }
 
-int __cil_avrule_expand_helper(policydb_t *pdb, struct cil_classperms *cp, uint16_t kind, uint32_t src, uint32_t tgt, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
+int __cil_avrule_expand_helper(policydb_t *pdb, uint16_t kind, uint32_t src, uint32_t tgt, struct cil_classperms *cp, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
@@ -1236,37 +1236,32 @@ exit:
 	return rc;
 }
 
-/* Before inserting, expand out avrule classpermset if it is a map class */
-int __cil_avrule_expand(policydb_t *pdb, uint32_t src, uint32_t tgt, struct cil_avrule *cil_avrule, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
+
+int __cil_avrule_expand(policydb_t *pdb, uint16_t kind, uint32_t src, uint32_t tgt, struct cil_list *classperms, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_ERR;
-	uint16_t kind = cil_avrule->rule_kind;
 	struct cil_list_item *curr;
 
-	cil_list_for_each(curr, cil_avrule->classperms) {
-		struct cil_classperms *classperms = curr->data;
-
-		if (classperms->flavor == CIL_CLASSPERMSET) {
-			struct cil_classpermset *cps = classperms->r.classpermset;
-			struct cil_list_item *i = NULL;
-			cil_list_for_each(i, cps->classperms) {
-				rc = __cil_avrule_expand_helper(pdb, i->data, kind, src, tgt, neverallows, cond_node, cond_flavor);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
+	cil_list_for_each(curr, classperms) {
+		struct cil_classperms *cp = curr->data;
+		if (cp->flavor == CIL_CLASSPERMSET) {
+			struct cil_classpermset *cps = cp->r.classpermset;
+			rc = __cil_avrule_expand(pdb, kind, src, tgt, cps->classperms, neverallows, cond_node, cond_flavor);
+			if (rc != SEPOL_OK) {
+				goto exit;
 			}
-		} else if (classperms->flavor == CIL_CLASSPERMS) {
-			rc = __cil_avrule_expand_helper(pdb, classperms, kind, src, tgt, neverallows, cond_node, cond_flavor);
+		} else if (cp->flavor == CIL_CLASSPERMS) {
+			rc = __cil_avrule_expand_helper(pdb, kind, src, tgt, cp, neverallows, cond_node, cond_flavor);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}	
 		} else { /* CIL_MAP_CLASSPEMRS */
 			struct cil_list_item *i = NULL;
-			cil_list_for_each(i, classperms->r.mcp.perms) {
+			cil_list_for_each(i, cp->r.mcp.perms) {
 				struct cil_map_perm *cmp = i->data;
 				struct cil_list_item *j = NULL;
 				cil_list_for_each(j, cmp->classperms) {
-					rc = __cil_avrule_expand_helper(pdb, j->data, kind, src, tgt, neverallows, cond_node, cond_flavor);
+					rc = __cil_avrule_expand_helper(pdb, kind, src, tgt, j->data, neverallows, cond_node, cond_flavor);
 					if (rc != SEPOL_OK) {
 						goto exit;
 					}
@@ -1288,6 +1283,8 @@ int __cil_avrule_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_a
 	char *tgt = NULL;
 	type_datum_t *sepol_src = NULL;
 	type_datum_t *sepol_tgt = NULL;
+	uint16_t kind = cil_avrule->rule_kind;
+	struct cil_list *classperms = cil_avrule->classperms;
 	ebitmap_t types;
 	ebitmap_init(&types);
 
@@ -1324,13 +1321,13 @@ int __cil_avrule_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_a
 					goto exit;
 				}
 
-				rc = __cil_avrule_expand(pdb, sepol_type->s.value, sepol_type->s.value, cil_avrule, neverallows, cond_node, cond_flavor);
+				rc = __cil_avrule_expand(pdb, kind, sepol_type->s.value, sepol_type->s.value, classperms, neverallows, cond_node, cond_flavor);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
 			}
 		} else {
-			rc = __cil_avrule_expand(pdb, sepol_src->s.value, sepol_src->s.value, cil_avrule, neverallows, cond_node, cond_flavor);
+			rc = __cil_avrule_expand(pdb, kind, sepol_src->s.value, sepol_src->s.value, classperms, neverallows, cond_node, cond_flavor);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1342,7 +1339,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_a
 			goto exit;
 		}
 
-		rc = __cil_avrule_expand(pdb, sepol_src->s.value, sepol_tgt->s.value, cil_avrule, neverallows, cond_node, cond_flavor);
+		rc = __cil_avrule_expand(pdb, kind, sepol_src->s.value, sepol_tgt->s.value, classperms, neverallows, cond_node, cond_flavor);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
