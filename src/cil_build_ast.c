@@ -5224,30 +5224,42 @@ void cil_destroy_args(struct cil_args *args)
 		return;
 	}
 
-	args->param_str = NULL;
-	if (args->arg_str == NULL) {
-		if (args->arg != NULL && args->arg->nodes != NULL && args->arg->nodes->head != NULL) {
-			switch (args->arg->nodes->head->flavor) {
-			struct cil_tree_node *node = args->arg->nodes->head->data;
-			case CIL_LEVEL:
-				cil_tree_node_destroy(&node);
-				args->arg = NULL;
-				break;
-			case CIL_CATSET:
-				cil_tree_node_destroy(&node);
-				args->arg = NULL;
-				break;
-			case CIL_IPADDR:
-				cil_tree_node_destroy(&node);
-				args->arg = NULL;
-				break;
-			}
+	if (args->arg_str != NULL) {
+		free(args->arg_str);
+		args->arg_str = NULL;
+	} else if (args->arg != NULL) {
+		struct cil_tree_node *node = args->arg->nodes->head->data;
+		switch (args->flavor) {
+		case CIL_NAME:
+			break;
+		case CIL_CATSET:
+			cil_destroy_catset((struct cil_catset *)args->arg);
+			free(node);
+			break;
+		case CIL_LEVEL:
+			cil_destroy_level((struct cil_level *)args->arg);
+			free(node);
+			break;
+		case CIL_LEVELRANGE:
+			cil_destroy_levelrange((struct cil_levelrange *)args->arg);
+			free(node);
+			break;
+		case CIL_IPADDR:
+			cil_destroy_ipaddr((struct cil_ipaddr *)args->arg);
+			free(node);
+			break;
+		case CIL_CLASSPERMSET:
+			cil_destroy_classpermset((struct cil_classpermset *)args->arg);
+			free(node);
+			break;
+		default:
+			cil_log(CIL_ERR, "Destroying arg with the unexpected flavor=%d\n",args->flavor);
+			break;
 		}
 	}
 
-	if (args->arg_str != NULL) {
-		free(args->arg_str);
-	}
+	args->param_str = NULL;
+	args->arg = NULL;
 
 	free(args);
 }

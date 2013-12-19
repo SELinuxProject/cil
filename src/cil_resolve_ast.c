@@ -2558,6 +2558,8 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 		cil_list_init(&new_call->args, CIL_LIST_ITEM);
 
 		cil_list_for_each(item, new_call->macro->params) {
+			enum cil_flavor flavor = ((struct cil_param*)item->data)->flavor;
+
 			if (pc == NULL) {
 				cil_log(CIL_ERR, "Missing arguments (%s, line: %d)\n", current->path, current->line);
 				rc = SEPOL_ERR;
@@ -2570,7 +2572,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 
 			cil_args_init(&new_arg);
 
-			switch (((struct cil_param*)item->data)->flavor) {
+			switch (flavor) {
 			case CIL_NAME: {
 				struct cil_name *name;
 				name = __cil_insert_name(args->db, pc->data, current);
@@ -2715,8 +2717,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 					cil_tree_node_init(&cps_node);
 					cps_node->flavor = CIL_CLASSPERMSET;
 					cps_node->data = cps;
-					cil_list_append(((struct cil_symtab_datum*)cps)->nodes, 
-									CIL_LIST_ITEM, cps_node);
+					cil_list_append(cps->datum.nodes, CIL_LIST_ITEM, cps_node);
 					new_arg->arg = (struct cil_symtab_datum*)cps;
 				} else {
 					new_arg->arg_str = cil_strdup(pc->data);
@@ -2730,7 +2731,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 				goto exit;
 			}
 			new_arg->param_str = ((struct cil_param*)item->data)->str;
-			new_arg->flavor = ((struct cil_param*)item->data)->flavor;
+			new_arg->flavor = flavor;
 
 			cil_list_append(new_call->args, CIL_ARGS, new_arg);
 
