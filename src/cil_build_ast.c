@@ -595,7 +595,7 @@ void cil_destroy_classperms(struct cil_classperms *cp)
 		cil_list_destroy(&cp->u.cp.perm_strs, CIL_TRUE);
 		cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
 		break;
-	case CIL_MAP_CLASS:
+	case CIL_MAP_CLASSPERMS:
 		free(cp->u.cp.class_str);
 		cil_list_destroy(&cp->u.cp.perm_strs, CIL_TRUE);
 		cil_list_destroy(&cp->r.mcp.perms, CIL_FALSE);

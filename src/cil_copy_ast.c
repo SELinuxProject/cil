@@ -177,19 +177,19 @@ void cil_copy_classperms(struct cil_classperms *orig, struct cil_classperms **ne
 	} else {
 		(*new)->u.cp.class_str = cil_strdup(orig->u.cp.class_str);
 		cil_copy_list(orig->u.cp.perm_strs, &((*new)->u.cp.perm_strs));
-		if (orig->flavor == CIL_MAP_CLASS) {
-			if (orig->r.mcp.class != NULL) {
-				cil_log(CIL_ERR, "Did not expect a map class datum\n");
-			}
-			if (orig->r.mcp.perms != NULL) {
-				cil_log(CIL_ERR, "Did not expect a map perms datums\n");
-			}
-		} else {
+		if (orig->flavor == CIL_CLASSPERMS) {
 			if (orig->r.cp.class != NULL) {
 				cil_log(CIL_ERR, "Did not expect a class datum\n");
 			}
 			if (orig->r.cp.perms != NULL) {
 				cil_log(CIL_ERR, "Did not expect a perms datums\n");
+			}
+		} else {
+			if (orig->r.mcp.class != NULL) {
+				cil_log(CIL_ERR, "Did not expect a map class datum\n");
+			}
+			if (orig->r.mcp.perms != NULL) {
+				cil_log(CIL_ERR, "Did not expect a map perms datums\n");
 			}
 		}
 	}

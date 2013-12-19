@@ -1217,7 +1217,7 @@ int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *fini
 
 				cp->r.cp.perms = new_list;
 			} else {
-				/* CIL_MAP_CLASS */
+				/* CIL_MAP_CLASSPERMS */
 				struct cil_map_class *class = cp->r.mcp.class;
 				struct cil_list *new_list = NULL;
 
