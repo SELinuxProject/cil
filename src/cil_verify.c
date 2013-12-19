@@ -79,22 +79,22 @@ int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[]
 	struct cil_tree_node *c = parse_current;
 	int i = 0;
 	while (i < len) {
-		if ((s[i] & SYM_END) && c == NULL) {
+		if ((s[i] & CIL_SYN_END) && c == NULL) {
 			break;
 		}
 
-		if (s[i] & SYM_N_LISTS || s[i] & SYM_N_STRINGS) {
+		if (s[i] & CIL_SYN_N_LISTS || s[i] & CIL_SYN_N_STRINGS) {
 			if (c == NULL) {
 				if (num_extras > 0) {
 					break;
 				} else {
 					goto exit;
 				}
-			} else if ((s[i] & SYM_N_LISTS) && (c->data == NULL && c->cl_head != NULL)) {
+			} else if ((s[i] & CIL_SYN_N_LISTS) && (c->data == NULL && c->cl_head != NULL)) {
 				c = c->next;
 				num_extras++;
 				continue;
-			} else if ((s[i] & SYM_N_STRINGS) && (c->data != NULL && c->cl_head == NULL)) {
+			} else if ((s[i] & CIL_SYN_N_STRINGS) && (c->data != NULL && c->cl_head == NULL)) {
 				c = c->next;
 				num_extras++;
 				continue;
@@ -105,7 +105,7 @@ int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[]
 			goto exit;
 		}
 
-		if (s[i] & SYM_STRING) {
+		if (s[i] & CIL_SYN_STRING) {
 			if (c->data != NULL && c->cl_head == NULL) {
 				c = c->next;
 				i++;
@@ -113,7 +113,7 @@ int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[]
 			}
 		}
 
-		if (s[i] & SYM_LIST) {
+		if (s[i] & CIL_SYN_LIST) {
 			if (c->data == NULL && c->cl_head != NULL) {
 				c = c->next;
 				i++;
@@ -121,7 +121,7 @@ int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[]
 			}
 		}
 
-		if (s[i] & SYM_EMPTY_LIST) {
+		if (s[i] & CIL_SYN_EMPTY_LIST) {
 			if (c->data == NULL && c->cl_head == NULL) {
 				c = c->next;
 				i++;
@@ -370,9 +370,9 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_fl
 	if (expr_flavor == CIL_CONSTRAIN || expr_flavor == CIL_MLSCONSTRAIN || expr_flavor == CIL_VALIDATETRANS || expr_flavor == CIL_MLSVALIDATETRANS) {
 		if (op_flavor == CIL_NOT) {
 			enum cil_syntax syntax[] = {
-				SYM_STRING,
-				SYM_LIST,
-				SYM_END
+				CIL_SYN_STRING,
+				CIL_SYN_LIST,
+				CIL_SYN_END
 			};
 			int syntax_len = sizeof(syntax)/sizeof(*syntax);
 			rc = __cil_verify_syntax(node, syntax, syntax_len);
@@ -381,10 +381,10 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_fl
 			}
 		} else if (op_flavor == CIL_AND || op_flavor == CIL_OR) {
 			enum cil_syntax syntax[] = {
-				SYM_STRING,
-				SYM_LIST,
-				SYM_LIST,
-				SYM_END
+				CIL_SYN_STRING,
+				CIL_SYN_LIST,
+				CIL_SYN_LIST,
+				CIL_SYN_END
 			};
 			int syntax_len = sizeof(syntax)/sizeof(*syntax);
 			rc = __cil_verify_syntax(node, syntax, syntax_len);
@@ -393,10 +393,10 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_fl
 			}
 		} else {
 			enum cil_syntax syntax[] = {
-				SYM_STRING,
-				SYM_STRING,
-				SYM_STRING,
-				SYM_END
+				CIL_SYN_STRING,
+				CIL_SYN_STRING,
+				CIL_SYN_STRING,
+				CIL_SYN_END
 			};
 			int syntax_len = sizeof(syntax)/sizeof(*syntax);
 			rc = __cil_verify_syntax(node, syntax, syntax_len);
@@ -407,8 +407,8 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_fl
 	} else {
 		if (op_flavor == CIL_STAR) {
 			enum cil_syntax syntax[] = {
-				SYM_STRING,
-				SYM_END
+				CIL_SYN_STRING,
+				CIL_SYN_END
 			};
 			int syntax_len = sizeof(syntax)/sizeof(*syntax);
 			rc = __cil_verify_syntax(node, syntax, syntax_len);
@@ -417,9 +417,9 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_fl
 			}
 		} else if (op_flavor == CIL_NOT) {
 			enum cil_syntax syntax[] = {
-				SYM_STRING,
-				SYM_STRING | SYM_LIST,
-				SYM_END
+				CIL_SYN_STRING,
+				CIL_SYN_STRING | CIL_SYN_LIST,
+				CIL_SYN_END
 			};
 			int syntax_len = sizeof(syntax)/sizeof(*syntax);
 			rc = __cil_verify_syntax(node, syntax, syntax_len);
@@ -428,8 +428,8 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_fl
 			}
 		} else if (op_flavor == CIL_NONE) {
 			enum cil_syntax syntax[] = {
-				SYM_N_STRINGS | SYM_N_LISTS,
-				SYM_END
+				CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS,
+				CIL_SYN_END
 			};
 			int syntax_len = sizeof(syntax)/sizeof(*syntax);
 			rc = __cil_verify_syntax(node, syntax, syntax_len);
@@ -438,10 +438,10 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_fl
 			}
 		} else {
 			enum cil_syntax syntax[] = {
-				SYM_STRING,
-				SYM_STRING | SYM_LIST,
-				SYM_STRING | SYM_LIST,
-				SYM_END
+				CIL_SYN_STRING,
+				CIL_SYN_STRING | CIL_SYN_LIST,
+				CIL_SYN_STRING | CIL_SYN_LIST,
+				CIL_SYN_END
 			};
 			int syntax_len = sizeof(syntax)/sizeof(*syntax);
 			rc = __cil_verify_syntax(node, syntax, syntax_len);

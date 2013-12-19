@@ -123,9 +123,9 @@ void cil_clear_node(struct cil_tree_node *ast_node)
 int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint16_t is_abstract)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_N_LISTS | SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_N_LISTS | CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -177,9 +177,9 @@ void cil_destroy_block(struct cil_block *block)
 int cil_gen_blockinherit(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_blockinherit *inherit = NULL;
@@ -226,9 +226,9 @@ void cil_destroy_blockinherit(struct cil_blockinherit *inherit)
 int cil_gen_blockabstract(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_blockabstract *abstract = NULL;
@@ -275,9 +275,9 @@ void cil_destroy_blockabstract(struct cil_blockabstract *abstract)
 int cil_gen_in(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_N_LISTS
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_N_LISTS
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -325,10 +325,10 @@ void cil_destroy_in(struct cil_in *in)
 int cil_gen_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST | SYM_END,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST | CIL_SYN_END,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -509,8 +509,8 @@ int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perms, in
 {
 	int rc = SEPOL_ERR;
 	enum cil_syntax syntax[] = {
-		SYM_N_STRINGS | SYM_N_LISTS,
-		SYM_END
+		CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
@@ -552,9 +552,9 @@ int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classper
 	} else {
 		struct cil_tree_node *class_node = parse_current;
 		enum cil_syntax syntax[] = {
-			SYM_STRING,
-			SYM_LIST,
-			SYM_END
+			CIL_SYN_STRING,
+			CIL_SYN_LIST,
+			CIL_SYN_END
 		};
 		int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
@@ -613,7 +613,7 @@ int cil_fill_classperms_list(struct cil_tree_node *parse_current, struct cil_lis
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *curr;
 	enum cil_syntax syntax[] = {
-		SYM_STRING | SYM_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
@@ -697,10 +697,10 @@ int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current,
 	char *key = NULL;
 	struct cil_classpermset *cps = NULL;
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
@@ -752,10 +752,10 @@ void cil_destroy_classpermset(struct cil_classpermset *cps)
 int cil_gen_map_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -812,10 +812,10 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 	int rc = SEPOL_ERR;
 	struct cil_classmapping *mapping = NULL;
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_N_STRINGS | SYM_N_LISTS,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS,
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
@@ -867,10 +867,10 @@ void cil_destroy_classmapping(struct cil_classmapping *mapping)
 int cil_gen_common(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -925,10 +925,10 @@ void cil_destroy_common(struct cil_common *common)
 int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_classcommon *clscom = NULL;
@@ -981,9 +981,9 @@ void cil_destroy_classcommon(struct cil_classcommon *clscom)
 int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -1031,10 +1031,10 @@ void cil_destroy_sid(struct cil_sid *sid)
 int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_sidcontext *sidcon = NULL;
@@ -1098,9 +1098,9 @@ void cil_destroy_sidcontext(struct cil_sidcontext *sidcon)
 int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -1149,10 +1149,10 @@ void cil_destroy_user(struct cil_user *user)
 int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_userlevel *usrlvl = NULL;
@@ -1216,10 +1216,10 @@ void cil_destroy_userlevel(struct cil_userlevel *usrlvl)
 int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_userrange *userrange = NULL;
@@ -1283,10 +1283,10 @@ void cil_destroy_userrange(struct cil_userrange *userrange)
 int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_userbounds *userbnds = NULL;
@@ -1338,10 +1338,10 @@ void cil_destroy_userbounds(struct cil_userbounds *userbnds)
 int cil_gen_userprefix(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_userprefix *userprefix = NULL;
@@ -1385,11 +1385,11 @@ void cil_destroy_userprefix(struct cil_userprefix *userprefix)
 int cil_gen_selinuxuser(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_selinuxuser *selinuxuser = NULL;
@@ -1434,10 +1434,10 @@ exit:
 int cil_gen_selinuxuserdefault(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_selinuxuser *selinuxuser = NULL;
@@ -1493,9 +1493,9 @@ void cil_destroy_selinuxuser(struct cil_selinuxuser *selinuxuser)
 int cil_gen_role(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -1545,10 +1545,10 @@ void cil_destroy_role(struct cil_role *role)
 int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_roletype *roletype = NULL;
@@ -1600,10 +1600,10 @@ void cil_destroy_roletype(struct cil_roletype *roletype)
 int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_userrole *userrole = NULL;
@@ -1655,12 +1655,12 @@ void cil_destroy_userrole(struct cil_userrole *userrole)
 int cil_gen_roletransition(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_roletransition *roletrans = NULL;
@@ -1722,10 +1722,10 @@ void cil_destroy_roletransition(struct cil_roletransition *roletrans)
 int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_roleallow *roleallow = NULL;
@@ -1777,9 +1777,9 @@ void cil_destroy_roleallow(struct cil_roleallow *roleallow)
 int cil_gen_roleattribute(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -1847,10 +1847,10 @@ void cil_destroy_roleattribute(struct cil_roleattribute *attr)
 int cil_gen_roleattributeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_roleattributeset *attrset = NULL;
@@ -1902,10 +1902,10 @@ void cil_destroy_roleattributeset(struct cil_roleattributeset *attrset)
 int cil_gen_rolebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_rolebounds *rolebnds = NULL;
@@ -1957,11 +1957,11 @@ void cil_destroy_rolebounds(struct cil_rolebounds *rolebnds)
 int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_avrule *rule = NULL;
@@ -2022,12 +2022,12 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_type_rule *rule = NULL;
@@ -2090,9 +2090,9 @@ void cil_destroy_type_rule(struct cil_type_rule *rule)
 int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -2145,9 +2145,9 @@ void cil_destroy_type(struct cil_type *type)
 int cil_gen_typeattribute(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -2216,10 +2216,10 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -2277,10 +2277,10 @@ void cil_destroy_bool(struct cil_bool *boolean)
 int cil_gen_tunable(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -2682,11 +2682,11 @@ exit:
 int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_LIST,
-		SYM_LIST | SYM_END,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_LIST,
+		CIL_SYN_LIST | CIL_SYN_END,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_booleanif *bif = NULL;
@@ -2762,11 +2762,11 @@ void cil_destroy_boolif(struct cil_booleanif *bif)
 int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_LIST,
-		SYM_LIST | SYM_END,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_LIST,
+		CIL_SYN_LIST | CIL_SYN_END,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_tunableif *tif = NULL;
@@ -2842,8 +2842,8 @@ void cil_destroy_tunif(struct cil_tunableif *tif)
 int cil_gen_condblock(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_N_LISTS
+		CIL_SYN_STRING,
+		CIL_SYN_N_LISTS
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -2887,10 +2887,10 @@ void cil_destroy_condblock(struct cil_condblock *cb)
 int cil_gen_alias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -2954,10 +2954,10 @@ void cil_destroy_alias(struct cil_alias *alias)
 int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_typeattributeset *attrset = NULL;
@@ -3008,10 +3008,10 @@ void cil_destroy_typeattributeset(struct cil_typeattributeset *attrset)
 int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_typebounds *typebnds = NULL;
@@ -3063,9 +3063,9 @@ void cil_destroy_typebounds(struct cil_typebounds *typebnds)
 int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_typepermissive *typeperm = NULL;
@@ -3113,13 +3113,13 @@ int cil_gen_typetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 {
 	int rc = SEPOL_ERR;
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING|SYM_END,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING|CIL_SYN_END,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *s1, *s2, *s3, *s4, *s5;
@@ -3213,12 +3213,12 @@ void cil_destroy_typetransition(struct cil_nametypetransition *nametypetrans)
 int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_rangetransition *rangetrans = NULL;
@@ -3294,9 +3294,9 @@ void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans)
 int cil_gen_sensitivity(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -3345,9 +3345,9 @@ void cil_destroy_sensitivity(struct cil_sens *sens)
 int cil_gen_category(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -3397,8 +3397,8 @@ int cil_set_to_list(struct cil_tree_node *parse_current, struct cil_list *ast_cl
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *curr = parse_current;
 	enum cil_syntax syntax[] = {
-		SYM_N_STRINGS,
-		SYM_END
+		CIL_SYN_N_STRINGS,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
  
@@ -3420,10 +3420,10 @@ exit:
 int cil_gen_catrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -3485,10 +3485,10 @@ void cil_destroy_catrange(struct cil_catrange *catrange)
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -3550,9 +3550,9 @@ void cil_destroy_catset(struct cil_catset *catset)
 int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_catorder *catorder = NULL;
@@ -3603,9 +3603,9 @@ void cil_destroy_catorder(struct cil_catorder *catorder)
 int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_sens_dominates *dom = NULL;
@@ -3657,9 +3657,9 @@ void cil_destroy_dominance(struct cil_sens_dominates *dom)
 int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_senscat *senscat = NULL;
@@ -3725,10 +3725,10 @@ void cil_destroy_senscat(struct cil_senscat *senscat)
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING|SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING|CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -3795,9 +3795,9 @@ void cil_destroy_level(struct cil_level *level)
 int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlrange)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -3842,10 +3842,10 @@ exit:
 int cil_gen_levelrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -3911,10 +3911,10 @@ void cil_destroy_levelrange(struct cil_levelrange *lvlrange)
 int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_constrain *cons = NULL;
@@ -3969,10 +3969,10 @@ void cil_destroy_constrain(struct cil_constrain *cons)
 int cil_gen_validatetrans(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_validatetrans *validtrans = NULL;
@@ -4027,11 +4027,11 @@ void cil_destroy_validatetrans(struct cil_validatetrans *validtrans)
 int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4072,10 +4072,10 @@ exit:
 int cil_gen_context(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -4147,12 +4147,12 @@ void cil_destroy_context(struct cil_context *context)
 int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST | SYM_EMPTY_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST | CIL_SYN_EMPTY_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4250,11 +4250,11 @@ void cil_destroy_filecon(struct cil_filecon *filecon)
 int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4351,11 +4351,11 @@ void cil_destroy_portcon(struct cil_portcon *portcon)
 int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4447,11 +4447,11 @@ void cil_destroy_nodecon(struct cil_nodecon *nodecon)
 int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4521,11 +4521,11 @@ void cil_destroy_genfscon(struct cil_genfscon *genfscon)
 int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4606,10 +4606,10 @@ void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 int cil_gen_pirqcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4672,10 +4672,10 @@ void cil_destroy_pirqcon(struct cil_pirqcon *pirqcon)
 int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4760,10 +4760,10 @@ void cil_destroy_iomemcon(struct cil_iomemcon *iomemcon)
 int cil_gen_ioportcon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4848,10 +4848,10 @@ void cil_destroy_ioportcon(struct cil_ioportcon *ioportcon)
 int cil_gen_pcidevicecon(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -4914,11 +4914,11 @@ void cil_destroy_pcidevicecon(struct cil_pcidevicecon *pcidevicecon)
 int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING | SYM_LIST,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *type = NULL;
@@ -5013,10 +5013,10 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	struct cil_macro *macro = NULL;
 	struct cil_tree_node *macro_content = NULL;
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST | SYM_EMPTY_LIST,
-		SYM_N_LISTS | SYM_END,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST | CIL_SYN_EMPTY_LIST,
+		CIL_SYN_N_LISTS | CIL_SYN_END,
 	};
 	int syntax_len = sizeof(syntax)/ sizeof(*syntax);
 
@@ -5036,9 +5036,9 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	struct cil_tree_node *current_item = parse_current->next->next->cl_head;
 	while (current_item != NULL) {
 		enum cil_syntax param_syntax[] = {
-			SYM_STRING,
-			SYM_STRING,
-			SYM_END
+			CIL_SYN_STRING,
+			CIL_SYN_STRING,
+			CIL_SYN_END
 		};
 		int param_syntax_len = sizeof(param_syntax)/sizeof(*param_syntax);
 		char *kind = NULL;
@@ -5157,10 +5157,10 @@ void cil_destroy_macro(struct cil_macro *macro)
 int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_LIST | SYM_END,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_LIST | CIL_SYN_END,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	struct cil_call *call = NULL;
@@ -5268,9 +5268,9 @@ void cil_destroy_args(struct cil_args *args)
 int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_N_LISTS | SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_N_LISTS | CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -5317,9 +5317,9 @@ void cil_destroy_optional(struct cil_optional *optional)
 int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -5366,10 +5366,10 @@ void cil_destroy_policycap(struct cil_policycap *polcap)
 int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	char *key = NULL;
@@ -5488,9 +5488,9 @@ int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
 		level->sens_str = cil_strdup(sens->data);
 	} else {
 		enum cil_syntax syntax[] = {
-			SYM_STRING,
-			SYM_STRING | SYM_LIST | SYM_END,
-			SYM_END
+			CIL_SYN_STRING,
+			CIL_SYN_STRING | CIL_SYN_LIST | CIL_SYN_END,
+			CIL_SYN_END
 		};
 		int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
@@ -5526,9 +5526,9 @@ exit:
 int cil_fill_catrange(struct cil_tree_node *cats, struct cil_catrange *catrange)
 {
 	enum cil_syntax syntax[] = {
-		SYM_STRING,
-		SYM_STRING,
-		SYM_END
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 	int rc = SEPOL_ERR;
@@ -5555,7 +5555,7 @@ exit:
 int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset)
 {
 	enum cil_syntax syntax[] = {
-		SYM_N_STRINGS | SYM_N_LISTS
+		CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS,
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 

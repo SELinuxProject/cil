@@ -38,12 +38,12 @@
 #include "cil_list.h"
 
 enum cil_syntax {
-	SYM_STRING = 1,
-	SYM_LIST = 2,
-	SYM_EMPTY_LIST = 4,
-	SYM_N_LISTS = 8,
-	SYM_N_STRINGS = 16,
-	SYM_END = 32
+	CIL_SYN_STRING      = 1 << 0,
+	CIL_SYN_LIST        = 1 << 1,
+	CIL_SYN_EMPTY_LIST  = 1 << 2,
+	CIL_SYN_N_LISTS     = 1 << 3,
+	CIL_SYN_N_STRINGS   = 1 << 4,
+	CIL_SYN_END         = 1 << 5
 };
 
 struct cil_args_verify {
