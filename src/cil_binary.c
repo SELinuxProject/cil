@@ -39,6 +39,7 @@
 #include <sepol/policydb/flask.h>
 
 #include "cil_internal.h"
+#include "cil_flavor.h"
 #include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
@@ -3034,6 +3035,8 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_ROLEALLOW:
 			rc = cil_roleallow_to_policydb(pdb, db, node->data);
+			break;
+		default:
 			break;
 		}
 	default:

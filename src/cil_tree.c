@@ -32,6 +32,7 @@
 #include <sepol/policydb/conditional.h>
 
 #include "cil_internal.h"
+#include "cil_flavor.h"
 #include "cil_log.h"
 #include "cil_tree.h"
 #include "cil_list.h"
@@ -1573,6 +1574,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 						case CIL_CATSET: cil_log(CIL_INFO, "categoryset:"); break;
 						case CIL_LEVEL: cil_log(CIL_INFO, "level:"); break;
 						case CIL_CLASS: cil_log(CIL_INFO, "class:"); break;
+						default: break;
 						}
 						cil_log(CIL_INFO, "%s ", ((struct cil_args*)item->data)->arg_str);
 					}

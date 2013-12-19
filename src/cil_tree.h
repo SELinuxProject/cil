@@ -32,6 +32,7 @@
 
 #include <stdint.h>
 
+#include "cil_flavor.h"
 #include "cil_list.h"
 
 struct cil_tree {
@@ -43,7 +44,7 @@ struct cil_tree_node {
 	struct cil_tree_node *cl_head;		//Head of child_list
 	struct cil_tree_node *cl_tail;		//Tail of child_list
 	struct cil_tree_node *next;		//Each element in the list points to the next element
-	uint32_t flavor;
+	enum cil_flavor flavor;
 	uint32_t line;
 	char *path;
 	void *data;

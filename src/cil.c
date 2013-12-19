@@ -34,6 +34,7 @@
 #include <sepol/policydb/symtab.h>
 
 #include "cil_internal.h"
+#include "cil_flavor.h"
 #include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
@@ -589,6 +590,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 			return CIL_KEY_DONTAUDIT;
 		case CIL_AVRULE_NEVERALLOW:
 			return CIL_KEY_NEVERALLOW;
+		default:
+			break;
 		}
 		break;
 	case CIL_BLOCKINHERIT:
@@ -641,6 +644,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 			return CIL_KEY_TYPEMEMBER;
 		case CIL_TYPE_CHANGE:
 			return CIL_KEY_TYPECHANGE;
+		default:
+			break;
 		}
 		break;
 	case CIL_TYPEBOUNDS:
@@ -781,6 +786,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_POLICYCAP;
 	case CIL_IPADDR:
 		return CIL_KEY_IPADDR;
+	default:
+		break;
 	}
 
 	return "<unknown>";

@@ -34,7 +34,6 @@
 void *cil_malloc(size_t size);
 void *cil_calloc(size_t num_elements, size_t element_size);
 char *cil_strdup(char *str);
-unsigned *cil_flavordup(unsigned flavor);
 void (*cil_mem_error_handler)(void);
 
 #endif /* CIL_MEM_H_ */

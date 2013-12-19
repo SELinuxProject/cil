@@ -35,6 +35,7 @@
 #include <sepol/policydb/conditional.h>
 
 #include "cil_internal.h"
+#include "cil_flavor.h"
 #include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"

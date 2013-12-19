@@ -30,6 +30,7 @@
 #include <stdlib.h>
 
 #include "cil_internal.h"
+#include "cil_flavor.h"
 #include "cil_log.h"
 #include "cil_mem.h"
 
@@ -39,7 +40,7 @@ __attribute__((noreturn)) void cil_list_error(const char* msg)
 	exit(1);
 }
 
-void cil_list_init(struct cil_list **list, unsigned flavor)
+void cil_list_init(struct cil_list **list, enum cil_flavor flavor)
 {
 	struct cil_list *new_list = cil_malloc(sizeof(*new_list));
 	new_list->head = NULL;
@@ -90,7 +91,7 @@ void cil_list_item_destroy(struct cil_list_item **item, unsigned destroy_data)
 	*item = NULL;
 }
 
-void cil_list_append(struct cil_list *list, unsigned flavor, void *data)
+void cil_list_append(struct cil_list *list, enum cil_flavor flavor, void *data)
 {
 	struct cil_list_item *item;
 
@@ -112,7 +113,7 @@ void cil_list_append(struct cil_list *list, unsigned flavor, void *data)
 	list->tail = item;
 }
 
-void cil_list_prepend(struct cil_list *list, unsigned flavor, void *data)
+void cil_list_prepend(struct cil_list *list, enum cil_flavor flavor, void *data)
 {
 	struct cil_list_item *item;
 
@@ -134,7 +135,7 @@ void cil_list_prepend(struct cil_list *list, unsigned flavor, void *data)
 	list->head = item;
 }
 
-struct cil_list_item *cil_list_insert(struct cil_list *list, struct cil_list_item *curr, unsigned flavor, void *data)
+struct cil_list_item *cil_list_insert(struct cil_list *list, struct cil_list_item *curr, enum cil_flavor flavor, void *data)
 {
 	struct cil_list_item *item;
 

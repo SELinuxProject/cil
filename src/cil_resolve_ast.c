@@ -34,6 +34,7 @@
 #include <sepol/policydb/conditional.h>
 
 #include "cil_internal.h"
+#include "cil_flavor.h"
 #include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
@@ -3174,6 +3175,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_CATALIAS:
 			rc = cil_resolve_alias(node, args, CIL_CAT);
 			break;
+		default: 
+			break;
 		}
 		break;
 	case CIL_PASS_ALIAS2:
@@ -3186,6 +3189,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_CATALIAS:
 			rc = cil_resolve_alias_to_actual(node, CIL_CAT);
+			break;
+		default:
 			break;
 		}
 		break;
@@ -3200,6 +3205,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_BOOLEANIF:
 			rc = cil_resolve_boolif(node, args);
 			break;
+		default:
+			break;
 		}
 		break;
 	case CIL_PASS_MLS:
@@ -3210,6 +3217,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_CATSET:
 			rc = cil_resolve_catset(node, (struct cil_catset*)node->data, args);
 			break;
+		default:
+			break;
 		}
 		break;
 	case CIL_PASS_MISC2:
@@ -3219,6 +3228,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_CLASSCOMMON:
 			rc = cil_resolve_classcommon(node, args);
+			break;
+		default:
 			break;
 		}
 		break;
