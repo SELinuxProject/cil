@@ -216,7 +216,7 @@
 	       (allow bin_t auditadm_t cps))
 
 	(call test_mapping ((file (read))))
-	;;(call test_mapping ((files (read))))
+	(call test_mapping ((files (read))))
 	(call test_mapping (char_w))
 )
 
