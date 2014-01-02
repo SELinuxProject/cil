@@ -671,7 +671,7 @@ int cil_nametypetransition_to_policy(FILE **file_arr, uint32_t file_index, struc
 	return SEPOL_OK;
 }
 
-int cil_expr_to_string(struct cil_list *expr, char **out)
+static int cil_expr_to_string(struct cil_list *expr, char **out)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;

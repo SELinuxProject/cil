@@ -233,7 +233,7 @@ int cil_tree_walk(struct cil_tree_node *start_node,
 }
 
 /* Copied from cil_policy.c, but changed to prefix -- Need to refactor */
-int cil_expr_to_string(struct cil_list *expr, char **out)
+static int cil_expr_to_string(struct cil_list *expr, char **out)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;
