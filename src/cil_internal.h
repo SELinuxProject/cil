@@ -35,6 +35,8 @@
 #include <stdint.h>
 #include <arpa/inet.h>
 
+#include <sepol/policydb/services.h>
+
 #include <cil/cil.h>
 
 #include "cil_flavor.h"
@@ -721,10 +723,11 @@ struct cil_pcidevicecon {
 	struct cil_context *context;
 };
 
+/* Ensure that CIL uses the same values as sepol services.h */
 enum cil_fsuse_types {
-	CIL_FSUSE_XATTR = 1,
-	CIL_FSUSE_TASK,
-	CIL_FSUSE_TRANS
+	CIL_FSUSE_XATTR = SECURITY_FS_USE_XATTR,
+	CIL_FSUSE_TASK = SECURITY_FS_USE_TASK,
+	CIL_FSUSE_TRANS = SECURITY_FS_USE_TRANS
 };
 
 struct cil_fsuse {
