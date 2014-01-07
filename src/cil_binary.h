@@ -195,7 +195,7 @@ int cil_user_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
-int cil_userrole_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_userrole_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum);
 
 /**
  * Insert cil bool structure into sepol policydb.

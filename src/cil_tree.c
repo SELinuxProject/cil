@@ -697,7 +697,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 
 			if (userrole->role != NULL) {
-				cil_log(CIL_INFO, " %s", userrole->role->datum.name);
+				cil_log(CIL_INFO, " %s", ((struct cil_symtab_datum *)userrole->role)->name);
 			} else if (userrole->role_str != NULL) {
 				cil_log(CIL_INFO, " %s", userrole->role_str);
 			}

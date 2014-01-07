@@ -942,7 +942,7 @@ int cil_resolve_userrole(struct cil_tree_node *current, void *extra_args)
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	userrole->role = (struct cil_role*)role_datum;
+	userrole->role = role_datum;
 
 	if (userrole->user->roles == NULL) {
 		cil_list_init(&userrole->user->roles, CIL_LIST_ITEM);

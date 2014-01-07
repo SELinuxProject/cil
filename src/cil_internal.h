@@ -383,7 +383,7 @@ struct cil_userrole {
 	char *user_str;
 	struct cil_user *user;
 	char *role_str;
-	struct cil_role *role;
+	void *role;
 };
 
 struct cil_userlevel {

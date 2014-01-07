@@ -600,26 +600,14 @@ exit:
 	return rc;
 }
 
-int cil_userrole_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
+static int __set_user_roles(policydb_t *pdb, user_datum_t *sepol_user, char *key)
 {
-	int rc = SEPOL_ERR;
-	uint32_t value = 0;
-	char *key = NULL;
-	struct cil_userrole *cil_userrole = (struct cil_userrole*)datum;
-	struct cil_user *cil_user = cil_userrole->user;
-	struct cil_role *cil_role = cil_userrole->role;
-	user_datum_t *sepol_user;
 	role_datum_t *sepol_role;
+	uint32_t value = 0;
 
-	key = cil_user->datum.name;
-	sepol_user = hashtab_search(pdb->p_users.table, key);
-	if (sepol_user == NULL) {
-		goto exit;
-	}
-
-	key = cil_role->datum.name;
 	sepol_role = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_role == NULL) {
+		cil_log(CIL_INFO, "Failure while searching sepol hashtab for role: %s\n", key);
 		goto exit;
 	}
 	value = sepol_role->s.value;
@@ -631,7 +619,54 @@ int cil_userrole_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
 	return SEPOL_OK;
 
 exit:
-	return rc;
+	return SEPOL_ERR;
+}
+
+int cil_userrole_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum)
+{
+	int rc;
+	char *key = NULL;
+	struct cil_userrole *cil_userrole = (struct cil_userrole*)datum;
+	struct cil_user *cil_user = cil_userrole->user;
+	struct cil_symtab_datum *cil_role_datum = cil_userrole->role;
+	enum cil_flavor flavor = ((struct cil_tree_node*)cil_role_datum->nodes->head->data)->flavor;
+	user_datum_t *sepol_user;
+
+	key = cil_user->datum.name;
+	sepol_user = hashtab_search(pdb->p_users.table, key);
+	if (sepol_user == NULL) {
+		goto exit;
+	}
+
+	if (flavor == CIL_ROLE) {
+		rc = __set_user_roles(pdb, sepol_user, cil_role_datum->name);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	} else {
+		struct cil_roleattribute *cil_attr = cil_userrole->role;
+		ebitmap_node_t *rnode;
+		unsigned int i;
+
+		ebitmap_for_each_bit(cil_attr->roles, rnode, i) {
+			struct cil_role *cil_role = NULL;
+
+			if (!ebitmap_get_bit(cil_attr->roles, i)) {
+				continue;
+			}
+
+			cil_role = db->val_to_role[i];
+			rc = __set_user_roles(pdb, sepol_user, cil_role->datum.name);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return SEPOL_ERR;
 }
 
 int cil_bool_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
@@ -2963,7 +2998,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			}
 			break;
 		case CIL_USERROLE:
-			rc = cil_userrole_to_policydb(pdb, node->data);
+			rc = cil_userrole_to_policydb(pdb, db, node->data);
 			break;
 		case CIL_TYPE_RULE:
 			rc = cil_type_rule_to_policydb(pdb, node->data);

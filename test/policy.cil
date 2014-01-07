@@ -138,6 +138,7 @@
 
 	(user system_u)
 	(user user_u)
+	(user foo_u)
 	(userprefix user_u user)
 	(userprefix system_u user)
 
@@ -158,10 +159,15 @@
 	(rolebounds system_r user_r)
 	(roletransition system_r bin_t file user_r)
 
+	(userrole foo_u foo_role)
+	(userlevel foo_u low)
+	(userrange foo_u low_high)
+
 	(userrole system_u system_r)
 	(userlevel system_u low)
 	(userrange system_u low_high)
 	(userbounds system_u user_u)
+
 	(userrole user_u user_r)
 	(userlevel user_u low)
 	(userrange user_u (low low))
