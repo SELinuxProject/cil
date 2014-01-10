@@ -61,6 +61,18 @@ struct cil_args_booleanif {
 	struct cil_list *neverallows;
 };
 
+struct cil_neverallow {
+	struct cil_tree_node *node;
+	struct cil_list *rules;
+};
+
+struct cil_neverallow_rule {
+	struct cil_symtab_datum *src;
+	struct cil_symtab_datum *tgt;
+	uint32_t class;
+	uint32_t perms;
+};
+
 void cil_neverallows_list_destroy(struct cil_list *neverallows)
 {
 	struct cil_list_item *i;
@@ -68,12 +80,11 @@ void cil_neverallows_list_destroy(struct cil_list *neverallows)
 
 	cil_list_for_each(i, neverallows) {
 		struct cil_neverallow *neverallow = i->data;
-		cil_list_for_each(j, neverallow->data) {
-			struct cil_neverallow_data *ndata = j->data;
-			free(ndata->key);
-			free(ndata);
+		cil_list_for_each(j, neverallow->rules) {
+			struct cil_neverallow_rule *rule = j->data;
+			free(rule);
 		}
-		cil_list_destroy(&neverallow->data, CIL_FALSE);
+		cil_list_destroy(&neverallow->rules, CIL_FALSE);
 		free(neverallow);
 	}
 	cil_list_destroy(&neverallows, CIL_FALSE);
@@ -1142,35 +1153,13 @@ exit:
 	return rc;
 }
 
-int __cil_insert_avrule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
+int __cil_insert_avrule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_OK;
 	avtab_key_t avtab_key;
 	avtab_datum_t avtab_datum;
 	avtab_datum_t *avtab_dup = NULL;
-	struct cil_list_item *curr = NULL;
 
-	if (neverallows != NULL && kind == CIL_AVRULE_ALLOWED) {
-		cil_list_for_each(curr, neverallows) {
-			struct cil_neverallow *neverallow = curr->data;
-			struct cil_list *ndata_list = neverallow->data;
-			struct cil_list_item *curr_data = NULL;
-			cil_list_for_each(curr_data, ndata_list) {
-				struct cil_tree_node *node = neverallow->node;
-				struct cil_neverallow_data *ndata = curr_data->data;
-				avtab_key_t *never_key = ndata->key;
-				if (src == never_key->source_type
-				    && tgt == never_key->target_type
-				    && obj == never_key->target_class
-				    && (ndata->types & data) != 0) {
-					cil_log(CIL_ERR, "Neverallow found that matches avrule at line %d of %s\n", node->line, node->path);
-					rc = SEPOL_ERR;
-					goto exit;
-				}
-			}
-		}
-	}
-	
 	avtab_key.source_type = src;
 	avtab_key.target_type = tgt;
 	avtab_key.target_class = obj;
@@ -1211,35 +1200,111 @@ exit:
 	return rc;
 }
 
-void __cil_neverallow_handle(uint32_t src, uint32_t tgt, uint32_t obj, uint32_t data, struct cil_list *neverallows)
+static void __cil_neverallow_handle(struct cil_list *neverallows, struct cil_symtab_datum *src, struct cil_symtab_datum *tgt, uint32_t class, uint32_t perms)
 {
 	struct cil_neverallow *neverallow = neverallows->head->data;
-	struct cil_list *neverallow_data = neverallow->data;
-	struct cil_neverallow_data *new_data = NULL;
-	avtab_key_t *never_key = NULL;
+	struct cil_list *neverallow_rules = neverallow->rules;
+	struct cil_neverallow_rule *new = NULL;
 
-	never_key = cil_malloc(sizeof(*never_key));
-	never_key->source_type = src;
-	never_key->target_type = tgt;
-	never_key->target_class = obj;
-	never_key->specified = AVTAB_NEVERALLOW;
+	new = cil_malloc(sizeof(*new));
+	new->src = src;
+	new->tgt = tgt;
+	new->class = class;
+	new->perms = perms;
 
-	new_data = cil_malloc(sizeof(*new_data));
-	new_data->key = never_key;
-	new_data->types = data;
-
-	cil_list_prepend(neverallow_data, CIL_LIST_ITEM, new_data);
+	cil_list_append(neverallow_rules, CIL_LIST_ITEM, new);
 }
 
-int __cil_avrule_expand_helper(policydb_t *pdb, uint16_t kind, uint32_t src, uint32_t tgt, struct cil_classperms *cp, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
+static int __cil_is_type_match(enum cil_flavor f1, struct cil_symtab_datum *t1, enum cil_flavor f2, struct cil_symtab_datum *t2)
+{
+	if (strcmp(t1->name, t2->name) == 0) {
+		return CIL_TRUE;
+	} else if (f1 == CIL_TYPEATTRIBUTE && f2 != CIL_TYPEATTRIBUTE) {
+		struct cil_typeattribute *a = (struct cil_typeattribute *)t1;
+		struct cil_type *t = (struct cil_type *)t2;
+		if (ebitmap_get_bit(a->types, t->value)) {
+			return CIL_TRUE;
+		}
+	} else if (f1 != CIL_TYPEATTRIBUTE && f2 == CIL_TYPEATTRIBUTE) {
+		struct cil_typeattribute *a = (struct cil_typeattribute *)t2;
+		struct cil_type *t = (struct cil_type *)t1;
+		if (ebitmap_get_bit(a->types, t->value)) {
+			return CIL_TRUE;
+		}
+	} else if (f1 == CIL_TYPEATTRIBUTE && f2 == CIL_TYPEATTRIBUTE) {
+		struct cil_typeattribute *a1 = (struct cil_typeattribute *)t2;
+		struct cil_typeattribute *a2 = (struct cil_typeattribute *)t1;
+		/* abusing the ebitmap abstraction for speed */
+		ebitmap_node_t *n1 = a1->types->node;
+		ebitmap_node_t *n2 = a2->types->node;
+		while (n1 && n2) {
+			if (n1->startbit < n2->startbit) {
+				n1 = n1->next;
+			} else if (n2->startbit < n1->startbit) {
+				n2 = n2->next;
+			} else {
+				if (n1->map & n2->map) {
+					return CIL_TRUE;
+				}
+				n1 = n1->next;
+				n2 = n2->next;
+			}
+		}
+	}
+	return CIL_FALSE;
+}
+
+static int __cil_check_neverallows(struct cil_list *neverallows, struct cil_symtab_datum *src, struct cil_symtab_datum *tgt, uint32_t class, uint32_t perms)
+{
+	struct cil_list_item *curr = NULL;
+	enum cil_flavor al_src_flavor = ((struct cil_tree_node*)src->nodes->head->data)->flavor;
+	enum cil_flavor al_tgt_flavor = ((struct cil_tree_node*)tgt->nodes->head->data)->flavor;
+	cil_list_for_each(curr, neverallows) {
+		struct cil_neverallow *neverallow = curr->data;
+		struct cil_tree_node *node = neverallow->node;
+		struct cil_list_item *curr_item = NULL;
+		cil_list_for_each(curr_item, neverallow->rules) {
+			struct cil_neverallow_rule *curr_rule = curr_item->data;
+			enum cil_flavor nv_src_flavor = ((struct cil_tree_node*)curr_rule->src->nodes->head->data)->flavor;
+			enum cil_flavor nv_tgt_flavor = ((struct cil_tree_node*)curr_rule->tgt->nodes->head->data)->flavor;
+			if ((curr_rule->perms & perms) && (class == curr_rule->class)) {
+				int src_match = __cil_is_type_match(al_src_flavor, src, nv_src_flavor, curr_rule->src);
+				if (src_match) {
+					int tgt_match = __cil_is_type_match(al_tgt_flavor, tgt, nv_tgt_flavor, curr_rule->tgt);
+					if (tgt_match) {
+						cil_log(CIL_ERR, "Neverallow found that matches avrule at line %d of %s\n", node->line, node->path);
+						return SEPOL_ERR;
+					}
+				}
+			}
+		}
+	}
+	return SEPOL_OK;
+}
+
+int __cil_avrule_expand_helper(policydb_t *pdb, uint16_t kind, struct cil_symtab_datum *src, struct cil_symtab_datum *tgt, struct cil_classperms *cp, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_ERR;
-	char *key = NULL;
+	char *class = NULL;
+	type_datum_t *sepol_src = NULL;
+	type_datum_t *sepol_tgt = NULL;
 	class_datum_t *sepol_class = NULL;
 	uint32_t data = 0;
 
-	key = ((struct cil_symtab_datum *)cp->r.cp.class)->name;
-	sepol_class = hashtab_search(pdb->p_classes.table, key);
+	sepol_src = hashtab_search(pdb->p_types.table, src->name);
+	if (sepol_src == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	sepol_tgt = hashtab_search(pdb->p_types.table, tgt->name);
+	if (sepol_tgt == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	class = ((struct cil_symtab_datum *)cp->r.cp.class)->name;
+	sepol_class = hashtab_search(pdb->p_classes.table, class);
 	if (sepol_class == NULL) {
 		goto exit;
 	}
@@ -1250,17 +1315,23 @@ int __cil_avrule_expand_helper(policydb_t *pdb, uint16_t kind, uint32_t src, uin
 	}
 
 	if (data == 0) {
-		cil_log(CIL_INFO, "No permissions for AV rule.\n");
+		/* No permissions, so don't insert rule. Maybe should return an error? */
+		return SEPOL_OK;
 	}
 
 	if (kind == CIL_AVRULE_NEVERALLOW) {
-		__cil_neverallow_handle(src, tgt, sepol_class->s.value, data, neverallows);
+		__cil_neverallow_handle(neverallows, src, tgt, sepol_class->s.value, data);
 	} else {
 		if (kind == CIL_AVRULE_DONTAUDIT) {
 			data = ~data;
+		} else if (neverallows != NULL && kind == CIL_AVRULE_ALLOWED) {
+			rc = __cil_check_neverallows(neverallows, src, tgt, sepol_class->s.value, data);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
 		}
 
-		rc = __cil_insert_avrule(pdb, kind, src, tgt, sepol_class->s.value, data, neverallows, cond_node, cond_flavor);
+		rc = __cil_insert_avrule(pdb, kind, sepol_src->s.value, sepol_tgt->s.value, sepol_class->s.value, data, cond_node, cond_flavor);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1273,7 +1344,7 @@ exit:
 }
 
 
-int __cil_avrule_expand(policydb_t *pdb, uint16_t kind, uint32_t src, uint32_t tgt, struct cil_list *classperms, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
+int __cil_avrule_expand(policydb_t *pdb, uint16_t kind, struct cil_symtab_datum *src, struct cil_symtab_datum *tgt, struct cil_list *classperms, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;
@@ -1315,32 +1386,18 @@ exit:
 int __cil_avrule_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_avrule *cil_avrule, struct cil_list *neverallows, cond_node_t *cond_node, enum cil_flavor cond_flavor)
 {
 	int rc = SEPOL_ERR;
-	char *src = NULL;
-	char *tgt = NULL;
-	type_datum_t *sepol_src = NULL;
-	type_datum_t *sepol_tgt = NULL;
+	struct cil_symtab_datum *src = NULL;
+	struct cil_symtab_datum *tgt = NULL;
 	uint16_t kind = cil_avrule->rule_kind;
 	struct cil_list *classperms = cil_avrule->classperms;
-	ebitmap_t types;
-	ebitmap_init(&types);
 
-	src = ((struct cil_symtab_datum *)cil_avrule->src)->name;
-	tgt = ((struct cil_symtab_datum *)cil_avrule->tgt)->name;
+	src = cil_avrule->src;
+	tgt = cil_avrule->tgt;
 
-	sepol_src = hashtab_search(pdb->p_types.table, src);
-	if (sepol_src == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	if (!strcmp(tgt, CIL_KEY_SELF)) {
-		struct cil_symtab_datum *srcdatum = cil_avrule->src;
-		enum cil_flavor flavor = ((struct cil_tree_node*)srcdatum->nodes->head->data)->flavor;
+	if (!strcmp(tgt->name, CIL_KEY_SELF)) {
+		enum cil_flavor flavor = ((struct cil_tree_node*)src->nodes->head->data)->flavor;
 		if (flavor == CIL_TYPEATTRIBUTE) {
-			struct cil_typeattribute *cil_attr = (struct cil_typeattribute*)srcdatum;
-			struct cil_type *cil_type = NULL;
-			type_datum_t *sepol_type = NULL;
-			char *key = NULL;
+			struct cil_typeattribute *cil_attr = (struct cil_typeattribute*)src;
 			unsigned int i;
 			ebitmap_node_t *tnode;
 
@@ -1349,42 +1406,29 @@ int __cil_avrule_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_a
 					continue;
 				}
 
-				cil_type = db->val_to_type[i];
-				key = cil_type->datum.name;
-				sepol_type = hashtab_search(pdb->p_types.table, key);
-				if (sepol_type == NULL) {
-					rc = SEPOL_ERR;
-					goto exit;
-				}
+				src = (struct cil_symtab_datum *)db->val_to_type[i];
 
-				rc = __cil_avrule_expand(pdb, kind, sepol_type->s.value, sepol_type->s.value, classperms, neverallows, cond_node, cond_flavor);
+				rc = __cil_avrule_expand(pdb, kind, src, src, classperms, neverallows, cond_node, cond_flavor);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
 			}
 		} else {
-			rc = __cil_avrule_expand(pdb, kind, sepol_src->s.value, sepol_src->s.value, classperms, neverallows, cond_node, cond_flavor);
+			rc = __cil_avrule_expand(pdb, kind, src, src, classperms, neverallows, cond_node, cond_flavor);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else {
-		sepol_tgt = hashtab_search(pdb->p_types.table, tgt);
-		if (sepol_tgt == NULL) {
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-
-		rc = __cil_avrule_expand(pdb, kind, sepol_src->s.value, sepol_tgt->s.value, classperms, neverallows, cond_node, cond_flavor);
+		rc = __cil_avrule_expand(pdb, kind, src, tgt, classperms, neverallows, cond_node, cond_flavor);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 	}
 
-	rc = SEPOL_OK;
+	return SEPOL_OK;
 
 exit:
-	ebitmap_destroy(&types);
 	return rc;
 }
 
@@ -3010,7 +3054,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 				struct cil_neverallow *new_rule = NULL;
 
 				new_rule = cil_malloc(sizeof(*new_rule));
-				cil_list_init(&new_rule->data, CIL_LIST_ITEM);
+				cil_list_init(&new_rule->rules, CIL_LIST_ITEM);
 				new_rule->node = node;
 
 				cil_list_prepend(neverallows, CIL_LIST_ITEM, new_rule);

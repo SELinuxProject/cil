@@ -32,6 +32,7 @@
 	(type device_t)
 	(type getty_t)
 	(type exec_t)
+	(type bad_t)
 
 	(allow console_t console_device_t file_rw)
 	(allow console_t console_device_t (files (read)))
@@ -68,11 +69,13 @@
 	(typeattribute foo_type)
 	(typeattribute bar_type)
 	(typeattribute baz_type)
+	(typeattribute not_bad_type)
 	(typeattributeset exec_type (or bin_t kernel_t))
 	(typeattributeset foo_type (and exec_type kernel_t))
 	(typeattributeset bar_type (xor exec_type foo_type))
 	(typeattributeset baz_type (not bin_t))
 	(typeattributeset baz_type (and exec_type (and bar_type bin_t)))
+	(typeattributeset not_bad_type (not bad_t))
 	(typealias bin_t sbin_t)
 	(typepermissive device_t) 
 	(typebounds device_t bin_t)
@@ -94,6 +97,11 @@
 	
 	(allow foo_type self (file (execute)))
 	(allow bin_t device_t (file (execute)))
+
+	;; Next two rules violate the neverallow rule that follows
+	;;(allow bad_t not_bad_type (file (execute)))
+	;;(allow bad_t exec_t (file (execute)))
+	(neverallow bad_t not_bad_type (file (execute)))
 			
 	(booleanif secure_mode
 		(true
