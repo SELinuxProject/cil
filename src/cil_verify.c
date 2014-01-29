@@ -137,315 +137,109 @@ exit:
 	return rc;
 }
 
-int __cil_verify_constrain_expr(struct cil_tree_node *current, enum cil_flavor eflavor, enum cil_flavor oflavor)
+int cil_verify_expr_syntax(struct cil_tree_node *current, enum cil_flavor op, enum cil_flavor expr_flavor)
 {
-	int rc = SEPOL_ERR;
-	char * lstr = NULL;
-	char * rstr = NULL;
-	int cons_token = CIL_FALSE;
+	int rc;
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
-	lstr = current->next->data;
-	rstr = current->next->next->data;
-
-	if (strcmp(lstr, CIL_KEY_CONS_T1) && strcmp(lstr, CIL_KEY_CONS_T2) &&
-		strcmp(lstr, CIL_KEY_CONS_R1) && strcmp(lstr, CIL_KEY_CONS_R2) &&
-		strcmp(lstr, CIL_KEY_CONS_U1) && strcmp(lstr, CIL_KEY_CONS_U2) &&
-		strcmp(lstr, CIL_KEY_CONS_L1) && strcmp(lstr, CIL_KEY_CONS_L2) &&
-		strcmp(lstr, CIL_KEY_CONS_H1) &&
-		((eflavor == CIL_VALIDATETRANS || eflavor == CIL_MLSVALIDATETRANS) &&
-		 strcmp(lstr, CIL_KEY_CONS_T3) && strcmp(lstr, CIL_KEY_CONS_R3) &&
-		 strcmp(lstr, CIL_KEY_CONS_U3))) {
-		cil_log(CIL_ERR, "Token %s not allowed on left side\n", lstr);
+	switch (op) {
+	case CIL_NOT:
+		syntax[2] = CIL_SYN_END;
+		syntax_len = 3;
+		break;
+	case CIL_AND:
+	case CIL_OR:
+	case CIL_XOR:
+		break;
+	case CIL_EQ:
+	case CIL_NEQ:
+		if (expr_flavor != CIL_BOOL && expr_flavor != CIL_TUNABLE ) {
+			cil_log(CIL_ERR,"Invalid operator (%s) for set expression\n", current->data);
+			goto exit;
+		}
+		break;
+	case CIL_STAR:
+		if (expr_flavor == CIL_BOOL || expr_flavor == CIL_TUNABLE) {
+			cil_log(CIL_ERR,"Invalid operator (%s) for boolean or tunable expression\n", current->data);
+			goto exit;
+		}
+		syntax[1] = CIL_SYN_END;
+		syntax_len = 2;
+		break;
+	case CIL_NONE: /* String or List */
+		syntax[0] = CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS;
+		syntax[1] = CIL_SYN_END;
+		syntax_len = 2;
+		break;
+	default:
+		cil_log(CIL_ERR,"Unexpected value (%s) for expression operator\n", current->data);
 		goto exit;
 	}
 
-	if (!strcmp(rstr, CIL_KEY_CONS_T1) || !strcmp(rstr, CIL_KEY_CONS_T2) ||
-		!strcmp(rstr, CIL_KEY_CONS_R1) || !strcmp(rstr, CIL_KEY_CONS_R2) ||
-		!strcmp(rstr, CIL_KEY_CONS_U1) || !strcmp(rstr, CIL_KEY_CONS_U2) ||
-		!strcmp(rstr, CIL_KEY_CONS_L1) || !strcmp(rstr, CIL_KEY_CONS_L2) ||
-		!strcmp(rstr, CIL_KEY_CONS_H1) || !strcmp(rstr, CIL_KEY_CONS_H2) ||
-		((eflavor == CIL_VALIDATETRANS || eflavor == CIL_MLSVALIDATETRANS) &&
-		 (!strcmp(rstr, CIL_KEY_CONS_T3) || !strcmp(rstr, CIL_KEY_CONS_R3) ||
-		  !strcmp(rstr, CIL_KEY_CONS_U3)))) {
-		cons_token = CIL_TRUE;
-	}
-
-	if (!strcmp(lstr, CIL_KEY_CONS_T1)) {
-		if (strcmp(rstr, CIL_KEY_CONS_T2) != 0 && cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_T2)) {
-		if (cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_T3)) {
-		if ((eflavor != CIL_VALIDATETRANS) && (eflavor != CIL_MLSVALIDATETRANS)) {
-			cil_log(CIL_ERR, "Token %s only allowed in VALIDATETRANS and MLSVALIDATETRANS expressions\n");
-			goto exit;
-		}
-		if (cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_R1)) {
-		if (strcmp(rstr, CIL_KEY_CONS_R2) != 0 && cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_R2)) {
-		if (cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right siden", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_R3)) {
-		if ((eflavor != CIL_VALIDATETRANS) && (eflavor != CIL_MLSVALIDATETRANS)) {
-			cil_log(CIL_ERR, "Token %s only allowed in VALIDATETRANS and MLSVALIDATETRANS expressions\n");
-			goto exit;
-		}
-		if (cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_U1)) {
-		if (strcmp(rstr, CIL_KEY_CONS_U2) != 0 && cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_U2)) {
-		if (cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_U3)) {
-		if ((eflavor != CIL_VALIDATETRANS) && (eflavor != CIL_MLSVALIDATETRANS)) {
-			cil_log(CIL_ERR, "Token %s only allowed in VALIDATETRANS and MLSVALIDATETRANS expressions\n");
-			goto exit;
-		}
-		if (cons_token) {
-			cil_log(CIL_ERR, "Token %s not allowed on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_L1)) {
-		if ((eflavor != CIL_MLSCONSTRAIN) && (eflavor != CIL_MLSVALIDATETRANS)) {
-			cil_log(CIL_ERR, "Token %s only allowed in MLSCONSTRAIN and MLSVALIDATETRANS expressions\n");
-			goto exit;
-		}
-		if (strcmp(rstr, CIL_KEY_CONS_L2) != 0 && 
-			strcmp(rstr, CIL_KEY_CONS_H1) != 0 && 
-			strcmp(rstr, CIL_KEY_CONS_H2) != 0) {
-			cil_log(CIL_ERR, "Token %s is invalid on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_L2)) {
-		if ((eflavor != CIL_MLSCONSTRAIN) && (eflavor != CIL_MLSVALIDATETRANS)) {
-			cil_log(CIL_ERR, "Token %s only allowed in MLSCONSTRAIN and MLSVALIDATETRANS expressions\n");
-			goto exit;
-		}
-		if (strcmp(rstr, CIL_KEY_CONS_H2) != 0) {
-			cil_log(CIL_ERR, "Token %s is invalid on right side\n", rstr);
-			goto exit;
-		}
-	} else if (!strcmp(lstr, CIL_KEY_CONS_H1)) {
-		if ((eflavor != CIL_MLSCONSTRAIN) && (eflavor != CIL_MLSVALIDATETRANS)) {
-			cil_log(CIL_ERR, "Token %s only allowed in MLSCONSTRAIN and MLSVALIDATETRANS expressions\n");
-			goto exit;
-		}
-		if (strcmp(rstr, CIL_KEY_CONS_L2) != 0 && 
-			strcmp(rstr, CIL_KEY_CONS_H2) != 0) {
-			cil_log(CIL_ERR, "Token %s is invalid on right side\n", rstr);
-			goto exit;
-		}
-	} else {
-		cil_log(CIL_ERR, "Token %s is invalid on left side\n", lstr);
+	rc = __cil_verify_syntax(current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
 		goto exit;
-	}
-
-	if (oflavor != CIL_EQ && oflavor != CIL_NEQ) {
-		if ((strcmp(lstr, CIL_KEY_CONS_R1) != 0 || strcmp(rstr, CIL_KEY_CONS_R2) != 0) && 
-			eflavor != CIL_MLSCONSTRAIN &&
-			eflavor != CIL_MLSVALIDATETRANS) {
-			cil_log(CIL_ERR, "Invalid operation\n");
-			goto exit;
-		}
 	}
 
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Invalid constrain expression syntax at line %d of %s\n",
-			current->line, current->path);
-	return rc;
-}
-
-int __cil_verify_expr_operator(const char *op, enum cil_flavor expr_flavor)
-{
-	if (!strcmp(op, CIL_KEY_AND)) {
-		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
-		    expr_flavor != CIL_PERM && expr_flavor != CIL_CONSTRAIN && 
-		    expr_flavor != CIL_VALIDATETRANS && expr_flavor != CIL_MLSCONSTRAIN &&
-		    expr_flavor != CIL_MLSVALIDATETRANS && expr_flavor != CIL_BOOL &&
-		    expr_flavor != CIL_TUNABLE) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_OR)) {
-		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
-		    expr_flavor != CIL_PERM && expr_flavor != CIL_CONSTRAIN && 
-		    expr_flavor != CIL_VALIDATETRANS && expr_flavor != CIL_MLSCONSTRAIN &&
-		    expr_flavor != CIL_MLSVALIDATETRANS && expr_flavor != CIL_BOOL &&
-		    expr_flavor != CIL_TUNABLE) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_NOT)) {
-		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
-		    expr_flavor != CIL_PERM && expr_flavor != CIL_CONSTRAIN && 
-		    expr_flavor != CIL_VALIDATETRANS && expr_flavor != CIL_MLSCONSTRAIN &&
-		    expr_flavor != CIL_MLSVALIDATETRANS && expr_flavor != CIL_BOOL &&
-		    expr_flavor != CIL_TUNABLE) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_STAR)) {
-		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
-		    expr_flavor != CIL_PERM) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_EQ)) {
-		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
-		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS &&
-		    expr_flavor != CIL_BOOL && expr_flavor != CIL_TUNABLE) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_NEQ)) {
-		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
-		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS &&
-		    expr_flavor != CIL_BOOL && expr_flavor != CIL_TUNABLE) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_XOR)) {
-		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
-		    expr_flavor != CIL_PERM && expr_flavor != CIL_BOOL &&
-		    expr_flavor != CIL_TUNABLE) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_CONS_DOM)) {
-		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
-		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_CONS_DOMBY)) {
-		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
-		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS) {
-			goto exit;
-		}
-	} else if (!strcmp(op, CIL_KEY_CONS_INCOMP)) {
-		if (expr_flavor != CIL_CONSTRAIN && expr_flavor != CIL_VALIDATETRANS &&
-		    expr_flavor != CIL_MLSCONSTRAIN && expr_flavor != CIL_MLSVALIDATETRANS) {
-			goto exit;
-		}
-	} else {
-		if (expr_flavor != CIL_TYPE && expr_flavor != CIL_ROLE && 
-			expr_flavor != CIL_PERM) {
-			cil_log(CIL_ERR, "Token %s is not an operator\n", op);
-			return SEPOL_ERR;
-		}
-	}
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Operator %s is invalid in the expression\n", op);
 	return SEPOL_ERR;
 }
 
-/* Parameters:
- * node:	current node in tree
- * expr_flavor:	current node flavor
- * op_flavor:	Operator flavor
- * */
-int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_flavor, enum cil_flavor op_flavor)
+int cil_verify_constraint_leaf_expr_syntax(enum cil_flavor l_flavor, enum cil_flavor r_flavor, enum cil_flavor op, enum cil_flavor expr_flavor)
 {
-	int rc = SEPOL_ERR;
-
-	if (expr_flavor == CIL_CONSTRAIN || expr_flavor == CIL_MLSCONSTRAIN || expr_flavor == CIL_VALIDATETRANS || expr_flavor == CIL_MLSVALIDATETRANS) {
-		if (op_flavor == CIL_NOT) {
-			enum cil_syntax syntax[] = {
-				CIL_SYN_STRING,
-				CIL_SYN_LIST,
-				CIL_SYN_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-		} else if (op_flavor == CIL_AND || op_flavor == CIL_OR) {
-			enum cil_syntax syntax[] = {
-				CIL_SYN_STRING,
-				CIL_SYN_LIST,
-				CIL_SYN_LIST,
-				CIL_SYN_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-		} else {
-			enum cil_syntax syntax[] = {
-				CIL_SYN_STRING,
-				CIL_SYN_STRING,
-				CIL_SYN_STRING,
-				CIL_SYN_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
+	if (r_flavor == CIL_STRING || r_flavor == CIL_LIST) {
+		if (l_flavor == CIL_CONS_L1 || l_flavor == CIL_CONS_L2 || l_flavor == CIL_CONS_H1 || l_flavor == CIL_CONS_H2 ) {
+			cil_log(CIL_ERR, "l1, l2, h1, and h2 cannot be used on the left side with a string or list on the right side\n");
+			goto exit;
+		} else if (l_flavor == CIL_CONS_U3 || l_flavor == CIL_CONS_R3 || l_flavor == CIL_CONS_T3) {
+			if (expr_flavor != CIL_MLSVALIDATETRANS) {
+				cil_log(CIL_ERR, "u3, r3, and t3 can only be used with mlsvalidatetrans rules\n");
 				goto exit;
 			}
 		}
 	} else {
-		if (op_flavor == CIL_STAR) {
-			enum cil_syntax syntax[] = {
-				CIL_SYN_STRING,
-				CIL_SYN_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
+		if (r_flavor == CIL_CONS_U2) {
+			if (op != CIL_EQ && op != CIL_NEQ) {
+				cil_log(CIL_ERR, "u2 on the right side must be used with eq or neq as the operator\n");
+				goto exit;
+			} else if (l_flavor != CIL_CONS_U1) {
+				cil_log(CIL_ERR, "u2 on the right side must be used with u1 on the left\n");
 				goto exit;
 			}
-		} else if (op_flavor == CIL_NOT) {
-			enum cil_syntax syntax[] = {
-				CIL_SYN_STRING,
-				CIL_SYN_STRING | CIL_SYN_LIST,
-				CIL_SYN_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
+		} else if (r_flavor == CIL_CONS_R2) {
+			if (l_flavor != CIL_CONS_R1) {
+				cil_log(CIL_ERR, "r2 on the right side must be used with r1 on the left\n");
 				goto exit;
 			}
-		} else if (op_flavor == CIL_NONE) {
-			enum cil_syntax syntax[] = {
-				CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS,
-				CIL_SYN_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
+		} else if (r_flavor == CIL_CONS_T2) {
+			if (op != CIL_EQ && op != CIL_NEQ) {
+				cil_log(CIL_ERR, "t2 on the right side must be used with eq or neq as the operator\n");
+				goto exit;
+			} else if (l_flavor != CIL_CONS_T1) {
+				cil_log(CIL_ERR, "t2 on the right side must be used with t1 on the left\n");
 				goto exit;
 			}
-		} else {
-			enum cil_syntax syntax[] = {
-				CIL_SYN_STRING,
-				CIL_SYN_STRING | CIL_SYN_LIST,
-				CIL_SYN_STRING | CIL_SYN_LIST,
-				CIL_SYN_END
-			};
-			int syntax_len = sizeof(syntax)/sizeof(*syntax);
-			rc = __cil_verify_syntax(node, syntax, syntax_len);
-			if (rc != SEPOL_OK) {
+		} else if (r_flavor == CIL_CONS_L2) {
+			if (l_flavor != CIL_CONS_L1 && l_flavor != CIL_CONS_H1) {
+				cil_log(CIL_ERR, "l2 on the right side must be used with l1 or h1 on the left\n");
+				goto exit;
+			}
+		} else if (r_flavor == CIL_CONS_H2) {
+			if (l_flavor != CIL_CONS_L1 && l_flavor != CIL_CONS_L2 && l_flavor != CIL_CONS_H1 ) {
+				cil_log(CIL_ERR, "h2 on the right side must be used with l1, l2, or h1 on the left\n");
+				goto exit;
+			}
+		} else if (r_flavor == CIL_CONS_H1) {
+			if (l_flavor != CIL_CONS_L1) {
+				cil_log(CIL_ERR, "h1 on the right side must be used with l1 on the left\n");
 				goto exit;
 			}
 		}
@@ -454,8 +248,56 @@ int __cil_verify_expr_syntax(struct cil_tree_node *node, enum cil_flavor expr_fl
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR,"Invalid expression syntax\n");
-	return rc;
+	return SEPOL_ERR;
+}
+
+int cil_verify_constraint_expr_syntax(struct cil_tree_node *current, enum cil_flavor op)
+{
+	int rc;
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_END,
+		CIL_SYN_END,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+
+	switch (op) {
+	case CIL_NOT:
+		syntax[1] = CIL_SYN_LIST;
+		syntax_len--;
+		break;
+	case CIL_AND:
+	case CIL_OR:
+		syntax[1] = CIL_SYN_LIST;
+		syntax[2] = CIL_SYN_LIST;
+		break;
+	case CIL_EQ:
+	case CIL_NEQ:
+		syntax[1] = CIL_SYN_STRING;
+		syntax[2] = CIL_SYN_STRING | CIL_SYN_LIST;
+		break;
+	case CIL_CONS_DOM:
+	case CIL_CONS_DOMBY:
+	case CIL_CONS_INCOMP:
+		syntax[1] = CIL_SYN_STRING;
+		syntax[2] = CIL_SYN_STRING;
+		break;
+	default:
+		cil_log(CIL_ERR,"Invalid operator (%s) for constraint expression\n",current->data);
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Invalid constraint syntax\n");
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return SEPOL_ERR;
 }
 
 int cil_verify_no_self_reference(struct cil_symtab_datum *datum, struct cil_list *datum_list)

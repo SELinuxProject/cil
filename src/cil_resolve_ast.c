@@ -2983,66 +2983,53 @@ exit:
 	return rc;
 }
 
-/* This modifies/destroys the original stack */
-int cil_evaluate_tunable_expr(struct cil_list *datum_expr, uint16_t *result)
+static int __cil_evaluate_tunable_expr(struct cil_list_item *curr);
+
+static int __cil_evaluate_tunable_expr_helper(struct cil_list_item *curr)
 {
-	int rc = SEPOL_ERR;
-	struct cil_list_item *curr;
-	uint16_t eval_stack[COND_EXPR_MAXDEPTH];
-	uint16_t value1 = CIL_FALSE;
-	uint16_t value2 = CIL_FALSE;
-	uint16_t pos = 0;
-
-	if (datum_expr == NULL) {
-		goto exit;
+	if (curr == NULL) {
+		return CIL_FALSE;
+	} else if (curr->flavor == CIL_DATUM) {
+		struct cil_tunable *tun = curr->data;
+		return tun->value;
+	} else if (curr->flavor == CIL_LIST) {
+		struct cil_list *l = curr->data;
+		return __cil_evaluate_tunable_expr(l->head);
+	} else {
+		return CIL_FALSE;
 	}
+}
 
-	cil_list_for_each(curr, datum_expr) {
-		if (curr->flavor == CIL_OP) {
-			enum cil_flavor op_flavor = (enum cil_flavor)curr->data;
-			if (op_flavor == CIL_NOT) {
-				if (pos == 0) {
-					cil_log(CIL_ERR, "Not enough operands for NOT operation\n");
-					goto exit;
-				}
-				eval_stack[pos - 1] = !eval_stack[pos - 1];
-			} else {
-				if (pos <= 1) {
-					cil_log(CIL_ERR, "Not enough operands for operation\n");
-					goto exit;
-				}
-				value1 = eval_stack[pos - 1];
-				value2 = eval_stack[pos - 2];
-				if (op_flavor == CIL_AND) {
-					eval_stack[pos - 2] = (value1 && value2);
-				} else if (op_flavor == CIL_OR) {
-					eval_stack[pos - 2] = (value1 || value2);
-				} else if (op_flavor == CIL_XOR) {
-					eval_stack[pos - 2] = (value1 ^ value2);
-				} else if (op_flavor == CIL_EQ) {
-					eval_stack[pos - 2] = (value1 == value2);
-				} else if (op_flavor == CIL_NEQ) {
-					eval_stack[pos - 2] = (value1 != value2);
-				}
-				pos--;
-			}
-		} else {
-			struct cil_tunable *tun = curr->data;
-			if (pos >= COND_EXPR_MAXDEPTH) {
-				cil_log(CIL_ERR, "Exceeded max depth for tunable expression\n");
-				goto exit;
-			}
-			eval_stack[pos] = tun->value;
-			pos++;
+static int __cil_evaluate_tunable_expr(struct cil_list_item *curr)
+{
+	/* Assumes expression is well-formed */
+
+	if (curr == NULL) {
+		return CIL_FALSE;
+	} else if (curr->flavor == CIL_OP) {
+		uint16_t v1, v2;
+		enum cil_flavor op_flavor = (enum cil_flavor)curr->data;
+
+		v1 = __cil_evaluate_tunable_expr_helper(curr->next);
+
+		if (op_flavor == CIL_NOT) return !v1;
+
+		v2 = __cil_evaluate_tunable_expr_helper(curr->next->next);
+
+		if (op_flavor == CIL_AND) return (v1 && v2);
+		else if (op_flavor == CIL_OR) return (v1 || v2);
+		else if (op_flavor == CIL_XOR) return (v1 ^ v2);
+		else if (op_flavor == CIL_EQ) return (v1 == v2);
+		else if (op_flavor == CIL_NEQ) return (v1 != v2);
+		else return CIL_FALSE;
+	} else {
+		uint16_t v;
+		for (;curr; curr = curr->next) {
+			v = __cil_evaluate_tunable_expr_helper(curr);
+			if (v) return v;
 		}
+		return CIL_FALSE;
 	}
-
-	*result = eval_stack[0];
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
 }
 
 int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args)
@@ -3065,12 +3052,7 @@ int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
-	rc = cil_evaluate_tunable_expr(tif->datum_expr, &result);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to evaluate expr stack at line %d of %s\n",
-				current->line, current->path);
-		goto exit;
-	}
+	result = __cil_evaluate_tunable_expr(tif->datum_expr->head);
 
 	if (current->cl_head != NULL && current->cl_head->flavor == CIL_CONDBLOCK) {
 		cb = current->cl_head->data;

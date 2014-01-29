@@ -46,8 +46,8 @@
 #include "cil_policy.h"
 #include "cil_verify.h"
 
-int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max);
-int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max);
+static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max);
+static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max);
 
 void cil_post_fc_fill_data(struct fc_data *fc, char *path)
 {
@@ -548,7 +548,7 @@ exit:
 	return rc;
 }
 
-int __cil_type_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int max)
+static int __cil_type_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int max)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *node = datum->nodes->head->data;
@@ -566,6 +566,7 @@ int __cil_type_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int 
 		ebitmap_init(bitmap);
 		if (ebitmap_set_bit(bitmap, type->value, 1)) {
 			cil_log(CIL_ERR, "Failed to set type bit\n");
+			ebitmap_destroy(bitmap);
 			goto exit;
 		}
 	} else {
@@ -573,6 +574,7 @@ int __cil_type_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int 
 		ebitmap_init(bitmap);
 		if (ebitmap_set_bit(bitmap, type->value, 1)) {
 			cil_log(CIL_ERR, "Failed to set type bit\n");
+			ebitmap_destroy(bitmap);
 			goto exit;
 		}
 	}
@@ -583,7 +585,7 @@ exit:
 	return rc;
 }
 
-int __cil_role_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int max)
+static int __cil_role_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int max)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *node = datum->nodes->head->data;
@@ -600,6 +602,7 @@ int __cil_role_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int 
 		ebitmap_init(bitmap);
 		if (ebitmap_set_bit(bitmap, role->value, 1)) {
 			cil_log(CIL_ERR, "Failed to set role bit\n");
+			ebitmap_destroy(bitmap);
 			goto exit;
 		}
 	}
@@ -610,13 +613,11 @@ exit:
 	return rc;
 }
 
-int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, __attribute__((unused)) int max)
+static int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, __attribute__((unused)) int max)
 {
-	int rc = SEPOL_ERR;
 	struct cil_tree_node *node = datum->nodes->head->data;
 	unsigned int value;
 
-	ebitmap_init(bitmap);
 	if (node->flavor == CIL_PERM) {
 		struct cil_perm *perm = (struct cil_perm *)datum;
 		value = perm->value;
@@ -625,11 +626,136 @@ int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, __at
 		value = perm->value;
 	}
 
+	ebitmap_init(bitmap);
 	if (ebitmap_set_bit(bitmap, value, 1)) {
-		rc = SEPOL_ERR;
 		cil_log(CIL_INFO, "Failed to set perm bit\n");
-		goto exit;
+		ebitmap_destroy(bitmap);
+		return SEPOL_ERR;
 	}
+
+	return SEPOL_OK;
+}
+
+static int __cil_expr_to_bitmap_helper(struct cil_list_item *curr, enum cil_flavor flavor, ebitmap_t *bitmap, int max)
+{
+	int rc = SEPOL_ERR;
+
+	if (curr->flavor == CIL_DATUM) {
+		switch (flavor) {
+		case CIL_TYPE:
+			rc = __cil_type_to_bitmap(curr->data, bitmap, max);
+			break;
+		case CIL_ROLE:
+			rc = __cil_role_to_bitmap(curr->data, bitmap, max);
+			break;
+		case CIL_PERM:
+			rc = __cil_perm_to_bitmap(curr->data, bitmap, max);
+			break;
+		default:
+			rc = SEPOL_ERR;
+		}
+	} else if (curr->flavor == CIL_LIST) {
+		struct cil_list *l = curr->data;
+		ebitmap_init(bitmap);
+		rc = __cil_expr_to_bitmap(l, bitmap, max);
+		if (rc != SEPOL_OK) {
+			ebitmap_destroy(bitmap);
+		}	
+	}
+
+	return rc;
+}
+
+static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
+{
+	int rc = SEPOL_ERR;
+	struct cil_list_item *curr;
+	enum cil_flavor flavor;
+	ebitmap_t tmp, b1, b2;
+
+	if (expr == NULL || expr->head == NULL) {
+		return SEPOL_OK;
+	}
+
+	curr = expr->head;
+	flavor = expr->flavor;
+
+	if (curr->flavor == CIL_OP) {
+		enum cil_flavor op = (enum cil_flavor)curr->data;
+
+		if (op == CIL_STAR) {
+			ebitmap_init(&b1); /* all zeros */
+			rc = ebitmap_not(&tmp, &b1, max);
+			ebitmap_destroy(&b1);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failed to Expand *\n");
+				ebitmap_destroy(&tmp);
+				goto exit;
+			}
+		} else {
+			rc = __cil_expr_to_bitmap_helper(curr->next, flavor, &b1, max);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failed to get first operand bitmap\n");
+				goto exit;
+			}
+
+			if (op == CIL_NOT) {
+				rc = ebitmap_not(&tmp, &b1, max);
+				ebitmap_destroy(&b1);
+				if (rc != SEPOL_OK) {
+					cil_log(CIL_INFO, "Failed to NOT bitmap\n");
+					ebitmap_destroy(&tmp);
+					goto exit;
+				}
+			} else {
+				rc = __cil_expr_to_bitmap_helper(curr->next->next, flavor, &b2, max);
+				if (rc != SEPOL_OK) {
+					cil_log(CIL_INFO, "Failed to get second operand bitmap\n");
+					goto exit;
+				}
+
+				if (op == CIL_OR) {
+					rc = ebitmap_or(&tmp, &b1, &b2);
+				} else if (op == CIL_AND) {
+					rc = ebitmap_and(&tmp, &b1, &b2);
+				} else if (op == CIL_XOR) {
+					rc = ebitmap_xor(&tmp, &b1, &b2);
+				} else {
+					rc = SEPOL_ERR;
+				}
+				ebitmap_destroy(&b1);
+				ebitmap_destroy(&b2);
+				if (rc != SEPOL_OK) {
+					cil_log(CIL_INFO, "Failed to apply operator to bitmaps\n");
+					ebitmap_destroy(&tmp);
+					goto exit;
+				}
+			}
+		}
+	} else {
+		ebitmap_init(&tmp);
+		for (;curr; curr = curr->next) {
+			rc = __cil_expr_to_bitmap_helper(curr, flavor, &b2, max);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failed to get operand in list\n");
+				ebitmap_destroy(&tmp);
+				goto exit;
+			}
+			b1 = tmp;
+			rc = ebitmap_or(&tmp, &b1, &b2);
+			ebitmap_destroy(&b1);
+			ebitmap_destroy(&b2);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failed to OR operands in list\n");
+				ebitmap_destroy(&tmp);
+				goto exit;
+			}
+
+		}
+	}
+
+	ebitmap_union(out, &tmp);
+	ebitmap_destroy(&tmp);
 
 	return SEPOL_OK;
 
@@ -637,192 +763,7 @@ exit:
 	return rc;
 }
 
-/* Evaluates postfix expression */
-int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
-{
-	int rc;
-	uint16_t pos = 0;
-	enum cil_flavor expr_flavor;
-	struct cil_list_item *item;
-	ebitmap_t bitmap;
-	ebitmap_t stack[COND_EXPR_MAXDEPTH];
-	unsigned is_list = CIL_TRUE;
-	unsigned consecutive = 0;
-
-	if (expr == NULL) {
-		return SEPOL_OK;
-	}
-
-	expr_flavor = expr->flavor;
-
-	cil_list_for_each(item, expr) {
-		if (item->flavor == CIL_OP) {
-			is_list = CIL_FALSE;
-			break;
-		}	
-	}
-
-	cil_list_for_each(item, expr) {
-		switch (item->flavor) {
-		case CIL_LIST:
-			rc = __cil_expr_to_bitmap(item->data, &bitmap, max);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-			stack[pos] = bitmap;
-			pos++;
-			consecutive++;
-			break;
-		case CIL_DATUM:
-			switch (expr_flavor) {
-			case CIL_TYPE:
-				rc = __cil_type_to_bitmap(item->data, &bitmap, max);
-				break;
-			case CIL_ROLE:
-				rc = __cil_role_to_bitmap(item->data, &bitmap, max);
-				break;
-			case CIL_PERM:
-				rc = __cil_perm_to_bitmap(item->data, &bitmap, max);
-				break;
-			default:
-				cil_log(CIL_ERR, "Unknown flavor (%d) for expression\n", expr_flavor);
-				goto exit;
-			}
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-			stack[pos] = bitmap;
-			pos++;
-			consecutive++;
-			break;
-		case CIL_OP: {
-			enum cil_flavor op_flavor = (enum cil_flavor)item->data;
-			consecutive = 0;
-			switch (op_flavor) {
-			case CIL_STAR: {
-				ebitmap_t all_zeros;
-				ebitmap_init(&all_zeros);
-				if (ebitmap_not(&bitmap, &all_zeros, max)) {
-					cil_log(CIL_INFO, "Failed to Expand *\n");
-					goto exit;
-				}
-				stack[pos] = bitmap;
-				pos++;
-				break;
-			}
-			case CIL_NOT:
-				if (pos < 1) {
-					cil_log(CIL_INFO, "Not enough operands for NOT operation\n");
-					goto exit;
-				}
-				if (ebitmap_not(&bitmap, &stack[pos - 1], max)) {
-					cil_log(CIL_INFO, "Failed to NOT bitmap\n");
-					goto exit;
-				}
-				ebitmap_destroy(&stack[pos - 1]);
-				stack[pos - 1] = bitmap;
-				break;
-			case CIL_OR:
-				if (pos < 2) {
-					cil_log(CIL_INFO, "Not enough operands for OR operation\n");
-					goto exit;
-				}
-				if (ebitmap_or(&bitmap, &stack[pos - 2], &stack[pos - 1])) {
-					cil_log(CIL_INFO, "Failed to OR attribute bitmaps\n");
-					goto exit;
-				}
-				ebitmap_destroy(&stack[pos - 2]);
-				ebitmap_destroy(&stack[pos - 1]);
-				stack[pos - 2] = bitmap;
-				pos--;
-				break;
-			case CIL_AND:
-				if (pos < 2) {
-					cil_log(CIL_INFO, "Not enough operands for AND operation\n");
-					goto exit;
-				}
-				if (ebitmap_and(&bitmap, &stack[pos - 2], &stack[pos - 1])) {
-					cil_log(CIL_INFO, "Failed to AND attribute bitmaps\n");
-					goto exit;
-				}
-				ebitmap_destroy(&stack[pos - 2]);
-				ebitmap_destroy(&stack[pos - 1]);
-				stack[pos - 2] = bitmap;
-				pos--;
-				break;
-			case CIL_XOR:
-				if (pos < 2) {
-					cil_log(CIL_INFO, "Not enough operands for XOR operation\n");
-					goto exit;
-				}
-				if (ebitmap_xor(&bitmap, &stack[pos - 2], &stack[pos - 1])) {
-					cil_log(CIL_INFO, "Failed to XOR attribute bitmaps\n");
-					goto exit;
-				}
-				ebitmap_destroy(&stack[pos - 2]);
-				ebitmap_destroy(&stack[pos - 1]);
-				stack[pos - 2] = bitmap;
-				pos--;
-				break;
-			default:
-				if (op_flavor == CIL_EQ || op_flavor == CIL_NEQ) {
-					cil_log(CIL_ERR, "Equality operator not allowed in this expression\n");
-					goto exit;	
-				} else if (op_flavor == CIL_CONS_DOM || op_flavor == CIL_CONS_DOMBY || op_flavor == CIL_CONS_INCOMP) {
-					cil_log(CIL_ERR, "Constraint operator not allowed in this expression\n");
-					goto exit;
-				} else {
-					cil_log(CIL_ERR, "Unrecognized operation in expression\n");
-					goto exit;
-					break;
-				}
-			}
-			break;
-		}
-		case CIL_CONS_OPERAND:
-			cil_log(CIL_ERR, "Constraint operand not allowed in this expression\n");
-			goto exit;
-			break;
-		default:
-			cil_log(CIL_ERR, "Unrecognized flavor in expression\n");
-			goto exit;
-			break;
-		}
-
-		if (is_list && consecutive == 2) {
-			/* implicit OR for lists */
-			if (ebitmap_or(&bitmap, &stack[pos - 2], &stack[pos - 1])) {
-				cil_log(CIL_INFO, "Failed to OR attribute bitmaps\n");
-				goto exit;
-			}
-			ebitmap_destroy(&stack[pos - 2]);
-			ebitmap_destroy(&stack[pos - 1]);
-			stack[pos - 2] = bitmap;
-			pos--;
-			consecutive = 1;
-		}
-	}
-
-	if (pos > 1) {
-		cil_log(CIL_INFO, "Not all operands were used in expression\n");
-		goto exit;
-	}
-
-	ebitmap_init(out);
-	ebitmap_union(out, &stack[0]);
-	ebitmap_destroy(&stack[0]);
-
-	return SEPOL_OK;
-
-exit:
-	while (pos > 0) {
-		ebitmap_destroy(&stack[pos-1]);
-		pos--;
-	}
-	return SEPOL_ERR;
-}
-
-int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max)
+static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *expr;
@@ -835,9 +776,12 @@ int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int ma
 
 	cil_list_for_each(expr, expr_list) {
 		ebitmap_t bitmap;
-		rc = __cil_expr_to_bitmap(expr->data, &bitmap, max);
+		struct cil_list *l = (struct cil_list *)expr->data;
+		ebitmap_init(&bitmap);
+		rc = __cil_expr_to_bitmap(l, &bitmap, max);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Failed to expand expression list to bitmap\n");
+			ebitmap_destroy(&bitmap);
 			goto exit;
 		}
 		ebitmap_union(out, &bitmap);
@@ -1087,8 +1031,10 @@ int __evaluate_perm_expression(struct cil_list *perms, symtab_t *class_symtab, s
 		return SEPOL_OK;
 	}
 
+	ebitmap_init(&bitmap);
 	rc = __cil_expr_to_bitmap(perms, &bitmap, num_perms);
 	if (rc != SEPOL_OK) {
+		ebitmap_destroy(&bitmap);
 		goto exit;
 	}
 

@@ -1513,87 +1513,152 @@ exit:
 	return SEPOL_ERR;
 }
 
-int cil_get_cond_expr(policydb_t *pdb, struct cil_list *expr, cond_node_t *cond_node, struct cil_tree_node *node)
-{
-	struct cil_list_item *item;
-	cond_expr_t *cond_expr = NULL;
-	cond_expr_t *cond_expr_tail = NULL;
+static int __cil_cond_expr_to_sepol_expr_helper(policydb_t *pdb, struct cil_list *cil_expr, cond_expr_t **head, cond_expr_t **tail);
 
-	if (expr->flavor != CIL_BOOL) {
-		cil_log(CIL_INFO, "Expected boolean expr at line %d of %s\n", node->line, node->path);
+static int __cil_cond_item_to_sepol_expr(policydb_t *pdb, struct cil_list_item *item, cond_expr_t **head, cond_expr_t **tail)
+{
+	if (item == NULL) {
+		goto exit;
+	} else if (item->flavor == CIL_DATUM) {
+		char *key = ((struct cil_symtab_datum *)item->data)->name;
+		cond_bool_datum_t *sepol_bool = hashtab_search(pdb->p_bools.table, key);
+		if (sepol_bool == NULL) {
+			cil_log(CIL_INFO, "Failed to find boolean\n");
+			goto exit;
+		}
+		*head = cil_malloc(sizeof(cond_expr_t));
+		(*head)->next = NULL;
+		(*head)->expr_type = COND_BOOL;
+		(*head)->bool = sepol_bool->s.value;
+		*tail = *head;
+	} else if (item->flavor == CIL_LIST) {
+		struct cil_list *l = item->data;
+		int rc = __cil_cond_expr_to_sepol_expr_helper(pdb, l, head, tail);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	} else {
 		goto exit;
 	}
 
-	cil_list_for_each(item, expr) {
-		char *key = NULL;
-		cond_bool_datum_t *sepol_bool = NULL;
-		cond_expr = cil_malloc(sizeof(*cond_expr));
-		memset(cond_expr, 0, sizeof(cond_expr_t));
-
-		switch (item->flavor) {
-		case CIL_LIST:
-			cil_log(CIL_INFO, "Sub expressions not allowed in conditional expression at line %d of %s\n", node->line, node->path);
-			break;
-		case CIL_DATUM:
-			cond_expr->expr_type = COND_BOOL;
-			key = ((struct cil_symtab_datum *)item->data)->name;
-			sepol_bool = hashtab_search(pdb->p_bools.table, key);
-			if (sepol_bool == NULL) {
-				cil_log(CIL_INFO, "Failed to find boolean at line %d of %s\n", node->line, node->path);
-				goto exit;
-			}
-			cond_expr->bool = sepol_bool->s.value;
-			break;
-		case CIL_OP: {
-			enum cil_flavor op_flavor = (enum cil_flavor)item->data;
-			switch (op_flavor) {
-			case CIL_NOT:
-				cond_expr->expr_type = COND_NOT;
-				break;
-			case CIL_OR:
-				cond_expr->expr_type = COND_OR;
-				break;
-			case CIL_AND:
-				cond_expr->expr_type = COND_AND;
-				break;
-			case CIL_XOR:
-				cond_expr->expr_type = COND_XOR;
-				break;
-			case CIL_EQ:
-				cond_expr->expr_type = COND_EQ;
-				break;
-			case CIL_NEQ:
-				cond_expr->expr_type = COND_NEQ;
-				break;
-			default:
-				cil_log(CIL_INFO, "Unknown booleanif operator at line %d of %s\n", node->line, node->path);
-				goto exit;
-			}
-			break;
-		}
-		case CIL_CONS_OPERAND:
-			cil_log(CIL_INFO, "Constraint operand not allowed in expression at line %d of %s\n", node->line, node->path);
-			goto exit;
-			break;
-		default:
-			cil_log(CIL_INFO, "Unknown flavor in expression at line %d of %s\n", node->line, node->path);
-			goto exit;
-			break;
-		}
-
-
-		if (cond_expr_tail == NULL) {
-			cond_node->expr = cond_expr;
-		} else {
-			cond_expr_tail->next = cond_expr;
-		}
-		cond_expr_tail = cond_expr;
-	}
 	return SEPOL_OK;
 
 exit:
-	cond_expr_destroy(cond_expr);
 	return SEPOL_ERR;
+}
+
+static int __cil_cond_expr_to_sepol_expr_helper(policydb_t *pdb, struct cil_list *cil_expr, cond_expr_t **head, cond_expr_t **tail)
+{
+	int rc = SEPOL_ERR;
+	struct cil_list_item *item = cil_expr->head;
+	enum cil_flavor flavor = cil_expr->flavor;
+	cond_expr_t *op, *h1, *h2, *t1, *t2;
+
+	if (flavor != CIL_BOOL) {
+		cil_log(CIL_INFO, "Expected boolean expression\n");
+		goto exit;
+	}
+
+	if (item == NULL) {
+		goto exit;
+	} else if (item->flavor == CIL_OP) {
+		enum cil_flavor cil_op = (enum cil_flavor)item->data;
+
+		op = cil_malloc(sizeof(*op));
+		op->bool = 0;
+		op->next = NULL;
+
+		switch (cil_op) {
+		case CIL_NOT:
+			op->expr_type = COND_NOT;
+			break;
+		case CIL_OR:
+			op->expr_type = COND_OR;
+			break;
+		case CIL_AND:
+			op->expr_type = COND_AND;
+			break;
+		case CIL_XOR:
+			op->expr_type = COND_XOR;
+			break;
+		case CIL_EQ:
+			op->expr_type = COND_EQ;
+			break;
+		case CIL_NEQ:
+			op->expr_type = COND_NEQ;
+			break;
+		default:
+			goto exit;
+		}
+
+		rc = __cil_cond_item_to_sepol_expr(pdb, item->next, &h1, &t1);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failed to get first operand of conditional expression\n");
+			free(op);
+			goto exit;
+		}
+
+		if (cil_op == CIL_NOT) {
+			*head = h1;
+			t1->next = op;
+			*tail = op;
+		} else {
+			rc = __cil_cond_item_to_sepol_expr(pdb, item->next->next, &h2, &t2);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failed to get second operand of conditional expression\n");
+				free(op);
+				cond_expr_destroy(h1);
+				goto exit;
+			}
+
+			*head = h1;
+			t1->next = h2;
+			t2->next = op;
+			*tail = op;
+		}
+	} else {
+		rc = __cil_cond_item_to_sepol_expr(pdb, item, &h1, &t1);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Failed to get initial item in conditional list\n");
+			goto exit;
+		}
+		*head = h1;
+		for (item = item->next; item; item = item->next) {
+			rc = __cil_cond_item_to_sepol_expr(pdb, item, &h2, &t2);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failed to get item in conditional list\n");
+				cond_expr_destroy(*head);
+				goto exit;
+			}
+			op = cil_malloc(sizeof(*op));
+			op->bool = 0;
+			op->next = NULL;
+			op->expr_type = COND_OR;
+			t1->next = h2;
+			t2->next = op;
+			t1 = op;
+		}
+		*tail = t1;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return SEPOL_ERR;
+}
+
+static int __cil_cond_expr_to_sepol_expr(policydb_t *pdb, struct cil_list *cil_expr, cond_expr_t **sepol_expr)
+{
+	int rc;
+	cond_expr_t *head, *tail;
+	
+	rc = __cil_cond_expr_to_sepol_expr_helper(pdb, cil_expr, &head, &tail);
+	if (rc != SEPOL_OK) {
+		return SEPOL_ERR;
+	}
+	*sepol_expr = head;
+
+	return SEPOL_OK;
 }
 
 int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_tree_node *node, struct cil_list *neverallows)
@@ -1614,8 +1679,9 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 		goto exit;
 	}
 	
-	rc = cil_get_cond_expr(pdb, cil_boolif->datum_expr, cond_node, node);
+	rc = __cil_cond_expr_to_sepol_expr(pdb, cil_boolif->datum_expr, &cond_node->expr);
 	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed to convert CIL conditional expression to sepol expression at line %d of %s\n", node->line, node->path);
 		goto exit;
 	}
 
@@ -1825,250 +1891,282 @@ exit:
 	return rc;
 }
 
-int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb, const struct cil_db *db,
-					const struct cil_list *cil_expr,
-					constraint_expr_t **sepol_expr)
+int __find_and_add_to_ebitmap(hashtab_t hash, char *key, ebitmap_t *bitmap)
 {
-	int rc = SEPOL_ERR;
-	struct cil_list_item *curr;
-	constraint_expr_t *new_expr = NULL;
-	constraint_expr_t *new_expr_node = NULL;
-	constraint_expr_t *curr_expr = NULL;
-
-	cil_list_for_each(curr, cil_expr) {
-
-		new_expr_node = cil_malloc(sizeof(*new_expr_node));
-		rc = constraint_expr_init(new_expr_node);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-
-		if (new_expr == NULL) {
-			new_expr = new_expr_node;
-		} else {
-			curr_expr->next = new_expr_node;
-		}
-		curr_expr = new_expr_node;
-
-		if (curr->flavor == CIL_LIST) {
-			struct cil_list *sub_expr = curr->data;
-			struct cil_list_item *l_item = sub_expr->head;
-			struct cil_list_item *r_item = l_item->next;
-			struct cil_list_item *op_item = r_item->next;
-			enum cil_flavor l_flavor = (enum cil_flavor)l_item->data;
-			enum cil_flavor op_flavor = (enum cil_flavor)op_item->data;
-
-			switch (op_flavor) {
-			case CIL_EQ:
-				curr_expr->op = CEXPR_EQ;
-				break;
-			case CIL_NEQ:
-				curr_expr->op = CEXPR_NEQ;
-				break;
-			case CIL_CONS_DOM:
-				curr_expr->op = CEXPR_DOM;
-				break;
-			case CIL_CONS_DOMBY:
-				curr_expr->op = CEXPR_DOMBY;
-				break;
-			case CIL_CONS_INCOMP:
-				curr_expr->op = CEXPR_INCOMP;
-				break;
-			default:
-				goto exit;
-				break;
-			}
-
-			switch (l_flavor) {
-			case CIL_CONS_U1:
-				curr_expr->attr = CEXPR_USER;
-				break;
-			case CIL_CONS_U2:
-				curr_expr->attr = CEXPR_USER | CEXPR_TARGET;
-				break;
-			case CIL_CONS_U3:
-				curr_expr->attr = CEXPR_USER | CEXPR_XTARGET;
-				break;
-			case CIL_CONS_R1:
-				curr_expr->attr = CEXPR_ROLE;
-				break;
-			case CIL_CONS_R2:
-				curr_expr->attr = CEXPR_ROLE | CEXPR_TARGET;
-				break;
-			case CIL_CONS_R3:
-				curr_expr->attr = CEXPR_ROLE | CEXPR_XTARGET;
-				break;
-			case CIL_CONS_T1:
-				curr_expr->attr = CEXPR_TYPE;
-				break;
-			case CIL_CONS_T2:
-				curr_expr->attr = CEXPR_TYPE | CEXPR_TARGET;
-				break;
-			case CIL_CONS_T3:
-				curr_expr->attr = CEXPR_TYPE | CEXPR_XTARGET;
-				break;
-			case CIL_CONS_L1: {
-				enum cil_flavor r_flavor = (enum cil_flavor)r_item->data;
-
-				if (r_flavor == CIL_CONS_L2) {
-					curr_expr->attr = CEXPR_L1L2;
-				} else if (r_flavor == CIL_CONS_H1) {
-					curr_expr->attr = CEXPR_L1H1;
-				} else {
-					curr_expr->attr = CEXPR_L1H2;
-				}
-				break;
-			}
-			case CIL_CONS_L2:
-				curr_expr->attr = CEXPR_L2H2;
-				break;
-			case CIL_CONS_H1: {
-				enum cil_flavor r_flavor = (enum cil_flavor)r_item->data;
-				if (r_flavor == CIL_CONS_L2) {
-					curr_expr->attr = CEXPR_H1L2;
-				} else {
-					curr_expr->attr = CEXPR_H1H2;
-				}
-				break;
-			}
-			default:
-				goto exit;
-				break;
-			}
-
-			if (r_item->flavor == CIL_DATUM) {
-				uint32_t value = 0;
-				struct cil_symtab_datum *datum = r_item->data;
-				struct cil_tree_node *node = datum->nodes->head->data;
-				char *key = datum->name;
-				enum cil_flavor flavor = node->flavor;
-
-				curr_expr->expr_type = CEXPR_NAMES;
-
-				switch (sub_expr->flavor) {
-				case CIL_USER: {
-					user_datum_t *sepol_user = hashtab_search(pdb->p_users.table, key);
-					if (sepol_user == NULL) {
-						goto exit;
-					}
-					value = sepol_user->s.value;
-					break;
-				}
-				case CIL_ROLE: {
-					type_datum_t *sepol_role;
-
-					if (flavor == CIL_ROLEATTRIBUTE) {
-						struct cil_roleattribute *cil_attr = (struct cil_roleattribute*)datum;
-						ebitmap_node_t *rnode;
-						unsigned int i;
-
-						ebitmap_for_each_bit(cil_attr->roles, rnode, i) {
-							struct cil_role *cil_role = NULL;
-
-							if (!ebitmap_get_bit(cil_attr->roles, i)) {
-								continue;
-							}
-
-							cil_role = db->val_to_role[i];
-							key = cil_role->datum.name;
-							sepol_role = hashtab_search(pdb->p_roles.table, key);
-							if (sepol_role == NULL) {
-								goto exit;
-							}
-							value = sepol_role->s.value;
-							if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
-								goto exit;
-							}
-						}
-					} else {
-						sepol_role = hashtab_search(pdb->p_roles.table, key);
-						if (sepol_role == NULL) {
-							goto exit;
-						}
-						value = sepol_role->s.value;
-						if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
-							goto exit;
-						}
-					}
-					break;
-				}
-				case CIL_TYPE: {
-					type_datum_t *sepol_type;
-
-					if (flavor == CIL_TYPEATTRIBUTE) {
-						struct cil_typeattribute *cil_attr = (struct cil_typeattribute*)datum;
-						ebitmap_node_t *tnode;
-						unsigned int i;
-
-						ebitmap_for_each_bit(cil_attr->types, tnode, i) {
-							struct cil_type *cil_type = NULL;
-
-							if (!ebitmap_get_bit(cil_attr->types, i)) {
-								continue;
-							}
-
-							cil_type = db->val_to_type[i];
-							key = cil_type->datum.name;
-							sepol_type = hashtab_search(pdb->p_types.table, key);
-							if (sepol_type == NULL) {
-								goto exit;
-							}
-							value = sepol_type->s.value;;
-							if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
-								goto exit;
-							}
-						}
-					} else {
-						sepol_type = hashtab_search(pdb->p_types.table, key);
-						if (sepol_type == NULL) {
-							goto exit;
-						}
-						value = sepol_type->s.value;
-						if (ebitmap_set_bit(&curr_expr->names, value - 1, 1)) {
-							goto exit;
-						}
-					}
-					break;
-				}
-				default:
-					goto exit;
-					break;
-				}
-			} else {
-				curr_expr->expr_type = CEXPR_ATTR;
-			}
-		} else {
-			struct cil_list_item *op_item = curr;
-			enum cil_flavor op_flavor = (enum cil_flavor)op_item->data;
-
-			switch (op_flavor) {
-			case CIL_NOT:
-				curr_expr->expr_type = CEXPR_NOT;
-				break;
-			case CIL_AND:
-				curr_expr->expr_type = CEXPR_AND;
-				break;
-			case CIL_OR:
-				curr_expr->expr_type = CEXPR_OR;
-				break;
-			default:
-				goto exit;
-				break;
-			}
-		}
+	symtab_datum_t *datum = hashtab_search(hash, key);
+	if (datum == NULL) {
+		return SEPOL_ERR;
+	}
+	if (ebitmap_set_bit(bitmap, datum->value - 1, 1)) {
+		return SEPOL_ERR;
 	}
 
-	*sepol_expr = new_expr;
+	return SEPOL_OK;
+}
+
+int __cil_constrain_expr_datum_to_sepol_expr(policydb_t *pdb, const struct cil_db *db, struct cil_list_item *item, enum cil_flavor expr_flavor, constraint_expr_t *expr)
+{
+	int rc = SEPOL_ERR;
+	struct cil_symtab_datum *datum = item->data;
+
+	if (expr_flavor == CIL_USER) {
+		rc = __find_and_add_to_ebitmap(pdb->p_users.table, datum->name, &expr->names);
+		if (rc != SEPOL_OK) goto exit;
+
+	} else if (expr_flavor == CIL_ROLE) {
+		struct cil_tree_node *node = datum->nodes->head->data;
+		if (node->flavor == CIL_ROLEATTRIBUTE) {
+			struct cil_roleattribute *cil_attr = (struct cil_roleattribute*)datum;
+			ebitmap_node_t *rnode;
+			unsigned int i;
+
+			ebitmap_for_each_bit(cil_attr->roles, rnode, i) {
+				struct cil_role *cil_role = NULL;
+				if (!ebitmap_get_bit(cil_attr->roles, i)) continue;
+
+				cil_role = db->val_to_role[i];
+				rc = __find_and_add_to_ebitmap(pdb->p_roles.table, cil_role->datum.name, &expr->names);
+				if (rc != SEPOL_OK) goto exit;
+			}
+		} else {
+			rc = __find_and_add_to_ebitmap(pdb->p_roles.table, datum->name, &expr->names);
+			if (rc != SEPOL_OK) goto exit;
+		}
+
+	} else if (expr_flavor == CIL_TYPE) {
+		struct cil_tree_node *node = datum->nodes->head->data;
+		if (node->flavor == CIL_TYPEATTRIBUTE) {
+			struct cil_typeattribute *cil_attr = (struct cil_typeattribute*)datum;
+			ebitmap_node_t *tnode;
+			unsigned int i;
+
+			ebitmap_for_each_bit(cil_attr->types, tnode, i) {
+				struct cil_type *cil_type = NULL;
+				if (!ebitmap_get_bit(cil_attr->types, i)) continue;
+
+				cil_type = db->val_to_type[i];
+				rc = __find_and_add_to_ebitmap(pdb->p_types.table, cil_type->datum.name, &expr->names);
+				if (rc != SEPOL_OK) goto exit;
+			}
+		} else {
+			rc = __find_and_add_to_ebitmap(pdb->p_types.table, datum->name, &expr->names);
+			if (rc != SEPOL_OK) goto exit;
+		}
+	} else {
+		goto exit;
+	}
 
 	return SEPOL_OK;
 
 exit:
-	while (new_expr != NULL) {
-		curr_expr = new_expr->next;
-		constraint_expr_destroy(new_expr);
-		new_expr = curr_expr;
-	}
 	return SEPOL_ERR;
+}
+
+int __cil_constrain_expr_leaf_to_sepol_expr(policydb_t *pdb, const struct cil_db *db, struct cil_list_item *op_item, enum cil_flavor expr_flavor, constraint_expr_t *expr)
+{
+	int rc = SEPOL_ERR;
+	struct cil_list_item *l_item = op_item->next;
+	struct cil_list_item *r_item = op_item->next->next;
+	
+	enum cil_flavor l_operand = (enum cil_flavor)l_item->data;
+
+	switch (l_operand) {
+	case CIL_CONS_U1:
+		expr->attr = CEXPR_USER;
+		break;
+	case CIL_CONS_U2:
+		expr->attr = CEXPR_USER | CEXPR_TARGET;
+		break;
+	case CIL_CONS_U3:
+		expr->attr = CEXPR_USER | CEXPR_XTARGET;
+		break;
+	case CIL_CONS_R1:
+		expr->attr = CEXPR_ROLE;
+		break;
+	case CIL_CONS_R2:
+		expr->attr = CEXPR_ROLE | CEXPR_TARGET;
+		break;
+	case CIL_CONS_R3:
+		expr->attr = CEXPR_ROLE | CEXPR_XTARGET;
+		break;
+	case CIL_CONS_T1:
+		expr->attr = CEXPR_TYPE;
+		break;
+	case CIL_CONS_T2:
+		expr->attr = CEXPR_TYPE | CEXPR_TARGET;
+		break;
+	case CIL_CONS_T3:
+		expr->attr = CEXPR_TYPE | CEXPR_XTARGET;
+		break;
+	case CIL_CONS_L1: {
+		enum cil_flavor r_operand = (enum cil_flavor)r_item->data;
+
+		if (r_operand == CIL_CONS_L2) {
+			expr->attr = CEXPR_L1L2;
+		} else if (r_operand == CIL_CONS_H1) {
+			expr->attr = CEXPR_L1H1;
+		} else {
+			expr->attr = CEXPR_L1H2;
+		}
+		break;
+	}
+	case CIL_CONS_L2:
+		expr->attr = CEXPR_L2H2;
+		break;
+	case CIL_CONS_H1: {
+		enum cil_flavor r_operand = (enum cil_flavor)r_item->data;
+		if (r_operand == CIL_CONS_L2) {
+			expr->attr = CEXPR_H1L2;
+		} else {
+			expr->attr = CEXPR_H1H2;
+		}
+		break;
+	}
+	default:
+		goto exit;
+		break;
+	}
+
+	if (r_item->flavor == CIL_CONS_OPERAND) {
+		expr->expr_type = CEXPR_ATTR;
+	} else {
+		expr->expr_type = CEXPR_NAMES;
+		if (r_item->flavor == CIL_DATUM) {
+			rc = __cil_constrain_expr_datum_to_sepol_expr(pdb, db, r_item, expr_flavor, expr);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		} else if (r_item->flavor == CIL_LIST) {
+			struct cil_list *r_expr = r_item->data;
+			struct cil_list_item *curr;
+			cil_list_for_each(curr, r_expr) {
+				rc = __cil_constrain_expr_datum_to_sepol_expr(pdb, db, curr, expr_flavor, expr);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+			}
+		} else {
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int __cil_constrain_expr_to_sepol_expr_helper(policydb_t *pdb, const struct cil_db *db, const struct cil_list *cil_expr, constraint_expr_t **head, constraint_expr_t **tail)
+{
+	int rc = SEPOL_ERR;
+	struct cil_list_item *item;
+	enum cil_flavor flavor;
+	constraint_expr_t *op, *h1, *h2, *t1, *t2;
+	int is_leaf = CIL_FALSE;
+
+	if (cil_expr == NULL) {
+		return SEPOL_ERR;
+	}
+
+	item = cil_expr->head;
+	flavor = cil_expr->flavor;
+
+	op = cil_malloc(sizeof(constraint_expr_t));
+	rc = constraint_expr_init(op);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	enum cil_flavor cil_op = (enum cil_flavor)item->data;
+	switch (cil_op) {
+	case CIL_NOT:
+		op->expr_type = CEXPR_NOT;
+		break;
+	case CIL_AND:
+		op->expr_type = CEXPR_AND;
+		break;
+	case CIL_OR:
+		op->expr_type = CEXPR_OR;
+		break;
+	case CIL_EQ:
+		op->op = CEXPR_EQ;
+		is_leaf = CIL_TRUE;
+		break;
+	case CIL_NEQ:
+		op->op = CEXPR_NEQ;
+		is_leaf = CIL_TRUE;
+		break;
+	case CIL_CONS_DOM:
+		op->op = CEXPR_DOM;
+		is_leaf = CIL_TRUE;
+		break;
+	case CIL_CONS_DOMBY:
+		op->op = CEXPR_DOMBY;
+		is_leaf = CIL_TRUE;
+		break;
+	case CIL_CONS_INCOMP:
+		op->op = CEXPR_INCOMP;
+		is_leaf = CIL_TRUE;
+		break;
+	default:
+		goto exit;
+	}
+
+	if (is_leaf == CIL_TRUE) {
+		rc = __cil_constrain_expr_leaf_to_sepol_expr(pdb, db, item, flavor, op);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		*head = op;
+		*tail = op;
+	} else if (cil_op == CIL_NOT) {
+		struct cil_list *l_expr = item->next->data;
+		rc = __cil_constrain_expr_to_sepol_expr_helper(pdb, db, l_expr, &h1, &t1);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		t1->next = op;
+		*head = h1;
+		*tail = op;
+	} else {
+		struct cil_list *l_expr = item->next->data;
+		struct cil_list *r_expr = item->next->next->data;
+		rc = __cil_constrain_expr_to_sepol_expr_helper(pdb, db, l_expr, &h1, &t1);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		rc = __cil_constrain_expr_to_sepol_expr_helper(pdb, db, r_expr, &h2, &t2);
+		if (rc != SEPOL_OK) {
+			constraint_expr_destroy(h1);
+			goto exit;
+		}
+		t1->next = h2;
+		t2->next = op;
+		*head = h1;
+		*tail = op;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	constraint_expr_destroy(op);
+	return SEPOL_ERR;
+}
+
+int __cil_constrain_expr_to_sepol_expr(policydb_t *pdb, const struct cil_db *db, const struct cil_list *cil_expr, constraint_expr_t **sepol_expr)
+{
+	int rc;
+	constraint_expr_t *head, *tail;
+
+	rc = __cil_constrain_expr_to_sepol_expr_helper(pdb, db, cil_expr, &head, &tail);
+	if (rc != SEPOL_OK) {
+		return SEPOL_ERR;
+	}
+
+	*sepol_expr = head;
+
+	return SEPOL_OK;
 }
 
 int cil_constrain_to_policydb_helper(policydb_t *pdb, const struct cil_db *db, char *key, struct cil_list *perms, struct cil_list *expr)
