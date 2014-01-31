@@ -282,8 +282,8 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 			case CIL_NOT:
 				op_str = CIL_KEY_NOT;
 				break;
-			case CIL_STAR:
-				op_str = CIL_KEY_STAR;
+			case CIL_ALL:
+				op_str = CIL_KEY_ALL;
 				break;
 			case CIL_EQ:
 				op_str = CIL_KEY_EQ;
@@ -959,8 +959,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			}
 			return;
 		}
-		case CIL_STAR:
-			cil_log(CIL_INFO, "*");
+		case CIL_ALL:
+			cil_log(CIL_INFO, "all");
 			return;
 		case CIL_AND:
 			cil_log(CIL_INFO, "&&");

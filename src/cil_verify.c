@@ -164,7 +164,7 @@ int cil_verify_expr_syntax(struct cil_tree_node *current, enum cil_flavor op, en
 			goto exit;
 		}
 		break;
-	case CIL_STAR:
+	case CIL_ALL:
 		if (expr_flavor == CIL_BOOL || expr_flavor == CIL_TUNABLE) {
 			cil_log(CIL_ERR,"Invalid operator (%s) for boolean or tunable expression\n", current->data);
 			goto exit;

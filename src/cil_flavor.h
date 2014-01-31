@@ -102,7 +102,7 @@ enum cil_flavor {
 	CIL_TUNABLEIFNDEF,
 
 	CIL_OP,
-	CIL_STAR,
+	CIL_ALL,
 	CIL_AND,
 	CIL_OR,
 	CIL_XOR,

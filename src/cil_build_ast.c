@@ -2376,7 +2376,7 @@ static enum cil_flavor __cil_get_expr_operator_flavor(const char *op)
 	else if (!strcmp(op, CIL_KEY_EQ))   return CIL_EQ;   /* Only conditional */
 	else if (!strcmp(op, CIL_KEY_NEQ))  return CIL_NEQ;
 	else if (!strcmp(op, CIL_KEY_XOR))  return CIL_XOR;
-	else if (!strcmp(op, CIL_KEY_STAR)) return CIL_STAR; /* Only set */
+	else if (!strcmp(op, CIL_KEY_ALL))  return CIL_ALL; /* Only set */
 	else return CIL_NONE;
 }
 
@@ -2404,7 +2404,7 @@ static int __cil_fill_expr_helper(struct cil_tree_node *current, enum cil_flavor
 		current = current->next;
 	}
 
-	if (op == CIL_NONE || op == CIL_STAR) {
+	if (op == CIL_NONE || op == CIL_ALL) {
 		(*depth)++;
 	}
 

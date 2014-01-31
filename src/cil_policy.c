@@ -501,8 +501,8 @@ void cil_perms_to_policy(FILE **file_arr, uint32_t file_index, struct cil_list *
 			case CIL_NOT:
 				op_str = CIL_KEY_NOT;
 				break;
-			case CIL_STAR:
-				op_str = CIL_KEY_STAR;
+			case CIL_ALL:
+				op_str = CIL_KEY_ALL;
 				break;
 			case CIL_XOR:
 				op_str = CIL_KEY_XOR;
@@ -720,8 +720,8 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 			case CIL_NOT:
 				op_str = CIL_KEY_NOT;
 				break;
-			case CIL_STAR:
-				op_str = CIL_KEY_STAR;
+			case CIL_ALL:
+				op_str = CIL_KEY_ALL;
 				break;
 			case CIL_EQ:
 				op_str = CIL_KEY_EQ;
