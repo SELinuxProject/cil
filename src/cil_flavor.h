@@ -33,7 +33,8 @@
 /*
 	Tree/list node types
 */
-#define CIL_MIN_DECLARATIVE	500
+#define CIL_MIN_OP_OPERANDS 1000
+#define CIL_MIN_DECLARATIVE 2000
 
 enum cil_flavor {
 	CIL_NONE = 0,
@@ -101,7 +102,20 @@ enum cil_flavor {
 	CIL_TUNABLEIFDEF,
 	CIL_TUNABLEIFNDEF,
 
-	CIL_OP,
+/*
+ *          boolean  constraint  set
+ *  dom                  X
+ *  domby                X
+ *  incomp               X
+ *  eq         X         X
+ *  ne         X         X
+ *  and        X         X        X
+ *  not        X         X        X
+ *  or         X         X        X
+ *  xor        X                  X
+ *  all                           X
+*/
+	CIL_OP = CIL_MIN_OP_OPERANDS,
 	CIL_ALL,
 	CIL_AND,
 	CIL_OR,
