@@ -126,6 +126,8 @@ int cil_gen_condblock(struct cil_db *db, struct cil_tree_node *parse_current, st
 void cil_destroy_condblock(struct cil_condblock *cb);
 int cil_gen_alias(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
 void cil_destroy_alias(struct cil_alias *alias);
+int cil_gen_aliasactual(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
+void cil_destroy_aliasactual(struct cil_aliasactual *aliasactual);
 int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_typeattributeset(struct cil_typeattributeset *attrtypes);
 int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

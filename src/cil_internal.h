@@ -120,6 +120,7 @@ enum cil_pass {
 #define CIL_KEY_TYPEMEMBER		"typemember"
 #define CIL_KEY_TYPEATTRIBUTESET	"typeattributeset"
 #define CIL_KEY_TYPEALIAS		"typealias"
+#define CIL_KEY_TYPEALIASACTUAL "typealiasactual"
 #define CIL_KEY_TYPEBOUNDS		"typebounds"
 #define CIL_KEY_TYPEPERMISSIVE		"typepermissive"
 #define CIL_KEY_MACRO			"macro"
@@ -138,8 +139,10 @@ enum cil_pass {
 #define CIL_KEY_FSUSE			"fsuse"
 #define CIL_KEY_SENSITIVITY		"sensitivity"
 #define CIL_KEY_SENSALIAS		"sensitivityalias"
+#define CIL_KEY_SENSALIASACTUAL "sensitivityaliasactual"
 #define CIL_KEY_CATEGORY		"category"
 #define CIL_KEY_CATALIAS		"categoryalias"
+#define CIL_KEY_CATALIASACTUAL  "categoryaliasactual"
 #define CIL_KEY_CATRANGE		"categoryrange"
 #define CIL_KEY_CATSET			"categoryset"
 #define CIL_KEY_CATORDER		"categoryorder"
@@ -356,8 +359,12 @@ struct cil_classcommon {
 
 struct cil_alias {
 	struct cil_symtab_datum datum;
-	char *actual_str;
 	void *actual;
+};
+
+struct cil_aliasactual {
+	char *alias_str;
+	char *actual_str;
 };
 
 struct cil_sid {
@@ -846,6 +853,7 @@ void cil_roletype_init(struct cil_roletype **roletype);
 void cil_typeattribute_init(struct cil_typeattribute **attribute);
 void cil_typeattributeset_init(struct cil_typeattributeset **attrset);
 void cil_alias_init(struct cil_alias **alias);
+void cil_aliasactual_init(struct cil_aliasactual **aliasactual);
 void cil_typebounds_init(struct cil_typebounds **typebnds);
 void cil_typepermissive_init(struct cil_typepermissive **typeperm);
 void cil_name_init(struct cil_name **name);

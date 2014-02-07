@@ -343,6 +343,11 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_CATALIAS:
 		cil_destroy_alias(*data);
 		break;
+	case CIL_TYPEALIASACTUAL:
+	case CIL_SENSALIASACTUAL:
+	case CIL_CATALIASACTUAL:
+		cil_destroy_aliasactual(*data);
+		break;
 	case CIL_TYPEATTRIBUTESET:
 		cil_destroy_typeattributeset(*data);
 		break;
@@ -760,6 +765,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_TUNABLE;
 	case CIL_TYPEALIAS:
 		return CIL_KEY_TYPEALIAS;
+	case CIL_TYPEALIASACTUAL:
+		return CIL_KEY_TYPEALIASACTUAL;
 	case CIL_CONTEXT:
 		return CIL_KEY_CONTEXT;
 	case CIL_LEVEL:
@@ -772,8 +779,12 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_CATEGORY;
 	case CIL_SENSALIAS:
 		return CIL_KEY_SENSALIAS;
+	case CIL_SENSALIASACTUAL:
+		return CIL_KEY_SENSALIASACTUAL;
 	case CIL_CATALIAS:
 		return CIL_KEY_CATALIAS;
+	case CIL_CATALIASACTUAL:
+		return CIL_KEY_CATALIASACTUAL;
 	case CIL_CATRANGE:
 		return CIL_KEY_CATRANGE;
 	case CIL_CATSET:
@@ -1582,9 +1593,17 @@ void cil_alias_init(struct cil_alias **alias)
 {
 	*alias = cil_malloc(sizeof(**alias));
 
-	cil_symtab_datum_init(&(*alias)->datum);
-	(*alias)->actual_str = NULL;
 	(*alias)->actual = NULL;
+
+	cil_symtab_datum_init(&(*alias)->datum);
+}
+
+void cil_aliasactual_init(struct cil_aliasactual **aliasactual)
+{
+	*aliasactual = cil_malloc(sizeof(**aliasactual));
+
+	(*aliasactual)->alias_str = NULL;
+	(*aliasactual)->actual_str = NULL;
 }
 
 void cil_typebounds_init(struct cil_typebounds **typebnds)

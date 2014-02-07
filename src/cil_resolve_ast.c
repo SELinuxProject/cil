@@ -436,25 +436,38 @@ int cil_reset_typeattributeset(struct cil_tree_node *current, __attribute__((unu
 	return SEPOL_OK;
 }
 
-int cil_resolve_alias(struct cil_tree_node *current, void *extra_args, 
-					  enum cil_flavor flavor)
+int cil_resolve_aliasactual(struct cil_tree_node *current, void *extra_args, enum cil_flavor flavor)
 {
-	enum cil_sym_index sym_index;
-	struct cil_symtab_datum *datum = NULL;
-	struct cil_alias *alias = current->data;
 	int rc = SEPOL_ERR;
+	enum cil_sym_index sym_index;
+	struct cil_aliasactual *aliasactual = current->data;
+	struct cil_symtab_datum *alias_datum = NULL;
+	struct cil_symtab_datum *actual_datum = NULL;
+	struct cil_alias *alias;
 
 	rc = cil_flavor_to_symtab_index(flavor, &sym_index);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-
-	rc = cil_resolve_name(current, alias->actual_str, sym_index, extra_args, &datum);
+	rc = cil_resolve_name(current, aliasactual->alias_str, sym_index, extra_args, &alias_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	alias->actual = datum;
+	rc = cil_resolve_name(current, aliasactual->actual_str, sym_index, extra_args, &actual_datum);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	alias = (struct cil_alias *)alias_datum;
+
+	if (alias->actual != NULL) {
+		cil_log(CIL_ERR, "Alias cannot bind more than one value\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	alias->actual = actual_datum;
 
 	return SEPOL_OK;
 
@@ -470,6 +483,11 @@ int cil_resolve_alias_to_actual(struct cil_tree_node *current, enum cil_flavor f
 	struct cil_tree_node *a1_node = NULL;
 	int steps = 0;
 	int limit = 2;
+
+	if (alias->actual == NULL) {
+		cil_log(CIL_ERR, "Alias declared but not used at line %d of %s\n",current->line, current->path);
+		return SEPOL_ERR;
+	}
 
 	a1_node = a1->datum.nodes->head->data;
 
@@ -3148,14 +3166,14 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		break;
 	case CIL_PASS_ALIAS1:
 		switch (node->flavor) {
-		case CIL_TYPEALIAS:
-			rc = cil_resolve_alias(node, args, CIL_TYPE);
+		case CIL_TYPEALIASACTUAL:
+			rc = cil_resolve_aliasactual(node, args, CIL_TYPE);
 			break;
-		case CIL_SENSALIAS:
-			rc = cil_resolve_alias(node, args, CIL_SENS);
+		case CIL_SENSALIASACTUAL:
+			rc = cil_resolve_aliasactual(node, args, CIL_SENS);
 			break;
-		case CIL_CATALIAS:
-			rc = cil_resolve_alias(node, args, CIL_CAT);
+		case CIL_CATALIASACTUAL:
+			rc = cil_resolve_aliasactual(node, args, CIL_CAT);
 			break;
 		default: 
 			break;

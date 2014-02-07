@@ -979,14 +979,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		case CIL_TYPEALIAS: {
 			struct cil_alias *alias = node->data;
-
-			if (alias->actual != NULL) {
-				struct cil_symtab_datum *datum = alias->actual;
-				cil_log(CIL_INFO, "TYPEALIAS: %s, type: %s\n", alias->datum.name, datum->name);
-			} else {
-				cil_log(CIL_INFO, "TYPEALIAS: %s, type: %s\n", alias->datum.name, alias->actual_str);
-			}
-
+			cil_log(CIL_INFO, "TYPEALIAS: %s\n", alias->datum.name);
+			return;
+		}
+		case CIL_TYPEALIASACTUAL: {
+			struct cil_aliasactual *aliasactual = node->data;
+			cil_log(CIL_INFO, "TYPEALIASACTUAL: type: %s, alias: %s\n", aliasactual->alias_str, aliasactual->actual_str);
 			return;
 		}
 		case CIL_TYPEBOUNDS: {
@@ -1152,12 +1150,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_SENSALIAS: {
 			struct cil_alias *alias = node->data;
-			if (alias->actual != NULL) {
-				struct cil_symtab_datum *datum = alias->actual;
-				cil_log(CIL_INFO, "SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, datum->name);
-			} else {
-				cil_log(CIL_INFO, "SENSITIVITYALIAS: %s, sensitivity: %s\n", alias->datum.name, alias->actual_str);
-			}
+			cil_log(CIL_INFO, "SENSITIVITYALIAS: %s\n", alias->datum.name);
+			return;
+		}
+		case CIL_SENSALIASACTUAL: {
+			struct cil_aliasactual *aliasactual = node->data;
+			cil_log(CIL_INFO, "SENSITIVITYALIAS: alias: %s, sensitivity: %s\n", aliasactual->alias_str, aliasactual->actual_str);
 
 			return;
 		}
@@ -1168,13 +1166,12 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_CATALIAS: {
 			struct cil_alias *alias = node->data;
-			if (alias->actual != NULL) {
-				struct cil_symtab_datum *datum = alias->actual;
-				cil_log(CIL_INFO, "CATEGORYALIAS: %s, category: %s\n", alias->datum.name, datum->name);
-			} else {
-				cil_log(CIL_INFO, "CATEGORYALIAS: %s, category: %s\n", alias->datum.name, alias->actual_str);
-			}
-
+			cil_log(CIL_INFO, "CATEGORYALIAS: %s\n", alias->datum.name);
+			return;
+		}
+		case CIL_CATALIASACTUAL: {
+			struct cil_aliasactual *aliasactual = node->data;
+			cil_log(CIL_INFO, "CATEGORYALIAS: alias %s, category: %s\n", aliasactual->alias_str, aliasactual->actual_str);
 			return;
 		}
 		case CIL_CATSET: {

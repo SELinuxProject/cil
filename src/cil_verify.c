@@ -804,7 +804,6 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 	struct cil_user *user = ctx->user;
 	struct cil_role *role = ctx->role;
 	struct cil_type *type = ctx->type;
-	struct cil_alias *alias = ctx->type;
 	struct cil_level *user_low = user->range->low;
 	struct cil_level *user_high = user->range->high;
 	struct cil_level *ctx_low = ctx->range->low;
@@ -835,20 +834,9 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 
 	if (role->types != NULL) {
 		if (!ebitmap_get_bit(role->types, type->value)) {
-			type = (struct cil_type *)alias->actual;
-			if (!type) {
-				cil_log(CIL_ERR, "Type %s is invalid for role %s\n", 
-					ctx->role_str, ctx->type_str);
-				rc = SEPOL_ERR;
-				goto exit;
-			} else if (!ebitmap_get_bit(role->types, type->value)) {
-				cil_log(CIL_ERR, "Type alias %s is invalid for role %s\n", 
-					ctx->role_str, ctx->type_str);
-				cil_log(CIL_ERR, "%s is an alias for %s\n", ctx->type_str, 
-					alias->actual_str);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
+			cil_log(CIL_ERR, "Type %s is invalid for role %s\n", ctx->type_str, ctx->role_str);
+			rc = SEPOL_ERR;
+			goto exit;
 		}
 	} else {
 		cil_log(CIL_ERR, "No types associated with role %s\n", ctx->role_str);

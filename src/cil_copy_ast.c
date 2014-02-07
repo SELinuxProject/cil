@@ -676,7 +676,22 @@ int cil_copy_alias(__attribute__((unused)) struct cil_db *db, void *data, void *
 	}
 
 	cil_alias_init(&new);
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
+int cil_copy_aliasactual(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused))symtab_t *symtab)
+{
+	struct cil_aliasactual *orig = data;
+	struct cil_aliasactual *new = NULL;
+
+	cil_aliasactual_init(&new);
+
+	new->alias_str = cil_strdup(orig->alias_str);
 	new->actual_str = cil_strdup(orig->actual_str);
+
 	*copy = new;
 
 	return SEPOL_OK;
@@ -1681,6 +1696,9 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_TYPEALIAS:
 		copy_func = &cil_copy_alias;
 		break;
+	case CIL_TYPEALIASACTUAL:
+		copy_func = &cil_copy_aliasactual;
+		break;
 	case CIL_ROLETRANSITION:
 		copy_func = &cil_copy_roletransition;
 		break;
@@ -1708,11 +1726,17 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_SENSALIAS:
 		copy_func = &cil_copy_alias;
 		break;
+	case CIL_SENSALIASACTUAL:
+		copy_func = &cil_copy_aliasactual;
+		break;
 	case CIL_CAT:
 		copy_func = &cil_copy_cat;
 		break;
 	case CIL_CATALIAS:
 		copy_func = &cil_copy_alias;
+		break;
+	case CIL_CATALIASACTUAL:
+		copy_func = &cil_copy_aliasactual;
 		break;
 	case CIL_CATRANGE:
 		copy_func = &cil_copy_catrange;
