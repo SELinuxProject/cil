@@ -85,7 +85,7 @@ int cil_copy_catrange(struct cil_db *db, void *data, void **copy, symtab_t *symt
 int cil_copy_catset(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_senscat(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_catorder(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-int cil_copy_dominance(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_sensitivityorder(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 void cil_copy_fill_level(struct cil_level *orig, struct cil_level *new);
 int cil_copy_level(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 void cil_copy_fill_levelrange(struct cil_levelrange *orig, struct cil_levelrange *new);

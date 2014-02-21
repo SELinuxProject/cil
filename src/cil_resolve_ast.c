@@ -53,7 +53,7 @@ struct cil_args_resolve {
 	struct cil_tree_node *macro;
 	struct cil_list *sidorder_lists;
 	struct cil_list *catorder_lists;
-	struct cil_list *dominance_lists;
+	struct cil_list *sensitivityorder_lists;
 };
 
 static struct cil_name * __cil_insert_name(struct cil_db *db, hashtab_key_t key, struct cil_tree_node *ast_node)
@@ -1628,11 +1628,11 @@ exit:
 	return rc;
 }
 
-int cil_resolve_dominance(struct cil_tree_node *current, void *extra_args)
+int cil_resolve_sensitivityorder(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_args_resolve *args = extra_args;
-	struct cil_list *dominance_list = args->dominance_lists;
-	struct cil_sens_dominates *sensorder = current->data;
+	struct cil_list *sensitivityorder_list = args->sensitivityorder_lists;
+	struct cil_sensorder *sensorder = current->data;
 	struct cil_list *new = NULL;
 	struct cil_list_item *curr = NULL;
 	struct cil_symtab_datum *datum = NULL;
@@ -1644,7 +1644,7 @@ int cil_resolve_dominance(struct cil_tree_node *current, void *extra_args)
 	cil_list_for_each(curr, sensorder->sens_list_str) {
 		rc = cil_resolve_name(current, (char *)curr->data, CIL_SYM_SENS, extra_args, &datum);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to resolve sensitivty &s in dominance\n", (char *)curr->data);
+			cil_log(CIL_ERR, "Failed to resolve sensitivty &s in sensitivityorder\n", (char *)curr->data);
 			goto exit;
 		}
 		cil_list_append(new, CIL_SENS, datum);
@@ -1653,7 +1653,7 @@ int cil_resolve_dominance(struct cil_tree_node *current, void *extra_args)
 	__cil_ordered_list_init(&ordered);
 	ordered->list = new;
 	ordered->node = current;
-	cil_list_append(dominance_list, CIL_DOMINANCE, ordered);
+	cil_list_append(sensitivityorder_list, CIL_SENSITIVITYORDER, ordered);
 
 	return SEPOL_OK;
 
@@ -3244,8 +3244,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_CATORDER:
 			rc = cil_resolve_catorder(node, args);
 			break;
-		case CIL_DOMINANCE:
-			rc = cil_resolve_dominance(node, args);
+		case CIL_SENSITIVITYORDER:
+			rc = cil_resolve_sensitivityorder(node, args);
 			break;
 		case CIL_BOOLEANIF:
 			rc = cil_resolve_boolif(node, args);
@@ -3699,11 +3699,11 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.macro = NULL;
 	extra_args.sidorder_lists = NULL;
 	extra_args.catorder_lists = NULL;
-	extra_args.dominance_lists = NULL;
+	extra_args.sensitivityorder_lists = NULL;
 
 	cil_list_init(&extra_args.sidorder_lists, CIL_LIST_ITEM);
 	cil_list_init(&extra_args.catorder_lists, CIL_LIST_ITEM);
-	cil_list_init(&extra_args.dominance_lists, CIL_LIST_ITEM);
+	cil_list_init(&extra_args.sensitivityorder_lists, CIL_LIST_ITEM);
 	for (pass = CIL_PASS_TIF; pass < CIL_PASS_NUM; pass++) {
 		extra_args.pass = pass;
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_first_child_helper, __cil_resolve_ast_last_child_helper, &extra_args);
@@ -3725,7 +3725,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 				goto exit;
 			}
 
-			db->dominance = __cil_ordered_lists_merge_all(&extra_args.dominance_lists);
+			db->sensitivityorder = __cil_ordered_lists_merge_all(&extra_args.sensitivityorder_lists);
 			rc = __cil_verify_ordered(current, CIL_SENS);
 			if (rc != SEPOL_OK) {
 				goto exit;
@@ -3745,10 +3745,10 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			if (pass >= CIL_PASS_MISC1) {
 				__cil_ordered_lists_reset(&extra_args.sidorder_lists);
 				__cil_ordered_lists_reset(&extra_args.catorder_lists);
-				__cil_ordered_lists_reset(&extra_args.dominance_lists);
+				__cil_ordered_lists_reset(&extra_args.sensitivityorder_lists);
 				cil_list_destroy(&db->sidorder, CIL_FALSE);
 				cil_list_destroy(&db->catorder, CIL_FALSE);
-				cil_list_destroy(&db->dominance, CIL_FALSE);
+				cil_list_destroy(&db->sensitivityorder, CIL_FALSE);
 			}
 
 			pass = CIL_PASS_CALL1;

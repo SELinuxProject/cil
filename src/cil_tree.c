@@ -1238,14 +1238,14 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			cil_log(CIL_INFO, " )\n");
 			return;
 		}
-		case CIL_DOMINANCE: {
-			struct cil_sens_dominates *dom = node->data;
+		case CIL_SENSITIVITYORDER: {
+			struct cil_sensorder *sensorder = node->data;
 			struct cil_list_item *sens;
 
-			cil_log(CIL_INFO, "DOMINANCE: (");
+			cil_log(CIL_INFO, "SENSITIVITYORDER: (");
 
-			if (dom->sens_list_str != NULL) {
-				cil_list_for_each(sens, dom->sens_list_str) {
+			if (sensorder->sens_list_str != NULL) {
+				cil_list_for_each(sens, sensorder->sens_list_str) {
 					if (sens->flavor == CIL_LIST) {
 						struct cil_list_item *sub;
 						cil_log(CIL_INFO, " (");

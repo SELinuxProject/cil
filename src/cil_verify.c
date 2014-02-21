@@ -374,7 +374,7 @@ int __cil_verify_ordered_node_helper(struct cil_tree_node *node, __attribute__((
 		} else if (node->flavor == CIL_SENS) {
 			struct cil_sens *sens = node->data;
 			if (sens->ordered == CIL_FALSE) {
-				cil_log(CIL_ERR, "Sensitivity %s not in dominance statement at line %d of %s\n", sens->datum.name, node->line, node->path);
+				cil_log(CIL_ERR, "Sensitivity %s not in sensitivityorder statement at line %d of %s\n", sens->datum.name, node->line, node->path);
 				return SEPOL_ERR;
 			}
 		}
@@ -538,13 +538,13 @@ exit:
 	return rc;
 }
 
-int __cil_verify_levelrange_dominance(struct cil_db *db, struct cil_sens *low, struct cil_sens *high)
+int __cil_verify_levelrange_sensitivityorder(struct cil_db *db, struct cil_sens *low, struct cil_sens *high)
 {
 	struct cil_list_item *curr;
 	int found = CIL_FALSE;
 	int rc = SEPOL_ERR;
 
-	cil_list_for_each(curr, db->dominance) {
+	cil_list_for_each(curr, db->sensitivityorder) {
 		if (curr->data == low) {
 			found = CIL_TRUE;
 		}
@@ -656,7 +656,7 @@ int __cil_verify_levelrange(struct cil_db *db, struct cil_levelrange *lr)
 {
 	int rc = SEPOL_ERR;
 
-	rc = __cil_verify_levelrange_dominance(db, lr->low->sens, lr->high->sens);
+	rc = __cil_verify_levelrange_sensitivityorder(db, lr->low->sens, lr->high->sens);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -814,7 +814,7 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 	struct cil_level *user_high = user->range->high;
 	struct cil_level *ctx_low = ctx->range->low;
 	struct cil_level *ctx_high = ctx->range->high;
-	struct cil_list *dominance = db->dominance;
+	struct cil_list *sensitivityorder = db->sensitivityorder;
 	struct cil_list_item *curr;
 	int found = CIL_FALSE;
 
@@ -858,7 +858,7 @@ int __cil_verify_context(struct cil_db *db, struct cil_context *ctx)
 		}
 	}
 
-	for (curr = dominance->head; curr != NULL; curr = curr->next) {
+	for (curr = sensitivityorder->head; curr != NULL; curr = curr->next) {
 		struct cil_sens *sens = curr->data;
 
 		if (found == CIL_FALSE) {

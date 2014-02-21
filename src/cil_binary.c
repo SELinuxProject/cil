@@ -769,7 +769,7 @@ exit:
 	return rc;
 }
 
-int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db)
+int cil_sensitivityorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
@@ -779,7 +779,7 @@ int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db)
 	level_datum_t *sepol_level = NULL;
 	mls_level_t *mls_level = NULL;
 
-	cil_list_for_each(curr, db->dominance) {
+	cil_list_for_each(curr, db->sensitivityorder) {
 		cil_sens = curr->data;
 		sepol_level = cil_malloc(sizeof(*sepol_level));
 		mls_level = cil_malloc(sizeof(*mls_level));
@@ -3498,7 +3498,7 @@ int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 			goto exit;
 		}
 
-		rc = cil_dominance_to_policydb(pdb, db);
+		rc = cil_sensitivityorder_to_policydb(pdb, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}

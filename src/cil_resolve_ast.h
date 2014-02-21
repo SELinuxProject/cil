@@ -61,7 +61,7 @@ int cil_resolve_rolebounds(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_sensalias(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_catalias(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args);
-int cil_resolve_dominance(struct cil_tree_node *current, void *extra_args);
+int cil_resolve_sensitivityorder(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_cat_list(struct cil_tree_node *current, struct cil_list *cat_list, struct cil_list *res_cat_list, void *extra_args);
 int cil_resolve_catset(struct cil_tree_node *current, struct cil_catset *catset, void *extra_args);
 int cil_resolve_catrange(struct cil_tree_node *current, struct cil_catrange *catrange, void *extra_args);

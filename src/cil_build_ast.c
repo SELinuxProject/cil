@@ -3667,7 +3667,7 @@ void cil_destroy_catorder(struct cil_catorder *catorder)
 	free(catorder);
 }
 
-int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_sensitivityorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
 		CIL_SYN_STRING,
@@ -3675,7 +3675,7 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_sens_dominates *dom = NULL;
+	struct cil_sensorder *sensorder = NULL;
 	int rc = SEPOL_ERR;
 
 	if (db == NULL || parse_current == NULL || ast_node == NULL) {
@@ -3687,36 +3687,36 @@ int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
-	cil_sens_dominates_init(&dom);
+	cil_sensorder_init(&sensorder);
 
-	rc = cil_fill_list(parse_current->next->cl_head, CIL_DOMINANCE, &dom->sens_list_str);
+	rc = cil_fill_list(parse_current->next->cl_head, CIL_SENSITIVITYORDER, &sensorder->sens_list_str);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	ast_node->data = dom;
-	ast_node->flavor = CIL_DOMINANCE;
+	ast_node->data = sensorder;
+	ast_node->flavor = CIL_SENSITIVITYORDER;
 
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad dominance declaration at line %d of %s\n", 
+	cil_log(CIL_ERR, "Bad sensitivityorder declaration at line %d of %s\n", 
 		parse_current->line, parse_current->path);
-	cil_destroy_dominance(dom);
+	cil_destroy_sensitivityorder(sensorder);
 	return rc;
 }
 
-void cil_destroy_dominance(struct cil_sens_dominates *dom)
+void cil_destroy_sensitivityorder(struct cil_sensorder *sensorder)
 {
-	if (dom == NULL) {
+	if (sensorder == NULL) {
 		return;
 	}
 
-	if (dom->sens_list_str != NULL) {
-		cil_list_destroy(&dom->sens_list_str, 1);
+	if (sensorder->sens_list_str != NULL) {
+		cil_list_destroy(&sensorder->sens_list_str, CIL_TRUE);
 	}
 
-	free(dom);
+	free(sensorder);
 }
 
 int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -5874,8 +5874,8 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	} else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
 		rc = cil_gen_catorder(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_DOMINANCE)) {
-		rc = cil_gen_dominance(db, parse_current, ast_node);
+	} else if (!strcmp(parse_current->data, CIL_KEY_SENSITIVITYORDER)) {
+		rc = cil_gen_sensitivityorder(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_SENSCAT)) {
 		rc = cil_gen_senscat(db, parse_current, ast_node);

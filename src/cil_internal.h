@@ -147,7 +147,7 @@ enum cil_pass {
 #define CIL_KEY_CATRANGE		"categoryrange"
 #define CIL_KEY_CATSET			"categoryset"
 #define CIL_KEY_CATORDER		"categoryorder"
-#define CIL_KEY_DOMINANCE		"dominance"
+#define CIL_KEY_SENSITIVITYORDER		"sensitivityorder"
 #define CIL_KEY_SENSCAT			"sensitivitycategory"
 #define CIL_KEY_LEVEL			"level"
 #define CIL_KEY_LEVELRANGE		"levelrange"
@@ -240,7 +240,7 @@ struct cil_db {
 	struct cil_type *selftype;
 	struct cil_list *sidorder;
 	struct cil_list *catorder;
-	struct cil_list *dominance;
+	struct cil_list *sensitivityorder;
 	struct cil_sort *netifcon;
 	struct cil_sort *genfscon;
 	struct cil_sort *filecon;
@@ -584,7 +584,7 @@ struct cil_sens {
 	uint32_t ordered;
 };
 
-struct cil_sens_dominates {
+struct cil_sensorder {
 	struct cil_list *sens_list_str;
 };
 
@@ -904,7 +904,7 @@ void cil_role_init(struct cil_role **role);
 void cil_type_init(struct cil_type **type);
 void cil_cat_init(struct cil_cat **cat);
 void cil_catorder_init(struct cil_catorder **catorder);
-void cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates);
+void cil_sensorder_init(struct cil_sensorder **sensorder);
 void cil_args_init(struct cil_args **args);
 void cil_call_init(struct cil_call **call);
 void cil_optional_init(struct cil_optional **optional);

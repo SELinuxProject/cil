@@ -152,8 +152,8 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 void cil_destroy_catset(struct cil_catset *catset);
 int cil_gen_catorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_catorder(struct cil_catorder *catorder);
-int cil_gen_dominance(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
-void cil_destroy_dominance(struct cil_sens_dominates *dom);
+int cil_gen_sensitivityorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_sensitivityorder(struct cil_sensorder *sensorder);
 int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_senscat(struct cil_senscat *senscat);
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

@@ -1347,9 +1347,9 @@ int cil_gen_policy(struct cil_db *db)
 		cil_multimap_insert(cats, item->data, NULL, CIL_CAT, 0);
 	}
 
-	if (db->dominance->head != NULL) {
-		fprintf(file_arr[SENS], "dominance { ");
-		cil_list_for_each(item, db->dominance) {
+	if (db->sensitivityorder->head != NULL) {
+		fprintf(file_arr[SENS], "sensitivityorder { ");
+		cil_list_for_each(item, db->sensitivityorder) {
 			fprintf(file_arr[SENS], "%s ", ((struct cil_sens*)item->data)->datum.name);
 		}
 		fprintf(file_arr[SENS], "};\n");

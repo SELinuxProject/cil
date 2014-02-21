@@ -44,7 +44,7 @@
 	(sensitivity s1)
 	(sensitivityalias sens0)
 	(sensitivityaliasactual sens0 s0)
-	(dominance (s0 s1))
+	(sensitivityorder (s0 s1))
 
 	(category c0)
 	(category c1)

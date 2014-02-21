@@ -989,12 +989,12 @@ int cil_copy_catorder(__attribute__((unused)) struct cil_db *db, void *data, voi
 	return SEPOL_OK;
 }
 
-int cil_copy_dominance(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+int cil_copy_sensitivityorder(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
-	struct cil_sens_dominates *orig = data;
-	struct cil_sens_dominates *new = NULL;
+	struct cil_sensorder *orig = data;
+	struct cil_sensorder *new = NULL;
 
-	cil_sens_dominates_init(&new);
+	cil_sensorder_init(&new);
 	if (orig->sens_list_str != NULL) {
 		cil_copy_list(orig->sens_list_str, &new->sens_list_str);
 	}
@@ -1768,8 +1768,8 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_CATORDER:
 		copy_func = &cil_copy_catorder;
 		break;
-	case CIL_DOMINANCE:
-		copy_func = &cil_copy_dominance;
+	case CIL_SENSITIVITYORDER:
+		copy_func = &cil_copy_sensitivityorder;
 		break;
 	case CIL_LEVEL:
 		copy_func = &cil_copy_level;

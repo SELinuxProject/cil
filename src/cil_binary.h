@@ -218,14 +218,14 @@ int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db);
 int cil_catalias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
 
 /**
- * Insert the cil dominance order into sepol policydb.
+ * Insert the cil sensitivityorder into sepol policydb.
  *
- * @param[in] pdb The policy database to insert the dominance into.
- * @param[in] db the cil database that contains the dominance order list.
+ * @param[in] pdb The policy database to insert the sensitivityorder into.
+ * @param[in] db the cil database that contains the sensitivityorder list.
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_dominance_to_policydb(policydb_t *pdb, const struct cil_db *db);
+int cil_sensitivityorder_to_policydb(policydb_t *pdb, const struct cil_db *db);
 
 /**
  * Insert cil type rule structure into sepol policydb.  This includes

@@ -68,7 +68,7 @@ void cil_db_init(struct cil_db **db)
 	cil_tree_init(&(*db)->ast);
 	(*db)->sidorder = NULL;
 	(*db)->catorder = NULL;
-	(*db)->dominance = NULL;
+	(*db)->sensitivityorder = NULL;
 	cil_sort_init(&(*db)->netifcon);
 	cil_sort_init(&(*db)->genfscon);
 	cil_sort_init(&(*db)->filecon);
@@ -105,7 +105,7 @@ void cil_db_destroy(struct cil_db **db)
 	cil_symtab_array_destroy((*db)->symtab);
 	cil_list_destroy(&(*db)->sidorder, CIL_FALSE);
 	cil_list_destroy(&(*db)->catorder, CIL_FALSE);
-	cil_list_destroy(&(*db)->dominance, CIL_FALSE);
+	cil_list_destroy(&(*db)->sensitivityorder, CIL_FALSE);
 	cil_sort_destroy(&(*db)->netifcon);
 	cil_sort_destroy(&(*db)->genfscon);
 	cil_sort_destroy(&(*db)->filecon);
@@ -386,8 +386,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_CATORDER:
 		cil_destroy_catorder(*data);
 		break;
-	case CIL_DOMINANCE:
-		cil_destroy_dominance(*data);
+	case CIL_SENSITIVITYORDER:
+		cil_destroy_sensitivityorder(*data);
 		break;
 	case CIL_SENSCAT:
 		cil_destroy_senscat(*data);
@@ -676,8 +676,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_ROLEBOUNDS;
 	case CIL_CATORDER:
 		return CIL_KEY_CATORDER;
-	case CIL_DOMINANCE:
-		return CIL_KEY_DOMINANCE;
+	case CIL_SENSITIVITYORDER:
+		return CIL_KEY_SENSITIVITYORDER;
 	case CIL_SENSCAT:
 		return CIL_KEY_SENSCAT;
 	case CIL_CLASSCOMMON:
@@ -2025,11 +2025,11 @@ void cil_catorder_init(struct cil_catorder **catorder)
 	(*catorder)->cat_list_str = NULL;
 }
 
-void cil_sens_dominates_init(struct cil_sens_dominates **sens_dominates)
+void cil_sensorder_init(struct cil_sensorder **sensorder)
 {
-	*sens_dominates = cil_malloc(sizeof(**sens_dominates));
+	*sensorder = cil_malloc(sizeof(**sensorder));
 
-	(*sens_dominates)->sens_list_str = NULL;
+	(*sensorder)->sens_list_str = NULL;
 }
 
 void cil_args_init(struct cil_args **args)
