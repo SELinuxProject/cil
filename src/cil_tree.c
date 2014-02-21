@@ -1520,6 +1520,22 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			cil_log(CIL_INFO, "\n");
 			return;
 		}
+		case CIL_SIDORDER: {
+			struct cil_sidorder *sidorder = node->data;
+			struct cil_list_item *sid;
+
+			if (sidorder->sid_list_str == NULL) {
+				cil_log(CIL_INFO, "SIDORDER: ()\n");
+				return;
+			}
+
+			cil_log(CIL_INFO, "SIDORDER: (");
+			cil_list_for_each(sid, sidorder->sid_list_str) {
+				cil_log(CIL_INFO, " %s", (char*)sid->data);
+			}
+			cil_log(CIL_INFO, " )\n");
+			return;
+		}
 		case CIL_POLICYCAP: {
 			struct cil_policycap *polcap = node->data;
 			cil_log(CIL_INFO, "POLICYCAP: %s\n", polcap->datum.name);

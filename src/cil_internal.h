@@ -90,6 +90,7 @@ enum cil_pass {
 #define CIL_KEY_CLASSCOMMON		"classcommon"
 #define CIL_KEY_SID			"sid"
 #define CIL_KEY_SIDCONTEXT		"sidcontext"
+#define CIL_KEY_SIDORDER        "sidorder"
 #define CIL_KEY_USER			"user"
 #define CIL_KEY_USERBOUNDS		"userbounds"
 #define CIL_KEY_USERPREFIX		"userprefix"
@@ -237,6 +238,7 @@ struct cil_db {
 	struct cil_tree *ast;
 	symtab_t symtab[CIL_SYM_NUM];
 	struct cil_type *selftype;
+	struct cil_list *sidorder;
 	struct cil_list *catorder;
 	struct cil_list *dominance;
 	struct cil_sort *netifcon;
@@ -370,12 +372,17 @@ struct cil_aliasactual {
 struct cil_sid {
 	struct cil_symtab_datum datum;
 	struct cil_context *context;
+	uint32_t ordered;
 };
 
 struct cil_sidcontext {
 	char *sid_str;
 	char *context_str;
 	struct cil_context *context;
+};
+
+struct cil_sidorder {
+	struct cil_list *sid_list_str;
 };
 
 struct cil_user {
@@ -842,6 +849,7 @@ void cil_common_init(struct cil_common **common);
 void cil_classcommon_init(struct cil_classcommon **classcommon);
 void cil_sid_init(struct cil_sid **sid);
 void cil_sidcontext_init(struct cil_sidcontext **sidcontext);
+void cil_sidorder_init(struct cil_sidorder **sidorder);
 void cil_userrole_init(struct cil_userrole **userrole);
 void cil_userbounds_init(struct cil_userbounds **userbounds);
 void cil_userprefix_init(struct cil_userprefix **userprefix);

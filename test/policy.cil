@@ -66,6 +66,8 @@
 	(sid kernel)
 	(sid security)
 	(sid unlabeled)
+	(sidorder (kernel security))
+	(sidorder (security unlabeled))
 		
 	(typeattribute exec_type)
 	(typeattribute foo_type)

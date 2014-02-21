@@ -2534,6 +2534,7 @@ int __cil_context_to_sepol_context(policydb_t *pdb, struct cil_context *cil_cont
 	key = ((struct cil_symtab_datum *)cil_context->user)->name;
 	sepol_user = hashtab_search(pdb->p_users.table, key);
 	if (sepol_user == NULL) {
+		cil_log(CIL_ERR,"Couldn't find user = %s\n",key);
 		goto exit;
 	}
 	sepol_context->user = sepol_user->s.value;
@@ -2541,6 +2542,7 @@ int __cil_context_to_sepol_context(policydb_t *pdb, struct cil_context *cil_cont
 	key = ((struct cil_symtab_datum *)cil_context->role)->name;
 	sepol_role = hashtab_search(pdb->p_roles.table, key);
 	if (sepol_role == NULL) {
+		cil_log(CIL_ERR,"Couldn't find role = %s\n",key);
 		goto exit;
 	}
 	sepol_context->role = sepol_role->s.value;
@@ -2548,6 +2550,7 @@ int __cil_context_to_sepol_context(policydb_t *pdb, struct cil_context *cil_cont
 	key = ((struct cil_symtab_datum *)cil_context->type)->name;
 	sepol_type = hashtab_search(pdb->p_types.table, key);
 	if (sepol_type == NULL) {
+		cil_log(CIL_ERR,"Couldn't find type = %s\n",key);
 		goto exit;
 	}
 	sepol_context->type = sepol_type->s.value;
@@ -2557,6 +2560,8 @@ int __cil_context_to_sepol_context(policydb_t *pdb, struct cil_context *cil_cont
 
 		rc = __cil_levelrange_to_mls_range(pdb, cil_lvlrange, &sepol_context->range);
 		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR,"Problem with MLS\n");
+			mls_context_destroy(sepol_context);
 			goto exit;
 		}
 	}
@@ -2567,41 +2572,41 @@ exit:
 	return rc;
 }
 
-int cil_sid_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
+int cil_sidorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
-	struct cil_sid *cil_sid = (struct cil_sid*)datum;
-	struct cil_context *cil_context = cil_sid->context;
+	struct cil_list_item *curr;
 	ocontext_t *new_sepol_sidcon = NULL;
-	context_struct_t *sepol_context = NULL;
+	unsigned count = 0;
 
-	new_sepol_sidcon = cil_malloc(sizeof(*new_sepol_sidcon));
-	memset(new_sepol_sidcon, 0, sizeof(ocontext_t));
-
-	if (pdb->ocontexts[OCON_ISID] == NULL) {
-		new_sepol_sidcon->sid[0] = 1;
-	} else {
-		new_sepol_sidcon->sid[0] = pdb->ocontexts[OCON_ISID]->sid[0] + 1;
+	if (db->sidorder == NULL || db->sidorder->head == NULL) {
+		cil_log(CIL_ERR, "No sidorder statement in policy\n");
+		return SEPOL_ERR;
 	}
-	new_sepol_sidcon->u.name = cil_strdup(cil_sid->datum.name);
 
-	sepol_context = &new_sepol_sidcon->context[0];
-
-	if (cil_context != NULL) {
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
-		if (rc != SEPOL_OK) {
-			goto exit;
+	cil_list_for_each(curr, db->sidorder) {
+		struct cil_sid *cil_sid = (struct cil_sid*)curr->data;
+		struct cil_context *cil_context = cil_sid->context;
+		new_sepol_sidcon = cil_malloc(sizeof(*new_sepol_sidcon));
+		memset(new_sepol_sidcon, 0, sizeof(ocontext_t));
+		count++;
+		new_sepol_sidcon->sid[0] = count;
+		new_sepol_sidcon->u.name = cil_strdup(cil_sid->datum.name);
+		if (cil_context != NULL) {
+			rc = __cil_context_to_sepol_context(pdb, cil_context, &new_sepol_sidcon->context[0]);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_ERR,"Problem with SID context\n");
+				goto exit;
+			}
 		}
+		new_sepol_sidcon->next = pdb->ocontexts[OCON_ISID];
+		pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
 	}
-
-	new_sepol_sidcon->next = pdb->ocontexts[OCON_ISID];
-	pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
 
 	return SEPOL_OK;
 
 exit:
 	free(new_sepol_sidcon->u.name);
-	context_destroy(&new_sepol_sidcon->context[0]);
 	free(new_sepol_sidcon);
 	return rc;
 }
@@ -3186,9 +3191,6 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 				rc = cil_validatetrans_to_policydb(pdb, db, node->data);
 			}
 			break;
-		case CIL_SID:
-			rc = cil_sid_to_policydb(pdb, node->data);
-			break;
 		case CIL_RANGETRANSITION:
 			if (pdb->mls == CIL_TRUE) {
 				rc = cil_rangetransition_to_policydb(pdb, node->data);
@@ -3528,12 +3530,18 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 	struct cil_list *neverallows = NULL;
 
 	if (db == NULL || policydb == NULL) {
-		goto exit;
+		if (db == NULL) {
+			cil_log(CIL_ERR,"db == NULL\n");
+		} else if (policydb == NULL) {
+			cil_log(CIL_ERR,"policydb == NULL\n");
+		}
+		return SEPOL_ERR;
 	}
 
 	rc = __cil_policydb_init(pdb, db);
 	if (rc != SEPOL_OK) {
-		goto exit;
+		cil_log(CIL_ERR,"Problem in policydb_init\n");
+		return SEPOL_ERR;
 	}
 	ebitmap_init(&types_bitmap);
 	cil_list_init(&neverallows, CIL_LIST_ITEM);
@@ -3550,6 +3558,11 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 			cil_log(CIL_INFO, "Failure while walking cil database\n");
 			goto exit;
 		}
+	}
+
+	rc = cil_sidorder_to_policydb(pdb, db);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
 
 	rc = __cil_policydb_val_arrays_create(pdb);

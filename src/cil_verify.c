@@ -359,7 +359,13 @@ int __cil_verify_ordered_node_helper(struct cil_tree_node *node, __attribute__((
 	uint32_t *flavor = args->flavor;
 
 	if (node->flavor == *flavor) {
-		if (node->flavor == CIL_CAT) {
+		if (node->flavor == CIL_SID) {
+			struct cil_sid *sid = node->data;
+			if (sid->ordered == CIL_FALSE) {
+				cil_log(CIL_ERR, "SID %s not in sidorder statement at line %d of %s\n", sid->datum.name, node->line, node->path);
+				return SEPOL_ERR;
+			}
+		} else if (node->flavor == CIL_CAT) {
 			struct cil_cat *cat = node->data;
 			if (cat->ordered == CIL_FALSE) {
 				cil_log(CIL_ERR, "Category %s not in categoryorder statement at line %d of %s\n", cat->datum.name, node->line, node->path);

@@ -1127,6 +1127,57 @@ void cil_destroy_sidcontext(struct cil_sidcontext *sidcon)
 	free(sidcon);
 }
 
+int cil_gen_sidorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_sidorder *sidorder = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc !=  SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_sidorder_init(&sidorder);
+
+	rc = cil_fill_list(parse_current->next->cl_head, CIL_SIDORDER, &sidorder->sid_list_str);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	ast_node->data = sidorder;
+	ast_node->flavor = CIL_SIDORDER;
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad sidorder declaration at line %d of %s\n", 
+		parse_current->line, parse_current->path);
+	cil_destroy_sidorder(sidorder);
+	return rc;
+}
+
+void cil_destroy_sidorder(struct cil_sidorder *sidorder)
+{
+	if (sidorder == NULL) {
+		return;
+	}
+
+	if (sidorder->sid_list_str != NULL) {
+		cil_list_destroy(&sidorder->sid_list_str, 1);
+	}
+
+	free(sidorder);
+}
+
 int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -5716,6 +5767,9 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_SIDCONTEXT)) {
 		rc = cil_gen_sidcontext(db, parse_current, ast_node);
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_SIDORDER)) {
+		rc = cil_gen_sidorder(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_USER)) {
 		rc = cil_gen_user(db, parse_current, ast_node);

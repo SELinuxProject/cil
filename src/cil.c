@@ -66,6 +66,7 @@ void cil_db_init(struct cil_db **db)
 
 	cil_tree_init(&(*db)->parse);
 	cil_tree_init(&(*db)->ast);
+	(*db)->sidorder = NULL;
 	(*db)->catorder = NULL;
 	(*db)->dominance = NULL;
 	cil_sort_init(&(*db)->netifcon);
@@ -102,6 +103,7 @@ void cil_db_destroy(struct cil_db **db)
 	cil_tree_destroy(&(*db)->parse);
 	cil_tree_destroy(&(*db)->ast);
 	cil_symtab_array_destroy((*db)->symtab);
+	cil_list_destroy(&(*db)->sidorder, CIL_FALSE);
 	cil_list_destroy(&(*db)->catorder, CIL_FALSE);
 	cil_list_destroy(&(*db)->dominance, CIL_FALSE);
 	cil_sort_destroy(&(*db)->netifcon);
@@ -286,6 +288,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_SIDCONTEXT:
 		cil_destroy_sidcontext(*data);
+		break;
+	case CIL_SIDORDER:
+		cil_destroy_sidorder(*data);
 		break;
 	case CIL_POLICYCAP:
 		cil_destroy_policycap(*data);
@@ -679,6 +684,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_CLASSCOMMON;
 	case CIL_SIDCONTEXT:
 		return CIL_KEY_SIDCONTEXT;
+	case CIL_SIDORDER:
+		return CIL_KEY_SIDORDER;
 	case CIL_CALL:
 		return CIL_KEY_CALL;
 	case CIL_BOOLEANIF:
@@ -1482,7 +1489,8 @@ void cil_sid_init(struct cil_sid **sid)
 	*sid = cil_malloc(sizeof(**sid));
 
 	cil_symtab_datum_init(&(*sid)->datum);
-	
+
+	(*sid)->ordered = CIL_FALSE;
 	(*sid)->context = NULL;
 }
 
@@ -1493,6 +1501,13 @@ void cil_sidcontext_init(struct cil_sidcontext **sidcontext)
 	(*sidcontext)->sid_str = NULL;
 	(*sidcontext)->context_str = NULL;
 	(*sidcontext)->context = NULL;
+}
+
+void cil_sidorder_init(struct cil_sidorder **sidorder)
+{
+	*sidorder = cil_malloc(sizeof(**sidorder));
+
+	(*sidorder)->sid_list_str = NULL;
 }
 
 void cil_userrole_init(struct cil_userrole **userrole)

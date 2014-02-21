@@ -1255,8 +1255,7 @@ int __cil_gen_policy_node_helper(struct cil_tree_node *node, uint32_t *finished,
 int cil_gen_policy(struct cil_db *db)
 {
 	struct cil_tree_node *curr = db->ast->root;
-	struct cil_list_item *catorder;
-	struct cil_list_item *dominance;
+	struct cil_list_item *item;
 	int rc = SEPOL_ERR;
 	FILE *policy_file;
 	FILE **file_arr = cil_malloc(sizeof(FILE*) * NUM_POLICY_FILES);
@@ -1338,14 +1337,20 @@ int cil_gen_policy(struct cil_db *db)
 
 	policy_file = fopen("policy.conf", "w+");
 
-	cil_list_for_each(catorder, db->catorder) {
-		cil_multimap_insert(cats, catorder->data, NULL, CIL_CAT, 0);
+	if (db->sidorder->head != NULL) {
+		cil_list_for_each(item, db->sidorder) {
+			fprintf(file_arr[ISIDS], "sid %s ", ((struct cil_sens*)item->data)->datum.name);
+		}
+	}
+
+	cil_list_for_each(item, db->catorder) {
+		cil_multimap_insert(cats, item->data, NULL, CIL_CAT, 0);
 	}
 
 	if (db->dominance->head != NULL) {
 		fprintf(file_arr[SENS], "dominance { ");
-		cil_list_for_each(dominance, db->dominance) {
-			fprintf(file_arr[SENS], "%s ", ((struct cil_sens*)dominance->data)->datum.name);
+		cil_list_for_each(item, db->dominance) {
+			fprintf(file_arr[SENS], "%s ", ((struct cil_sens*)item->data)->datum.name);
 		}
 		fprintf(file_arr[SENS], "};\n");
 	}

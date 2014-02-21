@@ -379,6 +379,21 @@ int cil_copy_sidcontext(__attribute__((unused)) struct cil_db *db, void *data, v
 	return SEPOL_OK;
 }
 
+int cil_copy_sidorder(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_sidorder *orig = data;
+	struct cil_sidorder *new = NULL;
+
+	cil_sidorder_init(&new);
+	if (orig->sid_list_str != NULL) {
+		cil_copy_list(orig->sid_list_str, &new->sid_list_str);
+	}
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
 int cil_copy_user(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
 	struct cil_user *orig = data;
@@ -1641,6 +1656,9 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_SIDCONTEXT:
 		copy_func = &cil_copy_sidcontext;
+		break;
+	case CIL_SIDORDER:
+		copy_func = &cil_copy_sidorder;
 		break;
 	case CIL_USER:
 		copy_func = &cil_copy_user;

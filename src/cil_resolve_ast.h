@@ -82,6 +82,7 @@ int cil_resolve_ioportcon(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_pcidevicecon(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_fsuse(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_sidcontext(struct cil_tree_node *current, void *extra_args);
+int cil_resolve_sidorder(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_blockinherit(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_in(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_call1(struct cil_tree_node *current, void *extra_args);

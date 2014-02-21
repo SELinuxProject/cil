@@ -75,6 +75,8 @@ int cil_gen_sid(struct cil_db *db, struct cil_tree_node *parse_current, struct c
 void cil_destroy_sid(struct cil_sid *sid);
 int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_sidcontext(struct cil_sidcontext *sidcon);
+int cil_gen_sidorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_sidorder(struct cil_sidorder *sidorder);
 int cil_gen_user(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_user(struct cil_user *user);
 int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

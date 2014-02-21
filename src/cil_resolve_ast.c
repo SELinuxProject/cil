@@ -51,6 +51,7 @@ struct cil_args_resolve {
 	struct cil_tree_node *callstack;
 	struct cil_tree_node *optstack;
 	struct cil_tree_node *macro;
+	struct cil_list *sidorder_lists;
 	struct cil_list *catorder_lists;
 	struct cil_list *dominance_lists;
 };
@@ -939,6 +940,7 @@ int cil_reset_sid(struct cil_tree_node *current, __attribute__((unused)) void *e
 	struct cil_sid *sid = current->data;
 	/* reset the context to NULL during a re-resolve */
 	sid->context = NULL;
+	sid->ordered = CIL_FALSE;
 
 	return SEPOL_OK;
 }
@@ -1370,7 +1372,14 @@ void __cil_ordered_lists_reset(struct cil_list **ordered_lists)
 
 struct cil_list_item *__cil_ordered_item_insert(struct cil_list *old, struct cil_list_item *curr, struct cil_list_item *item)
 {
-	if (item->flavor == CIL_CAT) {
+	if (item->flavor == CIL_SID) {
+		struct cil_sid *sid = item->data;
+		if (sid->ordered == CIL_TRUE) {
+			cil_log(CIL_ERR, "SID %s has already been merged into the ordered list\n", sid->datum.name);
+			return NULL;
+		}
+		sid->ordered = CIL_TRUE;
+	} else if (item->flavor == CIL_CAT) {
 		struct cil_cat *cat = item->data;
 		if (cat->ordered == CIL_TRUE) {
 			cil_log(CIL_ERR, "Category %s has already been merged into the ordered list\n", cat->datum.name);
@@ -1551,6 +1560,39 @@ struct cil_list *__cil_ordered_lists_merge_all(struct cil_list **ordered_lists)
 exit:
 	cil_list_destroy(&composite, CIL_FALSE);
 	return NULL;
+}
+
+int cil_resolve_sidorder(struct cil_tree_node *current, void *extra_args)
+{
+	struct cil_args_resolve *args = extra_args;
+	struct cil_list *sidorder_list = args->sidorder_lists;
+	struct cil_sidorder *sidorder = current->data;
+	struct cil_list *new = NULL;
+	struct cil_list_item *curr = NULL;
+	struct cil_symtab_datum *datum = NULL;
+	struct cil_ordered_list *ordered = NULL;
+	int rc = SEPOL_ERR;
+
+	cil_list_init(&new, CIL_SIDORDER);
+
+	cil_list_for_each(curr, sidorder->sid_list_str) {
+		rc = cil_resolve_name(current, (char *)curr->data, CIL_SYM_SIDS, extra_args, &datum);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to resolve sid &s in sidorder\n", (char *)curr->data);
+			goto exit;
+		}
+		cil_list_append(new, CIL_SID, datum);
+	}
+
+	__cil_ordered_list_init(&ordered);
+	ordered->list = new;
+	ordered->node = current;
+	cil_list_append(sidorder_list, CIL_SIDORDER, ordered);
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
 }
 
 int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args)
@@ -2405,9 +2447,9 @@ exit:
 int cil_resolve_sidcontext(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_sidcontext *sidcon = current->data;
-	struct cil_sid *sid = NULL;
 	struct cil_symtab_datum *sid_datum = NULL;
 	struct cil_symtab_datum *context_datum = NULL;
+	struct cil_sid *sid = NULL;
 
 	int rc = SEPOL_ERR;
 
@@ -3196,6 +3238,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		break;
 	case CIL_PASS_MISC1:
 		switch (node->flavor) {
+		case CIL_SIDORDER:
+			rc = cil_resolve_sidorder(node, args);
+			break;
 		case CIL_CATORDER:
 			rc = cil_resolve_catorder(node, args);
 			break;
@@ -3652,9 +3697,11 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.callstack = NULL;
 	extra_args.optstack = NULL;
 	extra_args.macro = NULL;
+	extra_args.sidorder_lists = NULL;
 	extra_args.catorder_lists = NULL;
 	extra_args.dominance_lists = NULL;
 
+	cil_list_init(&extra_args.sidorder_lists, CIL_LIST_ITEM);
 	cil_list_init(&extra_args.catorder_lists, CIL_LIST_ITEM);
 	cil_list_init(&extra_args.dominance_lists, CIL_LIST_ITEM);
 	for (pass = CIL_PASS_TIF; pass < CIL_PASS_NUM; pass++) {
@@ -3666,6 +3713,12 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		}
 
 		if (pass == CIL_PASS_MISC1) {
+			db->sidorder = __cil_ordered_lists_merge_all(&extra_args.sidorder_lists);
+			rc = __cil_verify_ordered(current, CIL_SID);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
 			db->catorder = __cil_ordered_lists_merge_all(&extra_args.catorder_lists);
 			rc = __cil_verify_ordered(current, CIL_CAT);
 			if (rc != SEPOL_OK) {
@@ -3690,8 +3743,10 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			cil_log(CIL_INFO, "Resetting declarations\n");
 
 			if (pass >= CIL_PASS_MISC1) {
+				__cil_ordered_lists_reset(&extra_args.sidorder_lists);
 				__cil_ordered_lists_reset(&extra_args.catorder_lists);
 				__cil_ordered_lists_reset(&extra_args.dominance_lists);
+				cil_list_destroy(&db->sidorder, CIL_FALSE);
 				cil_list_destroy(&db->catorder, CIL_FALSE);
 				cil_list_destroy(&db->dominance, CIL_FALSE);
 			}
