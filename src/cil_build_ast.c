@@ -5939,8 +5939,10 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_userprefix(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_SELINUXUSER)) {
 		rc = cil_gen_selinuxuser(db, parse_current, ast_node);
+		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_SELINUXUSERDEFAULT)) {
 		rc = cil_gen_selinuxuserdefault(db, parse_current, ast_node);
+		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
 		rc = cil_gen_type(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTRIBUTE)) {
