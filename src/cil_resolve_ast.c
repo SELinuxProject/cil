@@ -1181,6 +1181,7 @@ int cil_resolve_roletransition(struct cil_tree_node *current, void *extra_args)
 	struct cil_symtab_datum *tgt_datum = NULL;
 	struct cil_symtab_datum *obj_datum = NULL;
 	struct cil_symtab_datum *result_datum = NULL;
+	struct cil_tree_node *node = NULL;
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, roletrans->src_str, CIL_SYM_ROLES, extra_args, &src_datum);
@@ -1203,6 +1204,13 @@ int cil_resolve_roletransition(struct cil_tree_node *current, void *extra_args)
 
 	rc = cil_resolve_name(current, roletrans->result_str, CIL_SYM_ROLES, extra_args, &result_datum);
 	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	node = result_datum->nodes->head->data;
+	if (node->flavor != CIL_ROLE) {
+		rc = SEPOL_ERR;
+		printf("%i\n", node->flavor);
+		cil_log(CIL_ERR, "roletransition must result in a role, but %s is a %s\n", roletrans->result_str, cil_node_to_string(node));
 		goto exit;
 	}
 	roletrans->result = (struct cil_role*)result_datum;

@@ -774,6 +774,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_USER;
 	case CIL_ROLE:
 		return CIL_KEY_ROLE;
+	case CIL_ROLEATTRIBUTE:
+		return CIL_KEY_ROLEATTRIBUTE;
 	case CIL_TYPE:
 		return CIL_KEY_TYPE;
 	case CIL_TYPEATTRIBUTE:
