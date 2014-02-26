@@ -36,6 +36,7 @@
 #include <arpa/inet.h>
 
 #include <sepol/policydb/services.h>
+#include <sepol/policydb/policydb.h>
 
 #include <cil/cil.h>
 
@@ -162,6 +163,10 @@ enum cil_pass {
 #define CIL_KEY_CONDFALSE		"false"
 #define CIL_KEY_TUNABLEIFDEF		"tunableifdef"
 #define CIL_KEY_TUNABLEIFNDEF		"tunableifndef"
+#define CIL_KEY_DEFAULTUSER     "defaultuser"
+#define CIL_KEY_DEFAULTROLE     "defaultrole"
+#define CIL_KEY_DEFAULTTYPE     "defaulttype"
+#define CIL_KEY_DEFAULTRANGE    "defaultrange"
 #define CIL_KEY_ALL         "all"
 #define CIL_KEY_AND			"and"
 #define CIL_KEY_OR			"or"
@@ -816,6 +821,37 @@ struct cil_policycap {
 	struct cil_symtab_datum datum;
 };
 
+/* Ensure that CIL uses the same values as sepol policydb.h */
+enum cil_default_object {
+	CIL_DEFAULT_SOURCE = DEFAULT_SOURCE,
+	CIL_DEFAULT_TARGET = DEFAULT_TARGET,
+};
+
+/* Default labeling behavior for users, roles, and types */
+struct cil_default {
+	enum cil_flavor flavor;
+	struct cil_list *class_strs;
+	struct cil_list *class_datums;
+	enum cil_default_object object;
+};
+
+/* Ensure that CIL uses the same values as sepol policydb.h */
+enum cil_default_object_range {
+	CIL_DEFAULT_SOURCE_LOW      = DEFAULT_SOURCE_LOW,
+	CIL_DEFAULT_SOURCE_HIGH     = DEFAULT_SOURCE_HIGH,
+	CIL_DEFAULT_SOURCE_LOW_HIGH = DEFAULT_SOURCE_LOW_HIGH,
+	CIL_DEFAULT_TARGET_LOW      = DEFAULT_TARGET_LOW,
+	CIL_DEFAULT_TARGET_HIGH     = DEFAULT_TARGET_HIGH,
+	CIL_DEFAULT_TARGET_LOW_HIGH = DEFAULT_TARGET_LOW_HIGH,
+};
+
+/* Default labeling behavior for range */
+struct cil_defaultrange {
+	struct cil_list *class_strs;
+	struct cil_list *class_datums;
+	enum cil_default_object_range object_range;
+};
+
 void cil_db_init(struct cil_db **db);
 void cil_db_destroy(struct cil_db **db);
 
@@ -911,5 +947,7 @@ void cil_optional_init(struct cil_optional **optional);
 void cil_param_init(struct cil_param **param);
 void cil_macro_init(struct cil_macro **macro);
 void cil_policycap_init(struct cil_policycap **policycap);
+void cil_default_init(struct cil_default **def);
+void cil_defaultrange_init(struct cil_defaultrange **def);
 
 #endif

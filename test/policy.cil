@@ -237,6 +237,12 @@
 	(call test_mapping ((file (read))))
 	(call test_mapping ((files (read))))
 	(call test_mapping (char_w))
+
+	(defaultuser (file char) source)
+	(defaultrole char target)
+	;;(defaulttype (files) source)
+	(defaultrange (file) target low)
+	(defaultrange (char) source low-high)
 )
 
 (macro all ((type x))

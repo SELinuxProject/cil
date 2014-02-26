@@ -481,6 +481,14 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_IPADDR:
 		cil_destroy_ipaddr(*data);
 		break;
+	case CIL_DEFAULTUSER:
+	case CIL_DEFAULTROLE:
+	case CIL_DEFAULTTYPE:
+		cil_destroy_default(*data);
+		break;
+	case CIL_DEFAULTRANGE:
+		cil_destroy_defaultrange(*data);
+		break;
 	case CIL_INT:
 	case CIL_OP:
 	case CIL_CONS_OPERAND:
@@ -706,6 +714,14 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_TUNABLEIFDEF;
 	case CIL_TUNABLEIFNDEF:
 		return CIL_KEY_TUNABLEIFNDEF;
+	case CIL_DEFAULTUSER:
+		return CIL_KEY_DEFAULTUSER;
+	case CIL_DEFAULTROLE:
+		return CIL_KEY_DEFAULTROLE;
+	case CIL_DEFAULTTYPE:
+		return CIL_KEY_DEFAULTTYPE;
+	case CIL_DEFAULTRANGE:
+		return CIL_KEY_DEFAULTRANGE;
 	case CIL_AND:
 		return CIL_KEY_AND;
 	case CIL_OR:
@@ -2080,4 +2096,21 @@ void cil_policycap_init(struct cil_policycap **policycap)
 	*policycap = cil_malloc(sizeof(**policycap));
 
 	cil_symtab_datum_init(&(*policycap)->datum);
+}
+
+void cil_default_init(struct cil_default **def)
+{
+	*def = cil_malloc(sizeof(**def));
+
+	(*def)->flavor = CIL_NONE;
+	(*def)->class_strs = NULL;
+	(*def)->class_datums = NULL;
+}
+
+void cil_defaultrange_init(struct cil_defaultrange **def)
+{
+	*def = cil_malloc(sizeof(**def));
+
+	(*def)->class_strs = NULL;
+	(*def)->class_datums = NULL;
 }

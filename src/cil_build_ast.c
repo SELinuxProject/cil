@@ -5667,6 +5667,160 @@ exit:
 	return rc;
 }
 
+int cil_gen_default(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
+{
+	int rc = SEPOL_ERR;
+	struct cil_default *def = NULL;
+	char *object;
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_default_init(&def);
+
+	def->flavor = flavor;
+
+	if (parse_current->next->cl_head == NULL) {
+		cil_list_init(&def->class_strs, CIL_CLASS);
+		cil_list_append(def->class_strs, CIL_STRING, cil_strdup(parse_current->next->data));
+		rc = SEPOL_OK;
+	} else {
+		rc = cil_fill_list(parse_current->next->cl_head, CIL_CLASS, &def->class_strs);
+	}
+
+	object = parse_current->next->next->data;
+	if (strcmp(object,"source") == 0) {
+		def->object = CIL_DEFAULT_SOURCE;
+	} else if (strcmp(object,"target") == 0) {
+		def->object = CIL_DEFAULT_TARGET;
+	} else {
+		cil_log(CIL_ERR,"Expected either 'source' or 'target'\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	ast_node->data = def;
+	ast_node->flavor = flavor;
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad %s declaration at line %d of %s\n", 
+			cil_node_to_string(parse_current), parse_current->line, parse_current->path);
+	cil_destroy_default(def);
+	return rc;
+}
+
+void cil_destroy_default(struct cil_default *def)
+{
+	if (def == NULL) {
+		return;
+	}
+
+	cil_list_destroy(&def->class_strs, CIL_TRUE);
+
+	cil_list_destroy(&def->class_datums, CIL_FALSE);
+
+	free(def);
+}
+
+int cil_gen_defaultrange(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_defaultrange *def = NULL;
+	char *object;
+	char *range;
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_defaultrange_init(&def);
+
+	if (parse_current->next->cl_head == NULL) {
+		cil_list_init(&def->class_strs, CIL_CLASS);
+		cil_list_append(def->class_strs, CIL_STRING, cil_strdup(parse_current->next->data));
+		rc = SEPOL_OK;
+	} else {
+		rc = cil_fill_list(parse_current->next->cl_head, CIL_CLASS, &def->class_strs);
+	}
+
+	object = parse_current->next->next->data;
+	range = parse_current->next->next->next->data;
+	if (strcmp(object,"source") == 0) {
+		if (strcmp(range,"low") == 0) {
+			def->object_range = CIL_DEFAULT_SOURCE_LOW;
+		} else if (strcmp(range,"high") == 0) {
+			def->object_range = CIL_DEFAULT_SOURCE_HIGH;
+		} else if (strcmp(range,"low-high") == 0) {
+			def->object_range = CIL_DEFAULT_SOURCE_LOW_HIGH;
+		} else {
+			cil_log(CIL_ERR,"Expected 'low', 'high', or 'low-high'\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	} else if (strcmp(parse_current->next->next->data,"target") == 0) {
+		if (strcmp(range,"low") == 0) {
+			def->object_range = CIL_DEFAULT_TARGET_LOW;
+		} else if (strcmp(range,"high") == 0) {
+			def->object_range = CIL_DEFAULT_TARGET_HIGH;
+		} else if (strcmp(range,"low-high") == 0) {
+			def->object_range = CIL_DEFAULT_TARGET_LOW_HIGH;
+		} else {
+			cil_log(CIL_ERR,"Expected 'low', 'high', or 'low-high'\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	} else {
+		cil_log(CIL_ERR,"Expected either \'source\' or \'target\'\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	ast_node->data = def;
+	ast_node->flavor = CIL_DEFAULTRANGE;
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad defaultrange declaration at line %d of %s\n", 
+			parse_current->line, parse_current->path);
+	cil_destroy_defaultrange(def);
+	return rc;
+}
+
+void cil_destroy_defaultrange(struct cil_defaultrange *def)
+{
+	if (def == NULL) {
+		return;
+	}
+
+	cil_list_destroy(&def->class_strs, CIL_TRUE);
+
+	cil_list_destroy(&def->class_datums, CIL_FALSE);
+
+	free(def);
+}
+
+
 int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, void *extra_args)
 {
 	struct cil_args_build *args = NULL;
@@ -5943,6 +6097,18 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_optional(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_IPADDR)) {
 		rc = cil_gen_ipaddr(db, parse_current, ast_node);
+	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTUSER)) {
+		rc = cil_gen_default(parse_current, ast_node, CIL_DEFAULTUSER);
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTROLE)) {
+		rc = cil_gen_default(parse_current, ast_node, CIL_DEFAULTROLE);
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTTYPE)) {
+		rc = cil_gen_default(parse_current, ast_node, CIL_DEFAULTTYPE);
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTRANGE)) {
+		rc = cil_gen_defaultrange(parse_current, ast_node);
+		*finished = CIL_TREE_SKIP_NEXT;
 	} else {
 		cil_log(CIL_ERR, "Error: Unknown keyword %s\n", (char*)parse_current->data);
 		rc = SEPOL_ERR;

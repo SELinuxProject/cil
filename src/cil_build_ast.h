@@ -201,6 +201,10 @@ int cil_gen_policycap(struct cil_db *db, struct cil_tree_node *parse_current, st
 void cil_destroy_policycap(struct cil_policycap *polcap);
 int cil_gen_ipaddr(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_ipaddr(struct cil_ipaddr *ipaddr);
+int cil_gen_default(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor);
+void cil_destroy_default(struct cil_default *def);
+int cil_gen_defaultrange(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_defaultrange(struct cil_defaultrange *def);
 
 int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset);
 int cil_fill_catrange(struct cil_tree_node *cats, struct cil_catrange *catrange);

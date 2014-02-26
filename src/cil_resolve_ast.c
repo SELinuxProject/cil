@@ -2575,6 +2575,55 @@ exit:
 	return rc;
 }
 
+int cil_resolve_default(struct cil_tree_node *current, void *extra_args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_default *def = current->data;
+	struct cil_list_item *curr;
+	struct cil_symtab_datum *datum;
+
+	cil_list_init(&def->class_datums, def->flavor);
+
+	cil_list_for_each(curr, def->class_strs) {
+		rc = cil_resolve_name(current, (char *)curr->data, CIL_SYM_CLASSES, extra_args, &datum);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to resolve class %s in %s\n", (char *)curr->data, cil_node_to_string(current));
+			goto exit;
+		}
+		cil_list_append(def->class_datums, CIL_CLASS, datum);
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_resolve_defaultrange(struct cil_tree_node *current, void *extra_args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_defaultrange *def = current->data;
+	struct cil_list_item *curr;
+	struct cil_symtab_datum *datum;
+
+	cil_list_init(&def->class_datums, CIL_DEFAULTRANGE);
+
+	cil_list_for_each(curr, def->class_strs) {
+		rc = cil_resolve_name(current, (char *)curr->data, CIL_SYM_CLASSES, extra_args, &datum);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to resolve class %s in defaultrange\n", (char *)curr->data);
+			goto exit;
+		}
+		cil_list_append(def->class_datums, CIL_CLASS, datum);
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+
 int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_call *new_call = current->data;
@@ -3392,6 +3441,14 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_SIDCONTEXT:
 			rc = cil_resolve_sidcontext(node, args);
+			break;
+		case CIL_DEFAULTUSER:
+		case CIL_DEFAULTROLE:
+		case CIL_DEFAULTTYPE:
+			rc = cil_resolve_default(node, args);
+			break;
+		case CIL_DEFAULTRANGE:
+			rc = cil_resolve_defaultrange(node, args);
 			break;
 		default:
 			break;

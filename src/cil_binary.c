@@ -3059,6 +3059,78 @@ exit:
 	return rc;
 }
 
+int cil_default_to_policydb(policydb_t *pdb, struct cil_default *def)
+{
+	struct cil_list_item *curr;
+	class_datum_t *sepol_class;
+
+	cil_list_for_each(curr, def->class_datums) {
+		char *key = ((struct cil_symtab_datum *)curr->data)->name;
+		sepol_class = hashtab_search(pdb->p_classes.table, key);
+		if (sepol_class == NULL) {
+			goto exit;
+		}
+		switch (def->flavor) {
+		case CIL_DEFAULTUSER:
+			if (!sepol_class->default_user) { 
+				sepol_class->default_user = def->object;
+			} else {
+				cil_log(CIL_ERR,"User default labeling for class %s already specified\n",key);
+				goto exit;
+			}
+			break;
+		case CIL_DEFAULTROLE:
+			if (!sepol_class->default_role) { 
+				sepol_class->default_role = def->object;
+			} else {
+				cil_log(CIL_ERR,"Role default labeling for class %s already specified\n",key);
+				goto exit;
+			}
+			break;
+		case CIL_DEFAULTTYPE:
+			if (!sepol_class->default_type) { 
+				sepol_class->default_type = def->object;
+			} else {
+				cil_log(CIL_ERR,"Type default labeling for class %s already specified\n",key);
+				goto exit;
+			}
+			break;
+		default:
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return SEPOL_ERR;
+}
+
+int cil_defaultrange_to_policydb(policydb_t *pdb, struct cil_defaultrange *def)
+{
+	struct cil_list_item *curr;
+	class_datum_t *sepol_class;
+
+	cil_list_for_each(curr, def->class_datums) {
+		char *key = ((struct cil_symtab_datum *)curr->data)->name;
+		sepol_class = hashtab_search(pdb->p_classes.table, key);
+		if (sepol_class == NULL) {
+			goto exit;
+		}
+		if (!sepol_class->default_range) { 
+			sepol_class->default_range = def->object_range;
+		} else {
+			cil_log(CIL_ERR,"Range default labeling for class %s already specified\n",key);
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return SEPOL_ERR;
+}
+
 int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 {
 	int rc = SEPOL_OK;
@@ -3195,6 +3267,14 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			if (pdb->mls == CIL_TRUE) {
 				rc = cil_rangetransition_to_policydb(pdb, node->data);
 			}
+			break;
+		case CIL_DEFAULTUSER:
+		case CIL_DEFAULTROLE:
+		case CIL_DEFAULTTYPE:
+			rc = cil_default_to_policydb(pdb, node->data);
+			break;
+		case CIL_DEFAULTRANGE:
+			rc = cil_defaultrange_to_policydb(pdb, node->data);
 			break;
 		default:
 			break;

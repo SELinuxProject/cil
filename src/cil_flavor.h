@@ -105,6 +105,10 @@ enum cil_flavor {
 	CIL_CONDFALSE,
 	CIL_TUNABLEIFDEF,
 	CIL_TUNABLEIFNDEF,
+	CIL_DEFAULTUSER,
+	CIL_DEFAULTROLE,
+	CIL_DEFAULTTYPE,
+	CIL_DEFAULTRANGE,
 
 /*
  *          boolean  constraint  set

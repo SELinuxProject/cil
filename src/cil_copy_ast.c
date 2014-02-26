@@ -1591,6 +1591,44 @@ int cil_copy_tunif(struct cil_db *db, void *data, void **copy, __attribute__((un
 	return SEPOL_OK;
 }
 
+int cil_copy_default(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_default *orig = data;
+	struct cil_default *new = NULL;
+
+	cil_default_init(&new);
+
+	new->flavor = orig->flavor;
+
+	if (orig->class_strs != NULL) {
+		cil_copy_list(orig->class_strs, &new->class_strs);
+	}
+
+	new->object = orig->object;
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
+int cil_copy_defaultrange(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_defaultrange *orig = data;
+	struct cil_defaultrange *new = NULL;
+
+	cil_defaultrange_init(&new);
+
+	if (orig->class_strs != NULL) {
+		cil_copy_list(orig->class_strs, &new->class_strs);
+	}
+
+	new->object_range = orig->object_range;
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
 int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -1841,6 +1879,14 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_TUNABLEIF:
 		copy_func = &cil_copy_tunif;
+		break;
+	case CIL_DEFAULTUSER:
+	case CIL_DEFAULTROLE:
+	case CIL_DEFAULTTYPE:
+		copy_func = &cil_copy_default;
+		break;
+	case CIL_DEFAULTRANGE:
+		copy_func = &cil_copy_defaultrange;
 		break;
 	default:
 		goto exit;
