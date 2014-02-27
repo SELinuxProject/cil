@@ -309,14 +309,24 @@ int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *finished, v
 	}
 	case CIL_TYPE: {
 		struct cil_type *type = node->data;
-		type->value = db->num_types;
-		db->num_types++;
+		if (type->datum.nodes->head->data == node) {
+			// multiple AST nodes can point to the same cil_type data (like if
+			// copied from a macro). This check ensures we only count the
+			// duplicates once
+			type->value = db->num_types;
+			db->num_types++;
+		}
 		break;
 	}
 	case CIL_ROLE: {
 		struct cil_role *role = node->data;
-		role->value = db->num_roles;
-		db->num_roles++;
+		if (role->datum.nodes->head->data == node) {
+			// multiple AST nodes can point to the same cil_role data (like if
+			// copied from a macro). This check ensures we only count the
+			// duplicates once
+			role->value = db->num_roles;
+			db->num_roles++;
+		}
 		break;
 	}
 	case CIL_OPTIONAL: {
