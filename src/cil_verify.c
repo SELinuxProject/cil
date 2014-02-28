@@ -86,7 +86,8 @@ int __cil_verify_syntax(struct cil_tree_node *parse_current, enum cil_syntax s[]
 		if (s[i] & CIL_SYN_N_LISTS || s[i] & CIL_SYN_N_STRINGS) {
 			if (c == NULL) {
 				if (num_extras > 0) {
-					break;
+					i++;
+					continue;
 				} else {
 					goto exit;
 				}
