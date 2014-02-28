@@ -1935,6 +1935,10 @@ int __cil_constrain_expr_datum_to_sepol_expr(policydb_t *pdb, const struct cil_d
 
 	} else if (expr_flavor == CIL_TYPE) {
 		struct cil_tree_node *node = datum->nodes->head->data;
+		if (pdb->policyvers >= POLICYDB_VERSION_CONSTRAINT_NAMES) {
+			rc = __find_and_add_to_ebitmap(pdb->p_types.table, datum->name, &expr->type_names->types);
+			if (rc != SEPOL_OK) goto exit;	
+		}
 		if (node->flavor == CIL_TYPEATTRIBUTE) {
 			struct cil_typeattribute *cil_attr = (struct cil_typeattribute*)datum;
 			ebitmap_node_t *tnode;
