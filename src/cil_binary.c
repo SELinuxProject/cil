@@ -1391,6 +1391,18 @@ int __cil_avrule_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_a
 	uint16_t kind = cil_avrule->rule_kind;
 	struct cil_list *classperms = cil_avrule->classperms;
 
+	if (cil_avrule->rule_kind == CIL_AVRULE_DONTAUDIT && db->disable_dontaudit == CIL_TRUE) {
+		// Do not add dontaudit rules to binary
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
+	if (cil_avrule->rule_kind == CIL_AVRULE_NEVERALLOW && db->disable_neverallow == CIL_TRUE) {
+		// ignore neverallow rules
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
 	src = cil_avrule->src;
 	tgt = cil_avrule->tgt;
 
@@ -1436,11 +1448,6 @@ int cil_avrule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_
 {
 	int rc = SEPOL_OK;
 	struct cil_avrule *cil_avrule = (struct cil_avrule*)node->data;
-
-	if (cil_avrule->rule_kind == CIL_AVRULE_DONTAUDIT && db->disable_dontaudit == CIL_TRUE) {
-		// Do not add dontaudit rules to binary
-		goto exit;
-	}
 
 	rc = __cil_avrule_to_avtab(pdb, db, cil_avrule, neverallows, NULL, CIL_FALSE);
 	if (rc != SEPOL_OK) {
@@ -1494,7 +1501,7 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 		cil_avrule = node->data;
 		rc = __cil_avrule_to_avtab(pdb, db, cil_avrule, args->neverallows, cond_node, cond_flavor);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to insert typerule into avtab at line %d of %s\n", node->line, node->path);
+			cil_log(CIL_ERR, "Failed to insert avrule into avtab at line %d of %s\n", node->line, node->path);
 			goto exit;
 		}
 		break;

@@ -39,7 +39,7 @@
 
 void usage(char *prog)
 {
-	printf("Usage: %s [-v|--verbose] [-o|--output=<filename>] [-f|--filecontext=<filename>] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown=<action>] [-D|--disable-dontaudit] <files>\n", prog);
+	printf("Usage: %s [-v|--verbose] [-o|--output=<filename>] [-f|--filecontext=<filename>] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown=<action>] [-D|--disable-dontaudit] [-N|--disable-neverallow] <files>\n", prog);
 	exit(1);
 }
 
@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 	int target = SEPOL_TARGET_SELINUX;
 	int mls = 0;
 	int disable_dontaudit = 0;
+	int disable_neverallow = 0;
 	int handle_unknown = SEPOL_DENY_UNKNOWN;
 	int policyvers = POLICYDB_VERSION_MAX;
 	int opt_char;
@@ -75,6 +76,7 @@ int main(int argc, char *argv[])
 		{"policyversion", required_argument, 0, 'c'},
 		{"handle-unknown", required_argument, 0, 'U'},
 		{"disable-dontaudit", no_argument, 0, 'D'},
+		{"disable-neverallow", no_argument, 0, 'N'},
 		{"output", required_argument, 0, 'o'},
 		{"filecontexts", required_argument, 0, 'f'},
 		{0, 0, 0, 0}
@@ -82,7 +84,7 @@ int main(int argc, char *argv[])
 	int i;
 
 	while (1) {
-		opt_char = getopt_long(argc, argv, "o:f:U:hvt:MDc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "o:f:U:hvt:MDNc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
@@ -131,6 +133,9 @@ int main(int argc, char *argv[])
 			case 'D':
 				disable_dontaudit = 1;
 				break;
+			case 'N':
+				disable_neverallow = 1;
+				break;
 			case 'o':
 				output = strdup(optarg);
 				break;
@@ -155,6 +160,7 @@ int main(int argc, char *argv[])
 
 	cil_db_init(&db);
 	cil_set_disable_dontaudit(db, disable_dontaudit);
+	cil_set_disable_neverallow(db, disable_neverallow);
 
 	for (i = optind; i < argc; i++) {
 		file = fopen(argv[i], "r");

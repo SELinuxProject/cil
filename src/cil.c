@@ -92,6 +92,7 @@ void cil_db_init(struct cil_db **db)
 	(*db)->val_to_role = NULL;
 
 	(*db)->disable_dontaudit = CIL_FALSE;
+	(*db)->disable_neverallow = CIL_FALSE;
 }
 
 void cil_db_destroy(struct cil_db **db)
@@ -1209,6 +1210,11 @@ exit:
 void cil_set_disable_dontaudit(struct cil_db *db, int disable_dontaudit)
 {
 	db->disable_dontaudit = disable_dontaudit;
+}
+
+void cil_set_disable_neverallow(struct cil_db *db, int disable_neverallow)
+{
+	db->disable_neverallow = disable_neverallow;
 }
 
 void cil_symtab_array_init(symtab_t symtab[], int symtab_sizes[CIL_SYM_NUM])

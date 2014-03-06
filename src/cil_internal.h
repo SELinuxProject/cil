@@ -264,6 +264,7 @@ struct cil_db {
 	struct cil_type **val_to_type;
 	struct cil_role **val_to_role;
 	int disable_dontaudit;
+	int disable_neverallow;
 };
 
 struct cil_sort {
