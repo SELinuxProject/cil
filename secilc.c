@@ -39,7 +39,24 @@
 
 void usage(char *prog)
 {
-	printf("Usage: %s [-v|--verbose] [-o|--output=<filename>] [-f|--filecontext=<filename>] [-t|--target=<type>] [-M|--mls] [-c|--policyvers=<ver>] [-U|--handle-unknown=<action>] [-D|--disable-dontaudit] [-N|--disable-neverallow] <files>\n", prog);
+	printf("Usage: %s [OPTION]... FILE...\n", prog);
+	printf("\n");
+	printf("Options:\n");
+	printf("  -o, --output=<file>            write binary policy to <file>\n");
+	printf("                                 (default: policy.<version>)\n");
+	printf("  -f, --filecontext=<file>       write file contexts to <file>\n");
+	printf("                                 (default: file_contexts)\n");
+	printf("  -t, --target=<type>            specify target architecture. may be selinux or\n");
+	printf("                                 xen. (default: selinux)\n");
+	printf("  -M, --mls                      build an mls policy\n");
+	printf("  -c, --policyvers=<version>     build a binary policy with a given <version>\n");
+	printf("                                 (default: %i)\n", POLICYDB_VERSION_MAX);
+	printf("  -U, --handle-unknown=<action>  how to handle unknown classes or permissions.\n");
+	printf("                                 may be deny, allow, or reject. (default: deny)\n");
+	printf("  -D, --disable-dontaudit        do not add dontaudit rules to the binary policy\n");
+	printf("  -N, --disable-neverallow       do not check neverallow rules\n");
+	printf("  -v, --verbose                  increment verbosity level\n");
+	printf("  -h, --help                     display usage information\n");
 	exit(1);
 }
 
@@ -70,7 +87,7 @@ int main(int argc, char *argv[])
 	enum cil_log_level log_level = CIL_ERR;
 	static struct option long_opts[] = {
 		{"help", no_argument, 0, 'h'},
-		{"log", required_argument, 0, 'l'},
+		{"verbose", required_argument, 0, 'v'},
 		{"target", required_argument, 0, 't'},
 		{"mls", no_argument, 0, 'M'},
 		{"policyversion", required_argument, 0, 'c'},
