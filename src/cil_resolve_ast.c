@@ -520,6 +520,15 @@ int cil_resolve_alias_to_actual(struct cil_tree_node *current, enum cil_flavor f
 	return SEPOL_OK;
 }
 
+int cil_reset_alias(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
+{
+	struct cil_alias *alias = current->data;
+	/* reset actual to NULL during a re-resolve */
+	alias->actual = NULL;
+
+	return SEPOL_OK;
+}
+
 int cil_resolve_typebounds(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_typebounds *typebnds = current->data;
@@ -3415,6 +3424,11 @@ int __cil_reset_node(struct cil_tree_node *node,  __attribute__((unused)) uint32
 		break;
 	case CIL_TYPEATTRIBUTESET:
 		rc = cil_reset_typeattributeset(node, args);
+		break;
+	case CIL_TYPEALIAS:
+	case CIL_SENSALIAS:
+	case CIL_CATALIAS:
+		rc = cil_reset_alias(node, args);
 		break;
 	case CIL_ROLEATTRIBUTESET:
 		rc = cil_reset_roleattributeset(node, args);
