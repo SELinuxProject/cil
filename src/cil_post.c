@@ -646,6 +646,83 @@ static int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitma
 	return SEPOL_OK;
 }
 
+static int __cil_cat_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int max)
+{
+	int rc = SEPOL_ERR;
+	struct cil_tree_node *node = datum->nodes->head->data;
+
+	ebitmap_init(bitmap);
+
+	if (node->flavor == CIL_CATSET) {
+		struct cil_catset *catset = (struct cil_catset *)datum;
+		rc = __cil_expr_to_bitmap(catset->cats->datum_expr, bitmap, max);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to expand category set to bitmap\n");
+			goto exit;
+		}
+	} else if (node->flavor == CIL_CATALIAS) {
+		struct cil_alias *alias = (struct cil_alias *)datum;
+		struct cil_cat *cat = alias->actual;
+		if (ebitmap_set_bit(bitmap, cat->value, 1)) {
+			cil_log(CIL_ERR, "Failed to set cat bit\n");
+			ebitmap_destroy(bitmap);
+			goto exit;
+		}
+	} else {
+		struct cil_cat *cat = (struct cil_cat *)datum;
+		if (ebitmap_set_bit(bitmap, cat->value, 1)) {
+			cil_log(CIL_ERR, "Failed to set cat bit\n");
+			ebitmap_destroy(bitmap);
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+static int __cil_expr_range_to_bitmap_helper(struct cil_list_item *i1, struct cil_list_item *i2, ebitmap_t *bitmap)
+{
+	int rc = SEPOL_ERR;
+	struct cil_symtab_datum *d1 = i1->data;
+	struct cil_symtab_datum *d2 = i2->data;
+	struct cil_tree_node *n1 = d1->nodes->head->data;
+	struct cil_tree_node *n2 = d2->nodes->head->data;
+	struct cil_cat *c1 = (struct cil_cat *)d1;
+	struct cil_cat *c2 = (struct cil_cat *)d2;
+	int i;
+
+	if (n1->flavor == CIL_CATSET || n2->flavor == CIL_CATSET) {
+		cil_log(CIL_ERR, "Category sets cannont be used in a category range\n");
+		goto exit;
+	}
+
+	if (n1->flavor == CIL_CATALIAS) {
+		struct cil_alias *alias = (struct cil_alias *)d1;
+		c1 = alias->actual;
+	}
+
+	if (n2->flavor == CIL_CATALIAS) {
+		struct cil_alias *alias = (struct cil_alias *)d2;
+		c2 = alias->actual;
+	}
+
+	for (i = c1->value; i <= c2->value; i++) {
+		if (ebitmap_set_bit(bitmap, i, 1)) {
+			cil_log(CIL_ERR, "Failed to set cat bit\n");
+			ebitmap_destroy(bitmap);
+			goto exit;
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 static int __cil_expr_to_bitmap_helper(struct cil_list_item *curr, enum cil_flavor flavor, ebitmap_t *bitmap, int max)
 {
 	int rc = SEPOL_ERR;
@@ -660,6 +737,9 @@ static int __cil_expr_to_bitmap_helper(struct cil_list_item *curr, enum cil_flav
 			break;
 		case CIL_PERM:
 			rc = __cil_perm_to_bitmap(curr->data, bitmap, max);
+			break;
+		case CIL_CAT:
+			rc = __cil_cat_to_bitmap(curr->data, bitmap, max);
 			break;
 		default:
 			rc = SEPOL_ERR;
@@ -698,7 +778,20 @@ static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 			rc = ebitmap_not(&tmp, &b1, max);
 			ebitmap_destroy(&b1);
 			if (rc != SEPOL_OK) {
-				cil_log(CIL_INFO, "Failed to Expand *\n");
+				cil_log(CIL_INFO, "Failed to expand 'all' operator\n");
+				ebitmap_destroy(&tmp);
+				goto exit;
+			}
+		} else if (op == CIL_RANGE) {
+			if (flavor != CIL_CAT) {
+				cil_log(CIL_INFO, "Range operation only supported for categories\n");
+				rc = SEPOL_ERR;
+				goto exit;
+			}
+			ebitmap_init(&tmp);
+			rc = __cil_expr_range_to_bitmap_helper(curr->next, curr->next->next, &tmp);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failed to expand category range\n");
 				ebitmap_destroy(&tmp);
 				goto exit;
 			}
@@ -979,25 +1072,144 @@ exit:
 	return rc;
 }
 
-int cil_verify_is_list(struct cil_list *list)
+int cil_verify_is_list(struct cil_list *list, enum cil_flavor flavor)
 {
 	struct cil_list_item *curr;
 
 	cil_list_for_each(curr, list) {
 		switch (curr->flavor) {
 		case CIL_LIST:
-			if (!cil_verify_is_list(curr->data)) {
-				return CIL_FALSE;
-			}
+			return CIL_FALSE;
 			break;
 		case CIL_OP:
 			return CIL_FALSE;
 			break;
 		default:
+			if (flavor == CIL_CAT) {
+				struct cil_symtab_datum *d = curr->data;
+				struct cil_tree_node *n = d->nodes->head->data;
+				if (n->flavor == CIL_CATSET) {
+					return CIL_FALSE;
+				}
+			}
 			break;
 		}	
 	}
 	return CIL_TRUE;
+}
+
+int __evaluate_cat_expression(struct cil_cats *cats, struct cil_db *db)
+{
+	int rc = SEPOL_ERR;
+	ebitmap_t bitmap;
+	struct cil_list *new;
+	struct cil_list_item *curr;
+
+	if (cil_verify_is_list(cats->datum_expr, CIL_CAT)) {
+		return SEPOL_OK;
+	}
+
+	ebitmap_init(&bitmap);
+	rc = __cil_expr_to_bitmap(cats->datum_expr, &bitmap, db->num_cats);
+	if (rc != SEPOL_OK) {
+		ebitmap_destroy(&bitmap);
+		goto exit;
+	}
+
+	cil_list_init(&new, CIL_CAT);
+
+	cil_list_for_each(curr, db->catorder) {
+		struct cil_cat *cat = curr->data;
+		if (ebitmap_get_bit(&bitmap, cat->value)) {
+			cil_list_append(new, CIL_DATUM, cat);
+		}
+	}
+
+	ebitmap_destroy(&bitmap);
+	cil_list_destroy(&cats->datum_expr, CIL_FALSE);
+	if (new->head != NULL) { 
+		cats->datum_expr = new;
+	} else {
+		/* empty list */
+		cil_list_destroy(&new, CIL_FALSE);
+		cats->datum_expr = NULL;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void *extra_args)
+{
+	int rc = SEPOL_ERR;
+
+	switch (node->flavor) {
+	case CIL_BLOCK: {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_OPTIONAL: {
+		struct cil_optional *opt = node->data;
+		if (opt->datum.state != CIL_STATE_ENABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_CATSET: {
+		struct cil_catset *catset = node->data;
+		rc = __evaluate_cat_expression(catset->cats, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_SENSCAT: {
+		struct cil_senscat *senscat = node->data;
+		rc = __evaluate_cat_expression(senscat->cats, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_LEVEL: {
+		struct cil_level *level = node->data;
+		if (level->cats != NULL) {
+			rc = __evaluate_cat_expression(level->cats, extra_args);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+		break;
+	}
+	case CIL_LEVELRANGE: {
+		struct cil_levelrange *levelrange = node->data;
+		if (levelrange->low_str == NULL && levelrange->low != NULL && levelrange->low->cats != NULL) {
+			rc = __evaluate_cat_expression(levelrange->low->cats, extra_args);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+		if (levelrange->high_str == NULL && levelrange->high != NULL && levelrange->high->cats != NULL) {
+			rc = __evaluate_cat_expression(levelrange->high->cats, extra_args);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
 }
 
 struct perm_to_list {
@@ -1031,13 +1243,13 @@ int __perm_bits_to_list(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t
 	return SEPOL_OK;
 }
 
-int __evaluate_perm_expression(struct cil_list *perms, symtab_t *class_symtab, symtab_t *common_symtab, unsigned int num_perms, struct cil_list **new_list)
+int __evaluate_perm_expression(struct cil_list *perms, enum cil_flavor flavor, symtab_t *class_symtab, symtab_t *common_symtab, unsigned int num_perms, struct cil_list **new_list)
 {
 	int rc = SEPOL_ERR;
 	struct perm_to_list args;
 	ebitmap_t bitmap;
 
-	if (cil_verify_is_list(perms)) {
+	if (cil_verify_is_list(perms, CIL_PERM)) {
 		return SEPOL_OK;
 	}
 
@@ -1048,9 +1260,9 @@ int __evaluate_perm_expression(struct cil_list *perms, symtab_t *class_symtab, s
 		goto exit;
 	}
 
-	cil_list_init(new_list, CIL_PERM);
+	cil_list_init(new_list, flavor);
 
-	args.flavor = CIL_PERM;
+	args.flavor = flavor;
 	args.perms = &bitmap;
 	args.new_list = *new_list;
 
@@ -1101,7 +1313,7 @@ int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32_t *fin
 				common_symtab = &common->perms;
 			}
 
-			rc = __evaluate_perm_expression(cp->r.cp.perms, &class->perms, common_symtab, class->num_perms, &new_list);
+			rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1161,7 +1373,7 @@ int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *fini
 					common_symtab = &common->perms;
 				}
 
-				rc = __evaluate_perm_expression(cp->r.cp.perms, &class->perms, common_symtab, class->num_perms, &new_list);
+				rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
@@ -1178,7 +1390,7 @@ int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *fini
 				struct cil_map_class *class = cp->r.mcp.class;
 				struct cil_list *new_list = NULL;
 
-				rc = __evaluate_perm_expression(cp->r.mcp.perms, &class->perms, NULL, class->num_perms, &new_list);
+				rc = __evaluate_perm_expression(cp->r.mcp.perms, CIL_MAP_PERM, &class->perms, NULL, class->num_perms, &new_list);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
@@ -1231,14 +1443,22 @@ int cil_post_db(struct cil_db *db)
 		cil_log(CIL_INFO, "Failed during roletype association\n");
 		goto exit;
 	}
+
 	rc = cil_tree_walk(db->ast->root, __cil_post_db_class_mapping_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_INFO, "Failed to evaluate class mapping permissions expressions\n");
 		goto exit;
 	}
+
 	rc = cil_tree_walk(db->ast->root, __cil_post_db_classpermset_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_INFO, "Failed to evaluate class-permission sets expressions\n");
+		goto exit;
+	}
+
+	rc = cil_tree_walk(db->ast->root, __cil_post_db_cat_helper, NULL, NULL, db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_INFO, "Failed to evaluate category expressions\n");
 		goto exit;
 	}
 

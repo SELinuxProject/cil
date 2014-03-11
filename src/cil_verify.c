@@ -173,6 +173,14 @@ int cil_verify_expr_syntax(struct cil_tree_node *current, enum cil_flavor op, en
 		syntax[1] = CIL_SYN_END;
 		syntax_len = 2;
 		break;
+	case CIL_RANGE:
+		if (expr_flavor != CIL_CAT) {
+			cil_log(CIL_ERR,"Operator (%s) only valid for catset expression\n", current->data);
+			goto exit;
+		}
+		syntax[1] = CIL_SYN_STRING;
+		syntax[2] = CIL_SYN_STRING;
+		break;
 	case CIL_NONE: /* String or List */
 		syntax[0] = CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS;
 		syntax[1] = CIL_SYN_END;
@@ -396,147 +404,25 @@ int __cil_verify_ordered(struct cil_tree_node *current, enum cil_flavor flavor)
 	return rc;
 }
 
-int __cil_verify_catrange(struct cil_db *db, struct cil_catrange *catrange, struct cil_cat *cat)
+int __cil_verify_senscat(struct cil_sens *sens, struct cil_cat *cat)
 {
-	struct cil_list_item *cat_item;
-	int rc = SEPOL_ERR;
+	struct cil_list_item *cats_item;
 
-	if (catrange->cat_low == cat || catrange->cat_high == cat) {
-		rc = SEPOL_OK;
-		goto exit;
-	}
-
-	cil_list_for_each(cat_item, db->catorder) {
-		if (cat_item->data == catrange->cat_low) {
-			break;
-		}
-	}
-
-	if (cat_item == NULL) {
-		rc = SEPOL_ERR;
-		cil_log(CIL_ERR,"Could not find category range\n");
-		goto exit;
-	}
-
-
-	for (cat_item = cat_item->next; cat_item != NULL; cat_item = cat_item->next) {
-		if (cat_item->data == catrange->cat_high) {
-			break;
-		}
-		
-		if (cat_item->data == cat) {
-			rc = SEPOL_OK;
-			goto exit;
-		}
-	}
-
-	cil_log(CIL_ERR,"Category %s not found in category range\n", cat->datum.name);
-	return SEPOL_ERR;
-
-exit:
-	return rc;
-}
-
-int __cil_verify_senscat(struct cil_db *db, struct cil_sens *sens, struct cil_cat *cat)
-{
-	struct cil_list_item *catset_item;
-	int rc = SEPOL_ERR;
-
-	cil_list_for_each(catset_item, sens->catsets) {
-		struct cil_catset *catset = catset_item->data;
+	cil_list_for_each(cats_item, sens->cats_list) {
+		struct cil_cats *cats = cats_item->data;
 		struct cil_list_item *cat_item;
-		cil_list_for_each(cat_item, catset->cat_list) {
-			switch (cat_item->flavor) {
-			case CIL_CAT: {
-				if (cat_item->data == cat) {
-					rc = SEPOL_OK;
-					goto exit;
-				}
-				break;
-			}
-			case CIL_CATRANGE: {
-				rc = __cil_verify_catrange(db, cat_item->data, cat);
-				if (rc == SEPOL_OK) {
-					goto exit;
-				}
-				break;
-			}
-			default:
-				rc = SEPOL_ERR;
-				cil_log(CIL_ERR, "Category %s cannot be used with sensitivity %s\n", 
-					cat->datum.name, sens->datum.name);
-				goto exit;
+		cil_list_for_each(cat_item, cats->datum_expr) {
+			struct cil_cat *c = cat_item->data;
+			if (c == cat) {
+				return SEPOL_OK;
 			}
 		}
 	}
 
 	cil_log(CIL_ERR, "Category %s cannot be used with sensitivity %s\n", 
 		cat->datum.name, sens->datum.name);
+
 	return SEPOL_ERR;
-
-exit:
-	return rc;
-}
-
-int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil_catset *catset)
-{
-	struct cil_list_item *catset_item;
-	int rc = SEPOL_OK;
-
-	cil_list_for_each(catset_item, catset->cat_list) {
-		switch (catset_item->flavor) {
-		case CIL_CAT: {
-			struct cil_cat *cat = catset_item->data;
-			rc = __cil_verify_senscat(db, sens, cat);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-			break;
-		}
-		case CIL_CATRANGE: {
-			struct cil_catrange *catrange = catset_item->data;
-			struct cil_list_item *catorder;
-
-			cil_list_for_each(catorder, db->catorder) { 
-				if (catorder->data == catrange->cat_low) {
-					break;
-				}
-			}
-
-			if (catorder == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-			for (; catorder != NULL; catorder = catorder->next) {
-				struct cil_cat *cat = catorder->data;
-				rc = __cil_verify_senscat(db, sens, cat);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
-				if (catorder->data == catrange->cat_high) {
-					break;
-				}
-			}
-
-			if (catorder == NULL) {
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-			break;
-		}
-		default:
-			rc = SEPOL_ERR;
-			goto exit;
-		}
-	}
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Invalid category set for sensitivity %s\n", sens->datum.name);
-	return rc;
 }
 
 int __cil_verify_levelrange_sensitivityorder(struct cil_db *db, struct cil_sens *low, struct cil_sens *high)
@@ -568,42 +454,40 @@ exit:
 
 }
 
-int __cil_verify_cat_in_catset(struct cil_db *db, struct cil_cat *cat, struct cil_catset *set)
+int __cil_verify_cat_in_cats(struct cil_cat *cat, struct cil_cats *cats)
 {
-	int rc = SEPOL_ERR;
-	struct cil_list_item *set_curr;
+	struct cil_list_item *i;
 
-	cil_list_for_each(set_curr, set->cat_list) {
-		switch (set_curr->flavor) {
-		case CIL_CAT:
-			if (cat == set_curr->data) {
+	cil_list_for_each(i, cats->datum_expr) {
+		struct cil_symtab_datum *datum = i->data;
+		struct cil_tree_node *node = datum->nodes->head->data;
+		enum cil_flavor flavor = node->flavor;
+		if (flavor == CIL_CATSET) {
+			struct cil_list_item *j;
+			struct cil_catset *cs = i->data;
+			cil_list_for_each(j, cs->cats->datum_expr) {
+				struct cil_cat *c = j->data;
+				if (c == cat) {
+					return SEPOL_OK;
+				}
+			}
+		} else {
+			struct cil_cat *c = i->data;
+			if (c == cat) {
 				return SEPOL_OK;
 			}
-			break;
-		case CIL_CATRANGE:
-			rc = __cil_verify_catrange(db, set_curr->data, cat);
-			if (rc == SEPOL_OK) {
-				return SEPOL_OK;
-			}
-			break;
-		default:
-			goto exit;
 		}
 	}
 
-exit:
-	cil_log(CIL_ERR, "Failed to find %s in category set\n", cat->datum.name);
+	cil_log(CIL_ERR, "Failed to find category %s in category list\n", cat->datum.name);
+
 	return SEPOL_ERR;
 }
 
-int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, struct cil_catset *high)
+int __cil_verify_levelrange_cats(struct cil_cats *low, struct cil_cats *high)
 {
 	int rc = SEPOL_ERR;
-	struct cil_list_item *low_curr;
-	struct cil_list_item *order_curr;
-	struct cil_cat *range_low = NULL;
-	struct cil_cat *range_high = NULL;
-	int found = CIL_FALSE;
+	struct cil_list_item *item;
 
 	if (low == NULL || (low == NULL && high == NULL)) {
 		return SEPOL_OK;
@@ -614,34 +498,9 @@ int __cil_verify_levelrange_cats(struct cil_db *db, struct cil_catset *low, stru
 		goto exit;
 	}
 
-	cil_list_for_each(low_curr, low->cat_list) {
-		switch (low_curr->flavor) {
-		case CIL_CAT:
-			rc = __cil_verify_cat_in_catset(db, low_curr->data, high);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-			break;
-		case CIL_CATRANGE:
-			range_low = ((struct cil_catrange*)low_curr->data)->cat_low;
-			range_high = ((struct cil_catrange*)low_curr->data)->cat_high;
-			cil_list_for_each(order_curr, db->catorder) {
-				if (order_curr->data == range_low) {
-					found = CIL_TRUE;
-				} else if (order_curr->data == range_high) {
-					break;
-				}
-
-				if (found == CIL_TRUE) {
-					rc = __cil_verify_cat_in_catset(db, order_curr->data, high);
-					if (rc != SEPOL_OK) {
-						goto exit;
-					}
-				}
-			}
-			break;
-		default:
-			rc = SEPOL_ERR;
+	cil_list_for_each(item, low->datum_expr) {
+		rc = __cil_verify_cat_in_cats(item->data, high);
+		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 	}
@@ -662,7 +521,7 @@ int __cil_verify_levelrange(struct cil_db *db, struct cil_levelrange *lr)
 		goto exit;
 	}
 
-	rc = __cil_verify_levelrange_cats(db, lr->low->catset, lr->high->catset);
+	rc = __cil_verify_levelrange_cats(lr->low->cats, lr->high->cats);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}

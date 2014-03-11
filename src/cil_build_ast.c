@@ -1262,7 +1262,7 @@ int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, st
 	} else {
 		cil_level_init(&usrlvl->level);
 
-		rc = cil_fill_level(parse_current->next->next, usrlvl->level);
+		rc = cil_fill_level(parse_current->next->next->cl_head, usrlvl->level, CIL_FALSE);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1329,7 +1329,7 @@ int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, st
 	} else {
 		cil_levelrange_init(&userrange->range);
 
-		rc = cil_fill_levelrange(parse_current->next->next->cl_head, userrange->range);
+		rc = cil_fill_levelrange(parse_current->next->next->cl_head, userrange->range, CIL_FALSE);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1500,7 +1500,7 @@ int cil_gen_selinuxuser(struct cil_db *db, struct cil_tree_node *parse_current, 
 	} else {
 		cil_levelrange_init(&selinuxuser->range);
 
-		rc = cil_fill_levelrange(parse_current->next->next->next->cl_head, selinuxuser->range);
+		rc = cil_fill_levelrange(parse_current->next->next->next->cl_head, selinuxuser->range, CIL_FALSE);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1548,7 +1548,7 @@ int cil_gen_selinuxuserdefault(struct cil_db *db, struct cil_tree_node *parse_cu
 	} else {
 		cil_levelrange_init(&selinuxuser->range);
 
-		rc = cil_fill_levelrange(parse_current->next->next->cl_head, selinuxuser->range);
+		rc = cil_fill_levelrange(parse_current->next->next->cl_head, selinuxuser->range, CIL_FALSE);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2424,13 +2424,14 @@ void cil_destroy_tunable(struct cil_tunable *tunable)
 static enum cil_flavor __cil_get_expr_operator_flavor(const char *op)
 {
 	if (op == NULL) return CIL_NONE;
-	else if (!strcmp(op, CIL_KEY_AND))  return CIL_AND;
-	else if (!strcmp(op, CIL_KEY_OR))   return CIL_OR;
-	else if (!strcmp(op, CIL_KEY_NOT))  return CIL_NOT;  /* Only conditional */
-	else if (!strcmp(op, CIL_KEY_EQ))   return CIL_EQ;   /* Only conditional */
-	else if (!strcmp(op, CIL_KEY_NEQ))  return CIL_NEQ;
-	else if (!strcmp(op, CIL_KEY_XOR))  return CIL_XOR;
-	else if (!strcmp(op, CIL_KEY_ALL))  return CIL_ALL; /* Only set */
+	else if (!strcmp(op, CIL_KEY_AND))   return CIL_AND;
+	else if (!strcmp(op, CIL_KEY_OR))    return CIL_OR;
+	else if (!strcmp(op, CIL_KEY_NOT))   return CIL_NOT; 
+	else if (!strcmp(op, CIL_KEY_EQ))    return CIL_EQ;    /* Only conditional */
+	else if (!strcmp(op, CIL_KEY_NEQ))   return CIL_NEQ;   /* Only conditional */
+	else if (!strcmp(op, CIL_KEY_XOR))   return CIL_XOR;
+	else if (!strcmp(op, CIL_KEY_ALL))   return CIL_ALL;   /* Only set */
+	else if (!strcmp(op, CIL_KEY_RANGE)) return CIL_RANGE; /* Only catset */
 	else return CIL_NONE;
 }
 
@@ -3344,7 +3345,7 @@ int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_curre
 	} else {
 		cil_levelrange_init(&rangetrans->range);
 
-		rc = cil_fill_levelrange(parse_current->next->next->next->next->cl_head, rangetrans->range);
+		rc = cil_fill_levelrange(parse_current->next->next->next->next->cl_head, rangetrans->range, CIL_FALSE);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -3436,7 +3437,9 @@ void cil_destroy_sensitivity(struct cil_sens *sens)
 	}
 
 	cil_symtab_datum_destroy(&sens->datum);
-	cil_list_destroy(&sens->catsets, CIL_FALSE);
+
+	cil_list_destroy(&sens->cats_list, CIL_FALSE);
+
 	free(sens);
 }
 
@@ -3490,71 +3493,6 @@ void cil_destroy_category(struct cil_cat *cat)
 	free(cat);
 }
 
-int cil_gen_catrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	enum cil_syntax syntax[] = {
-		CIL_SYN_STRING,
-		CIL_SYN_STRING,
-		CIL_SYN_LIST,
-		CIL_SYN_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	char *key = NULL;
-	struct cil_catrange *catrange = NULL;
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	cil_catrange_init(&catrange);
-
-	key = parse_current->next->data;
-
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)catrange, (hashtab_key_t)key, CIL_SYM_CATS, CIL_CATRANGE);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	rc = cil_fill_catrange(parse_current->next->next->cl_head, catrange);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad categoryrange declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
-	cil_destroy_catrange(catrange);
-	cil_clear_node(ast_node);
-	return rc;
-}
-
-void cil_destroy_catrange(struct cil_catrange *catrange)
-{
-	if (catrange == NULL) {
-		return;
-	}
-
-	cil_symtab_datum_destroy(&catrange->datum);
-
-	if (catrange->cat_low_str != NULL) {
-		free(catrange->cat_low_str);
-	}
-
-	if (catrange->cat_high_str != NULL) {
-		free(catrange->cat_high_str);
-	}
-
-	free(catrange);
-}
-
 int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -3586,7 +3524,7 @@ int cil_gen_catset(struct cil_db *db, struct cil_tree_node *parse_current, struc
 		goto exit;
 	}
 
-	rc = cil_fill_catset(parse_current->next->next->cl_head, catset);
+	rc = cil_fill_cats(parse_current->next->next, &catset->cats, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3609,13 +3547,7 @@ void cil_destroy_catset(struct cil_catset *catset)
 
 	cil_symtab_datum_destroy(&catset->datum);
 
-	if (catset->cat_list_str != NULL) {
-		cil_list_destroy(&catset->cat_list_str, 1);
-	}
-
-	if (catset->cat_list != NULL) {
-		cil_list_destroy(&catset->cat_list, 0);
-	}
+	cil_destroy_cats(catset->cats);
 
 	free(catset);
 }
@@ -3748,15 +3680,9 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	senscat->sens_str = cil_strdup(parse_current->next->data);
 
-	if (parse_current->next->next->cl_head == NULL) {
-		senscat->catset_str = cil_strdup(parse_current->next->next->data);
-	} else {
-		cil_catset_init(&senscat->catset);
-
-		rc = cil_fill_catset(parse_current->next->next->cl_head, senscat->catset);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
+	rc = cil_fill_cats(parse_current->next->next, &senscat->cats, CIL_TRUE);
+	if (rc != SEPOL_OK) {
+		goto exit;
 	}
 
 	ast_node->data = senscat;
@@ -3777,17 +3703,9 @@ void cil_destroy_senscat(struct cil_senscat *senscat)
 		return;
 	}
 
-	if (senscat->sens_str != NULL) {
-		free(senscat->sens_str);
-	}
+	free(senscat->sens_str);
 
-	if (senscat->catset_str == NULL) {
-		cil_destroy_catset(senscat->catset);
-	}
-
-	if (senscat->catset_str != NULL) {
-		free(senscat->catset_str);
-	}
+	cil_destroy_cats(senscat->cats);
 
 	free(senscat);
 }
@@ -3797,7 +3715,7 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	enum cil_syntax syntax[] = {
 		CIL_SYN_STRING,
 		CIL_SYN_STRING,
-		CIL_SYN_STRING | CIL_SYN_LIST,
+		CIL_SYN_LIST,
 		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -3823,7 +3741,7 @@ int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	rc = cil_fill_level(parse_current->next->next, level);
+	rc = cil_fill_level(parse_current->next->next->cl_head, level, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3846,23 +3764,15 @@ void cil_destroy_level(struct cil_level *level)
 
 	cil_symtab_datum_destroy(&level->datum);
 
-	if (level->sens_str != NULL) {
-		free(level->sens_str);
-	}
+	free(level->sens_str);
 
-	if (level->catset_str == NULL) {
-		cil_destroy_catset(level->catset);
-	}
-
-	if (level->catset_str != NULL) {
-		free(level->catset_str);
-	}
+	cil_destroy_cats(level->cats);
 
 	free(level);
 }
 
 /* low should be pointing to either the name of the low level or to an open paren for an anonymous low level */
-int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlrange)
+int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlrange, int allow_exprs)
 {
 	enum cil_syntax syntax[] = {
 		CIL_SYN_STRING | CIL_SYN_LIST,
@@ -3886,7 +3796,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 		lvlrange->low_str = cil_strdup(low->data);
 	} else {
 		cil_level_init(&lvlrange->low);
-		rc = cil_fill_level(low, lvlrange->low);
+		rc = cil_fill_level(low->cl_head, lvlrange->low, allow_exprs);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -3896,7 +3806,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 		lvlrange->high_str = cil_strdup(low->next->data);
 	} else {
 		cil_level_init(&lvlrange->high);
-		rc = cil_fill_level(low->next, lvlrange->high);
+		rc = cil_fill_level(low->next->cl_head, lvlrange->high, allow_exprs);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -3940,7 +3850,7 @@ int cil_gen_levelrange(struct cil_db *db, struct cil_tree_node *parse_current, s
 		goto exit;
 	}
 
-	rc = cil_fill_levelrange(parse_current->next->next->cl_head, lvlrange);
+	rc = cil_fill_levelrange(parse_current->next->next->cl_head, lvlrange, CIL_TRUE);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -4126,7 +4036,7 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 	} else {
 		cil_levelrange_init(&context->range);
 
-		rc = cil_fill_levelrange(user_node->next->next->next->cl_head, context->range);
+		rc = cil_fill_levelrange(user_node->next->next->next->cl_head, context->range, CIL_FALSE);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -5548,131 +5458,77 @@ exit:
 	return rc;
 }
 
-int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level)
+int cil_fill_level(struct cil_tree_node *curr, struct cil_level *level, int allow_exprs)
 {
 	int rc = SEPOL_ERR;
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_STRING | CIL_SYN_LIST | CIL_SYN_END,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
 
-	if (sens == NULL) {
+	if (curr == NULL) {
 		goto exit;
 	}
 
-	if (sens->cl_head == NULL) {
-		level->sens_str = cil_strdup(sens->data);
-	} else {
-		enum cil_syntax syntax[] = {
-			CIL_SYN_STRING,
-			CIL_SYN_STRING | CIL_SYN_LIST | CIL_SYN_END,
-			CIL_SYN_END
-		};
-		int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	rc = __cil_verify_syntax(curr, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
 
-		sens = sens->cl_head;
-
-		rc = __cil_verify_syntax(sens, syntax, syntax_len);
+	level->sens_str = cil_strdup(curr->data);
+	if (curr->next != NULL) {
+		rc = cil_fill_cats(curr->next, &level->cats, allow_exprs);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
+	}
 
-		level->sens_str = cil_strdup(sens->data);
-		if (sens->next != NULL) {
-			if (sens->next->cl_head == NULL) {
-				level->catset_str = cil_strdup(sens->next->data);
-			} else {
-				cil_catset_init(&level->catset);
+	return SEPOL_OK;
 
-				rc = cil_fill_catset(sens->next->cl_head, level->catset);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
+exit:
+	cil_log(CIL_ERR, "Bad level\n");
+	return rc;
+}
+
+int cil_fill_cats(struct cil_tree_node *curr, struct cil_cats **cats, int allow_exprs)
+{
+	int rc = SEPOL_ERR;
+
+	cil_cats_init(cats);
+
+	if (allow_exprs) {
+		rc = cil_gen_expr(curr, CIL_CAT, &(*cats)->str_expr);
+	} else {
+		if (curr->cl_head == NULL) {
+			cil_list_init(&(*cats)->str_expr, CIL_CAT);
+			if (curr->data != NULL) {
+				cil_list_append((*cats)->str_expr, CIL_STRING, cil_strdup(curr->data));
+				rc = SEPOL_OK;
 			}
-		}
-	}
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad level");
-	return rc;
-}
-
-int cil_fill_catrange(struct cil_tree_node *cats, struct cil_catrange *catrange)
-{
-	enum cil_syntax syntax[] = {
-		CIL_SYN_STRING,
-		CIL_SYN_STRING,
-		CIL_SYN_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	int rc = SEPOL_ERR;
-
-	if (cats == NULL || catrange == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(cats, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	catrange->cat_low_str = cil_strdup(cats->data);
-	catrange->cat_high_str = cil_strdup(cats->next->data);
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad categoryrange\n");
-	return rc;
-}
-
-int cil_fill_catset(struct cil_tree_node *cats, struct cil_catset *catset)
-{
-	enum cil_syntax syntax[] = {
-		CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS,
-		CIL_SYN_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-
-	struct cil_tree_node *curr = NULL;
-	struct cil_list *cat_list = NULL;
-	struct cil_catrange *catrange = NULL;
-	int rc = SEPOL_ERR;
-
-	if (cats == NULL || catset == NULL) {
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(cats, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	cil_list_init(&cat_list, CIL_LIST_ITEM);
-
-	for (curr = cats; curr != NULL; curr = curr->next) {
-		if (curr->data != NULL) {
-			/* named category or categoryrange */
-			cil_list_append(cat_list, CIL_STRING, cil_strdup(curr->data));
 		} else {
-			/* anonymous category range */
-			cil_catrange_init(&catrange);
-
-			rc = cil_fill_catrange(curr->cl_head, catrange);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-
-			cil_list_append(cat_list, CIL_CATRANGE, catrange);
+			rc = cil_fill_list(curr->cl_head, CIL_CAT, &(*cats)->str_expr);
 		}
 	}
+	if (rc != SEPOL_OK) {
+		cil_destroy_cats(*cats);
+	}
 
-	catset->cat_list_str = cat_list;
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad category set\n");
 	return rc;
+}
+
+void cil_destroy_cats(struct cil_cats *cats)
+{
+	if (cats == NULL) {
+		return;
+	}
+
+	cil_list_destroy(&cats->str_expr, CIL_TRUE);
+
+	cil_list_destroy(&cats->datum_expr, CIL_FALSE);
+
+	free(cats);
 }
 
 int cil_gen_default(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
@@ -6029,9 +5885,6 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_alias(db, parse_current, ast_node, CIL_CATALIAS);
 	} else if (!strcmp(parse_current->data, CIL_KEY_CATALIASACTUAL)) {
 		rc = cil_gen_aliasactual(db, parse_current, ast_node, CIL_CATALIASACTUAL);
-	} else if (!strcmp(parse_current->data, CIL_KEY_CATRANGE)) {
-		rc = cil_gen_catrange(db, parse_current, ast_node);
-		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_CATSET)) {
 		rc = cil_gen_catset(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;

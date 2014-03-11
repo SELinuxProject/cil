@@ -111,17 +111,18 @@ enum cil_flavor {
 	CIL_DEFAULTRANGE,
 
 /*
- *          boolean  constraint  set
+ *          boolean  constraint  set  catset
  *  dom                  X
  *  domby                X
  *  incomp               X
  *  eq         X         X
  *  ne         X         X
- *  and        X         X        X
- *  not        X         X        X
- *  or         X         X        X
- *  xor        X                  X
- *  all                           X
+ *  and        X         X        X    X
+ *  not        X         X        X    X
+ *  or         X         X        X    X
+ *  xor        X                  X    X
+ *  all                           X    X
+ *  range                              X
 */
 	CIL_OP = CIL_MIN_OP_OPERANDS,
 	CIL_ALL,
@@ -131,6 +132,7 @@ enum cil_flavor {
 	CIL_NOT,
 	CIL_EQ,
 	CIL_NEQ,
+	CIL_RANGE,
 	CIL_PARAM,
 	CIL_CONS_DOM,
 	CIL_CONS_DOMBY,
@@ -172,7 +174,6 @@ enum cil_flavor {
 	CIL_SENSALIAS,
 	CIL_CAT,
 	CIL_CATALIAS,
-	CIL_CATRANGE,
 	CIL_CATSET,
 	CIL_LEVEL,
 	CIL_LEVELRANGE,

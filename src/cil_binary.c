@@ -2309,85 +2309,57 @@ exit:
 	return rc;
 }
 
-int __cil_catrange_expand_to_bitmap(policydb_t *pdb, struct cil_cat *start, struct cil_cat *end, ebitmap_t *bitmap)
+static int __cil_insert_cat(char *name, hashtab_t hashtab, ebitmap_t *cats)
+{
+	cat_datum_t *cat = NULL;
+
+	cat = hashtab_search(hashtab, name);
+	if (cat == NULL) {
+		return SEPOL_ERR;
+	}
+
+	if (ebitmap_set_bit(cats, cat->s.value - 1, 1)) {
+		return SEPOL_ERR;
+	}
+
+	return SEPOL_OK;
+}
+
+int __cil_cats_to_mls_level(policydb_t *pdb, struct cil_cats *cats, mls_level_t *mls_level)
 {
 	int rc = SEPOL_ERR;
-	uint32_t svalue = 0;
-	uint32_t evalue = 0;
-	unsigned int bit = 0;
-	char *key = NULL;
-	cat_datum_t *sepol_start = NULL;
-	cat_datum_t *sepol_end = NULL;
+	struct cil_list_item *i;
 
-	key = start->datum.name;
-	sepol_start = hashtab_search(pdb->p_cats.table, key);
-	if (sepol_start == NULL) {
-		goto exit;
-	}
-	svalue = sepol_start->s.value - 1;
-
-	key = end->datum.name;
-	sepol_end = hashtab_search(pdb->p_cats.table, key);
-	if (sepol_end == NULL) {
-		goto exit;
-	}
-	evalue = sepol_end->s.value - 1;
-
-	for (bit = svalue; bit <= evalue; bit++) {
-		if (ebitmap_set_bit(bitmap, bit, 1)) {
-			goto exit;
+	cil_list_for_each(i, cats->datum_expr) {
+		struct cil_symtab_datum *datum = i->data;
+		struct cil_tree_node *node = datum->nodes->head->data;
+		enum cil_flavor flavor = node->flavor;
+		if (flavor == CIL_CATSET) {
+			struct cil_list_item *j;
+			struct cil_catset *cs = i->data;
+			cil_list_for_each(j, cs->cats->datum_expr) {
+				struct cil_cat *c = j->data;
+				rc = __cil_insert_cat(c->datum.name, pdb->p_cats.table, &mls_level->cat);
+				if (rc != SEPOL_OK) {
+					return rc;
+				}
+			}
+		} else {
+			struct cil_cat *c = i->data;
+			rc = __cil_insert_cat(c->datum.name, pdb->p_cats.table, &mls_level->cat);
+			if (rc != SEPOL_OK) {
+				return rc;
+			}
 		}
 	}
 
 	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int __cil_catset_to_mls_level(policydb_t *pdb, struct cil_catset *catset, mls_level_t *mls_level)
-{
-	int rc = SEPOL_ERR;
-	struct cil_list *cats = catset->cat_list;
-	struct cil_list_item *curr_cat;
-
-	cil_list_for_each(curr_cat, cats) {
-		if (curr_cat->flavor == CIL_CATRANGE) {
-			struct cil_catrange *catrange = curr_cat->data;
-			struct cil_cat *start_cat = catrange->cat_low;
-			struct cil_cat *end_cat = catrange->cat_high;
-
-			rc = __cil_catrange_expand_to_bitmap(pdb, start_cat, end_cat, &mls_level->cat);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-		} else {
-			struct cil_cat *cil_cat = curr_cat->data;
-			cat_datum_t *sepol_cat = NULL;
-			char *key = NULL;
-
-			key = cil_cat->datum.name;
-			sepol_cat = hashtab_search(pdb->p_cats.table, key);
-			if (sepol_cat == NULL) {
-				goto exit;
-			}
-
-			if (ebitmap_set_bit(&mls_level->cat, sepol_cat->s.value - 1, 1)) {
-				goto exit;
-			}
-		}
-	}
-
-	rc = SEPOL_OK;
-exit:
-	return rc;
 }
 
 int __cil_sens_to_mls_level(policydb_t *pdb, struct cil_sens *cil_sens, mls_level_t *mls_level)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_list *catsets = cil_sens->catsets;
 	struct cil_list_item *curr;
 	level_datum_t *sepol_level = NULL;
 
@@ -2400,10 +2372,9 @@ int __cil_sens_to_mls_level(policydb_t *pdb, struct cil_sens *cil_sens, mls_leve
 
 	ebitmap_init(&mls_level->cat);
 
-	cil_list_for_each(curr, catsets) {
-		struct cil_catset *catset = curr->data;
-
-		rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
+	cil_list_for_each(curr, cil_sens->cats_list) {
+		struct cil_cats *cats = curr->data;
+		rc = __cil_cats_to_mls_level(pdb, cats, mls_level);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Failed to insert category set into sepol mls level\n");
 			goto exit;
@@ -2421,7 +2392,7 @@ int __cil_level_to_mls_level(policydb_t *pdb, struct cil_level *cil_level, mls_l
 	int rc = SEPOL_ERR;
 	char *key = NULL;
 	struct cil_sens *cil_sens = cil_level->sens;
-	struct cil_catset *catset = cil_level->catset;
+	struct cil_cats *cats = cil_level->cats;
 	level_datum_t *sepol_level = NULL;
 
 	key = cil_sens->datum.name;
@@ -2433,8 +2404,8 @@ int __cil_level_to_mls_level(policydb_t *pdb, struct cil_level *cil_level, mls_l
 
 	ebitmap_init(&mls_level->cat);
 
-   if (catset) {
-      rc = __cil_catset_to_mls_level(pdb, catset, mls_level);
+   if (cats != NULL) {
+      rc = __cil_cats_to_mls_level(pdb, cats, mls_level);
       if (rc != SEPOL_OK) {
          cil_log(CIL_INFO, "Failed to insert category set into sepol mls level\n");
          goto exit;

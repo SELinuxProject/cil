@@ -294,6 +294,9 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 			case CIL_XOR:
 				op_str = CIL_KEY_XOR;
 				break;
+			case CIL_RANGE:
+				op_str = CIL_KEY_RANGE;
+				break;
 			case CIL_CONS_DOM:
 				op_str = CIL_KEY_CONS_DOM;
 				break;
@@ -434,62 +437,9 @@ void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 	}
 }
 
-void cil_tree_print_catrange(struct cil_catrange *catrange)
+void cil_tree_print_cats(struct cil_cats *cats)
 {
-	cil_log(CIL_INFO, " (");
-
-	if (catrange->cat_low != NULL) {
-		cil_log(CIL_INFO, " %s", catrange->cat_low->datum.name);
-	} else {
-		cil_log(CIL_INFO, " %s", catrange->cat_low_str);
-	}
-	
-	if (catrange->cat_high != NULL) {
-		cil_log(CIL_INFO, " %s", catrange->cat_high->datum.name);
-	} else {
-		cil_log(CIL_INFO, " %s", catrange->cat_high_str);
-	}
-
-	cil_log(CIL_INFO, " )");
-
-}
-
-void cil_tree_print_catset(struct cil_catset *catset)
-{
-	struct cil_list_item *cat_item;
-
-	cil_log(CIL_INFO, " (");
-	if (catset->cat_list != NULL) {
-		cil_list_for_each(cat_item, catset->cat_list) {
-			switch (cat_item->flavor) {
-			case CIL_CATRANGE:
-				cil_tree_print_catrange(cat_item->data);
-				break;
-			case CIL_CAT: {
-				struct cil_cat *cat = cat_item->data;
-				cil_log(CIL_INFO, " %s", cat->datum.name);
-				break;
-			}
-			default:
-				break;
-			}
-		}
-	} else {
-		cil_list_for_each(cat_item, catset->cat_list_str) {
-			switch (cat_item->flavor) {
-			case CIL_CATRANGE:
-				cil_tree_print_catrange(cat_item->data);
-				break;
-			case CIL_STRING: {
-				cil_log(CIL_INFO, " %s", (char *)cat_item->data);
-				break;
-			}
-			default:
-				break;
-			}
-		}
-	}
-	cil_log(CIL_INFO, " )");
+	cil_tree_print_expr(cats->datum_expr, cats->str_expr);
 }
 
 void cil_tree_print_perm_strs(struct cil_list *perm_strs)
@@ -558,11 +508,7 @@ void cil_tree_print_level(struct cil_level *level)
 		cil_log(CIL_INFO, " %s", level->sens_str);
 	}
 
-	if (level->catset != NULL) {
-		cil_tree_print_catset(level->catset);
-	} else {
-		cil_log(CIL_INFO, " %s", level->catset_str);
-	}
+	cil_tree_print_cats(level->cats);
 
 	return;
 }
@@ -1176,30 +1122,11 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		}
 		case CIL_CATSET: {
 			struct cil_catset *catset = node->data;
-			struct cil_list *cat_list;
-			struct cil_list_item *cat;
 
-			cil_log(CIL_INFO, "CATSET: %s (",catset->datum.name);
+			cil_log(CIL_INFO, "CATSET: %s ",catset->datum.name);
 
-			cat_list = catset->cat_list ? catset->cat_list : catset->cat_list_str;
-			cil_list_for_each(cat, cat_list) {
-				if (cat->flavor == CIL_LIST) {
-					struct cil_list_item *sub;
-					cil_log(CIL_INFO, " (");
-					cil_list_for_each(sub, (struct cil_list*)cat->data) {
-						cil_log(CIL_INFO, " %s", ((struct cil_cat*)sub->data)->datum.name);
-					}
-					cil_log(CIL_INFO, " )");
-				} else {
-					if (cat->flavor == CIL_CAT) {
-						cil_log(CIL_INFO, " %s", ((struct cil_cat*)cat->data)->datum.name);
-					} else {
-						cil_log(CIL_INFO, " %s", (char*)cat->data);
-					}
-				}
-			}
+			cil_tree_print_cats(catset->cats);
 
-			cil_log(CIL_INFO, " )\n");
 			return;
 		}
 		case CIL_CATORDER: {
@@ -1229,13 +1156,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 				cil_log(CIL_INFO, " [processed]");
 			}
 
-			if (senscat->catset != NULL) {
-				cil_tree_print_catset(senscat->catset);
-			} else {
-				cil_log(CIL_INFO, " %s", senscat->catset_str);
-			}
+			cil_tree_print_cats(senscat->cats);
 
-			cil_log(CIL_INFO, " )\n");
 			return;
 		}
 		case CIL_SENSITIVITYORDER: {

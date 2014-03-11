@@ -303,8 +303,8 @@ int cil_constrain_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 /**
  * Define sepol level.
  * Associates the sepol level (sensitivity) with categories.
- * Looks at the cil_sens structure for a list of cil_catsets and
- * cil_catranges to associate the sensitivity with.
+ * Looks at the cil_sens structure for a list of cil_cats to 
+ * associate the sensitivity with.
  * Sets the sepol level as defined in the sepol policy database.
  *
  * @param[in] pdb The policy database that holds the sepol level.

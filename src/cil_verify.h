@@ -63,9 +63,7 @@ int cil_verify_no_self_reference(struct cil_symtab_datum *datum, struct cil_list
 int __cil_verify_ranges(struct cil_list *list);
 int __cil_verify_ordered_node_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args);
 int __cil_verify_ordered(struct cil_tree_node *current, enum cil_flavor flavor);
-int __cil_verify_catrange(struct cil_db *db, struct cil_catrange *catrange, struct cil_cat *cat);
-int __cil_verify_senscat(struct cil_db *db, struct cil_sens *sens, struct cil_cat *cat);
-int __cil_verify_senscatset(struct cil_db *db, struct cil_sens *sens, struct cil_catset *catset);
+int __cil_verify_senscat(struct cil_sens *sens, struct cil_cat *cat);
 int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args);
 
 #endif

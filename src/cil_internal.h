@@ -145,7 +145,6 @@ enum cil_pass {
 #define CIL_KEY_CATEGORY		"category"
 #define CIL_KEY_CATALIAS		"categoryalias"
 #define CIL_KEY_CATALIASACTUAL  "categoryaliasactual"
-#define CIL_KEY_CATRANGE		"categoryrange"
 #define CIL_KEY_CATSET			"categoryset"
 #define CIL_KEY_CATORDER		"categoryorder"
 #define CIL_KEY_SENSITIVITYORDER		"sensitivityorder"
@@ -174,6 +173,7 @@ enum cil_pass {
 #define CIL_KEY_NOT			"not"
 #define CIL_KEY_EQ			"eq"
 #define CIL_KEY_NEQ			"neq"
+#define CIL_KEY_RANGE           "range"
 #define CIL_KEY_OPTIONAL		"optional"
 #define CIL_KEY_IPADDR			"ipaddr"
 #define CIL_KEY_UDP			"udp"
@@ -259,6 +259,7 @@ struct cil_db {
 	struct cil_list *userprefixes;
 	struct cil_list *selinuxusers;
 	struct cil_list *names;
+	int num_cats;
 	int num_types;
 	int num_roles;
 	struct cil_type **val_to_type;
@@ -586,7 +587,7 @@ struct cil_roleallow {
 
 struct cil_sens {
 	struct cil_symtab_datum datum;
-	struct cil_list *catsets;
+	struct cil_list *cats_list;
 	uint32_t ordered;
 };
 
@@ -597,20 +598,17 @@ struct cil_sensorder {
 struct cil_cat {
 	struct cil_symtab_datum datum;
 	uint32_t ordered;
+	int value;
 };
 
-struct cil_catrange {
-	struct cil_symtab_datum datum;
-	char *cat_low_str;
-	struct cil_cat *cat_low;
-	char *cat_high_str;
-	struct cil_cat *cat_high;
+struct cil_cats {
+	struct cil_list *str_expr;
+	struct cil_list *datum_expr;
 };
 
 struct cil_catset {
 	struct cil_symtab_datum datum;
-	struct cil_list *cat_list_str;
-	struct cil_list *cat_list;
+	struct cil_cats *cats;
 };
 
 struct cil_catorder {
@@ -619,16 +617,14 @@ struct cil_catorder {
 
 struct cil_senscat {
 	char *sens_str;
-	char *catset_str;
-	struct cil_catset *catset;
+	struct cil_cats *cats;
 };
 
 struct cil_level {
 	struct cil_symtab_datum datum;
 	char *sens_str;
 	struct cil_sens *sens;
-	char *catset_str;
-	struct cil_catset *catset;
+	struct cil_cats *cats;
 };
 
 struct cil_levelrange {
@@ -913,8 +909,8 @@ void cil_avrule_init(struct cil_avrule **avrule);
 void cil_type_rule_init(struct cil_type_rule **type_rule);
 void cil_roletransition_init(struct cil_roletransition **roletrans);
 void cil_roleallow_init(struct cil_roleallow **role_allow);
-void cil_catrange_init(struct cil_catrange **catrange);
 void cil_catset_init(struct cil_catset **catset);
+void cil_cats_init(struct cil_cats **cats);
 void cil_senscat_init(struct cil_senscat **senscat);
 void cil_filecon_init(struct cil_filecon **filecon);
 void cil_portcon_init(struct cil_portcon **portcon);
