@@ -152,7 +152,7 @@ int cil_gen_block(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	enum cil_syntax syntax[] = {
 		CIL_SYN_STRING,
 		CIL_SYN_STRING,
-		CIL_SYN_N_LISTS,
+		CIL_SYN_N_LISTS | CIL_SYN_END,
 		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -5251,7 +5251,7 @@ int cil_gen_optional(struct cil_db *db, struct cil_tree_node *parse_current, str
 	enum cil_syntax syntax[] = {
 		CIL_SYN_STRING,
 		CIL_SYN_STRING,
-		CIL_SYN_N_LISTS,
+		CIL_SYN_N_LISTS | CIL_SYN_END,
 		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
