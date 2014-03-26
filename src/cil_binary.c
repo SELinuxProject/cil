@@ -3466,12 +3466,10 @@ int __cil_level_val_array_insert(hashtab_key_t key, hashtab_datum_t datum, void 
 	policydb_t *pdb = data;
 	level_datum_t *level = (level_datum_t *)datum;
 
-	if (level->isalias == 1) {
-		if (level->level->sens < 1 || level->level->sens > pdb->p_levels.nprim) {
-			return -EINVAL;
-		}
-		pdb->p_sens_val_to_name[level->level->sens - 1] = (char *)key;
+	if (level->level->sens < 1 || level->level->sens > pdb->p_levels.nprim) {
+		return -EINVAL;
 	}
+	pdb->p_sens_val_to_name[level->level->sens - 1] = (char *)key;
 
 	return 0;
 }
