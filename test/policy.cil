@@ -17,6 +17,9 @@
 	(class char (foo))
 	(classcommon char file)
 
+	(class dir ())
+	(classcommon dir file)
+
 	(classpermissionset char_w (char (write setattr)))
 	;;(classpermissionset char_w (file (open read getattr)))
 
