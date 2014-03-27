@@ -404,6 +404,28 @@ int __cil_verify_ordered(struct cil_tree_node *current, enum cil_flavor flavor)
 	return rc;
 }
 
+int __cil_verify_initsids(struct cil_list *sids)
+{
+	int rc = SEPOL_OK;
+	struct cil_list_item *i;
+
+	if (sids->head == NULL) {
+		cil_log(CIL_ERR, "At least one initial sid must be defined in the policy\n");
+		return SEPOL_ERR;
+	}
+
+	cil_list_for_each(i, sids) {
+		struct cil_sid *sid = i->data;
+		if (sid->context == NULL) {
+			struct cil_tree_node *node = sid->datum.nodes->head->data;
+			cil_log(CIL_ERR, "No context assigned to SID %s declared at line %d in %s\n",sid->datum.name, node->line, node->path);
+			rc = SEPOL_ERR;
+		}
+	}
+
+	return rc;
+}
+
 int __cil_verify_senscat(struct cil_sens *sens, struct cil_cat *cat)
 {
 	struct cil_list_item *cats_item;

@@ -3700,6 +3700,11 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		}
 	}
 
+	rc = __cil_verify_initsids(db->sidorder);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	
 	rc = SEPOL_OK;
 exit:
 	return rc;

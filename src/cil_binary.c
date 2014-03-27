@@ -2558,38 +2558,38 @@ int cil_sidorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;
-	ocontext_t *new_sepol_sidcon = NULL;
 	unsigned count = 0;
 
 	if (db->sidorder == NULL || db->sidorder->head == NULL) {
-		cil_log(CIL_ERR, "No sidorder statement in policy\n");
-		return SEPOL_ERR;
+		cil_log(CIL_WARN, "No sidorder statement in policy\n");
+		return SEPOL_OK;
 	}
 
 	cil_list_for_each(curr, db->sidorder) {
 		struct cil_sid *cil_sid = (struct cil_sid*)curr->data;
 		struct cil_context *cil_context = cil_sid->context;
-		new_sepol_sidcon = cil_malloc(sizeof(*new_sepol_sidcon));
-		memset(new_sepol_sidcon, 0, sizeof(ocontext_t));
-		count++;
-		new_sepol_sidcon->sid[0] = count;
-		new_sepol_sidcon->u.name = cil_strdup(cil_sid->datum.name);
+
 		if (cil_context != NULL) {
+			ocontext_t *new_sepol_sidcon = cil_malloc(sizeof(*new_sepol_sidcon));
+			memset(new_sepol_sidcon, 0, sizeof(ocontext_t));
+			count++;
+			new_sepol_sidcon->sid[0] = count;
+			new_sepol_sidcon->u.name = cil_strdup(cil_sid->datum.name);
 			rc = __cil_context_to_sepol_context(pdb, cil_context, &new_sepol_sidcon->context[0]);
 			if (rc != SEPOL_OK) {
-				cil_log(CIL_ERR,"Problem with SID context\n");
+				cil_log(CIL_ERR,"Problem with context for SID %s\n",cil_sid->datum.name);
+				free(new_sepol_sidcon->u.name);
+				free(new_sepol_sidcon);
 				goto exit;
 			}
+			new_sepol_sidcon->next = pdb->ocontexts[OCON_ISID];
+			pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
 		}
-		new_sepol_sidcon->next = pdb->ocontexts[OCON_ISID];
-		pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
 	}
 
 	return SEPOL_OK;
 
 exit:
-	free(new_sepol_sidcon->u.name);
-	free(new_sepol_sidcon);
 	return rc;
 }
 
