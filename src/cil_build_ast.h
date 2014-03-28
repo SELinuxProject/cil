@@ -155,7 +155,7 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 void cil_destroy_senscat(struct cil_senscat *senscat);
 int cil_gen_level(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_level(struct cil_level *level);
-int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlrange, int allow_expr);
+int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlrange);
 int cil_gen_levelrange(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_levelrange(struct cil_levelrange *lvlrange);
 void cil_destroy_constrain_node(struct cil_tree_node *cons_node);
@@ -203,12 +203,12 @@ void cil_destroy_default(struct cil_default *def);
 int cil_gen_defaultrange(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_defaultrange(struct cil_defaultrange *def);
 
-int cil_fill_cats(struct cil_tree_node *curr, struct cil_cats **cats, int allow_expr);
+int cil_fill_cats(struct cil_tree_node *curr, struct cil_cats **cats);
 void cil_destroy_cats(struct cil_cats *cats);
 int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *context);
 int cil_fill_integer(struct cil_tree_node *int_node, uint32_t *integer);
 int cil_fill_ipaddr(struct cil_tree_node *addr_node, struct cil_ipaddr *addr);
-int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level, int allow_expr);
+int cil_fill_level(struct cil_tree_node *sens, struct cil_level *level);
 
 int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct cil_tree_node *ast);
 

@@ -1098,12 +1098,16 @@ int cil_verify_is_list(struct cil_list *list, enum cil_flavor flavor)
 	return CIL_TRUE;
 }
 
-int __evaluate_cat_expression(struct cil_cats *cats, struct cil_db *db)
+static int __evaluate_cat_expression(struct cil_cats *cats, struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	ebitmap_t bitmap;
 	struct cil_list *new;
 	struct cil_list_item *curr;
+
+	if (cats->evaluated == CIL_TRUE) {
+		return SEPOL_OK;
+	}
 
 	if (cil_verify_is_list(cats->datum_expr, CIL_CAT)) {
 		return SEPOL_OK;
@@ -1135,7 +1139,39 @@ int __evaluate_cat_expression(struct cil_cats *cats, struct cil_db *db)
 		cats->datum_expr = NULL;
 	}
 
+	cats->evaluated = CIL_TRUE;
+
 	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+static int __evaluate_level_expression(struct cil_level *level, void *extra_args)
+{
+	if (level->cats != NULL) {
+		return __evaluate_cat_expression(level->cats, extra_args);
+	}
+
+	return SEPOL_OK;
+}
+
+static int __evaluate_levelrange_expression(struct cil_levelrange *levelrange, void *extra_args)
+{
+	int rc = SEPOL_OK;
+
+	if (levelrange->low != NULL && levelrange->low->cats != NULL) {
+		rc =  __evaluate_cat_expression(levelrange->low->cats, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	}
+	if (levelrange->high != NULL && levelrange->high->cats != NULL) {
+		rc = __evaluate_cat_expression(levelrange->high->cats, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	}
 
 exit:
 	return rc;
@@ -1177,28 +1213,147 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 		break;
 	}
 	case CIL_LEVEL: {
-		struct cil_level *level = node->data;
-		if (level->cats != NULL) {
-			rc = __evaluate_cat_expression(level->cats, extra_args);
+		rc = __evaluate_level_expression(node->data, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_LEVELRANGE: {
+		rc = __evaluate_levelrange_expression(node->data, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_USER: {
+		struct cil_user *user = node->data;
+		rc = __evaluate_level_expression(user->dftlevel, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		rc = __evaluate_levelrange_expression(user->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_SELINUXUSERDEFAULT:
+	case CIL_SELINUXUSER: {
+		struct cil_selinuxuser *selinuxuser = node->data;
+		rc = __evaluate_levelrange_expression(selinuxuser->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_RANGETRANSITION: {
+		struct cil_rangetransition *rangetrans = node->data;
+		rc = __evaluate_levelrange_expression(rangetrans->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_CONTEXT: {
+		struct cil_context *context = node->data;
+		rc = __evaluate_levelrange_expression(context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_SIDCONTEXT: {
+		struct cil_sidcontext *sidcontext = node->data;
+		rc = __evaluate_levelrange_expression(sidcontext->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_FILECON: {
+		struct cil_filecon *filecon = node->data;
+		if (filecon->context) {
+			rc = __evaluate_levelrange_expression(filecon->context->range, extra_args);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 		break;
 	}
-	case CIL_LEVELRANGE: {
-		struct cil_levelrange *levelrange = node->data;
-		if (levelrange->low_str == NULL && levelrange->low != NULL && levelrange->low->cats != NULL) {
-			rc = __evaluate_cat_expression(levelrange->low->cats, extra_args);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
+	case CIL_PORTCON: {
+		struct cil_portcon *portcon = node->data;
+		rc = __evaluate_levelrange_expression(portcon->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
-		if (levelrange->high_str == NULL && levelrange->high != NULL && levelrange->high->cats != NULL) {
-			rc = __evaluate_cat_expression(levelrange->high->cats, extra_args);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
+		break;
+	}
+	case CIL_NODECON: {
+		struct cil_nodecon *nodecon = node->data;
+		rc = __evaluate_levelrange_expression(nodecon->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_GENFSCON: {
+		struct cil_genfscon *genfscon = node->data;
+		rc = __evaluate_levelrange_expression(genfscon->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_NETIFCON: {
+		struct cil_netifcon *netifcon = node->data;
+		rc = __evaluate_levelrange_expression(netifcon->if_context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		rc = __evaluate_levelrange_expression(netifcon->packet_context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_PIRQCON: {
+		struct cil_pirqcon *pirqcon = node->data;
+		rc = __evaluate_levelrange_expression(pirqcon->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_IOMEMCON: {
+		struct cil_iomemcon *iomemcon = node->data;
+		rc = __evaluate_levelrange_expression(iomemcon->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_IOPORTCON: {
+		struct cil_ioportcon *ioportcon = node->data;
+		rc = __evaluate_levelrange_expression(ioportcon->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_PCIDEVICECON: {
+		struct cil_pcidevicecon *pcidevicecon = node->data;
+		rc = __evaluate_levelrange_expression(pcidevicecon->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_FSUSE: {
+		struct cil_fsuse *fsuse = node->data;
+		rc = __evaluate_levelrange_expression(fsuse->context->range, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
 		break;
 	}

@@ -694,13 +694,13 @@ int cil_resolve_rangetransition(struct cil_tree_node *current, void *extra_args)
 
 		/* This could still be an anonymous levelrange even if range_str is set, if range_str is a param_str*/
 		if (rangetrans->range->datum.name == NULL) {
-			rc = cil_resolve_levelrange(current, rangetrans->range, extra_args, CIL_FALSE);
+			rc = cil_resolve_levelrange(current, rangetrans->range, extra_args);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else {
-		rc = cil_resolve_levelrange(current, rangetrans->range, extra_args, CIL_FALSE);
+		rc = cil_resolve_levelrange(current, rangetrans->range, extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1033,13 +1033,13 @@ int cil_resolve_userlevel(struct cil_tree_node *current, void *extra_args)
 
 		/* This could still be an anonymous level even if level_str is set, if level_str is a param_str*/
 		if (user->dftlevel->datum.name == NULL) {
-			rc = cil_resolve_level(current, user->dftlevel, extra_args, CIL_FALSE);
+			rc = cil_resolve_level(current, user->dftlevel, extra_args);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else if (usrlvl->level != NULL) {
-		rc = cil_resolve_level(current, usrlvl->level, extra_args, CIL_FALSE);
+		rc = cil_resolve_level(current, usrlvl->level, extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1076,13 +1076,13 @@ int cil_resolve_userrange(struct cil_tree_node *current, void *extra_args)
 
 		/* This could still be an anonymous levelrange even if levelrange_str is set, if levelrange_str is a param_str*/
 		if (user->range->datum.name == NULL) {
-			rc = cil_resolve_levelrange(current, user->range, extra_args, CIL_FALSE);
+			rc = cil_resolve_levelrange(current, user->range, extra_args);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else if (userrange->range != NULL) {
-		rc = cil_resolve_levelrange(current, userrange->range, extra_args, CIL_FALSE);
+		rc = cil_resolve_levelrange(current, userrange->range, extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1165,13 +1165,13 @@ int cil_resolve_selinuxuser(struct cil_tree_node *current, void *extra_args)
 
 		/* This could still be an anonymous levelrange even if range_str is set, if range_str is a param_str*/
 		if (selinuxuser->range->datum.name == NULL) {
-			rc = cil_resolve_levelrange(current, selinuxuser->range, extra_args, CIL_FALSE);
+			rc = cil_resolve_levelrange(current, selinuxuser->range, extra_args);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else if (selinuxuser->range != NULL) {
-		rc = cil_resolve_levelrange(current, selinuxuser->range, extra_args, CIL_FALSE);
+		rc = cil_resolve_levelrange(current, selinuxuser->range, extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1716,37 +1716,16 @@ exit:
 	return rc;
 }
 
-int cil_resolve_cats(struct cil_tree_node *current, struct cil_cats *cats, void *extra_args, int allow_exprs)
+int cil_resolve_cats(struct cil_tree_node *current, struct cil_cats *cats, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 
-	if (allow_exprs) {
-		rc = cil_resolve_expr(cats->str_expr, &cats->datum_expr, current, extra_args);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR,"Unable to resolve categories\n");
-			goto exit;
-		}
-	} else {
-		struct cil_list_item *curr;
-		cil_list_init(&cats->datum_expr, cats->str_expr->flavor);
-		cil_list_for_each(curr, cats->str_expr) {
-			struct cil_symtab_datum *datum = NULL;
-
-			if (curr->flavor != CIL_STRING) {
-				cil_log(CIL_ERR,"Operators and expressions are not allowed in list\n");
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-			rc = cil_resolve_name(current, curr->data, CIL_SYM_CATS, extra_args, &datum);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-
-			cil_list_append(cats->datum_expr, CIL_DATUM, datum);
-		}
+	rc = cil_resolve_expr(cats->str_expr, &cats->datum_expr, current, extra_args);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR,"Unable to resolve categories\n");
+		goto exit;
 	}
-
+	
 	return SEPOL_OK;
 
 exit:
@@ -1758,7 +1737,7 @@ int cil_resolve_catset(struct cil_tree_node *current, struct cil_catset *catset,
 {
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_cats(current, catset->cats, extra_args, CIL_TRUE);
+	rc = cil_resolve_cats(current, catset->cats, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1786,7 +1765,7 @@ int cil_resolve_senscat(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
-	rc = cil_resolve_cats(current, senscat->cats, extra_args, CIL_TRUE);
+	rc = cil_resolve_cats(current, senscat->cats, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1805,7 +1784,7 @@ exit:
 	return rc;
 }
 
-int cil_resolve_level(struct cil_tree_node *current, struct cil_level *level, void *extra_args, int allow_expr)
+int cil_resolve_level(struct cil_tree_node *current, struct cil_level *level, void *extra_args)
 {
 	struct cil_symtab_datum *sens_datum = NULL;
 	int rc = SEPOL_ERR;
@@ -1819,7 +1798,7 @@ int cil_resolve_level(struct cil_tree_node *current, struct cil_level *level, vo
 	level->sens = (struct cil_sens *)sens_datum;
 
 	if (level->cats != NULL) {
-		rc = cil_resolve_cats(current, level->cats, extra_args, allow_expr);
+		rc = cil_resolve_cats(current, level->cats, extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1831,7 +1810,7 @@ exit:
 	return rc;
 }
 
-int cil_resolve_levelrange(struct cil_tree_node *current, struct cil_levelrange *lvlrange, void *extra_args, int allow_expr)
+int cil_resolve_levelrange(struct cil_tree_node *current, struct cil_levelrange *lvlrange, void *extra_args)
 {
 	struct cil_symtab_datum *low_datum = NULL;
 	struct cil_symtab_datum *high_datum = NULL;
@@ -1846,13 +1825,13 @@ int cil_resolve_levelrange(struct cil_tree_node *current, struct cil_levelrange 
 
 		/* This could still be an anonymous level even if low_str is set, if low_str is a param_str */
 		if (lvlrange->low->datum.name == NULL) {
-			rc = cil_resolve_level(current, lvlrange->low, extra_args, allow_expr);
+			rc = cil_resolve_level(current, lvlrange->low, extra_args);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else if (lvlrange->low != NULL) {
-		rc = cil_resolve_level(current, lvlrange->low, extra_args, allow_expr);
+		rc = cil_resolve_level(current, lvlrange->low, extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1867,13 +1846,13 @@ int cil_resolve_levelrange(struct cil_tree_node *current, struct cil_levelrange 
 
 		/* This could still be an anonymous level even if high_str is set, if high_str is a param_str */
 		if (lvlrange->high->datum.name == NULL) {
-			rc = cil_resolve_level(current, lvlrange->high, extra_args, allow_expr);
+			rc = cil_resolve_level(current, lvlrange->high, extra_args);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else if (lvlrange->high != NULL) {
-		rc = cil_resolve_level(current, lvlrange->high, extra_args, allow_expr);
+		rc = cil_resolve_level(current, lvlrange->high, extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1998,13 +1977,13 @@ int cil_resolve_context(struct cil_tree_node *current, struct cil_context *conte
 
 		/* This could still be an anonymous levelrange even if levelrange_str is set, if levelrange_str is a param_str*/
 		if (context->range->datum.name == NULL) {
-			rc = cil_resolve_levelrange(current, context->range, extra_args, CIL_FALSE);
+			rc = cil_resolve_levelrange(current, context->range, extra_args);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 		}
 	} else if (context->range != NULL) {
-		rc = cil_resolve_levelrange(current, context->range, extra_args, CIL_FALSE);
+		rc = cil_resolve_levelrange(current, context->range, extra_args);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2574,7 +2553,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 					struct cil_catset *catset = NULL;
 					struct cil_tree_node *cat_node = NULL;
 					cil_catset_init(&catset);
-					rc = cil_fill_cats(pc, &catset->cats, CIL_TRUE);
+					rc = cil_fill_cats(pc, &catset->cats);
 					if (rc != SEPOL_OK) {
 						cil_destroy_catset(catset);
 						goto exit;
@@ -2597,7 +2576,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 					struct cil_tree_node *lvl_node = NULL;
 					cil_level_init(&level);
 
-					rc = cil_fill_level(pc->cl_head, level, CIL_TRUE);
+					rc = cil_fill_level(pc->cl_head, level);
 					if (rc != SEPOL_OK) {
 						cil_log(CIL_ERR, "Failed to create anonymous level, rc: %d\n", rc);
 						cil_destroy_level(level);
@@ -2621,7 +2600,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 					struct cil_tree_node *range_node = NULL;
 					cil_levelrange_init(&range);
 
-					rc = cil_fill_levelrange(pc->cl_head, range, CIL_TRUE);
+					rc = cil_fill_levelrange(pc->cl_head, range);
 					if (rc != SEPOL_OK) {
 						cil_log(CIL_ERR, "Failed to create anonymous levelrange, rc: %d\n", rc);
 						cil_destroy_levelrange(range);
@@ -3248,10 +3227,10 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			rc = cil_resolve_rolebounds(node, args);
 			break;
 		case CIL_LEVEL:
-			rc = cil_resolve_level(node, (struct cil_level*)node->data, args, CIL_TRUE);
+			rc = cil_resolve_level(node, (struct cil_level*)node->data, args);
 			break;
 		case CIL_LEVELRANGE:
-			rc = cil_resolve_levelrange(node, (struct cil_levelrange*)node->data, args, CIL_TRUE);
+			rc = cil_resolve_levelrange(node, (struct cil_levelrange*)node->data, args);
 			break;
 		case CIL_CONSTRAIN:
 			rc = cil_resolve_constrain(node, args);

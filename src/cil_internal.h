@@ -602,6 +602,7 @@ struct cil_cat {
 };
 
 struct cil_cats {
+	uint32_t evaluated;
 	struct cil_list *str_expr;
 	struct cil_list *datum_expr;
 };

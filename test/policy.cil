@@ -59,7 +59,7 @@
 	(categoryaliasactual cat0 c0)
 	(categoryset cats01 (c0 c1))
 	(categoryset cats02 (c2 c3))
-	(categoryset cats03 (range c0 c2))
+	(categoryset cats03 (range c0 c3))
 	(categoryset cats04 (not (range c0 c2)))
 	(categoryorder (cat0 c1 c2 c3))
 
@@ -67,12 +67,12 @@
 	(sensitivitycategory s1 cats01)
 	(sensitivitycategory s1 (c2))
 	(sensitivitycategory s2 (cats01 cats02))
-	(sensitivitycategory s3 ((c0 c3)))
+	(sensitivitycategory s3 (range c0 c3))
 
-	(level low (s0 (c0)))
-	(level high (s1 (c0 c1)))
+	(level low (s0))
+	(level high (s3 (range c0 c3)))
 	(levelrange low_high (low high))
-	(levelrange lh1 ((s0 (c0)) (s3 (c0 c3))))
+	(levelrange lh1 ((s0 (c0)) (s2 (c0 c3))))
 	(levelrange lh2 (low (s2 (c0 c3))))
 	(levelrange lh3 ((s0 cats04) (s2 (range c0 c3))))
 
@@ -110,6 +110,7 @@
 	(roleattributeset baz_role (not user_r))
 
 	(rangetransition device_t console_t file low_high)
+	(rangetransition device_t kernel_t file ((s0) (s3 (not c3))))
 
 	(typetransition device_t console_t file "some_file" getty_t)
 	
@@ -169,7 +170,7 @@
 	(userprefix system_u user)
 
 	(selinuxuser name user_u low_high)
-	(selinuxuserdefault user_u low_high)
+	(selinuxuserdefault user_u ((s0 (c0)) (s3 (range c0 c3))))
 
 	(role system_r)
 	(role user_r)
@@ -195,11 +196,11 @@
 	(userbounds system_u user_u)
 
 	(userrole user_u user_r)
-	(userlevel user_u low)
-	(userrange user_u (low low))
+	(userlevel user_u (s0 (range c0 c2)))
+	(userrange user_u (low high))
 
-	(sidcontext kernel (system_u system_r kernel_t (low high)))
-	(sidcontext security (system_u system_r security_t (low high)))
+	(sidcontext kernel (system_u system_r kernel_t ((s0) high)))
+	(sidcontext security (system_u system_r security_t (low (s3 (range c0 c3)))))
 	(sidcontext unlabeled (system_u system_r unlabeled_t (low high)))
 
 	(context system_u_bin_t_l2h (system_u system_r bin_t (low high)))
@@ -212,10 +213,10 @@
 	(filecon "/usr/bin/" "foo" file system_u_bin_t_l2h)
 	(filecon "/usr/bin/" "bar" file (system_u system_r kernel_t (low high)))
 	(filecon "/usr/bin/" "baz" any ())
-	(filecon "/usr/bin/" "aaa" any (system_u system_r kernel_t ((s0) (s1 (c0 c1)))))
+	(filecon "/usr/bin/" "aaa" any (system_u system_r kernel_t ((s0) (s3 (range c0 c2)))))
 	(filecon "/usr/bin/" "bbb" any (system_u system_r kernel_t ((s0 (c0)) high)))
-	(filecon "/usr/bin/" "ccc" any (system_u system_r kernel_t (low (s1 (cats01)))))
-	(filecon "/usr/bin/" "ddd" any (system_u system_r kernel_t (low (s1 (cats01 cats02)))))
+	(filecon "/usr/bin/" "ccc" any (system_u system_r kernel_t (low (s3 (cats01)))))
+	(filecon "/usr/bin/" "ddd" any (system_u system_r kernel_t (low (s3 (cats01 cats02)))))
 	(nodecon ip_v4 netmask system_u_bin_t_l2h)
 	(nodecon ip_v6 netmask_v6 system_u_bin_t_l2h)
 	(portcon udp 25 system_u_bin_t_l2h)

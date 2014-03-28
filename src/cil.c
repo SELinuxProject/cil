@@ -1758,6 +1758,7 @@ void cil_cats_init(struct cil_cats **cats)
 {
 	*cats = cil_malloc(sizeof(**cats));
 
+	(*cats)->evaluated = CIL_FALSE;
 	(*cats)->str_expr = NULL;
 	(*cats)->datum_expr = NULL;
 }
