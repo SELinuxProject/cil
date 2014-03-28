@@ -59,8 +59,13 @@ int __cil_verify_name(const char *name)
 		goto exit;
 	}
 
-	for (i = 0; i < len; i++) {
-		if (!isalnum(name[i]) && name[i] != '_') {
+	if (!isalpha(name[0])) {
+			cil_log(CIL_ERR, "First character in %s is not a letter\n", name);
+			goto exit;
+	}
+
+	for (i = 1; i < len; i++) {
+		if (!isalnum(name[i]) && name[i] != '_' && name[i] != '-') {
 			cil_log(CIL_ERR, "Invalid character \"%c\" in %s\n", name[i], name);
 			goto exit;
 		}
