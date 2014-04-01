@@ -41,6 +41,7 @@
 #include "cil_list.h"
 #include "cil_build_ast.h"
 #include "cil_resolve_ast.h"
+#include "cil_reset_ast.h"
 #include "cil_copy_ast.h"
 #include "cil_verify.h"
 
@@ -218,29 +219,6 @@ exit:
 	return rc;
 }
 
-void cil_reset_classperms(struct cil_classperms *cp)
-{
-	if (cp == NULL) {
-		return;
-	}
-
-	switch (cp->flavor) {
-	case CIL_CLASSPERMSET:
-		cp->r.classpermset = NULL;
-		break;
-	case CIL_CLASSPERMS:
-		cp->r.cp.class = NULL;
-		cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
-		break;
-	case CIL_MAP_CLASSPERMS:
-		cp->r.mcp.class = NULL;
-		cil_list_destroy(&cp->r.mcp.perms, CIL_FALSE);
-		break;
-	default:
-		cil_log(CIL_ERR, "Invalid flavor found when resetting classperms\n");
-	}
-}
-
 int cil_resolve_classperms_list(struct cil_tree_node *current, struct cil_list *cp_list, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -258,31 +236,9 @@ exit:
 	return rc;
 }
 
-void cil_reset_classperms_list(struct cil_list *cp_list)
-{
-	struct cil_list_item *curr;
-
-	if (cp_list == NULL) {
-		return;
-	}
-
-	cil_list_for_each(curr, cp_list) {
-		cil_reset_classperms(curr->data);
-	}
-}
-
 int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classpermset *cps, void *extra_args)
 {
 	return cil_resolve_classperms_list(current, cps->classperms, extra_args);
-}
-
-int cil_reset_classpermset(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_classpermset *cps = current->data;
-
-	cil_reset_classperms_list(cps->classperms);
-
-	return SEPOL_OK;
 }
 
 int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
@@ -324,15 +280,6 @@ int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
 
 exit:
 	return rc;
-}
-
-int cil_reset_avrule(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_avrule *rule = current->data;
-
-	cil_reset_classperms_list(rule->classperms);
-
-	return SEPOL_OK;
 }
 
 int cil_resolve_type_rule(struct cil_tree_node *current, void *extra_args)
@@ -428,15 +375,6 @@ exit:
 	return rc;
 }
 
-int cil_reset_typeattributeset(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_typeattributeset *tas = current->data;
-
-	cil_list_destroy(&tas->datum_expr, CIL_FALSE);
-
-	return SEPOL_OK;
-}
-
 int cil_resolve_aliasactual(struct cil_tree_node *current, void *extra_args, enum cil_flavor flavor)
 {
 	int rc = SEPOL_ERR;
@@ -516,15 +454,6 @@ int cil_resolve_alias_to_actual(struct cil_tree_node *current, enum cil_flavor f
 	}
 
 	alias->actual = a1;
-
-	return SEPOL_OK;
-}
-
-int cil_reset_alias(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_alias *alias = current->data;
-	/* reset actual to NULL during a re-resolve */
-	alias->actual = NULL;
 
 	return SEPOL_OK;
 }
@@ -801,190 +730,6 @@ int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 
 exit:
 	return rc;
-}
-
-int cil_reset_classmapping(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_classmapping *cm = current->data;
-
-	cil_reset_classperms_list(cm->classperms);
-
-	return SEPOL_OK;
-}
-
-int __class_reset_perm_values(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
-{
-	struct cil_perm *perm = (struct cil_perm *)d;
-
-	perm->value -= *((int *)args);
-
-	return SEPOL_OK;
-}
-
-int cil_reset_class(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_class *class = current->data;
-
-	if (class->common != NULL) {
-		struct cil_common *common = class->common;
-		cil_symtab_map(&common->perms, __class_reset_perm_values, &common->num_perms);
-		/* during a re-resolve, we need to reset the common, so a classcommon
-		 * statement isn't seen as a duplicate */
-		class->num_perms -= common->num_perms;
-		class->common = NULL;
-	}
-
-	return SEPOL_OK;
-}
-
-int cil_reset_map_perm(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_map_perm *cmp = current->data;
-
-	cmp->classperms = NULL;
-
-	return SEPOL_OK;
-}
-
-int cil_reset_sens(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_sens *sens = current->data;
-	/* during a re-resolve, we need to reset the categories associated with
-	 * this sensitivity from a (sensitivitycategory) statement */
-	cil_list_destroy(&sens->cats_list, CIL_FALSE);
-	sens->ordered = CIL_FALSE;
-
-	return SEPOL_OK;
-}
-
-int cil_reset_cat(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_cat *cat = current->data;
-
-	cat->ordered = CIL_FALSE;
-
-	return SEPOL_OK;
-}
-
-void cil_reset_cats(struct cil_cats *cats)
-{
-	cil_list_destroy(&cats->str_expr, CIL_TRUE);
-}
-
-int cil_reset_senscat(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_senscat *senscat = current->data;
-
-	cil_reset_cats(senscat->cats);
-
-	return SEPOL_OK;
-}
-
-int cil_reset_catset(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_catset *catset = current->data;
-
-	cil_reset_cats(catset->cats);
-
-	return SEPOL_OK;
-}
-
-int cil_reset_level(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_level *level = current->data;
-
-	level->sens = NULL;
-
-	cil_reset_cats(level->cats);
-
-	return SEPOL_OK;
-}
-
-int cil_reset_typeattr(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_typeattribute *attr = current->data;
-
-	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributetypes statement */
-	if (attr->expr_list != NULL) {
-		/* we don't want to destroy the expression stacks (cil_list) inside
-		 * this list cil_list_destroy destroys sublists, so we need to do it
-		 * manually */
-		struct cil_list_item *expr = attr->expr_list->head;
-		while (expr != NULL) {
-			struct cil_list_item *next = expr->next;
-			cil_list_item_destroy(&expr, CIL_FALSE);
-			expr = next;
-		}
-		free(attr->expr_list);
-		attr->expr_list = NULL;
-	}
-
-	return SEPOL_OK;
-}
-
-int cil_reset_type(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_type *type = current->data;
-
-	/* reset the bounds to NULL during a re-resolve */
-	type->bounds = NULL;
-
-	return SEPOL_OK;
-}
-
-int cil_reset_user(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_user *user = current->data;
-
-	/* reset the bounds to NULL during a re-resolve */
-	user->bounds = NULL;
-	cil_list_destroy(&user->roles, CIL_FALSE);
-	user->dftlevel = NULL;
-	user->range = NULL;
-
-	return SEPOL_OK;
-}
-
-int cil_reset_roleattr(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_roleattribute *attr = current->data;
-
-	/* during a re-resolve, we need to reset the lists of expression stacks  associated with this attribute from a attributeroles statement */
-	if (attr->expr_list != NULL) {
-		/* we don't want to destroy the expression stacks (cil_list) inside
-		 * this list cil_list_destroy destroys sublists, so we need to do it
-		 * manually */
-		struct cil_list_item *expr = attr->expr_list->head;
-		while (expr != NULL) {
-			struct cil_list_item *next = expr->next;
-			cil_list_item_destroy(&expr, CIL_FALSE);
-			expr = next;
-		}
-		free(attr->expr_list);
-		attr->expr_list = NULL;
-	}
-
-	return SEPOL_OK;
-}
-
-int cil_reset_role(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_role *role = current->data;
-
-	/* reset the bounds to NULL during a re-resolve */
-	role->bounds = NULL;
-
-	return SEPOL_OK;
-}
-
-int cil_reset_sid(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_sid *sid = current->data;
-	/* reset the context to NULL during a re-resolve */
-	sid->context = NULL;
-	sid->ordered = CIL_FALSE;
-
-	return SEPOL_OK;
 }
 
 int cil_resolve_userrole(struct cil_tree_node *current, void *extra_args)
@@ -1329,15 +1074,6 @@ int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args
 
 exit:
 	return rc;
-}
-
-int cil_reset_roleattributeset(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_roleattributeset *ras = current->data;
-
-	cil_list_destroy(&ras->datum_expr, CIL_FALSE);
-
-	return SEPOL_OK;
 }
 
 int cil_resolve_rolebounds(struct cil_tree_node *current, void *extra_args)
@@ -1894,16 +1630,6 @@ exit:
 	return rc;
 }
 
-int cil_reset_constrain(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_constrain *con = current->data;
-
-	cil_reset_classperms_list(con->classperms);
-	cil_list_destroy(&con->datum_expr, CIL_FALSE);
-
-	return SEPOL_OK;
-}
-
 int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_validatetrans *validtrans = current->data;
@@ -1926,15 +1652,6 @@ int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args)
 
 exit:
 	return rc;
-}
-
-int cil_reset_validatetrans(struct cil_tree_node *current, __attribute__((unused)) void *extra_args)
-{
-	struct cil_validatetrans *vt = current->data;
-
-	cil_list_destroy(&vt->datum_expr, CIL_FALSE);
-
-	return SEPOL_OK;
 }
 
 int cil_resolve_context(struct cil_tree_node *current, struct cil_context *context, void *extra_args)
@@ -2468,7 +2185,6 @@ int cil_resolve_defaultrange(struct cil_tree_node *current, void *extra_args)
 exit:
 	return rc;
 }
-
 
 int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 {
@@ -3368,87 +3084,6 @@ exit:
 	return rc;
 }
 
-int __cil_reset_node(struct cil_tree_node *node,  __attribute__((unused)) uint32_t *finished, __attribute__((unused)) void *extra_args)
-{
-	int rc = SEPOL_ERR;
-	struct cil_args_resolve *args = extra_args;
-
-	switch (node->flavor) {
-	case CIL_CLASS:
-		rc = cil_reset_class(node, args);
-		break;
-	case CIL_MAP_PERM:
-		rc = cil_reset_map_perm(node, args);
-		break;
-	case CIL_ROLE:
-		rc = cil_reset_role(node, args);
-		break;
-	case CIL_TYPE:
-		rc = cil_reset_type(node, args);
-		break;
-	case CIL_USER:
-		rc = cil_reset_user(node, args);
-		break;
-	case CIL_ROLEATTRIBUTE:
-		rc = cil_reset_roleattr(node, args);
-		break;
-	case CIL_TYPEATTRIBUTE:
-		rc = cil_reset_typeattr(node, args);
-		break;
-	case CIL_SENS:
-		rc = cil_reset_sens(node, args);
-		break;
-	case CIL_CAT:
-		rc = cil_reset_cat(node, args);
-		break;
-	case CIL_SENSCAT:
-		rc = cil_reset_senscat(node, args);
-		break;
-	case CIL_CATSET:
-		rc = cil_reset_catset(node, args);
-		break;
-	case CIL_LEVEL:
-		rc = cil_reset_level(node, args);
-		break;
-	case CIL_SID:
-		rc = cil_reset_sid(node, args);
-		break;
-	case CIL_CLASSPERMSET:
-		rc = cil_reset_classpermset(node, args);
-		break;
-	case CIL_CLASSMAPPING:
-		rc = cil_reset_classmapping(node, args);
-		break;
-	case CIL_AVRULE:
-		rc = cil_reset_avrule(node, args);
-		break;
-	case CIL_TYPEATTRIBUTESET:
-		rc = cil_reset_typeattributeset(node, args);
-		break;
-	case CIL_TYPEALIAS:
-	case CIL_SENSALIAS:
-	case CIL_CATALIAS:
-		rc = cil_reset_alias(node, args);
-		break;
-	case CIL_ROLEATTRIBUTESET:
-		rc = cil_reset_roleattributeset(node, args);
-		break;
-	case CIL_CONSTRAIN:
-	case CIL_MLSCONSTRAIN:
-		rc = cil_reset_constrain(node, args);
-		break;
-	case CIL_VALIDATETRANS:
-	case CIL_MLSVALIDATETRANS:
-		rc = cil_reset_validatetrans(node, args);
-		break;
-	default:
-		rc = SEPOL_OK;
-		break;
-	}
-
-	return rc;
-}
-
 int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -3654,7 +3289,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			 * because things done in the preceeding passes aren't allowed in 
 			 * optionals, and thus can't be disabled.
 			 * Note: set pass to CIL_PASS_CALL1 because the pass++ will increment 
-			 * it to BLK_CALL1
+			 * it to CIL_PASS_CALL2
 			 */
 			cil_log(CIL_INFO, "Resetting declarations\n");
 
@@ -3669,8 +3304,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 			pass = CIL_PASS_CALL1;
 
-			/* reset the global data */
-			rc = cil_tree_walk(current, __cil_reset_node, NULL, NULL, NULL);
+			rc = cil_reset_ast(current);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_ERR, "Failed to reset declarations\n");
 				goto exit;

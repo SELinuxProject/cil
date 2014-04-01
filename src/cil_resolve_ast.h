@@ -95,10 +95,4 @@ int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current);
 int cil_resolve_name(struct cil_tree_node *ast_node, char *name, enum cil_sym_index sym_index, void *extra_args, struct cil_symtab_datum **datum);
 
-int cil_reset_class(struct cil_tree_node *current, void *extra_args);
-int cil_reset_role(struct cil_tree_node *current, void *extra_args);
-int cil_reset_sens(struct cil_tree_node *current, void *extra_args);
-int cil_reset_type(struct cil_tree_node *current, void *extra_args);
-int cil_reset_user(struct cil_tree_node *current, void *extra_args);
-
 #endif /* CIL_RESOLVE_AST_H_ */
