@@ -332,7 +332,7 @@ int cil_sid_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_rangetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_rangetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_rangetransition *rangetrans);
 
 /**
  * Insert cil portcon structure into sepol policydb.

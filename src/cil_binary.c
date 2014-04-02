@@ -2593,56 +2593,157 @@ exit:
 	return rc;
 }
 
-int cil_rangetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum)
+int __cil_insert_rangetransition(policydb_t *pdb, char *src, char *tgt, char *class, struct cil_levelrange *levelrange)
 {
 	int rc = SEPOL_ERR;
-	char *key = NULL;
-	struct cil_rangetransition *cil_rangetrans = (struct cil_rangetransition*)datum;
-	struct cil_levelrange *cil_lvlrange = cil_rangetrans->range;
 	type_datum_t *sepol_type = NULL;
 	class_datum_t *sepol_class = NULL;
-	mls_range_t *mls_range = NULL;
-	range_trans_t *sepol_rangetrans = cil_malloc(sizeof(*sepol_rangetrans));
-	memset(sepol_rangetrans, 0, sizeof(range_trans_t));
+	range_trans_t *curr = pdb->range_tr;
+	range_trans_t *new = cil_malloc(sizeof(*new));
+	memset(new, 0, sizeof(range_trans_t));
 
-	sepol_rangetrans->next = pdb->range_tr;
-	pdb->range_tr = sepol_rangetrans;
-
-	key = ((struct cil_symtab_datum *)cil_rangetrans->src)->name;
-	sepol_type = hashtab_search(pdb->p_types.table, key);
+	sepol_type = hashtab_search(pdb->p_types.table, src);
 	if (sepol_type == NULL) {
-		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_rangetrans->source_type = sepol_type->s.value;
+	new->source_type = sepol_type->s.value;
 
-	key = ((struct cil_symtab_datum *)cil_rangetrans->exec)->name;
-	sepol_type = hashtab_search(pdb->p_types.table, key);
+	sepol_type = hashtab_search(pdb->p_types.table, tgt);
 	if (sepol_type == NULL) {
-		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_rangetrans->target_type = sepol_type->s.value;
+	new->target_type = sepol_type->s.value;
 
-	key = ((struct cil_symtab_datum *)cil_rangetrans->obj)->name;
-	sepol_class = hashtab_search(pdb->p_classes.table, key);
+	sepol_class = hashtab_search(pdb->p_classes.table, class);
 	if (sepol_class == NULL) {
-		rc = SEPOL_ERR;
 		goto exit;
 	}
-	sepol_rangetrans->target_class = sepol_class->s.value;
+	new->target_class = sepol_class->s.value;
 
-	mls_range = &sepol_rangetrans->target_range;
-
-	rc = __cil_levelrange_to_mls_range(pdb, cil_lvlrange, mls_range);
+	rc = __cil_levelrange_to_mls_range(pdb, levelrange, &new->target_range);
 	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	while (curr != NULL) {
+		if (curr->source_type == new->source_type &&
+			curr->target_type == new->target_type &&
+			curr->target_class == new->target_class) {
+			if (mls_range_eq(&curr->target_range, &new->target_range)) {
+				rc = SEPOL_OK;
+				goto exit;
+			}
+			cil_log(CIL_INFO, "Conflicting Range transition rules\n");
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+		curr = curr->next;
+	}
+	new->next = pdb->range_tr;
+	pdb->range_tr = new;
+
+	return SEPOL_OK;
+
+exit:
+	mls_range_destroy(&new->target_range);
+	free(new);
+	return rc;
+}
+
+int cil_rangetransition_expand(policydb_t *pdb, struct cil_symtab_datum *src, struct cil_symtab_datum *tgt, struct cil_symtab_datum *tgt_class, struct cil_levelrange *range)
+{
+	int rc = SEPOL_ERR;
+	struct cil_tree_node *class_node = tgt_class->nodes->head->data;
+
+	if (class_node->flavor == CIL_CLASS) {
+		rc = __cil_insert_rangetransition(pdb, src->name, tgt->name, tgt_class->name, range);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	} else {
+		cil_log(CIL_ERR,"Map class used in a rangetransition rule\n");
 		goto exit;
 	}
 
 	return SEPOL_OK;
 
 exit:
-	free(sepol_rangetrans);
+	return rc;
+}
+
+int cil_rangetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_rangetransition *rangetrans)
+{
+	int rc = SEPOL_ERR;
+	struct cil_symtab_datum *src_datum = rangetrans->src;
+	struct cil_symtab_datum *tgt_datum = rangetrans->exec;
+	enum cil_flavor src_flavor = ((struct cil_tree_node *)src_datum->nodes->head->data)->flavor;
+	enum cil_flavor tgt_flavor = ((struct cil_tree_node *)tgt_datum->nodes->head->data)->flavor;
+
+	if (src_flavor != CIL_TYPEATTRIBUTE && tgt_flavor != CIL_TYPEATTRIBUTE) {
+		rc = cil_rangetransition_expand(pdb, src_datum, tgt_datum, (struct cil_symtab_datum *)rangetrans->obj, rangetrans->range);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	} else if (src_flavor == CIL_TYPEATTRIBUTE && tgt_flavor != CIL_TYPEATTRIBUTE) {
+		struct cil_typeattribute *a = (struct cil_typeattribute *)rangetrans->src;
+		struct cil_symtab_datum *src = NULL;
+		unsigned int i;
+		ebitmap_node_t *tnode;
+		ebitmap_for_each_bit(a->types, tnode, i) {
+			if (!ebitmap_get_bit(a->types, i)) {
+				continue;
+			}
+
+			src = (struct cil_symtab_datum *)db->val_to_type[i];
+			rc = cil_rangetransition_expand(pdb, src, tgt_datum, (struct cil_symtab_datum *)rangetrans->obj, rangetrans->range);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+	} else if (src_flavor != CIL_TYPEATTRIBUTE && tgt_flavor == CIL_TYPEATTRIBUTE) {
+		struct cil_typeattribute *a = (struct cil_typeattribute *)rangetrans->exec;
+		struct cil_symtab_datum *tgt = NULL;
+		unsigned int i;
+		ebitmap_node_t *tnode;
+		ebitmap_for_each_bit(a->types, tnode, i) {
+			if (!ebitmap_get_bit(a->types, i)) {
+				continue;
+			}
+
+			tgt = (struct cil_symtab_datum *)db->val_to_type[i];
+			rc = cil_rangetransition_expand(pdb, src_datum, tgt, (struct cil_symtab_datum *)rangetrans->obj, rangetrans->range);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+	} else {
+		struct cil_typeattribute *a1 = (struct cil_typeattribute *)rangetrans->src;
+		struct cil_typeattribute *a2 = (struct cil_typeattribute *)rangetrans->exec;
+		struct cil_symtab_datum *src = NULL;
+		struct cil_symtab_datum *tgt = NULL;
+		unsigned int i, j;
+		ebitmap_node_t *tnode1, *tnode2;
+		ebitmap_for_each_bit(a1->types, tnode1, i) {
+			if (!ebitmap_get_bit(a1->types, i)) {
+				continue;
+			}
+			src = (struct cil_symtab_datum *)db->val_to_type[i];
+			ebitmap_for_each_bit(a2->types, tnode2, j) {
+				if (!ebitmap_get_bit(a2->types, j)) {
+					continue;
+				}
+				tgt = (struct cil_symtab_datum *)db->val_to_type[j];
+				rc = cil_rangetransition_expand(pdb, src, tgt, (struct cil_symtab_datum *)rangetrans->obj, rangetrans->range);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+			}
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
 	return rc;
 }
 
@@ -3247,7 +3348,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_RANGETRANSITION:
 			if (pdb->mls == CIL_TRUE) {
-				rc = cil_rangetransition_to_policydb(pdb, node->data);
+				rc = cil_rangetransition_to_policydb(pdb, db, node->data);
 			}
 			break;
 		case CIL_DEFAULTUSER:
