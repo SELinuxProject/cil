@@ -51,6 +51,7 @@ struct cil_args_resolve {
 	uint32_t *changed;
 	struct cil_tree_node *callstack;
 	struct cil_tree_node *optstack;
+	struct cil_tree_node *boolif;
 	struct cil_tree_node *macro;
 	struct cil_list *sidorder_lists;
 	struct cil_list *catorder_lists;
@@ -3031,6 +3032,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	struct cil_args_resolve *args = extra_args;
 	enum cil_pass pass = args->pass;
 	struct cil_tree_node *optstack = args->optstack;
+	struct cil_tree_node *boolif = args->boolif;
 
 	if (node == NULL) {
 		goto exit;
@@ -3040,6 +3042,23 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		if (node->flavor == CIL_TUNABLE || node->flavor == CIL_MACRO) {
 			/* tuanbles and macros are not allowed in optionals*/
 			cil_log(CIL_ERR, "%s statment is not allowed in optionals (%s:%d)\n", cil_node_to_string(node), node->path, node->line);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+	}
+
+	if (boolif != NULL) {
+		if (!(node->flavor == CIL_CONDBLOCK ||
+			node->flavor == CIL_AVRULE ||
+			node->flavor == CIL_TYPE_RULE ||
+			node->flavor == CIL_CALL ||
+			node->flavor == CIL_TUNABLEIF ||
+			node->flavor == CIL_NAMETYPETRANSITION)) {
+			if (((struct cil_booleanif*)boolif->data)->preserved_tunable) {
+				cil_log(CIL_ERR, "%s statement is not allowed in booleanifs (tunableif treated as a booleanif) (%s:%d)\n", cil_node_to_string(node), node->path, node->line);
+			} else {
+				cil_log(CIL_ERR, "%s statement is not allowed in booleanifs (%s:%d)\n", cil_node_to_string(node), node->path, node->line);
+			}
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -3168,6 +3187,8 @@ int __cil_resolve_ast_first_child_helper(struct cil_tree_node *current, void *ex
 			}
 			args->optstack = new;
 		}
+	} else if (parent->flavor == CIL_BOOLEANIF) {
+		args->boolif = parent;
 	} else if (parent->flavor == CIL_MACRO) {
 		args->macro = parent;
 	}
@@ -3223,6 +3244,8 @@ int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *ext
 			optstack->cl_head->parent = NULL;
 		}
 		free(optstack);
+	} else if (parent->flavor == CIL_BOOLEANIF) {
+		args->boolif = NULL;
 	}
 
 	return SEPOL_OK;
@@ -3247,6 +3270,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.changed = &changed;
 	extra_args.callstack = NULL;
 	extra_args.optstack = NULL;
+	extra_args.boolif= NULL;
 	extra_args.macro = NULL;
 	extra_args.sidorder_lists = NULL;
 	extra_args.catorder_lists = NULL;

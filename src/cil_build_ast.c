@@ -49,6 +49,7 @@ struct cil_args_build {
 	struct cil_tree_node *ast;
 	struct cil_db *db;
 	struct cil_tree_node *macro;
+	struct cil_tree_node *boolif;
 	struct cil_tree_node *tifstack;
 };
 
@@ -2921,6 +2922,12 @@ int cil_gen_condblock(struct cil_db *db, struct cil_tree_node *parse_current, st
 		goto exit;
 	}
 
+	if (ast_node->parent->flavor != CIL_BOOLEANIF && ast_node->parent->flavor != CIL_TUNABLEIF) {
+		rc = SEPOL_ERR;
+		cil_log(CIL_ERR, "Conditional statements must be a direct child of a tunableif or booleanif statement.\n");
+		goto exit;
+	}
+
 	ast_node->flavor = CIL_CONDBLOCK;
 
 	cil_condblock_init(&cb);
@@ -2931,8 +2938,8 @@ int cil_gen_condblock(struct cil_db *db, struct cil_tree_node *parse_current, st
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad true condition declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
+	cil_log(CIL_ERR, "Bad %s condition declaration at line %d of %s\n",
+		parse_current->data, parse_current->line, parse_current->path);
 	cil_destroy_condblock(cb);
 	return rc;
 }
@@ -5697,6 +5704,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	struct cil_db *db = NULL;
 	struct cil_tree_node *ast_node = NULL;
 	struct cil_tree_node *macro = NULL;
+	struct cil_tree_node *boolif = NULL;
 	struct cil_tree_node *tifstack = NULL;
 	int rc = SEPOL_ERR;
 
@@ -5708,6 +5716,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	ast_current = args->ast;
 	db = args->db;
 	macro = args->macro;
+	boolif = args->boolif;
 	tifstack = args->tifstack;
 
 	if (parse_current->parent->cl_head != parse_current) {
@@ -5739,6 +5748,30 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			cil_log(CIL_ERR, "Found tunable at line %d of %s\n",
 				parse_current->line, parse_current->path);
 			cil_log(CIL_ERR, "Tunables cannot be defined within macro statment\n");
+			goto exit;
+		}
+	}
+
+	if (boolif != NULL) {
+		if (!(!strcmp(parse_current->data, CIL_KEY_CONDTRUE) ||
+			!strcmp(parse_current->data, CIL_KEY_CONDFALSE) ||
+			!strcmp(parse_current->data, CIL_KEY_AUDITALLOW) ||
+			!strcmp(parse_current->data, CIL_KEY_TUNABLEIF) ||
+			!strcmp(parse_current->data, CIL_KEY_ALLOW) ||
+			!strcmp(parse_current->data, CIL_KEY_DONTAUDIT) ||
+			!strcmp(parse_current->data, CIL_KEY_TYPETRANSITION) ||
+			!strcmp(parse_current->data, CIL_KEY_TYPECHANGE) ||
+			!strcmp(parse_current->data, CIL_KEY_CALL))) {
+			rc = SEPOL_ERR;
+			cil_log(CIL_ERR, "Found %s at line %d of %s\n",
+				(char*)parse_current->data, parse_current->line, parse_current->path);
+			if (((struct cil_booleanif*)boolif->data)->preserved_tunable) {
+				cil_log(CIL_ERR, "%s cannot be defined within tunableif statement (treated as a booleanif due to preserve-tunables)\n",
+						(char*)parse_current->data);
+			} else {
+				cil_log(CIL_ERR, "%s cannot be defined within booleanif statement\n",
+						(char*)parse_current->data);
+			}
 			goto exit;
 		}
 	}
@@ -5996,6 +6029,10 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 				args->macro = ast_current;
 			}
 
+			if (ast_current->flavor == CIL_BOOLEANIF) {
+				args->boolif = ast_current;
+			}
+
 			if (ast_current->flavor == CIL_TUNABLEIF) {
 				struct cil_tree_node *new;
 				cil_tree_node_init(&new);
@@ -6048,6 +6085,10 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 		args->macro = NULL;
 	}
 
+	if (ast->flavor == CIL_BOOLEANIF) {
+		args->boolif = NULL;
+	}
+
 	if (ast->flavor == CIL_TUNABLEIF) {
 		/* pop off the stack */
 		tifstack = args->tifstack;
@@ -6076,6 +6117,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	extra_args.ast = ast;
 	extra_args.db = db;
 	extra_args.macro = NULL;
+	extra_args.boolif = NULL;
 	extra_args.tifstack = NULL;
 
 	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, NULL, __cil_build_ast_last_child_helper, &extra_args);
