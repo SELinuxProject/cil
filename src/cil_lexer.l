@@ -41,6 +41,7 @@
 %option nounput
 %option noinput
 %option noyywrap
+%option prefix="cil_yy"
 
 digit		[0-9]
 alpha		[a-zA-Z]
