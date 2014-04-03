@@ -2447,9 +2447,9 @@ static enum cil_flavor __cil_get_expr_operator_flavor(const char *op)
 	else return CIL_NONE;
 }
 
-static int __cil_fill_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list *expr, int *depth, int *num_bools);
+static int __cil_fill_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list *expr, int *depth);
 
-static int __cil_fill_expr_helper(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list *expr, int *depth, int *num_bools)
+static int __cil_fill_expr_helper(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list *expr, int *depth)
 {
 	int rc = SEPOL_ERR;
 	enum cil_flavor op;
@@ -2476,7 +2476,7 @@ static int __cil_fill_expr_helper(struct cil_tree_node *current, enum cil_flavor
 	}
 
 	for (;current != NULL; current = current->next) {
-		rc = __cil_fill_expr(current, flavor, expr, depth, num_bools);
+		rc = __cil_fill_expr(current, flavor, expr, depth);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2490,7 +2490,7 @@ exit:
 	return rc;
 }
 
-static int __cil_fill_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list *expr, int *depth, int *num_bools)
+static int __cil_fill_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list *expr, int *depth)
 {
 	int rc = SEPOL_ERR;
 
@@ -2500,18 +2500,11 @@ static int __cil_fill_expr(struct cil_tree_node *current, enum cil_flavor flavor
 			cil_log(CIL_ERR,"Operator (%s) not in an expression\n", current->data);
 			goto exit;
 		}
-		if (flavor == CIL_BOOL) {
-			(*num_bools)++;
-			if (*num_bools > COND_MAX_BOOLS) {
-				cil_log(CIL_ERR, "Exceeded the max number (%d) of booleans in an expression\n",COND_MAX_BOOLS);
-				goto exit;
-			}
-		}
 		cil_list_append(expr, CIL_STRING, cil_strdup(current->data));
 	} else {
 		struct cil_list *sub_expr;
 		cil_list_init(&sub_expr, flavor);
-		rc = __cil_fill_expr_helper(current->cl_head, flavor, sub_expr, depth, num_bools);
+		rc = __cil_fill_expr_helper(current->cl_head, flavor, sub_expr, depth);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2528,15 +2521,14 @@ exit:
 int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **expr)
 {
 	int rc = SEPOL_ERR;
-	int num_bools = 0;
 	int depth = 0;
 
 	cil_list_init(expr, flavor);
 
 	if (current->cl_head == NULL) {
-		rc = __cil_fill_expr(current, flavor, *expr, &depth, &num_bools);
+		rc = __cil_fill_expr(current, flavor, *expr, &depth);
 	} else {
-		rc = __cil_fill_expr_helper(current->cl_head, flavor, *expr, &depth, &num_bools);
+		rc = __cil_fill_expr_helper(current->cl_head, flavor, *expr, &depth);
 	}
 
 	if (rc != SEPOL_OK) {
