@@ -1401,7 +1401,7 @@ int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args)
 		struct cil_tree_node *node = NULL;
 		rc = cil_resolve_name(current, (char *)curr->data, CIL_SYM_CATS, extra_args, &cat_datum);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to resolve category &s in categoryorder\n", (char *)curr->data);
+			cil_log(CIL_ERR, "Failed to resolve category %s in categoryorder\n", (char *)curr->data);
 			goto exit;
 		}
 		node = cat_datum->nodes->head->data;
