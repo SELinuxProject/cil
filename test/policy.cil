@@ -2,6 +2,7 @@
 (type kernel_t)
 (type security_t)
 (type unlabeled_t)
+(handleunknown allow)
 
 (policycap open_perms)
 

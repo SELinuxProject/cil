@@ -5688,6 +5688,58 @@ void cil_destroy_defaultrange(struct cil_defaultrange *def)
 	free(def);
 }
 
+int cil_gen_handleunknown(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	int rc = SEPOL_ERR;
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_handleunknown *unknown = NULL;
+	char *unknown_key;
+
+	if (parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_handleunknown_init(&unknown);
+
+	unknown_key = parse_current->next->data;
+	if (!strcmp(unknown_key, CIL_KEY_HANDLEUNKNOWN_ALLOW)) {
+		unknown->handle_unknown = SEPOL_ALLOW_UNKNOWN;
+	} else if (!strcmp(unknown_key, CIL_KEY_HANDLEUNKNOWN_DENY)) {
+		unknown->handle_unknown = SEPOL_DENY_UNKNOWN;
+	} else if (!strcmp(unknown_key, CIL_KEY_HANDLEUNKNOWN_REJECT)) {
+		unknown->handle_unknown = SEPOL_REJECT_UNKNOWN;
+	} else {
+		cil_log(CIL_ERR, "Expected either \'%s\', \'%s\', or \'%s\'\n", CIL_KEY_HANDLEUNKNOWN_ALLOW, CIL_KEY_HANDLEUNKNOWN_DENY, CIL_KEY_HANDLEUNKNOWN_REJECT);
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	ast_node->data = unknown;
+	ast_node->flavor = CIL_HANDLEUNKNOWN;
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad handleunknown at line %d of %s\n",
+			parse_current->line, parse_current->path);
+	cil_destroy_handleunknown(unknown);
+	return rc;
+}
+
+void cil_destroy_handleunknown(struct cil_handleunknown *unk)
+{
+	free(unk);
+}
 
 int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, void *extra_args)
 {
@@ -6009,6 +6061,9 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTRANGE)) {
 		rc = cil_gen_defaultrange(parse_current, ast_node);
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_HANDLEUNKNOWN)) {
+		rc = cil_gen_handleunknown(parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else {
 		cil_log(CIL_ERR, "Error: Unknown keyword %s\n", (char*)parse_current->data);

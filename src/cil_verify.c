@@ -1240,6 +1240,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 {
 	int rc = SEPOL_ERR;
 	int *avrule_cnt = 0;
+	int *handleunknown;
 	int *nseuserdflt = 0;
 	int state = 0;
 	int *pass = 0;
@@ -1253,6 +1254,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 
 	db = args->db;
 	avrule_cnt = args->avrule_cnt;
+	handleunknown = args->handleunknown;
 	nseuserdflt = args->nseuserdflt;
 	csymtab = args->csymtab;
 	pass = args->pass;
@@ -1296,6 +1298,15 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 		case CIL_AVRULE:
 			(*avrule_cnt)++;
 			rc = SEPOL_OK;
+			break;
+		case CIL_HANDLEUNKNOWN:
+			if (*handleunknown != -1) {
+				cil_log(CIL_ERR, "Policy can not have more than one handleunknown\n");
+				rc = SEPOL_ERR;
+			} else {
+				*handleunknown = ((struct cil_handleunknown*)node->data)->handle_unknown;
+				rc = SEPOL_OK;
+			}
 			break;
 		case CIL_ROLETRANSITION:
 			rc = SEPOL_OK; //TODO __cil_verify_rule doesn't work quite right

@@ -1636,6 +1636,7 @@ int cil_post_verify(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	int avrule_cnt = 0;
+	int handleunknown = -1;
 	int nseuserdflt = 0;
 	int pass = 0;
 	struct cil_args_verify extra_args;
@@ -1646,6 +1647,7 @@ int cil_post_verify(struct cil_db *db)
 	extra_args.db = db;
 	extra_args.csymtab = &csymtab;
 	extra_args.avrule_cnt = &avrule_cnt;
+	extra_args.handleunknown = &handleunknown;
 	extra_args.nseuserdflt = &nseuserdflt;
 	extra_args.pass = &pass;
 
@@ -1654,6 +1656,14 @@ int cil_post_verify(struct cil_db *db)
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to verify cil database\n");
 			goto exit;
+		}
+	}
+
+	if (db->handle_unknown == -1) {
+		if (handleunknown == -1) {
+			db->handle_unknown = SEPOL_DENY_UNKNOWN;
+		} else {
+			db->handle_unknown = handleunknown;
 		}
 	}
 

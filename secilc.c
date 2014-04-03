@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	struct sepol_policy_file *pf = NULL;
 	FILE *binary = NULL;
 	FILE *file_contexts;
-	FILE *file;
+	FILE *file = NULL;
 	char *buffer = NULL;
 	struct stat filedata;
 	uint32_t file_size;
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 	int disable_dontaudit = 0;
 	int disable_neverallow = 0;
 	int preserve_tunables = 0;
-	int handle_unknown = SEPOL_DENY_UNKNOWN;
+	int handle_unknown = -1;
 	int policyvers = POLICYDB_VERSION_MAX;
 	int opt_char;
 	int opt_index = 0;
@@ -184,6 +184,12 @@ int main(int argc, char *argv[])
 	cil_set_disable_dontaudit(db, disable_dontaudit);
 	cil_set_disable_neverallow(db, disable_neverallow);
 	cil_set_preserve_tunables(db, preserve_tunables);
+	if (handle_unknown != -1) {
+		rc = cil_set_handle_unknown(db, handle_unknown);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+	}
 
 	for (i = optind; i < argc; i++) {
 		file = fopen(argv[i], "r");
@@ -232,13 +238,6 @@ int main(int argc, char *argv[])
 		cil_log(CIL_ERR, "Failed to set policy version: %d\n", rc);
 		goto exit;
 	}
-
-	rc = sepol_policydb_set_handle_unknown(pdb, handle_unknown);
-	if (rc != 0) {
-		cil_log(CIL_ERR, "Failed to set handle unknown: %d\n", rc);
-		goto exit;
-	}
-
 	rc = cil_compile(db, pdb);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to compile cildb: %d\n", rc);

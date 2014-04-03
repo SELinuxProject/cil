@@ -3714,6 +3714,8 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 		}
 	}
 
+	pdb->handle_unknown = db->handle_unknown;
+
 	rc = cil_sidorder_to_policydb(pdb, db);
 	if (rc != SEPOL_OK) {
 		goto exit;

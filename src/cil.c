@@ -95,6 +95,7 @@ void cil_db_init(struct cil_db **db)
 	(*db)->disable_dontaudit = CIL_FALSE;
 	(*db)->disable_neverallow = CIL_FALSE;
 	(*db)->preserve_tunables = CIL_FALSE;
+	(*db)->handle_unknown = -1;
 }
 
 void cil_db_destroy(struct cil_db **db)
@@ -489,6 +490,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_DEFAULTRANGE:
 		cil_destroy_defaultrange(*data);
 		break;
+	case CIL_HANDLEUNKNOWN:
+		cil_destroy_handleunknown(*data);
+		break;
 	case CIL_INT:
 	case CIL_OP:
 	case CIL_CONS_OPERAND:
@@ -820,6 +824,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_POLICYCAP;
 	case CIL_IPADDR:
 		return CIL_KEY_IPADDR;
+	case CIL_HANDLEUNKNOWN:
+		return CIL_KEY_HANDLEUNKNOWN;
 	default:
 		break;
 	}
@@ -1168,6 +1174,24 @@ void cil_set_disable_neverallow(struct cil_db *db, int disable_neverallow)
 void cil_set_preserve_tunables(struct cil_db *db, int preserve_tunables)
 {
 	db->preserve_tunables = preserve_tunables;
+}
+
+int cil_set_handle_unknown(struct cil_db *db, int handle_unknown)
+{
+	int rc = 0;
+
+	switch (handle_unknown) {
+		case SEPOL_DENY_UNKNOWN:
+		case SEPOL_REJECT_UNKNOWN:
+		case SEPOL_ALLOW_UNKNOWN:
+			db->handle_unknown = handle_unknown;
+			break;
+		default:
+			cil_log(CIL_ERR, "Unknown value for handle-unknown: %i\n", handle_unknown);
+			rc = -1;
+	}
+
+	return rc;
 }
 
 void cil_symtab_array_init(symtab_t symtab[], int symtab_sizes[CIL_SYM_NUM])
@@ -2071,4 +2095,9 @@ void cil_defaultrange_init(struct cil_defaultrange **def)
 
 	(*def)->class_strs = NULL;
 	(*def)->class_datums = NULL;
+}
+
+void cil_handleunknown_init(struct cil_handleunknown **unk)
+{
+	*unk = cil_malloc(sizeof(**unk));
 }

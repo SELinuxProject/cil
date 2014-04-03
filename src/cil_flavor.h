@@ -109,6 +109,7 @@ enum cil_flavor {
 	CIL_DEFAULTROLE,
 	CIL_DEFAULTTYPE,
 	CIL_DEFAULTRANGE,
+	CIL_HANDLEUNKNOWN,
 
 /*
  *          boolean  constraint  set  catset

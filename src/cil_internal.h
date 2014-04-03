@@ -166,6 +166,10 @@ enum cil_pass {
 #define CIL_KEY_DEFAULTROLE     "defaultrole"
 #define CIL_KEY_DEFAULTTYPE     "defaulttype"
 #define CIL_KEY_DEFAULTRANGE    "defaultrange"
+#define CIL_KEY_HANDLEUNKNOWN   "handleunknown"
+#define CIL_KEY_HANDLEUNKNOWN_ALLOW		"allow"
+#define CIL_KEY_HANDLEUNKNOWN_DENY		"deny"
+#define CIL_KEY_HANDLEUNKNOWN_REJECT		"reject"
 #define CIL_KEY_ALL         "all"
 #define CIL_KEY_AND			"and"
 #define CIL_KEY_OR			"or"
@@ -267,6 +271,7 @@ struct cil_db {
 	int disable_dontaudit;
 	int disable_neverallow;
 	int preserve_tunables;
+	int handle_unknown;
 };
 
 struct cil_sort {
@@ -852,6 +857,10 @@ struct cil_defaultrange {
 	enum cil_default_object_range object_range;
 };
 
+struct cil_handleunknown {
+	int handle_unknown;
+};
+
 void cil_db_init(struct cil_db **db);
 void cil_db_destroy(struct cil_db **db);
 
@@ -949,5 +958,6 @@ void cil_macro_init(struct cil_macro **macro);
 void cil_policycap_init(struct cil_policycap **policycap);
 void cil_default_init(struct cil_default **def);
 void cil_defaultrange_init(struct cil_defaultrange **def);
+void cil_handleunknown_init(struct cil_handleunknown **unk);
 
 #endif

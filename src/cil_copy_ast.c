@@ -1578,6 +1578,18 @@ int cil_copy_defaultrange(__attribute__((unused)) struct cil_db *db, void *data,
 	return SEPOL_OK;
 }
 
+int cil_copy_handleunknown(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_handleunknown *orig = data;
+	struct cil_handleunknown *new = NULL;
+
+	cil_handleunknown_init(&new);
+	new->handle_unknown = orig->handle_unknown;
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
 int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -1833,6 +1845,9 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_DEFAULTRANGE:
 		copy_func = &cil_copy_defaultrange;
+		break;
+	case CIL_HANDLEUNKNOWN:
+		copy_func = &cil_copy_handleunknown;
 		break;
 	default:
 		goto exit;
