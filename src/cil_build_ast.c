@@ -2305,7 +2305,7 @@ void cil_destroy_typeattribute(struct cil_typeattribute *attr)
 	free(attr);
 }
 
-int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, int tunableif)
 {
 	enum cil_syntax syntax[] = {
 		CIL_SYN_STRING,
@@ -2349,8 +2349,13 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad boolean declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
+	if (tunableif) {
+		cil_log(CIL_ERR, "Bad tunable (treated as a boolean due to preserve-tunables) declaration at line %d of %s\n",
+			parse_current->line, parse_current->path);
+	} else {
+		cil_log(CIL_ERR, "Bad boolean declaration at line %d of %s\n",
+			parse_current->line, parse_current->path);
+	}
 	cil_destroy_bool(boolean);
 	cil_clear_node(ast_node);
 	return rc;
@@ -2730,7 +2735,7 @@ exit:
 	return rc;
 }
 
-int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, int tunableif)
 {
 	enum cil_syntax syntax[] = {
 		CIL_SYN_STRING,
@@ -2755,6 +2760,7 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	}
 
 	cil_boolif_init(&bif);
+	bif->preserved_tunable = tunableif;
 
 	rc = cil_gen_expr(parse_current->next, CIL_BOOL, &bif->str_expr);
 	if (rc != SEPOL_OK) {
@@ -2792,8 +2798,13 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad booleanif declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
+	if (tunableif) {
+		cil_log(CIL_ERR, "Bad tunableif (treated as a booleanif due to preserve-tunables) declaration at line %d of %s\n",
+				parse_current->line, parse_current->path);
+	} else {
+		cil_log(CIL_ERR, "Bad booleanif declaration at line %d of %s\n",
+				parse_current->line, parse_current->path);
+	}
 	cil_destroy_boolif(bif);
 	return rc;
 }
@@ -5837,13 +5848,21 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEBOUNDS)) {
 		rc = cil_gen_rolebounds(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
-		rc = cil_gen_bool(db, parse_current, ast_node);
+		rc = cil_gen_bool(db, parse_current, ast_node, CIL_FALSE);
 	} else if (!strcmp(parse_current->data, CIL_KEY_BOOLEANIF)) {
-		rc = cil_gen_boolif(db, parse_current, ast_node);
+		rc = cil_gen_boolif(db, parse_current, ast_node, CIL_FALSE);
 	} else if(!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
-		rc = cil_gen_tunable(db, parse_current, ast_node);
+		if (db->preserve_tunables) {
+			rc = cil_gen_bool(db, parse_current, ast_node, CIL_TRUE);
+		} else {
+			rc = cil_gen_tunable(db, parse_current, ast_node);
+		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
-		rc = cil_gen_tunif(db, parse_current, ast_node);
+		if (db->preserve_tunables) {
+			rc = cil_gen_boolif(db, parse_current, ast_node, CIL_TRUE);
+		} else {
+			rc = cil_gen_tunif(db, parse_current, ast_node);
+		}
 	} else if (!strcmp(parse_current->data, CIL_KEY_CONDTRUE)) {
 		rc = cil_gen_condblock(db, parse_current, ast_node, CIL_CONDTRUE);
 	} else if (!strcmp(parse_current->data, CIL_KEY_CONDFALSE)) {

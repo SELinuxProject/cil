@@ -54,6 +54,7 @@ void usage(char *prog)
 	printf("  -U, --handle-unknown=<action>  how to handle unknown classes or permissions.\n");
 	printf("                                 may be deny, allow, or reject. (default: deny)\n");
 	printf("  -D, --disable-dontaudit        do not add dontaudit rules to the binary policy\n");
+	printf("  -P, --preserve-tunables        treat tunables as booleans\n");
 	printf("  -N, --disable-neverallow       do not check neverallow rules\n");
 	printf("  -v, --verbose                  increment verbosity level\n");
 	printf("  -h, --help                     display usage information\n");
@@ -78,6 +79,7 @@ int main(int argc, char *argv[])
 	int mls = 0;
 	int disable_dontaudit = 0;
 	int disable_neverallow = 0;
+	int preserve_tunables = 0;
 	int handle_unknown = SEPOL_DENY_UNKNOWN;
 	int policyvers = POLICYDB_VERSION_MAX;
 	int opt_char;
@@ -94,6 +96,7 @@ int main(int argc, char *argv[])
 		{"handle-unknown", required_argument, 0, 'U'},
 		{"disable-dontaudit", no_argument, 0, 'D'},
 		{"disable-neverallow", no_argument, 0, 'N'},
+		{"preserve-tunables", no_argument, 0, 'P'},
 		{"output", required_argument, 0, 'o'},
 		{"filecontexts", required_argument, 0, 'f'},
 		{0, 0, 0, 0}
@@ -101,7 +104,7 @@ int main(int argc, char *argv[])
 	int i;
 
 	while (1) {
-		opt_char = getopt_long(argc, argv, "o:f:U:hvt:MDNc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "o:f:U:hvt:MPDNc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
@@ -152,6 +155,8 @@ int main(int argc, char *argv[])
 				break;
 			case 'N':
 				disable_neverallow = 1;
+			case 'P':
+				preserve_tunables = 1;
 				break;
 			case 'o':
 				output = strdup(optarg);
@@ -178,6 +183,7 @@ int main(int argc, char *argv[])
 	cil_db_init(&db);
 	cil_set_disable_dontaudit(db, disable_dontaudit);
 	cil_set_disable_neverallow(db, disable_neverallow);
+	cil_set_preserve_tunables(db, preserve_tunables);
 
 	for (i = optind; i < argc; i++) {
 		file = fopen(argv[i], "r");

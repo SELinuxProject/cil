@@ -1518,6 +1518,7 @@ int cil_copy_boolif(struct cil_db *db, void *data, void **copy, __attribute__((u
 
 	cil_copy_expr(db, orig->str_expr, &new->str_expr);
 	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
+	new->preserved_tunable = orig->preserved_tunable;
 
 	*copy = new;
 

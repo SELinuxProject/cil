@@ -1709,7 +1709,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 		bool_args.cond_flavor = CIL_CONDTRUE;
 		rc = cil_tree_walk(true_node, __cil_cond_to_policydb_helper, NULL, NULL, &bool_args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while walking true conditional block at line %d of %s\n", true_node->line, true_node->path);
+			cil_log(CIL_ERR, "Failure while walking true conditional block at line %d of %s\n", true_node->line, true_node->path);
 			goto exit;
 		}
 	}
@@ -1718,7 +1718,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 		bool_args.cond_flavor = CIL_CONDFALSE;
 		rc = cil_tree_walk(false_node, __cil_cond_to_policydb_helper, NULL, NULL, &bool_args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failure while walking false conditional block at line %d of %s\n", false_node->line, false_node->path);
+			cil_log(CIL_ERR, "Failure while walking false conditional block at line %d of %s\n", false_node->line, false_node->path);
 			goto exit;
 		}
 	}

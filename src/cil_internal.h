@@ -266,6 +266,7 @@ struct cil_db {
 	struct cil_role **val_to_role;
 	int disable_dontaudit;
 	int disable_neverallow;
+	int preserve_tunables;
 };
 
 struct cil_sort {
@@ -808,6 +809,7 @@ struct cil_condblock {
 struct cil_booleanif {
 	struct cil_list *str_expr;
 	struct cil_list *datum_expr;
+	int preserved_tunable;
 };
 
 struct cil_tunableif {

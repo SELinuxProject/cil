@@ -47,6 +47,7 @@ extern int cil_selinuxusers_to_string(cil_db_t *db, sepol_policydb_t *sepol_db, 
 extern int cil_filecons_to_string(cil_db_t *db, sepol_policydb_t *sepol_db, char **out, size_t *size);
 extern void cil_set_disable_dontaudit(cil_db_t *db, int disable_dontaudit);
 extern void cil_set_disable_neverallow(cil_db_t *db, int disable_neverallow);
+extern void cil_set_preserve_tunables(cil_db_t *db, int preserve_tunables);
 
 enum cil_log_level {
 	CIL_ERR = 1,

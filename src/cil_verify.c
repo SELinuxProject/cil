@@ -845,14 +845,20 @@ int __cil_verify_booleanif_helper(struct cil_tree_node *node, __attribute__((unu
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *rule_node = node;
+	struct cil_booleanif *bif = node->parent->parent->data;
 
 	switch (rule_node->flavor) {
 	case CIL_AVRULE: {
 		struct cil_avrule *avrule = NULL;
 		avrule = rule_node->data;
 		if (avrule->rule_kind == CIL_AVRULE_NEVERALLOW) {
-			cil_log(CIL_ERR, "Neverallow found in booleanif block at line %d or %s\n", 
-				node->line, node->path);
+			if (bif->preserved_tunable) {
+				cil_log(CIL_ERR, "Neverallow found in tunableif block (treated as a booleanif due to preserve-tunables) at line %d or %s\n",
+					node->line, node->path);
+			} else {
+				cil_log(CIL_ERR, "Neverallow found in booleanif block at line %d or %s\n",
+					node->line, node->path);
+			}
 			rc = SEPOL_ERR;
 			goto exit;
 		}
@@ -911,8 +917,13 @@ int __cil_verify_booleanif_helper(struct cil_tree_node *node, __attribute__((unu
 		break;
 	default: {
 		const char * flavor = cil_node_to_string(node);
-		cil_log(CIL_ERR, "Invalid %s statement in booleanif at line %d of %s\n", 
-				flavor, node->line, node->path);
+		if (bif->preserved_tunable) {
+			cil_log(CIL_ERR, "Invalid %s statement in tunableif (treated as a booleanif due to preserve-tunables) at line %d of %s\n",
+					flavor, node->line, node->path);
+		} else {
+			cil_log(CIL_ERR, "Invalid %s statement in booleanif at line %d of %s\n",
+					flavor, node->line, node->path);
+		}
 		goto exit;
 	}
 	}
@@ -925,10 +936,11 @@ exit:
 int __cil_verify_booleanif(struct cil_tree_node *node, struct cil_complex_symtab *symtab)
 {
 	int rc = SEPOL_ERR;
+	struct cil_booleanif *bif = (struct cil_booleanif*)node->data;
 	struct cil_tree_node *cond_block = node->cl_head;
 
 	while (cond_block != NULL) {
-		rc = cil_tree_walk(cond_block->cl_head, __cil_verify_booleanif_helper, NULL, NULL, symtab);
+		rc = cil_tree_walk(cond_block, __cil_verify_booleanif_helper, NULL, NULL, symtab);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -937,7 +949,11 @@ int __cil_verify_booleanif(struct cil_tree_node *node, struct cil_complex_symtab
 
 	return SEPOL_OK;
 exit:
-	cil_log(CIL_ERR, "Invalid booleanif at line %d of %s\n", node->line, node->path);
+	if (bif->preserved_tunable) {
+		cil_log(CIL_ERR, "Invalid tunableif (treated as a booleanif due to preserve-tunables) at line %d of %s\n", node->line, node->path);
+	} else {
+		cil_log(CIL_ERR, "Invalid booleanif at line %d of %s\n", node->line, node->path);
+	}
 	return rc;
 }
 
