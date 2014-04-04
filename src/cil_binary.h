@@ -55,7 +55,7 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *pdb);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_common_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum, common_datum_t **common_out);
+int cil_common_to_policydb(policydb_t *pdb, struct cil_common *cil_common, common_datum_t **common_out);
 
 /**
  * Insert cil class structure into sepol policydb.
@@ -65,7 +65,7 @@ int cil_common_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum, comm
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_class_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_class_to_policydb(policydb_t *pdb, struct cil_class *cil_class);
 
 /**
  * Insert cil role structure into sepol policydb.
@@ -75,7 +75,7 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_role_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_role_to_policydb(policydb_t *pdb, struct cil_role *cil_role);
 
 /**
  * Insert cil roletype structure into sepol policydb.
@@ -86,7 +86,7 @@ int cil_role_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
-int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum);
+int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletype *roletype);
 
 /**
  * Insert cil role bounds structure into sepol policydb.
@@ -98,7 +98,7 @@ int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct ci
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
-int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_role *cil_role);
 
 /**
  * Insert cil type structure into sepol policydb.
@@ -108,7 +108,7 @@ int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_type_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum, ebitmap_t *types_bitmap);
+int cil_type_to_policydb(policydb_t *pdb, struct cil_type *cil_type, ebitmap_t *types_bitmap);
 
 /**
  * Insert cil typealias structure into sepol policydb.
@@ -118,7 +118,7 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum, ebitma
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typealias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_typealias_to_policydb(policydb_t *pdb, struct cil_alias *cil_alias);
 
 /**
  * Insert cil typepermissive structure into sepol policydb.
@@ -130,7 +130,7 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typepermissive_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_typepermissive_to_policydb(policydb_t *pdb, struct cil_typepermissive *cil_typeperm);
 
 /**
  * Insert cil attribute structure into sepol policydb.
@@ -140,7 +140,7 @@ int cil_typepermissive_to_policydb(policydb_t *pdb, struct cil_symtab_datum *dat
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_typeattribute *cil_attr);
 
 /**
  * Insert cil attribute structure into sepol type->attribute bitmap.
@@ -155,7 +155,7 @@ int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datu
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_typeattribute_to_bitmap(policydb_t *pdb, const struct cil_db *cdb, struct cil_symtab_datum *datum);
+int cil_typeattribute_to_bitmap(policydb_t *pdb, const struct cil_db *cdb, struct cil_typeattribute *cil_attr);
 
 /**
  * Insert cil policycap structure into sepol policydb.
@@ -165,7 +165,7 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, const struct cil_db *cdb, struc
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_policycap_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_policycap_to_policydb(policydb_t *pdb, struct cil_policycap *cil_polcap);
 
 /**
  * Insert cil user structure into sepol policydb.
@@ -175,7 +175,7 @@ int cil_policycap_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_user_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_user_to_policydb(policydb_t *pdb, struct cil_user *cil_user);
 
 /**
  * Insert cil userrole structure into sepol policydb.
@@ -185,7 +185,7 @@ int cil_user_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
-int cil_userrole_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum);
+int cil_userrole_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_userrole *userrole);
 
 /**
  * Insert cil bool structure into sepol policydb.
@@ -195,7 +195,7 @@ int cil_userrole_to_policydb(policydb_t *pdb, const struct cil_db *db, struct ci
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_bool_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_bool_to_policydb(policydb_t *pdb, struct cil_bool *cil_bool);
 
 /**
  * Insert all ordered cil category structures into sepol policydb.
@@ -215,7 +215,7 @@ int cil_catorder_to_policydb(policydb_t *pdb, const struct cil_db *db);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_catalias_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_catalias_to_policydb(policydb_t *pdb, struct cil_alias *cil_alias);
 
 /**
  * Insert the cil sensitivityorder into sepol policydb.
@@ -236,7 +236,7 @@ int cil_sensitivityorder_to_policydb(policydb_t *pdb, const struct cil_db *db);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_type_rule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_type_rule *cil_rule);
 
 /**
  * Insert cil avrule structure into sepol policydb.
@@ -246,7 +246,7 @@ int cil_type_rule_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_avrule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_tree_node *node, struct cil_list *neverallows);
+int cil_avrule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_avrule *cil_avrule, struct cil_list *neverallows);
 
 /**
  * Insert cil booleanif structure into sepol policydb.  This populates the
@@ -268,7 +268,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletransition *roletrans);
 
 /**
  * Insert cil role allow structure into sepol policydb.
@@ -278,7 +278,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_roleallow_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum);
+int cil_roleallow_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roleallow *roleallow);
 
 /**
  * Insert cil file transition structure into sepol policydb.
@@ -288,7 +288,7 @@ int cil_roleallow_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_typetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_typetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_nametypetransition *typetrans);
 
 /**
  * Insert cil constrain/mlsconstrain structure(s) into sepol policydb.
@@ -298,7 +298,7 @@ int cil_typetransition_to_policydb(policydb_t *pdb, struct cil_symtab_datum *dat
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_constrain_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_symtab_datum *datum);
+int cil_constrain_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_constrain *cil_constrain);
 
 /**
  * Define sepol level.
@@ -312,17 +312,7 @@ int cil_constrain_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_sepol_level_define(policydb_t *pdb, struct cil_symtab_datum *datum);
-
-/**
- * Insert cil sid structure into sepol policydb.
- *
- * @param[in] pdb The policy database to insert the sid into.
- * @param[in] datum The cil_sid datum.
- *
- * @return SEPOL_OK upon success or an error otherwise.
- */
-int cil_sid_to_policydb(policydb_t *pdb, struct cil_symtab_datum *datum);
+int cil_sepol_level_define(policydb_t *pdb, struct cil_sens *cil_sens);
 
 /**
  * Insert cil rangetransition structure into sepol policydb.
