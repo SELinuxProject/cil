@@ -155,6 +155,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'N':
 				disable_neverallow = 1;
+				break;
 			case 'P':
 				preserve_tunables = 1;
 				break;
