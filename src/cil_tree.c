@@ -690,8 +690,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_USERBOUNDS: {
-			struct cil_userbounds *userbnds = node->data;
-			cil_log(CIL_INFO, "USERBOUNDS: user: %s, bounds: %s\n", userbnds->user_str, userbnds->bounds_str);
+			struct cil_bounds *bnds = node->data;
+			cil_log(CIL_INFO, "USERBOUNDS: user: %s, bounds: %s\n", bnds->parent_str, bnds->child_str);
 			return;
 		}
 		case CIL_ROLETYPE: {
@@ -781,8 +781,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_ROLEBOUNDS: {
-			struct cil_rolebounds *rolebnds = node->data;
-			cil_log(CIL_INFO, "ROLEBOUNDS: role: %s, bounds: %s\n", rolebnds->role_str, rolebnds->bounds_str);
+			struct cil_bounds *bnds = node->data;
+			cil_log(CIL_INFO, "ROLEBOUNDS: role: %s, bounds: %s\n", bnds->parent_str, bnds->child_str);
 			return;
 		}
 		case CIL_CLASS: {
@@ -934,8 +934,8 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_TYPEBOUNDS: {
-			struct cil_typebounds *typebnds = node->data;
-			cil_log(CIL_INFO, "TYPEBOUNDS: type: %s, bounds: %s\n", typebnds->type_str, typebnds->bounds_str);
+			struct cil_bounds *bnds = node->data;
+			cil_log(CIL_INFO, "TYPEBOUNDS: type: %s, bounds: %s\n", bnds->parent_str, bnds->child_str);
 			return;
 		}
 		case CIL_TYPEPERMISSIVE: {

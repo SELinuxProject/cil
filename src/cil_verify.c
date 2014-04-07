@@ -588,17 +588,25 @@ int __cil_verify_user(struct cil_db *db, struct cil_tree_node *node)
 		cil_log(CIL_ERR, "User %s does not have a level range\n", user->datum.name);
 		goto exit;
 	} else if (user->bounds != NULL) {
-		struct cil_user *bnds = user->bounds;
-		if (user == bnds) {
-			cil_log(CIL_ERR, "User %s cannot bound self\n", user->datum.name);
-			goto exit;
-		} else if (bnds->bounds != NULL) {
-			bnds = bnds->bounds;
-			if (user == bnds) {
-				cil_log(CIL_ERR, "Circular bounds found for user %s\n", 
-					user->datum.name);
+		int steps = 0;
+		int limit = 2;
+		struct cil_user *u1 = user;
+		struct cil_user *u2 = user->bounds;
+
+		while (u2 != NULL) {
+			if (u1 == u2) {
+				cil_log(CIL_ERR, "Circular bounds found for user %s\n", u1->datum.name);
 				goto exit;
 			}
+
+			if (steps == limit) {
+				steps = 0;
+				limit *= 2;
+				u1 = u2;
+			}
+
+			u2 = u2->bounds;
+			steps++;
 		}
 	}
 
@@ -619,33 +627,26 @@ exit:
 int __cil_verify_role(struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
+	struct cil_role *role = node->data;
 	int steps = 0;
 	int limit = 2;
-	struct cil_role *bnding = node->data;
-	struct cil_role *bnded = node->data;
+	struct cil_role *r1 = role;
+	struct cil_role *r2 = role->bounds;
 
-	if (bnding->bounds != NULL) {
-		while (1) {
-			if (bnding == NULL) {
-				break;
-			}
-			bnding = bnding->bounds;
-
-			steps += 1;
-
-			if (bnding == bnded) {
-				cil_log(CIL_ERR, "Circular role bounds found that includes %s\n", 
-					bnding->datum.name);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-			if (steps == limit) {
-				steps = 0;
-				limit *= 2;
-				bnded = bnding;
-			}
+	while (r2 != NULL) {
+		if (r1 == r2) {
+			cil_log(CIL_ERR, "Circular bounds found for role %s\n", r1->datum.name);
+			goto exit;
 		}
+
+		if (steps == limit) {
+			steps = 0;
+			limit *= 2;
+			r1 = r2;
+		}
+
+		r2 = r2->bounds;
+		steps++;
 	}
 
 	return SEPOL_OK;
@@ -657,32 +658,26 @@ exit:
 int __cil_verify_type(struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
+	struct cil_type *type = node->data;
 	int steps = 0;
 	int limit = 2;
-	struct cil_type *bnding = node->data;
-	struct cil_type *bnded = node->data;
+	struct cil_type *t1 = type;
+	struct cil_type *t2 = type->bounds;
 
-	if (bnding->bounds != NULL) {
-		while (1) {
-			if (bnding == NULL) {
-				break;
-			}
-			bnding = bnding->bounds;
-			steps += 1;
-
-			if (bnding == bnded) {
-				cil_log(CIL_ERR, "Circular type bounds found that includes %s\n", 
-					bnding->datum.name);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-
-			if (steps == limit) {
-				steps = 0;
-				limit *= 2;
-				bnded = bnding;
-			}
+	while (t2 != NULL) {
+		if (t1 == t2) {
+			cil_log(CIL_ERR, "Circular bounds found for type %s\n", t1->datum.name);
+			goto exit;
 		}
+
+		if (steps == limit) {
+			steps = 0;
+			limit *= 2;
+			t1 = t2;
+		}
+
+		t2 = t2->bounds;
+		steps++;
 	}
 
 	return SEPOL_OK;

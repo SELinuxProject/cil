@@ -1367,61 +1367,6 @@ void cil_destroy_userrange(struct cil_userrange *userrange)
 	free(userrange);
 }
 
-int cil_gen_userbounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	enum cil_syntax syntax[] = {
-		CIL_SYN_STRING,
-		CIL_SYN_STRING,
-		CIL_SYN_STRING,
-		CIL_SYN_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_userbounds *userbnds = NULL;
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	cil_userbounds_init(&userbnds);
-
-	userbnds->user_str = cil_strdup(parse_current->next->data);
-	userbnds->bounds_str = cil_strdup(parse_current->next->next->data);
-
-	ast_node->data = userbnds;
-	ast_node->flavor = CIL_USERBOUNDS;
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad userbounds declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
-	cil_destroy_userbounds(userbnds);
-	return rc;
-}
-
-void cil_destroy_userbounds(struct cil_userbounds *userbnds)
-{
-	if (userbnds == NULL) {
-		return;
-	}
-
-	if (userbnds->user_str != NULL) {
-		free(userbnds->user_str);
-	}
-
-	if (userbnds->bounds_str != NULL) {
-		free(userbnds->bounds_str);
-	}
-
-	free(userbnds);
-}
-
 int cil_gen_userprefix(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	enum cil_syntax syntax[] = {
@@ -1990,61 +1935,6 @@ void cil_destroy_roleattributeset(struct cil_roleattributeset *attrset)
 	cil_list_destroy(&attrset->datum_expr, CIL_FALSE);
 
 	free(attrset);
-}
-
-int cil_gen_rolebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	enum cil_syntax syntax[] = {
-		CIL_SYN_STRING,
-		CIL_SYN_STRING,
-		CIL_SYN_STRING,
-		CIL_SYN_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_rolebounds *rolebnds = NULL;
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	cil_rolebounds_init(&rolebnds);
-
-	rolebnds->role_str = cil_strdup(parse_current->next->data);
-	rolebnds->bounds_str = cil_strdup(parse_current->next->next->data);
-
-	ast_node->data = rolebnds;
-	ast_node->flavor = CIL_ROLEBOUNDS;
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad rolebounds declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
-	cil_destroy_rolebounds(rolebnds);
-	return rc;
-}
-
-void cil_destroy_rolebounds(struct cil_rolebounds *rolebnds)
-{
-	if (rolebnds == NULL) {
-		return;
-	}
-
-	if (rolebnds->role_str != NULL) {
-		free(rolebnds->role_str);
-	}
-
-	if (rolebnds->bounds_str != NULL) {
-		free(rolebnds->bounds_str);
-	}
-
-	free(rolebnds);
 }
 
 int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, uint32_t rule_kind)
@@ -3118,61 +3008,6 @@ void cil_destroy_typeattributeset(struct cil_typeattributeset *attrset)
 	cil_list_destroy(&attrset->datum_expr, CIL_FALSE);
 
 	free(attrset);
-}
-
-int cil_gen_typebounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
-{
-	enum cil_syntax syntax[] = {
-		CIL_SYN_STRING,
-		CIL_SYN_STRING,
-		CIL_SYN_STRING,
-		CIL_SYN_END
-	};
-	int syntax_len = sizeof(syntax)/sizeof(*syntax);
-	struct cil_typebounds *typebnds = NULL;
-	int rc = SEPOL_ERR;
-
-	if (db == NULL || parse_current == NULL || ast_node == NULL) {
-		goto exit;
-	}
-
-	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	cil_typebounds_init(&typebnds);
-
-	typebnds->type_str = cil_strdup(parse_current->next->data);
-	typebnds->bounds_str = cil_strdup(parse_current->next->next->data);
-
-	ast_node->data = typebnds;
-	ast_node->flavor = CIL_TYPEBOUNDS;
-
-	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_ERR, "Bad typebounds declaration at line %d of %s\n", 
-		parse_current->line, parse_current->path);
-	cil_destroy_typebounds(typebnds);
-	return rc;
-}
-
-void cil_destroy_typebounds(struct cil_typebounds *typebnds)
-{
-	if (typebnds == NULL) {
-		return;
-	}
-
-	if (typebnds->type_str != NULL) {
-		free(typebnds->type_str);
-	}
-
-	if (typebnds->bounds_str != NULL) {
-		free(typebnds->bounds_str);
-	}
-
-	free(typebnds);
 }
 
 int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
@@ -5534,6 +5369,68 @@ void cil_destroy_cats(struct cil_cats *cats)
 
 	free(cats);
 }
+int cil_gen_bounds(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
+{
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_bounds *bounds = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_bounds_init(&bounds);
+
+	bounds->parent_str = cil_strdup(parse_current->next->data);
+	bounds->child_str = cil_strdup(parse_current->next->next->data);
+
+	ast_node->data = bounds;
+
+	switch (flavor) {
+	case CIL_USER:
+		ast_node->flavor = CIL_USERBOUNDS;
+		break;
+	case CIL_ROLE:
+		ast_node->flavor = CIL_ROLEBOUNDS;
+		break;
+	case CIL_TYPE:
+		ast_node->flavor = CIL_TYPEBOUNDS;
+		break;
+	default:
+		break;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad bounds declaration at line %d of %s\n", 
+		parse_current->line, parse_current->path);
+	cil_destroy_bounds(bounds);
+	return rc;
+}
+
+void cil_destroy_bounds(struct cil_bounds *bounds)
+{
+	if (bounds == NULL) {
+		return;
+	}
+
+	free(bounds->parent_str);
+	free(bounds->child_str);
+
+	free(bounds);
+}
 
 int cil_gen_default(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor)
 {
@@ -5880,7 +5777,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_userrange(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_USERBOUNDS)) {
-		rc = cil_gen_userbounds(db, parse_current, ast_node);
+		rc = cil_gen_bounds(db, parse_current, ast_node, CIL_USER);
 	} else if (!strcmp(parse_current->data, CIL_KEY_USERPREFIX)) {
 		rc = cil_gen_userprefix(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_SELINUXUSER)) {
@@ -5901,7 +5798,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIASACTUAL)) {
 		rc = cil_gen_aliasactual(db, parse_current, ast_node, CIL_TYPEALIASACTUAL);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEBOUNDS)) {
-		rc = cil_gen_typebounds(db, parse_current, ast_node);
+		rc = cil_gen_bounds(db, parse_current, ast_node, CIL_TYPE);
 	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEPERMISSIVE)) {
 		rc = cil_gen_typepermissive(db, parse_current, ast_node);
 	} else if (!strcmp(parse_current->data, CIL_KEY_RANGETRANSITION)) {
@@ -5923,7 +5820,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_roleattributeset(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEBOUNDS)) {
-		rc = cil_gen_rolebounds(db, parse_current, ast_node);
+		rc = cil_gen_bounds(db, parse_current, ast_node, CIL_ROLE);
 	} else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
 		rc = cil_gen_bool(db, parse_current, ast_node, CIL_FALSE);
 	} else if (!strcmp(parse_current->data, CIL_KEY_BOOLEANIF)) {

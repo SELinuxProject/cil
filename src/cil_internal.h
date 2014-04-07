@@ -425,11 +425,6 @@ struct cil_userrange {
 	struct cil_levelrange *range;
 };
 
-struct cil_userbounds {
-	char *user_str;
-	char *bounds_str;
-};
-
 struct cil_userprefix {
 	char *user_str;
 	struct cil_user *user;
@@ -470,14 +465,9 @@ struct cil_roletype {
 	void *type; /* type, alias, or attribute */
 };
 
-struct cil_rolebounds {
-	char *role_str;
-	char *bounds_str;
-};
-
 struct cil_type	{
 	struct cil_symtab_datum datum;
-	void *bounds; /* type or alias */
+	struct cil_type *bounds;
 	int value;
 };
 
@@ -491,11 +481,6 @@ struct cil_typeattributeset {
 	char *attr_str;
 	struct cil_list *str_expr;
 	struct cil_list *datum_expr;
-};
-
-struct cil_typebounds {
-	char *type_str;
-	char *bounds_str;
 };
 
 struct cil_typepermissive {
@@ -826,6 +811,11 @@ struct cil_policycap {
 	struct cil_symtab_datum datum;
 };
 
+struct cil_bounds {
+	char *parent_str;
+	char *child_str;
+};
+
 /* Ensure that CIL uses the same values as sepol policydb.h */
 enum cil_default_object {
 	CIL_DEFAULT_SOURCE = DEFAULT_SOURCE,
@@ -896,18 +886,15 @@ void cil_sid_init(struct cil_sid **sid);
 void cil_sidcontext_init(struct cil_sidcontext **sidcontext);
 void cil_sidorder_init(struct cil_sidorder **sidorder);
 void cil_userrole_init(struct cil_userrole **userrole);
-void cil_userbounds_init(struct cil_userbounds **userbounds);
 void cil_userprefix_init(struct cil_userprefix **userprefix);
 void cil_selinuxuser_init(struct cil_selinuxuser **selinuxuser);
 void cil_roleattribute_init(struct cil_roleattribute **attribute);
 void cil_roleattributeset_init(struct cil_roleattributeset **attrset);
-void cil_rolebounds_init(struct cil_rolebounds **rolebounds);
 void cil_roletype_init(struct cil_roletype **roletype);
 void cil_typeattribute_init(struct cil_typeattribute **attribute);
 void cil_typeattributeset_init(struct cil_typeattributeset **attrset);
 void cil_alias_init(struct cil_alias **alias);
 void cil_aliasactual_init(struct cil_aliasactual **aliasactual);
-void cil_typebounds_init(struct cil_typebounds **typebnds);
 void cil_typepermissive_init(struct cil_typepermissive **typeperm);
 void cil_name_init(struct cil_name **name);
 void cil_nametypetransition_init(struct cil_nametypetransition **nametypetrans);
@@ -956,6 +943,7 @@ void cil_optional_init(struct cil_optional **optional);
 void cil_param_init(struct cil_param **param);
 void cil_macro_init(struct cil_macro **macro);
 void cil_policycap_init(struct cil_policycap **policycap);
+void cil_bounds_init(struct cil_bounds **bounds);
 void cil_default_init(struct cil_default **def);
 void cil_defaultrange_init(struct cil_defaultrange **def);
 void cil_handleunknown_init(struct cil_handleunknown **unk);

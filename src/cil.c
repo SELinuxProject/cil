@@ -330,7 +330,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		cil_destroy_roleattributeset(*data);
 		break;
 	case CIL_ROLEBOUNDS:
-		cil_destroy_rolebounds(*data);
+		cil_destroy_bounds(*data);
 		break;
 	case CIL_BOOL:
 		cil_destroy_bool(*data);
@@ -361,7 +361,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		cil_destroy_typeattributeset(*data);
 		break;
 	case CIL_TYPEBOUNDS:
-		cil_destroy_typebounds(*data);
+		cil_destroy_bounds(*data);
 		break;
 	case CIL_TYPEPERMISSIVE:
 		cil_destroy_typepermissive(*data);
@@ -422,7 +422,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		cil_destroy_userrange(*data);
 		break;
 	case CIL_USERBOUNDS:
-		cil_destroy_userbounds(*data);
+		cil_destroy_bounds(*data);
 		break;
 	case CIL_USERPREFIX:
 		cil_destroy_userprefix(*data);
@@ -1522,14 +1522,6 @@ void cil_userrole_init(struct cil_userrole **userrole)
 	(*userrole)->role = NULL;
 }
 
-void cil_userbounds_init(struct cil_userbounds **userbounds)
-{
-	*userbounds = cil_malloc(sizeof(**userbounds));
-
-	(*userbounds)->user_str = NULL;
-	(*userbounds)->bounds_str = NULL;
-}
-
 void cil_userprefix_init(struct cil_userprefix **userprefix)
 {
 	*userprefix = cil_malloc(sizeof(**userprefix));
@@ -1558,14 +1550,6 @@ void cil_roletype_init(struct cil_roletype **roletype)
 	(*roletype)->role = NULL;
 	(*roletype)->type_str = NULL;
 	(*roletype)->type = NULL;
-}
-
-void cil_rolebounds_init(struct cil_rolebounds **rolebounds)
-{
-	*rolebounds = cil_malloc(sizeof(**rolebounds));
-
-	(*rolebounds)->role_str = NULL;
-	(*rolebounds)->bounds_str = NULL;
 }
 
 void cil_roleattribute_init(struct cil_roleattribute **attr)
@@ -1621,14 +1605,6 @@ void cil_aliasactual_init(struct cil_aliasactual **aliasactual)
 
 	(*aliasactual)->alias_str = NULL;
 	(*aliasactual)->actual_str = NULL;
-}
-
-void cil_typebounds_init(struct cil_typebounds **typebnds)
-{
-	*typebnds = cil_malloc(sizeof(**typebnds));
-
-	(*typebnds)->type_str = NULL;
-	(*typebnds)->bounds_str = NULL;
 }
 
 void cil_typepermissive_init(struct cil_typepermissive **typeperm)
@@ -2078,6 +2054,14 @@ void cil_policycap_init(struct cil_policycap **policycap)
 	*policycap = cil_malloc(sizeof(**policycap));
 
 	cil_symtab_datum_init(&(*policycap)->datum);
+}
+
+void cil_bounds_init(struct cil_bounds **bounds)
+{
+	*bounds = cil_malloc(sizeof(**bounds));
+
+	(*bounds)->parent_str = NULL;
+	(*bounds)->child_str = NULL;
 }
 
 void cil_default_init(struct cil_default **def)

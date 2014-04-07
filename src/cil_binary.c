@@ -351,6 +351,29 @@ exit:
 	return rc;
 }
 
+int cil_role_bounds_to_policydb(policydb_t *pdb, struct cil_role *cil_role)
+{
+	int rc = SEPOL_ERR;
+	role_datum_t *sepol_role = NULL;
+	role_datum_t *sepol_parent = NULL;
+
+	if (cil_role->bounds) {
+		rc = __cil_get_sepol_role_datum(pdb, DATUM(cil_role), &sepol_role);
+		if (rc != SEPOL_OK) goto exit;
+
+		rc = __cil_get_sepol_role_datum(pdb, DATUM(cil_role->bounds), &sepol_parent);
+		if (rc != SEPOL_OK) goto exit;
+	
+		sepol_role->bounds = sepol_parent->s.value;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Failed to insert role bounds for role %s\n", cil_role->datum.name);
+	return SEPOL_ERR;
+}
+
 int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletype *roletype)
 {
 	int rc = SEPOL_ERR;
@@ -393,28 +416,6 @@ exit:
 	return rc;
 }
 
-int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_role *cil_role)
-{
-	int rc = SEPOL_ERR;
-	role_datum_t *sepol_role;
-	role_datum_t *sepol_rolebnds;
-
-	if (cil_role->bounds != NULL) {
-		rc = __cil_get_sepol_role_datum(pdb, DATUM(cil_role), &sepol_role);
-		if (rc != SEPOL_OK) goto exit;
-
-		rc = __cil_get_sepol_role_datum(pdb, DATUM(cil_role->bounds), &sepol_rolebnds);
-		if (rc != SEPOL_OK) goto exit;
-
-		sepol_role->bounds = sepol_rolebnds->s.value;
-	}
-
-        return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int cil_type_to_policydb(policydb_t *pdb, struct cil_type *cil_type, ebitmap_t *types_bitmap)
 {
 	int rc = SEPOL_ERR;
@@ -444,6 +445,29 @@ exit:
 	type_datum_destroy(sepol_type);
 	free(sepol_type);
 	return rc;
+}
+
+int cil_type_bounds_to_policydb(policydb_t *pdb, struct cil_type *cil_type)
+{
+	int rc = SEPOL_ERR;
+	type_datum_t *sepol_type = NULL;
+	type_datum_t *sepol_parent = NULL;
+
+	if (cil_type->bounds) {
+		rc = __cil_get_sepol_type_datum(pdb, DATUM(cil_type), &sepol_type);
+		if (rc != SEPOL_OK) goto exit;
+
+		rc = __cil_get_sepol_type_datum(pdb, DATUM(cil_type->bounds), &sepol_parent);
+		if (rc != SEPOL_OK) goto exit;
+	
+		sepol_type->bounds = sepol_parent->s.value;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Failed to insert type bounds for type %s\n", cil_type->datum.name);
+	return SEPOL_ERR;
 }
 
 int cil_typealias_to_policydb(policydb_t *pdb, struct cil_alias *cil_alias)
@@ -620,6 +644,29 @@ exit:
 	user_datum_destroy(sepol_user);
 	free(sepol_user);
 	return rc;
+}
+
+int cil_user_bounds_to_policydb(policydb_t *pdb, struct cil_user *cil_user)
+{
+	int rc = SEPOL_ERR;
+	user_datum_t *sepol_user = NULL;
+	user_datum_t *sepol_parent = NULL;
+
+	if (cil_user->bounds) {
+		rc = __cil_get_sepol_user_datum(pdb, DATUM(cil_user), &sepol_user);
+		if (rc != SEPOL_OK) goto exit;
+
+		rc = __cil_get_sepol_user_datum(pdb, DATUM(cil_user->bounds), &sepol_parent);
+		if (rc != SEPOL_OK) goto exit;
+	
+		sepol_user->bounds = sepol_parent->s.value;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Failed to insert user bounds for user %s\n", cil_user->datum.name);
+	return SEPOL_ERR;
 }
 
 int cil_userrole_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_userrole *userrole)
@@ -2970,6 +3017,9 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 		break;
 	case 2:
 		switch (node->flavor) {
+		case CIL_TYPE:
+			rc = cil_type_bounds_to_policydb(pdb, node->data);
+			break;
 		case CIL_TYPEALIAS:
 			rc = cil_typealias_to_policydb(pdb, node->data);
 			break;
@@ -2984,13 +3034,15 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 				rc = cil_sensalias_to_policydb(pdb, node->data);
 			}
 			break;
+		case CIL_ROLE:
+			rc = cil_role_bounds_to_policydb(pdb, node->data);
+			break;
 		case CIL_ROLETYPE:
 			rc = cil_roletype_to_policydb(pdb, db, node->data);
 			break;
-		case CIL_ROLE:
-			rc = cil_rolebounds_to_policydb(pdb, node->data);
-			break;
 		case CIL_USER:
+			rc = cil_user_bounds_to_policydb(pdb, node->data);
+			if (rc != SEPOL_OK) goto exit;
 			if (pdb->mls == CIL_TRUE) {
 				rc = cil_userlevel_userrange_to_policydb(pdb, node->data);
 			}

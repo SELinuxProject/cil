@@ -89,18 +89,6 @@ int cil_role_to_policydb(policydb_t *pdb, struct cil_role *cil_role);
 int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletype *roletype);
 
 /**
- * Insert cil role bounds structure into sepol policydb.
- * Each cil_role contains a bounds property which, if defined, contains
- * the role bounds associated with that role.
- *
- * @param[in] pdb The policy database to insert the rolebounds into.
- * @param[in] datum The cil_role datum.
- *
- * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
- */
-int cil_rolebounds_to_policydb(policydb_t *pdb, struct cil_role *cil_role);
-
-/**
  * Insert cil type structure into sepol policydb.
  *
  * @param[in] pdb The policy database to insert the type into.

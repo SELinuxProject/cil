@@ -459,57 +459,6 @@ int cil_resolve_alias_to_actual(struct cil_tree_node *current, enum cil_flavor f
 	return SEPOL_OK;
 }
 
-int cil_resolve_typebounds(struct cil_tree_node *current, void *extra_args)
-{
-	struct cil_typebounds *typebnds = current->data;
-	struct cil_symtab_datum *type_datum = NULL;
-	struct cil_tree_node *type_node = NULL;
-	struct cil_type *type = NULL;
-	struct cil_symtab_datum *bounds_datum = NULL;
-	struct cil_tree_node *bounds_node = NULL;
-	int rc = SEPOL_ERR;
-
-	rc = cil_resolve_name(current, typebnds->type_str, CIL_SYM_TYPES, extra_args, &type_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	type_node = type_datum->nodes->head->data;
-
-	if (type_node->flavor != CIL_TYPE && type_node->flavor != CIL_TYPEALIAS) {
-		cil_log(CIL_ERR, "Typebounds must be a type or type alias\n");
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-	
-	rc = cil_resolve_name(current, typebnds->bounds_str, CIL_SYM_TYPES, extra_args, &bounds_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	bounds_node = bounds_datum->nodes->head->data;
-
-	if (bounds_node->flavor != CIL_TYPE && bounds_node->flavor != CIL_TYPEALIAS) {
-		cil_log(CIL_ERR, "Typebounds must be a type or type alias\n");
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	type = (struct cil_type*)type_datum;
-	if (type->bounds != NULL) {
-		cil_log(CIL_ERR, "Type cannot bind more than one type\n");
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	type->bounds = bounds_datum;
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int cil_resolve_typepermissive(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_typepermissive *typeperm = current->data;
@@ -850,37 +799,6 @@ exit:
 	return rc;
 }
 
-int cil_resolve_userbounds(struct cil_tree_node *current, void *extra_args)
-{
-	struct cil_userbounds *userbnds = current->data;
-	struct cil_symtab_datum *user_datum = NULL;
-	struct cil_symtab_datum *bounds_datum = NULL;
-	int rc = SEPOL_ERR;
-
-	rc = cil_resolve_name(current, userbnds->user_str, CIL_SYM_USERS, extra_args, &user_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	rc = cil_resolve_name(current, userbnds->bounds_str, CIL_SYM_USERS, extra_args, &bounds_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	if (((struct cil_user*)user_datum)->bounds != NULL) {
-		cil_log(CIL_ERR, "user cannot bind more than one user\n");
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	((struct cil_user*)user_datum)->bounds = (struct cil_user*)bounds_datum;
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
 int cil_resolve_userprefix(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_userprefix *userprefix = current->data;
@@ -1070,37 +988,6 @@ int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args
 	}
 
 	cil_list_append(attr->expr_list, CIL_LIST, attrroles->datum_expr);
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-int cil_resolve_rolebounds(struct cil_tree_node *current, void *extra_args)
-{
-	struct cil_rolebounds *rolebnds = current->data;
-	struct cil_symtab_datum *role_datum = NULL;
-	struct cil_symtab_datum *bounds_datum = NULL;
-	int rc = SEPOL_ERR;
-
-	rc = cil_resolve_name(current, rolebnds->role_str, CIL_SYM_ROLES, extra_args, &role_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	rc = cil_resolve_name(current, rolebnds->bounds_str, CIL_SYM_ROLES, extra_args, &bounds_datum);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	if (((struct cil_role*)role_datum)->bounds != NULL) {
-		cil_log(CIL_ERR, "role cannot bind more than one role\n");
-		rc = SEPOL_ERR;
-		goto exit;
-	}
-
-	((struct cil_role*)role_datum)->bounds = (struct cil_role*)bounds_datum;
 
 	return SEPOL_OK;
 
@@ -2139,6 +2026,96 @@ exit:
 	return rc;
 }
 
+int cil_resolve_bounds(struct cil_tree_node *current, void *extra_args, enum cil_flavor flavor)
+{
+	int rc = SEPOL_ERR;
+	struct cil_bounds *bounds = current->data;
+	enum cil_sym_index index;
+	struct cil_symtab_datum *parent_datum = NULL;
+	struct cil_symtab_datum *child_datum = NULL;
+
+	rc = cil_flavor_to_symtab_index(flavor, &index);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = cil_resolve_name(current, bounds->parent_str, index, extra_args, &parent_datum);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = cil_resolve_name(current, bounds->child_str, index, extra_args, &child_datum);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	switch (flavor) {
+	case CIL_USER: {
+		struct cil_user *user = (struct cil_user *)child_datum;
+
+		if (user->bounds != NULL) {
+			struct cil_tree_node *node = user->bounds->datum.nodes->head->data;
+			cil_log(CIL_ERR, "User %s already bound by parent at line %n of %s\n", bounds->child_str, node->line, node->path);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		user->bounds = (struct cil_user *)parent_datum;
+		break;
+	}
+	case CIL_ROLE: {
+		struct cil_role *role = (struct cil_role *)child_datum;
+
+		if (role->bounds != NULL) {
+			struct cil_tree_node *node = role->bounds->datum.nodes->head->data;
+			cil_log(CIL_ERR, "Role %s already bound by parent at line %n of %s\n", bounds->child_str, node->line, node->path);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		role->bounds = (struct cil_role *)parent_datum;
+		break;
+	}
+	case CIL_TYPE: {
+		struct cil_type *type = (struct cil_type *)child_datum;
+		struct cil_tree_node *node = NULL;
+
+		if (type->bounds != NULL) {
+			node = ((struct cil_symtab_datum *)type->bounds)->nodes->head->data;
+			cil_log(CIL_ERR, "Type %s already bound by parent at line %n of %s\n", bounds->child_str, node->line, node->path);
+			cil_log(CIL_ERR, "Now being bound to parent %s at line %n of %s\n", bounds->parent_str, current->line, current->path);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		node = parent_datum->nodes->head->data;
+		if (node->flavor == CIL_TYPEATTRIBUTE) {
+			cil_log(CIL_ERR, "Bounds parent %s is an attribute\n", bounds->parent_str);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		node = child_datum->nodes->head->data;
+		if (node->flavor == CIL_TYPEATTRIBUTE) {
+			cil_log(CIL_ERR, "Bounds child %s is an attribute\n", bounds->child_str);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+		type->bounds = (struct cil_type *)parent_datum;
+		break;
+	}
+	default:
+		break;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad bounds statement at line %n of %s\n", current->line, current->path);
+	return rc;
+}
+
 int cil_resolve_default(struct cil_tree_node *current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -2895,7 +2872,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			rc = cil_resolve_typeattributeset(node, args);
 			break;
 		case CIL_TYPEBOUNDS:
-			rc = cil_resolve_typebounds(node, args);
+			rc = cil_resolve_bounds(node, args, CIL_TYPE);
 			break;
 		case CIL_TYPEPERMISSIVE:
 			rc = cil_resolve_typepermissive(node, args);
@@ -2928,7 +2905,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			rc = cil_resolve_userrange(node, args);
 			break;
 		case CIL_USERBOUNDS:
-			rc = cil_resolve_userbounds(node, args);
+			rc = cil_resolve_bounds(node, args, CIL_USER);
 			break;
 		case CIL_USERPREFIX:
 			rc = cil_resolve_userprefix(node, args);
@@ -2950,7 +2927,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			rc = cil_resolve_roleallow(node, args);
 			break;
 		case CIL_ROLEBOUNDS:
-			rc = cil_resolve_rolebounds(node, args);
+			rc = cil_resolve_bounds(node, args, CIL_ROLE);
 			break;
 		case CIL_LEVEL:
 			rc = cil_resolve_level(node, (struct cil_level*)node->data, args);

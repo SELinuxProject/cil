@@ -466,21 +466,6 @@ int cil_copy_userrange(struct cil_db *db, void *data, void **copy, __attribute__
 	return SEPOL_OK;
 }
 
-int cil_copy_userbounds(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
-{
-	struct cil_userbounds *orig = data;
-	struct cil_userbounds *new = NULL;
-
-	cil_userbounds_init(&new);
-
-	new->user_str = cil_strdup(orig->user_str);
-	new->bounds_str = cil_strdup(orig->bounds_str);
-
-	*copy = new;
-
-	return SEPOL_OK;
-}
-
 int cil_copy_userprefix(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_userprefix *orig = data;
@@ -523,21 +508,6 @@ int cil_copy_roletype(__attribute__((unused)) struct cil_db *db, void *data, voi
 
 	new->role_str = cil_strdup(orig->role_str);
 	new->type_str = cil_strdup(orig->type_str);
-
-	*copy = new;
-
-	return SEPOL_OK;
-}
-
-int cil_copy_rolebounds(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
-{
-	struct cil_rolebounds *orig = data;
-	struct cil_rolebounds *new = NULL;
-
-	cil_rolebounds_init(&new);
-
-	new->role_str = cil_strdup(orig->role_str);
-	new->bounds_str = cil_strdup(orig->bounds_str);
 
 	*copy = new;
 
@@ -608,21 +578,6 @@ int cil_copy_type(__attribute__((unused)) struct cil_db *db, void *data, void **
 	} else {
 		*copy = datum;
 	}
-
-	return SEPOL_OK;
-}
-
-int cil_copy_typebounds(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
-{
-	struct cil_typebounds *orig = data;
-	struct cil_typebounds *new = NULL;
-
-	cil_typebounds_init(&new);
-
-	new->type_str = cil_strdup(orig->type_str);
-	new->bounds_str = cil_strdup(orig->bounds_str);
-
-	*copy = new;
 
 	return SEPOL_OK;
 }
@@ -1590,6 +1545,21 @@ int cil_copy_handleunknown(__attribute__((unused)) struct cil_db *db, void *data
 	return SEPOL_OK;
 }
 
+int cil_copy_bounds(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_bounds *orig = data;
+	struct cil_bounds *new = NULL;
+
+	cil_bounds_init(&new);
+
+	new->parent_str = cil_strdup(orig->parent_str);
+	new->child_str = cil_strdup(orig->child_str);
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
 int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -1672,7 +1642,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		copy_func = &cil_copy_userrange;
 		break;
 	case CIL_USERBOUNDS:
-		copy_func = &cil_copy_userbounds;
+		copy_func = &cil_copy_bounds;
 		break;
 	case CIL_USERPREFIX:
 		copy_func = &cil_copy_userprefix;
@@ -1684,7 +1654,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		copy_func = &cil_copy_roletype;
 		break;
 	case CIL_ROLEBOUNDS:
-		copy_func = &cil_copy_rolebounds;
+		copy_func = &cil_copy_bounds;
 		break;
 	case CIL_ROLEATTRIBUTE:
 		copy_func = &cil_copy_roleattribute;
@@ -1699,7 +1669,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		copy_func = &cil_copy_type;
 		break;
 	case CIL_TYPEBOUNDS:
-		copy_func = &cil_copy_typebounds;
+		copy_func = &cil_copy_bounds;
 		break;
 	case CIL_TYPEPERMISSIVE:
 		copy_func = cil_copy_typepermissive;

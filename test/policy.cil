@@ -98,6 +98,8 @@
 	(typealiasactual sbin_t bin_t)
 	(typepermissive device_t) 
 	(typebounds device_t bin_t)
+	;;(typebounds bin_t kernel_t)    ;; This statement and the next can be used
+	;;(typebounds kernel_t device_t) ;; to verify that circular bounds can be found 
 	(typemember device_t bin_t file exec_t)
 	(typetransition device_t console_t file console_device_t)
 
