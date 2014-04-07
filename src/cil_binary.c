@@ -373,45 +373,36 @@ exit:
 	return SEPOL_ERR;
 }
 
-int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletype *roletype)
+int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_role *role)
 {
 	int rc = SEPOL_ERR;
-	role_datum_t *sepol_role = NULL;
-	type_datum_t *sepol_type = NULL;
-	ebitmap_t role_bitmap, type_bitmap;
-	ebitmap_node_t *rnode, *tnode;
-	unsigned int i, j;
 
-	rc = __cil_expand_role(roletype->role, &role_bitmap);
-	if (rc != SEPOL_OK) goto exit;
+	if (role->types) {
+		role_datum_t *sepol_role = NULL;
+		type_datum_t *sepol_type = NULL;
+		ebitmap_node_t *tnode;
+		unsigned int i;
 
-	rc = __cil_expand_type(roletype->type, &type_bitmap);
-	if (rc != SEPOL_OK) goto exit;
-
-	ebitmap_for_each_bit(&role_bitmap, rnode, i) {
-		if (!ebitmap_get_bit(&role_bitmap, i)) continue;
-
-		rc = __cil_get_sepol_role_datum(pdb, DATUM(db->val_to_role[i]), &sepol_role);
+		rc = __cil_get_sepol_role_datum(pdb, DATUM(role), &sepol_role);
 		if (rc != SEPOL_OK) goto exit;
 
-		ebitmap_for_each_bit(&type_bitmap, tnode, j) {
-			if (!ebitmap_get_bit(&type_bitmap, j)) continue;
+		ebitmap_for_each_bit(role->types, tnode, i) {
+			if (!ebitmap_get_bit(role->types, i)) continue;
 
-			rc = __cil_get_sepol_type_datum(pdb, DATUM(db->val_to_type[j]), &sepol_type);
+			rc = __cil_get_sepol_type_datum(pdb, DATUM(db->val_to_type[i]), &sepol_type);
 			if (rc != SEPOL_OK) goto exit;
 
 			if (ebitmap_set_bit(&sepol_role->types.types, sepol_type->s.value - 1, 1)) {
 				cil_log(CIL_INFO, "Failed to set type bit for role\n");
+				rc = SEPOL_ERR;
 				goto exit;
 			}
 		}
 	}
 
-	rc = SEPOL_OK;
+	return SEPOL_OK;
 
 exit:
-	ebitmap_destroy(&role_bitmap);
-	ebitmap_destroy(&type_bitmap);
 	return rc;
 }
 
@@ -3029,8 +3020,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_ROLE:
 			rc = cil_role_bounds_to_policydb(pdb, node->data);
-			break;
-		case CIL_ROLETYPE:
+			if (rc != SEPOL_OK) goto exit;
 			rc = cil_roletype_to_policydb(pdb, db, node->data);
 			break;
 		case CIL_USER:

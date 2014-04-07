@@ -86,7 +86,7 @@ int cil_role_to_policydb(policydb_t *pdb, struct cil_role *cil_role);
  *
  * @return SEPOL_OK upon success or SEPOL_ERR otherwise.
  */
-int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletype *roletype);
+int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_role *role);
 
 /**
  * Insert cil type structure into sepol policydb.
