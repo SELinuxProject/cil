@@ -50,7 +50,6 @@
 struct cil_args_binary {
 	const struct cil_db *db;
 	policydb_t *pdb;
-	ebitmap_t *types_bitmap;
 	struct cil_list *neverallows;
 	int pass;
 };
@@ -416,7 +415,7 @@ exit:
 	return rc;
 }
 
-int cil_type_to_policydb(policydb_t *pdb, struct cil_type *cil_type, ebitmap_t *types_bitmap)
+int cil_type_to_policydb(policydb_t *pdb, struct cil_type *cil_type)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
@@ -433,10 +432,6 @@ int cil_type_to_policydb(policydb_t *pdb, struct cil_type *cil_type, ebitmap_t *
 	}
 	sepol_type->s.value = value;
 	sepol_type->primary = 1;
-
-	if (ebitmap_set_bit(types_bitmap, value - 1, 1)) {
-		goto exit;
-	}
 
 	return SEPOL_OK;
 
@@ -2964,12 +2959,10 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 	struct cil_args_binary *args = extra_args;
 	const struct cil_db *db;
 	policydb_t *pdb;
-	ebitmap_t *types_bitmap;
 
 	db = args->db;
 	pdb = args->pdb;
 	pass = args->pass;
-	types_bitmap = args->types_bitmap;
 
 	if (node->flavor >= CIL_MIN_DECLARATIVE) {
 		if (node != DATUM(node->data)->nodes->head->data) {
@@ -2987,7 +2980,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			rc = cil_role_to_policydb(pdb, node->data);
 			break;
 		case CIL_TYPE:
-			rc = cil_type_to_policydb(pdb, node->data, types_bitmap);
+			rc = cil_type_to_policydb(pdb, node->data);
 			break;
 		case CIL_TYPEATTRIBUTE:
 			rc = cil_typeattribute_to_policydb(pdb, node->data);
@@ -3436,7 +3429,6 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 {
 	int rc = SEPOL_ERR;
 	int i;
-	ebitmap_t types_bitmap;
 	struct cil_args_binary extra_args;
 	policydb_t *pdb = &policydb->p;
 	struct cil_list *neverallows = NULL;
@@ -3455,12 +3447,11 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 		cil_log(CIL_ERR,"Problem in policydb_init\n");
 		return SEPOL_ERR;
 	}
-	ebitmap_init(&types_bitmap);
+
 	cil_list_init(&neverallows, CIL_LIST_ITEM);
 
 	extra_args.db = db;
 	extra_args.pdb = pdb;
-	extra_args.types_bitmap = &types_bitmap;
 	extra_args.neverallows = neverallows;
 	for (i = 1; i <= 3; i++) {
 		extra_args.pass = i;
@@ -3501,7 +3492,6 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 
 	rc = SEPOL_OK;
 exit:
-	ebitmap_destroy(&types_bitmap);
 	cil_neverallows_list_destroy(neverallows);
 	return rc;
 }

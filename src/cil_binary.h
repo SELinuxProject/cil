@@ -96,7 +96,7 @@ int cil_roletype_to_policydb(policydb_t *pdb, const struct cil_db *db, struct ci
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_type_to_policydb(policydb_t *pdb, struct cil_type *cil_type, ebitmap_t *types_bitmap);
+int cil_type_to_policydb(policydb_t *pdb, struct cil_type *cil_type);
 
 /**
  * Insert cil typealias structure into sepol policydb.
