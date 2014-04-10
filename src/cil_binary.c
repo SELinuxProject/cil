@@ -929,10 +929,14 @@ int __cil_insert_type_rule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_
 	
 	existing = avtab_search_node(&pdb->te_avtab, &avtab_key);
 	if (existing) {
-		/* Don't add duplicate type rule.
+		/* Don't add duplicate type rule and warn if they conflict.
 		 * A warning should have been previously given if there is a
 		 * non-duplicate rule using the same key.
 		 */
+		if (existing->datum.data != res) {
+			cil_log(CIL_ERR, "Conflicting type rules\n");
+			rc = SEPOL_ERR;
+		}
 		goto exit;
 	}
 
@@ -953,21 +957,18 @@ int __cil_insert_type_rule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_
 				other_list = cond_node->true_list;
 			}
 
-			search_datum = cil_cond_av_list_search(&avtab_key, this_list);
-			if (search_datum) {
-				/* Don't add duplicate type rule.
-				 * A warning should have been previously given if there is a
-				 * non-duplicate rule using the same key.
-				 */
-				goto exit;
-			}
-
 			search_datum = cil_cond_av_list_search(&avtab_key, other_list);
 			if (search_datum == NULL) {
-				/* The duplicate was not in either the true or false block */
-				cil_log(CIL_ERR, "Conflicting type rules\n");
-				rc = SEPOL_ERR;
-				goto exit;
+				if (existing->datum.data != res) {
+					cil_log(CIL_ERR, "Conflicting type rules\n");
+					rc = SEPOL_ERR;
+					goto exit;
+				}
+
+				search_datum = cil_cond_av_list_search(&avtab_key, this_list);
+				if (search_datum) {
+					goto exit;
+				}
 			}
 		}
 		rc = __cil_cond_insert_rule(&pdb->te_cond_avtab, &avtab_key, &avtab_datum, cond_node, cond_flavor);
