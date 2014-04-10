@@ -1614,34 +1614,68 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 	struct cil_tree_node *cb_node = node->cl_head;
 	struct cil_tree_node *true_node = NULL;
 	struct cil_tree_node *false_node = NULL;
+	struct cil_tree_node *tmp_node = NULL;
+	cond_node_t *tmp_cond = NULL;
 	cond_node_t *cond_node = NULL;
+	int was_created;
+	int swapped = CIL_FALSE;
+	cond_av_list_t tmp_cl;
 
-	cond_node = cond_node_create(pdb, NULL);
-	if (cond_node == NULL) {
+	tmp_cond = cond_node_create(pdb, NULL);
+	if (tmp_cond == NULL) {
 		rc = SEPOL_ERR;
 		cil_log(CIL_INFO, "Failed to create sepol conditional node at line %d of %s\n", 
 			node->line, node->path);
 		goto exit;
 	}
 	
-	rc = __cil_cond_expr_to_sepol_expr(pdb, cil_boolif->datum_expr, &cond_node->expr);
+	rc = __cil_cond_expr_to_sepol_expr(pdb, cil_boolif->datum_expr, &tmp_cond->expr);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_INFO, "Failed to convert CIL conditional expression to sepol expression at line %d of %s\n", node->line, node->path);
 		goto exit;
 	}
 
-	cond_node->next = pdb->cond_list;
-	pdb->cond_list = cond_node;
+	tmp_cond->true_list = &tmp_cl;
+
+	rc = cond_normalize_expr(pdb, tmp_cond);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	if (tmp_cond->false_list != NULL) {
+		tmp_cond->true_list = NULL;
+		swapped = CIL_TRUE;
+	}
+
+	cond_node = cond_node_find(pdb, tmp_cond, pdb->cond_list, &was_created);
+	if (cond_node == NULL) {
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	if (was_created) {
+		cond_node->next = pdb->cond_list;
+		pdb->cond_list = cond_node;
+	}
+
+	cond_expr_destroy(tmp_cond->expr);
+	free(tmp_cond);
 
 	for (cb_node = node->cl_head; cb_node != NULL; cb_node = cb_node->next) {
 		if (cb_node->flavor == CIL_CONDBLOCK) {
 			struct cil_condblock *cb = cb_node->data;
 			if (cb->flavor == CIL_CONDTRUE) {
-				true_node = cb_node;
+					true_node = cb_node;
 			} else if (cb->flavor == CIL_CONDFALSE) {
-				false_node = cb_node;
+					false_node = cb_node;
 			}
 		}
+	}
+
+	if (swapped) {
+		tmp_node = true_node;
+		true_node = false_node;
+		false_node = tmp_node;
 	}
 
 	bool_args.db = db;
@@ -3451,18 +3485,20 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 			cil_log(CIL_INFO, "Failure while walking cil database\n");
 			goto exit;
 		}
+
+		if (i == 1) {
+			rc = __cil_policydb_val_arrays_create(pdb);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failure creating val_to_{struct,name} arrays\n");
+				goto exit;
+			}
+		}
 	}
 
 	pdb->handle_unknown = db->handle_unknown;
 
 	rc = cil_sidorder_to_policydb(pdb, db);
 	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	rc = __cil_policydb_val_arrays_create(pdb);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failure creating val_to_{struct,name} arrays\n");
 		goto exit;
 	}
 
