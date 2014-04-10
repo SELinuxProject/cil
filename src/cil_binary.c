@@ -941,21 +941,32 @@ int __cil_insert_type_rule(policydb_t *pdb, uint32_t kind, uint32_t src, uint32_
 	} else {
 		existing = avtab_search_node(&pdb->te_cond_avtab, &avtab_key);
 		if (existing) {
-			cond_av_list_t *cond_list;
+			cond_av_list_t *this_list;
+			cond_av_list_t *other_list;
 			avtab_datum_t *search_datum;
 
 			if (cond_flavor == CIL_CONDTRUE) {
-				cond_list = cond_node->true_list;
+				this_list = cond_node->true_list;
+				other_list = cond_node->false_list;
 			} else {
-				cond_list = cond_node->false_list;
+				this_list = cond_node->false_list;
+				other_list = cond_node->true_list;
 			}
 
-			search_datum = cil_cond_av_list_search(&avtab_key, cond_list);
+			search_datum = cil_cond_av_list_search(&avtab_key, this_list);
 			if (search_datum) {
 				/* Don't add duplicate type rule.
 				 * A warning should have been previously given if there is a
 				 * non-duplicate rule using the same key.
 				 */
+				goto exit;
+			}
+
+			search_datum = cil_cond_av_list_search(&avtab_key, other_list);
+			if (search_datum == NULL) {
+				/* The duplicate was not in either the true or false block */
+				cil_log(CIL_ERR, "Conflicting type rules\n");
+				rc = SEPOL_ERR;
 				goto exit;
 			}
 		}
