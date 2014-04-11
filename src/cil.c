@@ -907,7 +907,7 @@ static int __cil_level_strlen(struct cil_level *lvl)
 				} else if (last == first + 1) {
 					str_len += strlen(str1) + strlen(str2) + strlen(cat->datum.name) + 2;
 				} else {
-					str_len += strlen(str1) + strlen(str2) + strlen(cat->datum.name) + 3;
+					str_len += strlen(str1) + strlen(str2) + strlen(cat->datum.name) + 2;
 				}
 				first = -1;
 				last = -1;
@@ -922,7 +922,7 @@ static int __cil_level_strlen(struct cil_level *lvl)
 			} else if (last == first + 1) {
 				str_len += strlen(str1) + strlen(str2) + 1;
 			} else {
-				str_len += strlen(str1) + strlen(str2) + 2;
+				str_len += strlen(str1) + strlen(str2) + 1;
 			}
 		}
 	}
@@ -965,7 +965,7 @@ static int __cil_level_to_string(struct cil_level *lvl, char *out)
 					buf_pos = sprintf(str_tmp, "%s,%s,%s", str1, str2, cat->datum.name);
 					str_tmp += buf_pos;
 				} else {
-					buf_pos = sprintf(str_tmp, "%s..%s,%s",str1, str2, cat->datum.name);
+					buf_pos = sprintf(str_tmp, "%s.%s,%s",str1, str2, cat->datum.name);
 					str_tmp += buf_pos;
 				}
 				first = -1;
@@ -984,7 +984,7 @@ static int __cil_level_to_string(struct cil_level *lvl, char *out)
 				buf_pos = sprintf(str_tmp, "%s,%s", str1, str2);
 				str_tmp += buf_pos;
 			} else {
-				buf_pos = sprintf(str_tmp, "%s..%s",str1, str2);
+				buf_pos = sprintf(str_tmp, "%s.%s",str1, str2);
 				str_tmp += buf_pos;
 			}
 		}
