@@ -1042,6 +1042,7 @@ int __cil_typetransition_to_avtab(policydb_t *pdb, const struct cil_db *db, stru
 	class_datum_t *sepol_obj = NULL;
 	type_datum_t *sepol_result = NULL;
 	filename_trans_t *sepol_nametypetrans = NULL;
+	filename_trans_t *curr = NULL;
 	ebitmap_t src_bitmap, tgt_bitmap;
 	ebitmap_node_t *node1, *node2;
 	unsigned int i, j;
@@ -1088,6 +1089,23 @@ int __cil_typetransition_to_avtab(policydb_t *pdb, const struct cil_db *db, stru
 			sepol_nametypetrans->tclass = sepol_obj->s.value;
 			sepol_nametypetrans->otype = sepol_result->s.value;
 			sepol_nametypetrans->name = cil_strdup(name);
+
+			curr = pdb->filename_trans;
+			while (curr != NULL) {
+				if (curr->stype == sepol_nametypetrans->stype &&
+					curr->ttype == sepol_nametypetrans->ttype &&
+					curr->tclass == sepol_nametypetrans->tclass &&
+					strcmp(curr->name, sepol_nametypetrans->name) == 0) {
+					if (curr->otype != sepol_nametypetrans->otype) {
+						cil_log(CIL_ERR, "Conflicting name type transition rules\n");
+						rc = SEPOL_ERR;
+					}
+					free(sepol_nametypetrans->name);
+					free(sepol_nametypetrans);
+					goto exit;
+				}
+				curr = curr->next;
+			}
 
 			sepol_nametypetrans->next = pdb->filename_trans;
 			pdb->filename_trans = sepol_nametypetrans;
@@ -1727,6 +1745,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 	class_datum_t *sepol_obj = NULL;
 	role_datum_t *sepol_result = NULL;
 	role_trans_t *sepol_roletrans = NULL;
+	role_trans_t *curr = NULL;
 	ebitmap_t role_bitmap, type_bitmap;
 	ebitmap_node_t *rnode, *tnode;
 	unsigned int i, j;
@@ -1762,6 +1781,21 @@ int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 			sepol_roletrans->type = sepol_tgt->s.value;
 			sepol_roletrans->tclass = sepol_obj->s.value;
 			sepol_roletrans->new_role = sepol_result->s.value;
+
+			curr = pdb->role_tr;
+			while (curr != NULL) {
+				if (curr->role == sepol_roletrans->role &&
+					curr->type == sepol_roletrans->type &&
+					curr->tclass == sepol_roletrans->tclass) {
+					if (curr->new_role != sepol_roletrans->new_role) {
+						cil_log(CIL_ERR, "Conflicting role transition rules\n");
+						rc = SEPOL_ERR;
+					}
+					free(sepol_roletrans);
+					goto exit;
+				}
+				curr = curr->next;
+			}
 
 			sepol_roletrans->next = pdb->role_tr;
 			pdb->role_tr = sepol_roletrans;
