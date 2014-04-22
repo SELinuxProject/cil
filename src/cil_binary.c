@@ -3463,6 +3463,40 @@ exit:
 	return rc;
 }
 
+static void __cil_set_conditional_state_and_flags(policydb_t *pdb)
+{
+	cond_node_t *cur;
+
+	for (cur = pdb->cond_list; cur != NULL; cur = cur->next) {
+		int new_state;
+		cond_av_list_t *c;
+
+		new_state = cond_evaluate_expr(pdb, cur->expr);
+
+		cur->cur_state = new_state;
+
+		if (new_state == -1) {
+			cil_log(CIL_WARN, "Expression result was undefined - disabling all rules\n");
+		}
+
+		for (c = cur->true_list; c != NULL; c = c->next) {
+			if (new_state <= 0) {
+				c->node->key.specified &= ~AVTAB_ENABLED;
+			} else {
+				c->node->key.specified |= AVTAB_ENABLED;
+			}
+		}
+
+		for (c = cur->false_list; c != NULL; c = c->next) {
+			if (new_state) { /* -1 or 1 */
+				c->node->key.specified &= ~AVTAB_ENABLED;
+			} else {
+				c->node->key.specified |= AVTAB_ENABLED;
+			}
+		}
+	}
+}
+
 int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
@@ -3563,10 +3597,7 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 	}
 
 	cond_optimize_lists(pdb->cond_list);
-	rc = evaluate_conds(pdb);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	__cil_set_conditional_state_and_flags(pdb);
 
 	rc = SEPOL_OK;
 
