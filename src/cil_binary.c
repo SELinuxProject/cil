@@ -3562,7 +3562,14 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 		}
 	}
 
+	cond_optimize_lists(pdb->cond_list);
+	rc = evaluate_conds(pdb);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
 	rc = SEPOL_OK;
+
 exit:
 	cil_neverallows_list_destroy(neverallows);
 	return rc;
