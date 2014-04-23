@@ -1236,6 +1236,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	int rc = SEPOL_ERR;
 	int *avrule_cnt = 0;
 	int *handleunknown;
+	int *mls;
 	int *nseuserdflt = 0;
 	int state = 0;
 	int *pass = 0;
@@ -1250,6 +1251,7 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	db = args->db;
 	avrule_cnt = args->avrule_cnt;
 	handleunknown = args->handleunknown;
+	mls = args->mls;
 	nseuserdflt = args->nseuserdflt;
 	csymtab = args->csymtab;
 	pass = args->pass;
@@ -1300,6 +1302,15 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 				rc = SEPOL_ERR;
 			} else {
 				*handleunknown = ((struct cil_handleunknown*)node->data)->handle_unknown;
+				rc = SEPOL_OK;
+			}
+			break;
+		case CIL_MLS:
+			if (*mls != -1) {
+				cil_log(CIL_ERR, "Policy can not have more than one mls\n");
+				rc = SEPOL_ERR;
+			} else {
+				*mls = ((struct cil_mls*)node->data)->value;
 				rc = SEPOL_OK;
 			}
 			break;

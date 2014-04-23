@@ -3,6 +3,7 @@
 (type security_t)
 (type unlabeled_t)
 (handleunknown allow)
+(mls true)
 
 (policycap open_perms)
 

@@ -1545,6 +1545,18 @@ int cil_copy_handleunknown(__attribute__((unused)) struct cil_db *db, void *data
 	return SEPOL_OK;
 }
 
+int cil_copy_mls(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_mls *orig = data;
+	struct cil_mls *new = NULL;
+
+	cil_mls_init(&new);
+	new->value = orig->value;
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
 int cil_copy_bounds(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	struct cil_bounds *orig = data;
@@ -1818,6 +1830,9 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		break;
 	case CIL_HANDLEUNKNOWN:
 		copy_func = &cil_copy_handleunknown;
+		break;
+	case CIL_MLS:
+		copy_func = &cil_copy_mls;
 		break;
 	default:
 		goto exit;

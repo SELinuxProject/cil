@@ -3501,6 +3501,9 @@ int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 
+	pdb->handle_unknown = db->handle_unknown;
+	pdb->mls = db->mls;
+
 	if (pdb->mls == CIL_TRUE) {
 		rc = cil_catorder_to_policydb(pdb, db);
 		if (rc != SEPOL_OK) {
@@ -3574,8 +3577,6 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 			}
 		}
 	}
-
-	pdb->handle_unknown = db->handle_unknown;
 
 	rc = cil_sidorder_to_policydb(pdb, db);
 	if (rc != SEPOL_OK) {

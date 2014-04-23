@@ -170,6 +170,7 @@ enum cil_pass {
 #define CIL_KEY_HANDLEUNKNOWN_ALLOW		"allow"
 #define CIL_KEY_HANDLEUNKNOWN_DENY		"deny"
 #define CIL_KEY_HANDLEUNKNOWN_REJECT		"reject"
+#define CIL_KEY_MLS		"mls"
 #define CIL_KEY_ALL         "all"
 #define CIL_KEY_AND			"and"
 #define CIL_KEY_OR			"or"
@@ -272,6 +273,7 @@ struct cil_db {
 	int disable_neverallow;
 	int preserve_tunables;
 	int handle_unknown;
+	int mls;
 };
 
 struct cil_sort {
@@ -851,6 +853,10 @@ struct cil_handleunknown {
 	int handle_unknown;
 };
 
+struct cil_mls {
+	int value;
+};
+
 void cil_db_init(struct cil_db **db);
 void cil_db_destroy(struct cil_db **db);
 
@@ -947,5 +953,6 @@ void cil_bounds_init(struct cil_bounds **bounds);
 void cil_default_init(struct cil_default **def);
 void cil_defaultrange_init(struct cil_defaultrange **def);
 void cil_handleunknown_init(struct cil_handleunknown **unk);
+void cil_mls_init(struct cil_mls **mls);
 
 #endif

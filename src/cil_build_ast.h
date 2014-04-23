@@ -201,6 +201,8 @@ int cil_gen_default(struct cil_tree_node *parse_current, struct cil_tree_node *a
 void cil_destroy_default(struct cil_default *def);
 int cil_gen_handleunknown(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_handleunknown(struct cil_handleunknown *unk);
+int cil_gen_mls(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
+void cil_destroy_mls(struct cil_mls *mls);
 int cil_gen_defaultrange(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_defaultrange(struct cil_defaultrange *def);
 

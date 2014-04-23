@@ -1637,6 +1637,7 @@ int cil_post_verify(struct cil_db *db)
 	int rc = SEPOL_ERR;
 	int avrule_cnt = 0;
 	int handleunknown = -1;
+	int mls = -1;
 	int nseuserdflt = 0;
 	int pass = 0;
 	struct cil_args_verify extra_args;
@@ -1648,6 +1649,7 @@ int cil_post_verify(struct cil_db *db)
 	extra_args.csymtab = &csymtab;
 	extra_args.avrule_cnt = &avrule_cnt;
 	extra_args.handleunknown = &handleunknown;
+	extra_args.mls = &mls;
 	extra_args.nseuserdflt = &nseuserdflt;
 	extra_args.pass = &pass;
 
@@ -1664,6 +1666,14 @@ int cil_post_verify(struct cil_db *db)
 			db->handle_unknown = SEPOL_DENY_UNKNOWN;
 		} else {
 			db->handle_unknown = handleunknown;
+		}
+	}
+
+	if (db->mls == -1) {
+		if (mls == -1) {
+			db->mls = CIL_FALSE;
+		} else {
+			db->mls = mls;
 		}
 	}
 

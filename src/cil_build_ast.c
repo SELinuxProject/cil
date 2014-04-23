@@ -5638,6 +5638,55 @@ void cil_destroy_handleunknown(struct cil_handleunknown *unk)
 	free(unk);
 }
 
+int cil_gen_mls(struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	int rc = SEPOL_ERR;
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_mls *mls = NULL;
+
+	if (parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_mls_init(&mls);
+
+	if (!strcmp(parse_current->next->data, "true")) {
+		mls->value = CIL_TRUE;
+	} else if (!strcmp(parse_current->next->data, "false")) {
+		mls->value = CIL_FALSE;
+	} else {
+		cil_log(CIL_ERR, "Value must be either \'true\' or \'false\'");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
+	ast_node->data = mls;
+	ast_node->flavor = CIL_MLS;
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad mls at line %d of %s\n",
+			parse_current->line, parse_current->path);
+	cil_destroy_mls(mls);
+	return rc;
+}
+
+void cil_destroy_mls(struct cil_mls *mls)
+{
+	free(mls);
+}
+
 int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *finished, void *extra_args)
 {
 	struct cil_args_build *args = NULL;
@@ -5961,6 +6010,9 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_HANDLEUNKNOWN)) {
 		rc = cil_gen_handleunknown(parse_current, ast_node);
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_MLS)) {
+		rc = cil_gen_mls(parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else {
 		cil_log(CIL_ERR, "Error: Unknown keyword %s\n", (char*)parse_current->data);

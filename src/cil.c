@@ -96,6 +96,7 @@ void cil_db_init(struct cil_db **db)
 	(*db)->disable_neverallow = CIL_FALSE;
 	(*db)->preserve_tunables = CIL_FALSE;
 	(*db)->handle_unknown = -1;
+	(*db)->mls = -1;
 }
 
 void cil_db_destroy(struct cil_db **db)
@@ -493,6 +494,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_HANDLEUNKNOWN:
 		cil_destroy_handleunknown(*data);
 		break;
+	case CIL_MLS:
+		cil_destroy_mls(*data);
+		break;
 	case CIL_INT:
 	case CIL_OP:
 	case CIL_CONS_OPERAND:
@@ -826,6 +830,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_IPADDR;
 	case CIL_HANDLEUNKNOWN:
 		return CIL_KEY_HANDLEUNKNOWN;
+	case CIL_MLS:
+		return CIL_KEY_MLS;
 	default:
 		break;
 	}
@@ -1192,6 +1198,11 @@ int cil_set_handle_unknown(struct cil_db *db, int handle_unknown)
 	}
 
 	return rc;
+}
+
+void cil_set_mls(struct cil_db *db, int mls)
+{
+	db->mls = mls;
 }
 
 void cil_symtab_array_init(symtab_t symtab[], int symtab_sizes[CIL_SYM_NUM])
@@ -2084,4 +2095,10 @@ void cil_defaultrange_init(struct cil_defaultrange **def)
 void cil_handleunknown_init(struct cil_handleunknown **unk)
 {
 	*unk = cil_malloc(sizeof(**unk));
+}
+
+void cil_mls_init(struct cil_mls **mls)
+{
+	*mls = cil_malloc(sizeof(**mls));
+	(*mls)->value = 0;
 }

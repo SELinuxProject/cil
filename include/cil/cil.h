@@ -49,6 +49,7 @@ extern void cil_set_disable_dontaudit(cil_db_t *db, int disable_dontaudit);
 extern void cil_set_disable_neverallow(cil_db_t *db, int disable_neverallow);
 extern void cil_set_preserve_tunables(cil_db_t *db, int preserve_tunables);
 extern int cil_set_handle_unknown(cil_db_t *db, int handle_unknown);
+extern void cil_set_mls(cil_db_t *db, int mls);
 
 enum cil_log_level {
 	CIL_ERR = 1,

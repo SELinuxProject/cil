@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 	char *filecontexts = NULL;
 	struct cil_db *db = NULL;
 	int target = SEPOL_TARGET_SELINUX;
-	int mls = 0;
+	int mls = -1;
 	int disable_dontaudit = 0;
 	int disable_neverallow = 0;
 	int preserve_tunables = 0;
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 		{"help", no_argument, 0, 'h'},
 		{"verbose", no_argument, 0, 'v'},
 		{"target", required_argument, 0, 't'},
-		{"mls", no_argument, 0, 'M'},
+		{"mls", required_argument, 0, 'M'},
 		{"policyversion", required_argument, 0, 'c'},
 		{"handle-unknown", required_argument, 0, 'U'},
 		{"disable-dontaudit", no_argument, 0, 'D'},
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	int i;
 
 	while (1) {
-		opt_char = getopt_long(argc, argv, "o:f:U:hvt:MPDNc:", long_opts, &opt_index);
+		opt_char = getopt_long(argc, argv, "o:f:U:hvt:M:PDNc:", long_opts, &opt_index);
 		if (opt_char == -1) {
 			break;
 		}
@@ -123,7 +123,13 @@ int main(int argc, char *argv[])
 				}
 				break;
 			case 'M':
-				mls = 1;
+				if (!strcasecmp(optarg, "true") || !strcasecmp(optarg, "1")) {
+					mls = 1;
+				} else if (!strcasecmp(optarg, "false") || !strcasecmp(optarg, "0")) {
+					mls = 0;
+				} else {
+					usage(argv[0]);
+				}
 				break;
 			case 'c': {
 				char *endptr = NULL;
@@ -192,6 +198,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	cil_set_mls(db, mls);
+
 	for (i = optind; i < argc; i++) {
 		file = fopen(argv[i], "r");
 		if (!file) {
@@ -231,7 +239,6 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 	pdb->p.policy_type = POLICY_KERN;
-	pdb->p.mls = mls;
 	pdb->p.target_platform = target;
 	
 	rc = sepol_policydb_set_vers(pdb, policyvers);
