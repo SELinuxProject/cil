@@ -208,6 +208,20 @@ static int __cil_expand_type(struct cil_symtab_datum *datum, ebitmap_t *new)
 exit:
 	return SEPOL_ERR;
 }
+
+static ocontext_t *cil_add_ocontext(ocontext_t **head, ocontext_t **tail)
+{
+	ocontext_t *new = cil_malloc(sizeof(ocontext_t));
+	memset(new, 0, sizeof(ocontext_t));
+	if (*tail) {
+		(*tail)->next = new;
+	} else {
+		*head = new;
+	}
+	*tail = new;
+
+	return new;
+}
 		
 int cil_common_to_policydb(policydb_t *pdb, struct cil_common *cil_common, common_datum_t **common_out)
 {
@@ -2448,6 +2462,7 @@ int cil_sidorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;
 	unsigned count = 0;
+	ocontext_t *tail = NULL;
 
 	if (db->sidorder == NULL || db->sidorder->head == NULL) {
 		cil_log(CIL_WARN, "No sidorder statement in policy\n");
@@ -2459,20 +2474,15 @@ int cil_sidorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 		struct cil_context *cil_context = cil_sid->context;
 
 		if (cil_context != NULL) {
-			ocontext_t *new_sepol_sidcon = cil_malloc(sizeof(*new_sepol_sidcon));
-			memset(new_sepol_sidcon, 0, sizeof(ocontext_t));
+			ocontext_t *new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_ISID], &tail);
 			count++;
-			new_sepol_sidcon->sid[0] = count;
-			new_sepol_sidcon->u.name = cil_strdup(cil_sid->datum.name);
-			rc = __cil_context_to_sepol_context(pdb, cil_context, &new_sepol_sidcon->context[0]);
+			new_ocon->sid[0] = count;
+			new_ocon->u.name = cil_strdup(cil_sid->datum.name);
+			rc = __cil_context_to_sepol_context(pdb, cil_context, &new_ocon->context[0]);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_ERR,"Problem with context for SID %s\n",cil_sid->datum.name);
-				free(new_sepol_sidcon->u.name);
-				free(new_sepol_sidcon);
 				goto exit;
 			}
-			new_sepol_sidcon->next = pdb->ocontexts[OCON_ISID];
-			pdb->ocontexts[OCON_ISID] = new_sepol_sidcon;
 		}
 	}
 
@@ -2561,27 +2571,18 @@ int cil_portcon_to_policydb(policydb_t *pdb, struct cil_sort *portcons)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_portcon *cil_portcon = NULL;
-	struct cil_context *cil_context = NULL;
-	ocontext_t *sepol_portcon = NULL;
-	context_struct_t *sepol_context = NULL;
+	ocontext_t *tail = NULL;
 
 	for (i = 0; i < portcons->count; i++) {
-		cil_portcon = portcons->array[i];
-		cil_context = cil_portcon->context;
-
-		sepol_portcon = cil_malloc(sizeof(*sepol_portcon));
-		memset(sepol_portcon, 0, sizeof(ocontext_t));
-
-		sepol_portcon->next = pdb->ocontexts[OCON_PORT];
-		pdb->ocontexts[OCON_PORT] = sepol_portcon;
+		struct cil_portcon *cil_portcon = portcons->array[i];
+		ocontext_t *new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_PORT], &tail);
 
 		switch (cil_portcon->proto) {
 		case CIL_PROTOCOL_UDP:
-			sepol_portcon->u.port.protocol = IPPROTO_UDP;
+			new_ocon->u.port.protocol = IPPROTO_UDP;
 			break;
 		case CIL_PROTOCOL_TCP:
-			sepol_portcon->u.port.protocol = IPPROTO_TCP;
+			new_ocon->u.port.protocol = IPPROTO_TCP;
 			break;
 		default:
 			/* should not get here */
@@ -2589,12 +2590,10 @@ int cil_portcon_to_policydb(policydb_t *pdb, struct cil_sort *portcons)
 			goto exit;
 		}
 
-		sepol_portcon->u.port.low_port = cil_portcon->port_low;
-		sepol_portcon->u.port.high_port = cil_portcon->port_high;
+		new_ocon->u.port.low_port = cil_portcon->port_low;
+		new_ocon->u.port.high_port = cil_portcon->port_high;
 
-		sepol_context = &sepol_portcon->context[0];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_portcon->context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2603,8 +2602,6 @@ int cil_portcon_to_policydb(policydb_t *pdb, struct cil_sort *portcons)
 	return SEPOL_OK;
 
 exit:
-	context_destroy(&sepol_portcon->context[0]);
-	free(sepol_portcon);
 	return rc;
 }
 
@@ -2612,35 +2609,22 @@ int cil_netifcon_to_policydb(policydb_t *pdb, struct cil_sort *netifcons)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_netifcon *cil_netifcon = NULL;
-	struct cil_context *cil_context = NULL;
-	ocontext_t *sepol_netifcon = NULL;
-	context_struct_t *sepol_context = NULL;
+	ocontext_t *tail = NULL;
 
 	for (i = 0; i < netifcons->count; i++) {
-		cil_netifcon = netifcons->array[i];
+		ocontext_t *new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_NETIF], &tail);
+		struct cil_netifcon *cil_netifcon = netifcons->array[i];
 
-		sepol_netifcon = cil_malloc(sizeof(*sepol_netifcon));
-		memset(sepol_netifcon, 0, sizeof(ocontext_t));
+		new_ocon->u.name = cil_strdup(cil_netifcon->interface_str);
 
-		sepol_netifcon->next = pdb->ocontexts[OCON_NETIF];
-		pdb->ocontexts[OCON_NETIF] = sepol_netifcon;
-
-		sepol_netifcon->u.name = cil_strdup(cil_netifcon->interface_str);
-
-		cil_context = cil_netifcon->if_context;
-		sepol_context = &sepol_netifcon->context[0];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_netifcon->if_context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 
-		cil_context = cil_netifcon->packet_context;
-		sepol_context = &sepol_netifcon->context[1];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_netifcon->packet_context, &new_ocon->context[1]);
 		if (rc != SEPOL_OK) {
+			context_destroy(&new_ocon->context[0]);
 			goto exit;
 		}
 	}
@@ -2648,9 +2632,6 @@ int cil_netifcon_to_policydb(policydb_t *pdb, struct cil_sort *netifcons)
 	return SEPOL_OK;
 
 exit:
-	free(sepol_netifcon->u.name);
-	context_destroy(&sepol_netifcon->context[0]);
-	free(sepol_netifcon);
 	return rc;
 }
 
@@ -2658,41 +2639,28 @@ int cil_nodecon_to_policydb(policydb_t *pdb, struct cil_sort *nodecons)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_nodecon *cil_nodecon = NULL;
-	struct cil_ipaddr *cil_addr = NULL;
-	struct cil_ipaddr *cil_mask = NULL;
-	struct cil_context *cil_context = NULL;
-	ocontext_t *sepol_nodecon = NULL;
-	context_struct_t *sepol_context = NULL;
+	ocontext_t *tail = NULL;
+	ocontext_t *tail6 = NULL;
 
 	for (i = 0; i < nodecons->count; i++) {
-		cil_nodecon = nodecons->array[i];
-		cil_addr = cil_nodecon->addr;
-		cil_mask = cil_nodecon->mask;
-		cil_context = cil_nodecon->context;
+		ocontext_t *new_ocon = NULL;
+		struct cil_nodecon *cil_nodecon = nodecons->array[i];
 
-		sepol_nodecon = cil_malloc(sizeof(*sepol_nodecon));
-		memset(sepol_nodecon, 0, sizeof(ocontext_t));
-
-		if (cil_addr->family == AF_INET) {
-			sepol_nodecon->next = pdb->ocontexts[OCON_NODE];
-			pdb->ocontexts[OCON_NODE] = sepol_nodecon;
-			sepol_nodecon->u.node.addr = cil_addr->ip.v4.s_addr;
-			sepol_nodecon->u.node.mask = cil_mask->ip.v4.s_addr;
-		} else if (cil_addr->family == AF_INET6) {
-			sepol_nodecon->next = pdb->ocontexts[OCON_NODE6];
-			pdb->ocontexts[OCON_NODE6] = sepol_nodecon;
-			memcpy(sepol_nodecon->u.node6.addr, &cil_addr->ip.v6.s6_addr32[0], 16);
-			memcpy(sepol_nodecon->u.node6.mask, &cil_mask->ip.v6.s6_addr32[0], 16);
+		if (cil_nodecon->addr->family == AF_INET) {
+			new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_NODE], &tail);
+			new_ocon->u.node.addr = cil_nodecon->addr->ip.v4.s_addr;
+			new_ocon->u.node.mask = cil_nodecon->mask->ip.v4.s_addr;
+		} else if (cil_nodecon->addr->family == AF_INET6) {
+			new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_NODE6], &tail6);
+			memcpy(new_ocon->u.node6.addr, &cil_nodecon->addr->ip.v6.s6_addr32[0], 16);
+			memcpy(new_ocon->u.node6.mask, &cil_nodecon->mask->ip.v6.s6_addr32[0], 16);
 		} else {
 			/* should not get here */
 			rc = SEPOL_ERR;
 			goto exit;
 		}
 
-		sepol_context = &sepol_nodecon->context[0];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_nodecon->context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2701,9 +2669,6 @@ int cil_nodecon_to_policydb(policydb_t *pdb, struct cil_sort *nodecons)
 	return SEPOL_OK;
 
 exit:
-	free(sepol_nodecon->u.name);
-	context_destroy(&sepol_nodecon->context[0]);
-	free(sepol_nodecon);
 	return rc;
 }
 
@@ -2711,27 +2676,16 @@ int cil_fsuse_to_policydb(policydb_t *pdb, struct cil_sort *fsuses)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_fsuse *cil_fsuse = NULL;
-	struct cil_context *cil_context = NULL;
-	ocontext_t *sepol_fsuse = NULL;
-	context_struct_t *sepol_context = NULL;
+	ocontext_t *tail = NULL;
 
 	for (i = 0; i < fsuses->count; i++) {
-		cil_fsuse = fsuses->array[i];
-		cil_context = cil_fsuse->context;
+		ocontext_t *new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_FSUSE], &tail);
+		struct cil_fsuse *cil_fsuse = fsuses->array[i];
 
-		sepol_fsuse = cil_malloc(sizeof(*sepol_fsuse));
-		memset(sepol_fsuse, 0, sizeof(ocontext_t));
+		new_ocon->u.name = cil_strdup(cil_fsuse->fs_str);
+		new_ocon->v.behavior = cil_fsuse->type;
 
-		sepol_fsuse->next = pdb->ocontexts[OCON_FSUSE];
-		pdb->ocontexts[OCON_FSUSE] = sepol_fsuse;
-
-		sepol_fsuse->u.name = cil_strdup(cil_fsuse->fs_str);
-		sepol_fsuse->v.behavior = cil_fsuse->type;
-
-		sepol_context = &sepol_fsuse->context[0];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_fsuse->context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2740,8 +2694,6 @@ int cil_fsuse_to_policydb(policydb_t *pdb, struct cil_sort *fsuses)
 	return SEPOL_OK;
 
 exit:
-	context_destroy(&sepol_fsuse->context[0]);
-	free(sepol_fsuse);
 	return rc;
 }
 
@@ -2749,46 +2701,35 @@ int cil_genfscon_to_policydb(policydb_t *pdb, struct cil_sort *genfscons)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_genfscon *cil_genfscon = NULL;
-	struct cil_context *cil_context = NULL;
-	genfs_t *sepol_genfs = NULL;
-	ocontext_t *sepol_genfscon = NULL;
-	context_struct_t *sepol_context = NULL;
+	genfs_t *genfs_tail = NULL;
+	ocontext_t *ocon_tail = NULL;
 
 	for (i = 0; i < genfscons->count; i++) {
-		cil_genfscon = genfscons->array[i];
-		cil_context = cil_genfscon->context;
+		struct cil_genfscon *cil_genfscon = genfscons->array[i];
+		ocontext_t *new_ocon = cil_malloc(sizeof(ocontext_t));
+		memset(new_ocon, 0, sizeof(ocontext_t));
 
-		sepol_genfscon = cil_malloc(sizeof(*sepol_genfscon));
-		memset(sepol_genfscon, 0, sizeof(ocontext_t));
-
-		if (pdb->genfs == NULL) {
-			sepol_genfs = cil_malloc(sizeof(*sepol_genfs));
-			memset(sepol_genfs, 0, sizeof(genfs_t));
-
-			pdb->genfs = sepol_genfs;
-			sepol_genfs->fstype = cil_strdup(cil_genfscon->fs_str);
-			sepol_genfs->head = sepol_genfscon;
-		} else if (strcmp(pdb->genfs->fstype, cil_genfscon->fs_str)) {
-			genfs_t *new_sepol_genfs = NULL;
-			new_sepol_genfs = cil_malloc(sizeof(*new_sepol_genfs));
-			memset(new_sepol_genfs, 0, sizeof(genfs_t));
-
-			new_sepol_genfs->next = sepol_genfs;
-			sepol_genfs = new_sepol_genfs;
-			pdb->genfs = sepol_genfs;
-
-			sepol_genfs->fstype = cil_strdup(cil_genfscon->fs_str);
-			sepol_genfs->head = sepol_genfscon;
+		if (genfs_tail && strcmp(genfs_tail->fstype, cil_genfscon->fs_str) == 0) {
+			ocon_tail->next = new_ocon;
 		} else {
-			sepol_genfscon->next = sepol_genfs->head;
-			sepol_genfs->head = sepol_genfscon;
+			genfs_t *new_genfs = cil_malloc(sizeof(genfs_t));
+			memset(new_genfs, 0, sizeof(genfs_t));
+			new_genfs->fstype = cil_strdup(cil_genfscon->fs_str);
+			new_genfs->head = new_ocon;
+
+			if (genfs_tail) {
+				genfs_tail->next = new_genfs;
+			} else {
+				pdb->genfs = new_genfs;
+			}
+			genfs_tail = new_genfs;
 		}
 
-		sepol_genfscon->u.name = cil_strdup(cil_genfscon->path_str);
-		sepol_context = &sepol_genfscon->context[0];
+		ocon_tail = new_ocon;
 
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		new_ocon->u.name = cil_strdup(cil_genfscon->path_str);
+
+		rc = __cil_context_to_sepol_context(pdb, cil_genfscon->context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2797,8 +2738,6 @@ int cil_genfscon_to_policydb(policydb_t *pdb, struct cil_sort *genfscons)
 	return SEPOL_OK;
 
 exit:
-	context_destroy(&sepol_genfscon->context[0]);
-	free(sepol_genfscon);
 	return rc;
 }
 
@@ -2806,26 +2745,15 @@ int cil_pirqcon_to_policydb(policydb_t *pdb, struct cil_sort *pirqcons)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_pirqcon *cil_pirqcon = NULL;
-	struct cil_context *cil_context = NULL;
-	ocontext_t *sepol_pirqcon = NULL;
-	context_struct_t *sepol_context = NULL;
+	ocontext_t *tail = NULL;
 
 	for (i = 0; i < pirqcons->count; i++) {
-		cil_pirqcon = pirqcons->array[i];
-		cil_context = cil_pirqcon->context;
+		ocontext_t *new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_XEN_PIRQ], &tail);
+		struct cil_pirqcon *cil_pirqcon = pirqcons->array[i];
 
-		sepol_pirqcon = cil_malloc(sizeof(*sepol_pirqcon));
-		memset(sepol_pirqcon, 0, sizeof(ocontext_t));
+		new_ocon->u.pirq = cil_pirqcon->pirq;
 
-		sepol_pirqcon->next = pdb->ocontexts[OCON_XEN_PIRQ];
-		pdb->ocontexts[OCON_XEN_PIRQ] = sepol_pirqcon;
-
-		sepol_pirqcon->u.pirq = cil_pirqcon->pirq;
-
-		sepol_context = &sepol_pirqcon->context[0];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_pirqcon->context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2834,8 +2762,6 @@ int cil_pirqcon_to_policydb(policydb_t *pdb, struct cil_sort *pirqcons)
 	return SEPOL_OK;
 
 exit:
-	context_destroy(&sepol_pirqcon->context[0]);
-	free(sepol_pirqcon);
 	return rc;
 }
 
@@ -2843,27 +2769,16 @@ int cil_iomemcon_to_policydb(policydb_t *pdb, struct cil_sort *iomemcons)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_iomemcon *cil_iomemcon = NULL;
-	struct cil_context *cil_context = NULL;
-	ocontext_t *sepol_iomemcon = NULL;
-	context_struct_t *sepol_context = NULL;
+	ocontext_t *tail = NULL;
 
 	for (i = 0; i < iomemcons->count; i++) {
-		cil_iomemcon = iomemcons->array[i];
-		cil_context = cil_iomemcon->context;
+		ocontext_t *new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_XEN_IOMEM], &tail);
+		struct cil_iomemcon *cil_iomemcon = iomemcons->array[i];
 
-		sepol_iomemcon = cil_malloc(sizeof(*sepol_iomemcon));
-		memset(sepol_iomemcon, 0, sizeof(ocontext_t));
+		new_ocon->u.iomem.low_iomem = cil_iomemcon->iomem_low;
+		new_ocon->u.iomem.high_iomem = cil_iomemcon->iomem_high;
 
-		sepol_iomemcon->next = pdb->ocontexts[OCON_XEN_IOMEM];
-		pdb->ocontexts[OCON_XEN_IOMEM] = sepol_iomemcon;
-
-		sepol_iomemcon->u.iomem.low_iomem = cil_iomemcon->iomem_low;
-		sepol_iomemcon->u.iomem.high_iomem = cil_iomemcon->iomem_high;
-
-		sepol_context = &sepol_iomemcon->context[0];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_iomemcon->context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2872,8 +2787,6 @@ int cil_iomemcon_to_policydb(policydb_t *pdb, struct cil_sort *iomemcons)
 	return SEPOL_OK;
 
 exit:
-	context_destroy(&sepol_iomemcon->context[0]);
-	free(sepol_iomemcon);
 	return rc;
 }
 
@@ -2881,27 +2794,16 @@ int cil_ioportcon_to_policydb(policydb_t *pdb, struct cil_sort *ioportcons)
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_ioportcon *cil_ioportcon = NULL;
-	struct cil_context *cil_context = NULL;
-	ocontext_t *sepol_ioportcon = NULL;
-	context_struct_t *sepol_context = NULL;
+	ocontext_t *tail = NULL;
 
 	for (i = 0; i < ioportcons->count; i++) {
-		cil_ioportcon = ioportcons->array[i];
-		cil_context = cil_ioportcon->context;
+		ocontext_t *new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_XEN_IOPORT], &tail);
+		struct cil_ioportcon *cil_ioportcon = ioportcons->array[i];
 
-		sepol_ioportcon = cil_malloc(sizeof(*sepol_ioportcon));
-		memset(sepol_ioportcon, 0, sizeof(ocontext_t));
+		new_ocon->u.ioport.low_ioport = cil_ioportcon->ioport_low;
+		new_ocon->u.ioport.high_ioport = cil_ioportcon->ioport_high;
 
-		sepol_ioportcon->next = pdb->ocontexts[OCON_XEN_IOPORT];
-		pdb->ocontexts[OCON_XEN_IOPORT] = sepol_ioportcon;
-
-		sepol_ioportcon->u.ioport.low_ioport = cil_ioportcon->ioport_low;
-		sepol_ioportcon->u.ioport.high_ioport = cil_ioportcon->ioport_high;
-
-		sepol_context = &sepol_ioportcon->context[0];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_ioportcon->context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2910,8 +2812,6 @@ int cil_ioportcon_to_policydb(policydb_t *pdb, struct cil_sort *ioportcons)
 	return SEPOL_OK;
 
 exit:
-	context_destroy(&sepol_ioportcon->context[0]);
-	free(sepol_ioportcon);
 	return rc;
 }
 
@@ -2919,26 +2819,15 @@ int cil_pcidevicecon_to_policydb(policydb_t *pdb, struct cil_sort *pcidevicecons
 {
 	int rc = SEPOL_ERR;
 	uint32_t i = 0;
-	struct cil_pcidevicecon *cil_pcidevicecon = NULL;
-	struct cil_context *cil_context = NULL;
-	ocontext_t *sepol_pcidevicecon = NULL;
-	context_struct_t *sepol_context = NULL;
+	ocontext_t *tail = NULL;
 
 	for (i = 0; i < pcidevicecons->count; i++) {
-		cil_pcidevicecon = pcidevicecons->array[i];
-		cil_context = cil_pcidevicecon->context;
+		ocontext_t *new_ocon = cil_add_ocontext(&pdb->ocontexts[OCON_XEN_PCIDEVICE], &tail);
+		struct cil_pcidevicecon *cil_pcidevicecon = pcidevicecons->array[i];
 
-		sepol_pcidevicecon = cil_malloc(sizeof(*sepol_pcidevicecon));
-		memset(sepol_pcidevicecon, 0, sizeof(ocontext_t));
+		new_ocon->u.device = cil_pcidevicecon->dev;
 
-		sepol_pcidevicecon->next = pdb->ocontexts[OCON_XEN_PCIDEVICE];
-		pdb->ocontexts[OCON_XEN_PCIDEVICE] = sepol_pcidevicecon;
-
-		sepol_pcidevicecon->u.device = cil_pcidevicecon->dev;
-
-		sepol_context = &sepol_pcidevicecon->context[0];
-
-		rc = __cil_context_to_sepol_context(pdb, cil_context, sepol_context);
+		rc = __cil_context_to_sepol_context(pdb, cil_pcidevicecon->context, &new_ocon->context[0]);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -2947,8 +2836,6 @@ int cil_pcidevicecon_to_policydb(policydb_t *pdb, struct cil_sort *pcidevicecons
 	return SEPOL_OK;
 
 exit:
-	context_destroy(&sepol_pcidevicecon->context[0]);
-	free(sepol_pcidevicecon);
 	return rc;
 }
 
