@@ -46,8 +46,34 @@
 #include "cil_policy.h"
 #include "cil_verify.h"
 
-static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max);
-static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max);
+static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max, struct cil_db *db);
+static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max, struct cil_db *db);
+
+static int cil_verify_is_list(struct cil_list *list, enum cil_flavor flavor)
+{
+	struct cil_list_item *curr;
+
+	cil_list_for_each(curr, list) {
+		switch (curr->flavor) {
+		case CIL_LIST:
+			return CIL_FALSE;
+			break;
+		case CIL_OP:
+			return CIL_FALSE;
+			break;
+		default:
+			if (flavor == CIL_CAT) {
+				struct cil_symtab_datum *d = curr->data;
+				struct cil_tree_node *n = d->nodes->head->data;
+				if (n->flavor == CIL_CATSET) {
+					return CIL_FALSE;
+				}
+			}
+			break;
+		}	
+	}
+	return CIL_TRUE;
+}
 
 void cil_post_fc_fill_data(struct fc_data *fc, char *path)
 {
@@ -288,16 +314,9 @@ int cil_post_fsuse_compare(const void *a, const void *b)
 	return rc;
 }
 
-int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
+static int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
-	int rc = SEPOL_ERR;
-	struct cil_db *db = NULL;
-
-	if (node == NULL || extra_args == NULL) {
-		goto exit;
-	}
-
-	db = (struct cil_db*)extra_args;
+	struct cil_db *db = extra_args;
 
 	switch(node->flavor) {
 	case CIL_BLOCK: {
@@ -374,22 +393,11 @@ int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *finished, v
 	}
 
 	return SEPOL_OK;
-
-exit:
-	cil_log(CIL_INFO, "cil_post_db_count_helper failed\n");
-	return rc;
 }
 
-int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+static int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
-	int rc = SEPOL_ERR;
-	struct cil_db *db = NULL;
-
-	if (node == NULL || extra_args == NULL) {
-		goto exit;
-	}
-
-	db = extra_args;
+	struct cil_db *db = extra_args;
 
 	switch(node->flavor) {
 	case CIL_BLOCK: {
@@ -552,28 +560,40 @@ int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__((unused
 	}
 
 	return SEPOL_OK;
+}
 
-exit:
-	cil_log(CIL_INFO, "cil_post_db_array_helper failed\n");
+static int __evaluate_type_expression(struct cil_typeattribute *attr, struct cil_db *db)
+{
+	int rc;
+
+	attr->types = cil_malloc(sizeof(*attr->types));
+	rc = __cil_expr_list_to_bitmap(attr->expr_list, attr->types, db->num_types, db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to expand type attribute to bitmap\n");
+		ebitmap_destroy(attr->types);
+		free(attr->types);
+		attr->types = NULL;
+	}
 	return rc;
 }
 
-static int __cil_type_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int max)
+static int __cil_type_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *node = datum->nodes->head->data;
 
+	ebitmap_init(bitmap);
+
 	if (node->flavor == CIL_TYPEATTRIBUTE) {
 		struct cil_typeattribute *attr = (struct cil_typeattribute *)datum;
-		rc = __cil_expr_list_to_bitmap(attr->expr_list, bitmap, max);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to expand type attribute to bitmap\n");
-			goto exit;
+		if (attr->types == NULL) {
+			rc = __evaluate_type_expression(attr, db);
+			if (rc != SEPOL_OK) goto exit;
 		}
+		ebitmap_union(bitmap, attr->types);
 	} else if (node->flavor == CIL_TYPEALIAS) {
 		struct cil_alias *alias = (struct cil_alias *)datum;
 		struct cil_type *type = alias->actual;
-		ebitmap_init(bitmap);
 		if (ebitmap_set_bit(bitmap, type->value, 1)) {
 			cil_log(CIL_ERR, "Failed to set type bit\n");
 			ebitmap_destroy(bitmap);
@@ -581,7 +601,6 @@ static int __cil_type_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitma
 		}
 	} else {
 		struct cil_type *type = (struct cil_type *)datum;
-		ebitmap_init(bitmap);
 		if (ebitmap_set_bit(bitmap, type->value, 1)) {
 			cil_log(CIL_ERR, "Failed to set type bit\n");
 			ebitmap_destroy(bitmap);
@@ -595,21 +614,37 @@ exit:
 	return rc;
 }
 
-static int __cil_role_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int max)
+static int __evaluate_role_expression(struct cil_roleattribute *attr, struct cil_db *db)
+{
+	int rc;
+
+	attr->roles = cil_malloc(sizeof(*attr->roles));
+	rc = __cil_expr_list_to_bitmap(attr->expr_list, attr->roles, db->num_roles, db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to expand role attribute to bitmap\n");
+		ebitmap_destroy(attr->roles);
+		free(attr->roles);
+		attr->roles = NULL;
+	}
+	return rc;
+}
+
+static int __cil_role_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *node = datum->nodes->head->data;
 
+	ebitmap_init(bitmap);
+
 	if (node->flavor == CIL_ROLEATTRIBUTE) {
 		struct cil_roleattribute *attr = (struct cil_roleattribute *)datum;
-		rc = __cil_expr_list_to_bitmap(attr->expr_list, bitmap, max);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to expand role expression to bitmap\n");
-			goto exit;
+		if (attr->roles == NULL) {
+			rc = __evaluate_role_expression(attr, db);
+			if (rc != SEPOL_OK) goto exit;
 		}
+		ebitmap_union(bitmap, attr->roles);
 	} else {
 		struct cil_role *role = (struct cil_role *)datum;
-		ebitmap_init(bitmap);
 		if (ebitmap_set_bit(bitmap, role->value, 1)) {
 			cil_log(CIL_ERR, "Failed to set role bit\n");
 			ebitmap_destroy(bitmap);
@@ -623,7 +658,7 @@ exit:
 	return rc;
 }
 
-static int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, __attribute__((unused)) int max)
+static int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, __attribute__((unused)) struct cil_db *db)
 {
 	struct cil_tree_node *node = datum->nodes->head->data;
 	unsigned int value;
@@ -646,7 +681,57 @@ static int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitma
 	return SEPOL_OK;
 }
 
-static int __cil_cat_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, int max)
+static int __evaluate_cat_expression(struct cil_cats *cats, struct cil_db *db)
+{
+	int rc = SEPOL_ERR;
+	ebitmap_t bitmap;
+	struct cil_list *new;
+	struct cil_list_item *curr;
+
+	if (cats->evaluated == CIL_TRUE) {
+		return SEPOL_OK;
+	}
+
+	if (cil_verify_is_list(cats->datum_expr, CIL_CAT)) {
+		return SEPOL_OK;
+	}
+
+	ebitmap_init(&bitmap);
+	rc = __cil_expr_to_bitmap(cats->datum_expr, &bitmap, db->num_cats, db);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to expand category expression to bitmap\n");
+		ebitmap_destroy(&bitmap);
+		goto exit;
+	}
+
+	cil_list_init(&new, CIL_CAT);
+
+	cil_list_for_each(curr, db->catorder) {
+		struct cil_cat *cat = curr->data;
+		if (ebitmap_get_bit(&bitmap, cat->value)) {
+			cil_list_append(new, CIL_DATUM, cat);
+		}
+	}
+
+	ebitmap_destroy(&bitmap);
+	cil_list_destroy(&cats->datum_expr, CIL_FALSE);
+	if (new->head != NULL) { 
+		cats->datum_expr = new;
+	} else {
+		/* empty list */
+		cil_list_destroy(&new, CIL_FALSE);
+		cats->datum_expr = NULL;
+	}
+
+	cats->evaluated = CIL_TRUE;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+static int __cil_cat_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *node = datum->nodes->head->data;
@@ -655,10 +740,18 @@ static int __cil_cat_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap
 
 	if (node->flavor == CIL_CATSET) {
 		struct cil_catset *catset = (struct cil_catset *)datum;
-		rc = __cil_expr_to_bitmap(catset->cats->datum_expr, bitmap, max);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to expand category set to bitmap\n");
-			goto exit;
+		struct cil_list_item *curr;
+		if (catset->cats->evaluated == CIL_FALSE) {
+			rc = __evaluate_cat_expression(catset->cats, db);
+			if (rc != SEPOL_OK) goto exit;
+		}
+		for (curr = catset->cats->datum_expr->head; curr; curr = curr->next) {
+			struct cil_cat *cat = (struct cil_cat *)curr->data;
+			if (ebitmap_set_bit(bitmap, cat->value, 1)) {
+				cil_log(CIL_ERR, "Failed to set cat bit\n");
+				ebitmap_destroy(bitmap);
+				goto exit;
+			}
 		}
 	} else if (node->flavor == CIL_CATALIAS) {
 		struct cil_alias *alias = (struct cil_alias *)datum;
@@ -723,23 +816,23 @@ exit:
 	return rc;
 }
 
-static int __cil_expr_to_bitmap_helper(struct cil_list_item *curr, enum cil_flavor flavor, ebitmap_t *bitmap, int max)
+static int __cil_expr_to_bitmap_helper(struct cil_list_item *curr, enum cil_flavor flavor, ebitmap_t *bitmap, int max, struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 
 	if (curr->flavor == CIL_DATUM) {
 		switch (flavor) {
 		case CIL_TYPE:
-			rc = __cil_type_to_bitmap(curr->data, bitmap, max);
+			rc = __cil_type_to_bitmap(curr->data, bitmap, db);
 			break;
 		case CIL_ROLE:
-			rc = __cil_role_to_bitmap(curr->data, bitmap, max);
+			rc = __cil_role_to_bitmap(curr->data, bitmap, db);
 			break;
 		case CIL_PERM:
-			rc = __cil_perm_to_bitmap(curr->data, bitmap, max);
+			rc = __cil_perm_to_bitmap(curr->data, bitmap, db);
 			break;
 		case CIL_CAT:
-			rc = __cil_cat_to_bitmap(curr->data, bitmap, max);
+			rc = __cil_cat_to_bitmap(curr->data, bitmap, db);
 			break;
 		default:
 			rc = SEPOL_ERR;
@@ -747,7 +840,7 @@ static int __cil_expr_to_bitmap_helper(struct cil_list_item *curr, enum cil_flav
 	} else if (curr->flavor == CIL_LIST) {
 		struct cil_list *l = curr->data;
 		ebitmap_init(bitmap);
-		rc = __cil_expr_to_bitmap(l, bitmap, max);
+		rc = __cil_expr_to_bitmap(l, bitmap, max, db);
 		if (rc != SEPOL_OK) {
 			ebitmap_destroy(bitmap);
 		}	
@@ -756,7 +849,7 @@ static int __cil_expr_to_bitmap_helper(struct cil_list_item *curr, enum cil_flav
 	return rc;
 }
 
-static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
+static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max, struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;
@@ -796,7 +889,7 @@ static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 				goto exit;
 			}
 		} else {
-			rc = __cil_expr_to_bitmap_helper(curr->next, flavor, &b1, max);
+			rc = __cil_expr_to_bitmap_helper(curr->next, flavor, &b1, max, db);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_INFO, "Failed to get first operand bitmap\n");
 				goto exit;
@@ -811,7 +904,7 @@ static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 					goto exit;
 				}
 			} else {
-				rc = __cil_expr_to_bitmap_helper(curr->next->next, flavor, &b2, max);
+				rc = __cil_expr_to_bitmap_helper(curr->next->next, flavor, &b2, max, db);
 				if (rc != SEPOL_OK) {
 					cil_log(CIL_INFO, "Failed to get second operand bitmap\n");
 					goto exit;
@@ -838,7 +931,7 @@ static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max)
 	} else {
 		ebitmap_init(&tmp);
 		for (;curr; curr = curr->next) {
-			rc = __cil_expr_to_bitmap_helper(curr, flavor, &b2, max);
+			rc = __cil_expr_to_bitmap_helper(curr, flavor, &b2, max, db);
 			if (rc != SEPOL_OK) {
 				cil_log(CIL_INFO, "Failed to get operand in list\n");
 				ebitmap_destroy(&tmp);
@@ -866,7 +959,7 @@ exit:
 	return rc;
 }
 
-static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max)
+static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max, struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *expr;
@@ -881,7 +974,7 @@ static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out,
 		ebitmap_t bitmap;
 		struct cil_list *l = (struct cil_list *)expr->data;
 		ebitmap_init(&bitmap);
-		rc = __cil_expr_to_bitmap(l, &bitmap, max);
+		rc = __cil_expr_to_bitmap(l, &bitmap, max, db);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Failed to expand expression list to bitmap\n");
 			ebitmap_destroy(&bitmap);
@@ -897,16 +990,10 @@ exit:
 	return SEPOL_ERR;
 }
 
-int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+static int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
-	struct cil_db *db = NULL;
-
-	if (node == NULL || extra_args == NULL) {
-		goto exit;
-	}
-
-	db = extra_args;
+	struct cil_db *db = extra_args;
 
 	switch (node->flavor) {
 	case CIL_BLOCK: {
@@ -929,24 +1016,17 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 	}
 	case CIL_TYPEATTRIBUTE: {
 		struct cil_typeattribute *attr = node->data;
-
-		attr->types = cil_malloc(sizeof(*attr->types));
-		rc = __cil_expr_list_to_bitmap(attr->expr_list, attr->types, db->num_types);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to expand type attribute expression to bitmap\n");
-			goto exit;
+		if (attr->types == NULL) {
+			rc = __evaluate_type_expression(attr, db);
+			if (rc != SEPOL_OK) goto exit;
 		}
 		break;
 	}
 	case CIL_ROLEATTRIBUTE: {
 		struct cil_roleattribute *attr = node->data;
-
-		attr->roles = cil_malloc(sizeof(*attr->roles));
-
-		rc = __cil_expr_list_to_bitmap(attr->expr_list, attr->roles, db->num_roles);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_ERR, "Failed to expand role attribute expression to bitmap\n");
-			goto exit;
+		if (attr->roles == NULL) {
+			rc = __evaluate_role_expression(attr, db);
+			if (rc != SEPOL_OK) goto exit;
 		}
 		break;
 	}
@@ -955,15 +1035,13 @@ int __cil_post_db_attr_helper(struct cil_tree_node *node, __attribute__((unused)
 	}
 
 	return SEPOL_OK;
+
 exit:
 	return rc;
-
 }
 
-int __cil_role_assign_types(struct cil_role *role, struct cil_symtab_datum *datum)
+static int __cil_role_assign_types(struct cil_role *role, struct cil_symtab_datum *datum)
 {
-	int rc = SEPOL_ERR;
-	ebitmap_t bitmap_tmp;
 	struct cil_tree_node *node = datum->nodes->head->data;
 
 	if (role->types == NULL) {
@@ -986,27 +1064,19 @@ int __cil_role_assign_types(struct cil_role *role, struct cil_symtab_datum *datu
 		}
 	} else if (node->flavor == CIL_TYPEATTRIBUTE) {
 		struct cil_typeattribute *attr = (struct cil_typeattribute *)datum;
-		if (ebitmap_or(&bitmap_tmp, attr->types, role->types)) {
-			cil_log(CIL_INFO, "Failed to OR role attribute bitmaps\n");
-			goto exit;
-		}
-		ebitmap_union(role->types, &bitmap_tmp);
-		ebitmap_destroy(&bitmap_tmp);
+		ebitmap_union(role->types, attr->types);
 	}
 
-	rc = SEPOL_OK;
+	return SEPOL_OK;
+
 exit:
-	return rc;
+	return SEPOL_ERR;
 }
 
-int __cil_post_db_roletype_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+static int __cil_post_db_roletype_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_db *db = extra_args;
-
-	if (node == NULL || extra_args == NULL) {
-		goto exit;
-	}
 
 	switch (node->flavor) {
 	case CIL_BLOCK: {
@@ -1072,102 +1142,27 @@ exit:
 	return rc;
 }
 
-int cil_verify_is_list(struct cil_list *list, enum cil_flavor flavor)
-{
-	struct cil_list_item *curr;
-
-	cil_list_for_each(curr, list) {
-		switch (curr->flavor) {
-		case CIL_LIST:
-			return CIL_FALSE;
-			break;
-		case CIL_OP:
-			return CIL_FALSE;
-			break;
-		default:
-			if (flavor == CIL_CAT) {
-				struct cil_symtab_datum *d = curr->data;
-				struct cil_tree_node *n = d->nodes->head->data;
-				if (n->flavor == CIL_CATSET) {
-					return CIL_FALSE;
-				}
-			}
-			break;
-		}	
-	}
-	return CIL_TRUE;
-}
-
-static int __evaluate_cat_expression(struct cil_cats *cats, struct cil_db *db)
-{
-	int rc = SEPOL_ERR;
-	ebitmap_t bitmap;
-	struct cil_list *new;
-	struct cil_list_item *curr;
-
-	if (cats->evaluated == CIL_TRUE) {
-		return SEPOL_OK;
-	}
-
-	if (cil_verify_is_list(cats->datum_expr, CIL_CAT)) {
-		return SEPOL_OK;
-	}
-
-	ebitmap_init(&bitmap);
-	rc = __cil_expr_to_bitmap(cats->datum_expr, &bitmap, db->num_cats);
-	if (rc != SEPOL_OK) {
-		ebitmap_destroy(&bitmap);
-		goto exit;
-	}
-
-	cil_list_init(&new, CIL_CAT);
-
-	cil_list_for_each(curr, db->catorder) {
-		struct cil_cat *cat = curr->data;
-		if (ebitmap_get_bit(&bitmap, cat->value)) {
-			cil_list_append(new, CIL_DATUM, cat);
-		}
-	}
-
-	ebitmap_destroy(&bitmap);
-	cil_list_destroy(&cats->datum_expr, CIL_FALSE);
-	if (new->head != NULL) { 
-		cats->datum_expr = new;
-	} else {
-		/* empty list */
-		cil_list_destroy(&new, CIL_FALSE);
-		cats->datum_expr = NULL;
-	}
-
-	cats->evaluated = CIL_TRUE;
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
-}
-
-static int __evaluate_level_expression(struct cil_level *level, void *extra_args)
+static int __evaluate_level_expression(struct cil_level *level, struct cil_db *db)
 {
 	if (level->cats != NULL) {
-		return __evaluate_cat_expression(level->cats, extra_args);
+		return __evaluate_cat_expression(level->cats, db);
 	}
 
 	return SEPOL_OK;
 }
 
-static int __evaluate_levelrange_expression(struct cil_levelrange *levelrange, void *extra_args)
+static int __evaluate_levelrange_expression(struct cil_levelrange *levelrange, struct cil_db *db)
 {
 	int rc = SEPOL_OK;
 
 	if (levelrange->low != NULL && levelrange->low->cats != NULL) {
-		rc =  __evaluate_cat_expression(levelrange->low->cats, extra_args);
+		rc =  __evaluate_cat_expression(levelrange->low->cats, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 	}
 	if (levelrange->high != NULL && levelrange->high->cats != NULL) {
-		rc = __evaluate_cat_expression(levelrange->high->cats, extra_args);
+		rc = __evaluate_cat_expression(levelrange->high->cats, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1177,9 +1172,10 @@ exit:
 	return rc;
 }
 
-int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void *extra_args)
+static int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_db *db = extra_args;
 
 	switch (node->flavor) {
 	case CIL_BLOCK: {
@@ -1198,7 +1194,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_CATSET: {
 		struct cil_catset *catset = node->data;
-		rc = __evaluate_cat_expression(catset->cats, extra_args);
+		rc = __evaluate_cat_expression(catset->cats, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1206,21 +1202,21 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_SENSCAT: {
 		struct cil_senscat *senscat = node->data;
-		rc = __evaluate_cat_expression(senscat->cats, extra_args);
+		rc = __evaluate_cat_expression(senscat->cats, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 		break;
 	}
 	case CIL_LEVEL: {
-		rc = __evaluate_level_expression(node->data, extra_args);
+		rc = __evaluate_level_expression(node->data, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
 		break;
 	}
 	case CIL_LEVELRANGE: {
-		rc = __evaluate_levelrange_expression(node->data, extra_args);
+		rc = __evaluate_levelrange_expression(node->data, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1228,11 +1224,11 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_USER: {
 		struct cil_user *user = node->data;
-		rc = __evaluate_level_expression(user->dftlevel, extra_args);
+		rc = __evaluate_level_expression(user->dftlevel, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		rc = __evaluate_levelrange_expression(user->range, extra_args);
+		rc = __evaluate_levelrange_expression(user->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1241,7 +1237,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	case CIL_SELINUXUSERDEFAULT:
 	case CIL_SELINUXUSER: {
 		struct cil_selinuxuser *selinuxuser = node->data;
-		rc = __evaluate_levelrange_expression(selinuxuser->range, extra_args);
+		rc = __evaluate_levelrange_expression(selinuxuser->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1249,7 +1245,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_RANGETRANSITION: {
 		struct cil_rangetransition *rangetrans = node->data;
-		rc = __evaluate_levelrange_expression(rangetrans->range, extra_args);
+		rc = __evaluate_levelrange_expression(rangetrans->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1257,7 +1253,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_CONTEXT: {
 		struct cil_context *context = node->data;
-		rc = __evaluate_levelrange_expression(context->range, extra_args);
+		rc = __evaluate_levelrange_expression(context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1265,7 +1261,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_SIDCONTEXT: {
 		struct cil_sidcontext *sidcontext = node->data;
-		rc = __evaluate_levelrange_expression(sidcontext->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(sidcontext->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1274,7 +1270,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	case CIL_FILECON: {
 		struct cil_filecon *filecon = node->data;
 		if (filecon->context) {
-			rc = __evaluate_levelrange_expression(filecon->context->range, extra_args);
+			rc = __evaluate_levelrange_expression(filecon->context->range, db);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1283,7 +1279,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_PORTCON: {
 		struct cil_portcon *portcon = node->data;
-		rc = __evaluate_levelrange_expression(portcon->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(portcon->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1291,7 +1287,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_NODECON: {
 		struct cil_nodecon *nodecon = node->data;
-		rc = __evaluate_levelrange_expression(nodecon->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(nodecon->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1299,7 +1295,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_GENFSCON: {
 		struct cil_genfscon *genfscon = node->data;
-		rc = __evaluate_levelrange_expression(genfscon->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(genfscon->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1307,11 +1303,11 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_NETIFCON: {
 		struct cil_netifcon *netifcon = node->data;
-		rc = __evaluate_levelrange_expression(netifcon->if_context->range, extra_args);
+		rc = __evaluate_levelrange_expression(netifcon->if_context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
-		rc = __evaluate_levelrange_expression(netifcon->packet_context->range, extra_args);
+		rc = __evaluate_levelrange_expression(netifcon->packet_context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1319,7 +1315,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_PIRQCON: {
 		struct cil_pirqcon *pirqcon = node->data;
-		rc = __evaluate_levelrange_expression(pirqcon->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(pirqcon->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1327,7 +1323,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_IOMEMCON: {
 		struct cil_iomemcon *iomemcon = node->data;
-		rc = __evaluate_levelrange_expression(iomemcon->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(iomemcon->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1335,7 +1331,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_IOPORTCON: {
 		struct cil_ioportcon *ioportcon = node->data;
-		rc = __evaluate_levelrange_expression(ioportcon->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(ioportcon->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1343,7 +1339,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_PCIDEVICECON: {
 		struct cil_pcidevicecon *pcidevicecon = node->data;
-		rc = __evaluate_levelrange_expression(pcidevicecon->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(pcidevicecon->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1351,7 +1347,7 @@ int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finished, __a
 	}
 	case CIL_FSUSE: {
 		struct cil_fsuse *fsuse = node->data;
-		rc = __evaluate_levelrange_expression(fsuse->context->range, extra_args);
+		rc = __evaluate_levelrange_expression(fsuse->context->range, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1373,7 +1369,7 @@ struct perm_to_list {
 	struct cil_list *new_list;
 };
 
-int __perm_bits_to_list(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
+static int __perm_bits_to_list(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
 {
 	struct perm_to_list *perm_args = (struct perm_to_list *)args;
 	ebitmap_t *perms = perm_args->perms;
@@ -1398,7 +1394,7 @@ int __perm_bits_to_list(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t
 	return SEPOL_OK;
 }
 
-int __evaluate_perm_expression(struct cil_list *perms, enum cil_flavor flavor, symtab_t *class_symtab, symtab_t *common_symtab, unsigned int num_perms, struct cil_list **new_list)
+static int __evaluate_perm_expression(struct cil_list *perms, enum cil_flavor flavor, symtab_t *class_symtab, symtab_t *common_symtab, unsigned int num_perms, struct cil_list **new_list, struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	struct perm_to_list args;
@@ -1409,7 +1405,7 @@ int __evaluate_perm_expression(struct cil_list *perms, enum cil_flavor flavor, s
 	}
 
 	ebitmap_init(&bitmap);
-	rc = __cil_expr_to_bitmap(perms, &bitmap, num_perms);
+	rc = __cil_expr_to_bitmap(perms, &bitmap, num_perms, db);
 	if (rc != SEPOL_OK) {
 		ebitmap_destroy(&bitmap);
 		goto exit;
@@ -1434,9 +1430,10 @@ exit:
 	return rc;
 }
 
-int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32_t *finished,  __attribute__((unused)) void *extra_args)
+static int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_db *db = extra_args;
 
 	switch (node->flavor) {
 	case CIL_BLOCK: {
@@ -1468,7 +1465,7 @@ int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32_t *fin
 				common_symtab = &common->perms;
 			}
 
-			rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list);
+			rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list, db);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1492,9 +1489,10 @@ exit:
 	return rc;
 }
 
-int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void *extra_args)
+static int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_db *db = extra_args;
 
 	switch (node->flavor) {
 	case CIL_BLOCK: {
@@ -1528,7 +1526,7 @@ int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *fini
 					common_symtab = &common->perms;
 				}
 
-				rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list);
+				rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list, db);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
@@ -1545,7 +1543,7 @@ int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *fini
 				struct cil_map_class *class = cp->r.mcp.class;
 				struct cil_list *new_list = NULL;
 
-				rc = __evaluate_perm_expression(cp->r.mcp.perms, CIL_MAP_PERM, &class->perms, NULL, class->num_perms, &new_list);
+				rc = __evaluate_perm_expression(cp->r.mcp.perms, CIL_MAP_PERM, &class->perms, NULL, class->num_perms, &new_list, db);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
@@ -1571,7 +1569,7 @@ exit:
 	return rc;
 }
 
-int cil_post_db(struct cil_db *db)
+static int cil_post_db(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 
@@ -1632,7 +1630,7 @@ exit:
 	return rc;
 }
 
-int cil_post_verify(struct cil_db *db)
+static int cil_post_verify(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 	int avrule_cnt = 0;
