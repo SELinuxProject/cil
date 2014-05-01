@@ -156,6 +156,7 @@ int main(int argc, char *argv[])
 				} else {
 					usage(argv[0]);
 				}
+				break;
 			case 'D':
 				disable_dontaudit = 1;
 				break;
