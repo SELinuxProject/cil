@@ -262,18 +262,15 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		cil_destroy_in(*data);
 		break;
 	case CIL_CLASS:
-		cil_destroy_class(*data);
-		break;
-	case CIL_MAP_PERM:
-		cil_destroy_map_perm(*data);
-		break;
+	case CIL_COMMON:
 	case CIL_MAP_CLASS:
-		cil_destroy_map_class(*data);
+		cil_destroy_class(*data);
 		break;
 	case CIL_CLASSMAPPING:
 		cil_destroy_classmapping(*data);
 		break;
 	case CIL_PERM:
+	case CIL_MAP_PERM:
 		cil_destroy_perm(*data);
 		break;
 	case CIL_CLASSPERMSET:
@@ -281,9 +278,6 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		break;
 	case CIL_CLASSPERMS:
 		cil_destroy_classperms(*data);
-		break;
-	case CIL_COMMON:
-		cil_destroy_common(*data);
 		break;
 	case CIL_CLASSCOMMON:
 		cil_destroy_classcommon(*data);
@@ -520,7 +514,11 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		*sym_index = CIL_SYM_BLOCKS;
 		break;
 	case CIL_CLASS:
+	case CIL_MAP_CLASS:
 		*sym_index = CIL_SYM_CLASSES;
+		break;
+	case CIL_COMMON:
+		*sym_index = CIL_SYM_COMMONS;
 		break;
 	case CIL_PERM:
 	case CIL_MAP_PERM:
@@ -528,12 +526,6 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 		break;
 	case CIL_CLASSPERMSET:
 		*sym_index = CIL_SYM_CLASSPERMSETS;
-		break;
-	case CIL_MAP_CLASS:
-		*sym_index = CIL_SYM_CLASSES;
-		break;
-	case CIL_COMMON:
-		*sym_index = CIL_SYM_COMMONS;
 		break;
 	case CIL_SID:
 		*sym_index = CIL_SYM_SIDS;
@@ -1244,13 +1236,9 @@ int cil_destroy_ast_symtabs(struct cil_tree_node *root)
 				cil_symtab_array_destroy(((struct cil_in*)current->data)->symtab);
 				break;
 			case CIL_CLASS:
-				cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
-				break;
-			case CIL_MAP_CLASS:
-				cil_symtab_destroy(&((struct cil_map_class*)current->data)->perms);
-				break;
 			case CIL_COMMON:
-				cil_symtab_destroy(&((struct cil_common*)current->data)->perms);
+			case CIL_MAP_CLASS:
+				cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
 				break;
 			case CIL_MACRO:
 				cil_symtab_array_destroy(((struct cil_macro*)current->data)->symtab);
@@ -1317,7 +1305,7 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 		} else if (ast_node->flavor == CIL_CLASS || ast_node->flavor == CIL_MAP_CLASS) {
 			*symtab = &((struct cil_class*)ast_node->data)->perms;
 		} else if (ast_node->flavor == CIL_COMMON) {
-			*symtab = &((struct cil_common*)ast_node->data)->perms;
+			*symtab = &((struct cil_class*)ast_node->data)->perms;
 		} else if (ast_node->flavor == CIL_CONDBLOCK && sym_index < CIL_SYM_NUM) {
 			if (ast_node->parent->flavor == CIL_TUNABLEIF) {
 				*symtab = &((struct cil_condblock*)ast_node->data)->symtab[sym_index];
@@ -1476,17 +1464,8 @@ void cil_class_init(struct cil_class **class)
 
 	cil_symtab_init(&(*class)->perms, CIL_CLASS_SYM_SIZE);
 
-	(*class)->common = NULL;
 	(*class)->num_perms = 0;
-}
-
-void cil_common_init(struct cil_common **common)
-{
-	*common = cil_malloc(sizeof(**common));
-
-	cil_symtab_datum_init(&(*common)->datum);
-	cil_symtab_init(&(*common)->perms, CIL_CLASS_SYM_SIZE);
-	(*common)->num_perms = 0;
+	(*class)->common = NULL;
 }
 
 void cil_classcommon_init(struct cil_classcommon **classcommon)
@@ -1902,6 +1881,7 @@ void cil_perm_init(struct cil_perm **perm)
 
 	cil_symtab_datum_init(&(*perm)->datum);
 	(*perm)->value = 0;
+	(*perm)->classperms = NULL;
 }
 
 void cil_classpermset_init(struct cil_classpermset **cps)
@@ -1917,24 +1897,6 @@ void cil_classperms_init(struct cil_classperms **cp)
 	*cp = cil_malloc(sizeof(**cp));
 	memset(*cp, 0, sizeof(struct cil_classperms));
 	(*cp)->flavor = CIL_NONE;
-}
-
-void cil_map_perm_init(struct cil_map_perm **cmp)
-{
-	*cmp = cil_malloc(sizeof(**cmp));
-
-	cil_symtab_datum_init(&(*cmp)->datum);
-	(*cmp)->classperms = NULL;
-	(*cmp)->value = 0;
-}
-
-void cil_map_class_init(struct cil_map_class **map)
-{
-	*map = cil_malloc(sizeof(**map));
-
-	cil_symtab_datum_init(&(*map)->datum);
-	cil_symtab_init(&(*map)->perms, CIL_CLASS_SYM_SIZE);
-	(*map)->num_perms = 0;
 }
 
 void cil_classmapping_init(struct cil_classmapping **mapping)

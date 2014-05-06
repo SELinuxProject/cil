@@ -55,7 +55,7 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *pdb);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_common_to_policydb(policydb_t *pdb, struct cil_common *cil_common, common_datum_t **common_out);
+int cil_common_to_policydb(policydb_t *pdb, struct cil_class *cil_common, common_datum_t **common_out);
 
 /**
  * Insert cil class structure into sepol policydb.

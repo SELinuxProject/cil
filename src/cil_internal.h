@@ -309,31 +309,14 @@ struct cil_optional {
 struct cil_perm {
 	struct cil_symtab_datum datum;
 	unsigned int value;
-};
-
-struct cil_common {
-	struct cil_symtab_datum datum;
-	symtab_t perms;
-	unsigned int num_perms;
+	struct cil_list *classperms; /* Only used for map perms */
 };
 
 struct cil_class {
 	struct cil_symtab_datum datum;
 	symtab_t perms;
-	struct cil_common *common;
 	unsigned int num_perms;
-};
-
-struct cil_map_perm {
-	struct cil_symtab_datum datum;
-	struct cil_list *classperms;
-	unsigned int value;
-};
-
-struct cil_map_class {
-	struct cil_symtab_datum datum;
-	symtab_t perms;
-	unsigned int num_perms;
+	struct cil_class *common; /* Only used for kernel class */
 };
 
 struct cil_classperms {
@@ -351,10 +334,6 @@ struct cil_classperms {
 			struct cil_class *class;
 			struct cil_list *perms;
 		} cp;
-		struct {
-			struct cil_map_class *class;
-			struct cil_list *perms;
-		} mcp;
 	} r;
 };
 
@@ -886,7 +865,6 @@ void cil_blockinherit_init(struct cil_blockinherit **inherit);
 void cil_blockabstract_init(struct cil_blockabstract **abstract);
 void cil_in_init(struct cil_in **in);
 void cil_class_init(struct cil_class **class);
-void cil_common_init(struct cil_common **common);
 void cil_classcommon_init(struct cil_classcommon **classcommon);
 void cil_sid_init(struct cil_sid **sid);
 void cil_sidcontext_init(struct cil_sidcontext **sidcontext);
@@ -932,8 +910,6 @@ void cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 void cil_perm_init(struct cil_perm **perm);
 void cil_classpermset_init(struct cil_classpermset **cps);
 void cil_classperms_init(struct cil_classperms **cp);
-void cil_map_perm_init(struct cil_map_perm **cmp);
-void cil_map_class_init(struct cil_map_class **map);
 void cil_classmapping_init(struct cil_classmapping **mapping);
 void cil_user_init(struct cil_user **user);
 void cil_userlevel_init(struct cil_userlevel **usrlvl);

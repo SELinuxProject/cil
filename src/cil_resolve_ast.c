@@ -165,11 +165,11 @@ int cil_resolve_classperms_helper(struct cil_tree_node *current, struct cil_clas
 		}
 		perms = &cp->r.cp.perms;
 	} else {
-		struct cil_map_class *mc = (struct cil_map_class *)class_datum;
+		struct cil_class *mc = (struct cil_class *)class_datum;
 		cp->flavor = CIL_MAP_CLASSPERMS;
-		cp->r.mcp.class = mc;
+		cp->r.cp.class = mc;
 		class_symtab = &mc->perms;
-		perms = &cp->r.mcp.perms;
+		perms = &cp->r.cp.perms;
 	}
 
 	rc = __cil_resolve_perms(class_symtab, common_symtab, cp->u.cp.perm_strs, perms);
@@ -612,7 +612,7 @@ int __class_update_perm_values(__attribute__((unused)) hashtab_key_t k, hashtab_
 int cil_resolve_classcommon(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_class *class = NULL;
-	struct cil_common *common = NULL;
+	struct cil_class *common = NULL;
 	struct cil_classcommon *clscom = current->data;
 	struct cil_symtab_datum *class_datum = NULL;
 	struct cil_symtab_datum *common_datum = NULL;
@@ -629,7 +629,7 @@ int cil_resolve_classcommon(struct cil_tree_node *current, void *extra_args)
 	}
 
 	class = (struct cil_class *)class_datum;
-	common = (struct cil_common *)common_datum;
+	common = (struct cil_class *)common_datum;
 	if (class->common != NULL) {
 		cil_log(CIL_ERR, "class cannot be associeated with more than one common\n");
 		rc = SEPOL_ERR;
@@ -652,22 +652,22 @@ int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_classmapping *mapping = current->data;
-	struct cil_map_class *map = NULL;
-	struct cil_map_perm *mp = NULL;
+	struct cil_class *map = NULL;
+	struct cil_perm *mp = NULL;
 	struct cil_symtab_datum *datum = NULL;
 
 	rc = cil_resolve_name(current, mapping->map_class_str, CIL_SYM_CLASSES, extra_args, &datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	map = (struct cil_map_class*)datum;
+	map = (struct cil_class*)datum;
 
 	rc = cil_symtab_get_datum(&map->perms, mapping->map_perm_str, &datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	mp = (struct cil_map_perm*)datum;
+	mp = (struct cil_perm*)datum;
 
 	rc = cil_resolve_classperms_list(current, mapping->classperms, extra_args);
 	if (rc != SEPOL_OK) {
@@ -2496,8 +2496,6 @@ int cil_resolve_call2(struct cil_tree_node *current, void *extra_args)
 			sym_index = CIL_SYM_CATS;
 			break;
 		case CIL_CLASS:
-			sym_index = CIL_SYM_CLASSES;
-			break;
 		case CIL_MAP_CLASS:
 			sym_index = CIL_SYM_CLASSES;
 			break;

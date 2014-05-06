@@ -660,16 +660,8 @@ exit:
 
 static int __cil_perm_to_bitmap(struct cil_symtab_datum *datum, ebitmap_t *bitmap, __attribute__((unused)) struct cil_db *db)
 {
-	struct cil_tree_node *node = datum->nodes->head->data;
-	unsigned int value;
-
-	if (node->flavor == CIL_PERM) {
-		struct cil_perm *perm = (struct cil_perm *)datum;
-		value = perm->value;
-	} else {
-		struct cil_map_perm *perm = (struct cil_map_perm *)datum;
-		value = perm->value;
-	}
+	struct cil_perm *perm = (struct cil_perm *)datum;
+	unsigned int value = perm->value;
 
 	ebitmap_init(bitmap);
 	if (ebitmap_set_bit(bitmap, value, 1)) {
@@ -1374,16 +1366,8 @@ static int __perm_bits_to_list(__attribute__((unused)) hashtab_key_t k, hashtab_
 	struct perm_to_list *perm_args = (struct perm_to_list *)args;
 	ebitmap_t *perms = perm_args->perms;
 	struct cil_list *new_list = perm_args->new_list;
-	enum cil_flavor flavor = perm_args->flavor;
-	unsigned int value;
-
-	if (flavor == CIL_PERM) {
-		struct cil_perm *perm = (struct cil_perm *)d;
-		value = perm->value;
-	} else {
-		struct cil_map_perm *perm = (struct cil_map_perm *)d;
-		value = perm->value;
-	}
+	struct cil_perm *perm = (struct cil_perm *)d;
+	unsigned int value = perm->value;
 
 	if (!ebitmap_get_bit(perms, value)) {
 		return SEPOL_OK;
@@ -1457,7 +1441,7 @@ static int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32
 		cil_list_for_each(curr, cm->classperms) {
 			struct cil_classperms *cp = curr->data;
 			struct cil_class *class = cp->r.cp.class;
-			struct cil_common *common = class->common;
+			struct cil_class *common = class->common;
 			symtab_t *common_symtab = NULL;
 			struct cil_list *new_list = NULL;
 
@@ -1518,7 +1502,7 @@ static int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_
 
 			if (cp->flavor == CIL_CLASSPERMS) {
 				struct cil_class *class = cp->r.cp.class;
-				struct cil_common *common = class->common;
+				struct cil_class *common = class->common;
 				symtab_t *common_symtab = NULL;
 				struct cil_list *new_list = NULL;
 
@@ -1540,10 +1524,10 @@ static int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_
 				cp->r.cp.perms = new_list;
 			} else {
 				/* CIL_MAP_CLASSPERMS */
-				struct cil_map_class *class = cp->r.mcp.class;
+				struct cil_class *class = cp->r.cp.class;
 				struct cil_list *new_list = NULL;
 
-				rc = __evaluate_perm_expression(cp->r.mcp.perms, CIL_MAP_PERM, &class->perms, NULL, class->num_perms, &new_list, db);
+				rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_MAP_PERM, &class->perms, NULL, class->num_perms, &new_list, db);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
@@ -1552,9 +1536,9 @@ static int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_
 					return SEPOL_OK;
 				}
 
-				cil_list_destroy(&cp->r.mcp.perms, CIL_FALSE);
+				cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
 
-				cp->r.mcp.perms = new_list;
+				cp->r.cp.perms = new_list;
 			}
 		}
 		break;

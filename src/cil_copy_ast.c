@@ -185,10 +185,10 @@ void cil_copy_classperms(struct cil_classperms *orig, struct cil_classperms **ne
 				cil_log(CIL_ERR, "Did not expect a perms datums\n");
 			}
 		} else {
-			if (orig->r.mcp.class != NULL) {
+			if (orig->r.cp.class != NULL) {
 				cil_log(CIL_ERR, "Did not expect a map class datum\n");
 			}
-			if (orig->r.mcp.perms != NULL) {
+			if (orig->r.cp.perms != NULL) {
 				cil_log(CIL_ERR, "Did not expect a map perms datums\n");
 			}
 		}
@@ -205,45 +205,6 @@ void cil_copy_classperms_list(struct cil_list *orig, struct cil_list **new)
 		cil_copy_classperms(orig_item->data, &classperms);
 		cil_list_append(*new, CIL_CLASSPERMS, classperms);
 	}
-}
-
-int cil_copy_map_perm(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
-{
-	struct cil_map_perm *orig = data;
-	struct cil_map_perm *new = NULL;
-	char *key = orig->datum.name;
-	struct cil_symtab_datum *datum = NULL;
-
-	cil_symtab_get_datum(symtab, key, &datum);
-	if (datum != NULL) {
-		cil_log(CIL_INFO, "Map permissions cannot be redefined\n");
-		return SEPOL_ERR;
-	}
-
-	*copy = new;
-
-	return SEPOL_OK;
-}
-
-int cil_copy_map_class(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
-{
-	struct cil_map_class *orig = data;
-	struct cil_map_class *new = NULL;
-	char *key = orig->datum.name;
-	struct cil_symtab_datum *datum = NULL;
-
-	cil_symtab_get_datum(symtab, key, &datum);
-	if (datum != NULL) {
-		cil_log(CIL_INFO, "Map class cannot be redefined\n");
-		return SEPOL_ERR;
-	}
-
-	cil_map_class_init(&new);
-	cil_symtab_init(&new->perms, CIL_CLASS_SYM_SIZE);
-
-	*copy = new;
-
-	return SEPOL_OK;
 }
 
 int cil_copy_classmapping(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
@@ -277,9 +238,9 @@ int cil_copy_class(__attribute__((unused)) struct cil_db *db, void *data, void *
 	}
 
 	cil_class_init(&new);
-	cil_symtab_init(&new->perms, CIL_CLASS_SYM_SIZE);
 
 	new->common = NULL;
+
 	*copy = new;
 
 	return SEPOL_OK;
@@ -302,26 +263,6 @@ int cil_copy_classpermset(__attribute__((unused)) struct cil_db *db, void *data,
 
 	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
-	*copy = new;
-
-	return SEPOL_OK;
-}
-
-int cil_copy_common(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
-{
-	struct cil_common *orig = data;
-	struct cil_common *new = NULL;
-	char *key = orig->datum.name;
-	struct cil_symtab_datum *datum = NULL;
-
-	cil_symtab_get_datum(symtab, key, &datum);
-	if (datum != NULL) {
-		cil_log(CIL_INFO, "cil_copy_common: common cannot be redefined\n");
-		return SEPOL_ERR;
-	}	
-
-	cil_common_init(&new);
-	cil_symtab_init(&new->perms, CIL_CLASS_SYM_SIZE);
 	*copy = new;
 
 	return SEPOL_OK;
@@ -1609,26 +1550,21 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 		copy_func = &cil_copy_policycap;
 		break;
 	case CIL_PERM:
-		copy_func = &cil_copy_perm;
-		break;
 	case CIL_MAP_PERM:
-		copy_func =  &cil_copy_map_perm;
-		break;
-	case CIL_MAP_CLASS:
-		copy_func = &cil_copy_map_class;
+		copy_func = &cil_copy_perm;
 		break;
 	case CIL_CLASSMAPPING:
 		copy_func = &cil_copy_classmapping;
 		break;
 	case CIL_CLASS:
+	case CIL_COMMON:
+	case CIL_MAP_CLASS:
 		copy_func = &cil_copy_class;
 		break;
 	case CIL_CLASSPERMSET:
 		copy_func = &cil_copy_classpermset;
 		break;
-	case CIL_COMMON:
-		copy_func = &cil_copy_common;
-		break;
+
 	case CIL_CLASSCOMMON:
 		copy_func = &cil_copy_classcommon;
 		break;

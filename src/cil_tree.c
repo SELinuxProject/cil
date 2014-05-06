@@ -428,7 +428,7 @@ void cil_tree_print_perms_list(struct cil_tree_node *current_perm)
 		if (current_perm->flavor == CIL_PERM) {
 			cil_log(CIL_INFO, " %s", ((struct cil_perm *)current_perm->data)->datum.name);
 		} else if (current_perm->flavor == CIL_MAP_PERM) {
-			cil_log(CIL_INFO, " %s", ((struct cil_map_perm*)current_perm->data)->datum.name);
+			cil_log(CIL_INFO, " %s", ((struct cil_perm*)current_perm->data)->datum.name);
 		} else {
 			cil_log(CIL_INFO, "\n\n perms list contained unexpected data type: %d\n", current_perm->flavor);
 			break;
@@ -800,7 +800,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_COMMON: {
-			struct cil_common *common = node->data;
+			struct cil_class *common = node->data;
 			cil_log(CIL_INFO, "COMMON: %s (", common->datum.name);
 		
 			cil_tree_print_perms_list(node->cl_head);
@@ -827,7 +827,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_MAP_CLASS: {
-			struct cil_map_class *cm = node->data;
+			struct cil_class *cm = node->data;
 			cil_log(CIL_INFO, "MAP_CLASS: %s", cm->datum.name);
 
 			cil_log(CIL_INFO, " (");
@@ -837,9 +837,9 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			return;
 		}
 		case CIL_MAP_PERM: {
-			struct cil_map_perm *cmp = node->data;
+			struct cil_perm *cmp = node->data;
 
-			cil_log(CIL_INFO, "MAP_CLASSPERM: %s", cmp->datum.name);
+			cil_log(CIL_INFO, "MAP_PERM: %s", cmp->datum.name);
 
 			if (cmp->classperms == NULL) {
 				cil_log(CIL_INFO, " perms: ()");

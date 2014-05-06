@@ -1183,7 +1183,7 @@ int __cil_verify_class(struct cil_tree_node *node)
 	struct cil_class *class = node->data;
 
 	if (class->common != NULL) {
-		struct cil_common *common = class->common;
+		struct cil_class *common = class->common;
 		struct cil_tree_node *common_node = common->datum.nodes->head->data;
 		struct cil_tree_node *curr_com_perm = NULL;
 

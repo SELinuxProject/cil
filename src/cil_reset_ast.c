@@ -21,7 +21,7 @@ static int __class_reset_perm_values(__attribute__((unused)) hashtab_key_t k, ha
 static void cil_reset_class(struct cil_class *class)
 {
 	if (class->common != NULL) {
-		struct cil_common *common = class->common;
+		struct cil_class *common = class->common;
 		cil_symtab_map(&common->perms, __class_reset_perm_values, &common->num_perms);
 		/* during a re-resolve, we need to reset the common, so a classcommon
 		 * statement isn't seen as a duplicate */
@@ -30,9 +30,9 @@ static void cil_reset_class(struct cil_class *class)
 	}
 }
 
-static void cil_reset_map_perm(struct cil_map_perm *cmp)
+static void cil_reset_perm(struct cil_perm *perm)
 {
-	cmp->classperms = NULL;
+	perm->classperms = NULL;
 }
 
 static inline void cil_reset_classperms(struct cil_classperms *cp)
@@ -46,12 +46,9 @@ static inline void cil_reset_classperms(struct cil_classperms *cp)
 		cp->r.classpermset = NULL;
 		break;
 	case CIL_CLASSPERMS:
+	case CIL_MAP_CLASSPERMS:
 		cp->r.cp.class = NULL;
 		cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
-		break;
-	case CIL_MAP_CLASSPERMS:
-		cp->r.mcp.class = NULL;
-		cil_list_destroy(&cp->r.mcp.perms, CIL_FALSE);
 		break;
 	default:
 		cil_log(CIL_ERR, "Invalid flavor found when resetting classperms\n");
@@ -315,8 +312,9 @@ int __cil_reset_node(struct cil_tree_node *node,  __attribute__((unused)) uint32
 	case CIL_CLASS:
 		cil_reset_class(node->data);
 		break;
+	case CIL_PERM:
 	case CIL_MAP_PERM:
-		cil_reset_map_perm(node->data);
+		cil_reset_perm(node->data);
 		break;
 	case CIL_CLASSPERMSET:
 		cil_reset_classpermset(node->data);

@@ -223,7 +223,7 @@ static ocontext_t *cil_add_ocontext(ocontext_t **head, ocontext_t **tail)
 	return new;
 }
 		
-int cil_common_to_policydb(policydb_t *pdb, struct cil_common *cil_common, common_datum_t **common_out)
+int cil_common_to_policydb(policydb_t *pdb, struct cil_class *cil_common, common_datum_t **common_out)
 {
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
@@ -296,7 +296,7 @@ int cil_class_to_policydb(policydb_t *pdb, struct cil_class *cil_class)
 	}
 
 	if (cil_class->common != NULL) {
-		struct cil_common *cil_common = cil_class->common;
+		struct cil_class *cil_common = cil_class->common;
 
 		key = cil_class->common->datum.name;
 		sepol_common = hashtab_search(pdb->p_commons.table, key);
@@ -1366,8 +1366,8 @@ int __cil_avrule_expand(policydb_t *pdb, uint16_t kind, struct cil_symtab_datum 
 			}
 		} else if (cp->flavor == CIL_MAP_CLASSPERMS) {
 			struct cil_list_item *i = NULL;
-			cil_list_for_each(i, cp->r.mcp.perms) {
-				struct cil_map_perm *cmp = i->data;
+			cil_list_for_each(i, cp->r.cp.perms) {
+				struct cil_perm *cmp = i->data;
 				rc = __cil_avrule_expand(pdb, kind, src, tgt, cmp->classperms, neverallows, cond_node, cond_flavor);
 			}
 		} else { /* CIL_CLASSPERMS */
@@ -2209,8 +2209,8 @@ int cil_constrain_expand(policydb_t *pdb, const struct cil_db *db, struct cil_li
 			}
 		} else if (cp->flavor == CIL_MAP_CLASSPERMS) {
 			struct cil_list_item *i = NULL;
-			cil_list_for_each(i, cp->r.mcp.perms) {
-				struct cil_map_perm *cmp = i->data;
+			cil_list_for_each(i, cp->r.cp.perms) {
+				struct cil_perm *cmp = i->data;
 				rc = cil_constrain_expand(pdb, db, cmp->classperms, expr);
 				if (rc != SEPOL_OK) {
 					goto exit;
