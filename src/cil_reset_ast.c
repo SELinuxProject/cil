@@ -41,18 +41,17 @@ static inline void cil_reset_classperms(struct cil_classperms *cp)
 		return;
 	}
 
-	switch (cp->flavor) {
-	case CIL_CLASSPERMSET:
-		cp->r.classpermset = NULL;
-		break;
-	case CIL_CLASSPERMS:
-	case CIL_MAP_CLASSPERMS:
-		cp->r.cp.class = NULL;
-		cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
-		break;
-	default:
-		cil_log(CIL_ERR, "Invalid flavor found when resetting classperms\n");
+	cp->class = NULL;
+	cil_list_destroy(&cp->perms, CIL_FALSE);
+}
+
+static inline void cil_reset_classperms_set(struct cil_classperms_set *cp_set)
+{
+	if (cp_set == NULL) {
+		return;
 	}
+
+	cp_set->set = NULL;
 }
 
 static inline void cil_reset_classperms_list(struct cil_list *cp_list)
@@ -64,7 +63,11 @@ static inline void cil_reset_classperms_list(struct cil_list *cp_list)
 	}
 
 	cil_list_for_each(curr, cp_list) {
-		cil_reset_classperms(curr->data);
+		if (curr->flavor == CIL_CLASSPERMS) { /* KERNEL or MAP */
+			cil_reset_classperms(curr->data);
+		} else { /* SET */
+			cil_reset_classperms_set(curr->data);
+		}
 	}
 }
 

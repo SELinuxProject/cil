@@ -46,6 +46,10 @@
 #include "cil_policy.h"
 #include "cil_verify.h"
 
+#define DATUM(d) ((struct cil_symtab_datum *)(d))
+#define NODE(n) ((struct cil_tree_node *)(DATUM(n)->nodes->head->data))
+#define FLAVOR(f) (NODE(f)->flavor)
+
 static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max, struct cil_db *db);
 static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max, struct cil_db *db);
 
@@ -1414,6 +1418,76 @@ exit:
 	return rc;
 }
 
+static int __evaluate_classperms(struct cil_classperms *cp, struct cil_db *db)
+{
+	int rc = SEPOL_ERR;
+	struct cil_class *class = cp->class;
+	struct cil_class *common = class->common;
+	symtab_t *common_symtab = NULL;
+	struct cil_list *new_list = NULL;
+
+	if (common) {
+		common_symtab = &common->perms;
+	}
+
+	rc = __evaluate_perm_expression(cp->perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list, db);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	if (new_list == NULL) {
+		return SEPOL_OK;
+	}
+
+	cil_list_destroy(&cp->perms, CIL_FALSE);
+
+	cp->perms = new_list;
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+static int __evaluate_classperms_list(struct cil_list *classperms, struct cil_db *db)
+{
+	int rc = SEPOL_ERR;
+	struct cil_list_item *curr;
+
+	cil_list_for_each(curr, classperms) {
+		if (curr->flavor == CIL_CLASSPERMS) {
+			struct cil_classperms *cp = curr->data;
+			if (FLAVOR(cp->class) == CIL_CLASS) {
+				rc = __evaluate_classperms(cp, db);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+			} else { /* MAP */
+				struct cil_list_item *i = NULL;
+				cil_list_for_each(i, cp->perms) {
+					struct cil_perm *cmp = i->data;
+					rc = __evaluate_classperms_list(cmp->classperms, db);
+					if (rc != SEPOL_OK) {
+						goto exit;
+					}
+				}
+			}	
+		} else { /* SET */
+			struct cil_classperms_set *cp_set = curr->data;
+			struct cil_classpermset *cps = cp_set->set;
+			rc = __evaluate_classperms_list(cps->classperms, db);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
 static int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
@@ -1436,31 +1510,9 @@ static int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32
 	}
 	case CIL_CLASSMAPPING: {
 		struct cil_classmapping *cm = node->data;
-		struct cil_list_item *curr;
-
-		cil_list_for_each(curr, cm->classperms) {
-			struct cil_classperms *cp = curr->data;
-			struct cil_class *class = cp->r.cp.class;
-			struct cil_class *common = class->common;
-			symtab_t *common_symtab = NULL;
-			struct cil_list *new_list = NULL;
-
-			if (common) {
-				common_symtab = &common->perms;
-			}
-
-			rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list, db);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-
-			if (new_list == NULL) {
-				return SEPOL_OK;
-			}
-
-			cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
-
-			cp->r.cp.perms = new_list;
+		rc = __evaluate_classperms_list(cm->classperms, db);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
 		break;
 	}
@@ -1495,51 +1547,9 @@ static int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_
 	}
 	case CIL_CLASSPERMSET: {
 		struct cil_classpermset *cps = node->data;
-		struct cil_list_item *curr;
-
-		cil_list_for_each(curr, cps->classperms) {
-			struct cil_classperms *cp = curr->data;
-
-			if (cp->flavor == CIL_CLASSPERMS) {
-				struct cil_class *class = cp->r.cp.class;
-				struct cil_class *common = class->common;
-				symtab_t *common_symtab = NULL;
-				struct cil_list *new_list = NULL;
-
-				if (common) {
-					common_symtab = &common->perms;
-				}
-
-				rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_PERM, &class->perms, common_symtab, class->num_perms, &new_list, db);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
-
-				if (new_list == NULL) {
-					return SEPOL_OK;
-				}
-
-				cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
-
-				cp->r.cp.perms = new_list;
-			} else {
-				/* CIL_MAP_CLASSPERMS */
-				struct cil_class *class = cp->r.cp.class;
-				struct cil_list *new_list = NULL;
-
-				rc = __evaluate_perm_expression(cp->r.cp.perms, CIL_MAP_PERM, &class->perms, NULL, class->num_perms, &new_list, db);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
-
-				if (new_list == NULL) {
-					return SEPOL_OK;
-				}
-
-				cil_list_destroy(&cp->r.cp.perms, CIL_FALSE);
-
-				cp->r.cp.perms = new_list;
-			}
+		rc = __evaluate_classperms_list(cps->classperms, db);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
 		break;
 	}

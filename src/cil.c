@@ -276,6 +276,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_CLASSPERMSET:
 		cil_destroy_classpermset(*data);
 		break;
+	case CIL_CLASSPERMS_SET:
+		cil_destroy_classperms_set(*data);
+		break;
 	case CIL_CLASSPERMS:
 		cil_destroy_classperms(*data);
 		break;
@@ -1892,11 +1895,20 @@ void cil_classpermset_init(struct cil_classpermset **cps)
 	(*cps)->classperms = NULL;
 }
 
+void cil_classperms_set_init(struct cil_classperms_set **cp_set)
+{
+	*cp_set = cil_malloc(sizeof(**cp_set));
+	(*cp_set)->set_str = NULL;
+	(*cp_set)->set = NULL;
+}
+
 void cil_classperms_init(struct cil_classperms **cp)
 {
 	*cp = cil_malloc(sizeof(**cp));
-	memset(*cp, 0, sizeof(struct cil_classperms));
-	(*cp)->flavor = CIL_NONE;
+	(*cp)->class_str = NULL;
+	(*cp)->class = NULL;
+	(*cp)->perm_strs = NULL;
+	(*cp)->perms = NULL;
 }
 
 void cil_classmapping_init(struct cil_classmapping **mapping)

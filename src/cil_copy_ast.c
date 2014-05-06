@@ -168,31 +168,14 @@ int cil_copy_perm(__attribute__((unused)) struct cil_db *db, void *data, void **
 void cil_copy_classperms(struct cil_classperms *orig, struct cil_classperms **new)
 {
 	cil_classperms_init(new);
-	(*new)->flavor = orig->flavor;
-	if (orig->flavor == CIL_CLASSPERMSET) {
-		(*new)->u.classpermset_str = cil_strdup(orig->u.classpermset_str);
-		if (orig->r.classpermset != NULL) {
-			cil_log(CIL_ERR, "Did not expect a classpermset datum\n");
-		}
-	} else {
-		(*new)->u.cp.class_str = cil_strdup(orig->u.cp.class_str);
-		cil_copy_list(orig->u.cp.perm_strs, &((*new)->u.cp.perm_strs));
-		if (orig->flavor == CIL_CLASSPERMS) {
-			if (orig->r.cp.class != NULL) {
-				cil_log(CIL_ERR, "Did not expect a class datum\n");
-			}
-			if (orig->r.cp.perms != NULL) {
-				cil_log(CIL_ERR, "Did not expect a perms datums\n");
-			}
-		} else {
-			if (orig->r.cp.class != NULL) {
-				cil_log(CIL_ERR, "Did not expect a map class datum\n");
-			}
-			if (orig->r.cp.perms != NULL) {
-				cil_log(CIL_ERR, "Did not expect a map perms datums\n");
-			}
-		}
-	}
+	(*new)->class_str = cil_strdup(orig->class_str);
+	cil_copy_list(orig->perm_strs, &((*new)->perm_strs));
+}
+
+void cil_copy_classperms_set(struct cil_classperms_set *orig, struct cil_classperms_set **new)
+{
+	cil_classperms_set_init(new);
+	(*new)->set_str = cil_strdup(orig->set_str);
 }
 
 void cil_copy_classperms_list(struct cil_list *orig, struct cil_list **new)
@@ -201,9 +184,15 @@ void cil_copy_classperms_list(struct cil_list *orig, struct cil_list **new)
 
 	cil_list_init(new, CIL_LIST_ITEM);
 	cil_list_for_each(orig_item, orig) {
-		struct cil_classperms *classperms;
-		cil_copy_classperms(orig_item->data, &classperms);
-		cil_list_append(*new, CIL_CLASSPERMS, classperms);
+		if (orig_item->flavor == CIL_CLASSPERMS) {
+			struct cil_classperms *cp;
+			cil_copy_classperms(orig_item->data, &cp);
+			cil_list_append(*new, CIL_CLASSPERMS, cp);
+		} else {
+			struct cil_classperms_set *cp_set;
+			cil_copy_classperms_set(orig_item->data, &cp_set);
+			cil_list_append(*new, CIL_CLASSPERMS_SET, cp_set);
+		}
 	}
 }
 

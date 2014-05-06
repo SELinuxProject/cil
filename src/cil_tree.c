@@ -466,25 +466,18 @@ void cil_tree_print_classperms(struct cil_classperms *cp)
 		return;
 	}
 
-	switch (cp->flavor) {
-	case CIL_CLASSPERMSET:
-		cil_log(CIL_INFO, " %s", cp->u.classpermset_str);
-		break;
-	case CIL_CLASSPERMS:
-		cil_log(CIL_INFO, " class: %s", cp->u.cp.class_str);
-		cil_log(CIL_INFO, ", perm_strs:");
-		cil_tree_print_perm_strs(cp->u.cp.perm_strs);
-		break;
-	case CIL_MAP_CLASSPERMS:
-		cil_log(CIL_INFO, " class: %s", cp->u.cp.class_str);
-		cil_log(CIL_INFO, ", perm_strs:");
-		cil_tree_print_perm_strs(cp->u.cp.perm_strs);
-		break;
-	default:
-		cil_log(CIL_INFO, " class: ?");
-		cil_log(CIL_INFO, ", perm_strs: (?)");
-		break;
+	cil_log(CIL_INFO, " class: %s", cp->class_str);
+	cil_log(CIL_INFO, ", perm_strs:");
+	cil_tree_print_perm_strs(cp->perm_strs);
+}
+
+void cil_tree_print_classperms_set(struct cil_classperms_set *cp_set)
+{
+	if (cp_set == NULL) {
+		return;
 	}
+
+	cil_log(CIL_INFO, " %s", cp_set->set_str);
 }
 
 void cil_tree_print_classperms_list(struct cil_list *cp_list)
@@ -496,7 +489,11 @@ void cil_tree_print_classperms_list(struct cil_list *cp_list)
 	}
 
 	cil_list_for_each(i, cp_list) {
-		cil_tree_print_classperms(i->data);
+		if (i->flavor == CIL_CLASSPERMS) {
+			cil_tree_print_classperms(i->data);
+		} else {
+			cil_tree_print_classperms_set(i->data);
+		}
 	}
 }
 

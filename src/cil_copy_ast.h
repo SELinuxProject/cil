@@ -44,9 +44,11 @@ int cil_copy_perm(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_class(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_classmapping(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_permset(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-void cil_copy_fill_classpermset(struct cil_classpermset *orig, struct cil_classpermset *new);
+
+void cil_copy_classperms(struct cil_classperms *orig, struct cil_classperms **new);
+void cil_copy_classperms_set(struct cil_classperms_set *orig, struct cil_classperms_set **new);
+void cil_copy_classperms_list(struct cil_list *orig, struct cil_list **new);
 int cil_copy_classpermset(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
-void cil_copy_fill_classperms(struct cil_classperms *orig, struct cil_classperms **new);
 int cil_copy_common(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_classcommon(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_sid(struct cil_db *db, void *data, void **copy, symtab_t *symtab);

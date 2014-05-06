@@ -319,22 +319,16 @@ struct cil_class {
 	struct cil_class *common; /* Only used for kernel class */
 };
 
+struct cil_classperms_set {
+	char *set_str;
+	struct cil_classpermset *set;
+};
+
 struct cil_classperms {
-	enum cil_flavor flavor;
-	union {
-		char *classpermset_str;
-		struct {
-			char *class_str;
-			struct cil_list *perm_strs;
-		} cp;
-	} u;
-	union {	
-		struct cil_classpermset *classpermset;
-		struct {
-			struct cil_class *class;
-			struct cil_list *perms;
-		} cp;
-	} r;
+	char *class_str;
+	struct cil_class *class;
+	struct cil_list *perm_strs;
+	struct cil_list *perms;
 };
 
 struct cil_classpermset {
@@ -909,6 +903,7 @@ void cil_validatetrans_init(struct cil_validatetrans **validtrans);
 void cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 void cil_perm_init(struct cil_perm **perm);
 void cil_classpermset_init(struct cil_classpermset **cps);
+void cil_classperms_set_init(struct cil_classperms_set **cp_set);
 void cil_classperms_init(struct cil_classperms **cp);
 void cil_classmapping_init(struct cil_classmapping **mapping);
 void cil_user_init(struct cil_user **user);

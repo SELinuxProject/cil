@@ -57,8 +57,10 @@ int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perm_strs
 int cil_fill_classpermset(struct cil_tree_node *class_node, struct cil_classpermset *cps);
 int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);
 void cil_destroy_classpermset(struct cil_classpermset *cps);
-int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classperms **cp, int allow_set, int allow_expr_ops);
+int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classperms **cp, int allow_expr_ops);
 void cil_destroy_classperms(struct cil_classperms *cp);
+int cil_fill_classperms_set(struct cil_tree_node *parse_current, struct cil_classperms_set **cp_set, int allow_set);
+void cil_destroy_classperms_set(struct cil_classperms_set *cp_set);
 int cil_fill_classperms_list(struct cil_tree_node *parse_current, struct cil_list **expr_list, int allow_sets, int allow_expr_ops);
 void cil_destroy_classperms_list(struct cil_list **cp_list);
 int cil_gen_map_class(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node);

@@ -140,39 +140,27 @@ exit:
 	return rc;
 }
 
-int cil_resolve_classperms_helper(struct cil_tree_node *current, struct cil_classperms *cp, void *extra_args)
+int cil_resolve_classperms(struct cil_tree_node *current, struct cil_classperms *cp, void *extra_args)
 {
-	struct cil_symtab_datum *class_datum = NULL;
-	struct cil_tree_node *class_node = NULL;
-	symtab_t *class_symtab = NULL;
-	symtab_t *common_symtab = NULL;
-	struct cil_list **perms = NULL;
 	int rc = SEPOL_ERR;
+	struct cil_symtab_datum *datum = NULL;
+	symtab_t *common_symtab = NULL;
+	struct cil_class *class;
 
-	rc = cil_resolve_name(current, cp->u.cp.class_str, CIL_SYM_CLASSES, extra_args, &class_datum);
+	rc = cil_resolve_name(current, cp->class_str, CIL_SYM_CLASSES, extra_args, &datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
-	class_node = class_datum->nodes->head->data;
+	class = (struct cil_class *)datum;
 
-	if (class_node->flavor == CIL_CLASS) {
-		struct cil_class *kc = (struct cil_class *)class_datum;
-		cp->r.cp.class = kc;
-		class_symtab = &kc->perms;
-		if (kc->common != NULL) {
-			common_symtab = &kc->common->perms;
-		}
-		perms = &cp->r.cp.perms;
-	} else {
-		struct cil_class *mc = (struct cil_class *)class_datum;
-		cp->flavor = CIL_MAP_CLASSPERMS;
-		cp->r.cp.class = mc;
-		class_symtab = &mc->perms;
-		perms = &cp->r.cp.perms;
+	if (class->common != NULL) {
+		common_symtab = &class->common->perms;
 	}
 
-	rc = __cil_resolve_perms(class_symtab, common_symtab, cp->u.cp.perm_strs, perms);
+	cp->class = class;
+
+	rc = __cil_resolve_perms(&class->perms, common_symtab, cp->perm_strs, &cp->perms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -183,34 +171,26 @@ exit:
 	return rc;
 }
 
-int cil_resolve_classperms(struct cil_tree_node *current, struct cil_classperms *cp, void *extra_args)
+int cil_resolve_classperms_set(struct cil_tree_node *current, struct cil_classperms_set *cp_set, void *extra_args)
 {
 	int rc = SEPOL_ERR;
+	struct cil_symtab_datum *datum = NULL;
 
-	if (cp->flavor == CIL_CLASSPERMSET) {
-		struct cil_symtab_datum *cps_datum = NULL;
+	rc = cil_resolve_name(current, cp_set->set_str, CIL_SYM_CLASSPERMSETS, extra_args, &datum);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	cp_set->set = (struct cil_classpermset*)datum;
 
-		rc = cil_resolve_name(current, cp->u.classpermset_str, CIL_SYM_CLASSPERMSETS, extra_args, &cps_datum);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-		cp->r.classpermset = (struct cil_classpermset*)cps_datum;
-
-		/* This could still be an anonymous classpermset even if classpermset_str is set, if classpermset_str is a param_str*/
-		if (cps_datum->name == NULL) {
-			struct cil_classpermset *cps = (struct cil_classpermset *)cps_datum;
-			struct cil_list_item *curr;
-			cil_list_for_each(curr, cps->classperms) {
-				rc = cil_resolve_classperms_helper(current, curr->data, extra_args);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
+	/* This could be an anonymous classpermset */
+	if (datum->name == NULL) {
+		struct cil_classpermset *cps = (struct cil_classpermset *)datum;
+		struct cil_list_item *curr;
+		cil_list_for_each(curr, cps->classperms) {
+			rc = cil_resolve_classperms(current, curr->data, extra_args);
+			if (rc != SEPOL_OK) {
+				goto exit;
 			}
-		}
-	} else {
-		rc = cil_resolve_classperms_helper(current, cp, extra_args);
-		if (rc != SEPOL_OK) {
-			goto exit;
 		}
 	}
 
@@ -226,11 +206,19 @@ int cil_resolve_classperms_list(struct cil_tree_node *current, struct cil_list *
 	struct cil_list_item *curr;
 
 	cil_list_for_each(curr, cp_list) {
-		rc = cil_resolve_classperms(current, curr->data, extra_args);
-		if (rc != SEPOL_OK) {
-			goto exit;
+		if (curr->flavor == CIL_CLASSPERMS) {
+			rc = cil_resolve_classperms(current, curr->data, extra_args);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		} else {
+			rc = cil_resolve_classperms_set(current, curr->data, extra_args);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
 		}
 	}
+
 	return SEPOL_OK;
 
 exit:
