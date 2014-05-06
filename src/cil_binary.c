@@ -44,10 +44,7 @@
 #include "cil_mem.h"
 #include "cil_tree.h"
 #include "cil_binary.h"
-
-#define DATUM(d) ((struct cil_symtab_datum *)(d))
-#define NODE(n) ((struct cil_tree_node *)(DATUM(n)->nodes->head->data))
-#define FLAVOR(f) (NODE(f)->flavor)
+#include "cil_symtab.h"
 
 struct cil_args_binary {
 	const struct cil_db *db;

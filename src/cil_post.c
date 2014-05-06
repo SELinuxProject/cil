@@ -45,10 +45,7 @@
 #include "cil_post.h"
 #include "cil_policy.h"
 #include "cil_verify.h"
-
-#define DATUM(d) ((struct cil_symtab_datum *)(d))
-#define NODE(n) ((struct cil_tree_node *)(DATUM(n)->nodes->head->data))
-#define FLAVOR(f) (NODE(f)->flavor)
+#include "cil_symtab.h"
 
 static int __cil_expr_to_bitmap(struct cil_list *expr, ebitmap_t *out, int max, struct cil_db *db);
 static int __cil_expr_list_to_bitmap(struct cil_list *expr_list, ebitmap_t *out, int max, struct cil_db *db);

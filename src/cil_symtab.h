@@ -44,6 +44,10 @@ struct cil_symtab_datum {
 	int state;
 };
 
+#define DATUM(d) ((struct cil_symtab_datum *)(d))
+#define NODE(n) ((struct cil_tree_node *)(DATUM(n)->nodes->head->data))
+#define FLAVOR(f) (NODE(f)->flavor)
+
 struct cil_complex_symtab_key {
 	intptr_t key1;
 	intptr_t key2;

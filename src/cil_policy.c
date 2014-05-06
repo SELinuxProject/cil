@@ -43,6 +43,7 @@
 #include "cil_tree.h"
 #include "cil_list.h"
 #include "cil_policy.h"
+#include "cil_symtab.h"
 
 #define SEPOL_DONE			555
 
@@ -65,10 +66,6 @@
 
 #define BUFFER				1024
 #define NUM_POLICY_FILES		16
-
-#define DATUM(d) ((struct cil_symtab_datum *)(d))
-#define NODE(n) ((struct cil_tree_node *)(DATUM(n)->nodes->head->data))
-#define FLAVOR(f) (NODE(f)->flavor)
 
 struct cil_args_genpolicy {
 	struct cil_list *users;
