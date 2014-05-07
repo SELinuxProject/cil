@@ -16,6 +16,10 @@
 
 	(classpermissionset file_rw (file (read write getattr setattr lock append)))
 
+	;;(classpermissionset loop1 ((loop2)))
+	;;(classpermissionset loop2 ((loop3)))
+	;;(classpermissionset loop3 ((loop1)))
+
 	(class char (foo))
 	(classcommon char file)
 

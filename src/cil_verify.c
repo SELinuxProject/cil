@@ -1231,7 +1231,7 @@ exit:
 	return rc;
 }
 
-int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint32_t *finished, void *extra_args)
+int __cil_verify_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	int *avrule_cnt = 0;
@@ -1387,6 +1387,157 @@ int __cil_verify_helper(struct cil_tree_node *node, __attribute__((unused)) uint
 	}
 	default:
 		rc = SEPOL_ERR;
+	}
+
+exit:
+	return rc;
+}
+
+static int __cil_verify_classperms(struct cil_list *classperms, struct cil_symtab_datum *orig)
+{
+	int rc = SEPOL_ERR;
+	struct cil_list_item *curr;
+
+	cil_list_for_each(curr, classperms) {
+		if (curr->flavor == CIL_CLASSPERMS) {
+			struct cil_classperms *cp = curr->data;
+			if (FLAVOR(cp->class) == CIL_CLASS) {
+				return SEPOL_OK;
+			} else { /* MAP */
+				struct cil_list_item *i = NULL;
+				cil_list_for_each(i, cp->perms) {
+					struct cil_perm *cmp = i->data;
+					if (&cmp->datum == orig) {
+						rc = SEPOL_ERR;
+						goto exit;
+					}
+					rc = __cil_verify_classperms(cmp->classperms, orig);
+					if (rc != SEPOL_OK) {
+						goto exit;
+					}
+				}
+			}	
+		} else { /* SET */
+			struct cil_classperms_set *cp_set = curr->data;
+			struct cil_classpermset *cps = cp_set->set;
+			if (&cps->datum == orig) {
+				rc = SEPOL_ERR;
+				goto exit;
+			}
+			rc = __cil_verify_classperms(cps->classperms, orig);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+		}
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+static int __cil_verify_classpermset(struct cil_tree_node *node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_classpermset *cps = node->data;
+
+	rc = __cil_verify_classperms(cps->classperms, &cps->datum);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Found circular class permissions involving the set %s at line %d of %s\n",cps->datum.name, node->line, node->path);
+		return rc;
+	}
+
+	return SEPOL_OK;
+}
+
+struct cil_verify_map_args {
+	struct cil_class *class;
+	struct cil_tree_node *node;
+	int rc;
+};
+
+static int __verify_map_perm_classperms(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
+{
+	int rc = SEPOL_ERR;
+	struct cil_verify_map_args *map_args = args;
+	struct cil_perm *cmp = (struct cil_perm *)d;
+
+	rc = __cil_verify_classperms(cmp->classperms, &cmp->datum);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Found circular class permissions involving the map class %s and permission %s at line %d of %s\n", map_args->class->datum.name, cmp->datum.name, map_args->node->line, map_args->node->path);
+		map_args->rc = SEPOL_ERR;
+	}
+
+	return SEPOL_OK;
+}
+
+static int __cil_verify_map_class(struct cil_tree_node *node)
+{
+	struct cil_class *mc = node->data;
+	struct cil_verify_map_args map_args;
+
+	map_args.class = mc;
+	map_args.node = node;
+	map_args.rc = SEPOL_OK;
+
+	cil_symtab_map(&mc->perms, __verify_map_perm_classperms, &map_args);
+
+	if (map_args.rc != SEPOL_OK) {
+		return SEPOL_ERR;
+	}
+
+	return SEPOL_OK;
+}
+
+static int __cil_verify_no_classperms_loop_helper(struct cil_tree_node *node, uint32_t *finished, __attribute__((unused)) void *extra_args)
+{
+	int rc = SEPOL_ERR;
+
+	if (node->flavor == CIL_OPTIONAL) {
+		int state = ((struct cil_symtab_datum *)node->data)->state;
+		if (state == CIL_STATE_DISABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		rc = SEPOL_OK;
+		goto exit;
+	} else if (node->flavor == CIL_MACRO) {
+		*finished = CIL_TREE_SKIP_HEAD;
+		rc = SEPOL_OK;
+		goto exit;
+	} else if (node->flavor == CIL_BLOCK) {
+		struct cil_block *blk = node->data;
+		if (blk->is_abstract == CIL_TRUE) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
+	switch (node->flavor) {
+	case CIL_MAP_CLASS:
+		rc = __cil_verify_map_class(node);
+		break;
+	case CIL_CLASSPERMSET:
+		rc = __cil_verify_classpermset(node);
+		break;
+	default:
+		rc = SEPOL_OK;
+		break;
+	}
+
+exit:
+	return rc;
+}
+
+int cil_verify_no_classperms_loop(struct cil_db *db)
+{
+	int rc = SEPOL_ERR;
+
+	rc = cil_tree_walk(db->ast->root, __cil_verify_no_classperms_loop_helper, NULL, NULL, NULL);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Failed to verify no loops in class permissions\n");
+		goto exit;
 	}
 
 exit:

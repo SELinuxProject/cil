@@ -1687,6 +1687,11 @@ int cil_post_process(struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
 
+	rc = cil_verify_no_classperms_loop(db);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
 	rc = cil_post_db(db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed post db handling\n");
@@ -1698,6 +1703,7 @@ int cil_post_process(struct cil_db *db)
 		cil_log(CIL_ERR, "Failed to verify cil database\n");
 		goto exit;
 	}
+
 exit:
 	return rc;
 		

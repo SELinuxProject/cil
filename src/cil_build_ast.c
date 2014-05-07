@@ -536,6 +536,7 @@ int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classper
 
 	rc = cil_fill_perms(parse_current->next, &(*cp)->perm_strs, allow_expr_ops);
 	if (rc != SEPOL_OK) {
+		cil_destroy_classperms(*cp);
 		goto exit;
 	}
 
@@ -543,7 +544,6 @@ int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classper
 
 exit:
 	cil_log(CIL_ERR, "Bad class-permissions\n");
-	cil_destroy_classperms(*cp);
 	*cp = NULL;
 	return rc;
 }
