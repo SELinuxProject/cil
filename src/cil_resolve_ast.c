@@ -2345,7 +2345,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 					struct cil_tree_node *cps_node = NULL;
 
 					cil_classpermset_init(&cps);
-					rc = cil_fill_classperms_list(pc, &cps->classperms, CIL_FALSE, CIL_TRUE);
+					rc = cil_fill_classperms_list(pc, &cps->classperms, CIL_TRUE);
 					if (rc != SEPOL_OK) {
 						cil_log(CIL_ERR, "Failed to create anonymous classpermset, rc: %d\n", rc);
 						cil_destroy_classpermset(cps);
