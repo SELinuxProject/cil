@@ -327,6 +327,16 @@ static int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *fini
 		}
 		break;
 	}
+	case CIL_OPTIONAL: {
+		struct cil_optional *opt = node->data;
+		if (opt->datum.state != CIL_STATE_ENABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_MACRO:
+		*finished = CIL_TREE_SKIP_HEAD;
+		break;
 	case CIL_TYPE: {
 		struct cil_type *type = node->data;
 		if (type->datum.nodes->head->data == node) {
@@ -349,16 +359,6 @@ static int __cil_post_db_count_helper(struct cil_tree_node *node, uint32_t *fini
 		}
 		break;
 	}
-	case CIL_OPTIONAL: {
-                struct cil_optional *opt = node->data;
-                if (opt->datum.state != CIL_STATE_ENABLED) {
-                        *finished = CIL_TREE_SKIP_HEAD;
-                }
-		break;
-	}
-        case CIL_MACRO:
-                *finished = CIL_TREE_SKIP_HEAD;
-		break;
 	case CIL_NETIFCON:
 		db->netifcon->count++;
 		break;
@@ -408,6 +408,16 @@ static int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__(
 		}
 		break;
 	}
+	case CIL_OPTIONAL: {
+		struct cil_optional *opt = node->data;
+		if (opt->datum.state != CIL_STATE_ENABLED) {
+			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_MACRO:
+		*finished = CIL_TREE_SKIP_HEAD;
+		break;
 	case CIL_TYPE: {
 		struct cil_type *type = node->data;
 		if (db->val_to_type == NULL) {
@@ -436,16 +446,6 @@ static int __cil_post_db_array_helper(struct cil_tree_node *node, __attribute__(
 		cil_list_append(db->selinuxusers, CIL_SELINUXUSERDEFAULT, node->data);
 		break;
 	}
-	case CIL_OPTIONAL: {
-                struct cil_optional *opt = node->data;
-                if (opt->datum.state != CIL_STATE_ENABLED) {
-                        *finished = CIL_TREE_SKIP_HEAD;
-                }
-		break;
-	}
-        case CIL_MACRO:
-                *finished = CIL_TREE_SKIP_HEAD;
-		break;
 	case CIL_NETIFCON: {
 		struct cil_sort *sort = db->netifcon;
 		uint32_t count = sort->count;
@@ -1183,6 +1183,10 @@ static int __cil_post_db_cat_helper(struct cil_tree_node *node, uint32_t *finish
 		if (opt->datum.state != CIL_STATE_ENABLED) {
 			*finished = CIL_TREE_SKIP_HEAD;
 		}
+		break;
+	}
+	case CIL_MACRO: {
+		*finished = CIL_TREE_SKIP_HEAD;
 		break;
 	}
 	case CIL_CATSET: {
