@@ -184,13 +184,9 @@ int cil_resolve_classperms_set(struct cil_tree_node *current, struct cil_classpe
 
 	/* This could be an anonymous classpermset */
 	if (datum->name == NULL) {
-		struct cil_classpermset *cps = (struct cil_classpermset *)datum;
-		struct cil_list_item *curr;
-		cil_list_for_each(curr, cps->classperms) {
-			rc = cil_resolve_classperms(current, curr->data, extra_args);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
+		rc = cil_resolve_classperms_list(current, cp_set->set->classperms, extra_args);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
 	}
 
@@ -2345,9 +2341,9 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 					struct cil_tree_node *cps_node = NULL;
 
 					cil_classpermset_init(&cps);
-					rc = cil_fill_classperms_list(pc, &cps->classperms, CIL_TRUE);
+					rc = cil_fill_classperms_list(pc, &cps->classperms);
 					if (rc != SEPOL_OK) {
-						cil_log(CIL_ERR, "Failed to create anonymous classpermset, rc: %d\n", rc);
+						cil_log(CIL_ERR, "Failed to create anonymous classpermset\n");
 						cil_destroy_classpermset(cps);
 						goto exit;
 					}

@@ -1485,44 +1485,33 @@ exit:
 	return rc;
 }
 
-static int __cil_post_db_class_mapping_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
-{
-	int rc = SEPOL_ERR;
-	struct cil_db *db = extra_args;
+struct class_map_args {
+	struct cil_db *db;
+	int rc;
+};
 
-	switch (node->flavor) {
-	case CIL_BLOCK: {
-		struct cil_block *blk = node->data;
-		if (blk->is_abstract == CIL_TRUE) {
-			*finished = CIL_TREE_SKIP_HEAD;
-		}
-		break;
-	}
-	case CIL_OPTIONAL: {
-		struct cil_optional *opt = node->data;
-		if (opt->datum.state != CIL_STATE_ENABLED) {
-			*finished = CIL_TREE_SKIP_HEAD;
-		}
-		break;
-	}
-	case CIL_CLASSMAPPING: {
-		struct cil_classmapping *cm = node->data;
-		rc = __evaluate_classperms_list(cm->classperms, db);
-		if (rc != SEPOL_OK) {
-			goto exit;
-		}
-		break;
-	}
-	default:
-		break;
-	}
+static int __evaluate_map_perm_classperms(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, void *args)
+{
+	struct class_map_args *map_args = args;
+	struct cil_perm *cmp = (struct cil_perm *)d;
+
+	map_args->rc  = __evaluate_classperms_list(cmp->classperms, map_args->db);
 
 	return SEPOL_OK;
-exit:
-	return rc;
 }
 
-static int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
+static int __evaluate_map_class(struct cil_class *mc, struct cil_db *db)
+{
+	struct class_map_args map_args;
+
+	map_args.db = db;
+	map_args.rc = SEPOL_OK;
+	cil_symtab_map(&mc->perms, __evaluate_map_perm_classperms, &map_args);		
+
+	return map_args.rc;
+}
+
+static int __cil_post_db_classperms_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_db *db = extra_args;
@@ -1539,12 +1528,39 @@ static int __cil_post_db_classpermset_helper(struct cil_tree_node *node, uint32_
 		struct cil_optional *opt = node->data;
 		if (opt->datum.state != CIL_STATE_ENABLED) {
 			*finished = CIL_TREE_SKIP_HEAD;
+		}
+		break;
+	}
+	case CIL_MACRO:
+		*finished = CIL_TREE_SKIP_HEAD;
+		break;
+	case CIL_MAP_CLASS: {
+		rc = __evaluate_map_class(node->data, db);
+		if (rc != SEPOL_OK) {
+			goto exit;
 		}
 		break;
 	}
 	case CIL_CLASSPERMSET: {
 		struct cil_classpermset *cps = node->data;
 		rc = __evaluate_classperms_list(cps->classperms, db);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_AVRULE: {
+		struct cil_avrule *avrule = node->data;
+		rc = __evaluate_classperms_list(avrule->classperms, db);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+		break;
+	}
+	case CIL_CONSTRAIN:
+	case CIL_MLSCONSTRAIN: {
+		struct cil_constrain *constrain = node->data;
+		rc = __evaluate_classperms_list(constrain->classperms, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -1588,15 +1604,9 @@ static int cil_post_db(struct cil_db *db)
 		goto exit;
 	}
 
-	rc = cil_tree_walk(db->ast->root, __cil_post_db_class_mapping_helper, NULL, NULL, db);
+	rc = cil_tree_walk(db->ast->root, __cil_post_db_classperms_helper, NULL, NULL, db);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_INFO, "Failed to evaluate class mapping permissions expressions\n");
-		goto exit;
-	}
-
-	rc = cil_tree_walk(db->ast->root, __cil_post_db_classpermset_helper, NULL, NULL, db);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_INFO, "Failed to evaluate class-permission sets expressions\n");
 		goto exit;
 	}
 

@@ -484,7 +484,7 @@ exit:
 	return rc;
 }
 
-int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perms, int allow_expr_ops)
+int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perms)
 {
 	int rc = SEPOL_ERR;
 	enum cil_syntax syntax[] = {
@@ -498,12 +498,7 @@ int cil_fill_perms(struct cil_tree_node *start_perm, struct cil_list **perms, in
 		goto exit;
 	}
 
-	if (allow_expr_ops) {
-		rc = cil_gen_expr(start_perm, CIL_PERM, perms);
-	} else {
-		rc = cil_fill_list(start_perm->cl_head, CIL_PERM, perms);
-	}
-
+	rc = cil_gen_expr(start_perm, CIL_PERM, perms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -515,7 +510,7 @@ exit:
 	return rc;
 }
 
-int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classperms **cp, int allow_expr_ops)
+int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classperms **cp)
 {
 	int rc = SEPOL_ERR;
 	enum cil_syntax syntax[] = {
@@ -534,7 +529,7 @@ int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classper
 
 	(*cp)->class_str = cil_strdup(parse_current->data);
 
-	rc = cil_fill_perms(parse_current->next, &(*cp)->perm_strs, allow_expr_ops);
+	rc = cil_fill_perms(parse_current->next, &(*cp)->perm_strs);
 	if (rc != SEPOL_OK) {
 		cil_destroy_classperms(*cp);
 		goto exit;
@@ -577,7 +572,7 @@ void cil_destroy_classperms_set(struct cil_classperms_set *cp_set)
 	free(cp_set);
 }
 
-int cil_fill_classperms_list(struct cil_tree_node *parse_current, struct cil_list **cp_list, int allow_expr_ops)
+int cil_fill_classperms_list(struct cil_tree_node *parse_current, struct cil_list **cp_list)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *curr;
@@ -607,7 +602,7 @@ int cil_fill_classperms_list(struct cil_tree_node *parse_current, struct cil_lis
 	} else if (curr->cl_head == NULL) {
 		/* Class-perms form: (CLASS1 (PERM1 ...)) */
 		struct cil_classperms *new_cp;
-		rc = cil_fill_classperms(curr, &new_cp, allow_expr_ops);
+		rc = cil_fill_classperms(curr, &new_cp);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
@@ -627,7 +622,7 @@ int cil_fill_classperms_list(struct cil_tree_node *parse_current, struct cil_lis
 				cil_list_append(*cp_list, CIL_CLASSPERMS_SET, new_cp_set);
 			} else {
 				struct cil_classperms *new_cp;
-				rc = cil_fill_classperms(cn, &new_cp, allow_expr_ops);
+				rc = cil_fill_classperms(cn, &new_cp);
 				if (rc != SEPOL_OK) {
 					goto exit;
 				}
@@ -694,7 +689,7 @@ int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current,
 		goto exit;
 	}
 
-	rc = cil_fill_classperms_list(parse_current->next->next, &cps->classperms, CIL_TRUE);
+	rc = cil_fill_classperms_list(parse_current->next->next, &cps->classperms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -790,7 +785,7 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 	mapping->map_class_str = cil_strdup(parse_current->next->data);
 	mapping->map_perm_str = cil_strdup(parse_current->next->next->data);
 
-	rc = cil_fill_classperms_list(parse_current->next->next->next, &mapping->classperms, CIL_TRUE);
+	rc = cil_fill_classperms_list(parse_current->next->next->next, &mapping->classperms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1876,7 +1871,7 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 	rule->src_str = cil_strdup(parse_current->next->data);
 	rule->tgt_str = cil_strdup(parse_current->next->next->data);
 
-	rc = cil_fill_classperms_list(parse_current->next->next->next, &rule->classperms, CIL_FALSE);
+	rc = cil_fill_classperms_list(parse_current->next->next->next, &rule->classperms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -3672,7 +3667,7 @@ int cil_gen_constrain(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	cil_constrain_init(&cons);
 
-	rc = cil_fill_classperms_list(parse_current->next, &cons->classperms, CIL_FALSE);
+	rc = cil_fill_classperms_list(parse_current->next, &cons->classperms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
