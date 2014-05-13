@@ -1253,6 +1253,20 @@ exit:
 	return rc;
 }
 
+void cil_set_cat_values(struct cil_list *ordered_cats, struct cil_db *db)
+{
+	struct cil_list_item *curr;
+	int v = 0;
+
+	cil_list_for_each(curr, ordered_cats) {
+		struct cil_cat *cat = curr->data;
+		cat->value = v;
+		v++;
+	}
+
+	db->num_cats = v;
+}
+
 int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_args_resolve *args = extra_args;
@@ -1263,7 +1277,6 @@ int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args)
 	struct cil_symtab_datum *cat_datum;
 	struct cil_cat *cat = NULL;
 	struct cil_ordered_list *ordered = NULL;
-	int total = 0;
 	int rc = SEPOL_ERR;
 
 	cil_list_init(&new, CIL_CATORDER);
@@ -1282,12 +1295,8 @@ int cil_resolve_catorder(struct cil_tree_node *current, void *extra_args)
 			goto exit;
 		}
 		cat = (struct cil_cat *)cat_datum;
-		cat->value = total;
-		++total;
 		cil_list_append(new, CIL_CAT, cat);
 	}
-
-	args->db->num_cats=total;
 
 	__cil_ordered_list_init(&ordered);
 	ordered->list = new;
@@ -3254,6 +3263,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 			}
 
 			db->catorder = __cil_ordered_lists_merge_all(&extra_args.catorder_lists);
+			cil_set_cat_values(db->catorder, db);
 			rc = __cil_verify_ordered(current, CIL_CAT);
 			if (rc != SEPOL_OK) {
 				goto exit;
