@@ -48,11 +48,15 @@ void usage(char *prog)
 	printf("                                 (default: file_contexts)\n");
 	printf("  -t, --target=<type>            specify target architecture. may be selinux or\n");
 	printf("                                 xen. (default: selinux)\n");
-	printf("  -M, --mls                      build an mls policy\n");
+	printf("  -M, --mls true|false           build an mls policy. Must be true or false.\n");
+	printf("                                 This will override the (mls boolean) statement\n");
+	printf("                                 if present in the policy\n");
 	printf("  -c, --policyvers=<version>     build a binary policy with a given <version>\n");
 	printf("                                 (default: %i)\n", POLICYDB_VERSION_MAX);
 	printf("  -U, --handle-unknown=<action>  how to handle unknown classes or permissions.\n");
 	printf("                                 may be deny, allow, or reject. (default: deny)\n");
+	printf("                                 This will override the (handleunknown action)\n");
+	printf("                                 statement if present in the policy\n");
 	printf("  -D, --disable-dontaudit        do not add dontaudit rules to the binary policy\n");
 	printf("  -P, --preserve-tunables        treat tunables as booleans\n");
 	printf("  -N, --disable-neverallow       do not check neverallow rules\n");
