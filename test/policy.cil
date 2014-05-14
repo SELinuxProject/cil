@@ -76,6 +76,7 @@
 	(sensitivitycategory s1 cats01)
 	(sensitivitycategory s1 (c2))
 	(sensitivitycategory s2 (cats01 cats02))
+	(sensitivitycategory s2 (range c4 c5))
 	(sensitivitycategory s3 (range c0 c5))
 
 	(level low (s0))
@@ -84,6 +85,7 @@
 	(levelrange lh1 ((s0 (c0)) (s2 (c0 c3))))
 	(levelrange lh2 (low (s2 (c0 c3))))
 	(levelrange lh3 ((s0 cats04) (s2 (range c0 c5))))
+	(levelrange lh4 ((s0) (s1)))
 
 	(sid kernel)
 	(sid security)

@@ -431,28 +431,66 @@ int __cil_verify_initsids(struct cil_list *sids)
 	return rc;
 }
 
-int __cil_verify_senscat(struct cil_sens *sens, struct cil_cat *cat)
+int __cil_is_cat_in_cats(struct cil_cat *cat, struct cil_cats *cats)
 {
-	struct cil_list_item *cats_item;
+	struct cil_list_item *i;
 
-	cil_list_for_each(cats_item, sens->cats_list) {
-		struct cil_cats *cats = cats_item->data;
-		struct cil_list_item *cat_item;
-		cil_list_for_each(cat_item, cats->datum_expr) {
-			struct cil_cat *c = cat_item->data;
-			if (c == cat) {
-				return SEPOL_OK;
-			}
+	cil_list_for_each(i, cats->datum_expr) {
+		struct cil_cat *c = i->data;
+		if (c == cat) {
+			return CIL_TRUE;
 		}
 	}
 
-	cil_log(CIL_ERR, "Category %s cannot be used with sensitivity %s\n", 
-		cat->datum.name, sens->datum.name);
-
-	return SEPOL_ERR;
+	return CIL_FALSE;
 }
 
-int __cil_verify_levelrange_sensitivityorder(struct cil_db *db, struct cil_sens *low, struct cil_sens *high)
+
+int __cil_verify_cat_in_cats(struct cil_cat *cat, struct cil_cats *cats)
+{
+	if (__cil_is_cat_in_cats(cat, cats) != CIL_TRUE) {
+		cil_log(CIL_ERR, "Failed to find category %s in category list\n", cat->datum.name);
+		return SEPOL_ERR;
+	}
+
+	return SEPOL_OK;
+}
+
+int __cil_verify_cats_associated_with_sens(struct cil_sens *sens, struct cil_cats *cats)
+{
+	int rc = SEPOL_OK;
+	struct cil_list_item *i, *j;
+
+	if (!cats) {
+		return SEPOL_OK;
+	}
+
+	if (!sens->cats_list) {
+		cil_log(CIL_ERR, "No categories can be used with sensitivity %s\n", sens->datum.name);
+		return SEPOL_ERR;
+	}
+
+	cil_list_for_each(i, cats->datum_expr) {
+		struct cil_cat *cat = i->data;
+		int ok = CIL_FALSE;
+		cil_list_for_each(j, sens->cats_list) {
+			if (__cil_is_cat_in_cats(cat, j->data) == CIL_TRUE) {
+				ok = CIL_TRUE;
+				break;
+			}
+		}
+
+		if (ok != CIL_TRUE) {
+			cil_log(CIL_ERR, "Category %s cannot be used with sensitivity %s\n", 
+					cat->datum.name, sens->datum.name);
+			rc = SEPOL_ERR;
+		}
+	}
+
+	return rc;
+}
+
+int __cil_verify_levelrange_sensitivity(struct cil_db *db, struct cil_sens *low, struct cil_sens *high)
 {
 	struct cil_list_item *curr;
 	int found = CIL_FALSE;
@@ -479,36 +517,6 @@ exit:
 		high->datum.name, low->datum.name);
 	return rc;
 
-}
-
-int __cil_verify_cat_in_cats(struct cil_cat *cat, struct cil_cats *cats)
-{
-	struct cil_list_item *i;
-
-	cil_list_for_each(i, cats->datum_expr) {
-		struct cil_symtab_datum *datum = i->data;
-		struct cil_tree_node *node = datum->nodes->head->data;
-		enum cil_flavor flavor = node->flavor;
-		if (flavor == CIL_CATSET) {
-			struct cil_list_item *j;
-			struct cil_catset *cs = i->data;
-			cil_list_for_each(j, cs->cats->datum_expr) {
-				struct cil_cat *c = j->data;
-				if (c == cat) {
-					return SEPOL_OK;
-				}
-			}
-		} else {
-			struct cil_cat *c = i->data;
-			if (c == cat) {
-				return SEPOL_OK;
-			}
-		}
-	}
-
-	cil_log(CIL_ERR, "Failed to find category %s in category list\n", cat->datum.name);
-
-	return SEPOL_ERR;
 }
 
 int __cil_verify_levelrange_cats(struct cil_cats *low, struct cil_cats *high)
@@ -543,7 +551,7 @@ int __cil_verify_levelrange(struct cil_db *db, struct cil_levelrange *lr)
 {
 	int rc = SEPOL_ERR;
 
-	rc = __cil_verify_levelrange_sensitivityorder(db, lr->low->sens, lr->high->sens);
+	rc = __cil_verify_levelrange_sensitivity(db, lr->low->sens, lr->high->sens);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -553,10 +561,21 @@ int __cil_verify_levelrange(struct cil_db *db, struct cil_levelrange *lr)
 		goto exit;
 	}
 
+	rc = __cil_verify_cats_associated_with_sens(lr->low->sens, lr->low->cats);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "Low level sensitivity and categories are not associated\n");
+		goto exit;
+	}
+
+	rc = __cil_verify_cats_associated_with_sens(lr->high->sens, lr->high->cats);
+	if (rc != SEPOL_OK) {
+		cil_log(CIL_ERR, "High level sensitivity and categories are not associated\n");
+		goto exit;
+	}
+	
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Invalid range\n");
 	return rc;
 }
 

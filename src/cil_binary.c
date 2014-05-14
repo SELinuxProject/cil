@@ -2330,12 +2330,14 @@ int cil_sepol_level_define(policydb_t *pdb, struct cil_sens *cil_sens)
 
 	ebitmap_init(&mls_level->cat);
 
-	cil_list_for_each(curr, cil_sens->cats_list) {
-		struct cil_cats *cats = curr->data;
-		rc = __cil_cats_to_mls_level(pdb, cats, mls_level);
-		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failed to insert category set into sepol mls level\n");
-			goto exit;
+	if (cil_sens->cats_list) {
+		cil_list_for_each(curr, cil_sens->cats_list) {
+			struct cil_cats *cats = curr->data;
+			rc = __cil_cats_to_mls_level(pdb, cats, mls_level);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Failed to insert category set into sepol mls level\n");
+				goto exit;
+			}
 		}
 	}
 
