@@ -119,7 +119,7 @@
       </sect2>
 
       <sect2 id="defaulttype">
-         <title>defaultuser</title>
+         <title>defaulttype</title>
          <para>Allows the default type to be taken from the source or target context when computing a new context for the object <literal><link linkend="class">class</link></literal> identifier. Requires policy version 28.</para>
          <para><emphasis role="bold">Statement definition:</emphasis></para>
          <programlisting><![CDATA[(defaulttype class_id default)]]></programlisting>
