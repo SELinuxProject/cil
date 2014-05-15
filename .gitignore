@@ -5,3 +5,6 @@
 src/cil_lexer.c
 unit_tests
 cov
+ docs/pdf/
+ docs/html/
+ docs/man8/
