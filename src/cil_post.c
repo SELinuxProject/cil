@@ -1499,7 +1499,11 @@ static int __evaluate_map_perm_classperms(__attribute__((unused)) hashtab_key_t 
 	struct class_map_args *map_args = args;
 	struct cil_perm *cmp = (struct cil_perm *)d;
 
-	map_args->rc  = __evaluate_classperms_list(cmp->classperms, map_args->db);
+	int rc = __evaluate_classperms_list(cmp->classperms, map_args->db);
+
+	if (rc != SEPOL_OK) {
+		map_args->rc = rc;
+	}
 
 	return SEPOL_OK;
 }
@@ -1510,7 +1514,7 @@ static int __evaluate_map_class(struct cil_class *mc, struct cil_db *db)
 
 	map_args.db = db;
 	map_args.rc = SEPOL_OK;
-	cil_symtab_map(&mc->perms, __evaluate_map_perm_classperms, &map_args);		
+	cil_symtab_map(&mc->perms, __evaluate_map_perm_classperms, &map_args);
 
 	return map_args.rc;
 }
