@@ -844,7 +844,7 @@ int cil_filecons_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char *
 
 void cil_symtab_array_init(symtab_t symtab[], int symtab_sizes[CIL_SYM_NUM]);
 void cil_symtab_array_destroy(symtab_t symtab[]);
-int cil_destroy_ast_symtabs(struct cil_tree_node *root);
+void cil_destroy_ast_symtabs(struct cil_tree_node *root);
 int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index);
 
 void cil_sort_init(struct cil_sort **sort);

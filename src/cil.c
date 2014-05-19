@@ -106,6 +106,7 @@ void cil_db_destroy(struct cil_db **db)
 	}
 
 	cil_tree_destroy(&(*db)->parse);
+	cil_destroy_ast_symtabs((*db)->ast->root);
 	cil_tree_destroy(&(*db)->ast);
 	cil_symtab_array_destroy((*db)->symtab);
 	cil_list_destroy(&(*db)->sidorder, CIL_FALSE);
@@ -198,13 +199,6 @@ int cil_compile(struct cil_db *db, sepol_policydb_t *sepol_db)
 	rc = cil_post_process(db);
 	if (rc != SEPOL_OK ) {
 		cil_log(CIL_ERR, "Post process failed\n");
-		goto exit;
-	}
-
-	cil_log(CIL_INFO, "Destroying AST Symtabs\n");
-	rc = cil_destroy_ast_symtabs(db->ast->root);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to destroy ast symtabs\n");
 		goto exit;
 	}
 
@@ -1216,72 +1210,37 @@ void cil_symtab_array_destroy(symtab_t symtab[])
 	}
 }
 
-int cil_destroy_ast_symtabs(struct cil_tree_node *root)
+void cil_destroy_ast_symtabs(struct cil_tree_node *current)
 {
-	struct cil_tree_node *current = root;
-	uint16_t reverse = 0;
-	int rc = SEPOL_ERR;
-
-	if (current == NULL) {
-		rc = SEPOL_OK;
-		goto exit;
-	}
-
-	do {
-		if (current->cl_head != NULL && !reverse) {
-			switch (current->flavor) {
-			case CIL_ROOT:
-				break;
-			case CIL_BLOCK:
-				cil_symtab_array_destroy(((struct cil_block*)current->data)->symtab);
-				break;
-			case CIL_IN:
-				cil_symtab_array_destroy(((struct cil_in*)current->data)->symtab);
-				break;
-			case CIL_CLASS:
-			case CIL_COMMON:
-			case CIL_MAP_CLASS:
-				cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
-				break;
-			case CIL_MACRO:
-				cil_symtab_array_destroy(((struct cil_macro*)current->data)->symtab);
-				break;
-			case CIL_TUNABLEIF:
-				break;
-			case CIL_BOOLEANIF:
-				/* do nothing */
-				break;
-			case CIL_CALL:
-				/* do nothing */
-				break;
-			case CIL_BLOCKINHERIT:
-				break;
-			case CIL_OPTIONAL:
-				/* do nothing */
-				break;
-			case CIL_CONDBLOCK:
-				cil_symtab_array_destroy(((struct cil_condblock*)current->data)->symtab);
-				break;
-			default:
-				cil_log(CIL_INFO, "destroy symtab error, wrong flavor node: %d\n", current->flavor);
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			current = current->cl_head;
-		} else if (current->next != NULL) {
-			current = current->next;
-			reverse = 0;
-		} else {
-			current = current->parent;
-			reverse = 1;
+	while (current) {
+		switch (current->flavor) {
+		case CIL_BLOCK:
+			cil_symtab_array_destroy(((struct cil_block*)current->data)->symtab);
+			break;
+		case CIL_IN:
+			cil_symtab_array_destroy(((struct cil_in*)current->data)->symtab);
+			break;
+		case CIL_CLASS:
+		case CIL_COMMON:
+		case CIL_MAP_CLASS:
+			cil_symtab_destroy(&((struct cil_class*)current->data)->perms);
+			break;
+		case CIL_MACRO:
+			cil_symtab_array_destroy(((struct cil_macro*)current->data)->symtab);
+			break;
+		case CIL_CONDBLOCK:
+			cil_symtab_array_destroy(((struct cil_condblock*)current->data)->symtab);
+			break;
+		default:
+			break;
 		}
+
+		if (current->cl_head) {
+			cil_destroy_ast_symtabs(current->cl_head);
+		}
+
+		current = current->next;
 	}
-	while (current != NULL && current->flavor != CIL_ROOT);
-
-	return SEPOL_OK;
-
-exit:
-	return rc;
 }
 
 int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index)
