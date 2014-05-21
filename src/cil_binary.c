@@ -2971,7 +2971,7 @@ int cil_default_to_policydb(policydb_t *pdb, struct cil_default *def)
 			case CIL_DEFAULTUSER:
 				if (!sepol_class->default_user) { 
 					sepol_class->default_user = def->object;
-				} else {
+				} else if (sepol_class->default_user != (char)def->object) {
 					cil_log(CIL_ERR,"User default labeling for class %s already specified\n",DATUM(c->data)->name);
 					goto exit;
 				}
@@ -2979,7 +2979,7 @@ int cil_default_to_policydb(policydb_t *pdb, struct cil_default *def)
 			case CIL_DEFAULTROLE:
 				if (!sepol_class->default_role) { 
 					sepol_class->default_role = def->object;
-				} else {
+				} else if (sepol_class->default_role != (char)def->object) {
 					cil_log(CIL_ERR,"Role default labeling for class %s already specified\n",DATUM(c->data)->name);
 					goto exit;
 				}
@@ -2987,7 +2987,7 @@ int cil_default_to_policydb(policydb_t *pdb, struct cil_default *def)
 			case CIL_DEFAULTTYPE:
 				if (!sepol_class->default_type) { 
 					sepol_class->default_type = def->object;
-				} else {
+				} else if (sepol_class->default_type != (char)def->object) {
 					cil_log(CIL_ERR,"Type default labeling for class %s already specified\n",DATUM(c->data)->name);
 					goto exit;
 				}
@@ -3024,7 +3024,7 @@ int cil_defaultrange_to_policydb(policydb_t *pdb, struct cil_defaultrange *def)
 
 			if (!sepol_class->default_range) { 
 				sepol_class->default_range = def->object_range;
-			} else {
+			} else if (sepol_class->default_range != (char)def->object_range) {
 				cil_log(CIL_ERR,"Range default labeling for class %s already specified\n", DATUM(curr->data)->name);
 				goto exit;
 			}
