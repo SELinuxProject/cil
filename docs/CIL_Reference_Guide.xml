@@ -69,6 +69,7 @@
                <member><literal><link linkend="role">role</link></literal></member>
                <member><literal><link linkend="roleattribute">roleattribute</link></literal></member>
                <member><literal><link linkend="type">type</link></literal></member>
+               <member><literal><link linkend="classpermission">classpermission</link></literal></member>
                <member><literal><link linkend="classpermissionset">classpermissionset</link></literal></member>
                <member><literal><link linkend="typeattribute">typeattribute</link></literal></member>
                <member><literal><link linkend="typealias">typealias</link></literal></member>
@@ -456,6 +457,8 @@ expr_key = and | or | xor | not | all | eq | neq | dom | domby | incomp | range]
             <programlisting><![CDATA[
 (class security (compute_av compute_create compute_member check_context load_policy compute_relabel compute_user setenforce setbool setsecparam setcheckreqprot read_policy))
 
+(classpermission cps_1)
+
 (classpermissionset cps_1 (security (not (load_policy setenforce))))]]>
             </programlisting>
 
@@ -465,6 +468,8 @@ expr_key = and | or | xor | not | all | eq | neq | dom | domby | incomp | range]
     compute_relabel compute_user setenforce setbool setsecparam setcheckreqprot
     read_policy)
 )
+
+(classpermission security_all_perms)
 
 (classpermissionset security_all_perms (security (all)))]]>
             </programlisting>

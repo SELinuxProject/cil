@@ -182,6 +182,10 @@ void cil_copy_classperms_list(struct cil_list *orig, struct cil_list **new)
 {
 	struct cil_list_item *orig_item;
 
+	if (orig == NULL) {
+		return;
+	}
+
 	cil_list_init(new, CIL_LIST_ITEM);
 	cil_list_for_each(orig_item, orig) {
 		if (orig_item->flavor == CIL_CLASSPERMS) {
@@ -235,20 +239,34 @@ int cil_copy_class(__attribute__((unused)) struct cil_db *db, void *data, void *
 	return SEPOL_OK;
 }
 
-int cil_copy_classpermset(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
+int cil_copy_classpermission(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 {
-	struct cil_classpermset *orig = data;
-	struct cil_classpermset *new = NULL;
+	struct cil_classpermission *orig = data;
+	struct cil_classpermission *new = NULL;
 	char *key = orig->datum.name;
 	struct cil_symtab_datum *datum = NULL;
 
 	if (key != NULL) {
 		cil_symtab_get_datum(symtab, key, &datum);
 		if (datum != NULL) {
-			cil_log(CIL_INFO, "cil_copy_classpermset: classpermissionset cannot be redefined\n");
+			cil_log(CIL_INFO, "classpermission cannot be redefined\n");
 			return SEPOL_ERR;
 		}
 	}
+
+	cil_copy_classperms_list(orig->classperms, &new->classperms);
+
+	*copy = new;
+
+	return SEPOL_OK;
+}
+
+int cil_copy_classpermissionset(__attribute__((unused)) struct cil_db *db, void *data, void **copy,  __attribute__((unused)) symtab_t *symtab)
+{
+	struct cil_classpermissionset *orig = data;
+	struct cil_classpermissionset *new = NULL;
+
+	new->set_str = cil_strdup(orig->set_str);
 
 	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
@@ -1550,10 +1568,12 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_MAP_CLASS:
 		copy_func = &cil_copy_class;
 		break;
-	case CIL_CLASSPERMSET:
-		copy_func = &cil_copy_classpermset;
+	case CIL_CLASSPERMISSION:
+		copy_func = &cil_copy_classpermission;
 		break;
-
+	case CIL_CLASSPERMISSIONSET:
+		copy_func = &cil_copy_classpermissionset;
+		break;
 	case CIL_CLASSCOMMON:
 		copy_func = &cil_copy_classcommon;
 		break;

@@ -106,7 +106,7 @@
                         <member><literal><link linkend="level">level</link></literal> (named or anonymous)</member>
                         <member><literal><link linkend="levelrange">levelrange</link></literal> (named or anonymous)</member>
                         <member><literal><link linkend="class">class</link></literal></member>
-                        <member><literal><link linkend="classpermissionset">classpermissionset</link></literal> (named or anonymous)</member>
+                        <member><literal><link linkend="classpermission">classpermission</link></literal> (named or anonymous)</member>
                         <member><literal><link linkend="ipaddr">ipaddr</link></literal> (named or anonymous)</member>
                         <member><literal><link linkend="boolean">block</link></literal></member>
                         <member><literal><link linkend="name">name</link></literal> (a string)</member>

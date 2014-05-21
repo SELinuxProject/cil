@@ -443,6 +443,8 @@ void cil_destroy_perm(struct cil_perm *perm)
 	}
 
 	cil_symtab_datum_destroy(&perm->datum);
+	cil_list_destroy(&perm->classperms, CIL_FALSE);
+
 	free(perm);
 }
 
@@ -608,27 +610,9 @@ int cil_fill_classperms_list(struct cil_tree_node *parse_current, struct cil_lis
 		}
 		cil_list_append(*cp_list, CIL_CLASSPERMS, new_cp);
 	} else {
-		/* Class-perms form: ((SET1)|(CLASS1 (PERM1 ...)) ...) */
-		for (; curr != NULL; curr = curr->next) {
-			struct cil_tree_node *cn = curr->cl_head;
-			if (cn == NULL) {
-				cil_log(CIL_ERR, "Bad class-permissions list form\n");
-				rc = SEPOL_ERR;
-				goto exit;
-			}
-			if (cn->next == NULL) {
-				struct cil_classperms_set *new_cp_set;
-				cil_fill_classperms_set(cn, &new_cp_set);
-				cil_list_append(*cp_list, CIL_CLASSPERMS_SET, new_cp_set);
-			} else {
-				struct cil_classperms *new_cp;
-				rc = cil_fill_classperms(cn, &new_cp);
-				if (rc != SEPOL_OK) {
-					goto exit;
-				}
-				cil_list_append(*cp_list, CIL_CLASSPERMS, new_cp);
-			}
-		}
+		cil_log(CIL_ERR, "Bad class-permissions list syntax\n");
+		rc = SEPOL_ERR;
+		goto exit;
 	}
 
 	return SEPOL_OK;
@@ -658,11 +642,69 @@ void cil_destroy_classperms_list(struct cil_list **cp_list)
 	cil_list_destroy(cp_list, CIL_FALSE);
 }
 
-int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+int cil_gen_classpermission(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
 {
 	int rc = SEPOL_ERR;
 	char *key = NULL;
-	struct cil_classpermset *cps = NULL;
+	struct cil_classpermission *cp = NULL;
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_STRING,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_classpermission_init(&cp);
+
+	key = parse_current->next->data;
+
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cp, (hashtab_key_t)key, CIL_SYM_CLASSPERMSETS, CIL_CLASSPERMISSION);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad classpermission declaration at line %d of %s\n", 
+		parse_current->line, parse_current->path);
+	cil_destroy_classpermission(cp);
+	cil_clear_node(ast_node);
+	return rc;
+}
+
+void cil_destroy_classpermission(struct cil_classpermission *cp)
+{
+	if (cp == NULL) {
+		return;
+	}
+
+	if (cp->datum.name != NULL) {
+		cil_list_destroy(&cp->classperms, CIL_FALSE);
+	} else {
+		/* anonymous classpermission from call */
+		cil_destroy_classperms_list(&cp->classperms);
+	}
+
+	cil_symtab_datum_destroy(&cp->datum);
+
+
+	free(cp);
+}
+
+int cil_gen_classpermissionset(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	int rc = SEPOL_ERR;
+	struct cil_classpermissionset *cps = NULL;
 	enum cil_syntax syntax[] = {
 		CIL_SYN_STRING,
 		CIL_SYN_STRING,
@@ -680,37 +722,34 @@ int cil_gen_classpermset(struct cil_db *db, struct cil_tree_node *parse_current,
 		goto exit;
 	}
 
-	cil_classpermset_init(&cps);
+	cil_classpermissionset_init(&cps);
 
-	key = parse_current->next->data;
-
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)cps, (hashtab_key_t)key, CIL_SYM_CLASSPERMSETS, CIL_CLASSPERMSET);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
+	cps->set_str = cil_strdup(parse_current->next->data);
 
 	rc = cil_fill_classperms_list(parse_current->next->next, &cps->classperms);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
+	ast_node->data = cps;
+	ast_node->flavor = CIL_CLASSPERMISSIONSET;
+
 	return SEPOL_OK;
 
 exit:
-	cil_log(CIL_ERR, "Bad classpermissionset declaration at line %d of %s\n", 
+	cil_log(CIL_ERR, "Bad classpermissionset at line %d of %s\n", 
 		parse_current->line, parse_current->path);
-	cil_destroy_classpermset(cps);
-	cil_clear_node(ast_node);
+	cil_destroy_classpermissionset(cps);
 	return rc;
 }
 
-void cil_destroy_classpermset(struct cil_classpermset *cps)
+void cil_destroy_classpermissionset(struct cil_classpermissionset *cps)
 {
 	if (cps == NULL) {
 		return;
 	}
 
-	cil_symtab_datum_destroy(&cps->datum);
+	free(cps->set_str);
 	cil_destroy_classperms_list(&cps->classperms);
 
 	free(cps);
@@ -766,7 +805,7 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 		CIL_SYN_STRING,
 		CIL_SYN_STRING,
 		CIL_SYN_STRING,
-		CIL_SYN_N_STRINGS | CIL_SYN_N_LISTS,
+		CIL_SYN_STRING | CIL_SYN_LIST,
 		CIL_SYN_END
 	};
 	int syntax_len = sizeof(syntax)/sizeof(*syntax);
@@ -4815,8 +4854,8 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			param->flavor = CIL_IPADDR;
 		} else if (!strcmp(kind, CIL_KEY_MAP_CLASS)) {
 			param->flavor = CIL_MAP_CLASS;
-		} else if (!strcmp(kind, CIL_KEY_CLASSPERMSET)) {
-			param->flavor = CIL_CLASSPERMSET;
+		} else if (!strcmp(kind, CIL_KEY_CLASSPERMISSION)) {
+			param->flavor = CIL_CLASSPERMISSION;
 		} else if (!strcmp(kind, CIL_KEY_BOOL)) {
 			param->flavor = CIL_BOOL;
 		} else if (!strcmp(kind, CIL_KEY_STRING)) {
@@ -4986,8 +5025,8 @@ void cil_destroy_args(struct cil_args *args)
 			cil_destroy_ipaddr((struct cil_ipaddr *)args->arg);
 			free(node);
 			break;
-		case CIL_CLASSPERMSET:
-			cil_destroy_classpermset((struct cil_classpermset *)args->arg);
+		case CIL_CLASSPERMISSION:
+			cil_destroy_classpermission((struct cil_classpermission *)args->arg);
 			free(node);
 			break;
 		default:
@@ -5705,8 +5744,11 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSMAPPING)) {
 		rc = cil_gen_classmapping(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSPERMSET)) {
-		rc = cil_gen_classpermset(db, parse_current, ast_node);
+	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSPERMISSION)) {
+		rc = cil_gen_classpermission(db, parse_current, ast_node);
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSPERMISSIONSET)) {
+		rc = cil_gen_classpermissionset(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
 		rc = cil_gen_common(db, parse_current, ast_node);

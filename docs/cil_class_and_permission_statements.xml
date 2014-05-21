@@ -160,9 +160,42 @@
          </programlisting>
       </sect2>
 
+     <sect2 id="classpermission">
+         <title>classpermission</title>
+         <para>Declares a class permission set identifier in the current namespace that can be used by one or more <literal><link linkend="classpermissionset">classpermissionset</link></literal>s to associate one or more classes and permissions to form a named set.</para>
+         <para><emphasis role="bold">Statement definition:</emphasis></para>
+         <programlisting><![CDATA[(classpermission classpermissionset_id)]]></programlisting>
+         <para><emphasis role="bold">Where:</emphasis></para>
+         <informaltable frame="all">
+            <tgroup cols="2">
+            <colspec colwidth="2 *"/>
+            <colspec colwidth="6 *"/>
+               <tbody>
+               <row>
+                  <entry>
+                     <para><literal><link linkend="classpermission">classpermission</link></literal></para>
+                  </entry>
+                  <entry>
+                     <para>The <literal><link linkend="classpermission">classpermission</link></literal> keyword.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para><literal>classpermissionset_id</literal></para>
+                  </entry>
+                  <entry>
+                     <para>The <literal><link linkend="classpermissionset">classpermissionset</link></literal> identifier.</para>
+                  </entry>
+               </row>
+            </tbody></tgroup>
+         </informaltable>
+         <para><emphasis role="bold">Example:</emphasis></para>
+         <para>See the <literal><link linkend="classpermissionset">classpermissionset</link></literal> statement for examples.</para>
+      </sect2>
+
       <sect2 id="classpermissionset">
          <title>classpermissionset</title>
-         <para>Declares a class permission set identifier in the current namespace that associates a class and one or more permissions to form a named set. Nested expressions may be used to determine the required permissions as shown in the examples. Anonymous <literal>classpermissionset</literal>s may be used in av rules and constraints.</para>
+         <para>Defines a class permission set identifier in the current namespace that associates a class and one or more permissions to form a named set. Nested expressions may be used to determine the required permissions as shown in the examples. Anonymous <literal>classpermissionset</literal>s may be used in av rules and constraints.</para>
          <para><emphasis role="bold">Statement definition:</emphasis></para>
          <programlisting><![CDATA[(classpermissionset classpermissionset_id (class_id (permission_id | expr ...)))]]></programlisting>
          <para><emphasis role="bold">Where:</emphasis></para>
@@ -232,6 +265,7 @@
 (type test_5)
 
 ; NOT
+(classpermission zygote_1)
 (classpermissionset zygote_1 (zygote
     (not
         (specifyinvokewith specifyseinfo)
@@ -241,6 +275,7 @@
 ;; allow unconfined.process test_1 : zygote { specifyids specifyrlimits specifycapabilities } ;
 
 ; AND - ALL - NOT - Equiv to test_1
+(classpermission zygote_2)
 (classpermissionset zygote_2 (zygote
     (and
         (all)
@@ -251,14 +286,17 @@
 ;; allow unconfined.process test_2 : zygote { specifyids specifyrlimits specifycapabilities  } ;
 
 ; OR
+(classpermission zygote_3)
 (classpermissionset zygote_3 (zygote ((or (specifyinvokewith) (specifyseinfo)))))
 (allow unconfined.process test_3 zygote_3)
 ;; allow unconfined.process test_3 : zygote { specifyinvokewith specifyseinfo } ;
 
 ; XOR - This will not produce an allow rule as the XOR will remove all the permissions:
+(classpermission zygote_4)
 (classpermissionset zygote_4 (zygote (xor (specifyids specifyrlimits specifycapabilities specifyinvokewith specifyseinfo) (specifyids specifyrlimits specifycapabilities specifyinvokewith specifyseinfo))))
 
 ; ALL
+(classpermission zygote_all_perms)
 (classpermissionset zygote_all_perms (zygote (all)))
 (allow unconfined.process test_5 zygote_all_perms)
 ;; allow unconfined.process test_5 : zygote { specifyids specifyrlimits specifycapabilities specifyinvokewith specifyseinfo } ;]]>
@@ -358,6 +396,7 @@
 (class property_service (set))
 (class zygote (specifyids specifyrlimits specifycapabilities specifyinvokewith specifyseinfo))
 
+(classpermission cps_zygote_1)
 (classpermissionset cps_zygote_1 (zygote ((not (specifyids)))))
 
 (classmap android_classes (set_1 set_2 set_3))

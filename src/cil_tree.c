@@ -812,12 +812,21 @@ void cil_tree_print_node(struct cil_tree_node *node)
 
 			return;
 		}
-		case CIL_CLASSPERMSET: {
-			struct cil_classpermset *csp = node->data;
+		case CIL_CLASSPERMISSION: {
+			struct cil_classpermission *cp = node->data;
 
-			cil_log(CIL_INFO, "CLASSPERMSET: %s", csp->datum.name);
+			cil_log(CIL_INFO, "CLASSPERMISSION: %s", cp->datum.name);
 
-			cil_tree_print_classperms_list(csp->classperms);
+			cil_log(CIL_INFO, "\n");
+
+			return;
+		}
+		case CIL_CLASSPERMISSIONSET: {
+			struct cil_classpermissionset *cps = node->data;
+
+			cil_log(CIL_INFO, "CLASSPERMISSIONSET: %s", cps->set_str);
+
+			cil_tree_print_classperms_list(cps->classperms);
 
 			cil_log(CIL_INFO, "\n");
 

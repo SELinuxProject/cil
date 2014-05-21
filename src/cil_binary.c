@@ -240,8 +240,8 @@ static void __add_classes_from_classperms_list(struct cil_list *classperms, stru
 			}	
 		} else { /* SET */
 			struct cil_classperms_set *cp_set = curr->data;
-			struct cil_classpermset *cps = cp_set->set;
-			__add_classes_from_classperms_list(cps->classperms, class_list);
+			struct cil_classpermission *cp = cp_set->set;
+			__add_classes_from_classperms_list(cp->classperms, class_list);
 		}
 	}
 }
@@ -1444,8 +1444,8 @@ int __cil_avrule_expand(policydb_t *pdb, uint16_t kind, struct cil_symtab_datum 
 			}	
 		} else { /* SET */
 			struct cil_classperms_set *cp_set = curr->data;
-			struct cil_classpermset *cps = cp_set->set;
-			rc = __cil_avrule_expand(pdb, kind, src, tgt, cps->classperms, neverallows, cond_node, cond_flavor);
+			struct cil_classpermission *cp = cp_set->set;
+			rc = __cil_avrule_expand(pdb, kind, src, tgt, cp->classperms, neverallows, cond_node, cond_flavor);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -2307,8 +2307,8 @@ int cil_constrain_expand(policydb_t *pdb, const struct cil_db *db, struct cil_li
 			}	
 		} else { /* SET */
 			struct cil_classperms_set *cp_set = curr->data;
-			struct cil_classpermset *cps = cp_set->set;
-			rc = cil_constrain_expand(pdb, db, cps->classperms, expr);
+			struct cil_classpermission *cp = cp_set->set;
+			rc = cil_constrain_expand(pdb, db, cp->classperms, expr);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}

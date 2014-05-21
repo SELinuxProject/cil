@@ -522,8 +522,8 @@ void cil_constrain_to_policy_helper(FILE **file_arr, char *kind, struct cil_list
 			}	
 		} else { /* SET */
 			struct cil_classperms_set *cp_set = curr->data;
-			struct cil_classpermset *cps = cp_set->set;
-			cil_constrain_to_policy_helper(file_arr, kind, cps->classperms, expr);
+			struct cil_classpermission *cp = cp_set->set;
+			cil_constrain_to_policy_helper(file_arr, kind, cp->classperms, expr);
 		}
 	}
 }
@@ -562,8 +562,8 @@ void cil_avrule_to_policy_helper(FILE **file_arr, uint32_t file_index, char *kin
 		} else { /* SET */
 			struct cil_list_item *j;
 			struct cil_classperms_set *cp_set = i->data;
-			struct cil_classpermset *cps = cp_set->set;
-			cil_list_for_each(j, cps->classperms) {
+			struct cil_classpermission *cp = cp_set->set;
+			cil_list_for_each(j, cp->classperms) {
 				cil_avrule_to_policy_helper(file_arr, file_index, kind, src, tgt, j->data);
 			}
 		}

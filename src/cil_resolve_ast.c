@@ -180,9 +180,9 @@ int cil_resolve_classperms_set(struct cil_tree_node *current, struct cil_classpe
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	cp_set->set = (struct cil_classpermset*)datum;
+	cp_set->set = (struct cil_classpermission*)datum;
 
-	/* This could be an anonymous classpermset */
+	/* This could be an anonymous classpermission */
 	if (datum->name == NULL) {
 		rc = cil_resolve_classperms_list(current, cp_set->set->classperms, extra_args);
 		if (rc != SEPOL_OK) {
@@ -221,9 +221,38 @@ exit:
 	return rc;
 }
 
-int cil_resolve_classpermset(struct cil_tree_node *current, struct cil_classpermset *cps, void *extra_args)
+int cil_resolve_classpermissionset(struct cil_tree_node *current, struct cil_classpermissionset *cps, void *extra_args)
 {
-	return cil_resolve_classperms_list(current, cps->classperms, extra_args);
+	int rc = SEPOL_ERR;
+	struct cil_args_resolve *args = extra_args;
+	struct cil_list_item *curr;
+	struct cil_symtab_datum *datum;
+	struct cil_classpermission *cp;
+
+	rc = cil_resolve_name(current, cps->set_str, CIL_SYM_CLASSPERMSETS, args, &datum);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	rc = cil_resolve_classperms_list(current, cps->classperms, extra_args);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
+	cp = (struct cil_classpermission *)datum;
+
+	if (cp->classperms == NULL) {
+		cil_list_init(&cp->classperms, CIL_CLASSPERMS);
+	}
+
+	cil_list_for_each(curr, cps->classperms) {
+		cil_list_append(cp->classperms, curr->flavor, curr->data);
+	}
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
 }
 
 int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
@@ -639,6 +668,7 @@ int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 	struct cil_class *map = NULL;
 	struct cil_perm *mp = NULL;
 	struct cil_symtab_datum *datum = NULL;
+	struct cil_list_item *curr;
 
 	rc = cil_resolve_name(current, mapping->map_class_str, CIL_SYM_CLASSES, extra_args, &datum);
 	if (rc != SEPOL_OK) {
@@ -658,7 +688,13 @@ int cil_resolve_classmapping(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
-	mp->classperms = mapping->classperms;
+	if (mp->classperms == NULL) {
+		cil_list_init(&mp->classperms, CIL_CLASSPERMS);
+	}
+
+	cil_list_for_each(curr, mapping->classperms) {
+		cil_list_append(mp->classperms, curr->flavor, curr->data);
+	}
 
 	return SEPOL_OK;
 
@@ -2344,23 +2380,23 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 			case CIL_MAP_CLASS:
 				new_arg->arg_str = cil_strdup(pc->data);
 				break;
-			case CIL_CLASSPERMSET: {
+			case CIL_CLASSPERMISSION: {
 				if (pc->cl_head != NULL) {
-					struct cil_classpermset *cps = NULL;
-					struct cil_tree_node *cps_node = NULL;
+					struct cil_classpermission *cp = NULL;
+					struct cil_tree_node *cp_node = NULL;
 
-					cil_classpermset_init(&cps);
-					rc = cil_fill_classperms_list(pc, &cps->classperms);
+					cil_classpermission_init(&cp);
+					rc = cil_fill_classperms_list(pc, &cp->classperms);
 					if (rc != SEPOL_OK) {
-						cil_log(CIL_ERR, "Failed to create anonymous classpermset\n");
-						cil_destroy_classpermset(cps);
+						cil_log(CIL_ERR, "Failed to create anonymous classpermission\n");
+						cil_destroy_classpermission(cp);
 						goto exit;
 					}
-					cil_tree_node_init(&cps_node);
-					cps_node->flavor = CIL_CLASSPERMSET;
-					cps_node->data = cps;
-					cil_list_append(cps->datum.nodes, CIL_LIST_ITEM, cps_node);
-					new_arg->arg = (struct cil_symtab_datum*)cps;
+					cil_tree_node_init(&cp_node);
+					cp_node->flavor = CIL_CLASSPERMISSION;
+					cp_node->data = cp;
+					cil_list_append(cp->datum.nodes, CIL_LIST_ITEM, cp_node);
+					new_arg->arg = (struct cil_symtab_datum*)cp;
 				} else {
 					new_arg->arg_str = cil_strdup(pc->data);
 				}
@@ -2462,7 +2498,7 @@ int cil_resolve_call2(struct cil_tree_node *current, void *extra_args)
 				sym_index = CIL_SYM_IPADDRS;
 			}
 			break;
-		case CIL_CLASSPERMSET:
+		case CIL_CLASSPERMISSION:
 			if (arg->arg_str == NULL && arg->arg != NULL) {
 				continue;
 			} else {
@@ -2874,8 +2910,8 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_RANGETRANSITION:
 			rc = cil_resolve_rangetransition(node, args);
 			break;
-		case CIL_CLASSPERMSET:
-			rc = cil_resolve_classpermset(node, (struct cil_classpermset*)node->data, args);
+		case CIL_CLASSPERMISSIONSET:
+			rc = cil_resolve_classpermissionset(node, (struct cil_classpermissionset*)node->data, args);
 			break;
 		case CIL_CLASSMAPPING:
 			rc = cil_resolve_classmapping(node, args);

@@ -1438,12 +1438,12 @@ static int __cil_verify_classperms(struct cil_list *classperms, struct cil_symta
 			}	
 		} else { /* SET */
 			struct cil_classperms_set *cp_set = curr->data;
-			struct cil_classpermset *cps = cp_set->set;
-			if (&cps->datum == orig) {
+			struct cil_classpermission *cp = cp_set->set;
+			if (&cp->datum == orig) {
 				rc = SEPOL_ERR;
 				goto exit;
 			}
-			rc = __cil_verify_classperms(cps->classperms, orig);
+			rc = __cil_verify_classperms(cp->classperms, orig);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1456,14 +1456,14 @@ exit:
 	return rc;
 }
 
-static int __cil_verify_classpermset(struct cil_tree_node *node)
+static int __cil_verify_classpermission(struct cil_tree_node *node)
 {
 	int rc = SEPOL_ERR;
-	struct cil_classpermset *cps = node->data;
+	struct cil_classpermission *cp = node->data;
 
-	rc = __cil_verify_classperms(cps->classperms, &cps->datum);
+	rc = __cil_verify_classperms(cp->classperms, &cp->datum);
 	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Found circular class permissions involving the set %s at line %d of %s\n",cps->datum.name, node->line, node->path);
+		cil_log(CIL_ERR, "Found circular class permissions involving the set %s at line %d of %s\n",cp->datum.name, node->line, node->path);
 		return rc;
 	}
 
@@ -1537,8 +1537,8 @@ static int __cil_verify_no_classperms_loop_helper(struct cil_tree_node *node, ui
 	case CIL_MAP_CLASS:
 		rc = __cil_verify_map_class(node);
 		break;
-	case CIL_CLASSPERMSET:
-		rc = __cil_verify_classpermset(node);
+	case CIL_CLASSPERMISSION:
+		rc = __cil_verify_classpermission(node);
 		break;
 	default:
 		rc = SEPOL_OK;

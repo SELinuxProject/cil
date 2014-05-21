@@ -48,7 +48,8 @@ int cil_copy_permset(struct cil_db *db, void *data, void **copy, symtab_t *symta
 void cil_copy_classperms(struct cil_classperms *orig, struct cil_classperms **new);
 void cil_copy_classperms_set(struct cil_classperms_set *orig, struct cil_classperms_set **new);
 void cil_copy_classperms_list(struct cil_list *orig, struct cil_list **new);
-int cil_copy_classpermset(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_classpermission(__attribute__((unused)) struct cil_db *db, void *data, void **copy, symtab_t *symtab);
+int cil_copy_classpermissionset(__attribute__((unused)) struct cil_db *db, void *data, void **copy,  __attribute__((unused)) symtab_t *symtab);
 int cil_copy_common(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_classcommon(struct cil_db *db, void *data, void **copy, symtab_t *symtab);
 int cil_copy_sid(struct cil_db *db, void *data, void **copy, symtab_t *symtab);

@@ -150,7 +150,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 	case CIL_CATSET:
 	case CIL_CLASS:
 	case CIL_MAP_CLASS:
-	case CIL_CLASSPERMSET:
+	case CIL_CLASSPERMISSION:
 	case CIL_COMMON:
 	case CIL_CONTEXT:
 	case CIL_IPADDR:

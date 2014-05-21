@@ -82,8 +82,8 @@ enum cil_pass {
 #define CIL_KEY_STRING          "string"
 #define CIL_KEY_CLASS			"class"
 #define CIL_KEY_PERM			"perm"
-#define CIL_KEY_CLASSPERMSET		"classpermissionset"
-#define CIL_KEY_CLASSPERMS		"classpermissions"
+#define CIL_KEY_CLASSPERMISSION		"classpermission"
+#define CIL_KEY_CLASSPERMISSIONSET		"classpermissionset"
 #define CIL_KEY_CLASSMAP        "classmap"
 #define CIL_KEY_MAP_CLASS		"classmap"
 #define CIL_KEY_CLASSMAPPING		"classmapping"
@@ -321,7 +321,7 @@ struct cil_class {
 
 struct cil_classperms_set {
 	char *set_str;
-	struct cil_classpermset *set;
+	struct cil_classpermission *set;
 };
 
 struct cil_classperms {
@@ -331,8 +331,13 @@ struct cil_classperms {
 	struct cil_list *perms;
 };
 
-struct cil_classpermset {
+struct cil_classpermission {
 	struct cil_symtab_datum datum;
+	struct cil_list *classperms;
+};
+
+struct cil_classpermissionset {
+	char *set_str;
 	struct cil_list *classperms;
 };
 
@@ -902,7 +907,8 @@ void cil_constrain_init(struct cil_constrain **constrain);
 void cil_validatetrans_init(struct cil_validatetrans **validtrans);
 void cil_ipaddr_init(struct cil_ipaddr **ipaddr);
 void cil_perm_init(struct cil_perm **perm);
-void cil_classpermset_init(struct cil_classpermset **cps);
+void cil_classpermission_init(struct cil_classpermission **cp);
+void cil_classpermissionset_init(struct cil_classpermissionset **cps);
 void cil_classperms_set_init(struct cil_classperms_set **cp_set);
 void cil_classperms_init(struct cil_classperms **cp);
 void cil_classmapping_init(struct cil_classmapping **mapping);

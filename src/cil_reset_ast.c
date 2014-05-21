@@ -4,6 +4,7 @@
 #include "cil_list.h"
 #include "cil_symtab.h"
 
+static inline void cil_reset_classperms_list(struct cil_list *cp_list);
 static inline void cil_reset_level(struct cil_level *level);
 static inline void cil_reset_levelrange(struct cil_levelrange *levelrange);
 static inline void cil_reset_context(struct cil_context *context);
@@ -32,7 +33,7 @@ static void cil_reset_class(struct cil_class *class)
 
 static void cil_reset_perm(struct cil_perm *perm)
 {
-	perm->classperms = NULL;
+	cil_reset_classperms_list(perm->classperms);
 }
 
 static inline void cil_reset_classperms(struct cil_classperms *cp)
@@ -71,7 +72,12 @@ static inline void cil_reset_classperms_list(struct cil_list *cp_list)
 	}
 }
 
-static void cil_reset_classpermset(struct cil_classpermset *cps)
+static void cil_reset_classpermission(struct cil_classpermission *cp)
+{
+	cil_reset_classperms_list(cp->classperms);
+}
+
+static void cil_reset_classpermissionset(struct cil_classpermissionset *cps)
 {
 	cil_reset_classperms_list(cps->classperms);
 }
@@ -319,8 +325,11 @@ int __cil_reset_node(struct cil_tree_node *node,  __attribute__((unused)) uint32
 	case CIL_MAP_PERM:
 		cil_reset_perm(node->data);
 		break;
-	case CIL_CLASSPERMSET:
-		cil_reset_classpermset(node->data);
+	case CIL_CLASSPERMISSION:
+		cil_reset_classpermission(node->data);
+		break;
+	case CIL_CLASSPERMISSIONSET:
+		cil_reset_classpermissionset(node->data);
 		break;
 	case CIL_CLASSMAPPING:
 		cil_reset_classmapping(node->data);

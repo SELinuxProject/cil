@@ -267,8 +267,11 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_MAP_PERM:
 		cil_destroy_perm(*data);
 		break;
-	case CIL_CLASSPERMSET:
-		cil_destroy_classpermset(*data);
+	case CIL_CLASSPERMISSION:
+		cil_destroy_classpermission(*data);
+		break;
+	case CIL_CLASSPERMISSIONSET:
+		cil_destroy_classpermissionset(*data);
 		break;
 	case CIL_CLASSPERMS_SET:
 		cil_destroy_classperms_set(*data);
@@ -521,7 +524,8 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 	case CIL_MAP_PERM:
 		*sym_index = CIL_SYM_PERMS;
 		break;
-	case CIL_CLASSPERMSET:
+	case CIL_CLASSPERMISSION:
+	case CIL_CLASSPERMISSIONSET:
 		*sym_index = CIL_SYM_CLASSPERMSETS;
 		break;
 	case CIL_SID:
@@ -779,10 +783,10 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_TYPEATTRIBUTE;
 	case CIL_BOOL:
 		return CIL_KEY_BOOL;
-	case CIL_CLASSPERMSET:
-		return CIL_KEY_CLASSPERMSET;
-	case CIL_CLASSPERMS:
-		return CIL_KEY_CLASSPERMS;
+	case CIL_CLASSPERMISSION:
+		return CIL_KEY_CLASSPERMISSION;
+	case CIL_CLASSPERMISSIONSET:
+		return CIL_KEY_CLASSPERMISSIONSET;
 	case CIL_TUNABLE:
 		return CIL_KEY_TUNABLE;
 	case CIL_TYPEALIAS:
@@ -1846,11 +1850,19 @@ void cil_perm_init(struct cil_perm **perm)
 	(*perm)->classperms = NULL;
 }
 
-void cil_classpermset_init(struct cil_classpermset **cps)
+void cil_classpermission_init(struct cil_classpermission **cp)
+{
+	*cp = cil_malloc(sizeof(**cp));
+
+	cil_symtab_datum_init(&(*cp)->datum);
+	(*cp)->classperms = NULL;
+}
+
+void cil_classpermissionset_init(struct cil_classpermissionset **cps)
 {
 	*cps = cil_malloc(sizeof(**cps));
 
-	cil_symtab_datum_init(&(*cps)->datum);
+	(*cps)->set_str = NULL;
 	(*cps)->classperms = NULL;
 }
 

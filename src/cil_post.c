@@ -1475,8 +1475,8 @@ static int __evaluate_classperms_list(struct cil_list *classperms, struct cil_db
 			}	
 		} else { /* SET */
 			struct cil_classperms_set *cp_set = curr->data;
-			struct cil_classpermset *cps = cp_set->set;
-			rc = __evaluate_classperms_list(cps->classperms, db);
+			struct cil_classpermission *cp = cp_set->set;
+			rc = __evaluate_classperms_list(cp->classperms, db);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -1549,9 +1549,9 @@ static int __cil_post_db_classperms_helper(struct cil_tree_node *node, uint32_t 
 		}
 		break;
 	}
-	case CIL_CLASSPERMSET: {
-		struct cil_classpermset *cps = node->data;
-		rc = __evaluate_classperms_list(cps->classperms, db);
+	case CIL_CLASSPERMISSION: {
+		struct cil_classpermission *cp = node->data;
+		rc = __evaluate_classperms_list(cp->classperms, db);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
