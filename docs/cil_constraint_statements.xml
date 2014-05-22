@@ -27,7 +27,7 @@
                      <para><literal>classpermissionset_id</literal></para>
                   </entry>
                   <entry>
-                     <para>One or more named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal>'s  or pairs of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
+                     <para>A single named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal> or a single set of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
                   </entry>
                </row>
                <row>
@@ -126,7 +126,7 @@
                      <para><literal>class_id</literal></para>
                   </entry>
                   <entry>
-                     <para>A single <literal><link linkend="class">class</link></literal> identifier.</para>
+                     <para>A single previously declared <literal><link linkend="class">class</link></literal> or <literal><link linkend="classmap">classmap</link></literal> identifier.</para>
                   </entry>
                </row>
                <row>
@@ -206,7 +206,7 @@
                      <para><literal>classpermissionset_id</literal></para>
                   </entry>
                   <entry>
-                     <para>One or more named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal>'s  or pairs of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
+                     <para>A single named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal> or a single set of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
                   </entry>
                </row>
                <row>
@@ -298,7 +298,7 @@
                      <para><literal>class_id</literal></para>
                   </entry>
                   <entry>
-                     <para>A single <literal><link linkend="class">class</link></literal> identifier.</para>
+                     <para>A single previously declared <literal><link linkend="class">class</link></literal> or <literal><link linkend="classmap">classmap</link></literal> identifier.</para>
                   </entry>
                </row>
                <row>

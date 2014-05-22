@@ -275,7 +275,6 @@
                   </entry>
                   <entry>
                      <para><literal><link linkend="typetransition">typetransition</link></literal></para>
-                     <simpara>(excluding 'file name transition' rule)</simpara>
                   </entry>
                </row>
                </tbody>

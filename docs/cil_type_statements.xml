@@ -341,7 +341,7 @@
                      <para><literal>class_id</literal></para>
                   </entry>
                   <entry>
-                     <para>A single previously declared <literal><link linkend="class">class</link></literal> identifier.</para>
+                     <para>A single previously declared <literal><link linkend="class">class</link></literal> or <literal><link linkend="classmap">classmap</link></literal> identifier.</para>
                   </entry>
                </row>
                <row>
@@ -412,7 +412,7 @@
                      <para><literal>class_id</literal></para>
                   </entry>
                   <entry>
-                     <para>A single previously declared <literal><link linkend="class">class</link></literal> identifier.</para>
+                     <para>A single previously declared <literal><link linkend="class">class</link></literal> or <literal><link linkend="classmap">classmap</link></literal> identifier.</para>
                   </entry>
                </row>
                <row>
@@ -483,7 +483,7 @@
                      <para><literal>class_id</literal></para>
                   </entry>
                   <entry>
-                     <para>A single previously declared <literal><link linkend="class">class</link></literal> identifier.</para>
+                     <para>A single previously declared <literal><link linkend="class">class</link></literal> or <literal><link linkend="classmap">classmap</link></literal> identifier.</para>
                   </entry>
                </row>
                <row>

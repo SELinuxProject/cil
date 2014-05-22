@@ -29,9 +29,9 @@
       <title>Common Interface Language (CIL) Reference Guide</title>
       <revhistory>
          <revision>
-            <revnumber>0.1</revnumber>
-            <date>13th May '14</date>
-            <revremark>First Draft</revremark>
+            <revnumber>0.2</revnumber>
+            <date>22nd May '14</date>
+            <revremark>Updated classmap/classmapping, added classmap to statements that utilise class_id's (defaultuser, typetransition etc.), update various examples to show anonymous classpermissionset's using expressions.</revremark>
          </revision>
       </revhistory>
    </articleinfo>
@@ -39,7 +39,7 @@
    <sect1>
       <title>CIL Information</title>
       <orderedlist>
-         <listitem><para>The statement definitions are those found in the source from: <literal>git clone <ulink url="https://bitbucket.org/jwcarter/secilc.git"></ulink></literal> dated 6th May '14.</para></listitem>
+         <listitem><para>The statement definitions are those found in the source from: <literal>git clone <ulink url="https://bitbucket.org/jwcarter/secilc.git"></ulink></literal> dated 21st May '14.</para></listitem>
          <listitem><para>Not all possible alternate statement permutations are shown, however there should be enough variation to work out any other valid formats. There is also an example <filename>policy.cil</filename> file shown in the <link linkend="example_policy">Appendix</link>.</para></listitem>
          <listitem><para>The MLS components on contexts and user statements must be declared even if the policy does not support MCS/MLS. </para></listitem>
          <listitem><para>The CIL compiler will not build a policy unless it also has as a minimum: one <literal><link linkend="allow">allow</link></literal> rule, one <literal><link linkend="sid">sid</link></literal>, <literal><link linkend="sidorder">sidorder</link></literal> and <literal><link linkend="sidcontext">sidcontext</link></literal> statement. </para></listitem>

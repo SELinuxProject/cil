@@ -1,7 +1,7 @@
 <!-- Common Interface Language (CIL) Reference Guide -->
               <!-- access_vector_rules.xml -->
 
-   <sect1>
+   <sect1 id="av_rules">
       <title>Access Vector Rules</title>
       <sect2 id="allow">
          <title>allow</title>
@@ -44,7 +44,7 @@
                      <para><literal>classpermissionset_id</literal></para>
                   </entry>
                   <entry>
-                     <para>One or more named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal>'s  or pairs of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
+                     <para>A single named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal> or a single set of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
                   </entry>
                </row>
             </tbody></tgroup>
@@ -62,22 +62,15 @@
 
 (classmap android_classes (set_1 set_2 set_3))
 
-(classmapping android_classes set_1
-      (binder (impersonate call set_context_mgr transfer receive))
-      (property_service (set))
-      (zygote (specifyids specifyrlimits specifycapabilities specifyinvokewith specifyseinfo))
-)
+(classmapping android_classes set_1 (binder (all)))
+(classmapping android_classes set_1 (property_service (set)))
+(classmapping android_classes set_1 (zygote (not (specifycapabilities))))
 
-(classmapping android_classes set_2
-      (binder (all))
-      (property_service (all))
-      (zygote (all))
-)
+(classmapping android_classes set_2 (binder (impersonate call set_context_mgr transfer)))
+(classmapping android_classes set_2 (zygote (specifyids specifyrlimits specifycapabilities specifyinvokewith)))
 
-(classmapping android_classes set_3
-      (binder (impersonate call set_context_mgr))
-      cps_zygote
-)
+(classmapping android_classes set_3 cps_zygote)
+(classmapping android_classes set_3 (binder (impersonate call set_context_mgr)))
 
 (block av_rules
     (type type_1)
@@ -85,25 +78,22 @@
     (type type_3)
     (type type_4)
     (type type_5)
-    (type type_6)
+
     (typeattribute all_types)
     (typeattributeset all_types (all))
 
-    (allow type_1 self (property_service (set)))
-    (allow type_2 self (zygote (specifyids)))
-    (allow type_3 self cps_zygote)
-    (allow type_4 self (android_classes (set_3)))
-    (allow all_types all_types (android_classes (set_2)))
+; These examples have named and anonymous classpermissionset's and
+; classmap/classmapping statements
+    (allow type_1 self (property_service (set)))          ; anonymous
+    (allow type_2 self (zygote (specifyids)))             ; anonymous
+    (allow type_3 self cps_zygote)                        ; named
+    (allow type_4 self (android_classes (set_3)))         ; classmap/classmapping
+    (allow all_types all_types (android_classes (set_2))) ; classmap/classmapping
 
 ;; This rule will cause the build to fail unless --disable-neverallow
 ;    (neverallow type_5 all_types (property_service (set)))
     (allow type_5 type_5 (property_service (set)))
     (allow type_1 all_types (property_service (set)))
-
-; This example has named and anonymous classpermissionset's and
-; classmap/classmapping statements:
-;                           named           anonymous          classmap/classmapping
-    (allow type_6 self ((cps_zygote) (binder (call transfer)) (android_classes (set_3))))
 )]]>
          </programlisting>
       </sect2>
@@ -149,7 +139,7 @@
                      <para><literal>classpermissionset_id</literal></para>
                   </entry>
                   <entry>
-                     <para>One or more named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal>'s  or pairs of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
+                     <para>A single named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal> or a single set of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
                   </entry>
                </row>
             </tbody></tgroup>
@@ -207,7 +197,7 @@
                      <para><literal>classpermissionset_id</literal></para>
                   </entry>
                   <entry>
-                     <para>One or more named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal>'s  or pairs of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
+                     <para>A single named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal> or a single set of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
                   </entry>
                </row>
             </tbody></tgroup>
@@ -261,7 +251,7 @@
                      <para><literal>classpermissionset_id</literal></para>
                   </entry>
                   <entry>
-                     <para>One or more named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal>'s  or pairs of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
+                     <para>A single named or anonymous <literal><link linkend="classpermissionset">classpermissionset</link></literal> or a single set of <literal><link linkend="classmap">classmap</link></literal>/<literal><link linkend="classmapping">classmapping</link></literal> identifiers.</para>
                   </entry>
                </row>
             </tbody></tgroup>
