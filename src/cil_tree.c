@@ -1553,7 +1553,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 
 	if (current != NULL) {
 		if (current->cl_head == NULL) {
-			if (current->flavor == CIL_PARSE_NODE) {
+			if (current->flavor == CIL_NODE) {
 				if (current->parent->cl_head == current) {
 					cil_log(CIL_INFO, "%s", (char*)current->data);
 				} else {
@@ -1573,7 +1573,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 				}
 				cil_log(CIL_INFO, "(");
 
-				if (current->flavor != CIL_PARSE_NODE) {
+				if (current->flavor != CIL_NODE) {
 					cil_tree_print_node(current);
 				}
 			}
@@ -1584,7 +1584,7 @@ void cil_tree_print(struct cil_tree_node *tree, uint32_t depth)
 			if ((current->parent != NULL) && (current->parent->cl_tail == current) && (current->parent->parent != NULL)) {
 				if (current->flavor == CIL_PERM) {
 					cil_log(CIL_INFO, ")\n");
-				} else if (current->flavor != CIL_PARSE_NODE) {
+				} else if (current->flavor != CIL_NODE) {
 					for (x = 0; x<depth-1; x++) {
 						cil_log(CIL_INFO, "\t");
 					}

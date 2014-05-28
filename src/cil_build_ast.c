@@ -5738,7 +5738,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		rc = cil_gen_class(db, parse_current, ast_node);
 		// To avoid parsing list of perms again
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSMAP)) {
+	} else if (!strcmp(parse_current->data, CIL_KEY_MAP_CLASS)) {
 		rc = cil_gen_map_class(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSMAPPING)) {

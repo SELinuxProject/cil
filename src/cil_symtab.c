@@ -74,10 +74,10 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
 	if (rc == SEPOL_OK) {
 		datum->name = newkey;
-		cil_list_append(datum->nodes, CIL_AST_NODE, node);
+		cil_list_append(datum->nodes, CIL_NODE, node);
 	} else if (rc == SEPOL_EEXIST) {
 		free(newkey);
-		cil_list_append(datum->nodes, CIL_AST_NODE, node);
+		cil_list_append(datum->nodes, CIL_NODE, node);
 	} else {
 		free(newkey);
 		cil_symtab_error("Failed to insert datum into hashtab\n");

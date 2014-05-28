@@ -229,19 +229,29 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	}
 
 	switch(flavor) {
-		case CIL_NONE:
+	case CIL_NONE:
 		break;
 	case CIL_ROOT:
 		free(*data);
 		break;
-	case CIL_PARSE_NODE:
+	case CIL_NODE:
 		free(*data);
 		break;
 	case CIL_STRING:
 		free(*data);
 		break;
+	case CIL_DATUM:
+		break;
 	case CIL_LIST:
 		cil_list_destroy(*data, CIL_FALSE);
+		break;
+	case CIL_LIST_ITEM:
+		break;
+	case CIL_PARAM:
+		cil_destroy_param(*data);
+		break;
+	case CIL_ARGS:
+		cil_destroy_args(*data);
 		break;
 	case CIL_BLOCK:
 		cil_destroy_block(*data);
@@ -255,157 +265,66 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_IN:
 		cil_destroy_in(*data);
 		break;
-	case CIL_CLASS:
-	case CIL_COMMON:
-	case CIL_MAP_CLASS:
-		cil_destroy_class(*data);
+	case CIL_MACRO:
+		cil_destroy_macro(*data);
 		break;
-	case CIL_CLASSMAPPING:
-		cil_destroy_classmapping(*data);
+	case CIL_CALL:
+		cil_destroy_call(*data);
+		break;
+	case CIL_OPTIONAL:
+		cil_destroy_optional(*data);
+		break;
+	case CIL_BOOL:
+		cil_destroy_bool(*data);
+		break;
+	case CIL_BOOLEANIF:
+		cil_destroy_boolif(*data);
+		break;
+	case CIL_TUNABLE:
+		cil_destroy_tunable(*data);
+		break;
+	case CIL_TUNABLEIF:
+		cil_destroy_tunif(*data);
+		break;
+	case CIL_CONDBLOCK:
+		cil_destroy_condblock(*data);
+		break;
+	case CIL_CONDTRUE:
+		break;
+	case CIL_CONDFALSE:
 		break;
 	case CIL_PERM:
 	case CIL_MAP_PERM:
 		cil_destroy_perm(*data);
 		break;
+	case CIL_COMMON:
+	case CIL_CLASS:
+	case CIL_MAP_CLASS:
+		cil_destroy_class(*data);
+		break;
 	case CIL_CLASSPERMISSION:
 		cil_destroy_classpermission(*data);
-		break;
-	case CIL_CLASSPERMISSIONSET:
-		cil_destroy_classpermissionset(*data);
-		break;
-	case CIL_CLASSPERMS_SET:
-		cil_destroy_classperms_set(*data);
-		break;
-	case CIL_CLASSPERMS:
-		cil_destroy_classperms(*data);
 		break;
 	case CIL_CLASSCOMMON:
 		cil_destroy_classcommon(*data);
 		break;
-	case CIL_SID:
-		cil_destroy_sid(*data);
+	case CIL_CLASSMAPPING:
+		cil_destroy_classmapping(*data);
 		break;
-	case CIL_SIDCONTEXT:
-		cil_destroy_sidcontext(*data);
+	case CIL_CLASSPERMS:
+		cil_destroy_classperms(*data);
 		break;
-	case CIL_SIDORDER:
-		cil_destroy_sidorder(*data);
+	case CIL_CLASSPERMS_SET:
+		cil_destroy_classperms_set(*data);
 		break;
-	case CIL_POLICYCAP:
-		cil_destroy_policycap(*data);
-		break;
-	case CIL_AVRULE:
-		cil_destroy_avrule(*data);
-		break;
-	case CIL_TYPE_RULE:
-		cil_destroy_type_rule(*data);
-		break;
-	case CIL_TYPE:
-		cil_destroy_type(*data);
-		break;
-	case CIL_TYPEATTRIBUTE:
-		cil_destroy_typeattribute(*data);
+	case CIL_CLASSPERMISSIONSET:
+		cil_destroy_classpermissionset(*data);
 		break;
 	case CIL_USER:
 		cil_destroy_user(*data);
 		break;
-	case CIL_ROLE:
-		cil_destroy_role(*data);
-		break;
-	case CIL_ROLETRANSITION:
-		cil_destroy_roletransition(*data);
-		break;
-	case CIL_ROLEALLOW:
-		cil_destroy_roleallow(*data);
-		break;
-	case CIL_ROLEATTRIBUTE:
-		cil_destroy_roleattribute(*data);
-		break;
-	case CIL_ROLEATTRIBUTESET:
-		cil_destroy_roleattributeset(*data);
-		break;
-	case CIL_ROLEBOUNDS:
-		cil_destroy_bounds(*data);
-		break;
-	case CIL_BOOL:
-		cil_destroy_bool(*data);
-		break;
-	case CIL_TUNABLE:
-		cil_destroy_tunable(*data);
-		break;
-	case CIL_CONDBLOCK:
-		cil_destroy_condblock(*data);
-		break;
-	case CIL_BOOLEANIF:
-		cil_destroy_boolif(*data);
-		break;
-	case CIL_TUNABLEIF:
-		cil_destroy_tunif(*data);
-		break;
-	case CIL_TYPEALIAS:
-	case CIL_SENSALIAS:
-	case CIL_CATALIAS:
-		cil_destroy_alias(*data);
-		break;
-	case CIL_TYPEALIASACTUAL:
-	case CIL_SENSALIASACTUAL:
-	case CIL_CATALIASACTUAL:
-		cil_destroy_aliasactual(*data);
-		break;
-	case CIL_TYPEATTRIBUTESET:
-		cil_destroy_typeattributeset(*data);
-		break;
-	case CIL_TYPEBOUNDS:
-		cil_destroy_bounds(*data);
-		break;
-	case CIL_TYPEPERMISSIVE:
-		cil_destroy_typepermissive(*data);
-		break;
-	case CIL_NAME:
-		cil_destroy_name(*data);
-		break;
-	case CIL_NAMETYPETRANSITION:
-		cil_destroy_typetransition(*data);
-		break;
-	case CIL_RANGETRANSITION:
-		cil_destroy_rangetransition(*data);
-		break;
-	case CIL_SENS:
-		cil_destroy_sensitivity(*data);
-		break;
-	case CIL_CAT:
-		cil_destroy_category(*data);
-		break;
-	case CIL_CATSET:
-		cil_destroy_catset(*data);
-		break;
-	case CIL_CATORDER:
-		cil_destroy_catorder(*data);
-		break;
-	case CIL_SENSITIVITYORDER:
-		cil_destroy_sensitivityorder(*data);
-		break;
-	case CIL_SENSCAT:
-		cil_destroy_senscat(*data);
-		break;
-	case CIL_LEVEL:
-		cil_destroy_level(*data);
-		break;
-	case CIL_LEVELRANGE:
-		cil_destroy_levelrange(*data);
-		break;
-	case CIL_CONSTRAIN:
-		cil_destroy_constrain(*data);
-		break;
-	case CIL_MLSCONSTRAIN:
-		cil_destroy_constrain(*data);
-		break;
-	case CIL_VALIDATETRANS:
-	case CIL_MLSVALIDATETRANS:
-		cil_destroy_validatetrans(*data);
-		break;
-	case CIL_ROLETYPE:
-		cil_destroy_roletype(*data);
+	case CIL_USERPREFIX:
+		cil_destroy_userprefix(*data);
 		break;
 	case CIL_USERROLE:
 		cil_destroy_userrole(*data);
@@ -419,15 +338,130 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_USERBOUNDS:
 		cil_destroy_bounds(*data);
 		break;
-	case CIL_USERPREFIX:
-		cil_destroy_userprefix(*data);
-		break;
 	case CIL_SELINUXUSER:
 	case CIL_SELINUXUSERDEFAULT:
 		cil_destroy_selinuxuser(*data);
 		break;
+	case CIL_ROLE:
+		cil_destroy_role(*data);
+		break;
+	case CIL_ROLEATTRIBUTE:
+		cil_destroy_roleattribute(*data);
+		break;
+	case CIL_ROLEATTRIBUTESET:
+		cil_destroy_roleattributeset(*data);
+		break;
+	case CIL_ROLETYPE:
+		cil_destroy_roletype(*data);
+		break;
+	case CIL_ROLEBOUNDS:
+		cil_destroy_bounds(*data);
+		break;
+	case CIL_TYPE:
+		cil_destroy_type(*data);
+		break;
+	case CIL_TYPEATTRIBUTE:
+		cil_destroy_typeattribute(*data);
+		break;
+	case CIL_TYPEALIAS:
+		cil_destroy_alias(*data);
+		break;
+	case CIL_TYPEATTRIBUTESET:
+		cil_destroy_typeattributeset(*data);
+		break;
+	case CIL_TYPEALIASACTUAL:
+		cil_destroy_aliasactual(*data);
+		break;
+	case CIL_TYPEBOUNDS:
+		cil_destroy_bounds(*data);
+		break;
+	case CIL_TYPEPERMISSIVE:
+		cil_destroy_typepermissive(*data);
+		break;
+	case CIL_SENS:
+		cil_destroy_sensitivity(*data);
+		break;
+	case CIL_SENSALIAS:
+		cil_destroy_alias(*data);
+		break;
+	case CIL_SENSALIASACTUAL:
+		cil_destroy_aliasactual(*data);
+		break;
+	case CIL_SENSITIVITYORDER:
+		cil_destroy_sensitivityorder(*data);
+		break;
+	case CIL_SENSCAT:
+		cil_destroy_senscat(*data);
+		break;
+	case CIL_CAT:
+		cil_destroy_category(*data);
+		break;
+	case CIL_CATSET:
+		cil_destroy_catset(*data);
+		break;
+	case CIL_CATALIAS:
+		cil_destroy_alias(*data);
+		break;
+	case CIL_CATALIASACTUAL:
+		cil_destroy_aliasactual(*data);
+		break;
+	case CIL_CATORDER:
+		cil_destroy_catorder(*data);
+		break;
+	case CIL_LEVEL:
+		cil_destroy_level(*data);
+		break;
+	case CIL_LEVELRANGE:
+		cil_destroy_levelrange(*data);
+		break;
+	case CIL_SID:
+		cil_destroy_sid(*data);
+		break;
+	case CIL_SIDORDER:
+		cil_destroy_sidorder(*data);
+		break;
+	case CIL_NAME:
+		cil_destroy_name(*data);
+		break;
+	case CIL_ROLEALLOW:
+		cil_destroy_roleallow(*data);
+		break;
+	case CIL_AVRULE:
+		cil_destroy_avrule(*data);
+		break;
+	case CIL_ROLETRANSITION:
+		cil_destroy_roletransition(*data);
+		break;
+	case CIL_TYPE_RULE:
+		cil_destroy_type_rule(*data);
+		break;
+	case CIL_NAMETYPETRANSITION:
+		cil_destroy_typetransition(*data);
+		break;
+	case CIL_RANGETRANSITION:
+		cil_destroy_rangetransition(*data);
+		break;
+	case CIL_CONSTRAIN:
+		cil_destroy_constrain(*data);
+		break;
+	case CIL_MLSCONSTRAIN:
+		cil_destroy_constrain(*data);
+		break;
+	case CIL_VALIDATETRANS:
+	case CIL_MLSVALIDATETRANS:
+		cil_destroy_validatetrans(*data);
+		break;
 	case CIL_CONTEXT:
 		cil_destroy_context(*data);
+		break;
+	case CIL_IPADDR:
+		cil_destroy_ipaddr(*data);
+		break;
+	case CIL_SIDCONTEXT:
+		cil_destroy_sidcontext(*data);
+		break;
+	case CIL_FSUSE:
+		cil_destroy_fsuse(*data);
 		break;
 	case CIL_FILECON:
 		cil_destroy_filecon(*data);
@@ -456,26 +490,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_PCIDEVICECON:
 		cil_destroy_pcidevicecon(*data);
 		break;
-	case CIL_FSUSE:
-		cil_destroy_fsuse(*data);
-		break;
-	case CIL_PARAM:
-		cil_destroy_param(*data);
-		break;
-	case CIL_MACRO:
-		cil_destroy_macro(*data);
-		break;
-	case CIL_CALL:
-		cil_destroy_call(*data);
-		break;
-	case CIL_ARGS:
-		cil_destroy_args(*data);
-		break;
-	case CIL_OPTIONAL:
-		cil_destroy_optional(*data);
-		break;
-	case CIL_IPADDR:
-		cil_destroy_ipaddr(*data);
+	case CIL_POLICYCAP:
+		cil_destroy_policycap(*data);
 		break;
 	case CIL_DEFAULTUSER:
 	case CIL_DEFAULTROLE:
@@ -491,7 +507,6 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_MLS:
 		cil_destroy_mls(*data);
 		break;
-	case CIL_INT:
 	case CIL_OP:
 	case CIL_CONS_OPERAND:
 		break;
@@ -513,34 +528,11 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 	case CIL_BLOCK:
 		*sym_index = CIL_SYM_BLOCKS;
 		break;
-	case CIL_CLASS:
-	case CIL_MAP_CLASS:
-		*sym_index = CIL_SYM_CLASSES;
+	case CIL_MACRO:
+		*sym_index = CIL_SYM_BLOCKS;
 		break;
-	case CIL_COMMON:
-		*sym_index = CIL_SYM_COMMONS;
-		break;
-	case CIL_PERM:
-	case CIL_MAP_PERM:
-		*sym_index = CIL_SYM_PERMS;
-		break;
-	case CIL_CLASSPERMISSION:
-	case CIL_CLASSPERMISSIONSET:
-		*sym_index = CIL_SYM_CLASSPERMSETS;
-		break;
-	case CIL_SID:
-		*sym_index = CIL_SYM_SIDS;
-		break;
-	case CIL_USER:
-		*sym_index = CIL_SYM_USERS;
-		break;
-	case CIL_ROLE:
-		*sym_index = CIL_SYM_ROLES;
-		break;
-	case CIL_TYPE:
-	case CIL_TYPEALIAS:
-	case CIL_TYPEATTRIBUTE:
-		*sym_index = CIL_SYM_TYPES;
+	case CIL_OPTIONAL:
+		*sym_index = CIL_SYM_BLOCKS;
 		break;
 	case CIL_BOOL:
 		*sym_index = CIL_SYM_BOOLS;
@@ -548,14 +540,32 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 	case CIL_TUNABLE:
 		*sym_index = CIL_SYM_TUNABLES;
 		break;
-	case CIL_CONTEXT:
-		*sym_index = CIL_SYM_CONTEXTS;
+	case CIL_PERM:
+	case CIL_MAP_PERM:
+		*sym_index = CIL_SYM_PERMS;
 		break;
-	case CIL_LEVEL:
-		*sym_index = CIL_SYM_LEVELS;
+	case CIL_COMMON:
+		*sym_index = CIL_SYM_COMMONS;
 		break;
-	case CIL_LEVELRANGE:
-		*sym_index = CIL_SYM_LEVELRANGES;
+	case CIL_CLASS:
+	case CIL_MAP_CLASS:
+		*sym_index = CIL_SYM_CLASSES;
+		break;
+	case CIL_CLASSPERMISSION:
+	case CIL_CLASSPERMISSIONSET:
+		*sym_index = CIL_SYM_CLASSPERMSETS;
+		break;
+	case CIL_USER:
+		*sym_index = CIL_SYM_USERS;
+		break;
+	case CIL_ROLE:
+	case CIL_ROLEATTRIBUTE:
+		*sym_index = CIL_SYM_ROLES;
+		break;
+	case CIL_TYPE:
+	case CIL_TYPEALIAS:
+	case CIL_TYPEATTRIBUTE:
+		*sym_index = CIL_SYM_TYPES;
 		break;
 	case CIL_SENS:
 	case CIL_SENSALIAS:
@@ -566,20 +576,26 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 	case CIL_CATALIAS:
 		*sym_index = CIL_SYM_CATS;
 		break;
-	case CIL_MACRO:
-		*sym_index = CIL_SYM_BLOCKS;
+	case CIL_LEVEL:
+		*sym_index = CIL_SYM_LEVELS;
 		break;
-	case CIL_OPTIONAL:
-		*sym_index = CIL_SYM_BLOCKS;
+	case CIL_LEVELRANGE:
+		*sym_index = CIL_SYM_LEVELRANGES;
 		break;
-	case CIL_POLICYCAP:
-		*sym_index = CIL_SYM_POLICYCAPS;
+	case CIL_SID:
+		*sym_index = CIL_SYM_SIDS;
+		break;
+	case CIL_NAME:
+		*sym_index = CIL_SYM_NAMES;
+		break;
+	case CIL_CONTEXT:
+		*sym_index = CIL_SYM_CONTEXTS;
 		break;
 	case CIL_IPADDR:
 		*sym_index = CIL_SYM_IPADDRS;
 		break;
-	case CIL_NAME:
-		*sym_index = CIL_SYM_NAMES;
+	case CIL_POLICYCAP:
+		*sym_index = CIL_SYM_POLICYCAPS;
 		break;
 	default:
 		*sym_index = CIL_SYM_UNKNOWN;
@@ -593,12 +609,148 @@ int cil_flavor_to_symtab_index(enum cil_flavor flavor, enum cil_sym_index *sym_i
 const char * cil_node_to_string(struct cil_tree_node *node)
 {
 	switch (node->flavor) {
+	case CIL_NONE:
+		return "<none>";
 	case CIL_ROOT:
 		return CIL_KEY_ROOT;
-	case CIL_AST_NODE:
-		return CIL_KEY_AST_NODE;
-	case CIL_PARSE_NODE:
-		return CIL_KEY_PARSE_NODE;
+	case CIL_NODE:
+		return CIL_KEY_NODE;
+	case CIL_STRING:
+		return "string";
+	case CIL_DATUM:
+		return "<datum>";
+	case CIL_LIST:
+		return "<list>";
+	case CIL_LIST_ITEM:
+		return "<list_item>";
+	case CIL_PARAM:
+		return "<param>";
+	case CIL_ARGS:
+		return "<args>";
+	case CIL_BLOCK:
+		return CIL_KEY_BLOCK;
+	case CIL_BLOCKINHERIT:
+		return CIL_KEY_BLOCKINHERIT;
+	case CIL_BLOCKABSTRACT:
+		return CIL_KEY_BLOCKABSTRACT;
+	case CIL_IN:
+		return CIL_KEY_IN;
+	case CIL_MACRO:
+		return CIL_KEY_MACRO;
+	case CIL_CALL:
+		return CIL_KEY_CALL;
+	case CIL_OPTIONAL:
+		return CIL_KEY_OPTIONAL;
+	case CIL_BOOL:
+		return CIL_KEY_BOOL;
+	case CIL_BOOLEANIF:
+		return CIL_KEY_BOOLEANIF;
+	case CIL_TUNABLE:
+		return CIL_KEY_TUNABLE;
+	case CIL_TUNABLEIF:
+		return CIL_KEY_TUNABLEIF;
+	case CIL_CONDBLOCK:
+		switch (((struct cil_condblock*)node->data)->flavor) {
+		case CIL_CONDTRUE:
+			return CIL_KEY_CONDTRUE;
+		case CIL_CONDFALSE:
+			return CIL_KEY_CONDFALSE;
+		default:
+			break;
+		}
+		break;
+	case CIL_CONDTRUE:
+		return CIL_KEY_CONDTRUE;
+	case CIL_CONDFALSE:
+		return CIL_KEY_CONDFALSE;
+	case CIL_PERM:
+		return CIL_KEY_PERM;
+	case CIL_COMMON:
+		return CIL_KEY_COMMON;
+	case CIL_CLASS:
+		return CIL_KEY_CLASS;
+	case CIL_MAP_CLASS:
+		return CIL_KEY_MAP_CLASS;
+	case CIL_CLASSPERMISSION:
+		return CIL_KEY_CLASSPERMISSION;
+	case CIL_CLASSCOMMON:
+		return CIL_KEY_CLASSCOMMON;
+	case CIL_CLASSMAPPING:
+		return CIL_KEY_CLASSMAPPING;
+	case CIL_CLASSPERMISSIONSET:
+		return CIL_KEY_CLASSPERMISSIONSET;
+	case CIL_USER:
+		return CIL_KEY_USER;
+	case CIL_USERPREFIX:
+		return CIL_KEY_USERPREFIX;
+	case CIL_USERROLE:
+		return CIL_KEY_USERROLE;
+	case CIL_USERLEVEL:
+		return CIL_KEY_USERLEVEL;
+	case CIL_USERRANGE:
+		return CIL_KEY_USERRANGE;
+	case CIL_USERBOUNDS:
+		return CIL_KEY_USERBOUNDS;
+	case CIL_SELINUXUSER:
+		return CIL_KEY_SELINUXUSER;
+	case CIL_SELINUXUSERDEFAULT:
+		return CIL_KEY_SELINUXUSERDEFAULT;
+	case CIL_ROLE:
+		return CIL_KEY_ROLE;
+	case CIL_ROLEATTRIBUTE:
+		return CIL_KEY_ROLEATTRIBUTE;
+	case CIL_ROLEATTRIBUTESET:
+		return CIL_KEY_ROLEATTRIBUTESET;
+	case CIL_ROLETYPE:
+		return CIL_KEY_ROLETYPE;
+	case CIL_ROLEBOUNDS:
+		return CIL_KEY_ROLEBOUNDS;
+	case CIL_TYPE:
+		return CIL_KEY_TYPE;
+	case CIL_TYPEATTRIBUTE:
+		return CIL_KEY_TYPEATTRIBUTE;
+	case CIL_TYPEALIAS:
+		return CIL_KEY_TYPEALIAS;
+	case CIL_TYPEATTRIBUTESET:
+		return CIL_KEY_TYPEATTRIBUTESET;
+	case CIL_TYPEALIASACTUAL:
+		return CIL_KEY_TYPEALIASACTUAL;
+	case CIL_TYPEBOUNDS:
+		return CIL_KEY_TYPEBOUNDS;
+	case CIL_TYPEPERMISSIVE:
+		return CIL_KEY_TYPEPERMISSIVE;
+	case CIL_SENS:
+		return CIL_KEY_SENSITIVITY;
+	case CIL_SENSALIAS:
+		return CIL_KEY_SENSALIAS;
+	case CIL_SENSALIASACTUAL:
+		return CIL_KEY_SENSALIASACTUAL;
+	case CIL_SENSITIVITYORDER:
+		return CIL_KEY_SENSITIVITYORDER;
+	case CIL_SENSCAT:
+		return CIL_KEY_SENSCAT;
+	case CIL_CAT:
+		return CIL_KEY_CATEGORY;
+	case CIL_CATSET:
+		return CIL_KEY_CATSET;
+	case CIL_CATALIAS:
+		return CIL_KEY_CATALIAS;
+	case CIL_CATALIASACTUAL:
+		return CIL_KEY_CATALIASACTUAL;
+	case CIL_CATORDER:
+		return CIL_KEY_CATORDER;
+	case CIL_LEVEL:
+		return CIL_KEY_LEVEL;
+	case CIL_LEVELRANGE:
+		return CIL_KEY_LEVELRANGE;
+	case CIL_SID:
+		return CIL_KEY_SID;
+	case CIL_SIDORDER:
+		return CIL_KEY_SIDORDER;
+	case CIL_NAME:
+		return CIL_KEY_NAME;
+	case CIL_ROLEALLOW:
+		return CIL_KEY_ROLEALLOW;
 	case CIL_AVRULE:
 		switch (((struct cil_avrule *)node->data)->rule_kind) {
 		case CIL_AVRULE_ALLOWED:
@@ -613,10 +765,40 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 			break;
 		}
 		break;
-	case CIL_BLOCKINHERIT:
-		return CIL_KEY_BLOCKINHERIT;
-	case CIL_IN:
-		return CIL_KEY_IN;
+	case CIL_ROLETRANSITION:
+		return CIL_KEY_ROLETRANSITION;
+	case CIL_TYPE_RULE:
+		switch (((struct cil_type_rule *)node->data)->rule_kind) {
+		case CIL_TYPE_TRANSITION:
+			return CIL_KEY_TYPETRANSITION;
+		case CIL_TYPE_MEMBER:
+			return CIL_KEY_TYPEMEMBER;
+		case CIL_TYPE_CHANGE:
+			return CIL_KEY_TYPECHANGE;
+		default:
+			break;
+		}
+		break;
+	case CIL_NAMETYPETRANSITION:
+		return CIL_KEY_TYPETRANSITION;
+	case CIL_RANGETRANSITION:
+		return CIL_KEY_RANGETRANSITION;
+	case CIL_CONSTRAIN:
+		return CIL_KEY_CONSTRAIN;
+	case CIL_MLSCONSTRAIN:
+		return CIL_KEY_MLSCONSTRAIN;
+	case CIL_VALIDATETRANS:
+		return CIL_KEY_VALIDATETRANS;
+	case CIL_MLSVALIDATETRANS:
+		return CIL_KEY_MLSVALIDATETRANS;
+	case CIL_CONTEXT:
+		return CIL_KEY_CONTEXT;
+	case CIL_IPADDR:
+		return CIL_KEY_IPADDR;
+	case CIL_SIDCONTEXT:
+		return CIL_KEY_SIDCONTEXT;
+	case CIL_FSUSE:
+		return CIL_KEY_FSUSE;
 	case CIL_FILECON:
 		return CIL_KEY_FILECON;
 	case CIL_PORTCON:
@@ -635,86 +817,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_IOPORTCON;
 	case CIL_PCIDEVICECON:
 		return CIL_KEY_PCIDEVICECON;
-	case CIL_FSUSE:
-		return CIL_KEY_FSUSE;
-	case CIL_CONSTRAIN:
-		return CIL_KEY_CONSTRAIN;
-	case CIL_MLSCONSTRAIN:
-		return CIL_KEY_MLSCONSTRAIN;
-	case CIL_PERM:
-		return CIL_KEY_PERM;
-	case CIL_CLASSMAPPING:
-		return CIL_KEY_CLASSMAPPING;
-	case CIL_USERROLE:
-		return CIL_KEY_USERROLE;
-	case CIL_USERLEVEL:
-		return CIL_KEY_USERLEVEL;
-	case CIL_USERRANGE:
-		return CIL_KEY_USERRANGE;
-	case CIL_USERBOUNDS:
-		return CIL_KEY_USERBOUNDS;
-	case CIL_TYPEATTRIBUTESET:
-		return CIL_KEY_TYPEATTRIBUTESET;
-	case CIL_TYPE_RULE:
-		switch (((struct cil_type_rule *)node->data)->rule_kind) {
-		case CIL_TYPE_TRANSITION:
-			return CIL_KEY_TYPETRANSITION;
-		case CIL_TYPE_MEMBER:
-			return CIL_KEY_TYPEMEMBER;
-		case CIL_TYPE_CHANGE:
-			return CIL_KEY_TYPECHANGE;
-		default:
-			break;
-		}
-		break;
-	case CIL_TYPEBOUNDS:
-		return CIL_KEY_TYPEBOUNDS;
-	case CIL_NAMETYPETRANSITION:
-		return CIL_KEY_TYPETRANSITION;
-	case CIL_RANGETRANSITION:
-		return CIL_KEY_RANGETRANSITION;
-	case CIL_TYPEPERMISSIVE:
-		return CIL_KEY_TYPEPERMISSIVE;
-	case CIL_ROLETRANSITION:
-		return CIL_KEY_ROLETRANSITION;
-	case CIL_ROLEALLOW:
-		return CIL_KEY_ROLEALLOW;
-	case CIL_ROLETYPE:
-		return CIL_KEY_ROLETYPE;
-	case CIL_ROLEBOUNDS:
-		return CIL_KEY_ROLEBOUNDS;
-	case CIL_CATORDER:
-		return CIL_KEY_CATORDER;
-	case CIL_SENSITIVITYORDER:
-		return CIL_KEY_SENSITIVITYORDER;
-	case CIL_SENSCAT:
-		return CIL_KEY_SENSCAT;
-	case CIL_CLASSCOMMON:
-		return CIL_KEY_CLASSCOMMON;
-	case CIL_SIDCONTEXT:
-		return CIL_KEY_SIDCONTEXT;
-	case CIL_SIDORDER:
-		return CIL_KEY_SIDORDER;
-	case CIL_CALL:
-		return CIL_KEY_CALL;
-	case CIL_BOOLEANIF:
-		return CIL_KEY_BOOLEANIF;
-	case CIL_TUNABLEIF:
-		return CIL_KEY_TUNABLEIF;
-	case CIL_CONDBLOCK:
-		switch (((struct cil_condblock*)node->data)->flavor) {
-		case CIL_CONDTRUE:
-			return CIL_KEY_CONDTRUE;
-		case CIL_CONDFALSE:
-			return CIL_KEY_CONDFALSE;
-		default:
-			break;
-		}
-		break;
-	case CIL_TUNABLEIFDEF:
-		return CIL_KEY_TUNABLEIFDEF;
-	case CIL_TUNABLEIFNDEF:
-		return CIL_KEY_TUNABLEIFNDEF;
+	case CIL_POLICYCAP:
+		return CIL_KEY_POLICYCAP;
 	case CIL_DEFAULTUSER:
 		return CIL_KEY_DEFAULTUSER;
 	case CIL_DEFAULTROLE:
@@ -723,6 +827,14 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_DEFAULTTYPE;
 	case CIL_DEFAULTRANGE:
 		return CIL_KEY_DEFAULTRANGE;
+	case CIL_HANDLEUNKNOWN:
+		return CIL_KEY_HANDLEUNKNOWN;
+	case CIL_MLS:
+		return CIL_KEY_MLS;
+	case CIL_ALL:
+		return CIL_KEY_ALL;
+	case CIL_RANGE:
+		return CIL_KEY_RANGE;
 	case CIL_AND:
 		return CIL_KEY_AND;
 	case CIL_OR:
@@ -745,14 +857,20 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_CONS_U1;
 	case CIL_CONS_U2:
 		return CIL_KEY_CONS_U2;
+	case CIL_CONS_U3:
+		return CIL_KEY_CONS_U3;
 	case CIL_CONS_T1:
 		return CIL_KEY_CONS_T1;
 	case CIL_CONS_T2:
 		return CIL_KEY_CONS_T2;
+	case CIL_CONS_T3:
+		return CIL_KEY_CONS_T3;
 	case CIL_CONS_R1:
 		return CIL_KEY_CONS_R1;
 	case CIL_CONS_R2:
 		return CIL_KEY_CONS_R2;
+	case CIL_CONS_R3:
+		return CIL_KEY_CONS_R3;
 	case CIL_CONS_L1:
 		return CIL_KEY_CONS_L1;
 	case CIL_CONS_L2:
@@ -761,70 +879,7 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_CONS_H1;
 	case CIL_CONS_H2:
 		return CIL_KEY_CONS_H2;
-	case CIL_BLOCK:
-		return CIL_KEY_BLOCK;
-	case CIL_CLASS:
-		return CIL_KEY_CLASS;
-	case CIL_MAP_CLASS:
-		return CIL_KEY_MAP_CLASS;
-	case CIL_COMMON:
-		return CIL_KEY_COMMON;
-	case CIL_SID:
-		return CIL_KEY_SID;
-	case CIL_USER:
-		return CIL_KEY_USER;
-	case CIL_ROLE:
-		return CIL_KEY_ROLE;
-	case CIL_ROLEATTRIBUTE:
-		return CIL_KEY_ROLEATTRIBUTE;
-	case CIL_TYPE:
-		return CIL_KEY_TYPE;
-	case CIL_TYPEATTRIBUTE:
-		return CIL_KEY_TYPEATTRIBUTE;
-	case CIL_BOOL:
-		return CIL_KEY_BOOL;
-	case CIL_CLASSPERMISSION:
-		return CIL_KEY_CLASSPERMISSION;
-	case CIL_CLASSPERMISSIONSET:
-		return CIL_KEY_CLASSPERMISSIONSET;
-	case CIL_TUNABLE:
-		return CIL_KEY_TUNABLE;
-	case CIL_TYPEALIAS:
-		return CIL_KEY_TYPEALIAS;
-	case CIL_TYPEALIASACTUAL:
-		return CIL_KEY_TYPEALIASACTUAL;
-	case CIL_CONTEXT:
-		return CIL_KEY_CONTEXT;
-	case CIL_LEVEL:
-		return CIL_KEY_LEVEL;
-	case CIL_LEVELRANGE:
-		return CIL_KEY_LEVELRANGE;
-	case CIL_SENS:
-		return CIL_KEY_SENSITIVITY;
-	case CIL_CAT:
-		return CIL_KEY_CATEGORY;
-	case CIL_SENSALIAS:
-		return CIL_KEY_SENSALIAS;
-	case CIL_SENSALIASACTUAL:
-		return CIL_KEY_SENSALIASACTUAL;
-	case CIL_CATALIAS:
-		return CIL_KEY_CATALIAS;
-	case CIL_CATALIASACTUAL:
-		return CIL_KEY_CATALIASACTUAL;
-	case CIL_CATSET:
-		return CIL_KEY_CATSET;
-	case CIL_MACRO:
-		return CIL_KEY_MACRO;
-	case CIL_OPTIONAL:
-		return CIL_KEY_OPTIONAL;
-	case CIL_POLICYCAP:
-		return CIL_KEY_POLICYCAP;
-	case CIL_IPADDR:
-		return CIL_KEY_IPADDR;
-	case CIL_HANDLEUNKNOWN:
-		return CIL_KEY_HANDLEUNKNOWN;
-	case CIL_MLS:
-		return CIL_KEY_MLS;
+
 	default:
 		break;
 	}

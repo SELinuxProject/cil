@@ -72,7 +72,7 @@ void cil_copy_list(struct cil_list *data, struct cil_list **copy)
 	*copy = new;
 }
 
-int cil_copy_parse(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
+int cil_copy_node(__attribute__((unused)) struct cil_db *db, void *data, void **copy, __attribute__((unused)) symtab_t *symtab)
 {
 	char *new = NULL;
 
@@ -1747,8 +1747,8 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	case CIL_MACRO:
 		copy_func = &cil_copy_macro;
 		break;
-	case CIL_PARSE_NODE:
-		copy_func = &cil_copy_parse;
+	case CIL_NODE:
+		copy_func = &cil_copy_node;
 		break;
 	case CIL_OPTIONAL:
 		copy_func = &cil_copy_optional;
