@@ -155,82 +155,79 @@ void cil_tree_node_destroy(struct cil_tree_node **node)
    last_child:		Function to call when finished with the last child of a node's children
    extra_args:               any additional data to be passed to the helper functions
 */
-int cil_tree_walk(struct cil_tree_node *start_node, 
-		  int (*process_node)(struct cil_tree_node *node, uint32_t *finished, 
-				      void *extra_args), 
-		  int (*first_child)(struct cil_tree_node *node, void *extra_args), 
-		  int (*last_child)(struct cil_tree_node *node, void *extra_args), 
-		  void *extra_args)
+
+int cil_tree_walk_core(struct cil_tree_node *node,
+					   int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args),
+					   int (*first_child)(struct cil_tree_node *node, void *extra_args), 
+					   int (*last_child)(struct cil_tree_node *node, void *extra_args), 
+					   void *extra_args)
 {
-	struct cil_tree_node *node = NULL;
-	uint32_t reverse = 0;
-	uint32_t finished = 0;
 	int rc = SEPOL_ERR;
 
-	if (start_node == NULL) {
-		return SEPOL_ERR;
+	while (node) {
+		uint32_t finished = CIL_TREE_SKIP_NOTHING;
+
+		if (process_node != NULL) {
+			rc = (*process_node)(node, &finished, extra_args);
+			if (rc != SEPOL_OK) {
+				cil_log(CIL_INFO, "Problem at line %d of %s\n", node->line, node->path);
+				return rc;
+			}
+		}
+
+		if (finished & CIL_TREE_SKIP_NEXT) {
+			return SEPOL_OK;
+		}
+
+		if (node->cl_head != NULL && !(finished & CIL_TREE_SKIP_HEAD)) {
+			rc = cil_tree_walk(node, process_node, first_child, last_child, extra_args);
+			if (rc != SEPOL_OK) {
+				return rc;
+			}
+		}
+
+		node = node->next;
 	}
 
-	if (start_node->cl_head == NULL) {
+	return SEPOL_OK;
+}
+
+int cil_tree_walk(struct cil_tree_node *node, 
+				  int (*process_node)(struct cil_tree_node *node, uint32_t *finished, void *extra_args), 
+				  int (*first_child)(struct cil_tree_node *node, void *extra_args), 
+				  int (*last_child)(struct cil_tree_node *node, void *extra_args), 
+				  void *extra_args)
+{
+	int rc = SEPOL_ERR;
+
+	if (!node || !node->cl_head) {
 		return SEPOL_OK;
 	}
 
-	node = start_node->cl_head;
-
-
 	if (first_child != NULL) {
-		rc = (*first_child)(node, extra_args);
+		rc = (*first_child)(node->cl_head, extra_args);
 		if (rc != SEPOL_OK) {
-			cil_log(CIL_INFO, "Failed to process first child at line %d of %s\n",
-				node->line, node->path);
+			cil_log(CIL_INFO, "Problem at line %d of %s\n", node->line, node->path);
 			return rc;
 		}
 	}
 
-	do {
-		if (!reverse) {
-			if (process_node != NULL) {
-				rc = (*process_node)(node, &finished, extra_args);
-				if (rc != SEPOL_OK) {
-					cil_log(CIL_INFO, "Failed to process node at line %d of %s\n", node->line, node->path);
-					return rc;
-				}
-			}
-		}
+	rc = cil_tree_walk_core(node->cl_head, process_node, first_child, last_child, extra_args);
+	if (rc != SEPOL_OK) {
+		return rc;
+	}
 
-		if (node->cl_head != NULL && !reverse && !(finished & CIL_TREE_SKIP_HEAD)) {
-			node = node->cl_head;
-			if (first_child != NULL) {
-				rc = (*first_child)(node, extra_args);
-				if (rc != SEPOL_OK) {
-					cil_log(CIL_INFO, "Failed to process first child at line %d of %s\n", node->line, node->path);
-					return rc;
-				}
-			}
-			finished = CIL_TREE_SKIP_NOTHING;
-		} else if (node->next != NULL && reverse && !(finished & CIL_TREE_SKIP_NEXT)) {
-			node = node->next;
-			reverse = 0;
-			finished = CIL_TREE_SKIP_NOTHING;
-		} else if (node->next != NULL && !(finished & CIL_TREE_SKIP_NEXT)) {
-			node = node->next;
-			finished = CIL_TREE_SKIP_NOTHING;
-		} else {
-			if (last_child != NULL) {
-				rc = (*last_child)(node, extra_args);
-				if (rc != SEPOL_OK) {
-					cil_log(CIL_INFO, "Failed to process last child at line %d of %s\n",node->line, node->path);
-					return rc;
-				}
-			}
-			node = node->parent;
-			reverse = 1;
-			finished = CIL_TREE_SKIP_NOTHING;
+	if (last_child != NULL) {
+		rc = (*last_child)(node->cl_tail, extra_args);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_INFO, "Problem at line %d of %s\n",node->line, node->path);
+			return rc;
 		}
-	} while (node != start_node);
-	
+	}
+
 	return SEPOL_OK;
 }
+
 
 /* Copied from cil_policy.c, but changed to prefix -- Need to refactor */
 static int cil_expr_to_string(struct cil_list *expr, char **out)
