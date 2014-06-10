@@ -50,7 +50,7 @@ struct cil_args_build {
 	struct cil_db *db;
 	struct cil_tree_node *macro;
 	struct cil_tree_node *boolif;
-	struct cil_tree_node *tifstack;
+	struct cil_tree_node *tunif;
 };
 
 int cil_fill_list(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **list)
@@ -5639,7 +5639,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	struct cil_tree_node *ast_node = NULL;
 	struct cil_tree_node *macro = NULL;
 	struct cil_tree_node *boolif = NULL;
-	struct cil_tree_node *tifstack = NULL;
+	struct cil_tree_node *tunif = NULL;
 	int rc = SEPOL_ERR;
 
 	if (parse_current == NULL || finished == NULL || extra_args == NULL) {
@@ -5651,7 +5651,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	db = args->db;
 	macro = args->macro;
 	boolif = args->boolif;
-	tifstack = args->tifstack;
+	tunif = args->tunif;
 
 	if (parse_current->parent->cl_head != parse_current) {
 		/* ignore anything that isn't following a parenthesis */
@@ -5710,7 +5710,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 		}
 	}
 
-	if (tifstack != NULL) {
+	if (tunif != NULL) {
 		if (!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Found tunable at line %d of %s\n",
@@ -5977,15 +5977,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			}
 
 			if (ast_current->flavor == CIL_TUNABLEIF) {
-				struct cil_tree_node *new;
-				cil_tree_node_init(&new);
-				new->data = ast_current->data;
-				new->flavor = ast_current->flavor;
-				if (args->tifstack != NULL) {
-					args->tifstack->parent = new;
-					new->cl_head = args->tifstack;
-				}
-				args->tifstack = new;
+				args->tunif = ast_current;
 			}
 		
 			ast_current->cl_head = ast_node;
@@ -6008,7 +6000,6 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *ast = NULL;
 	struct cil_args_build *args = NULL;
-	struct cil_tree_node *tifstack = NULL;
 
 	if (extra_args == NULL) {
 		goto exit;
@@ -6033,13 +6024,7 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 	}
 
 	if (ast->flavor == CIL_TUNABLEIF) {
-		/* pop off the stack */
-		tifstack = args->tifstack;
-		args->tifstack = tifstack->cl_head;
-		if (tifstack->cl_head) {
-			tifstack->cl_head->parent = NULL;
-		}
-		free(tifstack);
+		args->tunif = NULL;
 	}
 
 	return SEPOL_OK;
@@ -6061,7 +6046,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	extra_args.db = db;
 	extra_args.macro = NULL;
 	extra_args.boolif = NULL;
-	extra_args.tifstack = NULL;
+	extra_args.tunif = NULL;
 
 	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, NULL, __cil_build_ast_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {
