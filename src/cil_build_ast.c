@@ -3925,7 +3925,6 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		CIL_SYN_STRING,
 		CIL_SYN_STRING,
 		CIL_SYN_STRING,
-		CIL_SYN_STRING,
 		CIL_SYN_STRING | CIL_SYN_LIST | CIL_SYN_EMPTY_LIST,
 		CIL_SYN_END
 	};
@@ -3943,11 +3942,10 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	type = parse_current->next->next->next->data;
+	type = parse_current->next->next->data;
 	cil_filecon_init(&filecon);
 
-	filecon->root_str = cil_strdup(parse_current->next->data);
-	filecon->path_str = cil_strdup(parse_current->next->next->data);
+	filecon->path_str = cil_strdup(parse_current->next->data);
 
 	if (!strcmp(type, "file")) {
 		filecon->type = CIL_FILECON_FILE;
@@ -3971,15 +3969,15 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		goto exit;
 	}
 
-	if (parse_current->next->next->next->next->cl_head == NULL) {
-		filecon->context_str = cil_strdup(parse_current->next->next->next->next->data);
+	if (parse_current->next->next->next->cl_head == NULL) {
+		filecon->context_str = cil_strdup(parse_current->next->next->next->data);
 	} else {
-		if (parse_current->next->next->next->next->cl_head->next == NULL) {
+		if (parse_current->next->next->next->cl_head->next == NULL) {
 			filecon->context = NULL;
 		} else {
 			cil_context_init(&filecon->context);
 
-			rc = cil_fill_context(parse_current->next->next->next->next->cl_head, filecon->context);
+			rc = cil_fill_context(parse_current->next->next->next->cl_head, filecon->context);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -4003,10 +4001,6 @@ void cil_destroy_filecon(struct cil_filecon *filecon)
 {
 	if (filecon == NULL) {
 		return;
-	}
-
-	if (filecon->root_str != NULL) {
-		free(filecon->root_str);
 	}
 
 	if (filecon->path_str != NULL) {

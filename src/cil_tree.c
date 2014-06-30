@@ -1255,7 +1255,7 @@ void cil_tree_print_node(struct cil_tree_node *node)
 		case CIL_FILECON: {
 			struct cil_filecon *filecon = node->data;
 			cil_log(CIL_INFO, "FILECON:");
-			cil_log(CIL_INFO, " %s %s %d", filecon->root_str, filecon->path_str, filecon->type);
+			cil_log(CIL_INFO, " %s %d", filecon->path_str, filecon->type);
 
 			if (filecon->context_str != NULL) {
 				cil_log(CIL_INFO, " %s", filecon->context_str);

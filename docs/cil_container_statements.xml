@@ -200,7 +200,7 @@
     ; Add common policy rules to namespace:
     (blockinherit client_server)
     ; Label the log files
-    (filecon "/data/data/com.se4android.netclient/.*" "" file log_file_context)
+    (filecon "/data/data/com.se4android.netclient/.*" file log_file_context)
 )
 
 ; This is another policy block that will inherit the abstract block above:
@@ -209,7 +209,7 @@
     (blockinherit client_server)
 
     ; Label the log files
-    (filecon "/data/data/com.se4android.netserver/.*" "" file log_file_context)
+    (filecon "/data/data/com.se4android.netserver/.*" file log_file_context)
 )]]>
          </programlisting>
       </sect2>

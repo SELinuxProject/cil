@@ -1018,7 +1018,6 @@ int cil_copy_filecon(struct cil_db *db, void *data, void **copy, __attribute__((
 
 	cil_filecon_init(&new);
 
-	new->root_str = cil_strdup(orig->root_str);
 	new->path_str = cil_strdup(orig->path_str);
 	new->type = orig->type;
 	new->context_str = cil_strdup(orig->context_str);

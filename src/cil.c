@@ -1116,7 +1116,7 @@ int cil_filecons_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char *
 		struct cil_filecon *filecon = filecons->array[i];
 		struct cil_context *ctx = filecon->context;
 
-		str_len += strlen(filecon->root_str) + strlen(filecon->path_str);
+		str_len += strlen(filecon->path_str);
 
 		if (filecon->type != CIL_FILECON_ANY) {
 			/* If a type is specified,
@@ -1151,7 +1151,7 @@ int cil_filecons_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char *
 		struct cil_context *ctx = filecon->context;
 		char *str_type = NULL; 
 
-		buf_pos = sprintf(str_tmp, "%s%s", filecon->root_str, filecon->path_str);
+		buf_pos = sprintf(str_tmp, "%s", filecon->path_str);
 		str_tmp += buf_pos;
 
 		switch(filecon->type) {
@@ -1784,7 +1784,6 @@ void cil_filecon_init(struct cil_filecon **filecon)
 {
 	*filecon = cil_malloc(sizeof(**filecon));
 
-	(*filecon)->root_str = NULL;
 	(*filecon)->path_str = NULL;
 	(*filecon)->type = 0;
 	(*filecon)->context_str = NULL;

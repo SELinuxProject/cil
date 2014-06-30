@@ -77,7 +77,7 @@
             <programlisting><![CDATA[
 (context runas_exec_context (u object_r exec low_low))
 
-(filecon "/system/bin/run-as" "" file runas_exec_context)]]>
+(filecon "/system/bin/run-as" file runas_exec_context)]]>
             </programlisting>
          <simpara>to resolve/build a <literal>file_contexts</literal> entry of (assuming MLS enabled policy):</simpara>
             <programlisting><![CDATA[/system/bin/run-as  -- u:object_r:runas.exec:s0-s0]]></programlisting>

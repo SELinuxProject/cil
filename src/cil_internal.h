@@ -624,7 +624,6 @@ enum cil_filecon_types {
 };
 
 struct cil_filecon {
-	char *root_str;
 	char *path_str;
 	enum cil_filecon_types type;
 	char *context_str;

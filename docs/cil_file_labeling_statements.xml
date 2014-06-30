@@ -7,7 +7,7 @@
          <title>filecon</title>
          <para>Define entries for labeling files. The compiler will produce these entries in a file called <emphasis role="bold"><literal>file_contexts</literal></emphasis><literal>(5)</literal> by default in the <literal>cwd</literal>. The compiler option <literal>[-f|--filecontext &lt;filename>]</literal> may be used to specify a different path or file name.</para>
          <para><emphasis role="bold">Statement definition:</emphasis></para>
-         <programlisting><![CDATA[(filecon "root" "path" file_type context_id)]]></programlisting>
+         <programlisting><![CDATA[(filecon "path" file_type context_id)]]></programlisting>
          <para><emphasis role="bold">Where:</emphasis></para>
          <informaltable frame="all">
             <tgroup cols="2">
@@ -24,18 +24,10 @@
                </row>
                <row>
                   <entry>
-                     <para><literal>root</literal></para>
-                  </entry>
-                  <entry>
-                     <para>A string representing the file root that may be in the form of a regular expression. The string must be enclosed within double quotes (e.g. <literal>"/this/is/a/path(/.*)?"</literal>)</para>
-                  </entry>
-               </row>
-               <row>
-                  <entry>
                      <para><literal>path</literal></para>
                   </entry>
                   <entry>
-                     <para>A string representing the file path (this is normally an empty string <literal>""</literal>).</para>
+                     <para>A string representing the file path that may be in the form of a regular expression. The string must be enclosed within double quotes (e.g. <literal>"/this/is/a/path(/.*)?"</literal>)</para>
                   </entry>
                </row>
                <row>
@@ -147,9 +139,9 @@
             <programlisting><![CDATA[
 (context runas_exec_context (u object_r exec low_low))
 
-(filecon "/system/bin/run-as" "" file runas_exec_context)
-(filecon "/dev/socket/wpa_wlan[0-9]" "" any u:object_r:wpa.socket:s0-s0)
-(filecon "/data/local/mine" "" dir ())]]>
+(filecon "/system/bin/run-as" file runas_exec_context)
+(filecon "/dev/socket/wpa_wlan[0-9]" any u:object_r:wpa.socket:s0-s0)
+(filecon "/data/local/mine" dir ())]]>
             </programlisting>
          <simpara>to resolve/build <literal>file_contexts</literal> entries of (assuming MLS enabled policy):</simpara>
             <programlisting><![CDATA[
