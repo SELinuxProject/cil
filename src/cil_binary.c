@@ -402,6 +402,11 @@ int cil_role_to_policydb(policydb_t *pdb, struct cil_role *cil_role)
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
+	if (ebitmap_set_bit(&sepol_role->dominates, value - 1, 1)) {
+		cil_log(CIL_INFO, "Failed to set dominates bit for role\n");
+		rc = SEPOL_ERR;
+		goto exit;
+	}
 	sepol_role->s.value = value;
 	return SEPOL_OK;
 
