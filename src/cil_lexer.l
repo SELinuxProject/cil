@@ -45,7 +45,7 @@
 
 digit		[0-9]
 alpha		[a-zA-Z]
-spec_char	[\[\]\.\@\=\/\*\-\_\$\%\@\+\-\!\|\&\^\:]
+spec_char	[\[\]\.\@\=\/\*\-\_\$\%\+\-\!\|\&\^\:\~\`\#\{\}\'\<\>\?\,]
 symbol		({digit}|{alpha}|{spec_char})+
 white		[ \t]
 newline		[\n\r]
@@ -60,7 +60,8 @@ comment		;[^\n]*
 {symbol}	value=yytext; return SYMBOL;
 {white}		//cil_log(CIL_INFO, "white, ");
 {qstring}	value=yytext; return QSTRING;
-.		value=yytext; return NONE;
+<<EOF>>		return END_OF_FILE;
+.		value=yytext; return UNKNOWN;
 %%
 
 int cil_lexer_setup(char *buffer, uint32_t size)

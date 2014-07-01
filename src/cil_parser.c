@@ -58,7 +58,8 @@ int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_
 
 	do {
 		cil_lexer_next(&tok);
-		if (tok.type == OPAREN) {
+		switch (tok.type) {
+		case OPAREN:
 			paren_count++;
 			cil_tree_node_init(&node);
 			node->parent = current;
@@ -72,14 +73,17 @@ int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_
 			}
 			current->cl_tail = node;
 			current = node;
-		} else if (tok.type == CPAREN) {
+			break;
+		case CPAREN:
 			paren_count--;
 			if (paren_count < 0) {
 				cil_log(CIL_ERR, "Close parenthesis without matching open at line %d of %s\n", tok.line, path);
 				return SEPOL_ERR;
 			}
 			current = current->parent;
-		} else if ((tok.type == SYMBOL) || (tok.type == QSTRING)) {
+			break;
+		case SYMBOL:
+		case QSTRING:
 			if (paren_count == 0) {
 				cil_log(CIL_ERR, "Symbol not inside parenthesis at line %d of %s\n", tok.line, path);
 				return SEPOL_ERR;
@@ -101,13 +105,25 @@ int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_
 				current->cl_tail->next = item;
 			}
 			current->cl_tail = item;
-		} else if ((tok.type == 0) && (paren_count > 0)) {
-			cil_log(CIL_ERR, "Open parenthesis without matching close at line %d of %s\n", tok.line, path);
+			break;
+		case END_OF_FILE:
+			if (paren_count > 0) {
+				cil_log(CIL_ERR, "Open parenthesis without matching close at line %d of %s\n", tok.line, path);
+				return SEPOL_ERR;
+			}
+			break;
+		case COMMENT:
+			// ignore
+			break;
+		case UNKNOWN:
+			cil_log(CIL_ERR, "Invalid token '%s' at line %d of %s\n", tok.value, tok.line, path);
 			return SEPOL_ERR;
-		}	
-			
+		default:
+			cil_log(CIL_ERR, "Unknown token type '%d' at line %d of %s\n", tok.type, tok.line, path);
+			return SEPOL_ERR;
+		}
 	}
-	while (tok.type != 0);
+	while (tok.type != END_OF_FILE);
 
 	cil_lexer_destroy();
 

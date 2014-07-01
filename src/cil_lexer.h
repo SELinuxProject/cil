@@ -37,7 +37,8 @@
 #define SYMBOL 3
 #define QSTRING 4
 #define COMMENT 5
-#define NONE 6
+#define END_OF_FILE 6
+#define UNKNOWN 7
 
 struct token {
 	uint32_t type;
