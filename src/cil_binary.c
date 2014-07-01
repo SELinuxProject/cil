@@ -46,11 +46,17 @@
 #include "cil_binary.h"
 #include "cil_symtab.h"
 
+/* There are 44000 filename_trans in current fedora policy. 1.33 times this is the recommended
+ * size of a hashtable. The next power of 2 of this is 2 ** 16.
+ */
+#define FILENAME_TRANS_TABLE_SIZE 1 << 16
+
 struct cil_args_binary {
 	const struct cil_db *db;
 	policydb_t *pdb;
 	struct cil_list *neverallows;
 	int pass;
+	hashtab_t filename_trans_table;
 };
 
 struct cil_args_booleanif {
@@ -59,6 +65,7 @@ struct cil_args_booleanif {
 	cond_node_t *cond_node;
 	enum cil_flavor cond_flavor;
 	struct cil_list *neverallows;
+	hashtab_t filename_trans_table;
 };
 
 struct cil_neverallow {
@@ -1106,7 +1113,7 @@ int cil_type_rule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 	return  __cil_type_rule_to_avtab(pdb, db, cil_rule, NULL, CIL_FALSE);
 }
 
-int __cil_typetransition_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_nametypetransition *typetrans, cond_node_t *cond_node, enum cil_flavor cond_flavor)
+int __cil_typetransition_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_nametypetransition *typetrans, cond_node_t *cond_node, enum cil_flavor cond_flavor, hashtab_t filename_trans_table)
 {
 	int rc = SEPOL_ERR;
 	type_datum_t *sepol_src = NULL;
@@ -1115,12 +1122,12 @@ int __cil_typetransition_to_avtab(policydb_t *pdb, const struct cil_db *db, stru
 	struct cil_list *class_list;
 	type_datum_t *sepol_result = NULL;
 	filename_trans_t *new = NULL;
-	filename_trans_t *curr = NULL;
 	ebitmap_t src_bitmap, tgt_bitmap;
 	ebitmap_node_t *node1, *node2;
 	unsigned int i, j;
 	struct cil_list_item *c;
 	char *name = DATUM(typetrans->name)->name;
+	uint32_t *otype = NULL;
 
 	if (!strcmp(name, "*")) {
 		struct cil_type_rule trans;
@@ -1168,20 +1175,19 @@ int __cil_typetransition_to_avtab(policydb_t *pdb, const struct cil_db *db, stru
 				new->otype = sepol_result->s.value;
 				new->name = cil_strdup(name);
 
-				rc = SEPOL_OK;
-				curr = pdb->filename_trans;
-				while (curr != NULL) {
-					if (curr->stype == new->stype && curr->ttype == new->ttype &&
-						curr->tclass == new->tclass && 
-						strcmp(curr->name, new->name) == 0) {
+				rc = hashtab_insert(filename_trans_table, (hashtab_key_t)new, &(new->otype));
+				if (rc != SEPOL_OK) {
+					if (rc == SEPOL_EEXIST) {
 						add = CIL_FALSE;
-						if (curr->otype != new->otype) {
+						otype = hashtab_search(filename_trans_table, (hashtab_key_t)new);
+						if (new->otype != *otype) {
 							cil_log(CIL_ERR, "Conflicting name type transition rules\n");
-							rc = SEPOL_ERR;
-							break;
+						} else {
+							rc = SEPOL_OK;
 						}
+					} else {
+						cil_log(CIL_ERR, "Out of memory\n");
 					}
-					curr = curr->next;
 				}
 
 				if (add == CIL_TRUE) {
@@ -1207,9 +1213,9 @@ exit:
 	return rc;
 }
 
-int cil_typetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_nametypetransition *typetrans)
+int cil_typetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_nametypetransition *typetrans, hashtab_t filename_trans_table)
 {
-	return  __cil_typetransition_to_avtab(pdb, db, typetrans, NULL, CIL_FALSE);
+	return  __cil_typetransition_to_avtab(pdb, db, typetrans, NULL, CIL_FALSE, filename_trans_table);
 }
 
 int __cil_perms_to_datum(struct cil_list *perms, class_datum_t *sepol_class, uint32_t *datum)
@@ -1533,6 +1539,7 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 	struct cil_type_rule *cil_type_rule;
 	struct cil_avrule *cil_avrule;
 	struct cil_nametypetransition *cil_typetrans;
+	hashtab_t filename_trans_table = args->filename_trans_table;
 
 	flavor = node->flavor;
 	switch (flavor) {
@@ -1544,7 +1551,7 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 			node->line, node->path);
 			goto exit;
 		}
-		rc = __cil_typetransition_to_avtab(pdb, db, cil_typetrans, cond_node, cond_flavor);
+		rc = __cil_typetransition_to_avtab(pdb, db, cil_typetrans, cond_node, cond_flavor, filename_trans_table);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_ERR, "Failed to insert type transition into avtab at line %d of %s\n", node->line, node->path);
 			goto exit;
@@ -1729,7 +1736,7 @@ static int __cil_cond_expr_to_sepol_expr(policydb_t *pdb, struct cil_list *cil_e
 	return SEPOL_OK;
 }
 
-int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_tree_node *node, struct cil_list *neverallows)
+int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_tree_node *node, struct cil_list *neverallows, hashtab_t filename_trans_table)
 {
 	int rc = SEPOL_ERR;
 	struct cil_args_booleanif bool_args;
@@ -1805,6 +1812,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 	bool_args.pdb = pdb;
 	bool_args.cond_node = cond_node;
 	bool_args.neverallows = neverallows;
+	bool_args.filename_trans_table = filename_trans_table;
 
 	if (true_node != NULL) {
 		bool_args.cond_flavor = CIL_CONDTRUE;
@@ -3052,10 +3060,11 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 	struct cil_args_binary *args = extra_args;
 	const struct cil_db *db;
 	policydb_t *pdb;
-
+	hashtab_t filename_trans_table;
 	db = args->db;
 	pdb = args->pdb;
 	pass = args->pass;
+	filename_trans_table = args->filename_trans_table;
 
 	if (node->flavor >= CIL_MIN_DECLARATIVE) {
 		if (node != DATUM(node->data)->nodes->head->data) {
@@ -3161,7 +3170,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 		  /*rc = cil_roleattributeset_to_policydb(pdb, node->data);*/
 			break;
 		case CIL_NAMETYPETRANSITION:
-			rc = cil_typetransition_to_policydb(pdb, db, node->data);
+			rc = cil_typetransition_to_policydb(pdb, db, node->data, filename_trans_table);
 			break;
 		case CIL_CONSTRAIN:
 			rc = cil_constrain_to_policydb(pdb, db, node->data);
@@ -3199,7 +3208,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 	case 3:
 		switch (node->flavor) {
 		case CIL_BOOLEANIF:
-			rc = cil_booleanif_to_policydb(pdb, db, node, args->neverallows);
+			rc = cil_booleanif_to_policydb(pdb, db, node, args->neverallows, filename_trans_table);
 			break;
 		case CIL_AVRULE: {
 				struct cil_avrule *rule = node->data;
@@ -3554,6 +3563,23 @@ exit:
 	return rc;
 }
 
+static unsigned int filename_trans_hash(hashtab_t h, hashtab_key_t key)
+{
+	filename_trans_t *k = (filename_trans_t *)key;
+	return ((k->tclass + (k->ttype << 2) +
+				(k->stype << 9)) & (h->size - 1));
+}
+
+static int filename_trans_compare(hashtab_t h
+             __attribute__ ((unused)), hashtab_key_t key1,
+			              hashtab_key_t key2)
+{
+	filename_trans_t *a = (filename_trans_t *)key1;
+	filename_trans_t *b = (filename_trans_t *)key2;
+
+	return a->stype != b->stype || a->ttype != b->ttype || a->tclass != b->tclass || strcmp(a->name, b->name);
+}
+
 int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 {
 	int rc = SEPOL_ERR;
@@ -3561,6 +3587,7 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 	struct cil_args_binary extra_args;
 	policydb_t *pdb = &policydb->p;
 	struct cil_list *neverallows = NULL;
+	hashtab_t filename_trans_table = NULL;
 
 	if (db == NULL || policydb == NULL) {
 		if (db == NULL) {
@@ -3577,11 +3604,18 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 		return SEPOL_ERR;
 	}
 
+	filename_trans_table = hashtab_create(filename_trans_hash, filename_trans_compare, FILENAME_TRANS_TABLE_SIZE);
+	if (!filename_trans_table) {
+		cil_log(CIL_INFO, "Failure to create hashtab for filename_trans\n");
+		goto exit;
+	}
+
 	cil_list_init(&neverallows, CIL_LIST_ITEM);
 
 	extra_args.db = db;
 	extra_args.pdb = pdb;
 	extra_args.neverallows = neverallows;
+	extra_args.filename_trans_table = filename_trans_table;
 	for (i = 1; i <= 3; i++) {
 		extra_args.pass = i;
 

@@ -246,7 +246,7 @@ int cil_avrule_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_tree_node *node, struct cil_list *neverallows);
+int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_tree_node *node, struct cil_list *neverallows, hashtab_t filename_trans_table);
 
 /**
  * Insert cil role transition structure into sepol policydb.
@@ -276,7 +276,7 @@ int cil_roleallow_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_typetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_nametypetransition *typetrans);
+int cil_typetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_nametypetransition *typetrans, hashtab_t filename_trans_table);
 
 /**
  * Insert cil constrain/mlsconstrain structure(s) into sepol policydb.
