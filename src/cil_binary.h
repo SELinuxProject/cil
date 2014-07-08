@@ -256,7 +256,7 @@ int cil_booleanif_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
  *
  * @return SEPOL_OK upon success or SEPOL_ERR upon error.
  */
-int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletransition *roletrans);
+int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletransition *roletrans, hashtab_t role_trans_table);
 
 /**
  * Insert cil role allow structure into sepol policydb.
@@ -310,7 +310,7 @@ int cil_sepol_level_define(policydb_t *pdb, struct cil_sens *cil_sens);
  *
  * @return SEPOL_OK upon success or an error otherwise.
  */
-int cil_rangetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_rangetransition *rangetrans);
+int cil_rangetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_rangetransition *rangetrans, hashtab_t range_trans_table);
 
 /**
  * Insert cil portcon structure into sepol policydb.

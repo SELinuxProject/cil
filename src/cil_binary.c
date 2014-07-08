@@ -50,6 +50,8 @@
  * size of a hashtable. The next power of 2 of this is 2 ** 16.
  */
 #define FILENAME_TRANS_TABLE_SIZE 1 << 16
+#define RANGE_TRANS_TABLE_SIZE 1 << 13
+#define ROLE_TRANS_TABLE_SIZE 1 << 10
 
 struct cil_args_binary {
 	const struct cil_db *db;
@@ -57,6 +59,8 @@ struct cil_args_binary {
 	struct cil_list *neverallows;
 	int pass;
 	hashtab_t filename_trans_table;
+	hashtab_t range_trans_table;
+	hashtab_t role_trans_table;
 };
 
 struct cil_args_booleanif {
@@ -1838,7 +1842,7 @@ exit:
 	return rc;
 }
 
-int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletransition *roletrans)
+int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_roletransition *roletrans, hashtab_t role_trans_table)
 {
 	int rc = SEPOL_ERR;
 	role_datum_t *sepol_src = NULL;
@@ -1847,7 +1851,7 @@ int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 	struct cil_list *class_list;
 	role_datum_t *sepol_result = NULL;
 	role_trans_t *new = NULL;
-	role_trans_t *curr = NULL;
+	uint32_t *new_role = NULL;
 	ebitmap_t role_bitmap, type_bitmap;
 	ebitmap_node_t *rnode, *tnode;
 	unsigned int i, j;
@@ -1889,18 +1893,19 @@ int cil_roletrans_to_policydb(policydb_t *pdb, const struct cil_db *db, struct c
 				new->new_role = sepol_result->s.value;
 
 				rc = SEPOL_OK;
-				curr = pdb->role_tr;
-				while (curr != NULL) {
-					if (curr->role == new->role && curr->type == new->type &&
-						curr->tclass == new->tclass) {
+				rc = hashtab_insert(role_trans_table, (hashtab_key_t)new, &(new->new_role));
+				if (rc != SEPOL_OK) {
+					if (rc == SEPOL_EEXIST) {
 						add = CIL_FALSE;
-						if (curr->new_role != new->new_role) {
+						new_role = hashtab_search(role_trans_table, (hashtab_key_t)new);
+						if (new->new_role != *new_role) {
 							cil_log(CIL_ERR, "Conflicting role transition rules\n");
-							rc = SEPOL_ERR;
-							break;
+						} else {
+							rc = SEPOL_OK;
 						}
+					} else {
+						cil_log(CIL_ERR, "Out of memory\n");
 					}
-					curr = curr->next;
 				}
 
 				if (add == CIL_TRUE) {
@@ -2605,18 +2610,19 @@ exit:
 	return rc;
 }
 
-int cil_rangetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_rangetransition *rangetrans)
+int cil_rangetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, struct cil_rangetransition *rangetrans, hashtab_t range_trans_table)
 {
 	int rc = SEPOL_ERR;
 	type_datum_t *sepol_src = NULL;
 	type_datum_t *sepol_tgt = NULL;
 	class_datum_t *sepol_class = NULL;
 	struct cil_list *class_list;
-	range_trans_t *new, *curr;
+	range_trans_t *new;
 	ebitmap_t src_bitmap, tgt_bitmap;
 	ebitmap_node_t *node1, *node2;
 	unsigned int i, j;
 	struct cil_list_item *c;
+	struct mls_range *o_range = NULL;
 
 	rc = __cil_expand_type(rangetrans->src, &src_bitmap);
 	if (rc != SEPOL_OK) goto exit;
@@ -2655,19 +2661,19 @@ int cil_rangetransition_to_policydb(policydb_t *pdb, const struct cil_db *db, st
 				}
 
 				rc = SEPOL_OK;
-				curr = pdb->range_tr;
-				while (curr != NULL) {
-					if (curr->source_type == new->source_type &&
-						curr->target_type == new->target_type &&
-						curr->target_class == new->target_class) {
+				rc = hashtab_insert(range_trans_table, (hashtab_key_t)new, &(new->target_range));
+				if (rc != SEPOL_OK) {
+					if (rc == SEPOL_EEXIST) {
 						add = CIL_FALSE;
-						if (!mls_range_eq(&curr->target_range, &new->target_range)) {
-							cil_log(CIL_INFO, "Conflicting Range transition rules\n");
-							rc = SEPOL_ERR;
-							break;
+						o_range = hashtab_search(range_trans_table, (hashtab_key_t)new);
+						if (!mls_range_eq(&new->target_range, o_range)) {
+							cil_log(CIL_ERR, "Conflicting Range transition rules\n");
+						} else {
+							rc = SEPOL_OK;
 						}
+					} else {
+						cil_log(CIL_ERR, "Out of memory\n");
 					}
-					curr = curr->next;
 				}
 
 				if (add == CIL_TRUE) {
@@ -3061,10 +3067,14 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 	const struct cil_db *db;
 	policydb_t *pdb;
 	hashtab_t filename_trans_table;
+	hashtab_t range_trans_table;
+	hashtab_t role_trans_table;
 	db = args->db;
 	pdb = args->pdb;
 	pass = args->pass;
 	filename_trans_table = args->filename_trans_table;
+	range_trans_table = args->range_trans_table;
+	role_trans_table = args->role_trans_table;
 
 	if (node->flavor >= CIL_MIN_DECLARATIVE) {
 		if (node != DATUM(node->data)->nodes->head->data) {
@@ -3164,7 +3174,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			break;
 		}
 		case CIL_ROLETRANSITION:
-			rc = cil_roletrans_to_policydb(pdb, db, node->data);
+			rc = cil_roletrans_to_policydb(pdb, db, node->data, role_trans_table);
 			break;
 		case CIL_ROLEATTRIBUTESET:
 		  /*rc = cil_roleattributeset_to_policydb(pdb, node->data);*/
@@ -3190,7 +3200,7 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 			break;
 		case CIL_RANGETRANSITION:
 			if (pdb->mls == CIL_TRUE) {
-				rc = cil_rangetransition_to_policydb(pdb, db, node->data);
+				rc = cil_rangetransition_to_policydb(pdb, db, node->data, range_trans_table);
 			}
 			break;
 		case CIL_DEFAULTUSER:
@@ -3580,6 +3590,40 @@ static int filename_trans_compare(hashtab_t h
 	return a->stype != b->stype || a->ttype != b->ttype || a->tclass != b->tclass || strcmp(a->name, b->name);
 }
 
+static unsigned int range_trans_hash(hashtab_t h, hashtab_key_t key)
+{
+	range_trans_t *k = (range_trans_t *)key;
+	return ((k->target_class + (k->target_type << 2) +
+				(k->source_type << 5)) & (h->size - 1));
+}
+
+static int range_trans_compare(hashtab_t h
+             __attribute__ ((unused)), hashtab_key_t key1,
+			              hashtab_key_t key2)
+{
+	range_trans_t *a = (range_trans_t *)key1;
+	range_trans_t *b = (range_trans_t *)key2;
+
+	return a->source_type != b->source_type || a->target_type != b->target_type || a->target_class != b->target_class;
+}
+
+static unsigned int role_trans_hash(hashtab_t h, hashtab_key_t key)
+{
+	role_trans_t *k = (role_trans_t *)key;
+	return ((k->role + (k->type << 2) +
+				(k->tclass << 5)) & (h->size - 1));
+}
+
+static int role_trans_compare(hashtab_t h
+             __attribute__ ((unused)), hashtab_key_t key1,
+			              hashtab_key_t key2)
+{
+	role_trans_t *a = (role_trans_t *)key1;
+	role_trans_t *b = (role_trans_t *)key2;
+
+	return a->role != b->role || a->type != b->type || a->tclass != b->tclass;
+}
+
 int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 {
 	int rc = SEPOL_ERR;
@@ -3588,6 +3632,8 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 	policydb_t *pdb = &policydb->p;
 	struct cil_list *neverallows = NULL;
 	hashtab_t filename_trans_table = NULL;
+	hashtab_t range_trans_table = NULL;
+	hashtab_t role_trans_table = NULL;
 
 	if (db == NULL || policydb == NULL) {
 		if (db == NULL) {
@@ -3610,12 +3656,26 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 		goto exit;
 	}
 
+	range_trans_table = hashtab_create(range_trans_hash, range_trans_compare, RANGE_TRANS_TABLE_SIZE);
+	if (!range_trans_table) {
+		cil_log(CIL_INFO, "Failure to create hashtab for range_trans\n");
+		goto exit;
+	}
+
+	role_trans_table = hashtab_create(role_trans_hash, role_trans_compare, ROLE_TRANS_TABLE_SIZE);
+	if (!role_trans_table) {
+		cil_log(CIL_INFO, "Failure to create hashtab for role_trans\n");
+		goto exit;
+	}
+
 	cil_list_init(&neverallows, CIL_LIST_ITEM);
 
 	extra_args.db = db;
 	extra_args.pdb = pdb;
 	extra_args.neverallows = neverallows;
 	extra_args.filename_trans_table = filename_trans_table;
+	extra_args.range_trans_table = range_trans_table;
+	extra_args.role_trans_table = role_trans_table;
 	for (i = 1; i <= 3; i++) {
 		extra_args.pass = i;
 
@@ -3659,6 +3719,9 @@ int cil_binary_create(const struct cil_db *db, sepol_policydb_t *policydb)
 	rc = SEPOL_OK;
 
 exit:
+	hashtab_destroy(filename_trans_table);
+	hashtab_destroy(range_trans_table);
+	hashtab_destroy(role_trans_table);
 	cil_neverallows_list_destroy(neverallows);
 	return rc;
 }
