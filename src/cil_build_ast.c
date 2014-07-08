@@ -51,6 +51,7 @@ struct cil_args_build {
 	struct cil_tree_node *macro;
 	struct cil_tree_node *boolif;
 	struct cil_tree_node *tunif;
+	struct cil_tree_node *in;
 };
 
 int cil_fill_list(struct cil_tree_node *current, enum cil_flavor flavor, struct cil_list **list)
@@ -5634,6 +5635,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	struct cil_tree_node *macro = NULL;
 	struct cil_tree_node *boolif = NULL;
 	struct cil_tree_node *tunif = NULL;
+	struct cil_tree_node *in = NULL;
 	int rc = SEPOL_ERR;
 
 	if (parse_current == NULL || finished == NULL || extra_args == NULL) {
@@ -5646,6 +5648,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	macro = args->macro;
 	boolif = args->boolif;
 	tunif = args->tunif;
+	in = args->in;
 
 	if (parse_current->parent->cl_head != parse_current) {
 		/* ignore anything that isn't following a parenthesis */
@@ -5676,6 +5679,14 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			cil_log(CIL_ERR, "Found tunable at line %d of %s\n",
 				parse_current->line, parse_current->path);
 			cil_log(CIL_ERR, "Tunables cannot be defined within macro statment\n");
+			goto exit;
+		}
+
+		if (!strcmp(parse_current->data, CIL_KEY_IN)) {
+			rc = SEPOL_ERR;
+			cil_log(CIL_ERR, "Found in at line %d of %s\n",
+				parse_current->line, parse_current->path);
+			cil_log(CIL_ERR, "in-statements cannot be defined within macro statment\n");
 			goto exit;
 		}
 	}
@@ -5710,6 +5721,16 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			cil_log(CIL_ERR, "Found tunable at line %d of %s\n",
 				parse_current->line, parse_current->path);
 			cil_log(CIL_ERR, "Tunables cannot be defined within tunableif statement\n");
+			goto exit;
+		}
+	}
+
+	if (in != NULL) {
+		if (!strcmp(parse_current->data, CIL_KEY_IN)) {
+			rc = SEPOL_ERR;
+			cil_log(CIL_ERR, "Found in-statement at line %d of %s\n",
+				parse_current->line, parse_current->path);
+			cil_log(CIL_ERR, "in-statements cannot be defined within in-statements\n");
 			goto exit;
 		}
 	}
@@ -5973,6 +5994,10 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			if (ast_current->flavor == CIL_TUNABLEIF) {
 				args->tunif = ast_current;
 			}
+
+			if (ast_current->flavor == CIL_IN) {
+				args->in = ast_current;
+			}
 		
 			ast_current->cl_head = ast_node;
 		} else {
@@ -6021,6 +6046,10 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 		args->tunif = NULL;
 	}
 
+	if (ast->flavor == CIL_IN) {
+		args->in = NULL;
+	}
+
 	return SEPOL_OK;
 
 exit:
@@ -6041,6 +6070,7 @@ int cil_build_ast(struct cil_db *db, struct cil_tree_node *parse_tree, struct ci
 	extra_args.macro = NULL;
 	extra_args.boolif = NULL;
 	extra_args.tunif = NULL;
+	extra_args.in = NULL;
 
 	rc = cil_tree_walk(parse_tree, __cil_build_ast_node_helper, NULL, __cil_build_ast_last_child_helper, &extra_args);
 	if (rc != SEPOL_OK) {

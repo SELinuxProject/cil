@@ -56,6 +56,7 @@ struct cil_args_resolve {
 	struct cil_list *sidorder_lists;
 	struct cil_list *catorder_lists;
 	struct cil_list *sensitivityorder_lists;
+	struct cil_list *in_list;
 };
 
 static struct cil_name * __cil_insert_name(struct cil_db *db, hashtab_key_t key, struct cil_tree_node *ast_node)
@@ -2055,6 +2056,62 @@ exit:
 	return rc;
 }
 
+int cil_resolve_in_list(void *extra_args)
+{
+	struct cil_args_resolve *args = extra_args;
+	struct cil_list *ins = args->in_list;
+	struct cil_list_item *curr = NULL;
+	struct cil_tree_node *node = NULL;
+	struct cil_tree_node *last_failed_node = NULL;
+	struct cil_in *in = NULL;
+	struct cil_symtab_datum *block_datum = NULL;
+	int resolved = 0;
+	int unresolved = 0;
+	int rc = SEPOL_ERR;
+
+	do {
+		resolved = 0;
+		unresolved = 0;
+
+		cil_list_for_each(curr, ins) {
+			if (curr->flavor != CIL_NODE) {
+				continue;
+			}
+
+			node = curr->data;
+			in = node->data;
+
+			rc = cil_resolve_name(node, in->block_str, CIL_SYM_BLOCKS, extra_args, &block_datum);
+			if (rc != SEPOL_OK) {
+				unresolved++;
+				last_failed_node = node;
+			} else {
+				rc = cil_resolve_in(node, extra_args);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+				
+				resolved++;
+				curr->data = NULL;
+				curr->flavor = CIL_NONE;
+			}
+		}
+
+		if (unresolved > 0 && resolved == 0) {
+			cil_log(CIL_ERR, "Failed to resolve in-statement on line %d of %s\n", last_failed_node->line, last_failed_node->path);
+			rc = SEPOL_ERR;
+			goto exit;
+		}
+
+	} while (unresolved > 0);
+
+	rc = SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+
 int cil_resolve_bounds(struct cil_tree_node *current, void *extra_args, enum cil_flavor flavor)
 {
 	int rc = SEPOL_ERR;
@@ -2782,6 +2839,7 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 	int rc = SEPOL_OK;
 	struct cil_args_resolve *args = extra_args;
 	enum cil_pass pass = 0;
+	struct cil_list *ins = args->in_list;
 
 	if (node == NULL || args == NULL) {
 		goto exit;
@@ -2796,7 +2854,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		break;
 	case CIL_PASS_IN:
 		if (node->flavor == CIL_IN) {
-			rc = cil_resolve_in(node, args);
+			// due to ordering issues, in statements are just gathered here and
+			// resolved together in cil_resolve_in_list once all are found
+			cil_list_prepend(ins, CIL_NODE, node);
 		}
 		break;
 	case CIL_PASS_BLKIN:
@@ -3279,16 +3339,26 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.sidorder_lists = NULL;
 	extra_args.catorder_lists = NULL;
 	extra_args.sensitivityorder_lists = NULL;
+	extra_args.in_list = NULL;
 
 	cil_list_init(&extra_args.sidorder_lists, CIL_LIST_ITEM);
 	cil_list_init(&extra_args.catorder_lists, CIL_LIST_ITEM);
 	cil_list_init(&extra_args.sensitivityorder_lists, CIL_LIST_ITEM);
+	cil_list_init(&extra_args.in_list, CIL_IN);
 	for (pass = CIL_PASS_TIF; pass < CIL_PASS_NUM; pass++) {
 		extra_args.pass = pass;
 		rc = cil_tree_walk(current, __cil_resolve_ast_node_helper, __cil_resolve_ast_first_child_helper, __cil_resolve_ast_last_child_helper, &extra_args);
 		if (rc != SEPOL_OK) {
 			cil_log(CIL_INFO, "Pass %i of resolution failed\n", pass);
 			goto exit;
+		}
+
+		if (pass == CIL_PASS_IN) {
+			rc = cil_resolve_in_list(&extra_args);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+			cil_list_destroy(&extra_args.in_list, CIL_FALSE);
 		}
 
 		if (pass == CIL_PASS_MISC1) {
@@ -3474,7 +3544,6 @@ static int __cil_resolve_name_helper(struct cil_tree_node *ast_node, char *name,
 			symtab = &(((struct cil_block*)tmp_datum)->symtab[sym_index]);
 			rc = cil_symtab_get_datum(symtab, tok_current, &tmp_datum);
 			if (rc != SEPOL_OK) {
-				cil_log(CIL_ERR, "Failed to resolve name, current: %s\n", tok_current);
 				goto exit;
 			}
 		}
