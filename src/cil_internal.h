@@ -91,6 +91,7 @@ enum cil_pass {
 #define CIL_KEY_PERM                 "perm"
 #define CIL_KEY_COMMON               "common"
 #define CIL_KEY_CLASS                "class"
+#define CIL_KEY_CLASSORDER           "classorder"
 #define CIL_KEY_MAP_CLASS            "classmap"
 #define CIL_KEY_CLASSPERMISSION      "classpermission"
 #define CIL_KEY_CLASSCOMMON          "classcommon"
@@ -242,6 +243,7 @@ struct cil_db {
 	symtab_t symtab[CIL_SYM_NUM];
 	struct cil_type *selftype;
 	struct cil_list *sidorder;
+	struct cil_list *classorder;
 	struct cil_list *catorder;
 	struct cil_list *sensitivityorder;
 	struct cil_sort *netifcon;
@@ -310,6 +312,11 @@ struct cil_class {
 	symtab_t perms;
 	unsigned int num_perms;
 	struct cil_class *common; /* Only used for kernel class */
+	uint32_t ordered; /* Only used for kernel class */
+};
+
+struct cil_classorder {
+	struct cil_list *class_list_str;
 };
 
 struct cil_classperms_set {
@@ -856,6 +863,7 @@ void cil_blockinherit_init(struct cil_blockinherit **inherit);
 void cil_blockabstract_init(struct cil_blockabstract **abstract);
 void cil_in_init(struct cil_in **in);
 void cil_class_init(struct cil_class **class);
+void cil_classorder_init(struct cil_classorder **classorder);
 void cil_classcommon_init(struct cil_classcommon **classcommon);
 void cil_sid_init(struct cil_sid **sid);
 void cil_sidcontext_init(struct cil_sidcontext **sidcontext);

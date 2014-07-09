@@ -793,6 +793,22 @@ void cil_tree_print_node(struct cil_tree_node *node)
 			cil_log(CIL_INFO, " )");
 			return;
 		}
+		case CIL_CLASSORDER: {
+			struct cil_classorder *classorder = node->data;
+			struct cil_list_item *class;
+
+			if (classorder->class_list_str == NULL) {
+				cil_log(CIL_INFO, "CLASSORDER: ()\n");
+				return;
+			}
+
+			cil_log(CIL_INFO, "CLASSORDER: (");
+			cil_list_for_each(class, classorder->class_list_str) {
+				cil_log(CIL_INFO, " %s", (char*)class->data);
+			}
+			cil_log(CIL_INFO, " )\n");
+			return;
+		}
 		case CIL_COMMON: {
 			struct cil_class *common = node->data;
 			cil_log(CIL_INFO, "COMMON: %s (", common->datum.name);

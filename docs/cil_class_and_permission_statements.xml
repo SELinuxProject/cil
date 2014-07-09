@@ -159,7 +159,46 @@
          <programlisting><![CDATA[(class dir (add_name remove_name reparent search rmdir open audit_access execmod ioctl read write create getattr setattr lock relabelfrom relabelto append unlink link rename execute swapon quotaon mounton))]]>
          </programlisting>
       </sect2>
+      <sect2 id="classorder">
+         <title>classorder</title>
+         <para>Defines the order of <link linkend="class">class</link>'s. This is a mandatory statement. Multiple <literal>classorder</literal> statements declared in the policy will form an ordered list.</para>
+         <para><emphasis role="bold">Statement definition:</emphasis></para>
+         <programlisting><![CDATA[(classorder (class_id ...))]]></programlisting>
+         <para><emphasis role="bold">Where:</emphasis></para>
+         <informaltable frame="all">
+            <tgroup cols="2">
+            <colspec colwidth="2 *"/>
+            <colspec colwidth="6 *"/>
+               <tbody>
+               <row>
+                  <entry>
+                     <para><literal>classorder</literal></para>
+                  </entry>
+                  <entry>
+                     <para>The <literal>classorder</literal> keyword.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para><literal>class_id</literal></para>
+                  </entry>
+                  <entry>
+                     <para>One or more <literal><link linkend="class">class</link></literal> identifiers.</para>
+                  </entry>
+               </row>
+            </tbody></tgroup>
+         </informaltable>
 
+         <para><emphasis role="bold">Example:</emphasis></para>
+         <para>This will produce an ordered list of "<literal>file dir process</literal>"</para>
+         <programlisting><![CDATA[
+(class process)
+(class file)
+(class dir)
+(classorder (file dir))
+(classorder (dir process))]]>
+      </programlisting>
+      </sect2>
      <sect2 id="classpermission">
          <title>classpermission</title>
          <para>Declares a class permission set identifier in the current namespace that can be used by one or more <literal><link linkend="classpermissionset">classpermissionset</link></literal>s to associate one or more classes and permissions to form a named set.</para>

@@ -54,6 +54,7 @@ struct cil_args_resolve {
 	struct cil_tree_node *boolif;
 	struct cil_tree_node *macro;
 	struct cil_list *sidorder_lists;
+	struct cil_list *classorder_lists;
 	struct cil_list *catorder_lists;
 	struct cil_list *sensitivityorder_lists;
 	struct cil_list *in_list;
@@ -1074,6 +1075,13 @@ struct cil_list_item *__cil_ordered_item_insert(struct cil_list *old, struct cil
 			return NULL;
 		}
 		sid->ordered = CIL_TRUE;
+	} else if (item->flavor == CIL_CLASS) {
+		struct cil_class *class = item->data;
+		if (class->ordered == CIL_TRUE) {
+			cil_log(CIL_ERR, "Class %s has already been merged into the ordered list\n", class->datum.name);
+			return NULL;
+		}
+		class->ordered = CIL_TRUE;
 	} else if (item->flavor == CIL_CAT) {
 		struct cil_cat *cat = item->data;
 		if (cat->ordered == CIL_TRUE) {
@@ -1255,6 +1263,39 @@ struct cil_list *__cil_ordered_lists_merge_all(struct cil_list **ordered_lists)
 exit:
 	cil_list_destroy(&composite, CIL_FALSE);
 	return NULL;
+}
+
+int cil_resolve_classorder(struct cil_tree_node *current, void *extra_args)
+{
+	struct cil_args_resolve *args = extra_args;
+	struct cil_list *classorder_list = args->classorder_lists;
+	struct cil_classorder *classorder = current->data;
+	struct cil_list *new = NULL;
+	struct cil_list_item *curr = NULL;
+	struct cil_symtab_datum *datum = NULL;
+	struct cil_ordered_list *ordered = NULL;
+	int rc = SEPOL_ERR;
+
+	cil_list_init(&new, CIL_CLASSORDER);
+
+	cil_list_for_each(curr, classorder->class_list_str) {
+		rc = cil_resolve_name(current, (char *)curr->data, CIL_SYM_CLASSES, extra_args, &datum);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to resolve class &s in classorder\n", (char *)curr->data);
+			goto exit;
+		}
+		cil_list_append(new, CIL_CLASS, datum);
+	}
+
+	__cil_ordered_list_init(&ordered);
+	ordered->list = new;
+	ordered->node = current;
+	cil_list_append(classorder_list, CIL_CLASSORDER, ordered);
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
 }
 
 int cil_resolve_sidorder(struct cil_tree_node *current, void *extra_args)
@@ -2919,6 +2960,9 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 		case CIL_SIDORDER:
 			rc = cil_resolve_sidorder(node, args);
 			break;
+		case CIL_CLASSORDER:
+			rc = cil_resolve_classorder(node, args);
+			break;
 		case CIL_CATORDER:
 			rc = cil_resolve_catorder(node, args);
 			break;
@@ -3337,11 +3381,13 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	extra_args.boolif= NULL;
 	extra_args.macro = NULL;
 	extra_args.sidorder_lists = NULL;
+	extra_args.classorder_lists = NULL;
 	extra_args.catorder_lists = NULL;
 	extra_args.sensitivityorder_lists = NULL;
 	extra_args.in_list = NULL;
 
 	cil_list_init(&extra_args.sidorder_lists, CIL_LIST_ITEM);
+	cil_list_init(&extra_args.classorder_lists, CIL_LIST_ITEM);
 	cil_list_init(&extra_args.catorder_lists, CIL_LIST_ITEM);
 	cil_list_init(&extra_args.sensitivityorder_lists, CIL_LIST_ITEM);
 	cil_list_init(&extra_args.in_list, CIL_IN);
@@ -3364,6 +3410,12 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 		if (pass == CIL_PASS_MISC1) {
 			db->sidorder = __cil_ordered_lists_merge_all(&extra_args.sidorder_lists);
 			rc = __cil_verify_ordered(current, CIL_SID);
+			if (rc != SEPOL_OK) {
+				goto exit;
+			}
+
+			db->classorder = __cil_ordered_lists_merge_all(&extra_args.classorder_lists);
+			rc = __cil_verify_ordered(current, CIL_CLASS);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
@@ -3394,9 +3446,11 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 			if (pass >= CIL_PASS_MISC1) {
 				__cil_ordered_lists_reset(&extra_args.sidorder_lists);
+				__cil_ordered_lists_reset(&extra_args.classorder_lists);
 				__cil_ordered_lists_reset(&extra_args.catorder_lists);
 				__cil_ordered_lists_reset(&extra_args.sensitivityorder_lists);
 				cil_list_destroy(&db->sidorder, CIL_FALSE);
+				cil_list_destroy(&db->classorder, CIL_FALSE);
 				cil_list_destroy(&db->catorder, CIL_FALSE);
 				cil_list_destroy(&db->sensitivityorder, CIL_FALSE);
 			}
@@ -3430,7 +3484,7 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
-	
+
 	rc = SEPOL_OK;
 exit:
 	return rc;

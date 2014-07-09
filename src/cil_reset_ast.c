@@ -29,6 +29,7 @@ static void cil_reset_class(struct cil_class *class)
 		class->num_perms -= common->num_perms;
 		class->common = NULL;
 	}
+	class->ordered = CIL_FALSE;
 }
 
 static void cil_reset_perm(struct cil_perm *perm)
@@ -451,6 +452,7 @@ int __cil_reset_node(struct cil_tree_node *node,  __attribute__((unused)) uint32
 		break; /* Not effected by optional block disabling */
 	case CIL_MACRO:
 	case CIL_SIDORDER:
+	case CIL_CLASSORDER:
 	case CIL_CATORDER:
 	case CIL_SENSITIVITYORDER:
 		break; /* Nothing to reset */

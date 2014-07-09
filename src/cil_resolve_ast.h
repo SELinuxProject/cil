@@ -35,6 +35,7 @@
 #include "cil_internal.h"
 #include "cil_tree.h"
 
+int cil_resolve_classorder(struct cil_tree_node *current, void *extra_args);
 int cil_resolve_classperms(struct cil_tree_node *current, struct cil_classperms *cp, void *extra_args);
 int cil_resolve_classpermissionset(struct cil_tree_node *current, struct cil_classpermissionset *cps, void *extra_args);
 int cil_resolve_classperms_list(struct cil_tree_node *current, struct cil_list *cp_list, void *extra_args);

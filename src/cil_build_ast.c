@@ -411,6 +411,57 @@ void cil_destroy_class(struct cil_class *class)
 	free(class);
 }
 
+int cil_gen_classorder(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node)
+{
+	enum cil_syntax syntax[] = {
+		CIL_SYN_STRING,
+		CIL_SYN_LIST,
+		CIL_SYN_END
+	};
+	int syntax_len = sizeof(syntax)/sizeof(*syntax);
+	struct cil_classorder *classorder = NULL;
+	int rc = SEPOL_ERR;
+
+	if (db == NULL || parse_current == NULL || ast_node == NULL) {
+		goto exit;
+	}
+
+	rc = __cil_verify_syntax(parse_current, syntax, syntax_len);
+	if (rc !=  SEPOL_OK) {
+		goto exit;
+	}
+
+	cil_classorder_init(&classorder);
+
+	rc = cil_fill_list(parse_current->next->cl_head, CIL_CLASSORDER, &classorder->class_list_str);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+	ast_node->data = classorder;
+	ast_node->flavor = CIL_CLASSORDER;
+
+	return SEPOL_OK;
+
+exit:
+	cil_log(CIL_ERR, "Bad classorder declaration at line %d of %s\n", 
+		parse_current->line, parse_current->path);
+	cil_destroy_classorder(classorder);
+	return rc;
+}
+
+void cil_destroy_classorder(struct cil_classorder *classorder)
+{
+	if (classorder == NULL) {
+		return;
+	}
+
+	if (classorder->class_list_str != NULL) {
+		cil_list_destroy(&classorder->class_list_str, 1);
+	}
+
+	free(classorder);
+}
+
 int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct cil_tree_node *ast_node, enum cil_flavor flavor, unsigned int *num_perms)
 {
 	char *key = NULL;
@@ -5752,6 +5803,9 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	} else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
 		rc = cil_gen_class(db, parse_current, ast_node);
 		// To avoid parsing list of perms again
+		*finished = CIL_TREE_SKIP_NEXT;
+	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSORDER)) {
+		rc = cil_gen_classorder(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else if (!strcmp(parse_current->data, CIL_KEY_MAP_CLASS)) {
 		rc = cil_gen_map_class(db, parse_current, ast_node);

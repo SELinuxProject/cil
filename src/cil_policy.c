@@ -1000,34 +1000,6 @@ int cil_name_to_policy(FILE **file_arr, struct cil_tree_node *current)
 		fprintf(file_arr[COMMONS], "}\n");
 
 		return SEPOL_DONE;
-	case CIL_CLASS:
-		fprintf(file_arr[CLASS_DECL], "class %s\n", ((struct cil_class*)current->data)->datum.name);
-
-		fprintf(file_arr[CLASSES], "class %s ", ((struct cil_class*)(current->data))->datum.name);
-
-		if (((struct cil_class*)current->data)->common != NULL) {
-			fprintf(file_arr[CLASSES], "inherits %s ", ((struct cil_class*)current->data)->common->datum.name);
-		}
-
-
-		if (current->cl_head != NULL) {
-			fprintf(file_arr[CLASSES], "{ ");
-			current = current->cl_head;
-			while (current != NULL) {
-				if (current->flavor == CIL_PERM) {
-					fprintf(file_arr[CLASSES], "%s ", ((struct cil_symtab_datum*)current->data)->name);
-				} else {
-					cil_log(CIL_INFO, "Improper data type found in class permissions: %d\n", current->flavor);
-					return SEPOL_ERR;
-				}
-				current = current->next;
-			}
-			fprintf(file_arr[CLASSES], "}");
-		}
-
-		fprintf(file_arr[CLASSES], "\n");
-
-		return SEPOL_DONE;
 	case CIL_AVRULE: {
 		struct cil_avrule *avrule = (struct cil_avrule*)current->data;
 		rc = cil_avrule_to_policy(file_arr, ALLOWS, avrule);
@@ -1303,14 +1275,36 @@ int cil_gen_policy(struct cil_db *db)
 
 	policy_file = fopen("policy.conf", "w+");
 
-	if (db->sidorder->head != NULL) {
-		cil_list_for_each(item, db->sidorder) {
-			fprintf(file_arr[ISIDS], "sid %s ", ((struct cil_sens*)item->data)->datum.name);
-		}
+	cil_list_for_each(item, db->sidorder) {
+		fprintf(file_arr[ISIDS], "sid %s ", ((struct cil_sid*)item->data)->datum.name);
 	}
 
-	cil_list_for_each(item, db->catorder) {
-		cil_multimap_insert(cats, item->data, NULL, CIL_CAT, 0);
+	cil_list_for_each(item, db->classorder) {
+		struct cil_class *class = item->data;
+		struct cil_tree_node *node = class->datum.nodes->head->data;
+
+		fprintf(file_arr[CLASS_DECL], "class %s\n", class->datum.name);
+
+		fprintf(file_arr[CLASSES], "class %s ", class->datum.name);
+		if (class->common != NULL) {
+			fprintf(file_arr[CLASSES], "inherits %s ", class->common->datum.name);
+		}
+		if (node->cl_head != NULL) {
+			struct cil_tree_node *curr_perm = node->cl_head;
+			fprintf(file_arr[CLASSES], "{ ");
+			while (curr_perm != NULL) {
+				fprintf(file_arr[CLASSES], "%s ", ((struct cil_symtab_datum*)curr_perm->data)->name);
+				curr_perm = curr_perm->next;
+			}
+			fprintf(file_arr[CLASSES], "}");
+		}
+		fprintf(file_arr[CLASSES], "\n");
+	}
+
+	if (db->catorder->head != NULL) {
+		cil_list_for_each(item, db->catorder) {
+			cil_multimap_insert(cats, item->data, NULL, CIL_CAT, 0);
+		}
 	}
 
 	if (db->sensitivityorder->head != NULL) {

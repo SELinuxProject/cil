@@ -67,6 +67,7 @@ void cil_db_init(struct cil_db **db)
 	cil_tree_init(&(*db)->parse);
 	cil_tree_init(&(*db)->ast);
 	(*db)->sidorder = NULL;
+	(*db)->classorder = NULL;
 	(*db)->catorder = NULL;
 	(*db)->sensitivityorder = NULL;
 	cil_sort_init(&(*db)->netifcon);
@@ -110,6 +111,7 @@ void cil_db_destroy(struct cil_db **db)
 	cil_tree_destroy(&(*db)->ast);
 	cil_symtab_array_destroy((*db)->symtab);
 	cil_list_destroy(&(*db)->sidorder, CIL_FALSE);
+	cil_list_destroy(&(*db)->classorder, CIL_FALSE);
 	cil_list_destroy(&(*db)->catorder, CIL_FALSE);
 	cil_list_destroy(&(*db)->sensitivityorder, CIL_FALSE);
 	cil_sort_destroy(&(*db)->netifcon);
@@ -301,6 +303,9 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_CLASS:
 	case CIL_MAP_CLASS:
 		cil_destroy_class(*data);
+		break;
+	case CIL_CLASSORDER:
+		cil_destroy_classorder(*data);
 		break;
 	case CIL_CLASSPERMISSION:
 		cil_destroy_classpermission(*data);
@@ -669,6 +674,8 @@ const char * cil_node_to_string(struct cil_tree_node *node)
 		return CIL_KEY_COMMON;
 	case CIL_CLASS:
 		return CIL_KEY_CLASS;
+	case CIL_CLASSORDER:
+		return CIL_KEY_CLASSORDER;
 	case CIL_MAP_CLASS:
 		return CIL_KEY_MAP_CLASS;
 	case CIL_CLASSPERMISSION:
@@ -1487,6 +1494,14 @@ void cil_class_init(struct cil_class **class)
 
 	(*class)->num_perms = 0;
 	(*class)->common = NULL;
+	(*class)->ordered = CIL_FALSE;
+}
+
+void cil_classorder_init(struct cil_classorder **classorder)
+{
+	*classorder = cil_malloc(sizeof(**classorder));
+
+	(*classorder)->class_list_str = NULL;
 }
 
 void cil_classcommon_init(struct cil_classcommon **classcommon)

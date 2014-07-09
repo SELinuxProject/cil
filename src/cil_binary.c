@@ -330,66 +330,72 @@ exit:
 	return rc;
 }
 
-int cil_class_to_policydb(policydb_t *pdb, struct cil_class *cil_class)
+int cil_classorder_to_policydb(policydb_t *pdb, const struct cil_db *db)
 {
 	int rc = SEPOL_ERR;
-	uint32_t value = 0;
-	char *key = NULL;
-	struct cil_tree_node *node = cil_class->datum.nodes->head->data;
-	struct cil_tree_node *cil_perm = node->cl_head;
-	common_datum_t *sepol_common = NULL;
-	class_datum_t *sepol_class = cil_malloc(sizeof(*sepol_class));
-	memset(sepol_class, 0, sizeof(class_datum_t));
+	struct cil_list_item *curr_class;
 
-	key = cil_strdup(cil_class->datum.name);
-	rc = symtab_insert(pdb, SYM_CLASSES, key, sepol_class, SCOPE_DECL, 0, &value);
-	if (rc != SEPOL_OK) {
-		free(sepol_class);
-		goto exit;
-	}
-	sepol_class->s.value = value;
+	cil_list_for_each(curr_class, db->classorder) {
+		struct cil_class *cil_class = curr_class->data;
+		uint32_t value = 0;
+		char *key = NULL;
+		struct cil_tree_node *node = cil_class->datum.nodes->head->data;
+		struct cil_tree_node *cil_perm = node->cl_head;
+		common_datum_t *sepol_common = NULL;
+		class_datum_t *sepol_class = cil_malloc(sizeof(*sepol_class));
+		memset(sepol_class, 0, sizeof(class_datum_t));
 
-	rc = symtab_init(&sepol_class->permissions, PERM_SYMTAB_SIZE);
-	if (rc != SEPOL_OK) {
-		goto exit;
-	}
-
-	if (cil_class->common != NULL) {
-		struct cil_class *cil_common = cil_class->common;
-
-		key = cil_class->common->datum.name;
-		sepol_common = hashtab_search(pdb->p_commons.table, key);
-		if (sepol_common == NULL) {
-			rc = cil_common_to_policydb(pdb, cil_common, &sepol_common);
-			if (rc != SEPOL_OK) {
-				goto exit;
-			}
-		}
-		sepol_class->comdatum = sepol_common;
-		sepol_class->comkey = cil_strdup(key);
-		sepol_class->permissions.nprim += sepol_common->permissions.nprim;
-	}
-
-	while (cil_perm != NULL) {
-		struct cil_perm *curr = cil_perm->data;
-		perm_datum_t *sepol_perm = cil_malloc(sizeof(*sepol_perm));
-		memset(sepol_perm, 0, sizeof(perm_datum_t));
-
-		key = cil_strdup(curr->datum.name);
-		rc = hashtab_insert(sepol_class->permissions.table, key, sepol_perm);
+		key = cil_strdup(cil_class->datum.name);
+		rc = symtab_insert(pdb, SYM_CLASSES, key, sepol_class, SCOPE_DECL, 0, &value);
 		if (rc != SEPOL_OK) {
-			free(sepol_perm);
+			free(sepol_class);
+			free(key);
 			goto exit;
 		}
-		sepol_perm->s.value = sepol_class->permissions.nprim + 1;
-		sepol_class->permissions.nprim++;
-		cil_perm = cil_perm->next;
+		sepol_class->s.value = value;
+
+		rc = symtab_init(&sepol_class->permissions, PERM_SYMTAB_SIZE);
+		if (rc != SEPOL_OK) {
+			goto exit;
+		}
+
+		if (cil_class->common != NULL) {
+			struct cil_class *cil_common = cil_class->common;
+
+			key = cil_class->common->datum.name;
+			sepol_common = hashtab_search(pdb->p_commons.table, key);
+			if (sepol_common == NULL) {
+				rc = cil_common_to_policydb(pdb, cil_common, &sepol_common);
+				if (rc != SEPOL_OK) {
+					goto exit;
+				}
+			}
+			sepol_class->comdatum = sepol_common;
+			sepol_class->comkey = cil_strdup(key);
+			sepol_class->permissions.nprim += sepol_common->permissions.nprim;
+		}
+
+		while (cil_perm != NULL) {
+			struct cil_perm *curr_perm = cil_perm->data;
+			perm_datum_t *sepol_perm = cil_malloc(sizeof(*sepol_perm));
+			memset(sepol_perm, 0, sizeof(perm_datum_t));
+
+			key = cil_strdup(curr_perm->datum.name);
+			rc = hashtab_insert(sepol_class->permissions.table, key, sepol_perm);
+			if (rc != SEPOL_OK) {
+				free(sepol_perm);
+				free(key);
+				goto exit;
+			}
+			sepol_perm->s.value = sepol_class->permissions.nprim + 1;
+			sepol_class->permissions.nprim++;
+			cil_perm = cil_perm->next;
+		}
 	}
 
 	return SEPOL_OK;
 
 exit:
-	free(key);
 	return rc;
 }
 
@@ -3085,9 +3091,6 @@ int __cil_node_to_policydb(struct cil_tree_node *node, void *extra_args)
 	switch (pass) {
 	case 1:
 		switch (node->flavor) {
-		case CIL_CLASS:
-			rc = cil_class_to_policydb(pdb, node->data);
-			break;
 		case CIL_ROLE:
 			rc = cil_role_to_policydb(pdb, node->data);
 			break;
@@ -3544,6 +3547,11 @@ int __cil_policydb_init(policydb_t *pdb, const struct cil_db *db)
 
 	pdb->handle_unknown = db->handle_unknown;
 	pdb->mls = db->mls;
+
+	rc = cil_classorder_to_policydb(pdb, db);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
 
 	if (pdb->mls == CIL_TRUE) {
 		rc = cil_catorder_to_policydb(pdb, db);
