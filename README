@@ -5,7 +5,7 @@ INTRODUCTION
 	The SELinux CIL Compiler is a compiler that converts the CIL language as
 	described on the CIL design wiki into a kernel binary policy file.
 	Please see the CIL Design Wiki at:
-	http://userspace.selinuxproject.org/trac/wiki/CilDesign
+	http://github.com/SELinuxProject/cil/wiki/
 	for more information about the goals and features on the CIL language.
 
 DEPENDENCIES
@@ -20,7 +20,7 @@ BUILD STEPS
 
 	Open a terminal client and execute the following command to download the source code:
 
-			git clone https://bitbucket.org/jwcarter/secilc.git
+			git clone https://github.com/SELinuxProject/cil.git
 
 	Change directory into the "cil" directory.
 	Run "make" with one of the following targets:
