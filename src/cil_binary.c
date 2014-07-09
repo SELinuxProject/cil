@@ -2463,7 +2463,7 @@ exit:
 	return rc;
 }
 
-int __cil_level_to_mls_level(policydb_t *pdb, struct cil_level *cil_level, mls_level_t *mls_level)
+int cil_level_to_mls_level(policydb_t *pdb, struct cil_level *cil_level, mls_level_t *mls_level)
 {
 	int rc = SEPOL_ERR;
 	struct cil_sens *cil_sens = cil_level->sens;
@@ -2499,14 +2499,14 @@ int __cil_levelrange_to_mls_range(policydb_t *pdb, struct cil_levelrange *cil_lv
 
 	mls_level = &mls_range->level[0];
 
-	rc = __cil_level_to_mls_level(pdb, low, mls_level);
+	rc = cil_level_to_mls_level(pdb, low, mls_level);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
 	mls_level = &mls_range->level[1];
 
-	rc = __cil_level_to_mls_level(pdb, high, mls_level);
+	rc = cil_level_to_mls_level(pdb, high, mls_level);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2527,7 +2527,7 @@ int cil_userlevel_userrange_to_policydb(policydb_t *pdb, struct cil_user *cil_us
 	rc = __cil_get_sepol_user_datum(pdb, DATUM(cil_user), &sepol_user);
 	if (rc != SEPOL_OK) goto exit;
 
-	rc = __cil_level_to_mls_level(pdb, cil_level, &sepol_user->exp_dfltlevel);
+	rc = cil_level_to_mls_level(pdb, cil_level, &sepol_user->exp_dfltlevel);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}

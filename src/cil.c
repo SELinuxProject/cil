@@ -939,6 +939,23 @@ exit:
 
 }
 
+static int cil_level_equals(policydb_t *pdb, struct cil_level *low, struct cil_level *high)
+{
+	mls_level_t l;
+	mls_level_t h;
+	int rc;
+
+	cil_level_to_mls_level(pdb, low, &l);
+	cil_level_to_mls_level(pdb, high, &h);
+
+	rc = mls_level_eq(&l, &h);
+
+	mls_level_destroy(&l);
+	mls_level_destroy(&h);
+
+	return rc;
+}
+
 static int __cil_level_strlen(struct cil_level *lvl)
 {
 	struct cil_list_item *item;
@@ -1140,7 +1157,11 @@ int cil_filecons_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char *
 
 			if (sepol_db->p.mls == CIL_TRUE) {
 				struct cil_levelrange *range = ctx->range;
-				str_len += __cil_level_strlen(range->low) + __cil_level_strlen(range->high) + 2;
+				if (cil_level_equals(&sepol_db->p, range->low, range->high)) {
+					str_len += __cil_level_strlen(range->low) + 1;
+				} else {
+					str_len += __cil_level_strlen(range->low) + __cil_level_strlen(range->high) + 2;
+				}
 			}
 		} else {
 			str_len += strlen("\t<<none>>");
@@ -1205,10 +1226,13 @@ int cil_filecons_to_string(struct cil_db *db, sepol_policydb_t *sepol_db, char *
 				str_tmp += buf_pos;
 				buf_pos = __cil_level_to_string(range->low, str_tmp);
 				str_tmp += buf_pos;
-				buf_pos = sprintf(str_tmp, "-");
-				str_tmp += buf_pos;
-				buf_pos = __cil_level_to_string(range->high, str_tmp);
-				str_tmp += buf_pos;
+
+				if (!cil_level_equals(&sepol_db->p, range->low, range->high)) {
+					buf_pos = sprintf(str_tmp, "-");
+					str_tmp += buf_pos;
+					buf_pos = __cil_level_to_string(range->high, str_tmp);
+					str_tmp += buf_pos;
+				}
 			}
 		} else {
 			buf_pos = sprintf(str_tmp, "\t<<none>>");

@@ -420,5 +420,17 @@ int cil_ioportcon_to_policydb(policydb_t *pdb, struct cil_sort *ioportcons);
  */
 int cil_pcidevicecon_to_policydb(policydb_t *pdb, struct cil_sort *pcidevicecons);
 
+/**
+ * Create an mls level using a cil level.
+ * The function is given a structure containing the a cil_level and
+ * outputs a created mls_level_t.
+ *
+ * @param[in] pdb The policy database to use to get sepol level from cil_level's sensitivity.
+ * @param[in] cil_level The cil_level that will be used to create an mls_level_t.
+ * @param[out] mls_level The mls_level that is created.
+ *
+ * @return SEPOL_OK upon success or an error otherwise.
+ */
+int cil_level_to_mls_level(policydb_t *pdb, struct cil_level *cil_level, mls_level_t *mls_level);
 
 #endif //_CIL_BINARY_H_
