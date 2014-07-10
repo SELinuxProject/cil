@@ -6068,7 +6068,7 @@ exit:
 	return rc;
 }
 
-int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_node *parse_current, void *extra_args)
+int __cil_build_ast_last_child_helper(struct cil_tree_node *parse_current, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_tree_node *ast = NULL;
@@ -6103,6 +6103,13 @@ int __cil_build_ast_last_child_helper(__attribute__((unused)) struct cil_tree_no
 	if (ast->flavor == CIL_IN) {
 		args->in = NULL;
 	}
+
+	// At this point we no longer have any need for parse_current or any of its
+	// siblings; they have all been converted to the appropriate AST node. The
+	// full parse tree will get deleted elsewhere, but in an attempt to
+	// minimize memory useage (of which the parse tree uses alot), start
+	// deleting the parts we don't need now.
+	cil_tree_children_destroy(parse_current->parent);
 
 	return SEPOL_OK;
 
