@@ -35,6 +35,7 @@
 #include "cil_log.h"
 #include "cil_mem.h"
 #include "cil_tree.h"
+#include "cil_strpool.h"
 
 struct cil_args_qualify {
 	char fqparent[CIL_MAX_NAME_LENGTH];
@@ -185,8 +186,9 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		strcpy(fqn, args->fqparent);
 		strcat(fqn, datum->name);
 
-		free(datum->name);
-		datum->name = fqn;
+		cil_strpool_release(datum->name);
+		datum->name = cil_strpool_get(fqn);
+		free(fqn);
 		break;
 	default:
 		rc = SEPOL_ERR;

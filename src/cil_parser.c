@@ -38,6 +38,7 @@
 #include "cil_mem.h"
 #include "cil_tree.h" 
 #include "cil_lexer.h"
+#include "cil_strpool.h"
 
 int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_tree)
 {
@@ -91,10 +92,10 @@ int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_
 			cil_tree_node_init(&item);
 			item->parent = current;
 			if (tok.type == QSTRING) {
-				item->data = cil_strdup(tok.value + 1);
-				((char*)item->data)[strlen(item->data) - 1] = '\0';
+				tok.value[strlen(tok.value) - 1] = '\0';
+				item->data = cil_strpool_get(tok.value + 1);
 			} else {
-				item->data = cil_strdup(tok.value);
+				item->data = cil_strpool_get(tok.value);
 			}
 			item->flavor = CIL_NODE;
 			item->line = tok.line;

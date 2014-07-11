@@ -49,6 +49,7 @@
 #include "cil_post.h"
 #include "cil_binary.h"
 #include "cil_policy.h"
+#include "cil_strpool.h"
 
 int cil_sym_sizes[CIL_SYM_ARRAY_NUM][CIL_SYM_NUM] = {
 	{64, 64, 64, 1 << 13, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64},
@@ -63,6 +64,7 @@ void cil_db_init(struct cil_db **db)
 	*db = cil_malloc(sizeof(**db));
 
 	cil_symtab_array_init((*db)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_ROOT]);
+	cil_strpool_init();
 
 	cil_tree_init(&(*db)->parse);
 	cil_tree_init(&(*db)->ast);
@@ -85,7 +87,7 @@ void cil_db_init(struct cil_db **db)
 	cil_list_init(&(*db)->names, CIL_LIST_ITEM);
 
 	cil_type_init(&(*db)->selftype);
-	(*db)->selftype->datum.name = cil_strdup(CIL_KEY_SELF);
+	(*db)->selftype->datum.name = cil_strpool_get(CIL_KEY_SELF);
 
 	(*db)->num_types = 0;
 	(*db)->num_roles = 0;
@@ -130,6 +132,7 @@ void cil_db_destroy(struct cil_db **db)
 
 	cil_destroy_type((*db)->selftype);
 
+	cil_strpool_destroy();
 	free((*db)->val_to_type);
 	free((*db)->val_to_role);
 
@@ -237,10 +240,10 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		free(*data);
 		break;
 	case CIL_NODE:
-		free(*data);
+		cil_strpool_release(*data);
 		break;
 	case CIL_STRING:
-		free(*data);
+		cil_strpool_release(*data);
 		break;
 	case CIL_DATUM:
 		break;

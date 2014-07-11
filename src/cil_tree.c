@@ -37,6 +37,7 @@
 #include "cil_tree.h"
 #include "cil_list.h"
 #include "cil_parser.h"
+#include "cil_strpool.h"
 
 void cil_tree_print_perms_list(struct cil_tree_node *current_perm);
 void cil_tree_print_classperms(struct cil_classperms *cp);
@@ -252,11 +253,11 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 			pos++;
 			break;
 		case CIL_STRING:
-			stack[pos] = cil_strdup(curr->data);
+			stack[pos] = cil_strpool_get(curr->data);
 			pos++;
 			break;
 		case CIL_DATUM:
-			stack[pos] = cil_strdup(((struct cil_symtab_datum *)curr->data)->name);
+			stack[pos] = cil_strpool_get(((struct cil_symtab_datum *)curr->data)->name);
 			pos++;
 			break;
 		case CIL_OP: {
@@ -381,7 +382,7 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 				goto exit;
 				break;
 			}
-			stack[pos] = cil_strdup(operand_str);
+			stack[pos] = cil_strpool_get(operand_str);
 			pos++;
 			break;
 		}
@@ -398,7 +399,7 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 
 exit:
 	for (i = 0; i < pos; i++) {
-		free(stack[i]);
+		cil_strpool_release(stack[i]);
 	}
 	return rc;
 }

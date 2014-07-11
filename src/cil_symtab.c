@@ -38,6 +38,7 @@
 #include "cil_tree.h"
 #include "cil_symtab.h"
 #include "cil_mem.h"
+#include "cil_strpool.h"
 
 __attribute__((noreturn)) void cil_symtab_error(const char* msg)
 {
@@ -62,7 +63,7 @@ void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 
 void cil_symtab_datum_destroy(struct cil_symtab_datum *datum)
 {
-	free(datum->name);
+	cil_strpool_release(datum->name);
 	cil_list_destroy(&datum->nodes, 0);
 }
 
@@ -70,16 +71,16 @@ void cil_symtab_datum_destroy(struct cil_symtab_datum *datum)
    Note that cil_symtab_datum_destroy() is the analog to the initializer portion */
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node)
 {
-	char *newkey = cil_strdup(key);
+	char *newkey = cil_strpool_get(key);
 	int rc = hashtab_insert(symtab->table, newkey, (hashtab_datum_t)datum);
 	if (rc == SEPOL_OK) {
 		datum->name = newkey;
 		cil_list_append(datum->nodes, CIL_NODE, node);
 	} else if (rc == SEPOL_EEXIST) {
-		free(newkey);
+		cil_strpool_release(newkey);
 		cil_list_append(datum->nodes, CIL_NODE, node);
 	} else {
-		free(newkey);
+		cil_strpool_release(newkey);
 		cil_symtab_error("Failed to insert datum into hashtab\n");
 	}
 

@@ -44,6 +44,7 @@
 #include "cil_list.h"
 #include "cil_policy.h"
 #include "cil_symtab.h"
+#include "cil_strpool.h"
 
 #define SEPOL_DONE			555
 
@@ -659,11 +660,11 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 			pos++;
 			break;
 		case CIL_STRING:
-			stack[pos] = cil_strdup(curr->data);
+			stack[pos] = cil_strpool_get(curr->data);
 			pos++;
 			break;
 		case CIL_DATUM:
-			stack[pos] = cil_strdup(((struct cil_symtab_datum *)curr->data)->name);
+			stack[pos] = cil_strpool_get(((struct cil_symtab_datum *)curr->data)->name);
 			pos++;
 			break;
 		case CIL_OP: {
@@ -785,7 +786,7 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 				goto exit;
 				break;
 			}
-			stack[pos] = cil_strdup(operand_str);
+			stack[pos] = cil_strpool_get(operand_str);
 			pos++;
 			break;
 		}
@@ -1211,67 +1212,67 @@ int cil_gen_policy(struct cil_db *db)
 
 	strcpy(temp, "/tmp/cil_classdecl-XXXXXX");
 	file_arr[CLASS_DECL] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[CLASS_DECL] = cil_strdup(temp);
+	file_path_arr[CLASS_DECL] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_isids-XXXXXX");
 	file_arr[ISIDS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[ISIDS] = cil_strdup(temp);
+	file_path_arr[ISIDS] = cil_strpool_get(temp);
 
 	strcpy(temp,"/tmp/cil_common-XXXXXX");
 	file_arr[COMMONS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[COMMONS] = cil_strdup(temp);
+	file_path_arr[COMMONS] = cil_strpool_get(temp);
 	
 	strcpy(temp, "/tmp/cil_class-XXXXXX");
 	file_arr[CLASSES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[CLASSES] = cil_strdup(temp);
+	file_path_arr[CLASSES] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_interf-XXXXXX");
 	file_arr[INTERFACES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[INTERFACES] = cil_strdup(temp);
+	file_path_arr[INTERFACES] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_sens-XXXXXX");
 	file_arr[SENS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[SENS] = cil_strdup(temp);
+	file_path_arr[SENS] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_cats-XXXXXX");
 	file_arr[CATS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[CATS] = cil_strdup(temp);
+	file_path_arr[CATS] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_levels-XXXXXX");
 	file_arr[LEVELS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[LEVELS] = cil_strdup(temp);
+	file_path_arr[LEVELS] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_mlscon-XXXXXX");
 	file_arr[CONSTRAINS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[CONSTRAINS] = cil_strdup(temp);
+	file_path_arr[CONSTRAINS] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_attrtypes-XXXXXX");
 	file_arr[TYPEATTRTYPES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[TYPEATTRTYPES] = cil_strdup(temp);
+	file_path_arr[TYPEATTRTYPES] = cil_strpool_get(temp);
 	
 	strcpy(temp, "/tmp/cil_aliases-XXXXXX");
 	file_arr[ALIASES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[ALIASES] = cil_strdup(temp);
+	file_path_arr[ALIASES] = cil_strpool_get(temp);
 	
 	strcpy(temp, "/tmp/cil_allows-XXXXXX");
 	file_arr[ALLOWS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[ALLOWS] = cil_strdup(temp);
+	file_path_arr[ALLOWS] = cil_strpool_get(temp);
 	
 	strcpy(temp, "/tmp/cil_conds-XXXXXX");
 	file_arr[CONDS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[CONDS] = cil_strdup(temp);
+	file_path_arr[CONDS] = cil_strpool_get(temp);
 	
 	strcpy(temp, "/tmp/cil_userroles-XXXXXX");
 	file_arr[USERROLES] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[USERROLES] = cil_strdup(temp);
+	file_path_arr[USERROLES] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_sids-XXXXXX");
 	file_arr[SIDS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[SIDS] = cil_strdup(temp);
+	file_path_arr[SIDS] = cil_strpool_get(temp);
 
 	strcpy(temp, "/tmp/cil_netifcons-XXXXXX");
 	file_arr[NETIFCONS] = fdopen(mkstemp(temp), "w+");
-	file_path_arr[NETIFCONS] = cil_strdup(temp);
+	file_path_arr[NETIFCONS] = cil_strpool_get(temp);
 
 	policy_file = fopen("policy.conf", "w+");
 
@@ -1417,7 +1418,7 @@ int cil_gen_policy(struct cil_db *db)
 			cil_log(CIL_ERR, "Error unlinking temporary files\n");
 			return SEPOL_ERR;
 		}
-		free(file_path_arr[i]);
+		cil_strpool_release(file_path_arr[i]);
 	}
 
 	rc = fclose(policy_file);
