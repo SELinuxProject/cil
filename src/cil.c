@@ -1632,6 +1632,7 @@ void cil_typeattribute_init(struct cil_typeattribute **attr)
 
 	(*attr)->expr_list = NULL;
 	(*attr)->types = NULL;
+	(*attr)->used = CIL_FALSE;
 }
 
 void cil_typeattributeset_init(struct cil_typeattributeset **attrset)

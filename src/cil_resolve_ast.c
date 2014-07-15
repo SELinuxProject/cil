@@ -258,6 +258,18 @@ exit:
 	return rc;
 }
 
+int cil_type_used(struct cil_symtab_datum *datum)
+{
+	struct cil_typeattribute *attr = NULL;
+
+	if (FLAVOR(datum) == CIL_TYPEATTRIBUTE) {
+		attr = (struct cil_typeattribute*)datum;
+		attr->used = CIL_TRUE;
+	}
+
+	return 0;
+}
+
 int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_args_resolve *args = extra_args;
@@ -277,7 +289,10 @@ int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 	rule->src = src_datum;
-
+	if (rule->rule_kind != CIL_AVRULE_NEVERALLOW) {
+		cil_type_used(src_datum);
+	}
+		
 	if (!strcmp(rule->tgt_str, CIL_KEY_SELF)) {
 		rule->tgt = db->selftype;
 	} else {
@@ -286,6 +301,9 @@ int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
 			goto exit;
 		}
 		rule->tgt = tgt_datum;
+		if (rule->rule_kind != CIL_AVRULE_NEVERALLOW) {
+			cil_type_used(tgt_datum);
+		}
 	}
 
 	rc = cil_resolve_classperms_list(current, rule->classperms, extra_args);
@@ -314,12 +332,14 @@ int cil_resolve_type_rule(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 	rule->src = src_datum;
+	cil_type_used(src_datum);
 
 	rc = cil_resolve_name(current, rule->tgt_str, CIL_SYM_TYPES, extra_args, &tgt_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 	rule->tgt = tgt_datum;
+	cil_type_used(tgt_datum);
 
 	rc = cil_resolve_name(current, rule->obj_str, CIL_SYM_CLASSES, extra_args, &obj_datum);
 	if (rc != SEPOL_OK) {
@@ -370,7 +390,7 @@ int cil_resolve_typeattributeset(struct cil_tree_node *current, void *extra_args
 
 	attr = (struct cil_typeattribute*)attr_datum;
 
-	rc = cil_resolve_expr(attrtypes->str_expr, &attrtypes->datum_expr, current, extra_args);
+	rc = cil_resolve_expr(CIL_TYPEATTRIBUTESET, attrtypes->str_expr, &attrtypes->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -520,12 +540,14 @@ int cil_resolve_nametypetransition(struct cil_tree_node *current, void *extra_ar
 		goto exit;
 	}
 	nametypetrans->src = src_datum;
+	cil_type_used(src_datum);
 
 	rc = cil_resolve_name(current, nametypetrans->tgt_str, CIL_SYM_TYPES, extra_args, &tgt_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 	nametypetrans->tgt = tgt_datum;
+	cil_type_used(tgt_datum);
 
 	rc = cil_resolve_name(current, nametypetrans->obj_str, CIL_SYM_CLASSES, extra_args, &obj_datum);
 	if (rc != SEPOL_OK) {
@@ -576,12 +598,14 @@ int cil_resolve_rangetransition(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 	rangetrans->src = src_datum;
+	cil_type_used(src_datum);
 
 	rc = cil_resolve_name(current, rangetrans->exec_str, CIL_SYM_TYPES, extra_args, &exec_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 	rangetrans->exec = exec_datum;
+	cil_type_used(exec_datum);
 
 	rc = cil_resolve_name(current, rangetrans->obj_str, CIL_SYM_CLASSES, extra_args, &obj_datum);
 	if (rc != SEPOL_OK) {
@@ -896,6 +920,7 @@ int cil_resolve_roletype(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 	roletype->type = (struct cil_type*)type_datum;
+	cil_type_used(type_datum);
 
 	return SEPOL_OK;
 
@@ -924,6 +949,7 @@ int cil_resolve_roletransition(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 	roletrans->tgt = tgt_datum;
+	cil_type_used(tgt_datum);
 
 	rc = cil_resolve_name(current, roletrans->obj_str, CIL_SYM_CLASSES, extra_args, &obj_datum);
 	if (rc != SEPOL_OK) {
@@ -996,7 +1022,7 @@ int cil_resolve_roleattributeset(struct cil_tree_node *current, void *extra_args
 	}
 	attr = (struct cil_roleattribute*)attr_datum;
 
-	rc = cil_resolve_expr(attrroles->str_expr, &attrroles->datum_expr, current, extra_args);
+	rc = cil_resolve_expr(CIL_ROLEATTRIBUTESET, attrroles->str_expr, &attrroles->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1425,7 +1451,7 @@ int cil_resolve_cats(struct cil_tree_node *current, struct cil_cats *cats, void 
 {
 	int rc = SEPOL_ERR;
 
-	rc = cil_resolve_expr(cats->str_expr, &cats->datum_expr, current, extra_args);
+	rc = cil_resolve_expr(CIL_CATSET, cats->str_expr, &cats->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR,"Unable to resolve categories\n");
 		goto exit;
@@ -1579,7 +1605,7 @@ int cil_resolve_constrain(struct cil_tree_node *current, void *extra_args)
 		goto exit;
 	}
 
-	rc = cil_resolve_expr(cons->str_expr, &cons->datum_expr, current, extra_args);
+	rc = cil_resolve_expr(CIL_CONSTRAIN, cons->str_expr, &cons->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -1603,7 +1629,7 @@ int cil_resolve_validatetrans(struct cil_tree_node *current, void *extra_args)
 	}
 	validtrans->class = (struct cil_class*)class_datum;
 
-	rc = cil_resolve_expr(validtrans->str_expr, &validtrans->datum_expr, current, extra_args);
+	rc = cil_resolve_expr(CIL_VALIDATETRANS, validtrans->str_expr, &validtrans->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2681,7 +2707,7 @@ exit:
 	return rc;
 }
 
-int cil_resolve_expr(struct cil_list *str_expr, struct cil_list **datum_expr, struct cil_tree_node *parent, void *extra_args)
+int cil_resolve_expr(enum cil_flavor expr_type, struct cil_list *str_expr, struct cil_list **datum_expr, struct cil_tree_node *parent, void *extra_args)
 {
 	int rc = SEPOL_ERR;
 	struct cil_list_item *curr;
@@ -2721,11 +2747,15 @@ int cil_resolve_expr(struct cil_list *str_expr, struct cil_list **datum_expr, st
 				goto exit;
 			}
 
+			if (sym_index == CIL_SYM_TYPES && (expr_type == CIL_CONSTRAIN || expr_type == CIL_VALIDATETRANS)) {
+				cil_type_used(res_datum);
+			}
+
 			cil_list_append(*datum_expr, CIL_DATUM, res_datum);
 			break;
 		case CIL_LIST: {
 			struct cil_list *datum_sub_expr;
-			rc = cil_resolve_expr(curr->data, &datum_sub_expr, parent, extra_args);
+			rc = cil_resolve_expr(expr_type, curr->data, &datum_sub_expr, parent, extra_args);
 			if (rc != SEPOL_OK) {
 				cil_list_destroy(&datum_sub_expr, CIL_TRUE);
 				goto exit;
@@ -2749,7 +2779,7 @@ int cil_resolve_boolif(struct cil_tree_node *current, void *extra_args)
 	int rc = SEPOL_ERR;
 	struct cil_booleanif *bif = (struct cil_booleanif*)current->data;
 
-	rc = cil_resolve_expr(bif->str_expr, &bif->datum_expr, current, extra_args);
+	rc = cil_resolve_expr(CIL_BOOLEANIF, bif->str_expr, &bif->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
@@ -2824,7 +2854,7 @@ int cil_resolve_tunif(struct cil_tree_node *current, void *extra_args)
 		db = args->db;
 	}
 
-	rc = cil_resolve_expr(tif->str_expr, &tif->datum_expr, current, extra_args);
+	rc = cil_resolve_expr(CIL_TUNABLEIF, tif->str_expr, &tif->datum_expr, current, extra_args);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}

@@ -455,6 +455,7 @@ struct cil_typeattribute {
 	struct cil_symtab_datum datum;
 	struct cil_list *expr_list;
 	ebitmap_t *types;
+	int used;	// whether or not this typeattribute was used and should be added to the binary
 };
 
 struct cil_typeattributeset {

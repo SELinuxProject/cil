@@ -596,7 +596,13 @@ int cil_typeattribute_to_policydb(policydb_t *pdb, struct cil_typeattribute *cil
 	int rc = SEPOL_ERR;
 	uint32_t value = 0;
 	char *key = NULL;
-	type_datum_t *sepol_attr = cil_malloc(sizeof(*sepol_attr));
+	type_datum_t *sepol_attr = NULL;
+
+	if (cil_attr->used == CIL_FALSE) {
+		return SEPOL_OK;		
+	}
+
+	sepol_attr = cil_malloc(sizeof(*sepol_attr));
 	type_datum_init(sepol_attr);
 
 	sepol_attr->flavor = TYPE_ATTRIB;
@@ -645,7 +651,11 @@ int cil_typeattribute_to_bitmap(policydb_t *pdb, const struct cil_db *db, struct
 	type_datum_t *sepol_type = NULL;
 	ebitmap_node_t *tnode;
 	unsigned int i;
-	
+
+	if (cil_attr->used == CIL_FALSE) {
+		return SEPOL_OK;
+	}
+
 	if (pdb->type_attr_map == NULL) {
 		rc = __cil_typeattr_bitmap_init(pdb);
 		if (rc != SEPOL_OK) {
@@ -1398,12 +1408,6 @@ int __cil_avrule_expand_helper(policydb_t *pdb, uint16_t kind, struct cil_symtab
 	class_datum_t *sepol_class = NULL;
 	uint32_t data = 0;
 
-	rc = __cil_get_sepol_type_datum(pdb, src, &sepol_src);
-	if (rc != SEPOL_OK) goto exit;
-
-	rc = __cil_get_sepol_type_datum(pdb, tgt, &sepol_tgt);
-	if (rc != SEPOL_OK) goto exit;
-
 	rc = __cil_get_sepol_class_datum(pdb, DATUM(cp->class), &sepol_class);
 	if (rc != SEPOL_OK) goto exit;
 
@@ -1426,6 +1430,12 @@ int __cil_avrule_expand_helper(policydb_t *pdb, uint16_t kind, struct cil_symtab
 				goto exit;
 			}
 		}
+
+		rc = __cil_get_sepol_type_datum(pdb, src, &sepol_src);
+		if (rc != SEPOL_OK) goto exit;
+
+		rc = __cil_get_sepol_type_datum(pdb, tgt, &sepol_tgt);
+		if (rc != SEPOL_OK) goto exit;
 
 		rc = __cil_insert_avrule(pdb, kind, sepol_src->s.value, sepol_tgt->s.value, sepol_class->s.value, data, cond_node, cond_flavor);
 		if (rc != SEPOL_OK) {
