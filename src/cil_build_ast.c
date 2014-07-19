@@ -2450,7 +2450,7 @@ static enum cil_flavor __cil_get_constraint_operand_flavor(const char *operand)
 	else if (!strcmp(operand, CIL_KEY_CONS_R3)) return CIL_CONS_R3;
 	else if (!strcmp(operand, CIL_KEY_CONS_U1)) return CIL_CONS_U1;
 	else if (!strcmp(operand, CIL_KEY_CONS_U2)) return CIL_CONS_U2;
-	else if (!strcmp(operand, CIL_KEY_CONS_R3)) return CIL_CONS_U3;
+	else if (!strcmp(operand, CIL_KEY_CONS_U3)) return CIL_CONS_U3;
 	else if (!strcmp(operand, CIL_KEY_CONS_L1)) return CIL_CONS_L1;
 	else if (!strcmp(operand, CIL_KEY_CONS_L2)) return CIL_CONS_L2;
 	else if (!strcmp(operand, CIL_KEY_CONS_H1)) return CIL_CONS_H1;
