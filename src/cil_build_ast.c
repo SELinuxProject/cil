@@ -4949,6 +4949,10 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	macro_content = parse_current->next->next->next;
 	cil_tree_subtree_destroy(parse_current->next->next);
 	parse_current->next->next = macro_content;
+	if (macro_content == NULL) {
+		/* No statements in macro and macro parameter list was last node */
+		parse_current->parent->cl_tail = parse_current->next;
+	}
 
 	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)macro, (hashtab_key_t)key, CIL_SYM_BLOCKS, CIL_MACRO);
 	if (rc != SEPOL_OK) {

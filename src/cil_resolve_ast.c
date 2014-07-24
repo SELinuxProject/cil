@@ -2117,6 +2117,7 @@ int cil_resolve_in(struct cil_tree_node *current, void *extra_args)
 
 	cil_tree_children_destroy(current);
 	current->cl_head = NULL;
+	current->cl_tail = NULL;
 
 	return SEPOL_OK;
 
