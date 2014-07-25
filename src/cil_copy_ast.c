@@ -333,9 +333,9 @@ int cil_copy_sidcontext(struct cil_db *db, void *data, void **copy, __attribute_
 
 	cil_sidcontext_init(&new);
 
-	new->context_str = cil_strpool_get(orig->context_str);
-
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -401,9 +401,10 @@ int cil_copy_userlevel(struct cil_db *db, void *data, void **copy, __attribute__
 	cil_userlevel_init(&new);
 
 	new->user_str = cil_strpool_get(orig->user_str);
-	new->level_str = cil_strpool_get(orig->level_str);
 
-	if (orig->level != NULL && orig->level_str == NULL) {
+	if (orig->level_str != NULL) {
+		new->level_str = cil_strpool_get(orig->level_str);
+	} else {
 		cil_copy_fill_level(db, orig->level, &new->level);
 	}
 
@@ -420,9 +421,10 @@ int cil_copy_userrange(struct cil_db *db, void *data, void **copy, __attribute__
 	cil_userrange_init(&new);
 
 	new->user_str = cil_strpool_get(orig->user_str);
-	new->range_str = cil_strpool_get(orig->range_str);
 
-	if (orig->range != NULL && orig->range_str == NULL) {
+	if (orig->range_str != NULL) {
+		new->range_str = cil_strpool_get(orig->range_str);
+	} else {
 		cil_levelrange_init(&new->range);
 		cil_copy_fill_levelrange(db, orig->range, new->range);
 	}
@@ -678,9 +680,10 @@ int cil_copy_rangetransition(struct cil_db *db, void *data, void **copy, __attri
 	new->src_str = cil_strpool_get(orig->src_str);
 	new->exec_str = cil_strpool_get(orig->exec_str);
 	new->obj_str = cil_strpool_get(orig->obj_str);
-	new->range_str = cil_strpool_get(orig->range_str);
 
-	if (orig->range != NULL && orig->range_str == NULL) {
+	if (orig->range_str != NULL) {
+		new->range_str = cil_strpool_get(orig->range_str);
+	} else {
 		cil_levelrange_init(&new->range);
 		cil_copy_fill_levelrange(db, orig->range, new->range);
 	}
@@ -911,14 +914,15 @@ int cil_copy_level(struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 
 void cil_copy_fill_levelrange(struct cil_db *db, struct cil_levelrange *data, struct cil_levelrange *new)
 {
-	new->low_str = cil_strpool_get(data->low_str);
-	new->high_str = cil_strpool_get(data->high_str);
-
-	if (data->low != NULL && data->low_str == NULL) {
+	if (data->low_str != NULL) {
+		new->low_str = cil_strpool_get(data->low_str);
+	} else {
 		cil_copy_fill_level(db, data->low, &new->low);
 	}
 
-	if (data->high != NULL && data->high_str == NULL) {
+	if (data->high_str != NULL) {
+		new->high_str = cil_strpool_get(data->high_str);
+	} else {
 		cil_copy_fill_level(db, data->high, &new->high);
 	}
 }
@@ -951,9 +955,10 @@ void cil_copy_fill_context(struct cil_db *db, struct cil_context *data, struct c
 	new->user_str = cil_strpool_get(data->user_str);
 	new->role_str = cil_strpool_get(data->role_str);
 	new->type_str = cil_strpool_get(data->type_str);
-	new->range_str = cil_strpool_get(data->range_str);
 
-	if (data->range != NULL && data->range_str == NULL) {
+	if (data->range_str != NULL) {
+		new->range_str = cil_strpool_get(data->range_str);
+	} else {
 		cil_levelrange_init(&new->range);
 		cil_copy_fill_levelrange(db, data->range, new->range);
 	}
@@ -990,15 +995,17 @@ int cil_copy_netifcon(struct cil_db *db, void *data, void **copy, __attribute__(
 	cil_netifcon_init(&new);
 
 	new->interface_str = cil_strpool_get(orig->interface_str);
-	new->if_context_str = cil_strpool_get(orig->if_context_str);
-	new->packet_context_str = cil_strpool_get(orig->packet_context_str);
 
-	if (orig->if_context != NULL && orig->if_context_str == NULL) {
+	if (orig->if_context_str != NULL) {
+		new->if_context_str = cil_strpool_get(orig->if_context_str);
+	} else {
 		cil_context_init(&new->if_context);
 		cil_copy_fill_context(db, orig->if_context, new->if_context);
 	}
 
-	if (orig->packet_context != NULL && orig->packet_context_str == NULL) {
+	if (orig->packet_context_str != NULL) {
+		new->packet_context_str = cil_strpool_get(orig->packet_context_str);
+	} else {
 		cil_context_init(&new->packet_context);
 		cil_copy_fill_context(db, orig->packet_context, new->packet_context);
 	}
@@ -1017,9 +1024,10 @@ int cil_copy_genfscon(struct cil_db *db, void *data, void **copy, __attribute__(
 
 	new->fs_str = cil_strpool_get(orig->fs_str);
 	new->path_str = cil_strpool_get(orig->path_str);
-	new->context_str = cil_strpool_get(orig->context_str);
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -1038,9 +1046,10 @@ int cil_copy_filecon(struct cil_db *db, void *data, void **copy, __attribute__((
 
 	new->path_str = cil_strpool_get(orig->path_str);
 	new->type = orig->type;
-	new->context_str = cil_strpool_get(orig->context_str);
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -1057,21 +1066,23 @@ int cil_copy_nodecon(struct cil_db *db, void *data, void **copy, __attribute__((
 
 	cil_nodecon_init(&new);
 
-	new->addr_str = cil_strpool_get(orig->addr_str);
-	new->mask_str = cil_strpool_get(orig->mask_str);
-	new->context_str = cil_strpool_get(orig->context_str);
-
-	if (orig->addr != NULL && orig->addr_str == NULL) {
+	if (orig->addr_str != NULL) {
+		new->addr_str = cil_strpool_get(orig->addr_str);
+	} else {
 		cil_ipaddr_init(&new->addr);
 		cil_copy_fill_ipaddr(orig->addr, new->addr);
 	}
 
-	if (orig->mask != NULL && orig->mask_str == NULL) {
+	if (orig->mask_str != NULL) {
+		new->mask_str = cil_strpool_get(orig->mask_str);
+	} else {
 		cil_ipaddr_init(&new->mask);
 		cil_copy_fill_ipaddr(orig->mask, new->mask);
 	}
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -1091,9 +1102,10 @@ int cil_copy_portcon(struct cil_db *db, void *data, void **copy, __attribute__((
 	new->proto = orig->proto;
 	new->port_low = orig->port_low;
 	new->port_high = orig->port_high;
-	new->context_str = cil_strpool_get(orig->context_str);
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -1111,9 +1123,10 @@ int cil_copy_pirqcon(struct cil_db *db, void *data, void **copy, __attribute__((
 	cil_pirqcon_init(&new);
 
 	new->pirq = orig->pirq;
-	new->context_str = cil_strpool_get(orig->context_str);
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -1132,9 +1145,10 @@ int cil_copy_iomemcon(struct cil_db *db, void *data, void **copy, __attribute__(
 
 	new->iomem_low = orig->iomem_low;
 	new->iomem_high = orig->iomem_high;
-	new->context_str = cil_strpool_get(orig->context_str);
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -1153,9 +1167,10 @@ int cil_copy_ioportcon(struct cil_db *db, void *data, void **copy, __attribute__
 
 	new->ioport_low = orig->ioport_low;
 	new->ioport_high = orig->ioport_high;
-	new->context_str = cil_strpool_get(orig->context_str);
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -1173,9 +1188,10 @@ int cil_copy_pcidevicecon(struct cil_db *db, void *data, void **copy, __attribut
 	cil_pcidevicecon_init(&new);
 
 	new->dev = orig->dev;
-	new->context_str = cil_strpool_get(orig->context_str);
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
@@ -1194,9 +1210,10 @@ int cil_copy_fsuse(struct cil_db *db, void *data, void **copy, __attribute__((un
 
 	new->type = orig->type;
 	new->fs_str = cil_strpool_get(orig->fs_str);
-	new->context_str = cil_strpool_get(orig->context_str);
 
-	if (orig->context != NULL && orig->context_str == NULL) {
+	if (orig->context_str != NULL) {
+		new->context_str = cil_strpool_get(orig->context_str);
+	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
