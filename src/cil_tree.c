@@ -237,7 +237,6 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 	struct cil_list_item *curr;
 	char *stack[COND_EXPR_MAXDEPTH] = {};
 	int pos = 0;
-	int i;
 
 	cil_list_for_each(curr, expr) {
 		if (pos > COND_EXPR_MAXDEPTH) {
@@ -253,11 +252,11 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 			pos++;
 			break;
 		case CIL_STRING:
-			stack[pos] = cil_strpool_get(curr->data);
+			stack[pos] = curr->data;
 			pos++;
 			break;
 		case CIL_DATUM:
-			stack[pos] = cil_strpool_get(((struct cil_symtab_datum *)curr->data)->name);
+			stack[pos] = ((struct cil_symtab_datum *)curr->data)->name;
 			pos++;
 			break;
 		case CIL_OP: {
@@ -382,7 +381,7 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 				goto exit;
 				break;
 			}
-			stack[pos] = cil_strpool_get(operand_str);
+			stack[pos] = operand_str;
 			pos++;
 			break;
 		}
@@ -398,9 +397,6 @@ static int cil_expr_to_string(struct cil_list *expr, char **out)
 	return SEPOL_OK;
 
 exit:
-	for (i = 0; i < pos; i++) {
-		cil_strpool_release(stack[i]);
-	}
 	return rc;
 }
 

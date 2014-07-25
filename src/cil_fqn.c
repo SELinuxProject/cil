@@ -186,8 +186,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		strcpy(fqn, args->fqparent);
 		strcat(fqn, datum->name);
 
-		cil_strpool_release(datum->name);
-		datum->name = cil_strpool_get(fqn);
+		datum->name = cil_strpool_add(fqn);
 		free(fqn);
 		break;
 	default:

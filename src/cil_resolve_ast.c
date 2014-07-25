@@ -2384,27 +2384,27 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 				if (name != NULL) {
 					new_arg->arg = (struct cil_symtab_datum *)name;
 				} else {
-					new_arg->arg_str = cil_strpool_get(pc->data);
+					new_arg->arg_str = pc->data;
 				}
 			}
 				break;
 			case CIL_TYPE:
-				new_arg->arg_str = cil_strpool_get(pc->data);
+				new_arg->arg_str = pc->data;
 				break;
 			case CIL_ROLE:
-				new_arg->arg_str = cil_strpool_get(pc->data);
+				new_arg->arg_str = pc->data;
 				break;
 			case CIL_USER:
-				new_arg->arg_str = cil_strpool_get(pc->data);
+				new_arg->arg_str = pc->data;
 				break;
 			case CIL_SENS:
-				new_arg->arg_str = cil_strpool_get(pc->data);
+				new_arg->arg_str = pc->data;
 				break;
 			case CIL_CAT:
-				new_arg->arg_str = cil_strpool_get(pc->data);
+				new_arg->arg_str = pc->data;
 				break;
 			case CIL_BOOL:
-				new_arg->arg_str = cil_strpool_get(pc->data);
+				new_arg->arg_str = pc->data;
 				break;
 			case CIL_CATSET: {
 				if (pc->cl_head != NULL) {
@@ -2423,7 +2423,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 									CIL_LIST_ITEM, cat_node);
 					new_arg->arg = (struct cil_symtab_datum*)catset;
 				} else {
-					new_arg->arg_str = cil_strpool_get(pc->data);
+					new_arg->arg_str = pc->data;
 				}
 
 				break;
@@ -2447,7 +2447,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 									CIL_LIST_ITEM, lvl_node);
 					new_arg->arg = (struct cil_symtab_datum*)level;
 				} else {
-					new_arg->arg_str = cil_strpool_get(pc->data);
+					new_arg->arg_str = pc->data;
 				}
 
 				break;
@@ -2471,7 +2471,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 									CIL_LIST_ITEM, range_node);
 					new_arg->arg = (struct cil_symtab_datum*)range;
 				} else {
-					new_arg->arg_str = cil_strpool_get(pc->data);
+					new_arg->arg_str = pc->data;
 				}
 
 				break;
@@ -2495,16 +2495,16 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 									CIL_LIST_ITEM, addr_node);
 					new_arg->arg = (struct cil_symtab_datum*)ipaddr;
 				} else {
-					new_arg->arg_str = cil_strpool_get(pc->data);
+					new_arg->arg_str = pc->data;
 				}
 
 				break;
 			}
 			case CIL_CLASS:
-				new_arg->arg_str = cil_strpool_get(pc->data);
+				new_arg->arg_str = pc->data;
 				break;
 			case CIL_MAP_CLASS:
-				new_arg->arg_str = cil_strpool_get(pc->data);
+				new_arg->arg_str = pc->data;
 				break;
 			case CIL_CLASSPERMISSION: {
 				if (pc->cl_head != NULL) {
@@ -2524,7 +2524,7 @@ int cil_resolve_call1(struct cil_tree_node *current, void *extra_args)
 					cil_list_append(cp->datum.nodes, CIL_LIST_ITEM, cp_node);
 					new_arg->arg = (struct cil_symtab_datum*)cp;
 				} else {
-					new_arg->arg_str = cil_strpool_get(pc->data);
+					new_arg->arg_str = pc->data;
 				}
 				break;
 			}

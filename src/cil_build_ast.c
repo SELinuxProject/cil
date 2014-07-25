@@ -73,7 +73,7 @@ int cil_fill_list(struct cil_tree_node *current, enum cil_flavor flavor, struct 
 	cil_list_init(list, flavor);
 
 	for (curr = current; curr != NULL; curr = curr->next) {
-		cil_list_append(*list, CIL_STRING, cil_strpool_get(curr->data));
+		cil_list_append(*list, CIL_STRING, curr->data);
 	}
 
 	return SEPOL_OK;
@@ -227,7 +227,7 @@ int cil_gen_blockinherit(struct cil_db *db, struct cil_tree_node *parse_current,
 
 	cil_blockinherit_init(&inherit);
 
-	inherit->block_str = cil_strpool_get(parse_current->next->data);
+	inherit->block_str = parse_current->next->data;
 
 	ast_node->data = inherit;
 	ast_node->flavor = CIL_BLOCKINHERIT;
@@ -245,10 +245,6 @@ void cil_destroy_blockinherit(struct cil_blockinherit *inherit)
 {
 	if (inherit == NULL) {
 		return;
-	}
-
-	if (inherit->block_str != NULL) {
-		cil_strpool_release(inherit->block_str);
 	}
 
 	free(inherit);
@@ -276,7 +272,7 @@ int cil_gen_blockabstract(struct cil_db *db, struct cil_tree_node *parse_current
 
 	cil_blockabstract_init(&abstract);
 
-	abstract->block_str = cil_strpool_get(parse_current->next->data);
+	abstract->block_str = parse_current->next->data;
 
 	ast_node->data = abstract;
 	ast_node->flavor = CIL_BLOCKABSTRACT;
@@ -294,10 +290,6 @@ void cil_destroy_blockabstract(struct cil_blockabstract *abstract)
 {
 	if (abstract == NULL) {
 		return;
-	}
-
-	if (abstract->block_str != NULL) {
-		cil_strpool_release(abstract->block_str);
 	}
 
 	free(abstract);
@@ -326,7 +318,7 @@ int cil_gen_in(struct cil_db *db, struct cil_tree_node *parse_current, struct ci
 
 	cil_in_init(&in);
 
-	in->block_str = cil_strpool_get(parse_current->next->data);
+	in->block_str = parse_current->next->data;
 
 	ast_node->data = in;
 	ast_node->flavor = CIL_IN;
@@ -343,10 +335,6 @@ void cil_destroy_in(struct cil_in *in)
 {
 	if (in == NULL) {
 		return;
-	}
-
-	if (in->block_str != NULL) {
-		cil_strpool_release(in->block_str);
 	}
 
 	cil_symtab_array_destroy(in->symtab);
@@ -582,7 +570,7 @@ int cil_fill_classperms(struct cil_tree_node *parse_current, struct cil_classper
 
 	cil_classperms_init(cp);
 
-	(*cp)->class_str = cil_strpool_get(parse_current->data);
+	(*cp)->class_str = parse_current->data;
 
 	rc = cil_fill_perms(parse_current->next, &(*cp)->perm_strs);
 	if (rc != SEPOL_OK) {
@@ -604,7 +592,6 @@ void cil_destroy_classperms(struct cil_classperms *cp)
 		return;
 	}
 
-	cil_strpool_release(cp->class_str);
 	cil_list_destroy(&cp->perm_strs, CIL_TRUE);
 	cil_list_destroy(&cp->perms, CIL_FALSE);
 
@@ -614,7 +601,7 @@ void cil_destroy_classperms(struct cil_classperms *cp)
 void cil_fill_classperms_set(struct cil_tree_node *parse_current, struct cil_classperms_set **cp_set)
 {
 	cil_classperms_set_init(cp_set);
-	(*cp_set)->set_str = cil_strpool_get(parse_current->data);
+	(*cp_set)->set_str = parse_current->data;
 }
 
 void cil_destroy_classperms_set(struct cil_classperms_set *cp_set)
@@ -623,7 +610,6 @@ void cil_destroy_classperms_set(struct cil_classperms_set *cp_set)
 		return;
 	}
 
-	cil_strpool_release(cp_set->set_str);
 	free(cp_set);
 }
 
@@ -777,7 +763,7 @@ int cil_gen_classpermissionset(struct cil_db *db, struct cil_tree_node *parse_cu
 
 	cil_classpermissionset_init(&cps);
 
-	cps->set_str = cil_strpool_get(parse_current->next->data);
+	cps->set_str = parse_current->next->data;
 
 	rc = cil_fill_classperms_list(parse_current->next->next, &cps->classperms);
 	if (rc != SEPOL_OK) {
@@ -802,7 +788,6 @@ void cil_destroy_classpermissionset(struct cil_classpermissionset *cps)
 		return;
 	}
 
-	cil_strpool_release(cps->set_str);
 	cil_destroy_classperms_list(&cps->classperms);
 
 	free(cps);
@@ -874,8 +859,8 @@ int cil_gen_classmapping(struct cil_db *db, struct cil_tree_node *parse_current,
 
 	cil_classmapping_init(&mapping);
 
-	mapping->map_class_str = cil_strpool_get(parse_current->next->data);
-	mapping->map_perm_str = cil_strpool_get(parse_current->next->next->data);
+	mapping->map_class_str = parse_current->next->data;
+	mapping->map_perm_str = parse_current->next->next->data;
 
 	rc = cil_fill_classperms_list(parse_current->next->next->next, &mapping->classperms);
 	if (rc != SEPOL_OK) {
@@ -900,8 +885,6 @@ void cil_destroy_classmapping(struct cil_classmapping *mapping)
 		return;
 	}
 
-	cil_strpool_release(mapping->map_class_str);
-	cil_strpool_release(mapping->map_perm_str);
 	cil_destroy_classperms_list(&mapping->classperms);
 
 	free(mapping);
@@ -978,8 +961,8 @@ int cil_gen_classcommon(struct cil_db *db, struct cil_tree_node *parse_current, 
 
 	cil_classcommon_init(&clscom);
 
-	clscom->class_str = cil_strpool_get(parse_current->next->data);
-	clscom->common_str = cil_strpool_get(parse_current->next->next->data);
+	clscom->class_str = parse_current->next->data;
+	clscom->common_str = parse_current->next->next->data;
 
 	ast_node->data = clscom;
 	ast_node->flavor = CIL_CLASSCOMMON;
@@ -998,14 +981,6 @@ void cil_destroy_classcommon(struct cil_classcommon *clscom)
 {
 	if (clscom == NULL) {
 		return;
-	}
-
-	if (clscom->class_str != NULL) {
-		cil_strpool_release(clscom->class_str);
-	}
-
-	if (clscom->common_str != NULL) {
-		cil_strpool_release(clscom->common_str);
 	}
 
 	free(clscom);
@@ -1084,10 +1059,10 @@ int cil_gen_sidcontext(struct cil_db *db, struct cil_tree_node *parse_current, s
 
 	cil_sidcontext_init(&sidcon);
 
-	sidcon->sid_str = cil_strpool_get(parse_current->next->data);
+	sidcon->sid_str = parse_current->next->data;
 
 	if (parse_current->next->next->cl_head == NULL) {
-		sidcon->context_str = cil_strpool_get(parse_current->next->next->data);
+		sidcon->context_str = parse_current->next->next->data;
 	} else {
 		cil_context_init(&sidcon->context);
 
@@ -1115,13 +1090,7 @@ void cil_destroy_sidcontext(struct cil_sidcontext *sidcon)
 		return;
 	}
 
-	if (sidcon->sid_str != NULL) {
-		cil_strpool_release(sidcon->sid_str);
-	}
-
-	if (sidcon->context_str != NULL) {
-		cil_strpool_release(sidcon->context_str);
-	} else if (sidcon->context != NULL && sidcon->context->datum.name == NULL) {
+	if (sidcon->context != NULL && sidcon->context->datum.name == NULL) {
 		cil_destroy_context(sidcon->context);
 	}
 
@@ -1253,10 +1222,10 @@ int cil_gen_userlevel(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	cil_userlevel_init(&usrlvl);
 
-	usrlvl->user_str = cil_strpool_get(parse_current->next->data);
+	usrlvl->user_str = parse_current->next->data;
 
 	if (parse_current->next->next->cl_head == NULL) {
-		usrlvl->level_str = cil_strpool_get(parse_current->next->next->data);
+		usrlvl->level_str = parse_current->next->next->data;
 	} else {
 		cil_level_init(&usrlvl->level);
 
@@ -1284,13 +1253,7 @@ void cil_destroy_userlevel(struct cil_userlevel *usrlvl)
 		return;
 	}
 
-	if (usrlvl->user_str != NULL) {
-		cil_strpool_release(usrlvl->user_str);
-	}
-
-	if (usrlvl->level_str != NULL) {
-		cil_strpool_release(usrlvl->level_str);
-	} else if (usrlvl->level != NULL) {
+	if (usrlvl->level != NULL) {
 		cil_destroy_level(usrlvl->level);
 	}
 
@@ -1320,10 +1283,10 @@ int cil_gen_userrange(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	cil_userrange_init(&userrange);
 
-	userrange->user_str = cil_strpool_get(parse_current->next->data);
+	userrange->user_str = parse_current->next->data;
 
 	if (parse_current->next->next->cl_head == NULL) {
-		userrange->range_str = cil_strpool_get(parse_current->next->next->data);
+		userrange->range_str = parse_current->next->next->data;
 	} else {
 		cil_levelrange_init(&userrange->range);
 
@@ -1351,13 +1314,7 @@ void cil_destroy_userrange(struct cil_userrange *userrange)
 		return;
 	}
 
-	if (userrange->user_str != NULL) {
-		cil_strpool_release(userrange->user_str);
-	}
-
-	if (userrange->range_str != NULL) {
-		cil_strpool_release(userrange->range_str);
-	} else if (userrange->range != NULL) {
+	if (userrange->range != NULL) {
 		cil_destroy_levelrange(userrange->range);
 	}
 
@@ -1387,8 +1344,8 @@ int cil_gen_userprefix(struct cil_db *db, struct cil_tree_node *parse_current, s
 
 	cil_userprefix_init(&userprefix);
 
-	userprefix->user_str = cil_strpool_get(parse_current->next->data);
-	userprefix->prefix_str = cil_strpool_get(parse_current->next->next->data);
+	userprefix->user_str = parse_current->next->data;
+	userprefix->prefix_str = parse_current->next->next->data;
 
 	ast_node->data = userprefix;
 	ast_node->flavor = CIL_USERPREFIX;
@@ -1406,8 +1363,7 @@ void cil_destroy_userprefix(struct cil_userprefix *userprefix)
 	if (userprefix == NULL) {
 		return;
 	}
-	cil_strpool_release(userprefix->user_str);
-	cil_strpool_release(userprefix->prefix_str);
+
 	free(userprefix);
 }
 
@@ -1435,11 +1391,11 @@ int cil_gen_selinuxuser(struct cil_db *db, struct cil_tree_node *parse_current, 
 
 	cil_selinuxuser_init(&selinuxuser);
 
-	selinuxuser->name_str = cil_strpool_get(parse_current->next->data);
-	selinuxuser->user_str = cil_strpool_get(parse_current->next->next->data);
+	selinuxuser->name_str = parse_current->next->data;
+	selinuxuser->user_str = parse_current->next->next->data;
 
 	if (parse_current->next->next->next->cl_head == NULL) {
-		selinuxuser->range_str = cil_strpool_get(parse_current->next->next->next->data);
+		selinuxuser->range_str = parse_current->next->next->next->data;
 	} else {
 		cil_levelrange_init(&selinuxuser->range);
 
@@ -1483,11 +1439,11 @@ int cil_gen_selinuxuserdefault(struct cil_db *db, struct cil_tree_node *parse_cu
 
 	cil_selinuxuser_init(&selinuxuser);
 
-	selinuxuser->name_str = cil_strpool_get("__default__");
-	selinuxuser->user_str = cil_strpool_get(parse_current->next->data);
+	selinuxuser->name_str = cil_strpool_add("__default__");
+	selinuxuser->user_str = parse_current->next->data;
 
 	if (parse_current->next->next->cl_head == NULL) {
-		selinuxuser->range_str = cil_strpool_get(parse_current->next->next->data);
+		selinuxuser->range_str = parse_current->next->next->data;
 	} else {
 		cil_levelrange_init(&selinuxuser->range);
 
@@ -1514,11 +1470,7 @@ void cil_destroy_selinuxuser(struct cil_selinuxuser *selinuxuser)
 		return;
 	}
 
-	cil_strpool_release(selinuxuser->name_str);
-	cil_strpool_release(selinuxuser->user_str);
-	if (selinuxuser->range_str != NULL) {
-		cil_strpool_release(selinuxuser->range_str);
-	} else {
+	if (selinuxuser->range != NULL) {
 		cil_destroy_levelrange(selinuxuser->range);
 	}
 
@@ -1600,8 +1552,8 @@ int cil_gen_roletype(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	cil_roletype_init(&roletype);
 
-	roletype->role_str = cil_strpool_get(parse_current->next->data);
-	roletype->type_str = cil_strpool_get(parse_current->next->next->data);
+	roletype->role_str = parse_current->next->data;
+	roletype->type_str = parse_current->next->next->data;
 
 	ast_node->data = roletype;
 	ast_node->flavor = CIL_ROLETYPE;
@@ -1619,14 +1571,6 @@ void cil_destroy_roletype(struct cil_roletype *roletype)
 {
 	if (roletype == NULL) {
 		return;
-	}
-
-	if (roletype->role_str != NULL) {
-		cil_strpool_release(roletype->role_str);
-	}
-
-	if (roletype->type_str != NULL) {
-		cil_strpool_release(roletype->type_str);
 	}
 
 	free(roletype);
@@ -1655,8 +1599,8 @@ int cil_gen_userrole(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	cil_userrole_init(&userrole);
 
-	userrole->user_str = cil_strpool_get(parse_current->next->data);
-	userrole->role_str = cil_strpool_get(parse_current->next->next->data);
+	userrole->user_str = parse_current->next->data;
+	userrole->role_str = parse_current->next->next->data;
 
 	ast_node->data = userrole;
 	ast_node->flavor = CIL_USERROLE;
@@ -1674,14 +1618,6 @@ void cil_destroy_userrole(struct cil_userrole *userrole)
 {
 	if (userrole == NULL) {
 		return;
-	}
-
-	if (userrole->user_str != NULL) {
-		cil_strpool_release(userrole->user_str);
-	}
-
-	if (userrole->role_str != NULL) {
-		cil_strpool_release(userrole->role_str);
 	}
 
 	free(userrole);
@@ -1712,10 +1648,10 @@ int cil_gen_roletransition(struct cil_tree_node *parse_current, struct cil_tree_
 
 	cil_roletransition_init(&roletrans);
 
-	roletrans->src_str = cil_strpool_get(parse_current->next->data);
-	roletrans->tgt_str = cil_strpool_get(parse_current->next->next->data);
-	roletrans->obj_str = cil_strpool_get(parse_current->next->next->next->data);
-	roletrans->result_str = cil_strpool_get(parse_current->next->next->next->next->data);
+	roletrans->src_str = parse_current->next->data;
+	roletrans->tgt_str = parse_current->next->next->data;
+	roletrans->obj_str = parse_current->next->next->next->data;
+	roletrans->result_str = parse_current->next->next->next->next->data;
 
 	ast_node->data = roletrans;
 	ast_node->flavor = CIL_ROLETRANSITION;
@@ -1733,22 +1669,6 @@ void cil_destroy_roletransition(struct cil_roletransition *roletrans)
 {
 	if (roletrans == NULL) {
 		return;
-	}
-
-	if (roletrans->src_str != NULL) {
-		cil_strpool_release(roletrans->src_str);
-	}
-
-	if (roletrans->tgt_str != NULL) {
-		cil_strpool_release(roletrans->tgt_str);
-	}
-
-	if (roletrans->obj_str != NULL) {
-		cil_strpool_release(roletrans->obj_str);
-	}
-
-	if (roletrans->result_str != NULL) {
-		cil_strpool_release(roletrans->result_str);
 	}
 
 	free(roletrans);
@@ -1777,8 +1697,8 @@ int cil_gen_roleallow(struct cil_db *db, struct cil_tree_node *parse_current, st
 
 	cil_roleallow_init(&roleallow);
 
-	roleallow->src_str = cil_strpool_get(parse_current->next->data);
-	roleallow->tgt_str = cil_strpool_get(parse_current->next->next->data);
+	roleallow->src_str = parse_current->next->data;
+	roleallow->tgt_str = parse_current->next->next->data;
 
 	ast_node->data = roleallow;
 	ast_node->flavor = CIL_ROLEALLOW;
@@ -1796,14 +1716,6 @@ void cil_destroy_roleallow(struct cil_roleallow *roleallow)
 {
 	if (roleallow == NULL) {
 		return;
-	}
-
-	if (roleallow->src_str != NULL) {
-		cil_strpool_release(roleallow->src_str);
-	}
-
-	if (roleallow->tgt_str != NULL) {
-		cil_strpool_release(roleallow->tgt_str);
 	}
 
 	free(roleallow);
@@ -1902,7 +1814,7 @@ int cil_gen_roleattributeset(struct cil_db *db, struct cil_tree_node *parse_curr
 
 	cil_roleattributeset_init(&attrset);
 
-	attrset->attr_str = cil_strpool_get(parse_current->next->data);
+	attrset->attr_str = parse_current->next->data;
 
 	rc = cil_gen_expr(parse_current->next->next, CIL_ROLE, &attrset->str_expr);
 	if (rc != SEPOL_OK) {
@@ -1927,7 +1839,6 @@ void cil_destroy_roleattributeset(struct cil_roleattributeset *attrset)
 		return;
 	}
 
-	cil_strpool_release(attrset->attr_str);
 	cil_list_destroy(&attrset->str_expr, CIL_TRUE);
 	cil_list_destroy(&attrset->datum_expr, CIL_FALSE);
 
@@ -1960,8 +1871,8 @@ int cil_gen_avrule(struct cil_tree_node *parse_current, struct cil_tree_node *as
 
 	rule->rule_kind = rule_kind;
 
-	rule->src_str = cil_strpool_get(parse_current->next->data);
-	rule->tgt_str = cil_strpool_get(parse_current->next->next->data);
+	rule->src_str = parse_current->next->data;
+	rule->tgt_str = parse_current->next->next->data;
 
 	rc = cil_fill_classperms_list(parse_current->next->next->next, &rule->classperms);
 	if (rc != SEPOL_OK) {
@@ -1984,14 +1895,6 @@ void cil_destroy_avrule(struct cil_avrule *rule)
 {
 	if (rule == NULL) {
 		return;
-	}
-
-	if (rule->src_str != NULL) {
-		cil_strpool_release(rule->src_str);
-	}
-
-	if (rule->tgt_str != NULL) {
-		cil_strpool_release(rule->tgt_str);
 	}
 
 	cil_destroy_classperms_list(&rule->classperms);
@@ -2025,10 +1928,10 @@ int cil_gen_type_rule(struct cil_tree_node *parse_current, struct cil_tree_node 
 	cil_type_rule_init(&rule);
 
 	rule->rule_kind = rule_kind;
-	rule->src_str = cil_strpool_get(parse_current->next->data);
-	rule->tgt_str = cil_strpool_get(parse_current->next->next->data);
-	rule->obj_str = cil_strpool_get(parse_current->next->next->next->data);
-	rule->result_str = cil_strpool_get(parse_current->next->next->next->next->data);
+	rule->src_str = parse_current->next->data;
+	rule->tgt_str = parse_current->next->next->data;
+	rule->obj_str = parse_current->next->next->next->data;
+	rule->result_str = parse_current->next->next->next->next->data;
 
 	ast_node->data = rule;
 	ast_node->flavor = CIL_TYPE_RULE;
@@ -2046,22 +1949,6 @@ void cil_destroy_type_rule(struct cil_type_rule *rule)
 {
 	if (rule == NULL) {
 		return;
-	}
-
-	if (rule->src_str != NULL) {
-		cil_strpool_release(rule->src_str);
-	}
-
-	if (rule->tgt_str != NULL) {
-		cil_strpool_release(rule->tgt_str);
-	}
-
-	if (rule->obj_str != NULL) {
-		cil_strpool_release(rule->obj_str);
-	}
-
-	if (rule->result_str != NULL) {
-		cil_strpool_release(rule->result_str);
 	}
 
 	free(rule);
@@ -2387,7 +2274,7 @@ static int __cil_fill_expr(struct cil_tree_node *current, enum cil_flavor flavor
 			cil_log(CIL_ERR,"Operator (%s) not in an expression\n", current->data);
 			goto exit;
 		}
-		cil_list_append(expr, CIL_STRING, cil_strpool_get(current->data));
+		cil_list_append(expr, CIL_STRING, current->data);
 	} else {
 		struct cil_list *sub_expr;
 		cil_list_init(&sub_expr, flavor);
@@ -2507,7 +2394,7 @@ static int __cil_fill_constraint_leaf_expr(struct cil_tree_node *current, enum c
 	cil_list_append(*leaf_expr, CIL_CONS_OPERAND, (void *)l_flavor);
 
 	if (r_flavor == CIL_STRING) {
-		cil_list_append(*leaf_expr, CIL_STRING, cil_strpool_get(current->next->next->data));
+		cil_list_append(*leaf_expr, CIL_STRING, current->next->next->data);
 	} else if (r_flavor == CIL_LIST) {
 		struct cil_list *sub_list;
 		cil_fill_list(current->next->next->cl_head, leaf_expr_flavor, &sub_list);
@@ -2925,9 +2812,9 @@ int cil_gen_aliasactual(struct cil_db *db, struct cil_tree_node *parse_current, 
 
 	cil_aliasactual_init(&aliasactual);
 
-	aliasactual->alias_str = cil_strpool_get(parse_current->next->data);
+	aliasactual->alias_str = parse_current->next->data;
 
-	aliasactual->actual_str = cil_strpool_get(parse_current->next->next->data);
+	aliasactual->actual_str = parse_current->next->next->data;
 
 	ast_node->data = aliasactual;
 	ast_node->flavor = flavor;
@@ -2946,9 +2833,6 @@ void cil_destroy_aliasactual(struct cil_aliasactual *aliasactual)
 	if (aliasactual == NULL) {
 		return;
 	}
-
-	cil_strpool_release(aliasactual->alias_str);
-	cil_strpool_release(aliasactual->actual_str);
 
 	free(aliasactual);
 }
@@ -2976,7 +2860,7 @@ int cil_gen_typeattributeset(struct cil_db *db, struct cil_tree_node *parse_curr
 
 	cil_typeattributeset_init(&attrset);
 
-	attrset->attr_str = cil_strpool_get(parse_current->next->data);
+	attrset->attr_str = parse_current->next->data;
 
 	rc = cil_gen_expr(parse_current->next->next, CIL_TYPE, &attrset->str_expr);
 	if (rc != SEPOL_OK) {
@@ -3000,7 +2884,6 @@ void cil_destroy_typeattributeset(struct cil_typeattributeset *attrset)
 		return;
 	}
 
-	cil_strpool_release(attrset->attr_str);
 	cil_list_destroy(&attrset->str_expr, CIL_TRUE);
 	cil_list_destroy(&attrset->datum_expr, CIL_FALSE);
 
@@ -3029,7 +2912,7 @@ int cil_gen_typepermissive(struct cil_db *db, struct cil_tree_node *parse_curren
 
 	cil_typepermissive_init(&typeperm);
 
-	typeperm->type_str = cil_strpool_get(parse_current->next->data);
+	typeperm->type_str = parse_current->next->data;
 
 	ast_node->data = typeperm;
 	ast_node->flavor = CIL_TYPEPERMISSIVE;
@@ -3047,10 +2930,6 @@ void cil_destroy_typepermissive(struct cil_typepermissive *typeperm)
 {
 	if (typeperm == NULL) {
 		return;
-	}
-
-	if (typeperm->type_str != NULL) {
-		cil_strpool_release(typeperm->type_str);
 	}
 
 	free(typeperm);
@@ -3080,18 +2959,17 @@ int cil_gen_typetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 		goto exit;
 	}
 
-	s1 = cil_strpool_get(parse_current->next->data);
-	s2 = cil_strpool_get(parse_current->next->next->data);
-	s3 = cil_strpool_get(parse_current->next->next->next->data);
-	s4 = cil_strpool_get(parse_current->next->next->next->next->data);
+	s1 = parse_current->next->data;
+	s2 = parse_current->next->next->data;
+	s3 = parse_current->next->next->next->data;
+	s4 = parse_current->next->next->next->next->data;
 	s5 = NULL;
 
 	if (parse_current->next->next->next->next->next) {
 		if (strcmp(s4,"*") == 0) {
-			cil_strpool_release(s4);
-			s4 = cil_strpool_get(parse_current->next->next->next->next->next->data);
+			s4 = parse_current->next->next->next->next->next->data;
 		} else {
-			s5 = cil_strpool_get(parse_current->next->next->next->next->next->data);
+			s5 = parse_current->next->next->next->next->next->data;
 		}
 	}
 
@@ -3138,7 +3016,6 @@ void cil_destroy_name(struct cil_name *name)
 	}
 
 	cil_symtab_datum_destroy(&name->datum);
-	cil_strpool_release(name->name_str);
 	free(name);
 }
 
@@ -3147,12 +3024,6 @@ void cil_destroy_typetransition(struct cil_nametypetransition *nametypetrans)
 	if (nametypetrans == NULL) {
 		return;
 	}
-
-	cil_strpool_release(nametypetrans->src_str);
-	cil_strpool_release(nametypetrans->tgt_str);
-	cil_strpool_release(nametypetrans->obj_str);
-	cil_strpool_release(nametypetrans->name_str);
-	cil_strpool_release(nametypetrans->result_str);
 
 	free(nametypetrans);
 }
@@ -3182,14 +3053,14 @@ int cil_gen_rangetransition(struct cil_db *db, struct cil_tree_node *parse_curre
 
 	cil_rangetransition_init(&rangetrans);
 
-	rangetrans->src_str = cil_strpool_get(parse_current->next->data);
-	rangetrans->exec_str = cil_strpool_get(parse_current->next->next->data);
-	rangetrans->obj_str = cil_strpool_get(parse_current->next->next->next->data);
+	rangetrans->src_str = parse_current->next->data;
+	rangetrans->exec_str = parse_current->next->next->data;
+	rangetrans->obj_str = parse_current->next->next->next->data;
 
 	rangetrans->range_str = NULL;
 
 	if (parse_current->next->next->next->next->cl_head == NULL) {
-		rangetrans->range_str = cil_strpool_get(parse_current->next->next->next->next->data);
+		rangetrans->range_str = parse_current->next->next->next->next->data;
 	} else {
 		cil_levelrange_init(&rangetrans->range);
 
@@ -3217,21 +3088,7 @@ void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans)
 		return;
 	}
 
-	if (rangetrans->src_str != NULL) {
-		cil_strpool_release(rangetrans->src_str);
-	}
-
-	if (rangetrans->exec_str != NULL) {
-		cil_strpool_release(rangetrans->exec_str);
-	}
-
-	if (rangetrans->obj_str != NULL) {
-		cil_strpool_release(rangetrans->obj_str);
-	}
-
-	if (rangetrans->range_str != NULL) {
-		cil_strpool_release(rangetrans->range_str);
-	} else if (rangetrans->range != NULL) {
+	if (rangetrans->range != NULL) {
 		cil_destroy_levelrange(rangetrans->range);
 	}
 
@@ -3526,7 +3383,7 @@ int cil_gen_senscat(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	cil_senscat_init(&senscat);
 
-	senscat->sens_str = cil_strpool_get(parse_current->next->data);
+	senscat->sens_str = parse_current->next->data;
 
 	rc = cil_fill_cats(parse_current->next->next, &senscat->cats);
 	if (rc != SEPOL_OK) {
@@ -3550,8 +3407,6 @@ void cil_destroy_senscat(struct cil_senscat *senscat)
 	if (senscat == NULL) {
 		return;
 	}
-
-	cil_strpool_release(senscat->sens_str);
 
 	cil_destroy_cats(senscat->cats);
 
@@ -3612,8 +3467,6 @@ void cil_destroy_level(struct cil_level *level)
 
 	cil_symtab_datum_destroy(&level->datum);
 
-	cil_strpool_release(level->sens_str);
-
 	cil_destroy_cats(level->cats);
 
 	free(level);
@@ -3641,7 +3494,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 	}
 
 	if (low->cl_head == NULL) {
-		lvlrange->low_str = cil_strpool_get(low->data);
+		lvlrange->low_str = low->data;
 	} else {
 		cil_level_init(&lvlrange->low);
 		rc = cil_fill_level(low->cl_head, lvlrange->low);
@@ -3651,7 +3504,7 @@ int cil_fill_levelrange(struct cil_tree_node *low, struct cil_levelrange *lvlran
 	}
 
 	if (low->next->cl_head == NULL) {
-		lvlrange->high_str = cil_strpool_get(low->next->data);
+		lvlrange->high_str = low->next->data;
 	} else {
 		cil_level_init(&lvlrange->high);
 		rc = cil_fill_level(low->next->cl_head, lvlrange->high);
@@ -3723,14 +3576,10 @@ void cil_destroy_levelrange(struct cil_levelrange *lvlrange)
 
 	if (lvlrange->low_str == NULL) {
 		cil_destroy_level(lvlrange->low);
-	} else {
-		cil_strpool_release(lvlrange->low_str);
 	}
 
 	if (lvlrange->high_str == NULL) {
 		cil_destroy_level(lvlrange->high);
-	} else {
-		cil_strpool_release(lvlrange->high_str);
 	}
 
 	free(lvlrange);
@@ -3817,7 +3666,7 @@ int cil_gen_validatetrans(struct cil_db *db, struct cil_tree_node *parse_current
 
 	cil_validatetrans_init(&validtrans);
 
-	validtrans->class_str = cil_strpool_get(parse_current->next->data);
+	validtrans->class_str = parse_current->next->data;
 
 	rc = cil_gen_constraint_expr(parse_current->next->next, flavor, &validtrans->str_expr);
 	if (rc != SEPOL_OK) {
@@ -3844,7 +3693,6 @@ void cil_destroy_validatetrans(struct cil_validatetrans *validtrans)
 		return;
 	}
 
-	cil_strpool_release(validtrans->class_str);
 	cil_list_destroy(&validtrans->str_expr, CIL_TRUE);
 	cil_list_destroy(&validtrans->datum_expr, CIL_FALSE);
 
@@ -3873,14 +3721,14 @@ int cil_fill_context(struct cil_tree_node *user_node, struct cil_context *contex
 		goto exit;
 	}
 
-	context->user_str = cil_strpool_get(user_node->data);
-	context->role_str = cil_strpool_get(user_node->next->data);
-	context->type_str = cil_strpool_get(user_node->next->next->data);
+	context->user_str = user_node->data;
+	context->role_str = user_node->next->data;
+	context->type_str = user_node->next->next->data;
 
 	context->range_str = NULL;
 
 	if (user_node->next->next->next->cl_head == NULL) {
-		context->range_str = cil_strpool_get(user_node->next->next->next->data);
+		context->range_str = user_node->next->next->next->data;
 	} else {
 		cil_levelrange_init(&context->range);
 
@@ -3951,21 +3799,7 @@ void cil_destroy_context(struct cil_context *context)
 
 	cil_symtab_datum_destroy(&context->datum);;
 
-	if (context->user_str != NULL) {
-		cil_strpool_release(context->user_str);
-	}
-
-	if (context->role_str != NULL) {
-		cil_strpool_release(context->role_str);
-	}
-
-	if (context->type_str != NULL) {
-		cil_strpool_release(context->type_str);
-	}
-
-	if (context->range_str != NULL) {
-		cil_strpool_release(context->range_str);
-	} else if (context->range != NULL) {
+	if (context->range != NULL) {
 		cil_destroy_levelrange(context->range);
 	}
 
@@ -3998,7 +3832,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	type = parse_current->next->next->data;
 	cil_filecon_init(&filecon);
 
-	filecon->path_str = cil_strpool_get(parse_current->next->data);
+	filecon->path_str = parse_current->next->data;
 
 	if (!strcmp(type, "file")) {
 		filecon->type = CIL_FILECON_FILE;
@@ -4026,7 +3860,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 		if (parse_current->next->next->next->data == NULL) {
 			filecon->context_str = NULL;
 		} else {
-			filecon->context_str = cil_strpool_get(parse_current->next->next->next->data);
+			filecon->context_str = parse_current->next->next->next->data;
 		}
 	} else {
 		if (parse_current->next->next->next->cl_head->next == NULL) {
@@ -4060,13 +3894,7 @@ void cil_destroy_filecon(struct cil_filecon *filecon)
 		return;
 	}
 
-	if (filecon->path_str != NULL) {
-		cil_strpool_release(filecon->path_str);
-	}
-
-	if (filecon->context_str != NULL) {
-		cil_strpool_release(filecon->context_str);
-	} else if (filecon->context != NULL) {
+	if (filecon->context != NULL) {
 		cil_destroy_context(filecon->context);
 	}
 
@@ -4137,7 +3965,7 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	if (parse_current->next->next->next->cl_head == NULL ) {
-		portcon->context_str = cil_strpool_get(parse_current->next->next->next->data);
+		portcon->context_str = parse_current->next->next->next->data;
 	} else {
 		cil_context_init(&portcon->context);
 
@@ -4165,9 +3993,7 @@ void cil_destroy_portcon(struct cil_portcon *portcon)
 		return;
 	}
 
-	if (portcon->context_str != NULL) {
-		cil_strpool_release(portcon->context_str);
-	} else if (portcon->context != NULL) {
+	if (portcon->context != NULL) {
 		cil_destroy_context(portcon->context);
 	}
 
@@ -4199,7 +4025,7 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	cil_nodecon_init(&nodecon);
 
 	if (parse_current->next->cl_head == NULL ) {
-		nodecon->addr_str = cil_strpool_get(parse_current->next->data);
+		nodecon->addr_str = parse_current->next->data;
 	} else {
 		cil_ipaddr_init(&nodecon->addr);
 
@@ -4210,7 +4036,7 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	if (parse_current->next->next->cl_head == NULL ) {
-		nodecon->mask_str = cil_strpool_get(parse_current->next->next->data);
+		nodecon->mask_str = parse_current->next->next->data;
 	} else {
 		cil_ipaddr_init(&nodecon->mask);
 
@@ -4221,7 +4047,7 @@ int cil_gen_nodecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	if (parse_current->next->next->next->cl_head == NULL ) {
-		nodecon->context_str = cil_strpool_get(parse_current->next->next->next->data);
+		nodecon->context_str = parse_current->next->next->next->data;
 	} else {
 		cil_context_init(&nodecon->context);
 
@@ -4249,21 +4075,15 @@ void cil_destroy_nodecon(struct cil_nodecon *nodecon)
 		return;
 	}
 
-	if (nodecon->addr_str != NULL) {
-		cil_strpool_release(nodecon->addr_str);
-	} else if (nodecon->addr != NULL) {
+	if (nodecon->addr != NULL) {
 		cil_destroy_ipaddr(nodecon->addr);
 	}
 
-	if (nodecon->mask_str != NULL) {
-		cil_strpool_release(nodecon->mask_str);
-	} else if (nodecon->mask != NULL) {
+	if (nodecon->mask != NULL) {
 		cil_destroy_ipaddr(nodecon->mask);
 	}
 
-	if (nodecon->context_str != NULL) {
-		cil_strpool_release(nodecon->context_str);
-	} else if (nodecon->context != NULL) {
+	if (nodecon->context != NULL) {
 		cil_destroy_context(nodecon->context);
 	}
 
@@ -4294,11 +4114,11 @@ int cil_gen_genfscon(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	cil_genfscon_init(&genfscon);
 
-	genfscon->fs_str = cil_strpool_get(parse_current->next->data);
-	genfscon->path_str = cil_strpool_get(parse_current->next->next->data);
+	genfscon->fs_str = parse_current->next->data;
+	genfscon->path_str = parse_current->next->next->data;
 
 	if (parse_current->next->next->next->cl_head == NULL ) {
-		genfscon->context_str = cil_strpool_get(parse_current->next->next->next->data);
+		genfscon->context_str = parse_current->next->next->next->data;
 	} else {
 		cil_context_init(&genfscon->context);
 
@@ -4326,17 +4146,7 @@ void cil_destroy_genfscon(struct cil_genfscon *genfscon)
 		return;
 	}
 
-	if (genfscon->fs_str != NULL) {
-		cil_strpool_release(genfscon->fs_str);
-	}
-
-	if (genfscon->path_str != NULL) {
-		cil_strpool_release(genfscon->path_str);
-	}
-
-	if (genfscon->context_str != NULL) {
-		cil_strpool_release(genfscon->context_str);
-	} else if (genfscon->context != NULL) {
+	if (genfscon->context != NULL) {
 		cil_destroy_context(genfscon->context);
 	}
 
@@ -4368,10 +4178,10 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 
 	cil_netifcon_init(&netifcon);
 
-	netifcon->interface_str = cil_strpool_get(parse_current->next->data);
+	netifcon->interface_str = parse_current->next->data;
 
 	if (parse_current->next->next->cl_head == NULL) {
-		netifcon->if_context_str = cil_strpool_get(parse_current->next->next->data);
+		netifcon->if_context_str = parse_current->next->next->data;
 	} else {
 		cil_context_init(&netifcon->if_context);
 
@@ -4382,7 +4192,7 @@ int cil_gen_netifcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	}
 
 	if (parse_current->next->next->next->cl_head == NULL) {
-		netifcon->packet_context_str = cil_strpool_get(parse_current->next->next->next->data);
+		netifcon->packet_context_str = parse_current->next->next->next->data;
 	} else {
 		cil_context_init(&netifcon->packet_context);
 
@@ -4410,19 +4220,11 @@ void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 		return;
 	}
 
-	if (netifcon->interface_str != NULL) {
-		cil_strpool_release(netifcon->interface_str);
-	}
-
-	if (netifcon->if_context_str != NULL) {
-		cil_strpool_release(netifcon->if_context_str);
-	} else if (netifcon->if_context != NULL) {
+	if (netifcon->if_context != NULL) {
 		cil_destroy_context(netifcon->if_context);
 	}
 
-	if (netifcon->packet_context_str != NULL) {
-		cil_strpool_release(netifcon->packet_context_str);
-	} else if (netifcon->packet_context != NULL) {
+	if (netifcon->packet_context != NULL) {
 		cil_destroy_context(netifcon->packet_context);
 	}
 
@@ -4458,7 +4260,7 @@ int cil_gen_pirqcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	if (parse_current->next->next->cl_head == NULL) {
-		pirqcon->context_str = cil_strpool_get(parse_current->next->next->data);
+		pirqcon->context_str = parse_current->next->next->data;
 	} else {
 		cil_context_init(&pirqcon->context);
 
@@ -4486,9 +4288,7 @@ void cil_destroy_pirqcon(struct cil_pirqcon *pirqcon)
 		return;
 	}
 
-	if (pirqcon->context_str != NULL) {
-		cil_strpool_release(pirqcon->context_str);
-	} else if (pirqcon->context != NULL) {
+	if (pirqcon->context != NULL) {
 		cil_destroy_context(pirqcon->context);
 	}
 
@@ -4546,7 +4346,7 @@ int cil_gen_iomemcon(struct cil_db *db, struct cil_tree_node *parse_current, str
 	}
 
 	if (parse_current->next->next->cl_head == NULL ) {
-		iomemcon->context_str = cil_strpool_get(parse_current->next->next->data);
+		iomemcon->context_str = parse_current->next->next->data;
 	} else {
 		cil_context_init(&iomemcon->context);
 
@@ -4574,9 +4374,7 @@ void cil_destroy_iomemcon(struct cil_iomemcon *iomemcon)
 		return;
 	}
 
-	if (iomemcon->context_str != NULL) {
-		cil_strpool_release(iomemcon->context_str);
-	} else if (iomemcon->context != NULL) {
+	if (iomemcon->context != NULL) {
 		cil_destroy_context(iomemcon->context);
 	}
 
@@ -4634,7 +4432,7 @@ int cil_gen_ioportcon(struct cil_db *db, struct cil_tree_node *parse_current, st
 	}
 
 	if (parse_current->next->next->cl_head == NULL ) {
-		ioportcon->context_str = cil_strpool_get(parse_current->next->next->data);
+		ioportcon->context_str = parse_current->next->next->data;
 	} else {
 		cil_context_init(&ioportcon->context);
 
@@ -4662,9 +4460,7 @@ void cil_destroy_ioportcon(struct cil_ioportcon *ioportcon)
 		return;
 	}
 
-	if (ioportcon->context_str != NULL) {
-		cil_strpool_release(ioportcon->context_str);
-	} else if (ioportcon->context != NULL) {
+	if (ioportcon->context != NULL) {
 		cil_destroy_context(ioportcon->context);
 	}
 
@@ -4700,7 +4496,7 @@ int cil_gen_pcidevicecon(struct cil_db *db, struct cil_tree_node *parse_current,
 	}
 
 	if (parse_current->next->next->cl_head == NULL) {
-		pcidevicecon->context_str = cil_strpool_get(parse_current->next->next->data);
+		pcidevicecon->context_str = parse_current->next->next->data;
 	} else {
 		cil_context_init(&pcidevicecon->context);
 
@@ -4728,9 +4524,7 @@ void cil_destroy_pcidevicecon(struct cil_pcidevicecon *pcidevicecon)
 		return;
 	}
 
-	if (pcidevicecon->context_str != NULL) {
-		cil_strpool_release(pcidevicecon->context_str);
-	} else if (pcidevicecon->context != NULL) {
+	if (pcidevicecon->context != NULL) {
 		cil_destroy_context(pcidevicecon->context);
 	}
 
@@ -4775,10 +4569,10 @@ int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	fsuse->fs_str = cil_strpool_get(parse_current->next->next->data);
+	fsuse->fs_str = parse_current->next->next->data;
 
 	if (parse_current->next->next->next->cl_head == NULL) {
-		fsuse->context_str = cil_strpool_get(parse_current->next->next->next->data);
+		fsuse->context_str = parse_current->next->next->next->data;
 	} else {
 		cil_context_init(&fsuse->context);
 
@@ -4806,13 +4600,7 @@ void cil_destroy_fsuse(struct cil_fsuse *fsuse)
 		return;
 	}
 
-	if (fsuse->fs_str != NULL) {
-		cil_strpool_release(fsuse->fs_str);
-	}
-
-	if (fsuse->context_str != NULL) {
-		cil_strpool_release(fsuse->context_str);
-	} else if (fsuse->context != NULL) {
+	if (fsuse->context != NULL) {
 		cil_destroy_context(fsuse->context);
 	}
 
@@ -4823,10 +4611,6 @@ void cil_destroy_param(struct cil_param *param)
 {
 	if (param == NULL) {
 		return;
-	}
-
-	if (param->str != NULL) {
-		cil_strpool_release(param->str);
 	}
 
 	free(param);
@@ -4919,7 +4703,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 			goto exit;
 		}
 
-		param->str =  cil_strpool_get(current_item->cl_head->next->data);
+		param->str =  current_item->cl_head->next->data;
 
 		rc = __cil_verify_name(param->str);
 		if (rc != SEPOL_OK) {
@@ -5008,7 +4792,7 @@ int cil_gen_call(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	cil_call_init(&call);
 
-	call->macro_str = cil_strpool_get(parse_current->next->data);
+	call->macro_str = parse_current->next->data;
 
 	if (parse_current->next->next != NULL) {
 		cil_tree_init(&call->args_tree);
@@ -5033,10 +4817,6 @@ void cil_destroy_call(struct cil_call *call)
 		return;
 	}
 
-	if (call->macro_str != NULL) {
-		cil_strpool_release(call->macro_str);
-	}
-
 	call->macro = NULL;
 
 	if (call->args_tree != NULL) {
@@ -5057,7 +4837,6 @@ void cil_destroy_args(struct cil_args *args)
 	}
 
 	if (args->arg_str != NULL) {
-		cil_strpool_release(args->arg_str);
 		args->arg_str = NULL;
 	} else if (args->arg != NULL) {
 		struct cil_tree_node *node = args->arg->nodes->head->data;
@@ -5327,7 +5106,7 @@ int cil_fill_level(struct cil_tree_node *curr, struct cil_level *level)
 		goto exit;
 	}
 
-	level->sens_str = cil_strpool_get(curr->data);
+	level->sens_str = curr->data;
 	if (curr->next != NULL) {
 		rc = cil_fill_cats(curr->next, &level->cats);
 		if (rc != SEPOL_OK) {
@@ -5391,8 +5170,8 @@ int cil_gen_bounds(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 	cil_bounds_init(&bounds);
 
-	bounds->parent_str = cil_strpool_get(parse_current->next->data);
-	bounds->child_str = cil_strpool_get(parse_current->next->next->data);
+	bounds->parent_str = parse_current->next->data;
+	bounds->child_str = parse_current->next->next->data;
 
 	ast_node->data = bounds;
 
@@ -5425,9 +5204,6 @@ void cil_destroy_bounds(struct cil_bounds *bounds)
 		return;
 	}
 
-	cil_strpool_release(bounds->parent_str);
-	cil_strpool_release(bounds->child_str);
-
 	free(bounds);
 }
 
@@ -5455,7 +5231,7 @@ int cil_gen_default(struct cil_tree_node *parse_current, struct cil_tree_node *a
 
 	if (parse_current->next->cl_head == NULL) {
 		cil_list_init(&def->class_strs, CIL_CLASS);
-		cil_list_append(def->class_strs, CIL_STRING, cil_strpool_get(parse_current->next->data));
+		cil_list_append(def->class_strs, CIL_STRING, parse_current->next->data);
 		rc = SEPOL_OK;
 	} else {
 		rc = cil_fill_list(parse_current->next->cl_head, CIL_CLASS, &def->class_strs);
@@ -5521,7 +5297,7 @@ int cil_gen_defaultrange(struct cil_tree_node *parse_current, struct cil_tree_no
 
 	if (parse_current->next->cl_head == NULL) {
 		cil_list_init(&def->class_strs, CIL_CLASS);
-		cil_list_append(def->class_strs, CIL_STRING, cil_strpool_get(parse_current->next->data));
+		cil_list_append(def->class_strs, CIL_STRING, parse_current->next->data);
 		rc = SEPOL_OK;
 	} else {
 		rc = cil_fill_list(parse_current->next->cl_head, CIL_CLASS, &def->class_strs);

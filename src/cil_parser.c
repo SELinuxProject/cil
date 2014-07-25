@@ -93,9 +93,9 @@ int cil_parser(char *path, char *buffer, uint32_t size, struct cil_tree **parse_
 			item->parent = current;
 			if (tok.type == QSTRING) {
 				tok.value[strlen(tok.value) - 1] = '\0';
-				item->data = cil_strpool_get(tok.value + 1);
+				item->data = cil_strpool_add(tok.value + 1);
 			} else {
-				item->data = cil_strpool_get(tok.value);
+				item->data = cil_strpool_add(tok.value);
 			}
 			item->flavor = CIL_NODE;
 			item->line = tok.line;

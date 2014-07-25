@@ -56,7 +56,7 @@ void cil_copy_list(struct cil_list *data, struct cil_list **copy)
 	cil_list_for_each(orig_item, data) {
 		switch (orig_item->flavor) {
 		case CIL_STRING:
-			cil_list_append(new, CIL_STRING, cil_strpool_get(orig_item->data));
+			cil_list_append(new, CIL_STRING, orig_item->data);
 			break;
 		case CIL_LIST: {
 			struct cil_list *new_sub = NULL;
@@ -78,7 +78,7 @@ int cil_copy_node(__attribute__((unused)) struct cil_db *db, void *data, void **
 	char *new = NULL;
 
 	if (data != NULL) {
-		new = cil_strpool_get(data);
+		new = data;
 	}
 	*copy = new;
 
@@ -111,7 +111,7 @@ int cil_copy_blockabstract(__attribute__((unused)) struct cil_db *db, void *data
 
 	cil_blockabstract_init(&new);
 
-	new->block_str = cil_strpool_get(orig->block_str);
+	new->block_str = orig->block_str;
 
 	*copy = new;
 
@@ -125,7 +125,7 @@ int cil_copy_blockinherit(__attribute__((unused)) struct cil_db *db, void *data,
 
 	cil_blockinherit_init(&new);
 
-	new->block_str = cil_strpool_get(orig->block_str);
+	new->block_str = orig->block_str;
 
 	*copy = new;
 
@@ -171,14 +171,14 @@ int cil_copy_perm(__attribute__((unused)) struct cil_db *db, void *data, void **
 void cil_copy_classperms(struct cil_classperms *orig, struct cil_classperms **new)
 {
 	cil_classperms_init(new);
-	(*new)->class_str = cil_strpool_get(orig->class_str);
+	(*new)->class_str = orig->class_str;
 	cil_copy_list(orig->perm_strs, &((*new)->perm_strs));
 }
 
 void cil_copy_classperms_set(struct cil_classperms_set *orig, struct cil_classperms_set **new)
 {
 	cil_classperms_set_init(new);
-	(*new)->set_str = cil_strpool_get(orig->set_str);
+	(*new)->set_str = orig->set_str;
 }
 
 void cil_copy_classperms_list(struct cil_list *orig, struct cil_list **new)
@@ -210,8 +210,8 @@ int cil_copy_classmapping(__attribute__((unused)) struct cil_db *db, void *data,
 
 	cil_classmapping_init(&new);
 
-	new->map_class_str = cil_strpool_get(orig->map_class_str);
-	new->map_perm_str = cil_strpool_get(orig->map_perm_str);
+	new->map_class_str = orig->map_class_str;
+	new->map_perm_str = orig->map_perm_str;
 
 	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
@@ -284,7 +284,7 @@ int cil_copy_classpermissionset(__attribute__((unused)) struct cil_db *db, void 
 	struct cil_classpermissionset *orig = data;
 	struct cil_classpermissionset *new = NULL;
 
-	new->set_str = cil_strpool_get(orig->set_str);
+	new->set_str = orig->set_str;
 
 	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
@@ -300,8 +300,8 @@ int cil_copy_classcommon(__attribute__((unused)) struct cil_db *db, void *data, 
 
 	cil_classcommon_init(&new);
 
-	new->class_str = cil_strpool_get(orig->class_str);
-	new->common_str = cil_strpool_get(orig->common_str);
+	new->class_str = orig->class_str;
+	new->common_str = orig->common_str;
 
 	*copy = new;
 
@@ -334,7 +334,7 @@ int cil_copy_sidcontext(struct cil_db *db, void *data, void **copy, __attribute_
 	cil_sidcontext_init(&new);
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -385,8 +385,8 @@ int cil_copy_userrole(__attribute__((unused)) struct cil_db *db, void *data, voi
 
 	cil_userrole_init(&new);
 
-	new->user_str = cil_strpool_get(orig->user_str);
-	new->role_str = cil_strpool_get(orig->role_str);
+	new->user_str = orig->user_str;
+	new->role_str = orig->role_str;
 
 	*copy = new;
 
@@ -400,10 +400,10 @@ int cil_copy_userlevel(struct cil_db *db, void *data, void **copy, __attribute__
 
 	cil_userlevel_init(&new);
 
-	new->user_str = cil_strpool_get(orig->user_str);
+	new->user_str = orig->user_str;
 
 	if (orig->level_str != NULL) {
-		new->level_str = cil_strpool_get(orig->level_str);
+		new->level_str = orig->level_str;
 	} else {
 		cil_copy_fill_level(db, orig->level, &new->level);
 	}
@@ -420,10 +420,10 @@ int cil_copy_userrange(struct cil_db *db, void *data, void **copy, __attribute__
 
 	cil_userrange_init(&new);
 
-	new->user_str = cil_strpool_get(orig->user_str);
+	new->user_str = orig->user_str;
 
 	if (orig->range_str != NULL) {
-		new->range_str = cil_strpool_get(orig->range_str);
+		new->range_str = orig->range_str;
 	} else {
 		cil_levelrange_init(&new->range);
 		cil_copy_fill_levelrange(db, orig->range, new->range);
@@ -441,8 +441,8 @@ int cil_copy_userprefix(__attribute__((unused)) struct cil_db *db, void *data, v
 
 	cil_userprefix_init(&new);
 
-	new->user_str = cil_strpool_get(orig->user_str);
-	new->prefix_str = cil_strpool_get(orig->prefix_str);
+	new->user_str = orig->user_str;
+	new->prefix_str = orig->prefix_str;
 
 	*copy = new;
 
@@ -474,8 +474,8 @@ int cil_copy_roletype(__attribute__((unused)) struct cil_db *db, void *data, voi
 
 	cil_roletype_init(&new);
 
-	new->role_str = cil_strpool_get(orig->role_str);
-	new->type_str = cil_strpool_get(orig->type_str);
+	new->role_str = orig->role_str;
+	new->type_str = orig->type_str;
 
 	*copy = new;
 
@@ -507,7 +507,7 @@ int cil_copy_roleattributeset(struct cil_db *db, void *data, void **copy, __attr
 
 	cil_roleattributeset_init(&new);
 
-	new->attr_str = cil_strpool_get(orig->attr_str);
+	new->attr_str = orig->attr_str;
 	
 	cil_copy_expr(db, orig->str_expr, &new->str_expr);
 	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
@@ -524,8 +524,8 @@ int cil_copy_roleallow(__attribute__((unused)) struct cil_db *db, void *data, vo
 
 	cil_roleallow_init(&new);
 
-	new->src_str = cil_strpool_get(orig->src_str);
-	new->tgt_str = cil_strpool_get(orig->tgt_str);
+	new->src_str = orig->src_str;
+	new->tgt_str = orig->tgt_str;
 
 	*copy = new;
 
@@ -557,7 +557,7 @@ int cil_copy_typepermissive(__attribute__((unused)) struct cil_db *db, void *dat
 
 	cil_typepermissive_init(&new);
 
-	new->type_str = cil_strpool_get(orig->type_str);
+	new->type_str = orig->type_str;
 
 	*copy = new;
 
@@ -589,7 +589,7 @@ int cil_copy_typeattributeset(struct cil_db *db, void *data, void **copy, __attr
 
 	cil_typeattributeset_init(&new);
 
-	new->attr_str = cil_strpool_get(orig->attr_str);
+	new->attr_str = orig->attr_str;
 
 	cil_copy_expr(db, orig->str_expr, &new->str_expr);
 	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
@@ -626,8 +626,8 @@ int cil_copy_aliasactual(__attribute__((unused)) struct cil_db *db, void *data, 
 
 	cil_aliasactual_init(&new);
 
-	new->alias_str = cil_strpool_get(orig->alias_str);
-	new->actual_str = cil_strpool_get(orig->actual_str);
+	new->alias_str = orig->alias_str;
+	new->actual_str = orig->actual_str;
 
 	*copy = new;
 
@@ -641,10 +641,10 @@ int cil_copy_roletransition(__attribute__((unused)) struct cil_db *db, void *dat
 
 	cil_roletransition_init(&new);
 
-	new->src_str = cil_strpool_get(orig->src_str);
-	new->tgt_str = cil_strpool_get(orig->tgt_str);
-	new->obj_str = cil_strpool_get(orig->obj_str);
-	new->result_str = cil_strpool_get(orig->result_str);
+	new->src_str = orig->src_str;
+	new->tgt_str = orig->tgt_str;
+	new->obj_str = orig->obj_str;
+	new->result_str = orig->result_str;
 
 	*copy = new;
 
@@ -658,11 +658,11 @@ int cil_copy_nametypetransition(__attribute__((unused)) struct cil_db *db, void 
 
 	cil_nametypetransition_init(&new);
 
-	new->src_str = cil_strpool_get(orig->src_str);
-	new->tgt_str = cil_strpool_get(orig->tgt_str);
-	new->obj_str = cil_strpool_get(orig->obj_str);
-	new->name_str = cil_strpool_get(orig->name_str);
-	new->result_str = cil_strpool_get(orig->result_str);
+	new->src_str = orig->src_str;
+	new->tgt_str = orig->tgt_str;
+	new->obj_str = orig->obj_str;
+	new->name_str = orig->name_str;
+	new->result_str = orig->result_str;
 
 
 	*copy = new;
@@ -677,12 +677,12 @@ int cil_copy_rangetransition(struct cil_db *db, void *data, void **copy, __attri
 
 	cil_rangetransition_init(&new);
 
-	new->src_str = cil_strpool_get(orig->src_str);
-	new->exec_str = cil_strpool_get(orig->exec_str);
-	new->obj_str = cil_strpool_get(orig->obj_str);
+	new->src_str = orig->src_str;
+	new->exec_str = orig->exec_str;
+	new->obj_str = orig->obj_str;
 
 	if (orig->range_str != NULL) {
-		new->range_str = cil_strpool_get(orig->range_str);
+		new->range_str = orig->range_str;
 	} else {
 		cil_levelrange_init(&new->range);
 		cil_copy_fill_levelrange(db, orig->range, new->range);
@@ -741,8 +741,8 @@ int cil_copy_avrule(__attribute__((unused)) struct cil_db *db, void *data, void 
 	cil_avrule_init(&new);
 
 	new->rule_kind = orig->rule_kind;
-	new->src_str = cil_strpool_get(orig->src_str);
-	new->tgt_str = cil_strpool_get(orig->tgt_str);
+	new->src_str = orig->src_str;
+	new->tgt_str = orig->tgt_str;
 	cil_copy_classperms_list(orig->classperms, &new->classperms);
 
 	*copy = new;
@@ -758,10 +758,10 @@ int cil_copy_type_rule(__attribute__((unused)) struct cil_db *db, void *data, vo
 	cil_type_rule_init(&new);
 
 	new->rule_kind = orig->rule_kind;
-	new->src_str = cil_strpool_get(orig->src_str);
-	new->tgt_str = cil_strpool_get(orig->tgt_str);
-	new->obj_str = cil_strpool_get(orig->obj_str);
-	new->result_str = cil_strpool_get(orig->result_str);
+	new->src_str = orig->src_str;
+	new->tgt_str = orig->tgt_str;
+	new->obj_str = orig->obj_str;
+	new->result_str = orig->result_str;
 
 	*copy = new;
 
@@ -840,7 +840,7 @@ int cil_copy_senscat(struct cil_db *db, void *data, void **copy, __attribute__((
 
 	cil_senscat_init(&new);
 
-	new->sens_str = cil_strpool_get(orig->sens_str);
+	new->sens_str = orig->sens_str;
 
 	cil_copy_cats(db, orig->cats, &new->cats);
 
@@ -883,7 +883,7 @@ void cil_copy_fill_level(struct cil_db *db, struct cil_level *orig, struct cil_l
 {
 	cil_level_init(new);
 
-	(*new)->sens_str = cil_strpool_get(orig->sens_str);
+	(*new)->sens_str = orig->sens_str;
 
 	if (orig->cats != NULL) {
 		cil_copy_cats(db, orig->cats, &(*new)->cats);
@@ -915,13 +915,13 @@ int cil_copy_level(struct cil_db *db, void *data, void **copy, symtab_t *symtab)
 void cil_copy_fill_levelrange(struct cil_db *db, struct cil_levelrange *data, struct cil_levelrange *new)
 {
 	if (data->low_str != NULL) {
-		new->low_str = cil_strpool_get(data->low_str);
+		new->low_str = data->low_str;
 	} else {
 		cil_copy_fill_level(db, data->low, &new->low);
 	}
 
 	if (data->high_str != NULL) {
-		new->high_str = cil_strpool_get(data->high_str);
+		new->high_str = data->high_str;
 	} else {
 		cil_copy_fill_level(db, data->high, &new->high);
 	}
@@ -952,12 +952,12 @@ int cil_copy_levelrange(struct cil_db *db, void *data, void **copy, symtab_t *sy
 
 void cil_copy_fill_context(struct cil_db *db, struct cil_context *data, struct cil_context *new)
 {
-	new->user_str = cil_strpool_get(data->user_str);
-	new->role_str = cil_strpool_get(data->role_str);
-	new->type_str = cil_strpool_get(data->type_str);
+	new->user_str = data->user_str;
+	new->role_str = data->role_str;
+	new->type_str = data->type_str;
 
 	if (data->range_str != NULL) {
-		new->range_str = cil_strpool_get(data->range_str);
+		new->range_str = data->range_str;
 	} else {
 		cil_levelrange_init(&new->range);
 		cil_copy_fill_levelrange(db, data->range, new->range);
@@ -994,17 +994,17 @@ int cil_copy_netifcon(struct cil_db *db, void *data, void **copy, __attribute__(
 
 	cil_netifcon_init(&new);
 
-	new->interface_str = cil_strpool_get(orig->interface_str);
+	new->interface_str = orig->interface_str;
 
 	if (orig->if_context_str != NULL) {
-		new->if_context_str = cil_strpool_get(orig->if_context_str);
+		new->if_context_str = orig->if_context_str;
 	} else {
 		cil_context_init(&new->if_context);
 		cil_copy_fill_context(db, orig->if_context, new->if_context);
 	}
 
 	if (orig->packet_context_str != NULL) {
-		new->packet_context_str = cil_strpool_get(orig->packet_context_str);
+		new->packet_context_str = orig->packet_context_str;
 	} else {
 		cil_context_init(&new->packet_context);
 		cil_copy_fill_context(db, orig->packet_context, new->packet_context);
@@ -1022,11 +1022,11 @@ int cil_copy_genfscon(struct cil_db *db, void *data, void **copy, __attribute__(
 
 	cil_genfscon_init(&new);
 
-	new->fs_str = cil_strpool_get(orig->fs_str);
-	new->path_str = cil_strpool_get(orig->path_str);
+	new->fs_str = orig->fs_str;
+	new->path_str = orig->path_str;
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1044,11 +1044,11 @@ int cil_copy_filecon(struct cil_db *db, void *data, void **copy, __attribute__((
 
 	cil_filecon_init(&new);
 
-	new->path_str = cil_strpool_get(orig->path_str);
+	new->path_str = orig->path_str;
 	new->type = orig->type;
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1067,21 +1067,21 @@ int cil_copy_nodecon(struct cil_db *db, void *data, void **copy, __attribute__((
 	cil_nodecon_init(&new);
 
 	if (orig->addr_str != NULL) {
-		new->addr_str = cil_strpool_get(orig->addr_str);
+		new->addr_str = orig->addr_str;
 	} else {
 		cil_ipaddr_init(&new->addr);
 		cil_copy_fill_ipaddr(orig->addr, new->addr);
 	}
 
 	if (orig->mask_str != NULL) {
-		new->mask_str = cil_strpool_get(orig->mask_str);
+		new->mask_str = orig->mask_str;
 	} else {
 		cil_ipaddr_init(&new->mask);
 		cil_copy_fill_ipaddr(orig->mask, new->mask);
 	}
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1104,7 +1104,7 @@ int cil_copy_portcon(struct cil_db *db, void *data, void **copy, __attribute__((
 	new->port_high = orig->port_high;
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1125,7 +1125,7 @@ int cil_copy_pirqcon(struct cil_db *db, void *data, void **copy, __attribute__((
 	new->pirq = orig->pirq;
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1147,7 +1147,7 @@ int cil_copy_iomemcon(struct cil_db *db, void *data, void **copy, __attribute__(
 	new->iomem_high = orig->iomem_high;
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1169,7 +1169,7 @@ int cil_copy_ioportcon(struct cil_db *db, void *data, void **copy, __attribute__
 	new->ioport_high = orig->ioport_high;
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1190,7 +1190,7 @@ int cil_copy_pcidevicecon(struct cil_db *db, void *data, void **copy, __attribut
 	new->dev = orig->dev;
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1209,10 +1209,10 @@ int cil_copy_fsuse(struct cil_db *db, void *data, void **copy, __attribute__((un
 	cil_fsuse_init(&new);
 
 	new->type = orig->type;
-	new->fs_str = cil_strpool_get(orig->fs_str);
+	new->fs_str = orig->fs_str;
 
 	if (orig->context_str != NULL) {
-		new->context_str = cil_strpool_get(orig->context_str);
+		new->context_str = orig->context_str;
 	} else {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
@@ -1243,7 +1243,7 @@ int cil_copy_expr(struct cil_db *db, struct cil_list *orig, struct cil_list **ne
 			break;
 		}
 		case CIL_STRING:
-			cil_list_append(*new, CIL_STRING, cil_strpool_get(curr->data));
+			cil_list_append(*new, CIL_STRING, curr->data);
 			break;
 		case CIL_DATUM:
 			cil_list_append(*new, curr->flavor, curr->data);
@@ -1287,7 +1287,7 @@ int cil_copy_validatetrans(struct cil_db *db, void *data, void **copy, __attribu
 
 	cil_validatetrans_init(&new);
 
-	new->class_str = cil_strpool_get(orig->class_str);
+	new->class_str = orig->class_str;
 
 	cil_copy_expr(db, orig->str_expr, &new->str_expr);
 	cil_copy_expr(db, orig->datum_expr, &new->datum_expr);
@@ -1305,7 +1305,7 @@ int cil_copy_call(struct cil_db *db, void *data, void **copy, __attribute__((unu
 
 	cil_call_init(&new);
 
-	new->macro_str = cil_strpool_get(orig->macro_str);
+	new->macro_str = orig->macro_str;
 
 	if (orig->args_tree != NULL) {
 		cil_tree_init(&new->args_tree);
@@ -1546,8 +1546,8 @@ int cil_copy_bounds(__attribute__((unused)) struct cil_db *db, void *data, void 
 
 	cil_bounds_init(&new);
 
-	new->parent_str = cil_strpool_get(orig->parent_str);
-	new->child_str = cil_strpool_get(orig->child_str);
+	new->parent_str = orig->parent_str;
+	new->child_str = orig->child_str;
 
 	*copy = new;
 

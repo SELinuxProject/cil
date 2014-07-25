@@ -38,7 +38,6 @@
 
 struct cil_strpool_entry {
 	char *str;
-	int ref;
 };
 
 static hashtab_t cil_strpool_tab = NULL;
@@ -65,7 +64,7 @@ static int cil_strpool_compare(hashtab_t h __attribute__ ((unused)), hashtab_key
 	return strcmp(keyp1, keyp2);
 }
 
-char *cil_strpool_get(char *str)
+char *cil_strpool_add(char *str)
 {
 	struct cil_strpool_entry *strpool_ref = NULL;
 
@@ -73,37 +72,21 @@ char *cil_strpool_get(char *str)
 	if (strpool_ref == NULL) {
 		strpool_ref = cil_malloc(sizeof(*strpool_ref));
 		strpool_ref->str = cil_strdup(str);
-		strpool_ref->ref = 0;
 		int rc = hashtab_insert(cil_strpool_tab, (hashtab_key_t)strpool_ref->str, strpool_ref);
 		if (rc != SEPOL_OK) {
 			(*cil_mem_error_handler)();
 		}
 	}
-	strpool_ref->ref++;
 
 	return strpool_ref->str;
 }
 
-static void cil_strpool_entry_destroy(hashtab_key_t k __attribute__ ((unused)), hashtab_datum_t d, void *args __attribute__ ((unused)))
+static int cil_strpool_entry_destroy(hashtab_key_t k __attribute__ ((unused)), hashtab_datum_t d, void *args __attribute__ ((unused)))
 {
 	struct cil_strpool_entry *strpool_ref = (struct cil_strpool_entry*)d;
 	free(strpool_ref->str);
 	free(strpool_ref);
-}
-
-void cil_strpool_release(char *str)
-{
-	struct cil_strpool_entry *strpool_ref = NULL;
-
-	if (str == NULL) {
-		return;
-	}
-
-	strpool_ref = hashtab_search(cil_strpool_tab, (hashtab_key_t)str);
-	strpool_ref->ref--;
-	if (strpool_ref->ref == 0) {
-		hashtab_remove(cil_strpool_tab, (hashtab_key_t)str, cil_strpool_entry_destroy, NULL);
-	}
+	return SEPOL_OK;
 }
 
 void cil_strpool_init(void)
@@ -116,5 +99,6 @@ void cil_strpool_init(void)
 
 void cil_strpool_destroy(void)
 {
+	hashtab_map(cil_strpool_tab, cil_strpool_entry_destroy, NULL);
 	hashtab_destroy(cil_strpool_tab);
 }

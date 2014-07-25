@@ -87,7 +87,7 @@ void cil_db_init(struct cil_db **db)
 	cil_list_init(&(*db)->names, CIL_LIST_ITEM);
 
 	cil_type_init(&(*db)->selftype);
-	(*db)->selftype->datum.name = cil_strpool_get(CIL_KEY_SELF);
+	(*db)->selftype->datum.name = CIL_KEY_SELF;
 
 	(*db)->num_types = 0;
 	(*db)->num_roles = 0;
@@ -240,10 +240,8 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 		free(*data);
 		break;
 	case CIL_NODE:
-		cil_strpool_release(*data);
 		break;
 	case CIL_STRING:
-		cil_strpool_release(*data);
 		break;
 	case CIL_DATUM:
 		break;
