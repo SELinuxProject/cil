@@ -86,6 +86,8 @@ static void cil_init_keys(void)
 	CIL_KEY_CONDTRUE = cil_strpool_add("true");
 	CIL_KEY_CONDFALSE = cil_strpool_add("false");
 	CIL_KEY_SELF = cil_strpool_add("self");
+	CIL_KEY_OBJECT_R = cil_strpool_add("object_r");
+	CIL_KEY_STAR = cil_strpool_add("*");
 	CIL_KEY_UDP = cil_strpool_add("udp");
 	CIL_KEY_TCP = cil_strpool_add("tcp");
 	CIL_KEY_AUDITALLOW = cil_strpool_add("auditallow");

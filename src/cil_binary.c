@@ -407,14 +407,14 @@ int cil_role_to_policydb(policydb_t *pdb, struct cil_role *cil_role)
 	role_datum_t *sepol_role = cil_malloc(sizeof(*sepol_role));
 	role_datum_init(sepol_role);
 
-	key = cil_strdup(cil_role->datum.name);
-	if (!strcmp(key, "object_r")) {
+	if (cil_role->datum.name == CIL_KEY_OBJECT_R) {
 		/* special case
 		 * object_r defaults to 1 in libsepol symtab */
 		rc = SEPOL_OK;
 		goto exit;
 	}
 
+	key = cil_strdup(cil_role->datum.name);
 	rc = symtab_insert(pdb, SYM_ROLES, (hashtab_key_t)key, sepol_role, SCOPE_DECL, 0, &value);
 	if (rc != SEPOL_OK) {
 		goto exit;
@@ -1149,7 +1149,7 @@ int __cil_typetransition_to_avtab(policydb_t *pdb, const struct cil_db *db, stru
 	char *name = DATUM(typetrans->name)->name;
 	uint32_t *otype = NULL;
 
-	if (!strcmp(name, "*")) {
+	if (name == CIL_KEY_STAR) {
 		struct cil_type_rule trans;
 		trans.rule_kind = CIL_TYPE_TRANSITION;
 		trans.src = typetrans->src;
@@ -1335,7 +1335,7 @@ static void __cil_neverallow_handle(struct cil_list *neverallows, struct cil_sym
 
 static int __cil_is_type_match(enum cil_flavor f1, struct cil_symtab_datum *t1, enum cil_flavor f2, struct cil_symtab_datum *t2)
 {
-	if (strcmp(t1->name, t2->name) == 0) {
+	if (t1->name == t2->name) {
 		return CIL_TRUE;
 	} else if (f1 == CIL_TYPEATTRIBUTE && f2 != CIL_TYPEATTRIBUTE) {
 		struct cil_typeattribute *a = (struct cil_typeattribute *)t1;
@@ -1512,7 +1512,7 @@ int __cil_avrule_to_avtab(policydb_t *pdb, const struct cil_db *db, struct cil_a
 	src = cil_avrule->src;
 	tgt = cil_avrule->tgt;
 
-	if (!strcmp(tgt->name, CIL_KEY_SELF)) {
+	if (tgt->name == CIL_KEY_SELF) {
 		ebitmap_t type_bitmap;
 		ebitmap_node_t *tnode;
 		unsigned int i;
@@ -1565,7 +1565,7 @@ int __cil_cond_to_policydb_helper(struct cil_tree_node *node, __attribute__((unu
 	switch (flavor) {
 	case CIL_NAMETYPETRANSITION:
 		cil_typetrans = (struct cil_nametypetransition*)node->data;
-		if (strcmp(DATUM(cil_typetrans->name)->name,"*") != 0) {
+		if (DATUM(cil_typetrans->name)->name != CIL_KEY_STAR) {
 			cil_log(CIL_ERR, "typetransition with file name not allowed within a booleanif block.\n");
 			cil_log(CIL_ERR,"Invalid typetransition statement at line %d of %s\n", 
 			node->line, node->path);

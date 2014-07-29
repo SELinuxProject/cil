@@ -1363,7 +1363,7 @@ int cil_copy_macro(__attribute__((unused)) struct cil_db *db, void *data, void *
 
 				param_orig = (struct cil_param*)curr_orig->data;
 				param_new = (struct cil_param*)curr_new->data;
-				if (strcmp(param_orig->str, param_new->str)) {
+				if (param_orig->str != param_new->str) {
 					goto exit;
 				} else if (param_orig->flavor != param_new->flavor) {
 					goto exit;
@@ -1858,7 +1858,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 					cil_list_for_each(item, param_list) {
 						param = item->data;
 						if (param->flavor == new->flavor) {
-							if (!strcmp(param->str, ((struct cil_symtab_datum*)new->data)->name)) {
+							if (param->str == ((struct cil_symtab_datum*)new->data)->name) {
 								cil_log(CIL_ERR, "%s %s shadows a macro parameter (%s line:%d)\n", cil_node_to_string(new), ((struct cil_symtab_datum*)orig->data)->name, orig->path, orig->line);
 								cil_log(CIL_ERR, "Note: macro declaration (%s line:%d)\n", namespace->path, namespace->line);
 								rc = SEPOL_ERR;

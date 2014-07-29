@@ -90,7 +90,7 @@ static struct cil_name * __cil_insert_name(struct cil_db *db, hashtab_key_t key,
 	if (macro != NULL) {
 		struct cil_list_item *item;
 		cil_list_for_each(item, macro->params) {
-			if (strcmp(((struct cil_param*)item->data)->str, key) == 0) {
+			if (((struct cil_param*)item->data)->str == key) {
 				return NULL;
 			}
 		}
@@ -293,7 +293,7 @@ int cil_resolve_avrule(struct cil_tree_node *current, void *extra_args)
 		cil_type_used(src_datum);
 	}
 		
-	if (!strcmp(rule->tgt_str, CIL_KEY_SELF)) {
+	if (rule->tgt_str == CIL_KEY_SELF) {
 		rule->tgt = db->selftype;
 	} else {
 		rc = cil_resolve_name(current, rule->tgt_str, CIL_SYM_TYPES, args, &tgt_datum);
@@ -2694,7 +2694,7 @@ int cil_resolve_name_call_args(struct cil_call *call, char *name, enum cil_sym_i
 		struct cil_args * arg = item->data;
 		rc = cil_flavor_to_symtab_index(arg->flavor, &param_index);
 		if (param_index == sym_index) {
-			if (!strcmp(name, arg->param_str)) {
+			if (name == arg->param_str) {
 				*datum = arg->arg;
 				rc = SEPOL_OK;
 				goto exit;

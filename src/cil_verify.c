@@ -1223,7 +1223,7 @@ int __cil_verify_class(struct cil_tree_node *node)
 				curr_class_perm = curr_class_perm->next) {
 				struct cil_perm *class_perm = curr_class_perm->data;
 
-				if (!strcmp(com_perm->datum.name, class_perm->datum.name)) {
+				if (com_perm->datum.name == class_perm->datum.name) {
 					cil_log(CIL_ERR, "Duplicate permissions between %s common and class declarations\n", class_perm->datum.name);
 					goto exit;
 				}

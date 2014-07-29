@@ -2966,7 +2966,7 @@ int cil_gen_typetransition(struct cil_db *db, struct cil_tree_node *parse_curren
 	s5 = NULL;
 
 	if (parse_current->next->next->next->next->next) {
-		if (strcmp(s4,"*") == 0) {
+		if (s4 == CIL_KEY_STAR) {
 			s4 = parse_current->next->next->next->next->next->data;
 		} else {
 			s5 = parse_current->next->next->next->next->next->data;
