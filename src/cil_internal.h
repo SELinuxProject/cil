@@ -72,130 +72,146 @@ enum cil_pass {
 /*
 	Keywords
 */
-#define CIL_KEY_ROOT                 "<root>"
-#define CIL_KEY_NODE                 "<node>"
-#define CIL_KEY_STRING               "string"
-#define CIL_KEY_BLOCK                "block"
-#define CIL_KEY_BLOCKINHERIT         "blockinherit"
-#define CIL_KEY_BLOCKABSTRACT        "blockabstract"
-#define CIL_KEY_IN                   "in"
-#define CIL_KEY_MACRO                "macro"
-#define CIL_KEY_CALL                 "call"
-#define CIL_KEY_OPTIONAL             "optional"
-#define CIL_KEY_BOOL                 "boolean"
-#define CIL_KEY_BOOLEANIF            "booleanif"
-#define CIL_KEY_TUNABLE              "tunable"
-#define CIL_KEY_TUNABLEIF            "tunableif"
-#define CIL_KEY_CONDTRUE             "true"
-#define CIL_KEY_CONDFALSE            "false"
-#define CIL_KEY_PERM                 "perm"
-#define CIL_KEY_COMMON               "common"
-#define CIL_KEY_CLASS                "class"
-#define CIL_KEY_CLASSORDER           "classorder"
-#define CIL_KEY_MAP_CLASS            "classmap"
-#define CIL_KEY_CLASSPERMISSION      "classpermission"
-#define CIL_KEY_CLASSCOMMON          "classcommon"
-#define CIL_KEY_CLASSMAPPING         "classmapping"
-#define CIL_KEY_CLASSPERMISSIONSET   "classpermissionset"
-#define CIL_KEY_USER                 "user"
-#define CIL_KEY_USERPREFIX           "userprefix"
-#define CIL_KEY_USERROLE             "userrole"
-#define CIL_KEY_USERLEVEL            "userlevel"
-#define CIL_KEY_USERRANGE            "userrange"
-#define CIL_KEY_USERBOUNDS           "userbounds"
-#define CIL_KEY_SELINUXUSER          "selinuxuser"
-#define CIL_KEY_SELINUXUSERDEFAULT   "selinuxuserdefault"
-#define CIL_KEY_ROLE                 "role"
-#define CIL_KEY_ROLEATTRIBUTE        "roleattribute"
-#define CIL_KEY_ROLEATTRIBUTESET     "roleattributeset"
-#define CIL_KEY_ROLETYPE             "roletype"
-#define CIL_KEY_ROLEBOUNDS           "rolebounds"
-#define CIL_KEY_TYPE                 "type"
-#define CIL_KEY_TYPEATTRIBUTE        "typeattribute"
-#define CIL_KEY_TYPEALIAS            "typealias"
-#define CIL_KEY_TYPEATTRIBUTESET     "typeattributeset"
-#define CIL_KEY_TYPEALIASACTUAL      "typealiasactual"
-#define CIL_KEY_TYPEBOUNDS           "typebounds"
-#define CIL_KEY_TYPEPERMISSIVE       "typepermissive"
-#define CIL_KEY_SENSITIVITY          "sensitivity"
-#define CIL_KEY_SENSALIAS            "sensitivityalias"
-#define CIL_KEY_SENSALIASACTUAL      "sensitivityaliasactual"
-#define CIL_KEY_SENSITIVITYORDER     "sensitivityorder"
-#define CIL_KEY_SENSCAT              "sensitivitycategory"
-#define CIL_KEY_CATEGORY             "category"
-#define CIL_KEY_CATSET               "categoryset"
-#define CIL_KEY_CATALIAS             "categoryalias"
-#define CIL_KEY_CATALIASACTUAL       "categoryaliasactual"
-#define CIL_KEY_CATORDER             "categoryorder"
-#define CIL_KEY_LEVEL                "level"
-#define CIL_KEY_LEVELRANGE           "levelrange"
-#define CIL_KEY_SID                  "sid"
-#define CIL_KEY_SIDORDER             "sidorder"
-#define CIL_KEY_NAME                 "name"
-#define CIL_KEY_ROLEALLOW            "roleallow"
-#define CIL_KEY_SELF                 "self"
-#define CIL_KEY_ALLOW                "allow"
-#define CIL_KEY_AUDITALLOW           "auditallow"
-#define CIL_KEY_DONTAUDIT            "dontaudit"
-#define CIL_KEY_NEVERALLOW           "neverallow"
-#define CIL_KEY_ROLETRANSITION       "roletransition"
-#define CIL_KEY_TYPETRANSITION       "typetransition"
-#define CIL_KEY_TYPECHANGE           "typechange"
-#define CIL_KEY_TYPEMEMBER           "typemember"
-#define CIL_KEY_RANGETRANSITION      "rangetransition"
-#define CIL_KEY_CONSTRAIN            "constrain"
-#define CIL_KEY_MLSCONSTRAIN         "mlsconstrain"
-#define CIL_KEY_VALIDATETRANS        "validatetrans"
-#define CIL_KEY_MLSVALIDATETRANS     "mlsvalidatetrans"
-#define CIL_KEY_CONTEXT              "context"
-#define CIL_KEY_IPADDR               "ipaddr"
-#define CIL_KEY_UDP                  "udp"
-#define CIL_KEY_TCP                  "tcp"
-#define CIL_KEY_SIDCONTEXT           "sidcontext"
-#define CIL_KEY_FSUSE                "fsuse"
-#define CIL_KEY_FILECON              "filecon"
-#define CIL_KEY_PORTCON              "portcon"
-#define CIL_KEY_NODECON              "nodecon"
-#define CIL_KEY_GENFSCON             "genfscon"
-#define CIL_KEY_NETIFCON             "netifcon"
-#define CIL_KEY_PIRQCON              "pirqcon"
-#define CIL_KEY_IOMEMCON             "iomemcon"
-#define CIL_KEY_IOPORTCON            "ioportcon"
-#define CIL_KEY_PCIDEVICECON         "pcidevicecon"
-#define CIL_KEY_POLICYCAP            "policycap"
-#define CIL_KEY_DEFAULTUSER          "defaultuser"
-#define CIL_KEY_DEFAULTROLE          "defaultrole"
-#define CIL_KEY_DEFAULTTYPE          "defaulttype"
-#define CIL_KEY_DEFAULTRANGE         "defaultrange"
-#define CIL_KEY_HANDLEUNKNOWN        "handleunknown"
-#define CIL_KEY_HANDLEUNKNOWN_ALLOW  "allow"
-#define CIL_KEY_HANDLEUNKNOWN_DENY   "deny"
-#define CIL_KEY_HANDLEUNKNOWN_REJECT "reject"
-#define CIL_KEY_MLS                  "mls"
-#define CIL_KEY_ALL                  "all"
-#define CIL_KEY_RANGE                "range"
-#define CIL_KEY_AND                  "and"
-#define CIL_KEY_OR                   "or"
-#define CIL_KEY_XOR                  "xor"
-#define CIL_KEY_NOT                  "not"
-#define CIL_KEY_EQ                   "eq"
-#define CIL_KEY_NEQ                  "neq"
-#define CIL_KEY_CONS_DOM             "dom"
-#define CIL_KEY_CONS_DOMBY           "domby"
-#define CIL_KEY_CONS_INCOMP          "incomp"
-#define CIL_KEY_CONS_U1              "u1"
-#define CIL_KEY_CONS_U2              "u2"
-#define CIL_KEY_CONS_U3              "u3"
-#define CIL_KEY_CONS_T1              "t1"
-#define CIL_KEY_CONS_T2              "t2"
-#define CIL_KEY_CONS_T3              "t3"
-#define CIL_KEY_CONS_R1              "r1"
-#define CIL_KEY_CONS_R2              "r2"
-#define CIL_KEY_CONS_R3              "r3"
-#define CIL_KEY_CONS_L1              "l1"
-#define CIL_KEY_CONS_L2              "l2"
-#define CIL_KEY_CONS_H1              "h1"
-#define CIL_KEY_CONS_H2              "h2"
+char *CIL_KEY_CONS_T1;
+char *CIL_KEY_CONS_T2;
+char *CIL_KEY_CONS_T3;
+char *CIL_KEY_CONS_R1;
+char *CIL_KEY_CONS_R2;
+char *CIL_KEY_CONS_R3;
+char *CIL_KEY_CONS_U1;
+char *CIL_KEY_CONS_U2;
+char *CIL_KEY_CONS_U3;
+char *CIL_KEY_CONS_L1;
+char *CIL_KEY_CONS_L2;
+char *CIL_KEY_CONS_H1;
+char *CIL_KEY_CONS_H2;
+char *CIL_KEY_AND;
+char *CIL_KEY_OR;
+char *CIL_KEY_NOT;
+char *CIL_KEY_EQ;
+char *CIL_KEY_NEQ;
+char *CIL_KEY_CONS_DOM;
+char *CIL_KEY_CONS_DOMBY;
+char *CIL_KEY_CONS_INCOMP;
+char *CIL_KEY_CONDTRUE;
+char *CIL_KEY_CONDFALSE;
+char *CIL_KEY_SELF;
+char *CIL_KEY_TCP;
+char *CIL_KEY_UDP;
+char *CIL_KEY_AUDITALLOW;
+char *CIL_KEY_TUNABLEIF;
+char *CIL_KEY_ALLOW;
+char *CIL_KEY_DONTAUDIT;
+char *CIL_KEY_TYPETRANSITION;
+char *CIL_KEY_TYPECHANGE;
+char *CIL_KEY_CALL;
+char *CIL_KEY_TUNABLE;
+char *CIL_KEY_XOR;
+char *CIL_KEY_ALL;
+char *CIL_KEY_RANGE;
+char *CIL_KEY_GLOB;
+char *CIL_KEY_FILE;
+char *CIL_KEY_DIR;
+char *CIL_KEY_CHAR;
+char *CIL_KEY_BLOCK;
+char *CIL_KEY_SOCKET;
+char *CIL_KEY_PIPE;
+char *CIL_KEY_SYMLINK;
+char *CIL_KEY_ANY;
+char *CIL_KEY_XATTR;
+char *CIL_KEY_TASK;
+char *CIL_KEY_TRANS;
+char *CIL_KEY_TYPE;
+char *CIL_KEY_ROLE;
+char *CIL_KEY_USER;
+char *CIL_KEY_SENSITIVITY;
+char *CIL_KEY_CATEGORY;
+char *CIL_KEY_CATSET;
+char *CIL_KEY_LEVEL;
+char *CIL_KEY_LEVELRANGE;
+char *CIL_KEY_CLASS;
+char *CIL_KEY_IPADDR;
+char *CIL_KEY_MAP_CLASS;
+char *CIL_KEY_CLASSPERMISSION;
+char *CIL_KEY_BOOL;
+char *CIL_KEY_STRING;
+char *CIL_KEY_NAME;
+char *CIL_KEY_SOURCE;
+char *CIL_KEY_TARGET;
+char *CIL_KEY_LOW;
+char *CIL_KEY_HIGH;
+char *CIL_KEY_LOW_HIGH;
+char *CIL_KEY_HANDLEUNKNOWN;
+char *CIL_KEY_HANDLEUNKNOWN_ALLOW;
+char *CIL_KEY_HANDLEUNKNOWN_DENY;
+char *CIL_KEY_HANDLEUNKNOWN_REJECT;
+char *CIL_KEY_MACRO;
+char *CIL_KEY_IN;
+char *CIL_KEY_MLS;
+char *CIL_KEY_DEFAULTRANGE;
+char *CIL_KEY_BLOCKINHERIT;
+char *CIL_KEY_BLOCKABSTRACT;
+char *CIL_KEY_CLASSORDER;
+char *CIL_KEY_CLASSMAPPING;
+char *CIL_KEY_CLASSPERMISSIONSET;
+char *CIL_KEY_COMMON;
+char *CIL_KEY_CLASSCOMMON;
+char *CIL_KEY_SID;
+char *CIL_KEY_SIDCONTEXT;
+char *CIL_KEY_SIDORDER;
+char *CIL_KEY_USERLEVEL;
+char *CIL_KEY_USERRANGE;
+char *CIL_KEY_USERBOUNDS;
+char *CIL_KEY_USERPREFIX;
+char *CIL_KEY_SELINUXUSER;
+char *CIL_KEY_SELINUXUSERDEFAULT;
+char *CIL_KEY_TYPEATTRIBUTE;
+char *CIL_KEY_TYPEATTRIBUTESET;
+char *CIL_KEY_TYPEALIAS;
+char *CIL_KEY_TYPEALIASACTUAL;
+char *CIL_KEY_TYPEBOUNDS;
+char *CIL_KEY_TYPEPERMISSIVE;
+char *CIL_KEY_RANGETRANSITION;
+char *CIL_KEY_USERROLE;
+char *CIL_KEY_ROLETYPE;
+char *CIL_KEY_ROLETRANSITION;
+char *CIL_KEY_ROLEALLOW;
+char *CIL_KEY_ROLEATTRIBUTE;
+char *CIL_KEY_ROLEATTRIBUTESET;
+char *CIL_KEY_ROLEBOUNDS;
+char *CIL_KEY_BOOLEANIF;
+char *CIL_KEY_NEVERALLOW;
+char *CIL_KEY_TYPEMEMBER;
+char *CIL_KEY_SENSALIAS;
+char *CIL_KEY_SENSALIASACTUAL;
+char *CIL_KEY_CATALIAS;
+char *CIL_KEY_CATALIASACTUAL;
+char *CIL_KEY_CATORDER;
+char *CIL_KEY_SENSITIVITYORDER;
+char *CIL_KEY_SENSCAT;
+char *CIL_KEY_CONSTRAIN;
+char *CIL_KEY_MLSCONSTRAIN;
+char *CIL_KEY_VALIDATETRANS;
+char *CIL_KEY_MLSVALIDATETRANS;
+char *CIL_KEY_CONTEXT;
+char *CIL_KEY_FILECON;
+char *CIL_KEY_PORTCON;
+char *CIL_KEY_NODECON;
+char *CIL_KEY_GENFSCON;
+char *CIL_KEY_NETIFCON;
+char *CIL_KEY_PIRQCON;
+char *CIL_KEY_IOMEMCON;
+char *CIL_KEY_IOPORTCON;
+char *CIL_KEY_PCIDEVICECON;
+char *CIL_KEY_FSUSE;
+char *CIL_KEY_POLICYCAP;
+char *CIL_KEY_OPTIONAL;
+char *CIL_KEY_DEFAULTUSER;
+char *CIL_KEY_DEFAULTROLE;
+char *CIL_KEY_DEFAULTTYPE;
+char *CIL_KEY_ROOT;
+char *CIL_KEY_NODE;
+char *CIL_KEY_PERM;
 
 /*
 	Symbol Table Array Indices

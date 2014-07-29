@@ -123,7 +123,7 @@ int cil_gen_node(struct cil_db *db, struct cil_tree_node *ast_node, struct cil_s
 			cil_list_for_each(item, param_list) {
 				struct cil_param *param = item->data;
 				if (param->flavor == ast_node->flavor) {
-					if (!strcmp(param->str, key)) {
+					if (param->str == key) {
 						cil_log(CIL_ERR, "%s %s shadows a macro parameter in macro declaration\n", cil_node_to_string(ast_node), key);
 						rc = SEPOL_ERR;
 						goto exit;
@@ -1742,7 +1742,7 @@ int cil_gen_roleattribute(struct cil_db *db, struct cil_tree_node *parse_current
 		goto exit;
 	}
 
-	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+	if (parse_current->next->data == CIL_KEY_SELF) {
 		cil_log(CIL_ERR, "The keyword '%s' is reserved\n", CIL_KEY_SELF);
 		rc = SEPOL_ERR;
 		goto exit;
@@ -1975,7 +1975,7 @@ int cil_gen_type(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 		goto exit;
 	}
 
-	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+	if (parse_current->next->data == CIL_KEY_SELF) {
 		cil_log(CIL_ERR, "The keyword '%s' is reserved\n", CIL_KEY_SELF);
 		rc = SEPOL_ERR;
 		goto exit;
@@ -2030,7 +2030,7 @@ int cil_gen_typeattribute(struct cil_db *db, struct cil_tree_node *parse_current
 		goto exit;
 	}
 
-	if (!strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+	if (parse_current->next->data == CIL_KEY_SELF) {
 		cil_log(CIL_ERR, "The keyword '%s' is reserved\n", CIL_KEY_SELF);
 		rc = SEPOL_ERR;
 		goto exit;
@@ -2106,9 +2106,9 @@ int cil_gen_bool(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	key = parse_current->next->data;
 
-	if (!strcmp(parse_current->next->next->data, "true")) {
+	if (parse_current->next->next->data == CIL_KEY_CONDTRUE) {
 		boolean->value = CIL_TRUE;
-	} else if (!strcmp(parse_current->next->next->data, "false")) {
+	} else if (parse_current->next->next->data == CIL_KEY_CONDFALSE) {
 		boolean->value = CIL_FALSE;
 	} else {
 		cil_log(CIL_ERR, "Value must be either \'true\' or \'false\'");
@@ -2172,9 +2172,9 @@ int cil_gen_tunable(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	key = parse_current->next->data;
 
-	if (!strcmp(parse_current->next->next->data, "true")) {
+	if (parse_current->next->next->data == CIL_KEY_CONDTRUE) {
 		tunable->value = CIL_TRUE;
-	} else if (!strcmp(parse_current->next->next->data, "false")) {
+	} else if (parse_current->next->next->data == CIL_KEY_CONDFALSE) {
 		tunable->value = CIL_FALSE;
 	} else {
 		cil_log(CIL_ERR, "Value must be either \'true\' or \'false\'");
@@ -2210,14 +2210,14 @@ void cil_destroy_tunable(struct cil_tunable *tunable)
 static enum cil_flavor __cil_get_expr_operator_flavor(const char *op)
 {
 	if (op == NULL) return CIL_NONE;
-	else if (!strcmp(op, CIL_KEY_AND))   return CIL_AND;
-	else if (!strcmp(op, CIL_KEY_OR))    return CIL_OR;
-	else if (!strcmp(op, CIL_KEY_NOT))   return CIL_NOT; 
-	else if (!strcmp(op, CIL_KEY_EQ))    return CIL_EQ;    /* Only conditional */
-	else if (!strcmp(op, CIL_KEY_NEQ))   return CIL_NEQ;   /* Only conditional */
-	else if (!strcmp(op, CIL_KEY_XOR))   return CIL_XOR;
-	else if (!strcmp(op, CIL_KEY_ALL))   return CIL_ALL;   /* Only set */
-	else if (!strcmp(op, CIL_KEY_RANGE)) return CIL_RANGE; /* Only catset */
+	else if (op == CIL_KEY_AND)   return CIL_AND;
+	else if (op == CIL_KEY_OR)    return CIL_OR;
+	else if (op == CIL_KEY_NOT)   return CIL_NOT;
+	else if (op == CIL_KEY_EQ)    return CIL_EQ;    /* Only conditional */
+	else if (op == CIL_KEY_NEQ)   return CIL_NEQ;   /* Only conditional */
+	else if (op == CIL_KEY_XOR)   return CIL_XOR;
+	else if (op == CIL_KEY_ALL)   return CIL_ALL;   /* Only set */
+	else if (op == CIL_KEY_RANGE) return CIL_RANGE; /* Only catset */
 	else return CIL_NONE;
 }
 
@@ -2315,33 +2315,33 @@ int cil_gen_expr(struct cil_tree_node *current, enum cil_flavor flavor, struct c
 
 static enum cil_flavor __cil_get_constraint_operator_flavor(const char *op)
 {
-	if (!strcmp(op, CIL_KEY_AND))              return CIL_AND;
-	else if (!strcmp(op, CIL_KEY_OR))          return CIL_OR;
-	else if (!strcmp(op, CIL_KEY_NOT))         return CIL_NOT;
-	else if (!strcmp(op, CIL_KEY_EQ))          return CIL_EQ;
-	else if (!strcmp(op, CIL_KEY_NEQ))         return CIL_NEQ;
-	else if (!strcmp(op, CIL_KEY_CONS_DOM))    return CIL_CONS_DOM;
-	else if (!strcmp(op, CIL_KEY_CONS_DOMBY))  return CIL_CONS_DOMBY;
-	else if (!strcmp(op, CIL_KEY_CONS_INCOMP)) return CIL_CONS_INCOMP;
+	if (op == CIL_KEY_AND)         return CIL_AND;
+	else if (op == CIL_KEY_OR)     return CIL_OR;
+	else if (op == CIL_KEY_NOT)    return CIL_NOT;
+	else if (op == CIL_KEY_EQ)     return CIL_EQ;
+	else if (op == CIL_KEY_NEQ)    return CIL_NEQ;
+	else if (op == CIL_KEY_CONS_DOM)    return CIL_CONS_DOM;
+	else if (op == CIL_KEY_CONS_DOMBY)  return CIL_CONS_DOMBY;
+	else if (op == CIL_KEY_CONS_INCOMP) return CIL_CONS_INCOMP;
 	else return CIL_NONE;
 }
 
 static enum cil_flavor __cil_get_constraint_operand_flavor(const char *operand)
 {
 	if (operand == NULL) return CIL_LIST;
-	else if (!strcmp(operand, CIL_KEY_CONS_T1)) return CIL_CONS_T1;
-	else if (!strcmp(operand, CIL_KEY_CONS_T2)) return CIL_CONS_T2;
-	else if (!strcmp(operand, CIL_KEY_CONS_T3)) return CIL_CONS_T3;
-	else if (!strcmp(operand, CIL_KEY_CONS_R1)) return CIL_CONS_R1;
-	else if (!strcmp(operand, CIL_KEY_CONS_R2)) return CIL_CONS_R2;
-	else if (!strcmp(operand, CIL_KEY_CONS_R3)) return CIL_CONS_R3;
-	else if (!strcmp(operand, CIL_KEY_CONS_U1)) return CIL_CONS_U1;
-	else if (!strcmp(operand, CIL_KEY_CONS_U2)) return CIL_CONS_U2;
-	else if (!strcmp(operand, CIL_KEY_CONS_U3)) return CIL_CONS_U3;
-	else if (!strcmp(operand, CIL_KEY_CONS_L1)) return CIL_CONS_L1;
-	else if (!strcmp(operand, CIL_KEY_CONS_L2)) return CIL_CONS_L2;
-	else if (!strcmp(operand, CIL_KEY_CONS_H1)) return CIL_CONS_H1;
-	else if (!strcmp(operand, CIL_KEY_CONS_H2)) return CIL_CONS_H2;
+	else if (operand == CIL_KEY_CONS_T1) return CIL_CONS_T1;
+	else if (operand == CIL_KEY_CONS_T2) return CIL_CONS_T2;
+	else if (operand == CIL_KEY_CONS_T3) return CIL_CONS_T3;
+	else if (operand == CIL_KEY_CONS_R1) return CIL_CONS_R1;
+	else if (operand == CIL_KEY_CONS_R2) return CIL_CONS_R2;
+	else if (operand == CIL_KEY_CONS_R3) return CIL_CONS_R3;
+	else if (operand == CIL_KEY_CONS_U1) return CIL_CONS_U1;
+	else if (operand == CIL_KEY_CONS_U2) return CIL_CONS_U2;
+	else if (operand == CIL_KEY_CONS_U3) return CIL_CONS_U3;
+	else if (operand == CIL_KEY_CONS_L1) return CIL_CONS_L1;
+	else if (operand == CIL_KEY_CONS_L2) return CIL_CONS_L2;
+	else if (operand == CIL_KEY_CONS_H1) return CIL_CONS_H1;
+	else if (operand == CIL_KEY_CONS_H2) return CIL_CONS_H2;
 	else return CIL_STRING;
 }
 
@@ -2537,8 +2537,8 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 	cond = parse_current->next->next;
 
 	/* Destroying expr tree after stack is created*/
-	if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
-		(strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+	if (cond->cl_head->data != CIL_KEY_CONDTRUE &&
+		cond->cl_head->data != CIL_KEY_CONDFALSE) {
 		rc = SEPOL_ERR;
 		cil_log(CIL_ERR, "Conditional neither true nor false\n");
 		goto exit;
@@ -2546,8 +2546,8 @@ int cil_gen_boolif(struct cil_db *db, struct cil_tree_node *parse_current, struc
 
 	if (cond->next != NULL) {
 		cond = cond->next;
-		if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
-			(strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+		if (cond->cl_head->data != CIL_KEY_CONDTRUE &&
+			cond->cl_head->data != CIL_KEY_CONDFALSE) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Conditional neither true nor false\n");
 			goto exit;
@@ -2621,8 +2621,8 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	cond = parse_current->next->next;
 
-	if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
-	    (strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+	if (cond->cl_head->data != CIL_KEY_CONDTRUE &&
+		cond->cl_head->data != CIL_KEY_CONDFALSE) {
 		rc = SEPOL_ERR;
 		cil_log(CIL_ERR, "Conditional neither true nor false\n");
 		goto exit;
@@ -2631,8 +2631,8 @@ int cil_gen_tunif(struct cil_db *db, struct cil_tree_node *parse_current, struct
 	if (cond->next != NULL) {
 		cond = cond->next;
 
-		if ((strcmp(cond->cl_head->data, CIL_KEY_CONDTRUE)) &&
-		    (strcmp(cond->cl_head->data, CIL_KEY_CONDFALSE))) {
+		if (cond->cl_head->data != CIL_KEY_CONDTRUE &&
+			cond->cl_head->data != CIL_KEY_CONDFALSE) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Conditional neither true nor false\n");
 			goto exit;
@@ -2742,7 +2742,7 @@ int cil_gen_alias(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		goto exit;
 	}
 
-	if (flavor == CIL_TYPEALIAS && !strcmp(parse_current->next->data, CIL_KEY_SELF)) {
+	if (flavor == CIL_TYPEALIAS && parse_current->next->data == CIL_KEY_SELF) {
 		cil_log(CIL_ERR, "The keyword '%s' is reserved\n", CIL_KEY_SELF);
 		rc = SEPOL_ERR;
 		goto exit;
@@ -2804,7 +2804,7 @@ int cil_gen_aliasactual(struct cil_db *db, struct cil_tree_node *parse_current, 
 		goto exit;
 	}
 
-	if (flavor == CIL_TYPEALIAS && (!strcmp(parse_current->next->data, CIL_KEY_SELF) || !strcmp(parse_current->next->next->data, CIL_KEY_SELF))) {
+	if ((flavor == CIL_TYPEALIAS && parse_current->next->data == CIL_KEY_SELF) || parse_current->next->next->data == CIL_KEY_SELF) {
 		cil_log(CIL_ERR, "The keyword '%s' is reserved\n", CIL_KEY_SELF);
 		rc = SEPOL_ERR;
 		goto exit;
@@ -3834,21 +3834,21 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 
 	filecon->path_str = parse_current->next->data;
 
-	if (!strcmp(type, "file")) {
+	if (type == CIL_KEY_FILE) {
 		filecon->type = CIL_FILECON_FILE;
-	} else if (!strcmp(type, "dir")) {
+	} else if (type == CIL_KEY_DIR) {
 		filecon->type = CIL_FILECON_DIR;
-	} else if (!strcmp(type, "char")) {
+	} else if (type == CIL_KEY_CHAR) {
 		filecon->type = CIL_FILECON_CHAR;
-	} else if (!strcmp(type, "block")) {
+	} else if (type == CIL_KEY_BLOCK) {
 		filecon->type = CIL_FILECON_BLOCK;
-	} else if (!strcmp(type, "socket")) {
+	} else if (type == CIL_KEY_SOCKET) {
 		filecon->type = CIL_FILECON_SOCKET;
-	} else if (!strcmp(type, "pipe")) {
+	} else if (type == CIL_KEY_PIPE) {
 		filecon->type = CIL_FILECON_PIPE;
-	} else if (!strcmp(type, "symlink")) {
+	} else if (type == CIL_KEY_SYMLINK) {
 		filecon->type = CIL_FILECON_SYMLINK;
-	} else if (!strcmp(type, "any")) {
+	} else if (type == CIL_KEY_ANY) {
 		filecon->type = CIL_FILECON_ANY;
 	} else {
 		cil_log(CIL_ERR, "Invalid file type\n");
@@ -3927,9 +3927,9 @@ int cil_gen_portcon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	cil_portcon_init(&portcon);
 
 	proto = parse_current->next->data;
-	if (!strcmp(proto, CIL_KEY_UDP)) {
+	if (proto == CIL_KEY_UDP) {
 		portcon->proto = CIL_PROTOCOL_UDP;
-	} else if (!strcmp(proto, CIL_KEY_TCP)) {
+	} else if (proto == CIL_KEY_TCP) {
 		portcon->proto = CIL_PROTOCOL_TCP;
 	} else {
 		cil_log(CIL_ERR, "Invalid protocol\n");
@@ -4558,11 +4558,11 @@ int cil_gen_fsuse(struct cil_db *db, struct cil_tree_node *parse_current, struct
 
 	cil_fsuse_init(&fsuse);
 
-	if (!strcmp(type, "xattr")) {
+	if (type == CIL_KEY_XATTR) {
 		fsuse->type = CIL_FSUSE_XATTR;
-	} else if (!strcmp(type, "task")) {
+	} else if (type == CIL_KEY_TASK) {
 		fsuse->type = CIL_FSUSE_TASK;
-	} else if (!strcmp(type, "trans")) {
+	} else if (type == CIL_KEY_TRANS) {
 		fsuse->type = CIL_FSUSE_TRANS;
 	} else {
 		cil_log(CIL_ERR, "Invalid fsuse type\n");
@@ -4667,35 +4667,35 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		kind = current_item->cl_head->data;
 		cil_param_init(&param);
 
-		if (!strcmp(kind, CIL_KEY_TYPE)) {
+		if (kind == CIL_KEY_TYPE) {
 			param->flavor = CIL_TYPE;
-		} else if (!strcmp(kind, CIL_KEY_ROLE)) {
+		} else if (kind == CIL_KEY_ROLE) {
 			param->flavor = CIL_ROLE;
-		} else if (!strcmp(kind, CIL_KEY_USER)) {
+		} else if (kind == CIL_KEY_USER) {
 			param->flavor = CIL_USER;
-		} else if (!strcmp(kind, CIL_KEY_SENSITIVITY)) {
+		} else if (kind == CIL_KEY_SENSITIVITY) {
 			param->flavor = CIL_SENS;
-		} else if (!strcmp(kind, CIL_KEY_CATEGORY)) {
+		} else if (kind == CIL_KEY_CATEGORY) {
 			param->flavor = CIL_CAT;
-		} else if (!strcmp(kind, CIL_KEY_CATSET)) {
+		} else if (kind == CIL_KEY_CATSET) {
 			param->flavor = CIL_CATSET;
-		} else if (!strcmp(kind, CIL_KEY_LEVEL)) {
+		} else if (kind == CIL_KEY_LEVEL) {
 			param->flavor = CIL_LEVEL;
-		} else if (!strcmp(kind, CIL_KEY_LEVELRANGE)) {
+		} else if (kind == CIL_KEY_LEVELRANGE) {
 			param->flavor = CIL_LEVELRANGE;
-		} else if (!strcmp(kind, CIL_KEY_CLASS)) {
+		} else if (kind == CIL_KEY_CLASS) {
 			param->flavor = CIL_CLASS;
-		} else if (!strcmp(kind, CIL_KEY_IPADDR)) {
+		} else if (kind == CIL_KEY_IPADDR) {
 			param->flavor = CIL_IPADDR;
-		} else if (!strcmp(kind, CIL_KEY_MAP_CLASS)) {
+		} else if (kind == CIL_KEY_MAP_CLASS) {
 			param->flavor = CIL_MAP_CLASS;
-		} else if (!strcmp(kind, CIL_KEY_CLASSPERMISSION)) {
+		} else if (kind == CIL_KEY_CLASSPERMISSION) {
 			param->flavor = CIL_CLASSPERMISSION;
-		} else if (!strcmp(kind, CIL_KEY_BOOL)) {
+		} else if (kind == CIL_KEY_BOOL) {
 			param->flavor = CIL_BOOL;
-		} else if (!strcmp(kind, CIL_KEY_STRING)) {
+		} else if (kind == CIL_KEY_STRING) {
 			param->flavor = CIL_NAME;
-		} else if (!strcmp(kind, CIL_KEY_NAME)) {
+		} else if (kind == CIL_KEY_NAME) {
 			param->flavor = CIL_NAME;
 		} else {
 			cil_log(CIL_ERR, "The kind %s is not allowed as a parameter\n",kind);
@@ -4714,7 +4714,7 @@ int cil_gen_macro(struct cil_db *db, struct cil_tree_node *parse_current, struct
 		//walk current list and check for duplicate parameters
 		struct cil_list_item *curr_param;
 		cil_list_for_each(curr_param, macro->params) {
-			if (!strcmp(param->str, ((struct cil_param*)curr_param->data)->str)) {
+			if (param->str == ((struct cil_param*)curr_param->data)->str) {
 				if (param->flavor == ((struct cil_param*)curr_param->data)->flavor) {
 					cil_log(CIL_ERR, "Duplicate parameter\n");
 					cil_destroy_param(param);
@@ -5238,9 +5238,9 @@ int cil_gen_default(struct cil_tree_node *parse_current, struct cil_tree_node *a
 	}
 
 	object = parse_current->next->next->data;
-	if (strcmp(object,"source") == 0) {
+	if (object == CIL_KEY_SOURCE) {
 		def->object = CIL_DEFAULT_SOURCE;
-	} else if (strcmp(object,"target") == 0) {
+	} else if (object == CIL_KEY_TARGET) {
 		def->object = CIL_DEFAULT_TARGET;
 	} else {
 		cil_log(CIL_ERR,"Expected either 'source' or 'target'\n");
@@ -5305,24 +5305,24 @@ int cil_gen_defaultrange(struct cil_tree_node *parse_current, struct cil_tree_no
 
 	object = parse_current->next->next->data;
 	range = parse_current->next->next->next->data;
-	if (strcmp(object,"source") == 0) {
-		if (strcmp(range,"low") == 0) {
+	if (object == CIL_KEY_SOURCE) {
+		if (range == CIL_KEY_LOW) {
 			def->object_range = CIL_DEFAULT_SOURCE_LOW;
-		} else if (strcmp(range,"high") == 0) {
+		} else if (range == CIL_KEY_HIGH) {
 			def->object_range = CIL_DEFAULT_SOURCE_HIGH;
-		} else if (strcmp(range,"low-high") == 0) {
+		} else if (range == CIL_KEY_LOW_HIGH) {
 			def->object_range = CIL_DEFAULT_SOURCE_LOW_HIGH;
 		} else {
 			cil_log(CIL_ERR,"Expected 'low', 'high', or 'low-high'\n");
 			rc = SEPOL_ERR;
 			goto exit;
 		}
-	} else if (strcmp(parse_current->next->next->data,"target") == 0) {
-		if (strcmp(range,"low") == 0) {
+	} else if (parse_current->next->next->data == CIL_KEY_TARGET) {
+		if (range == CIL_KEY_LOW) {
 			def->object_range = CIL_DEFAULT_TARGET_LOW;
-		} else if (strcmp(range,"high") == 0) {
+		} else if (range == CIL_KEY_HIGH) {
 			def->object_range = CIL_DEFAULT_TARGET_HIGH;
-		} else if (strcmp(range,"low-high") == 0) {
+		} else if (range == CIL_KEY_LOW_HIGH) {
 			def->object_range = CIL_DEFAULT_TARGET_LOW_HIGH;
 		} else {
 			cil_log(CIL_ERR,"Expected 'low', 'high', or 'low-high'\n");
@@ -5384,11 +5384,11 @@ int cil_gen_handleunknown(struct cil_tree_node *parse_current, struct cil_tree_n
 	cil_handleunknown_init(&unknown);
 
 	unknown_key = parse_current->next->data;
-	if (!strcmp(unknown_key, CIL_KEY_HANDLEUNKNOWN_ALLOW)) {
+	if (unknown_key == CIL_KEY_HANDLEUNKNOWN_ALLOW) {
 		unknown->handle_unknown = SEPOL_ALLOW_UNKNOWN;
-	} else if (!strcmp(unknown_key, CIL_KEY_HANDLEUNKNOWN_DENY)) {
+	} else if (unknown_key == CIL_KEY_HANDLEUNKNOWN_DENY) {
 		unknown->handle_unknown = SEPOL_DENY_UNKNOWN;
-	} else if (!strcmp(unknown_key, CIL_KEY_HANDLEUNKNOWN_REJECT)) {
+	} else if (unknown_key == CIL_KEY_HANDLEUNKNOWN_REJECT) {
 		unknown->handle_unknown = SEPOL_REJECT_UNKNOWN;
 	} else {
 		cil_log(CIL_ERR, "Expected either \'%s\', \'%s\', or \'%s\'\n", CIL_KEY_HANDLEUNKNOWN_ALLOW, CIL_KEY_HANDLEUNKNOWN_DENY, CIL_KEY_HANDLEUNKNOWN_REJECT);
@@ -5435,9 +5435,9 @@ int cil_gen_mls(struct cil_tree_node *parse_current, struct cil_tree_node *ast_n
 
 	cil_mls_init(&mls);
 
-	if (!strcmp(parse_current->next->data, "true")) {
+	if (parse_current->next->data == CIL_KEY_CONDTRUE) {
 		mls->value = CIL_TRUE;
-	} else if (!strcmp(parse_current->next->data, "false")) {
+	} else if (parse_current->next->data == CIL_KEY_CONDFALSE) {
 		mls->value = CIL_FALSE;
 	} else {
 		cil_log(CIL_ERR, "Value must be either \'true\' or \'false\'");
@@ -5502,7 +5502,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	}
 
 	if (macro != NULL) {
-		if (!strcmp(parse_current->data, CIL_KEY_MACRO)) {
+		if (parse_current->data == CIL_KEY_MACRO) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Found macro at line %d of %s\n",
 				parse_current->line, parse_current->path);
@@ -5510,7 +5510,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto exit;
 		}
 
-		if (!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
+		if (parse_current->data == CIL_KEY_TUNABLE) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Found tunable at line %d of %s\n",
 				parse_current->line, parse_current->path);
@@ -5518,7 +5518,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 			goto exit;
 		}
 
-		if (!strcmp(parse_current->data, CIL_KEY_IN)) {
+		if (parse_current->data == CIL_KEY_IN) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Found in at line %d of %s\n",
 				parse_current->line, parse_current->path);
@@ -5528,15 +5528,15 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	}
 
 	if (boolif != NULL) {
-		if (!(!strcmp(parse_current->data, CIL_KEY_CONDTRUE) ||
-			!strcmp(parse_current->data, CIL_KEY_CONDFALSE) ||
-			!strcmp(parse_current->data, CIL_KEY_AUDITALLOW) ||
-			!strcmp(parse_current->data, CIL_KEY_TUNABLEIF) ||
-			!strcmp(parse_current->data, CIL_KEY_ALLOW) ||
-			!strcmp(parse_current->data, CIL_KEY_DONTAUDIT) ||
-			!strcmp(parse_current->data, CIL_KEY_TYPETRANSITION) ||
-			!strcmp(parse_current->data, CIL_KEY_TYPECHANGE) ||
-			!strcmp(parse_current->data, CIL_KEY_CALL))) {
+		if (parse_current->data != CIL_KEY_CONDTRUE &&
+			parse_current->data != CIL_KEY_CONDFALSE &&
+			parse_current->data != CIL_KEY_AUDITALLOW &&
+			parse_current->data != CIL_KEY_TUNABLEIF &&
+			parse_current->data != CIL_KEY_ALLOW &&
+			parse_current->data != CIL_KEY_DONTAUDIT &&
+			parse_current->data != CIL_KEY_TYPETRANSITION &&
+			parse_current->data != CIL_KEY_TYPECHANGE &&
+			parse_current->data != CIL_KEY_CALL) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Found %s at line %d of %s\n",
 				(char*)parse_current->data, parse_current->line, parse_current->path);
@@ -5552,7 +5552,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	}
 
 	if (tunif != NULL) {
-		if (!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
+		if (parse_current->data == CIL_KEY_TUNABLE) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Found tunable at line %d of %s\n",
 				parse_current->line, parse_current->path);
@@ -5562,7 +5562,7 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	}
 
 	if (in != NULL) {
-		if (!strcmp(parse_current->data, CIL_KEY_IN)) {
+		if (parse_current->data == CIL_KEY_IN) {
 			rc = SEPOL_ERR;
 			cil_log(CIL_ERR, "Found in-statement at line %d of %s\n",
 				parse_current->line, parse_current->path);
@@ -5577,242 +5577,242 @@ int __cil_build_ast_node_helper(struct cil_tree_node *parse_current, uint32_t *f
 	ast_node->line = parse_current->line;
 	ast_node->path = parse_current->path;
 
-	if (!strcmp(parse_current->data, CIL_KEY_BLOCK)) {
+	if (parse_current->data == CIL_KEY_BLOCK) {
 		rc = cil_gen_block(db, parse_current, ast_node, 0);
-	} else if (!strcmp(parse_current->data, CIL_KEY_BLOCKINHERIT)) {
+	} else if (parse_current->data == CIL_KEY_BLOCKINHERIT) {
 		rc = cil_gen_blockinherit(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_BLOCKABSTRACT)) {
+	} else if (parse_current->data == CIL_KEY_BLOCKABSTRACT) {
 		rc = cil_gen_blockabstract(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_IN)) {
+	} else if (parse_current->data == CIL_KEY_IN) {
 		rc = cil_gen_in(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_CLASS)) {
+	} else if (parse_current->data == CIL_KEY_CLASS) {
 		rc = cil_gen_class(db, parse_current, ast_node);
 		// To avoid parsing list of perms again
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSORDER)) {
+	} else if (parse_current->data == CIL_KEY_CLASSORDER) {
 		rc = cil_gen_classorder(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_MAP_CLASS)) {
+	} else if (parse_current->data == CIL_KEY_MAP_CLASS) {
 		rc = cil_gen_map_class(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSMAPPING)) {
+	} else if (parse_current->data == CIL_KEY_CLASSMAPPING) {
 		rc = cil_gen_classmapping(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSPERMISSION)) {
+	} else if (parse_current->data == CIL_KEY_CLASSPERMISSION) {
 		rc = cil_gen_classpermission(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSPERMISSIONSET)) {
+	} else if (parse_current->data == CIL_KEY_CLASSPERMISSIONSET) {
 		rc = cil_gen_classpermissionset(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_COMMON)) {
+	} else if (parse_current->data == CIL_KEY_COMMON) {
 		rc = cil_gen_common(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CLASSCOMMON)) {
+	} else if (parse_current->data == CIL_KEY_CLASSCOMMON) {
 		rc = cil_gen_classcommon(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_SID)) {
+	} else if (parse_current->data == CIL_KEY_SID) {
 		rc = cil_gen_sid(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_SIDCONTEXT)) {
+	} else if (parse_current->data == CIL_KEY_SIDCONTEXT) {
 		rc = cil_gen_sidcontext(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_SIDORDER)) {
+	} else if (parse_current->data == CIL_KEY_SIDORDER) {
 		rc = cil_gen_sidorder(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_USER)) {
+	} else if (parse_current->data == CIL_KEY_USER) {
 		rc = cil_gen_user(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_USERLEVEL)) {
+	} else if (parse_current->data == CIL_KEY_USERLEVEL) {
 		rc = cil_gen_userlevel(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_USERRANGE)) {
+	} else if (parse_current->data == CIL_KEY_USERRANGE) {
 		rc = cil_gen_userrange(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_USERBOUNDS)) {
+	} else if (parse_current->data == CIL_KEY_USERBOUNDS) {
 		rc = cil_gen_bounds(db, parse_current, ast_node, CIL_USER);
-	} else if (!strcmp(parse_current->data, CIL_KEY_USERPREFIX)) {
+	} else if (parse_current->data == CIL_KEY_USERPREFIX) {
 		rc = cil_gen_userprefix(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_SELINUXUSER)) {
+	} else if (parse_current->data == CIL_KEY_SELINUXUSER) {
 		rc = cil_gen_selinuxuser(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_SELINUXUSERDEFAULT)) {
+	} else if (parse_current->data == CIL_KEY_SELINUXUSERDEFAULT) {
 		rc = cil_gen_selinuxuserdefault(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPE)) {
+	} else if (parse_current->data == CIL_KEY_TYPE) {
 		rc = cil_gen_type(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTRIBUTE)) {
+	} else if (parse_current->data == CIL_KEY_TYPEATTRIBUTE) {
 		rc = cil_gen_typeattribute(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEATTRIBUTESET)) {
+	} else if (parse_current->data == CIL_KEY_TYPEATTRIBUTESET) {
 		rc = cil_gen_typeattributeset(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIAS)) {
+	} else if (parse_current->data == CIL_KEY_TYPEALIAS) {
 		rc = cil_gen_alias(db, parse_current, ast_node, CIL_TYPEALIAS);
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEALIASACTUAL)) {
+	} else if (parse_current->data == CIL_KEY_TYPEALIASACTUAL) {
 		rc = cil_gen_aliasactual(db, parse_current, ast_node, CIL_TYPEALIASACTUAL);
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEBOUNDS)) {
+	} else if (parse_current->data == CIL_KEY_TYPEBOUNDS) {
 		rc = cil_gen_bounds(db, parse_current, ast_node, CIL_TYPE);
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEPERMISSIVE)) {
+	} else if (parse_current->data == CIL_KEY_TYPEPERMISSIVE) {
 		rc = cil_gen_typepermissive(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_RANGETRANSITION)) {
+	} else if (parse_current->data == CIL_KEY_RANGETRANSITION) {
 		rc = cil_gen_rangetransition(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_ROLE)) {
+	} else if (parse_current->data == CIL_KEY_ROLE) {
 		rc = cil_gen_role(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_USERROLE)) {
+	} else if (parse_current->data == CIL_KEY_USERROLE) {
 		rc = cil_gen_userrole(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_ROLETYPE)) {
+	} else if (parse_current->data == CIL_KEY_ROLETYPE) {
 		rc = cil_gen_roletype(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_ROLETRANSITION)) {
+	} else if (parse_current->data == CIL_KEY_ROLETRANSITION) {
 		rc = cil_gen_roletransition(parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEALLOW)) {
+	} else if (parse_current->data == CIL_KEY_ROLEALLOW) {
 		rc = cil_gen_roleallow(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEATTRIBUTE)) {
+	} else if (parse_current->data == CIL_KEY_ROLEATTRIBUTE) {
 		rc = cil_gen_roleattribute(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEATTRIBUTESET)) {
+	} else if (parse_current->data == CIL_KEY_ROLEATTRIBUTESET) {
 		rc = cil_gen_roleattributeset(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_ROLEBOUNDS)) {
+	} else if (parse_current->data == CIL_KEY_ROLEBOUNDS) {
 		rc = cil_gen_bounds(db, parse_current, ast_node, CIL_ROLE);
-	} else if (!strcmp(parse_current->data, CIL_KEY_BOOL)) {
+	} else if (parse_current->data == CIL_KEY_BOOL) {
 		rc = cil_gen_bool(db, parse_current, ast_node, CIL_FALSE);
-	} else if (!strcmp(parse_current->data, CIL_KEY_BOOLEANIF)) {
+	} else if (parse_current->data == CIL_KEY_BOOLEANIF) {
 		rc = cil_gen_boolif(db, parse_current, ast_node, CIL_FALSE);
-	} else if(!strcmp(parse_current->data, CIL_KEY_TUNABLE)) {
+	} else if(parse_current->data == CIL_KEY_TUNABLE) {
 		if (db->preserve_tunables) {
 			rc = cil_gen_bool(db, parse_current, ast_node, CIL_TRUE);
 		} else {
 			rc = cil_gen_tunable(db, parse_current, ast_node);
 		}
-	} else if (!strcmp(parse_current->data, CIL_KEY_TUNABLEIF)) {
+	} else if (parse_current->data == CIL_KEY_TUNABLEIF) {
 		if (db->preserve_tunables) {
 			rc = cil_gen_boolif(db, parse_current, ast_node, CIL_TRUE);
 		} else {
 			rc = cil_gen_tunif(db, parse_current, ast_node);
 		}
-	} else if (!strcmp(parse_current->data, CIL_KEY_CONDTRUE)) {
+	} else if (parse_current->data == CIL_KEY_CONDTRUE) {
 		rc = cil_gen_condblock(db, parse_current, ast_node, CIL_CONDTRUE);
-	} else if (!strcmp(parse_current->data, CIL_KEY_CONDFALSE)) {
+	} else if (parse_current->data == CIL_KEY_CONDFALSE) {
 		rc = cil_gen_condblock(db, parse_current, ast_node, CIL_CONDFALSE);
-	} else if (!strcmp(parse_current->data, CIL_KEY_ALLOW)) {
+	} else if (parse_current->data == CIL_KEY_ALLOW) {
 		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_ALLOWED);
 		// So that the object and perms lists do not get parsed again
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_AUDITALLOW)) {
+	} else if (parse_current->data == CIL_KEY_AUDITALLOW) {
 		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_AUDITALLOW);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_DONTAUDIT)) {
+	} else if (parse_current->data == CIL_KEY_DONTAUDIT) {
 		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_DONTAUDIT);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_NEVERALLOW)) {
+	} else if (parse_current->data == CIL_KEY_NEVERALLOW) {
 		rc = cil_gen_avrule(parse_current, ast_node, CIL_AVRULE_NEVERALLOW);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPETRANSITION)) {
+	} else if (parse_current->data == CIL_KEY_TYPETRANSITION) {
 		rc = cil_gen_typetransition(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPECHANGE)) {
+	} else if (parse_current->data == CIL_KEY_TYPECHANGE) {
 		rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_CHANGE);
-	} else if (!strcmp(parse_current->data, CIL_KEY_TYPEMEMBER)) {
+	} else if (parse_current->data == CIL_KEY_TYPEMEMBER) {
 		rc = cil_gen_type_rule(parse_current, ast_node, CIL_TYPE_MEMBER);
-	} else if (!strcmp(parse_current->data, CIL_KEY_SENSITIVITY)) {
+	} else if (parse_current->data == CIL_KEY_SENSITIVITY) {
 		rc = cil_gen_sensitivity(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_SENSALIAS)) {
+	} else if (parse_current->data == CIL_KEY_SENSALIAS) {
 		rc = cil_gen_alias(db, parse_current, ast_node, CIL_SENSALIAS);
-	} else if (!strcmp(parse_current->data, CIL_KEY_SENSALIASACTUAL)) {
+	} else if (parse_current->data == CIL_KEY_SENSALIASACTUAL) {
 		rc = cil_gen_aliasactual(db, parse_current, ast_node, CIL_SENSALIASACTUAL);
-	} else if (!strcmp(parse_current->data, CIL_KEY_CATEGORY)) {
+	} else if (parse_current->data == CIL_KEY_CATEGORY) {
 		rc = cil_gen_category(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_CATALIAS)) {
+	} else if (parse_current->data == CIL_KEY_CATALIAS) {
 		rc = cil_gen_alias(db, parse_current, ast_node, CIL_CATALIAS);
-	} else if (!strcmp(parse_current->data, CIL_KEY_CATALIASACTUAL)) {
+	} else if (parse_current->data == CIL_KEY_CATALIASACTUAL) {
 		rc = cil_gen_aliasactual(db, parse_current, ast_node, CIL_CATALIASACTUAL);
-	} else if (!strcmp(parse_current->data, CIL_KEY_CATSET)) {
+	} else if (parse_current->data == CIL_KEY_CATSET) {
 		rc = cil_gen_catset(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CATORDER)) {
+	} else if (parse_current->data == CIL_KEY_CATORDER) {
 		rc = cil_gen_catorder(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_SENSITIVITYORDER)) {
+	} else if (parse_current->data == CIL_KEY_SENSITIVITYORDER) {
 		rc = cil_gen_sensitivityorder(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_SENSCAT)) {
+	} else if (parse_current->data == CIL_KEY_SENSCAT) {
 		rc = cil_gen_senscat(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_LEVEL)) {
+	} else if (parse_current->data == CIL_KEY_LEVEL) {
 		rc = cil_gen_level(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_LEVELRANGE)) {
+	} else if (parse_current->data == CIL_KEY_LEVELRANGE) {
 		rc = cil_gen_levelrange(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CONSTRAIN)) {
+	} else if (parse_current->data == CIL_KEY_CONSTRAIN) {
 		rc = cil_gen_constrain(db, parse_current, ast_node, CIL_CONSTRAIN);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_MLSCONSTRAIN)) {
+	} else if (parse_current->data == CIL_KEY_MLSCONSTRAIN) {
 		rc = cil_gen_constrain(db, parse_current, ast_node, CIL_MLSCONSTRAIN);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_VALIDATETRANS)) {
+	} else if (parse_current->data == CIL_KEY_VALIDATETRANS) {
 		rc = cil_gen_validatetrans(db, parse_current, ast_node, CIL_VALIDATETRANS);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_MLSVALIDATETRANS)) {
+	} else if (parse_current->data == CIL_KEY_MLSVALIDATETRANS) {
 		rc = cil_gen_validatetrans(db, parse_current, ast_node, CIL_MLSVALIDATETRANS);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_CONTEXT)) {
+	} else if (parse_current->data == CIL_KEY_CONTEXT) {
 		rc = cil_gen_context(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_FILECON)) {
+	} else if (parse_current->data == CIL_KEY_FILECON) {
 		rc = cil_gen_filecon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_PORTCON)) {
+	} else if (parse_current->data == CIL_KEY_PORTCON) {
 		rc = cil_gen_portcon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_NODECON)) {
+	} else if (parse_current->data == CIL_KEY_NODECON) {
 		rc = cil_gen_nodecon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_GENFSCON)) {
+	} else if (parse_current->data == CIL_KEY_GENFSCON) {
 		rc = cil_gen_genfscon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_NETIFCON)) {
+	} else if (parse_current->data == CIL_KEY_NETIFCON) {
 		rc = cil_gen_netifcon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_PIRQCON)) {
+	} else if (parse_current->data == CIL_KEY_PIRQCON) {
 		rc = cil_gen_pirqcon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_IOMEMCON)) {
+	} else if (parse_current->data == CIL_KEY_IOMEMCON) {
 		rc = cil_gen_iomemcon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_IOPORTCON)) {
+	} else if (parse_current->data == CIL_KEY_IOPORTCON) {
 		rc = cil_gen_ioportcon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_PCIDEVICECON)) {
+	} else if (parse_current->data == CIL_KEY_PCIDEVICECON) {
 		rc = cil_gen_pcidevicecon(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_FSUSE)) {
+	} else if (parse_current->data == CIL_KEY_FSUSE) {
 		rc = cil_gen_fsuse(db, parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_MACRO)) {
+	} else if (parse_current->data == CIL_KEY_MACRO) {
 		rc = cil_gen_macro(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_CALL)) {
+	} else if (parse_current->data == CIL_KEY_CALL) {
 		rc = cil_gen_call(db, parse_current, ast_node);
 		*finished = 1;
-	} else if (!strcmp(parse_current->data, CIL_KEY_POLICYCAP)) {
+	} else if (parse_current->data == CIL_KEY_POLICYCAP) {
 		rc = cil_gen_policycap(db, parse_current, ast_node);
 		*finished = 1;
-	} else if (!strcmp(parse_current->data, CIL_KEY_OPTIONAL)) {
+	} else if (parse_current->data == CIL_KEY_OPTIONAL) {
 		rc = cil_gen_optional(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_IPADDR)) {
+	} else if (parse_current->data == CIL_KEY_IPADDR) {
 		rc = cil_gen_ipaddr(db, parse_current, ast_node);
-	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTUSER)) {
+	} else if (parse_current->data == CIL_KEY_DEFAULTUSER) {
 		rc = cil_gen_default(parse_current, ast_node, CIL_DEFAULTUSER);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTROLE)) {
+	} else if (parse_current->data == CIL_KEY_DEFAULTROLE) {
 		rc = cil_gen_default(parse_current, ast_node, CIL_DEFAULTROLE);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTTYPE)) {
+	} else if (parse_current->data == CIL_KEY_DEFAULTTYPE) {
 		rc = cil_gen_default(parse_current, ast_node, CIL_DEFAULTTYPE);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_DEFAULTRANGE)) {
+	} else if (parse_current->data == CIL_KEY_DEFAULTRANGE) {
 		rc = cil_gen_defaultrange(parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_HANDLEUNKNOWN)) {
+	} else if (parse_current->data == CIL_KEY_HANDLEUNKNOWN) {
 		rc = cil_gen_handleunknown(parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
-	} else if (!strcmp(parse_current->data, CIL_KEY_MLS)) {
+	} else if (parse_current->data == CIL_KEY_MLS) {
 		rc = cil_gen_mls(parse_current, ast_node);
 		*finished = CIL_TREE_SKIP_NEXT;
 	} else {
