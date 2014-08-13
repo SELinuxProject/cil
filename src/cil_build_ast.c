@@ -3857,11 +3857,7 @@ int cil_gen_filecon(struct cil_db *db, struct cil_tree_node *parse_current, stru
 	}
 
 	if (parse_current->next->next->next->cl_head == NULL) {
-		if (parse_current->next->next->next->data == NULL) {
-			filecon->context_str = NULL;
-		} else {
-			filecon->context_str = parse_current->next->next->next->data;
-		}
+		filecon->context_str = parse_current->next->next->next->data;
 	} else {
 		if (parse_current->next->next->next->cl_head->next == NULL) {
 			filecon->context = NULL;

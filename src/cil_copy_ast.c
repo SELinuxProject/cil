@@ -1049,7 +1049,7 @@ int cil_copy_filecon(struct cil_db *db, void *data, void **copy, __attribute__((
 
 	if (orig->context_str != NULL) {
 		new->context_str = orig->context_str;
-	} else {
+	} else if (orig->context != NULL) {
 		cil_context_init(&new->context);
 		cil_copy_fill_context(db, orig->context, new->context);
 	}
