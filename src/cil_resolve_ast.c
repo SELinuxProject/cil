@@ -3441,25 +3441,26 @@ int cil_resolve_ast(struct cil_db *db, struct cil_tree_node *current)
 
 		if (pass == CIL_PASS_MISC1) {
 			db->sidorder = __cil_ordered_lists_merge_all(&extra_args.sidorder_lists);
+			db->classorder = __cil_ordered_lists_merge_all(&extra_args.classorder_lists);
+			db->catorder = __cil_ordered_lists_merge_all(&extra_args.catorder_lists);
+			cil_set_cat_values(db->catorder, db);
+			db->sensitivityorder = __cil_ordered_lists_merge_all(&extra_args.sensitivityorder_lists);
+
 			rc = __cil_verify_ordered(current, CIL_SID);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 
-			db->classorder = __cil_ordered_lists_merge_all(&extra_args.classorder_lists);
 			rc = __cil_verify_ordered(current, CIL_CLASS);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 
-			db->catorder = __cil_ordered_lists_merge_all(&extra_args.catorder_lists);
-			cil_set_cat_values(db->catorder, db);
 			rc = __cil_verify_ordered(current, CIL_CAT);
 			if (rc != SEPOL_OK) {
 				goto exit;
 			}
 
-			db->sensitivityorder = __cil_ordered_lists_merge_all(&extra_args.sensitivityorder_lists);
 			rc = __cil_verify_ordered(current, CIL_SENS);
 			if (rc != SEPOL_OK) {
 				goto exit;
