@@ -1090,7 +1090,7 @@ void cil_destroy_sidcontext(struct cil_sidcontext *sidcon)
 		return;
 	}
 
-	if (sidcon->context != NULL && sidcon->context->datum.name == NULL) {
+	if (sidcon->context_str == NULL && sidcon->context != NULL) {
 		cil_destroy_context(sidcon->context);
 	}
 
@@ -1253,7 +1253,7 @@ void cil_destroy_userlevel(struct cil_userlevel *usrlvl)
 		return;
 	}
 
-	if (usrlvl->level != NULL) {
+	if (usrlvl->level_str == NULL && usrlvl->level != NULL) {
 		cil_destroy_level(usrlvl->level);
 	}
 
@@ -1314,7 +1314,7 @@ void cil_destroy_userrange(struct cil_userrange *userrange)
 		return;
 	}
 
-	if (userrange->range != NULL) {
+	if (userrange->range_str == NULL && userrange->range != NULL) {
 		cil_destroy_levelrange(userrange->range);
 	}
 
@@ -1470,7 +1470,7 @@ void cil_destroy_selinuxuser(struct cil_selinuxuser *selinuxuser)
 		return;
 	}
 
-	if (selinuxuser->range != NULL) {
+	if (selinuxuser->range_str == NULL && selinuxuser->range != NULL) {
 		cil_destroy_levelrange(selinuxuser->range);
 	}
 
@@ -3088,7 +3088,7 @@ void cil_destroy_rangetransition(struct cil_rangetransition *rangetrans)
 		return;
 	}
 
-	if (rangetrans->range != NULL) {
+	if (rangetrans->range_str == NULL && rangetrans->range != NULL) {
 		cil_destroy_levelrange(rangetrans->range);
 	}
 
@@ -3799,7 +3799,7 @@ void cil_destroy_context(struct cil_context *context)
 
 	cil_symtab_datum_destroy(&context->datum);;
 
-	if (context->range != NULL) {
+	if (context->range_str == NULL && context->range != NULL) {
 		cil_destroy_levelrange(context->range);
 	}
 
@@ -3890,7 +3890,7 @@ void cil_destroy_filecon(struct cil_filecon *filecon)
 		return;
 	}
 
-	if (filecon->context != NULL) {
+	if (filecon->context_str == NULL && filecon->context != NULL) {
 		cil_destroy_context(filecon->context);
 	}
 
@@ -3989,7 +3989,7 @@ void cil_destroy_portcon(struct cil_portcon *portcon)
 		return;
 	}
 
-	if (portcon->context != NULL) {
+	if (portcon->context_str == NULL && portcon->context != NULL) {
 		cil_destroy_context(portcon->context);
 	}
 
@@ -4071,15 +4071,15 @@ void cil_destroy_nodecon(struct cil_nodecon *nodecon)
 		return;
 	}
 
-	if (nodecon->addr != NULL) {
+	if (nodecon->addr_str == NULL && nodecon->addr != NULL) {
 		cil_destroy_ipaddr(nodecon->addr);
 	}
 
-	if (nodecon->mask != NULL) {
+	if (nodecon->mask_str == NULL && nodecon->mask != NULL) {
 		cil_destroy_ipaddr(nodecon->mask);
 	}
 
-	if (nodecon->context != NULL) {
+	if (nodecon->context_str == NULL && nodecon->context != NULL) {
 		cil_destroy_context(nodecon->context);
 	}
 
@@ -4142,7 +4142,7 @@ void cil_destroy_genfscon(struct cil_genfscon *genfscon)
 		return;
 	}
 
-	if (genfscon->context != NULL) {
+	if (genfscon->context_str == NULL && genfscon->context != NULL) {
 		cil_destroy_context(genfscon->context);
 	}
 
@@ -4216,11 +4216,11 @@ void cil_destroy_netifcon(struct cil_netifcon *netifcon)
 		return;
 	}
 
-	if (netifcon->if_context != NULL) {
+	if (netifcon->if_context_str == NULL && netifcon->if_context != NULL) {
 		cil_destroy_context(netifcon->if_context);
 	}
 
-	if (netifcon->packet_context != NULL) {
+	if (netifcon->packet_context_str == NULL && netifcon->packet_context != NULL) {
 		cil_destroy_context(netifcon->packet_context);
 	}
 
@@ -4284,7 +4284,7 @@ void cil_destroy_pirqcon(struct cil_pirqcon *pirqcon)
 		return;
 	}
 
-	if (pirqcon->context != NULL) {
+	if (pirqcon->context_str == NULL && pirqcon->context != NULL) {
 		cil_destroy_context(pirqcon->context);
 	}
 
@@ -4370,7 +4370,7 @@ void cil_destroy_iomemcon(struct cil_iomemcon *iomemcon)
 		return;
 	}
 
-	if (iomemcon->context != NULL) {
+	if (iomemcon->context_str == NULL && iomemcon->context != NULL) {
 		cil_destroy_context(iomemcon->context);
 	}
 
@@ -4456,7 +4456,7 @@ void cil_destroy_ioportcon(struct cil_ioportcon *ioportcon)
 		return;
 	}
 
-	if (ioportcon->context != NULL) {
+	if (ioportcon->context_str == NULL && ioportcon->context != NULL) {
 		cil_destroy_context(ioportcon->context);
 	}
 
@@ -4520,7 +4520,7 @@ void cil_destroy_pcidevicecon(struct cil_pcidevicecon *pcidevicecon)
 		return;
 	}
 
-	if (pcidevicecon->context != NULL) {
+	if (pcidevicecon->context_str == NULL && pcidevicecon->context != NULL) {
 		cil_destroy_context(pcidevicecon->context);
 	}
 
@@ -4596,7 +4596,7 @@ void cil_destroy_fsuse(struct cil_fsuse *fsuse)
 		return;
 	}
 
-	if (fsuse->context != NULL) {
+	if (fsuse->context_str == NULL && fsuse->context != NULL) {
 		cil_destroy_context(fsuse->context);
 	}
 
