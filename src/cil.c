@@ -173,7 +173,7 @@ static void cil_init_keys(void)
 	CIL_KEY_PIRQCON = cil_strpool_add("pirqcon");
 	CIL_KEY_IOMEMCON = cil_strpool_add("iomemcon");
 	CIL_KEY_IOPORTCON = cil_strpool_add("ioportcon");
-	CIL_KEY_PCIDEVICECON = cil_strpool_add("pcidevcon");
+	CIL_KEY_PCIDEVICECON = cil_strpool_add("pcidevicecon");
 	CIL_KEY_FSUSE = cil_strpool_add("fsuse");
 	CIL_KEY_POLICYCAP = cil_strpool_add("policycap");
 	CIL_KEY_OPTIONAL = cil_strpool_add("optional");
