@@ -3181,7 +3181,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	if (optstack != NULL) {
 		if (node->flavor == CIL_TUNABLE || node->flavor == CIL_MACRO) {
 			/* tuanbles and macros are not allowed in optionals*/
-			cil_log(CIL_ERR, "%s statment is not allowed in optionals (%s:%d)\n", cil_node_to_string(node), node->path, node->line);
+			cil_log(CIL_ERR, "%s statement is not allowed in optionals (%s:%d)\n", cil_node_to_string(node), node->path, node->line);
 			rc = SEPOL_ERR;
 			goto exit;
 		}
