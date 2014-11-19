@@ -2075,9 +2075,13 @@ int cil_resolve_blockabstract(struct cil_tree_node *current, void *extra_args)
 	int rc = SEPOL_ERR;
 
 	rc = cil_resolve_name(current, abstract->block_str, CIL_SYM_BLOCKS, extra_args, &block_datum);
+	if (rc != SEPOL_OK) {
+		goto exit;
+	}
+
 	block_node = block_datum->nodes->head->data;
-	if (rc != SEPOL_OK || block_node->flavor != CIL_BLOCK) {
-		cil_log(CIL_ERR, "Failed to resolve block, rc: %d\n", rc);
+	if (block_node->flavor != CIL_BLOCK) {
+		cil_log(CIL_ERR, "Failed to resolve blockabstract to a block, rc: %d\n", rc);
 		goto exit;
 	}
 
