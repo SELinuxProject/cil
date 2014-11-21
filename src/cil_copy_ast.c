@@ -64,10 +64,20 @@ void cil_copy_list(struct cil_list *data, struct cil_list **copy)
 			cil_list_append(new, CIL_LIST, new_sub);
 			break;
 		}
+		case CIL_PARAM: {
+			struct cil_param *po = orig_item->data;
+			struct cil_param *pn;
+			cil_param_init(&pn);
+			pn->str = po->str;
+			pn->flavor = po->flavor;
+			cil_list_append(new, CIL_PARAM, pn);
+		}
+			break;
+
 		default:
 			cil_list_append(new, orig_item->flavor, orig_item->data);
 			break;
-		}	
+		}
 	}
 
 	*copy = new;
