@@ -95,7 +95,6 @@ int cil_copy_block(__attribute__((unused)) struct cil_db *db, void *data, void *
 	if (datum == NULL) {
 		struct cil_block *new;
 		cil_block_init(&new);
-		cil_symtab_array_init(new->symtab, cil_sym_sizes[CIL_SYM_ARRAY_BLOCK]);
 		*copy = new;
 	} else {
 		*copy = datum;;
@@ -1336,7 +1335,6 @@ int cil_copy_macro(__attribute__((unused)) struct cil_db *db, void *data, void *
 	if (datum == NULL) {
 		struct cil_macro *new;
 		cil_macro_init(&new);
-		cil_symtab_array_init(new->symtab, cil_sym_sizes[CIL_SYM_ARRAY_MACRO]);
 		cil_copy_list(orig->params, &new->params);
 
 		*copy = new;
