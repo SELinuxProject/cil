@@ -461,7 +461,7 @@ int cil_gen_perm(struct cil_db *db, struct cil_tree_node *parse_current, struct 
 
 	key = parse_current->data;
 
-	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)perm, (hashtab_key_t)key, CIL_SYM_UNKNOWN, flavor);
+	rc = cil_gen_node(db, ast_node, (struct cil_symtab_datum*)perm, (hashtab_key_t)key, CIL_SYM_PERMS, flavor);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
