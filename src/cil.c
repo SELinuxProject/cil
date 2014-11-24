@@ -210,7 +210,6 @@ void cil_db_init(struct cil_db **db)
 {
 	*db = cil_malloc(sizeof(**db));
 
-	cil_symtab_array_init((*db)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_ROOT]);
 	cil_strpool_init();
 	cil_init_keys();
 
@@ -259,7 +258,6 @@ void cil_db_destroy(struct cil_db **db)
 	cil_tree_destroy(&(*db)->parse);
 	cil_destroy_ast_symtabs((*db)->ast->root);
 	cil_tree_destroy(&(*db)->ast);
-	cil_symtab_array_destroy((*db)->symtab);
 	cil_list_destroy(&(*db)->sidorder, CIL_FALSE);
 	cil_list_destroy(&(*db)->classorder, CIL_FALSE);
 	cil_list_destroy(&(*db)->catorder, CIL_FALSE);
@@ -286,6 +284,23 @@ void cil_db_destroy(struct cil_db **db)
 
 	free(*db);
 	*db = NULL;	
+}
+
+void cil_root_init(struct cil_root **root)
+{
+	struct cil_root *r = cil_malloc(sizeof(*r));
+	cil_symtab_array_init(r->symtab, cil_sym_sizes[CIL_SYM_ARRAY_ROOT]);
+
+	*root = r;
+}
+
+void cil_root_destroy(struct cil_root *root)
+{
+	if (root == NULL) {
+		return;
+	}
+	cil_symtab_array_destroy(root->symtab);
+	free(root);
 }
 
 int cil_add_file(cil_db_t *db, char *name, char *data, size_t size)
@@ -385,7 +400,7 @@ void cil_destroy_data(void **data, enum cil_flavor flavor)
 	case CIL_NONE:
 		break;
 	case CIL_ROOT:
-		free(*data);
+		cil_root_destroy(*data);
 		break;
 	case CIL_NODE:
 		break;
@@ -1482,7 +1497,7 @@ void cil_destroy_ast_symtabs(struct cil_tree_node *current)
 	}
 }
 
-int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index)
+int cil_get_symtab(struct cil_tree_node *ast_node, symtab_t **symtab, enum cil_sym_index sym_index)
 {
 	struct cil_tree_node *node = ast_node;
 	*symtab = NULL;
@@ -1505,7 +1520,7 @@ int cil_get_symtab(struct cil_db *db, struct cil_tree_node *ast_node, symtab_t *
 	while (node != NULL && *symtab == NULL) {
 		switch (node->flavor) {
 		case CIL_ROOT:
-			*symtab = &db->symtab[sym_index];
+			*symtab = &((struct cil_root *)node->data)->symtab[sym_index];
 			break;
 		case CIL_BLOCK:
 			*symtab = &((struct cil_block*)node->data)->symtab[sym_index];

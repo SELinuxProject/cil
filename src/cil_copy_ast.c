@@ -1834,7 +1834,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 			goto exit;
 		}
 
-		rc = cil_get_symtab(db, parent, &symtab, sym_index);
+		rc = cil_get_symtab(parent, &symtab, sym_index);
 		if (rc != SEPOL_OK) {
 			goto exit;
 		}
