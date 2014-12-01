@@ -320,6 +320,7 @@ struct cil_in {
 
 struct cil_optional {
 	struct cil_symtab_datum datum;
+	int enabled;
 };
 
 struct cil_perm {

@@ -28,6 +28,7 @@
  */
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #include <sepol/policydb/conditional.h>
 
@@ -47,6 +48,15 @@ void cil_tree_print_context(struct cil_context *context);
 void cil_tree_print_expr_tree(struct cil_tree_node *expr_root);
 void cil_tree_print_constrain(struct cil_constrain *cons);
 void cil_tree_print_node(struct cil_tree_node *node);
+
+__attribute__((noreturn)) __attribute__((format (printf, 1, 2))) void cil_tree_error(const char* msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	cil_vlog(CIL_ERR, msg, ap);
+	va_end(ap);
+	exit(1);
+}
 
 int cil_tree_init(struct cil_tree **tree)
 {
@@ -126,13 +136,28 @@ void cil_tree_node_init(struct cil_tree_node **node)
 
 void cil_tree_node_destroy(struct cil_tree_node **node)
 {
+	int rc = SEPOL_ERR;
+	symtab_t *symtab = NULL;
+	enum cil_sym_index sym_index;
+	struct cil_symtab_datum *datum;
+
 	if (node == NULL || *node == NULL) {
 		return;
 	}
 
 	if ((*node)->flavor >= CIL_MIN_DECLARATIVE) {
-		cil_symtab_datum_remove((*node)->data, *node);
-		struct cil_symtab_datum *datum = (*node)->data;
+		rc = cil_flavor_to_symtab_index((*node)->flavor, &sym_index);
+		if (rc != SEPOL_OK) {
+			cil_tree_error("Could not get symtab_index from flavor: %d.\n", (*node)->flavor);
+		}
+
+		rc = cil_get_symtab((*node)->parent, &symtab, sym_index);
+		if (rc != SEPOL_OK) {
+			cil_tree_error("Could not get symtab for node.");
+		}
+
+		datum = (*node)->data;
+		cil_symtab_remove(symtab, datum->name, *node);
 		if (datum->nodes != NULL && datum->nodes->head == NULL) {
 			cil_destroy_data(&(*node)->data, (*node)->flavor);
 		}

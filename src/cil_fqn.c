@@ -117,7 +117,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		goto exit;
 	}
 
-	if (node->flavor < CIL_MIN_DECLARATIVE || node->flavor == CIL_PERM || node->flavor == CIL_MAP_PERM) {
+	if (node->flavor < CIL_MIN_DECLARATIVE) {
 		rc = SEPOL_OK;
 		goto exit;
 	}
@@ -127,9 +127,6 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 
 	switch (node->flavor) {
 	case CIL_OPTIONAL:
-		if (datum->state == CIL_STATE_DISABLED) {
-			*finished = CIL_TREE_SKIP_HEAD;
-		}
 		break;
 	case CIL_MACRO:
 		*finished = CIL_TREE_SKIP_HEAD;
@@ -139,6 +136,12 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 			*finished = CIL_TREE_SKIP_HEAD;
 		}
 		break;
+	case CIL_SENS:
+	case CIL_CAT:
+	case CIL_PERM:
+	case CIL_MAP_PERM:
+		datum->fqn = datum->name;
+		break;
 	case CIL_STRING:
 	case CIL_NAME:
 		/* Strings don't change */
@@ -146,7 +149,6 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 	case CIL_TYPEATTRIBUTE:
 	case CIL_ROLEATTRIBUTE:
 	case CIL_BOOL:
-	case CIL_CAT:
 	case CIL_CATALIAS:
 	case CIL_CATSET:
 	case CIL_CLASS:
@@ -159,7 +161,6 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 	case CIL_LEVELRANGE:
 	case CIL_POLICYCAP:
 	case CIL_ROLE:
-	case CIL_SENS:
 	case CIL_SENSALIAS:
 	case CIL_SID:
 	case CIL_TUNABLE:
@@ -171,6 +172,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		}
 
 		if (args->len == 0) {
+			datum->fqn = datum->name;
 			rc = SEPOL_OK;
 			goto exit;
 		}
@@ -186,7 +188,7 @@ int __cil_fqn_qualify_node_helper(struct cil_tree_node *node, uint32_t *finished
 		strcpy(fqn, args->fqparent);
 		strcat(fqn, datum->name);
 
-		datum->name = cil_strpool_add(fqn);
+		datum->fqn = cil_strpool_add(fqn);
 		free(fqn);
 		break;
 	default:

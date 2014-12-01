@@ -235,6 +235,7 @@ void cil_db_init(struct cil_db **db)
 
 	cil_type_init(&(*db)->selftype);
 	(*db)->selftype->datum.name = CIL_KEY_SELF;
+	(*db)->selftype->datum.fqn = CIL_KEY_SELF;
 
 	(*db)->num_types = 0;
 	(*db)->num_roles = 0;
@@ -256,7 +257,6 @@ void cil_db_destroy(struct cil_db **db)
 	}
 
 	cil_tree_destroy(&(*db)->parse);
-	cil_destroy_ast_symtabs((*db)->ast->root);
 	cil_tree_destroy(&(*db)->ast);
 	cil_list_destroy(&(*db)->sidorder, CIL_FALSE);
 	cil_list_destroy(&(*db)->classorder, CIL_FALSE);
@@ -2243,6 +2243,7 @@ void cil_call_init(struct cil_call **call)
 void cil_optional_init(struct cil_optional **optional)
 {
 	*optional = cil_malloc(sizeof(**optional));
+	(*optional)->enabled = CIL_TRUE;
 	cil_symtab_datum_init(&(*optional)->datum);
 }
 

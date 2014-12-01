@@ -35,13 +35,10 @@
 
 #include "cil_tree.h"
 
-#define CIL_STATE_ENABLED 1
-#define CIL_STATE_DISABLED 2
-#define CIL_STATE_DISABLING 3
 struct cil_symtab_datum {
 	struct cil_list *nodes;
 	char *name;
-	int state;
+	char *fqn;
 };
 
 #define DATUM(d) ((struct cil_symtab_datum *)(d))
@@ -76,7 +73,7 @@ void cil_symtab_init(symtab_t *symtab, unsigned int size);
 void cil_symtab_datum_init(struct cil_symtab_datum *datum);
 void cil_symtab_datum_destroy(struct cil_symtab_datum *datum);
 int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_datum *datum, struct cil_tree_node *node);
-void cil_symtab_datum_remove(struct cil_symtab_datum *datum, struct cil_tree_node *node);
+void cil_symtab_remove(symtab_t *symtab, hashtab_key_t key, struct cil_tree_node *node);
 int cil_symtab_get_datum(symtab_t *symtab, char *key, struct cil_symtab_datum **datum);
 int cil_symtab_map(symtab_t *symtab,
 				   int (*apply) (hashtab_key_t k, hashtab_datum_t d, void *args),

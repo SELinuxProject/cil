@@ -29,6 +29,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include <sepol/errcodes.h>
 #include <sepol/policydb/hashtab.h>
@@ -39,10 +40,14 @@
 #include "cil_symtab.h"
 #include "cil_mem.h"
 #include "cil_strpool.h"
+#include "cil_log.h"
 
-__attribute__((noreturn)) void cil_symtab_error(const char* msg)
+__attribute__((noreturn)) __attribute__((format (printf, 1, 2))) void cil_symtab_error(const char* msg, ...)
 {
-	cil_log(CIL_ERR, "%s\n",msg);
+	va_list ap;
+	va_start(ap, msg);
+	cil_vlog(CIL_ERR, msg, ap);
+	va_end(ap);
 	exit(1);
 }
 
@@ -57,8 +62,8 @@ void cil_symtab_init(symtab_t *symtab, unsigned int size)
 void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 {
 	datum->name = NULL;
+	datum->fqn = NULL;
 	cil_list_init(&datum->nodes, CIL_LIST_ITEM);
-	datum->state = CIL_STATE_ENABLED;
 }
 
 void cil_symtab_datum_destroy(struct cil_symtab_datum *datum)
@@ -89,22 +94,16 @@ void cil_symtab_remove_datum_destroy(__attribute__((unused))hashtab_key_t key, h
 	free(datum);
 }
 
-void cil_symtab_datum_remove(struct cil_symtab_datum *datum, struct cil_tree_node *node)
+void cil_symtab_remove(symtab_t *symtab, hashtab_key_t key, struct cil_tree_node *node)
 {
+	struct cil_symtab_datum *datum = hashtab_search(symtab->table, key);
+	if (datum == NULL) {
+		cil_symtab_error("Failed to find symtab_datum for key: %s\n", key);
+	}
 	if (datum->nodes != NULL) {
-		struct cil_list_item *item;
-		struct cil_list_item *previous = NULL;
-		cil_list_for_each(item, datum->nodes) {
-			if (item->data == node) {
-				if (previous == NULL) {
-					datum->nodes->head = item->next;
-				} else {
-					previous->next = item->next;
-				}
-				cil_list_item_destroy(&item, 0);
-				break;
-			}
-			previous = item;
+		cil_list_remove(datum->nodes, CIL_NODE, node, 0);
+		if (datum->nodes->head == NULL) {
+			hashtab_remove(symtab->table, key, NULL, NULL);
 		}
 	}
 }
@@ -112,7 +111,7 @@ void cil_symtab_datum_remove(struct cil_symtab_datum *datum, struct cil_tree_nod
 int cil_symtab_get_datum(symtab_t *symtab, char *key, struct cil_symtab_datum **datum)
 {
 	*datum = (struct cil_symtab_datum*)hashtab_search(symtab->table, (hashtab_key_t)key);
-	if (*datum == NULL || (*datum)->state != CIL_STATE_ENABLED) {
+	if (*datum == NULL) {
 		return SEPOL_ENOENT;
 	}
 

@@ -3216,13 +3216,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		}
 	}
 
-	if (node->flavor == CIL_OPTIONAL && ((struct cil_symtab_datum *)node->data)->state == CIL_STATE_DISABLED) {
-		/* don't try to resolve children of a disabled optional */
-		*finished = CIL_TREE_SKIP_HEAD;
-		rc = SEPOL_OK;
-		goto exit;
-	}
-
 	if (node->flavor == CIL_BLOCK && ((((struct cil_block*)node->data)->is_abstract == CIL_TRUE) && (pass > CIL_PASS_BLKABS))) {
 		*finished = CIL_TREE_SKIP_HEAD;
 		rc = SEPOL_OK;
@@ -3234,7 +3227,7 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 		struct cil_optional *opt = (struct cil_optional *)optstack->data;
 		cil_log(CIL_WARN, "Disabling optional %s at %d of %s\n", opt->datum.name, node->parent->line, node->parent->path);
 		/* disable an optional if something failed to resolve */
-		opt->datum.state = CIL_STATE_DISABLING;
+		opt->enabled = CIL_FALSE;
 		rc = SEPOL_OK;
 	} else if (rc != SEPOL_OK) {
 		cil_log(CIL_ERR, "Failed to resolve %s statement at %d of %s\n", cil_node_to_string(node), node->line, node->path);
@@ -3242,42 +3235,6 @@ int __cil_resolve_ast_node_helper(struct cil_tree_node *node, __attribute__((unu
 	}
 
 	return rc;
-
-exit:
-	return rc;
-}
-
-int __cil_disable_children_helper(struct cil_tree_node *node, uint32_t *finished, void *extra_args)
-{
-	int rc = SEPOL_ERR;
-	struct cil_args_resolve *args = extra_args;
-	uint32_t *changed = args->changed;
-
-	if (node == NULL || finished == NULL) {
-		goto exit;
-	}
-
-	if (node->flavor < CIL_MIN_DECLARATIVE) {
-		/* only declarative statements need to be disabled */
-		rc = SEPOL_OK;
-		goto exit;
-	}
-
-	if (node->flavor == CIL_OPTIONAL) {
-		if (((struct cil_symtab_datum *)node->data)->state == CIL_STATE_DISABLED) {
-			/* don't bother going into an optional that isn't enabled */
-			*finished = CIL_TREE_SKIP_HEAD;
-			rc = SEPOL_OK;
-			goto exit;
-		}
-	} else {
-		/* Do we need to reset for a block? */
-		*changed = 1;
-	}
-
-	((struct cil_symtab_datum *)node->data)->state = CIL_STATE_DISABLED;
-
-	return SEPOL_OK;
 
 exit:
 	return rc;
@@ -3369,16 +3326,9 @@ int __cil_resolve_ast_last_child_helper(struct cil_tree_node *current, void *ext
 	} else if (parent->flavor == CIL_OPTIONAL) {
 		struct cil_tree_node *optstack;
 
-		if (((struct cil_optional *)parent->data)->datum.state == CIL_STATE_DISABLING) {
-			/* go into the optional, removing everything that it added */
-			if (args->pass >= CIL_PASS_CALL1) {
-				rc = cil_tree_walk(parent, __cil_disable_children_helper, NULL, NULL, extra_args);
-				if (rc != SEPOL_OK) {
-					cil_log(CIL_ERR, "Failed to disable declarations in optional\n");
-					goto exit;
-				}
-			}
-			((struct cil_optional *)parent->data)->datum.state = CIL_STATE_DISABLED;
+		if (((struct cil_optional *)parent->data)->enabled == CIL_FALSE) {
+			*(args->changed) = CIL_TRUE;
+			cil_tree_children_destroy(parent);
 		}
 
 		/* pop off the stack */
