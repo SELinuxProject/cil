@@ -10,3 +10,5 @@ secilc
  docs/pdf/
  docs/html/
  docs/man8/
+policy.*
+file_contexts
