@@ -1651,6 +1651,8 @@ void cil_block_init(struct cil_block **block)
 	cil_symtab_array_init((*block)->symtab, cil_sym_sizes[CIL_SYM_ARRAY_BLOCK]);
 
 	(*block)->is_abstract = CIL_FALSE;
+
+	(*block)->bi_nodes = NULL;
 }
 
 void cil_blockinherit_init(struct cil_blockinherit **inherit)

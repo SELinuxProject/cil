@@ -135,6 +135,7 @@ int cil_copy_blockinherit(__attribute__((unused)) struct cil_db *db, void *data,
 	cil_blockinherit_init(&new);
 
 	new->block_str = orig->block_str;
+	new->block = orig->block;
 
 	*copy = new;
 
@@ -1578,6 +1579,7 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 	symtab_t *symtab = NULL;
 	void *data = NULL;
 	int (*copy_func)(struct cil_db *db, void *data, void **copy, symtab_t *symtab) = NULL;
+	struct cil_blockinherit *blockinherit = NULL;
 
 	if (orig == NULL || extra_args == NULL) {
 		goto exit;
@@ -1879,6 +1881,11 @@ int __cil_copy_node_helper(struct cil_tree_node *orig, __attribute__((unused)) u
 					}
 				}
 			}
+		}
+
+		if (new->flavor == CIL_BLOCKINHERIT) {
+			blockinherit = new->data;
+			cil_list_append(blockinherit->block->bi_nodes, CIL_NODE, new);
 		}
 
 		if (parent->cl_head == NULL) {

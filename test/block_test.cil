@@ -45,7 +45,7 @@
 
 (block b2b
   (blockinherit b2a)
-  (blockinherit b2)) ;; Results in b2b.tb (not b2b.ta)
+  (blockinherit b2))
 
 
 ;; All of these work
@@ -110,7 +110,7 @@
 ;;
 ;; Types:
 ;;   b1.ta, b1a.b1.tb, b1b.b1.tb, b1b.ta
-;;   b2.ta, b2a.b2.tb, b2b.b2.tb, b2b.tb
+;;   b2.ta, b2a.b2.tb, b2b.b2.tb, b2b.ta
 ;;   b3a.b.t, b3a.t3a, b3b.b.t, b3b.t3a, b3c.t, b3d.b.t, b3d.t3a, b3e.t, b3e.t3a
 ;;   t4
 ;;   t5

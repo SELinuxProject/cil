@@ -2036,29 +2036,67 @@ exit:
 	return rc;
 }
 
-int cil_resolve_blockinherit(struct cil_tree_node *current, void *extra_args)
+int cil_resolve_blockinherit_link(struct cil_tree_node *current, void *extra_args)
 {
 	struct cil_blockinherit *inherit = current->data;
-	struct cil_args_resolve *args = extra_args;
-	struct cil_db *db = NULL;
 	struct cil_symtab_datum *block_datum = NULL;
+	struct cil_tree_node *node = NULL;
 	int rc = SEPOL_ERR;
-
-	if (args != NULL) {
-		db = args->db;
-	}
 
 	rc = cil_resolve_name(current, inherit->block_str, CIL_SYM_BLOCKS, extra_args, &block_datum);
 	if (rc != SEPOL_OK) {
 		goto exit;
 	}
 
+	node = block_datum->nodes->head->data;
+
+	if (node->flavor != CIL_BLOCK) {
+		cil_log(CIL_ERR, "%s is not a block\n", cil_node_to_string(node));
+		rc = SEPOL_ERR;
+		goto exit;
+	}
+
 	inherit->block = (struct cil_block *)block_datum;
 
-	rc = cil_copy_ast(db, NODE(block_datum), current);
-	if (rc != SEPOL_OK) {
-		cil_log(CIL_ERR, "Failed to copy block, rc: %d\n", rc);
+	if (inherit->block->bi_nodes == NULL) {
+		cil_list_init(&inherit->block->bi_nodes, CIL_NODE);
+	}
+	cil_list_append(inherit->block->bi_nodes, CIL_NODE, current);
+
+	return SEPOL_OK;
+
+exit:
+	return rc;
+}
+
+int cil_resolve_blockinherit_copy(struct cil_tree_node *current, void *extra_args)
+{
+	struct cil_block *block = current->data;
+	struct cil_args_resolve *args = extra_args;
+	struct cil_db *db = NULL;
+	struct cil_list_item *item = NULL;
+	int rc = SEPOL_ERR;
+
+	// This block is not inherited
+	if (block->bi_nodes == NULL) {
+		rc = SEPOL_OK;
 		goto exit;
+	}
+
+	db = args->db;
+
+	// Make sure this is the original block and not a merged block from a blockinherit
+	if (current != block->datum.nodes->head->data) {
+		rc = SEPOL_OK;
+		goto exit;
+	}
+
+	cil_list_for_each(item, block->bi_nodes) {
+		rc = cil_copy_ast(db, current, item->data);
+		if (rc != SEPOL_OK) {
+			cil_log(CIL_ERR, "Failed to copy block contents into blockinherit\n");
+			goto exit;
+		}
 	}
 
 	return SEPOL_OK;
@@ -2936,9 +2974,14 @@ int __cil_resolve_ast_node(struct cil_tree_node *node, void *extra_args)
 			cil_list_prepend(ins, CIL_NODE, node);
 		}
 		break;
-	case CIL_PASS_BLKIN:
+	case CIL_PASS_BLKIN_LINK:
 		if (node->flavor == CIL_BLOCKINHERIT) {
-			rc = cil_resolve_blockinherit(node, args);
+			rc = cil_resolve_blockinherit_link(node, args);
+		}
+		break;
+	case CIL_PASS_BLKIN_COPY:
+		if (node->flavor == CIL_BLOCK) {
+			rc = cil_resolve_blockinherit_copy(node, args);
 		}
 		break;
 	case CIL_PASS_BLKABS:
