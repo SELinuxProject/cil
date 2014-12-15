@@ -1315,6 +1315,7 @@ int cil_copy_call(struct cil_db *db, void *data, void **copy, __attribute__((unu
 	cil_call_init(&new);
 
 	new->macro_str = orig->macro_str;
+	new->macro = orig->macro;
 
 	if (orig->args_tree != NULL) {
 		cil_tree_init(&new->args_tree);
@@ -1345,7 +1346,9 @@ int cil_copy_macro(__attribute__((unused)) struct cil_db *db, void *data, void *
 	if (datum == NULL) {
 		struct cil_macro *new;
 		cil_macro_init(&new);
-		cil_copy_list(orig->params, &new->params);
+		if (orig->params != NULL) {
+			cil_copy_list(orig->params, &new->params);
+		}
 
 		*copy = new;
 
