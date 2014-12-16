@@ -215,6 +215,7 @@ void cil_db_init(struct cil_db **db)
 
 	cil_tree_init(&(*db)->parse);
 	cil_tree_init(&(*db)->ast);
+	cil_root_init((struct cil_root **)&(*db)->ast->root->data);
 	(*db)->sidorder = NULL;
 	(*db)->classorder = NULL;
 	(*db)->catorder = NULL;
