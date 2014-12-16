@@ -237,6 +237,9 @@ void cil_list_remove(struct cil_list *list, enum cil_flavor flavor, void *data, 
 			} else {
 				previous->next = item->next;
 			}
+			if (item->next == NULL) {
+				list->tail = previous;
+			}
 			cil_list_item_destroy(&item, destroy_data);
 			break;
 		}
