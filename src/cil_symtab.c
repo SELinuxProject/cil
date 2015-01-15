@@ -78,6 +78,7 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 	int rc = hashtab_insert(symtab->table, key, (hashtab_datum_t)datum);
 	if (rc == SEPOL_OK) {
 		datum->name = key;
+		datum->fqn = key;
 		cil_list_append(datum->nodes, CIL_NODE, node);
 	} else if (rc == SEPOL_EEXIST) {
 		cil_list_append(datum->nodes, CIL_NODE, node);
