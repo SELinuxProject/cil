@@ -63,12 +63,24 @@ void cil_symtab_datum_init(struct cil_symtab_datum *datum)
 {
 	datum->name = NULL;
 	datum->fqn = NULL;
+	datum->symtab = NULL;
 	cil_list_init(&datum->nodes, CIL_LIST_ITEM);
 }
 
 void cil_symtab_datum_destroy(struct cil_symtab_datum *datum)
 {
 	cil_list_destroy(&datum->nodes, 0);
+	cil_symtab_remove_datum(datum);
+}
+
+void cil_symtab_datum_remove_node(struct cil_symtab_datum *datum, struct cil_tree_node *node)
+{
+	if (datum && datum->nodes != NULL) {
+		cil_list_remove(datum->nodes, CIL_NODE, node, 0);
+		if (datum->nodes->head == NULL) {
+			cil_symtab_datum_destroy(datum);
+		}
+	}
 }
 
 /* This both initializes the datum and inserts it into the symtab.
@@ -79,6 +91,7 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 	if (rc == SEPOL_OK) {
 		datum->name = key;
 		datum->fqn = key;
+		datum->symtab = symtab;
 		cil_list_append(datum->nodes, CIL_NODE, node);
 	} else if (rc == SEPOL_EEXIST) {
 		cil_list_append(datum->nodes, CIL_NODE, node);
@@ -89,24 +102,16 @@ int cil_symtab_insert(symtab_t *symtab, hashtab_key_t key, struct cil_symtab_dat
 	return rc;
 }
 
-void cil_symtab_remove_datum_destroy(__attribute__((unused))hashtab_key_t key, hashtab_datum_t datum, __attribute__((unused))void *args)
+void cil_symtab_remove_datum(struct cil_symtab_datum *datum)
 {
-	cil_symtab_datum_destroy((struct cil_symtab_datum *)datum);
-	free(datum);
-}
+	symtab_t *symtab = datum->symtab;
 
-void cil_symtab_remove(symtab_t *symtab, hashtab_key_t key, struct cil_tree_node *node)
-{
-	struct cil_symtab_datum *datum = hashtab_search(symtab->table, key);
-	if (datum == NULL) {
-		cil_symtab_error("Failed to find symtab_datum for key: %s\n", key);
+	if (symtab == NULL) {
+		return;
 	}
-	if (datum->nodes != NULL) {
-		cil_list_remove(datum->nodes, CIL_NODE, node, 0);
-		if (datum->nodes->head == NULL) {
-			hashtab_remove(symtab->table, key, NULL, NULL);
-		}
-	}
+
+	hashtab_remove(symtab->table, datum->name, NULL, NULL);
+	datum->symtab = NULL;
 }
 
 int cil_symtab_get_datum(symtab_t *symtab, char *key, struct cil_symtab_datum **datum)
@@ -126,9 +131,17 @@ int cil_symtab_map(symtab_t *symtab,
 	return hashtab_map(symtab->table, apply, args);
 }
 
+static int __cil_symtab_destroy_helper(__attribute__((unused)) hashtab_key_t k, hashtab_datum_t d, __attribute__((unused)) void *args)
+{
+	struct cil_symtab_datum *datum = d;
+	datum->symtab = NULL;
+	return SEPOL_OK;
+}
+
 void cil_symtab_destroy(symtab_t *symtab)
 {
 	if (symtab->table != NULL){
+		cil_symtab_map(symtab, __cil_symtab_destroy_helper, NULL);
 		hashtab_destroy(symtab->table);
 		symtab->table = NULL;
 	}
