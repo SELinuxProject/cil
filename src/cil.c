@@ -1657,6 +1657,7 @@ void cil_blockinherit_init(struct cil_blockinherit **inherit)
 {
 	*inherit = cil_malloc(sizeof(**inherit));
 	(*inherit)->block_str = NULL;
+	(*inherit)->block = NULL;
 }
 
 void cil_blockabstract_init(struct cil_blockabstract **abstract)

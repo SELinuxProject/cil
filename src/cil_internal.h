@@ -307,6 +307,7 @@ struct cil_block {
 
 struct cil_blockinherit {
 	char *block_str;
+	struct cil_block *block;
 };
 
 struct cil_blockabstract {
