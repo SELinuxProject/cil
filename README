@@ -1,3 +1,5 @@
+NOTE: CIL has been merged into the SELinux Userspace repository. All future changes will be made there.
+
 SELinux Common Intermediate Language (CIL) Compiler
 
 INTRODUCTION
